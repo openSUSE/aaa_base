@@ -10,7 +10,20 @@
 
 . /etc/rc.config
 
-test -n "$DHCLIENT"  -a "$DHCLIENT" = "yes" && exit 0
+# Determine the base and follow a runlevel link name.
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
+
+# If not called by a runlevel directory, maybe the device
+# is given as *second* argument
+if test $link = $base -a -n "$2" ; then
+    NETCONFIG=""
+    for I in _0 _1 _2 _3; do
+        eval NETDEV=\$NETDEV$I
+        test "$2" = "$NETDEV" && NETCONFIG="$I"
+    done
+fi
+
 test -n "$NETCONFIG" -a "$NETCONFIG" != "YAST_ASK" || exit 0
 
 : ${ROUTECONF:=/etc/route.conf}
@@ -33,9 +46,13 @@ run_route ()
     local command="/sbin/route $@"
     retvalue="`$command 2>&1`"
     if test $? -ne 0 ; then
+	case "$retvalue" in
+	    SIOCADDRT:*File*exists) return ;;
+	    *)
+	esac
 	test "$ret" = "$rc_done" && echo
 	echo -e "\033[1mError while excuting:\n    $command\033[m"
-	echo -n "    $retvalue"
+	echo    "    ${retvalue%%Usage:*}"
 	ret=$rc_failed
     fi
 }
@@ -65,11 +82,16 @@ case "$todo" in
 	while read proc ; do
 	    n=$((n + 1))
 	    test $n -gt 2 || continue
-	    given="${given} ${proc%:*}"
-	    if test -n "$sdev" -a "${proc%:*}" = "$sdev" ; then
+	    d=${proc%:*}
+	    case "`ifconfig ${d}`" in
+		${d}*UP*) ;;
+		${d}*) continue
+	    esac
+	    if test -n "$sdev" -a "${d}" = "$sdev" ; then
 		given=$sdev
 		break
 	    fi
+	    given="${given} ${d}"
 	done < /proc/net/dev
 	if test -n "$sdev" -a "$given" != "$sdev" ; then
 	    test "$ret" = "$rc_done" && echo
@@ -200,11 +222,16 @@ case "$todo" in
 	while read proc ; do
 	    n=$((n + 1))
 	    test $n -gt 2 || continue
-	    given="${given} ${proc%:*}"
-	    if test -n "$sdev" -a "${proc%:*}" = "$sdev" ; then
+	    d="${proc%:*}"
+	    case "`ifconfig ${d}`" in
+		${d}*UP*) ;;
+		${d}*) continue
+	    esac
+	    if test -n "$sdev" -a "${d}" = "$sdev" ; then
 		given=$sdev
 		break
 	    fi
+	    given="${given} ${d}"
 	done < /proc/net/dev
 	if test -n "$sdev" -a "$given" != "$sdev" ; then
 	    test "$ret" = "$rc_done" && echo
@@ -284,7 +311,7 @@ case "$todo" in
 				    echo -e "Shutting down routing $ret"
 	;;
     restart)
-	$0 stop && $0 start || ret=$rc_failed
+	$0 stop ${2+"$sdev"} && $0 start ${2+"$sdev"} || ret=$rc_failed
 	;;
     status)
 	n=0
