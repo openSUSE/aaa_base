@@ -28,7 +28,7 @@ DEFAULT_WM=kde
 ## Formating the boot script messages, see /etc/rc.status.
 ## Source /etc/rc.status if rc_done isn't defined
 ##
-test $rc_done= = = -a -e /etc/rc.status && . /etc/rc.status
+test "$rc_done"= = = -a -e /etc/rc.status && . /etc/rc.status
 
 #
 # end of initial rc.config
