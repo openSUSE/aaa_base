@@ -153,7 +153,7 @@ BEAUTIFY_ETC_HOSTS=yes
 # if SORT_PASSWD_BY_UID is set to yes, SuSEconfig sorts your /etc/passwd
 # and /etc/group by uid/gid.
 #
-SORT_PASSWD_BY_UID=yes
+SORT_PASSWD_BY_UID=no
 
 
 #
