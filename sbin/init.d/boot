@@ -34,6 +34,17 @@ if test "$START_KERNELD" = yes -a \
 fi
 
 #
+# check if sysrq should be enabled
+#
+if test -e /proc/sys/kernel/sysrq ; then
+if test "$ENABLE_SYSRQ" = yes ; then
+    echo "1" > /proc/sys/kernel/sysrq 
+else
+    echo "0" > /proc/sys/kernel/sysrq 
+fi
+fi
+
+#
 # maybe we use "Multiple devices".  So initialize MD.
 #
 if test -f /etc/mdtab -a -x /sbin/mdadd ; then

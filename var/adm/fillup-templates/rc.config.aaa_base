@@ -14,6 +14,13 @@ LANGUAGE=
 #
 ENABLE_SUSECONFIG=yes
 
+#
+# If you say yes here, you will have some control over the system even
+# if the system crashes for example during kernel debugging.
+# Please consult /usr/src/linux/Documentation/sysrq.txt
+# for further information.
+#
+ENABLE_SYSRQ=no
 
 #
 #
