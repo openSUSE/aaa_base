@@ -1,7 +1,7 @@
 #! /bin/sh
 # Copyright (c) 2000 SuSE Gmbh Nuernberg, Germany.  All rights reserved.
 #
-# Author: Rdiger Oertel <ro@suse.de>, 2000
+# Author: Ruediger Oertel <ro@suse.de>, 2000
 
 # check if we are started as root
 # only one of UID and USER must be set correctly
@@ -60,3 +60,5 @@ if test "$CHECK_NEWPACKAGE" != false -a -x /usr/X11R6/bin/mkfontdir ; then
     done
 fi
 
+echo "create XftCache files ..."
+xftcache
