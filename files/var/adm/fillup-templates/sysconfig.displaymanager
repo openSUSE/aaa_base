@@ -11,7 +11,9 @@ DISPLAYMANAGER=""
 ## Type:	yesno
 ## Default:	no
 #
-# Allow remote access to your display manager (xdm only for now)
+# Allow remote access to your display manager (xdm/kdm). Please note 
+# that a modified kdm or xdm configuration, e.g. by KDE control center
+# will not be changed.
 #
 DISPLAYMANAGER_REMOTE_ACCESS="no"
 
