@@ -34,7 +34,7 @@ fi
 if test "$REINIT_MANDB" = yes ; then
     if test -x /usr/bin/mandb ; then
         rm -f /var/catman/index.bt
-        /usr/bin/mandb -q 2> /dev/null || {
+        /usr/bin/mandb -q -s 2> /dev/null || {
             echo There seem to be trouble with mandb.
             echo
             echo please run /usr/bin/mandb an check the output...
