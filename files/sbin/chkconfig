@@ -1,134 +1,336 @@
-#!/bin/sh
-# /sbin/chkconfig is for RedHat based systems only. The method is
-# not compatible with SuSE Linux, since we use LSB-conform
-# init scripts. There is no way to convert chkconfig-based
-# init scripts to an LSB-conform one. You have to do it
-# yourself (look at /etc/init.d/skeleton for a well-documented
-# example). 
+#!/usr/bin/perl
 
-# This wrapper tries to behave a bit like chkconfig for your convenience.
-# The other purpose of this file is to make RPM happy and to give the user the
-# chance to install RPMs which require /sbin/chkconfig.
+use strict;
+use Getopt::Long;
+use File::Temp 'tempfile';
 
+my $initdir = '/etc/init.d';
 
-IAM=`basename $0`
+my %to_d = (
+  '0' => 'rc0.d', '1' => 'rc1.d', '2' => 'rc2.d', '3' => 'rc3.d',
+  '4' => 'rc4.d', '5' => 'rc5.d', 'S' => 'rcS.d', 'B' => 'boot.d'
+);
 
-function usage
-{
-	cat <<-EOF
-	$IAM is a wrapper to insserv, resembling Redhat's chkconfig. 
-	Actually, you can just use vi and insserv instead. See man 8 insserv 
-	for more information. 
-	The --level switch is not supported, since we want to honour the 
-	script interdependencies.
+# which files to skip in $initdir
+my %skips = map {$_ => 1} qw {rc rx skeleton powerfail boot halt reboot single boot.local halt.local};
 
-	usage:
-	        $IAM -l|--list [--deps] [<name>]	(shows the links)
-	        $IAM -a|--add  <name>		(runs insserv)
-	        $IAM -d|--del  <name>		(runs insserv -r)
-	        $IAM -e|--edit <name>		(runs vi, insserv -r, and insserv)
+# which services are currently on?
+# initialized by initlinks(), used in getreal()
+my %links = ();
+my %links_unknown = ();
 
-	EOF
+#
+# get the contents of a directory
+#
+sub ls {
+  my $dir = shift;
+
+  local *D;
+  return () unless opendir(D, $dir);
+  my @ret = grep {$_ ne '.' && $_ ne '..'} readdir(D);
+  closedir D;
+  return @ret;
 }
 
-test -t 1 && { BRIGHT='[01m'; RED='[31m'; GREEN='[32m'; NORMAL='[00m'; }
-function myecho { echo $BRIGHT$@$NORMAL; }
-function error { echo $RED$@$NORMAL; }
-function myexit { error something ugly seems to have happened in line $1...; exit $2; }
+#
+# calculate the default runlevels of a service by reading the
+# insserv header. regexes taken from insserv.c
+#
+sub getdef {
+  my $s = shift;
 
-on="${BRIGHT}${GREEN}on    $NORMAL"
-off="off   "
+  my $file = "$initdir/$s";
+  local *F;
+  open(F, "<$file") || return undef;
+  while (<F>) {
+    chomp;
+    if (/^#[[:blank:]]*default[-_]?start:[[:blank:]]*([[:print:][:blank:]]*)/i) {
+      my $ret = $1;
+      close F;
+      $ret =~ s/[[:blank:]]+//g;
+      my @ret = split('', $ret);
+      $ret = '';
+      for (sort @ret) {
+	$_ = uc($_);
+	$ret .= $_ if /[0123456SB]/;
+      }
+      return $ret;
+    }
+  }
+  return "35";
+}
 
-while true; do
-	case "$1" in
-		-l|--list) 
-			shift
-			case "$1" in
-			    --dep*)	shift; deps=yes;;
-			    -x)		shift; set -x;;
-			esac
-			if test -z "$1"; then
-				services=`cd /etc/init.d; ls -1`
-			else
-				services=$*
-			fi
-			ACTION=list
-			break
-			;;
-		-d|--del) 
-			shift; service=$1; shift; ACTION=del; break;;
-		-a|--add) 
-			shift; service=$1; shift; ACTION=add; break;;
-		-e|--edit) 
-			shift; service=$1; shift; ACTION=edit; break;;
-		--level) 
-			exit 0;;
-		--dep*)
-			shift; deps=yes;;
-		-x) 
-			shift; PS4=\$LINENO\ +; set -x;;
-		-h|--help)
-			usage; exit 0;;
-		*) echo unrecognized option: $1; usage; exit 2;;
-	esac
-done
+#
+# calculate the required services by reading the insserv header.
+# regexes taken from insserv.c
+#
+sub getdeps {
+  my $s = shift;
 
-case $ACTION in
-    add|del|edit) test -f /etc/init.d/$service || { echo service /etc/init.d/$service does not exist >&2; exit 1; };;
-esac
+  my $file = "$initdir/$s";
+  local *F;
+  open(F, "<$file") || return undef;
+  while (<F>) {
+    chomp;
+    if (/^#[[:blank:]]*required[-_]?start:[[:blank:]]*([[:print:][:blank:]]*)/i) {
+      my $ret = $1;
+      close F;
+      $ret =~ s/\s+$//;
+      return $ret;
+    }
+  }
+  return '';
+}
 
-case $ACTION in
-    list)
-	if [ "$deps" = yes ]; then 
-		echo "Service                   Runlevels                                               Required-Start"
-		echo "------------------------- ------------------------------------------------------- --------------"
-	fi
-	for service in $services; do
+#
+# calculate the active runlevels of a service. Uses global %links
+# hash.
+#
+sub getreal {
+  my $s = shift;
 
-		test -d /etc/init.d/$service && continue; 
-		case $service in 
-			README|*.rpm*|*.swap|*.bak|*.orig|\#*|*~)	continue ;;
-		esac
+  my $start = '';
+  my $l;
+  initlinks() if $links_unknown{$s};
+  for $l (sort keys %links) {
+    $start .= $l if $links{$l}->{$s};
+  }
+  return $start;
+}
 
-		test -f /etc/init.d/$service || { echo service /etc/init.d/$service does not exist >&2; continue; }
+#
+# calculate current status, use on/off when appropriate
+#
+sub getcurrent {
+  my $s = shift;
 
-		printf "%-25s " $service 
-		for i in 0 1 2 3 4 5 6; do 
-			test -f /etc/init.d/rc$i.d/S[0-9][0-9]$service && echo -n "$BRIGHT${GREEN}$i:$on" || echo -n "$i:$off"
-		done 
+  if (! -f "$initdir/$s") {
+    print STDERR "$s: unknown service\n";
+    return undef;
+  }
+  my ($defstart, $start);
+  $defstart = getdef($s);
+  if (!defined($defstart)) {
+    print STDERR "$initdir/$s: $!\n";
+    return undef;
+  }
+  $start = getreal($s);
+  if ($start eq '') {
+    $start = 'off';
+  } elsif ($start eq $defstart) {
+    $start = 'on';
+  }
+  return $start;
+}
 
-		if [ "$deps" != yes ]; then 
-			echo
-		else
-			while read line; do 
-				case $line in 
-				    *Required-Start*) 
-					line=${line/*Required-Start*:/}
-					required_start=$line
-					break
-					;; 
-				    *)
-					;;
-				esac 
-			done < /etc/init.d/$service
-			echo $required_start
-		fi
-	done
-	;;
-    add)
-	insserv /etc/init.d/$service
-	;;
-    del)
-	insserv -r /etc/init.d/$service
-	;;
-    edit)
-	editor=${VISUAL:-vim}
-	$editor /etc/init.d/$service -c "/Default-Start" && { insserv -r /etc/init.d/$service; insserv /etc/init.d/$service; }
-	;;
-esac
+#
+# initializes global %links hash by scanning the link directories
+# for each runlevel.
+#
+sub initlinks {
+  my $l;
+  for $l (keys %to_d) {
+    my @links = grep {s/^S\d\d//} ls("$initdir/$to_d{$l}");
+    $links{$l} = { map {$_ => 1} @links };
+  }
+  %links_unknown = ();
+}
 
-case $ACTION in
-    add|del|edit) exec $0 --list $service;;
-esac
+#
+# return all services we know about by scanning $initdir for init
+# scripts.
+#
+sub allservices {
+  my @services = ();
+  for (ls($initdir)) {
+    next unless -f "$initdir/$_";
+    next if /^README/ || /^core/;
+    next if $skips{$_};
+    next if /~$/ || /^[\d\$\.#_\-\\\*]/ || /\.(rpm|ba|old|new|save|swp|core)/;
+    push @services, $_;
+  }
+  return sort @services;
+}
 
-exit 0
+#
+# run insserv
+#
+sub insserv {
+  my $r = system("/sbin/insserv", @_);
+  if ($r == -1) {
+    printf STDERR "/sbin/insserv: $!\n";
+  } elsif ($r) {
+    printf STDERR "/sbin/insserv failed, exit code %d\n", $? >> 8;
+  }
+}
+
+#
+# main programm starts here
+#
+
+my $mode = '';
+my $printdeps;
+
+
+sub addmode {
+  die("Please specify only one mode.\n") if $mode;
+  $mode = substr($_[0], 0, 1);
+}
+
+sub usage {
+  print <<EOF;
+usage:
+        chkconfig -t|--terse [names]            (shows the links)
+        chkconfig -e|--edit  [names]            (configure services)
+        chkconfig -s|--set   [name state]...    (configure services)
+        chkconfig -l|--list [--deps] [names]    (shows the links)
+        chkconfig -a|--add   [names]            (runs insserv)
+        chkconfig -d|--del   [names]            (runs insserv -r)
+        chkconfig -h|--help                     (print usage)
+
+        chkconfig [name]           same as chkconfig -t
+        chkconfig name state...    same as chkconfig -s name state
+EOF
+}
+
+if (!GetOptions('list|l'   => \&addmode,
+                'terse|t'  => \&addmode,
+                'add|a'    => \&addmode,
+                'del|d'    => \&addmode,
+                'edit|e'   => \&addmode,
+                'help|h'   => \&addmode,
+                'set|s' => \&addmode,
+                'deps'     => \$printdeps
+   )) {
+  usage();
+  exit 1;
+}
+if ($mode eq 'h') {
+  usage();
+  exit 0;
+}
+my (@services, $s);
+
+if (@ARGV) {
+  @services = @ARGV;
+  $mode = @services == 1 ? 't' : 's' if $mode eq '';
+} else {
+  @services = allservices() if $mode ne 's';
+}
+$mode = 't' if $mode eq '';
+
+initlinks() if $mode eq 'e' || $mode eq 't' || $mode eq 's';
+
+my %current = ();
+
+if ($mode eq 'e' || $mode eq 't') {
+  my ($fh, $tmpname);
+  my $maxlen = 0;
+  $maxlen >= length($_) or $maxlen = length($_) for @services;
+  if ($mode eq 'e') {
+    ($fh, $tmpname) = tempfile("chkconfig.XXXXX", DIR => '/tmp', UNLINK => 1);
+    die("Could not create temporary file\n") unless $tmpname ne '';
+  } else {
+    $fh = *STDOUT;
+  }
+  for $s (@services) {
+    $current{$s} = getcurrent($s);
+    next unless defined $current{$s};
+    printf $fh "%-*s  %s\n", $maxlen, $s, $current{$s};
+  }
+  exit(0) unless $mode eq 'e';
+  close $fh;
+  system("\${VISUAL:-vim} $tmpname");
+  open(STDIN, "<$tmpname") or die("Could not open temporary file\n");
+  $mode = 's';
+  @services = ();
+}
+
+if ($mode eq 's') {
+  my $usestdin = !@services;
+  my $ln = 0;
+  do {
+    if ($usestdin) {
+      while (<STDIN>) {
+	$ln++;
+	chomp;
+	next if /^\s*#/;
+	next if /^\s*$/;
+	my @line = split(' ', $_);
+	if (@line != 2) {
+	  print STDERR "parse error line $ln: $_\n";
+	  next;
+	}
+	@services = @line;
+	last;
+      }
+      exit(1) unless @services;
+    }
+    if (@services & 1) {
+      printf("Usage: chkconfig -s service on|off|runlevels\n");
+      exit(1);
+    }
+    while(@services) {
+      $s = shift @services;
+      my $want = shift @services;
+      $want = lc($want);
+      if ($want ne 'on' && $want ne 'off') {
+	$want =~ s/s/S/g;
+	$want =~ s/b/B/g;
+	$want = join('', sort split('', $want));
+	if ($want =~ /([^0123456SB])/) {
+	  print STDERR "illegal runlevel specified for $s: $1\n";
+	  next;
+	}
+      }
+      $current{$s} = getcurrent($s) unless defined $current{$s};
+      next unless defined $current{$s};
+      next if $want eq $current{$s};
+      if ($want eq '' || $want eq 'off') {
+	insserv('-r', '-d', "$initdir/$s");
+      } elsif ($want eq 'on') {
+	insserv('-d', "$initdir/$s");
+      } else {
+	insserv('-r', '-d', "$initdir/$s");
+	insserv("$initdir/$s,start=".join(',',split('', $want)));
+      }
+      delete $current{$s};
+      $links_unknown{$s} = 1;	# check again for this service
+    }
+  } while ($usestdin);
+  exit(0);
+}
+
+if ($mode eq 'a' || $mode eq 'd') {
+  for $s (splice @services) {
+    if (! -f "$initdir/$s") {
+      print STDERR "$s: unknown service\n";
+      next;
+    }
+    push @services, $s;
+    if ($mode eq 'a') {
+      insserv("$initdir/$s");
+    } else {
+      insserv('-r', "$initdir/$s");
+    }
+  }
+  $mode = 'l';
+}
+if ($mode eq 'l') {
+  initlinks();
+  my $usecolor = -t STDOUT;
+  for $s (@services) {
+    printf "%-25s ", $s;
+    my $l;
+    for $l (0, 1, 2, 3, 4, 5, 6) {
+      if ($usecolor) {
+	print $links{$l}->{$s} ? "\e[0;1;32m$l:on    \e[m" : "$l:off   ";
+      } else {
+	print $links{$l}->{$s} ? "$l:on    " : "$l:off   ";
+      }
+    }
+    print getdeps($s) if $printdeps;
+    print "\n";
+  }
+  exit(0);
+}
