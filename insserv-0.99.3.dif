@@ -38,8 +38,8 @@
  
 -	if (stat(*argv, &st_script) < 0) {
 -	    if (errno != ENOENT)
-+	if ((*argv)[0] == '/' || ((*argv)[0] == '.' && (*argv)[1] == '/') ||
-+	    !strncmp("etc/init.d/", *argv, 11)) {
++	/* Catch `/path/script', `./script', and `path/script' */
++	if (strchr(*argv, '/')) {
 +	    if ( stat(*argv, &st_script) < 0)
  		error("%s: %s\n", *argv, strerror(errno));
 +	} else {
