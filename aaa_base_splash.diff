@@ -1,6 +1,6 @@
-diff -urN etc/init.d/boot etc/init.d/boot
---- etc/init.d/boot	Sat Sep  1 19:26:00 2001
-+++ etc/init.d/boot	Fri Sep  7 14:39:05 2001
+diff -urN t/etc/init.d/boot u/etc/init.d/boot
+--- t/etc/init.d/boot	Sun Sep  9 23:47:12 2001
++++ u/etc/init.d/boot	Mon Sep 10 13:06:41 2001
 @@ -122,6 +122,8 @@
      fi
  fi
@@ -26,8 +26,8 @@ diff -urN etc/init.d/boot etc/init.d/boot
 +rc_splash "fsck stop"
  
  # set and adjust the CMOS clock
- if test "$HWCLOCK_ACCESS" != "no" ; then
-@@ -420,6 +425,8 @@
+ if test "$HWCLOCK_ACCESS" = "no" ; then
+@@ -445,6 +450,8 @@
      rc_status -v -r
  fi
  
@@ -36,7 +36,7 @@ diff -urN etc/init.d/boot etc/init.d/boot
  #
  # initialize loopback device
  #
-@@ -674,6 +681,7 @@
+@@ -699,6 +706,7 @@
  # Let YaST2 finish its installation, if you installed with YaST2
  #
  if test -f /var/lib/YaST2/runme_at_boot ; then
@@ -44,9 +44,9 @@ diff -urN etc/init.d/boot etc/init.d/boot
      exec 0<> $REDIRECT 1>&0 2>&0
      # if yast2 failed, this ensures proper system setup
      touch /var/lib/YaST2/run_suseconfig
-diff -urN etc/init.d/halt etc/init.d/halt
---- etc/init.d/halt	Sat Sep  1 13:13:00 2001
-+++ etc/init.d/halt	Fri Sep  7 14:39:05 2001
+diff -urN t/etc/init.d/halt u/etc/init.d/halt
+--- t/etc/init.d/halt	Sat Sep  1 13:13:03 2001
++++ u/etc/init.d/halt	Mon Sep 10 13:06:41 2001
 @@ -16,6 +16,8 @@
  trap "echo" SIGINT SIGSEGV SIGQUIT SIGTERM
  set +e
@@ -56,9 +56,9 @@ diff -urN etc/init.d/halt etc/init.d/halt
  case "$0" in
  	*halt)
  		message="The system will be halted immediately."
-diff -urN etc/init.d/rc etc/init.d/rc
---- etc/init.d/rc	Mon Aug 27 17:08:00 2001
-+++ etc/init.d/rc	Fri Sep  7 14:39:05 2001
+diff -urN t/etc/init.d/rc u/etc/init.d/rc
+--- t/etc/init.d/rc	Mon Aug 27 17:08:07 2001
++++ u/etc/init.d/rc	Mon Sep 10 13:06:41 2001
 @@ -115,6 +115,9 @@
      test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
      test -x "$1"  && continue
@@ -89,9 +89,9 @@ diff -urN etc/init.d/rc etc/init.d/rc
  echo -n "Master Resource Control: "
  echo -e "runlevel ${RUNLEVEL} has been ${stat}${extd}reached${norm}"
  if test -n "$failed" ; then
-diff -urN etc/rc.status etc/rc.status
---- etc/rc.status	Tue Aug  7 16:55:00 2001
-+++ etc/rc.status	Fri Sep  7 14:45:59 2001
+diff -urN t/etc/rc.status u/etc/rc.status
+--- t/etc/rc.status	Tue Aug  7 16:55:36 2001
++++ u/etc/rc.status	Mon Sep 10 13:06:41 2001
 @@ -31,6 +31,10 @@
  #    \015          carriage return (without newline)
  #
