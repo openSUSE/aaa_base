@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996, 1999 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
 #         Werner Fink <werner@suse.de>, 1996,98
@@ -42,11 +42,12 @@ case "$1" in
 	test "$USE_KERNEL_NFSD_NUMBER" -gt 0 && PARAMS="$USE_KERNEL_NFSD_NUMBER"
 
 	echo -n "Starting kernel based NFS server"
+        /usr/sbin/rpc.klockd                               || return=$rc_failed
 	checkproc /usr/sbin/rpc.kstatd || \
-	startproc -l /var/log/rpc.kstatd /usr/sbin/rpc.kstatd || return=$rc_failed
-	/usr/sbin/kexportfs -r                                || return=$rc_failed
-	startproc    /usr/sbin/rpc.kmountd --no-nfs-version 3 || return=$rc_failed
-	/usr/sbin/rpc.knfsd $PARAMS                           || return=$rc_failed
+		startproc /usr/sbin/rpc.kstatd             || return=$rc_failed
+	/usr/sbin/kexportfs -r 			           || return=$rc_failed
+	startproc /usr/sbin/rpc.kmountd --no-nfs-version 3 || return=$rc_failed
+	/usr/sbin/rpc.knfsd $PARAMS		           || return=$rc_failed
       else
 	test -x /usr/sbin/rpc.mountd || exit 0
 	PARAMS=""
@@ -66,6 +67,7 @@ case "$1" in
 	/usr/sbin/kexportfs -au
 	killproc -n -KILL nfsd                  || return=$rc_failed
 	killproc    -TERM /usr/sbin/rpc.kmountd || return=$rc_failed
+	killproc -n -KILL lockd
 	killproc    -TERM /usr/sbin/rpc.kstatd
       else
         echo -n "Shutting down NFS server"
