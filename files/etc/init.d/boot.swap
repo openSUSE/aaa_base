@@ -18,14 +18,40 @@
 . /etc/rc.status
 . /etc/sysconfig/kernel
 
+get_swap_id() {
+    local line;
+    fdisk -l | while read line; do
+	case "$line" in
+	/*Linux\ swap) echo "${line%% *}"
+	esac
+    done
+}
+
+check_swap_sig () {
+    local part="$(get_swap_id)"
+    local where what type rest p c
+    while read  where what type rest ; do
+	test "$type" = "swap" || continue
+	c=continue
+	for p in $part ; do
+	    test "$p" = "$where" && c=true
+	done
+	$c
+	case "$(dd if=$where bs=1 count=6 skip=4086 2>/dev/null)" in
+	S1SUSP|S2SUSP) mkswap $where
+	esac
+    done < /etc/fstab
+}
+
 rc_reset
 
 case "$1" in
-  start)
+    start)
 	#
 	# After mounting we may activate swap files in /etc/fstab
 	# .. this should work know with the new swapon behavio(u)r
 	#
+	check_swap_sig
 	echo "Activating remaining swap-devices in /etc/fstab..."
 	swapon -a &> /dev/null
 	rc_status -v1 -r
