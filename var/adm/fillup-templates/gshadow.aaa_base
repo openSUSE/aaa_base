@@ -28,9 +28,6 @@ xok:*:root:root
 trusted:*:root:root
 modem:*:root:root
 named:*:root:root
-db2fadm1:*:root:root
-db2iadm1:*:root:root
-db2asgrp:*:root:root
 users:*:root:root
 postfix:*:root:root
 dbmaker:*:root:root
