@@ -49,30 +49,30 @@ ippp*)
     case "$BASENAME" in
     ip-up)
 	# default deny
-        #ipfwadm -I -p deny
-        #ipfwadm -O -p deny
+        #ipfwadm-wrapper -I -p deny
+        #ipfwadm-wrapper -O -p deny
         
         # flush
-        #ipfwadm -I -f
-        #ipfwadm -O -f
+        #ipfwadm-wrapper -I -f
+        #ipfwadm-wrapper -O -f
 
         # accept dns
-        #ipfwadm -O -a accept -P udp -S 0/0 53 1024:65535 -D 0/0 53 -W $INTERFACE
-        #ipfwadm -I -a accept -P udp -D 0/0 53 1024:65535 -S 0/0 53 -W $INTERFACE
-        #ipfwadm -O -a accept -P tcp -S 0/0 53 1024:65535 -D 0/0 53 -W $INTERFACE
-        #ipfwadm -I -a accept -P tcp -D 0/0 53 1024:65535 -S 00/0 53 -k -W $INTERFACE
+        #ipfwadm-wrapper -O -a accept -P udp -S 0/0 53 1024:65535 -D 0/0 53 -W $INTERFACE
+        #ipfwadm-wrapper -I -a accept -P udp -D 0/0 53 1024:65535 -S 0/0 53 -W $INTERFACE
+        #ipfwadm-wrapper -O -a accept -P tcp -S 0/0 53 1024:65535 -D 0/0 53 -W $INTERFACE
+        #ipfwadm-wrapper -I -a accept -P tcp -D 0/0 53 1024:65535 -S 00/0 53 -k -W $INTERFACE
 
         # accept connect from client to internet
-        #ipfwadm -O -a accept -P tcp -S 0/0 1024:65535 -D 0/0 -W $INTERFACE
-        #ipfwadm -I -a accept -P tcp -D 0/0 1024:65535 -S 0/0 -k -W $INTERFACE
+        #ipfwadm-wrapper -O -a accept -P tcp -S 0/0 1024:65535 -D 0/0 -W $INTERFACE
+        #ipfwadm-wrapper -I -a accept -P tcp -D 0/0 1024:65535 -S 0/0 -k -W $INTERFACE
 
         # deny, last match
-        #ipfwadm -I -a deny -P tcp -S 0/0 -D 0/0 -W $INTERFACE
-        #ipfwadm -I -a deny -P udp -S 0/0 -D 0/0 -W $INTERFACE
+        #ipfwadm-wrapper -I -a deny -P tcp -S 0/0 -D 0/0 -W $INTERFACE
+        #ipfwadm-wrapper -I -a deny -P udp -S 0/0 -D 0/0 -W $INTERFACE
 
         # default accept
-        #ipfwadm -I -p accept
-        #ipfwadm -O -p accept
+        #ipfwadm-wrapper -I -p accept
+        #ipfwadm-wrapper -O -p accept
 
         /sbin/route add default gw $REMOTEIP dev $INTERFACE
 	
@@ -94,8 +94,8 @@ ippp*)
         /sbin/ifconfig $INTERFACE $IFCONFIG
 
 	# flush, del all rules
-        #ipfwadm -I -f
-        #ipfwadm -O -f
+        #ipfwadm-wrapper -I -f
+        #ipfwadm-wrapper -O -f
 
         # set routes from /etc/route.conf 
         test -z "$DEST"    || /sbin/route add -host $DEST dev $INTERFACE
