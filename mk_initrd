@@ -30,6 +30,9 @@
 #
 # ChangeLog:
 #
+# 14/1/2002:	v1.22
+#  - INITRD_MODULES has been moved to /etc/sysconfig/kernel
+#
 # 13/9/2001:	v1.21
 #  - added oem resize support
 #  - added support for splash image sizes
@@ -102,7 +105,7 @@ usage() {
                            the initrd; position have match to "kernel list"
                            defaults to "initrd initrd.suse"
           -m "module list" modules to include in initrd, defaults to
-                           INITRD_MODULES variable in /etc/rc.config
+                           INITRD_MODULES variable in /etc/sysconfig/kernel
           -b boot_dir      boot dir, defaults to "/boot"
           -d root_device   root device, defaults to the device from which
                            the root_dir is mounted; overwrites the rootdev
@@ -368,7 +371,7 @@ rootfstype=`echo $x1 | cut -f 3 -d " "`
 
 echo "using \"$rootdev\" as root device (mounted on \"$root_dir\" as \"$rootfstype\")"
 
-[ -f "$root_dir/etc/rc.config" ] && . $root_dir/etc/rc.config
+[ -f "$root_dir/etc/sysconfig/kernel" ] && . $root_dir/etc/sysconfig/kernel
 
 [ -z "$modules" ] && modules="$INITRD_MODULES"
 
