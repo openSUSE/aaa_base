@@ -1,0 +1,4 @@
+var/adm/fillup-templates/passwd.aaa_base
+var/adm/fillup-templates/group.aaa_base
+var/adm/fillup-templates/gshadow.aaa_base
+var/adm/fillup-templates/shadow.aaa_base
