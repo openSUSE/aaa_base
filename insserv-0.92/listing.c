@@ -32,6 +32,7 @@ int maxorder = 0;  /* Maximum order of runlevels 0 upto 6 and S */
 /* See listing.c for list_t and list_entry() macro */
 #define getdir(list)  list_entry((list), struct dir_struct, d_list)
 #define getlink(list) list_entry((list), struct link_struct, l_list)
+#define getnode(list) list_entry((list), struct loop_struct, n_list)
 
 /*
  * We handle services (aka scripts) as directories because
@@ -55,6 +56,13 @@ typedef struct dir_struct {
 } dir_t;			/* This is a "directory" */
 
 static list_t dirs = { &(dirs), &(dirs) }, * d_start = &dirs;
+
+typedef struct loop_struct {
+    list_t	      n_list;	/* The linked list to other symbolic links */
+    struct dir_struct * node;
+} loop_t;			/* This is a "symbolic link" */
+
+static list_t nodes = { &(nodes), &(nodes) }, * n_start = &nodes;
 
 /*
  * Provide or find a service dir, set initial states and
@@ -142,19 +150,47 @@ static void ln_sf(const char * isprovided, const char * itrequires)
 	this->target = target;
 	goto out;
     }
+    error("%s", strerror(errno));
 out:
+}
+
+/*
+ * Remember loops
+ */
+static boolean remembernode (dir_t * dir)
+{
+    list_t * ptr;
+    loop_t * this;
+    boolean ret = false;
+
+    for (ptr = n_start->next; ptr !=  n_start; ptr = ptr->next)
+	if (dir == getnode(ptr)->node) {
+	    ret = true;
+	    goto out;
+	}
+
+    this = (loop_t *)malloc(sizeof(loop_t));
+    if (this) {
+	insert(&(this->n_list), n_start->prev);
+	this->node = dir;
+	goto out;
+    }
+    error("%s", strerror(errno));
+out:
+    return ret;
 }
 
 /*
  * Recursively called function to follow all
  * links within a service dir.
  * Just like a `find * -follow' within a directory tree
- * of deep one with cross linked dependencies.
+ * of depth one with cross linked dependencies.
  */
-static void __follow (dir_t * dir, int level, int offset)
+static void __follow (dir_t * dir, dir_t * skip, int level, int offset)
 {
     dir_t *tmp;
-    register int deep = level;	/* Link deep, maybe we're called recursive */
+    register int deep = level;	/* Link depth, maybe we're called recursive */
+    static boolean warned = false;
 
     if (*dir->name == '$') 	/* Dirty hack to decrease the order caused by */
 	offset--;		/* system facilities, may fail */
@@ -163,9 +199,9 @@ static void __follow (dir_t * dir, int level, int offset)
 	list_t * dent, * l_start = &(tmp->link.l_list);
 
 	if (++deep > MAX_DEEP) {
-	    static int warned = 0;
-	    if (warned++ < 5)
-		warn("Max recursions deep %d reached\n",  MAX_DEEP);
+	    if (!warned)
+		warn("Max recursions depth %d reached\n",  MAX_DEEP);
+	    warned = true;
 	    break;
 	}
 
@@ -173,7 +209,7 @@ static void __follow (dir_t * dir, int level, int offset)
 	     continue;		/* Not same boot level */
 
 	/*
-	 * As higher the link deep, as higher the start order.
+	 * As higher the link depth, as higher the start order.
 	 */
 	if (tmp->order < (deep + offset))
 	    tmp->order = (deep + offset);
@@ -190,18 +226,24 @@ static void __follow (dir_t * dir, int level, int offset)
 	    if (target == dir)
 		break;		/* Loop detected */
 
-	    __follow(target, deep, offset);
+	    if (skip && target == skip) {
+		if (!remembernode(skip))
+		    warn("There is a loop at service %s\n",  skip->name);
+		break;		/* Cross over detected */
+	    }
+
+	    __follow(target, tmp, deep, offset);
 	}
     }
 }
 
 /*
- * Helper for follow_all: start with deep zero.
+ * Helper for follow_all: start with depth zero.
  */
 inline static void follow(dir_t * dir)
 {
-    /* Link deep and offset starts here with zero */
-    __follow(dir, 0, 0);
+    /* Link depth and offset starts here with zero */
+    __follow(dir, NULL, 0, 0);
 }
 
 /*
@@ -527,7 +569,7 @@ void setorder(const char * script, const int order)
      * Follow the script and re-calculate the ordering.
      */
     offset = order - (dir->order + 1);
-    __follow(dir, dir->order, offset);
+    __follow(dir, NULL, dir->order, offset);
 
     /*
      * Guess order of not installed scripts in comparision

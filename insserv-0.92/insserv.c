@@ -171,11 +171,15 @@ static serv_t * findserv(const char * serv)
     list_t * ptr;
     serv_t * ret = NULL;
 
+    if (!serv)
+	goto out;
+
     for (ptr = serv_start->next; ptr != serv_start;  ptr = ptr->next)
 	if (!strcmp(getserv(ptr)->name, serv)) {
 	    ret = getserv(ptr);
 	    break;
 	}
+out:
     return ret;
 }
 
@@ -821,16 +825,15 @@ int main (int argc, char *argv[])
 	    continue;
 	}
 
-	/*
-	 * Use guessed service to find it within the the runlevels
-	 * (by using the list from the first scan for script locations).
-	 */
-	service = findserv(script_inf.provides);
-
 	if (!script_inf.provides || script_inf.provides == empty) {
 	    /* Oops, no comment found, guess one */
 	    script_inf.provides = xstrdup(d->d_name);
 
+	   /*
+	    * Use guessed service to find it within the the runlevels
+	    * (by using the list from the first scan for script locations).
+	    */
+	    service = findserv(script_inf.provides);
 	    if (service) {
 		if (!script_inf.required_start || script_inf.required_start == empty) {
 		    list_t * ptr = NULL;
@@ -843,6 +846,13 @@ int main (int argc, char *argv[])
 		}
 	    }
 	}
+
+	/*
+	 * Use guessed service to find it within the the runlevels
+	 * (by using the list from the first scan for script locations).
+	 */
+	if (!service)
+	    service = findserv(script_inf.provides);
 
 	if (service) {
 	    if (script_inf.default_start && script_inf.default_start != empty) {
