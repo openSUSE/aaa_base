@@ -252,25 +252,10 @@ if test -d $r/usr/lib/dvgt_help ; then
     echo "export DV_IMMED_HELP" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv DV_IMMED_HELP /usr/lib/dvgt_help" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
-if test -d $r/usr/lib/maple ; then
-    echo "MAPLE=/usr/lib/maple" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export MAPLE" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv MAPLE /usr/lib/maple" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
 if test -d $r/usr/lib/rasmol ; then
     echo "RASMOLPATH=/usr/lib/rasmol" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export RASMOLPATH" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv RASMOLPATH /usr/lib/rasmol" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/mars_e ; then
-    echo "DMARSCONF=/usr/lib/mars_e" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export DMARSCONF" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv DMARSCONF /usr/lib/mars_e" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/crisp/macros ; then
-    echo "CRPATH=/usr/lib/crisp/macros" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export CRPATH" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv CRPATH /usr/lib/crisp/macros" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test -d $r/usr/lib/cint ; then
     echo "CINTSYSDIR=/usr/lib/cint" >> $r/etc/SuSEconfig/profile.SuSEconfig
@@ -281,11 +266,6 @@ if test -d $r/usr/lib/maxwell ; then
     echo "MAXHOME=/usr/lib/maxwell" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export MAXHOME" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv MAXHOME /usr/lib/maxwell" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/X11R6/lib/blender ; then
-    echo "BLENDERDIR=/usr/X11R6/lib/blender" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export BLENDERDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv BLENDERDIR /usr/X11R6/lib/blender" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test -n "$HTTP_PROXY" ; then
     echo "http_proxy=$HTTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig

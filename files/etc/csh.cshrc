@@ -18,8 +18,6 @@ onintr -
 #
 set echo_style=both
 #
-setenv OPENWINHOME /usr/openwin
-setenv HELPPATH $OPENWINHOME/lib/help
 setenv MANPATH  "`(unsetenv MANPATH; manpath -q)`"
 setenv MINICOM  "-c on"
 setenv HOSTNAME "`hostname -f`"

@@ -26,8 +26,8 @@ endif
 set _xpath
 set _tpath=( /opt/bin /usr/andrew/bin /usr/games )
 
-if ( ${?OPENWINHOME} && -d $OPENWINHOME/bin ) then
-    set _xpath=( $OPENWINHOME/bin )
+if ( -d /usr/openwin/bin ) then
+    set _xpath=( /usr/openwin/bin )
 endif
 if ( -d /usr/bin/X11 ) then
     set _xpath=( /usr/bin/X11   $_xpath )

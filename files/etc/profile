@@ -199,11 +199,6 @@ if test -s /etc/organization ; then
     export ORGANIZATION
 fi
 
-if test -d /usr/openwin/lib ; then
-    OPENWINHOME=/usr/openwin
-    export OPENWINHOME
-fi
-
 #
 # Midnight Commander needs this to run in color mode
 #
