@@ -485,15 +485,6 @@ if test -r /etc/isapnp.conf -a -x /sbin/isapnp -a "$START_ISAPNP" = yes ; then
 fi
 
 #
-# start encrypted filesystems
-#
-if test -f /etc/init.d/boot.crypto ; then
-	echo "Running /etc/init.d/boot.crypto"
-	/bin/sh /etc/init.d/boot.crypto
-	rc_status -v1 -r
-fi
-
-#
 # start user defined bootup script.
 #
 if test -f /etc/init.d/boot.local ; then
