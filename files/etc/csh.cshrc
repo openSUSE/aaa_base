@@ -219,23 +219,27 @@ if ($?tcsh) then
     unset _rev _rel
 endif
 #
-# Enable editing in EUC encoding for the languages where this make sense:
+# Enable editing in multibyte encodings for the locales where this make sense:
 #
-if ( ${?LANG} ) then
-    switch ( ${LANG:r} )
-    case ja*:
-	set dspmbyte=euc
+switch ( `locale charmap` )
+    case UTF-8:
+	set dspmbyte=utf8
         breaksw
-    case ko*:
-	set dspmbyte=euc
-        breaksw
-    case zh_TW*:
+    case BIG5:
 	set dspmbyte=big5
+        breaksw
+    case EUC-JP:
+	set dspmbyte=euc
+        breaksw
+    case EUC-KR:
+	set dspmbyte=euc
+        breaksw
+    case SHIFT_JIS:
+	set dspmbyte=sjis
         breaksw
     default:
         breaksw
     endsw
-endif
 #
 end:
     onintr
