@@ -161,7 +161,7 @@ ppp*)
 			cp -p /etc/resolv.conf /etc/ppp/resolv.prev
 			grep domain /etc/ppp/resolv.prev > /etc/resolv.conf
 			grep search /etc/ppp/resolv.prev >> /etc/resolv.conf
-			cat /etc/ppp/resolv.conf /etc >> /etc/resolv.conf
+			cat /etc/ppp/resolv.conf >> /etc/resolv.conf
 			echo "Modified /etc/resolv.conf for DNS at $INTERFACE"
 		else
 			cp /etc/ppp/resolv.conf /etc

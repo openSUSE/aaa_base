@@ -37,8 +37,8 @@ if [ "$DELETE_OLD_CATMAN" = yes ] ; then
     # Default is 7 days
     CATMAN_ATIME=7
   fi
-  test -e /var/catman && \
-      find /var/catman -name '*.gz' -type f -atime +$CATMAN_ATIME  -print0 | \
+  test -e /var/cache/man && \
+      find /var/cache/man -name '*.gz' -type f -atime +$CATMAN_ATIME  -print0 | \
       xargs --no-run-if-empty --max-lines=200 --null -- rm -f
 fi
 
