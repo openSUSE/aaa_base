@@ -405,6 +405,11 @@ if test -d $r/usr/lib/maxwell ; then
     echo "export MAXHOME" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv MAXHOME /usr/lib/maxwell" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
+if test -d $r/usr/X11R6/lib/blender ; then
+    echo "BLENDERDIR=/usr/X11R6/lib/blender" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export BLENDERDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv BLENDERDIR /usr/X11R6/lib/blender" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
 if test -n "$HTTP_PROXY" ; then
     echo "http_proxy=$HTTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export http_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
