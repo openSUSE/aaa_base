@@ -650,6 +650,9 @@ if test -e /var/adm/setup/setup.newinst -o -e /usr/lib/YaST/.configured2 ; then
             sleep 2
             rm -f /usr/lib/YaST/.configured2
         fi
+        if test -x /etc/init.d/kbd ; then
+            /etc/init.d/kbd start
+        fi
         /lib/YaST/bootsetup
         #
         # maybe YaST has started gpm. This can lead into trouble with
