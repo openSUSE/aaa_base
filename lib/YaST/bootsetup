@@ -250,14 +250,20 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     export -f press_enter
     export LANGUAGE
 
-    ( press_enter; touch /tmp/return.$$ ) &
+    rm -rf /tmp/.bootsetup$$
+    if ! mkdir /tmp/.bootsetup$$ ; then
+	echo "Warning - can't create /tmp/.bootsetup$$ - security problem!"
+	exit 1
+    fi
+
+    ( press_enter; touch /tmp/.bootsetup$$/return ) &
     ENTER_SHELL=$!
-    while [ ! -f /tmp/return.$$ -a -f /usr/lib/YaST/.configured2 ]
+    while [ ! -f /tmp/.bootsetup$$/return -a -f /usr/lib/YaST/.configured2 ]
     do
         sleep 1
     done
     echo
-    rm -f /tmp/return.$$
+    rm -rf /tmp/.bootsetup$$
     disown $ENTER_SHELL 2>/dev/null
     kill $ENTER_SHELL 2>/dev/null
 
