@@ -66,7 +66,7 @@
 /opt/kde/bin/kcheckpass                root.root        4755
 /opt/kde/bin/kvt                       root.tty         2755
 /sbin/cardctl                          root.root        4755
-/sbin/isdnbutton                       root.root        4755
+/usr/sbin/isdnbutton                   root.root        4755
 /usr/X11R6/bin/Xwrapper                root.root        4755
 /usr/X11R6/bin/dga                     root.root        4755
 /usr/X11R6/bin/xlock                   root.shadow      2755

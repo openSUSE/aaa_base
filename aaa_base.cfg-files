@@ -26,6 +26,7 @@ etc/shells
 etc/ttytype
 etc/zshrc
 etc/ppp/ip-up
+etc/ppp/ip-down
 sbin/init.d/boot
 sbin/init.d/boot.setup
 sbin/init.d/cron

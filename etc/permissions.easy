@@ -61,7 +61,7 @@
 /usr/sbin/amcheck                      root.root        4755
 /usr/sbin/suexec                       root.root        4755
 /opt/kde/bin/apm_proxy                 root.root        4755
-/sbin/isdnctrl                         root.root        4755
+/usr/sbin/isdnctrl                     root.uucp        4750
 
 #
 # sgid shadow

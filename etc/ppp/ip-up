@@ -19,15 +19,14 @@ if [ -z "$REMOTEIP" ]; then
     exit 1
 fi
 
+. /etc/rc.config
 
 case "$INTERFACE" in
 ippp*)
 
-    . /etc/rc.config
-
     # find the device
     found=0
-    for I in $NETCONFIG; do
+    for I in $NETCONFIG $NETCONFIG_PCMCIA; do
         eval NETDEV=\$NETDEV$I
         if [ $NETDEV = $INTERFACE ]; then
             found=1
@@ -48,32 +47,6 @@ ippp*)
 
     case "$BASENAME" in
     ip-up)
-	# default deny
-        #ipfwadm-wrapper -I -p deny
-        #ipfwadm-wrapper -O -p deny
-        
-        # flush
-        #ipfwadm-wrapper -I -f
-        #ipfwadm-wrapper -O -f
-
-        # accept dns
-        #ipfwadm-wrapper -O -a accept -P udp -S 0/0 53 1024:65535 -D 0/0 53 -W $INTERFACE
-        #ipfwadm-wrapper -I -a accept -P udp -D 0/0 53 1024:65535 -S 0/0 53 -W $INTERFACE
-        #ipfwadm-wrapper -O -a accept -P tcp -S 0/0 53 1024:65535 -D 0/0 53 -W $INTERFACE
-        #ipfwadm-wrapper -I -a accept -P tcp -D 0/0 53 1024:65535 -S 00/0 53 -k -W $INTERFACE
-
-        # accept connect from client to internet
-        #ipfwadm-wrapper -O -a accept -P tcp -S 0/0 1024:65535 -D 0/0 -W $INTERFACE
-        #ipfwadm-wrapper -I -a accept -P tcp -D 0/0 1024:65535 -S 0/0 -k -W $INTERFACE
-
-        # deny, last match
-        #ipfwadm-wrapper -I -a deny -P tcp -S 0/0 -D 0/0 -W $INTERFACE
-        #ipfwadm-wrapper -I -a deny -P udp -S 0/0 -D 0/0 -W $INTERFACE
-
-        # default accept
-        #ipfwadm-wrapper -I -p accept
-        #ipfwadm-wrapper -O -p accept
-
         /sbin/route add default gw $REMOTEIP dev $INTERFACE
 	
 	# Get the nameservers (works with ipppd option ms-get-dns):
@@ -94,6 +67,20 @@ ippp*)
 			echo "Installed /etc/resolv.conf for DNS at $INTERFACE"
 		fi
 	fi
+
+	#
+	# SuSE Firewall script: If you installed the package firewals
+	# and configured your firewall in /etc/rc.config.d/firewall.rc.config 
+	# then set START_FW in /etc/rc.config to yes and it will be
+	# started here:
+	#
+        test "$START_FW" = yes && /sbin/SuSEfirewall
+
+	#
+	# You may choose to use a default firewall script, configured for
+	# the standard dialup user(install package ipchains):
+	#
+	#test -x /etc/ppp/inet_chains.local && /etc/ppp/inet_chains.local $*
 
 	# maybe you want to start mail services:
         # set follow variables in /etc/rc.config 
@@ -137,13 +124,17 @@ ippp*)
 	sleep 1
         /sbin/ifconfig $INTERFACE $IFCONFIG
 
-	# flush, del all rules
-        #ipfwadm-wrapper -I -f
-        #ipfwadm-wrapper -O -f
-
         # set routes from /etc/route.conf 
         # test -z "$DEST"    || /sbin/route add -host $DEST dev $INTERFACE
         test -z "$DEFAULT" || /sbin/route add default gw $DEFAULT 
+
+	#
+	# SuSE Firewall script: If you installed the package firewals
+	# and configured your firewall in /etc/rc.config.d/firewall.rc.config 
+	# then set START_FW in /etc/rc.config to yes and it will be
+	# started here:
+	#
+        test "$START_FW" = yes && /sbin/SuSEfirewall
 
 	# call ip-down.local if it exists and is executable:
 	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local $*
@@ -177,10 +168,22 @@ ppp*)
 			chmod 644 /etc/resolv.conf
                         echo "Installed /etc/resolv.conf for DNS at $INTERFACE"
 		fi
-		if [ "$START_NSCD" = yes ]; then
-			/sbin/init.d/nscd restart &
-		fi
 	fi
+	#
+	# SuSE Firewall script: If you installed the package firewals
+	# and configured your firewall in /etc/rc.config.d/firewall.rc.config 
+	# then set START_FW in /etc/rc.config to yes and it will be
+	# started here:
+	#
+        test "$START_FW" = yes && /sbin/SuSEfirewall
+	
+	#
+	# You may choose to use a default firewall script, configured for
+	# the standard dialup user(install package ipchains):
+	#
+	#test -x /etc/ppp/inet_chains.local && /etc/ppp/inet_chains.local $*
+
+	# call ip-up.local if it exists and is executable:
 	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local $*
         ;;
     ip-down)
@@ -197,10 +200,16 @@ ppp*)
 			rm -f /etc/resolv.conf
 			echo "Deinstalled /etc/resolv.conf"
 		fi
-		if [ "$START_NSCD" = yes ]; then
-			/sbin/init.d/nscd restart &
-		fi
 	fi
+	#
+	# SuSE Firewall script: If you installed the package firewals
+	# and configured your firewall in /etc/rc.config.d/firewall.rc.config 
+	# then set START_FW in /etc/rc.config to yes and it will be
+	# started here:
+	#
+        test "$START_FW" = yes && /sbin/SuSEfirewall
+
+	# call ip-down.local if it exists and is executable:
 	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local $*
         ;;
     *)

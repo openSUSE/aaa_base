@@ -150,7 +150,7 @@
 /bin/su                                root.trusted    4750
 /bin/umount                            root.root        755
 /sbin/cardctl                          root.trusted     4750
-/sbin/isdnbutton                       root.trusted     4750
+/usr/sbin/isdnbutton                   root.trusted     4750
 # The next lines are protected by the directory which is
 # 750 root.xok.
 /usr/X11R6/bin/XF86_8514               root.root         755
