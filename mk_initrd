@@ -754,8 +754,8 @@ for k in $kernels ; do
     rmdir $tmp_mnt/lost+found
     mkdir $tmp_mnt/{bin,dev}
     case $arch in
-	s390*) initrd_devices=$root_dir/dev/{zero,null,ram0,ram1,ram2,ram,ramdisk,console};;
-	*) initrd_devices=$root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console};;
+	s390*) initrd_devices=$root_dir/dev/{zero,null,ram0,ram1,ram2,ram,ramdisk,console,md0};;
+	*) initrd_devices=$root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console,md0};;
     esac
     eval cp -a $initrd_devices $tmp_mnt/dev
     cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 4 "no static shell"
