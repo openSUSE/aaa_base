@@ -30,7 +30,6 @@
 # 'normal' suid root programs
 #
 /usr/X11R6/bin/cardinfo                root.root         755
-/usr/X11R6/bin/xosview.bin             root.root         755
 /usr/bin/bttvgrab                      root.root         755
 /usr/bin/chage                         root.root         755
 /usr/bin/chfn                          root.root         755
