@@ -3,7 +3,7 @@
 # mk_initrd - create the inital ramdisk images
 # usage: see below usage() or call with -h
 #
-# Copyright (C) 2001 SuSE GmbH, Nuernberg, Germany
+# Copyright (C) 2002 SuSE Linux AG, Nuernberg, Germany
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@
 # Version 1.21
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
-# (c) 1999 SuSE GmbH
+# (c) 1999-2002 SuSE Linux AG
 # (c) 1999 Heiko Eiﬂfeldt bugfix, add module parameter passing
 # (c) 2000 Karsten Keil   option and kernel 2.4 support
 #

@@ -181,10 +181,10 @@ done
 mkdir -p etc/init.d
 echo "#! /bin/sh
 #
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.  All rights reserved.
 #
 # Author: Werner Fink <werner@suse.de>, 1996
-#         Burchard Steinbild <bs@suse.de>, 1996
+#         Burchard Steinbild <feedback@suse.de>, 1996
 #
 # /etc/init.d/boot.local
 #
@@ -206,10 +206,10 @@ rm -f etc/init.d/boot.local.new
 chmod 744 etc/init.d/boot.local
 echo "#! /bin/sh
 #
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.  All rights reserved.
 #
 # Author: Werner Fink <werner@suse.de>, 1998
-#         Burchard Steinbild <bs@suse.de>, 1998
+#         Burchard Steinbild <feedback@suse.de>, 1998
 #
 # /etc/init.d/halt.local
 #

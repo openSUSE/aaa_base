@@ -5,12 +5,12 @@
 # Please add your local changes to cron.daily.local
 # since this file will be overwritten, when updating your system.
 #
-# Copyright (c) 1996-2000 SuSE GmbH Nuernberg, Germany.   
+# Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
 #
 # please send bugfixes or comments to feedback@suse.de.
 #
-# Author: Burchard Steinbild <bs@suse.de>, 1996
-#         Florian La Roche <florian@suse.de>, 1996
+# Author: Burchard Steinbild <feedback@suse.de>, 1996
+#         Florian La Roche <feedback@suse.de>, 1996
 #
 
 #

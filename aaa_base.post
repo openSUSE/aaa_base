@@ -3,7 +3,7 @@
 #
 # post.sh - to be done after extraction
 #
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.
+# Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.
 #
 #
 #
@@ -55,10 +55,11 @@ if [ ! -e etc/rc.config ]; then
 #
 # /etc/rc.config
 #
-# Copyright (c) 1996-2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996-2002 SuSE Linux AG Nuernberg, Germany.
+# All rights reserved.
 #
 # Author: Werner Fink <werner@suse.de>, 1996
-#         Burchard Steinbild <bs@suse.de>, 1996
+#         Burchard Steinbild <feedback@suse.de>, 1996
 #
 # Configuration database for shell scripts in /etc/init.d, /sbin/SuSEconfig
 # and /etc/cron.daily/aaa_base*
@@ -92,7 +93,7 @@ if [ ! -f etc/sysconfig/language -a -f etc/rc.config.d/lang.rc.config ] ; then
 fi
 for i in language backup displaymanager mouse kernel \
 	suseconfig clock proxy windowmanager sysctl java mail \
-	hardware cron_daily ; do
+	hardware cron_daily printer ; do
 %{fillup_only -n $i}
 done
 

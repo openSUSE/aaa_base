@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 1999 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1999 SuSE Linux AG, Nuernberg, Germany. All rights reserved.
 #
 
 for i in $* ; do

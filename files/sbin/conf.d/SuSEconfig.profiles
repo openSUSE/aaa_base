@@ -1,7 +1,8 @@
 #! /bin/sh
-# Copyright (c) 2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 2000-2002 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
 #
-# Author: Burchard Steinbild <bs@suse.de>, 1996-97
+# Author: Burchard Steinbild <feedback@suse.de>, 1996-97
 #         Bernhard Kaindl <bk@suse.de>, 1999
 #         Rüdiger Oertel <ro@suse.de>, 2000
 #
@@ -24,7 +25,7 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 }
 . $r/lib/YaST/SuSEconfig.functions
 
-for i in $r/etc/rc.config $r/etc/sysconfig/language $r/etc/sysconfig/windowmanager $r/etc/sysconfig/suseconfig $r/etc/sysconfig/mail ; do
+for i in $r/etc/rc.config $r/etc/sysconfig/language $r/etc/sysconfig/windowmanager $r/etc/sysconfig/suseconfig $r/etc/sysconfig/mail $r/etc/sysconfig/printer ; do
   test -f $i || {
     echo "No $i found."
     exit 1

@@ -1,8 +1,9 @@
 #! /bin/sh
-# Copyright (c) 1996,98, 99 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
 #
-# Author: Burchard Steinbild <bs@suse.de>, 1996-97
-#         Florian La Roche <florian@suse.de>, 1996
+# Author: Burchard Steinbild <feedback@suse.de>, 1996-97
+#         Florian La Roche <feedback@suse.de>, 1996
 # i18n support added by Aleksey Smirnov <smi@logic.ru>
 #  & Aleksey Novodvorsky <aen@logic.ru> from IPLabs Linux Team, Moscow.
 # Attention! The shell must be restarted before localisation takes effect!

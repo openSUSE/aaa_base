@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 2002 SuSE GmbH Nuernberg, Germany.
+# Copyright (c) 2002 SuSE Linux AG, Nuernberg, Germany. All rights reserved.
 #
 # File: /etc/init.d/boot.idedma
 # Author: Ladislav Slezak <lslezak@suse.cz>

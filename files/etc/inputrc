@@ -2,7 +2,7 @@
 ## /etc/inputrc
 ##
 ## Attempt to put different TERMs together in one readline init file.
-## Copyright (c) 1997,2000 SuSE GmbH Nuernberg, Germany.
+## Copyright (c) 1997,2000 SuSE Linux AG, Nuernberg, Germany.
 ##
 ## Author: Werner Fink,  <werner@suse.de>
 ##

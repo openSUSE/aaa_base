@@ -1,6 +1,7 @@
 #! /bin/sh
 #
-# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 2001-2002 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
 #
 # /etc/init.d/boot.ldconfig
 #
@@ -22,7 +23,7 @@ case "$1" in
   start)
 	#
 	# Let ld.so rebuild its cache.
-	# But do some tests before if it is really needed (bs@suse.de 01/2000)
+	# But do some tests before if it is really needed
 	LDCONFIG_NEEDED=false
 	test -s /etc/ld.so.cache || LDCONFIG_NEEDED=true
 	test "$run_ldconfig" = true && LDCONFIG_NEEDED=true

@@ -1,7 +1,8 @@
 #! /bin/sh
-# Copyright (c) 2000-2002 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 2000-2002 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
 #
-# Author: Burchard Steinbild <bs@suse.de>, 1996-97
+# Author: Burchard Steinbild <feedback@suse.de>, 1996-97
 #         Bernhard Kaindl <bk@suse.de>, 1999
 #         Rüdiger Oertel <ro@suse.de>, 2000-01
 #

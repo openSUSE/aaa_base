@@ -1,7 +1,7 @@
 #!/bin/sh
 #
-# (C) Copyright  Florian  La Roche, <flla@stud.uni-sb.de, florian@suse.de>
-# (C) SuSE GmbH, Nuernberg, Germany 
+# (C) Copyright  Florian  La Roche, <flla@stud.uni-sb.de, feedback@suse.de>
+# (C) SuSE Linux AG, Nuernberg, Germany.
 # See the GNU Copyright...
 
 version="0.12"
