@@ -174,7 +174,7 @@ else
         fi
 	if test "$ROOT_USES_LANG" = ctype -a "$var" = LC_CTYPE ; then
             if eval test "\$RC_$var"; then
-               eval echo "'    '$var=\\\"\$RC_CTYPE\\\""
+               eval echo "'    '$var=\\\"\$RC_LC_CTYPE\\\""
             else
                eval echo "'    '$var=\\\"\$RC_LANG\\\""
             fi
