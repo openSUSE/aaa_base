@@ -78,33 +78,31 @@ done
 
 
 TMPFILE=`mktemp /tmp/Check.perms.XXXXXX`
-TMPFILE2=`mktemp /tmp/Check.perms.XXXXXX`
 
-if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
-        -x /usr/bin/perl -a -x /usr/bin/chkstat ; then
-  if test "$UID" = 0 -o -n "$RPM_BUILD_ROOT" ; then
-
-    cat /etc/permissions > $TMPFILE
-    for PERMEXT in $PERMISSION_SECURITY ; do
-        test -e /etc/permissions."$PERMEXT" &&\
-	    cat /etc/permissions."$PERMEXT" >> $TMPFILE
-    done
-    if test -n "$RPM_BUILD_ROOT" ; then
-        cat $TMPFILE | sed -e"s:^/:$RPM_BUILD_ROOT/:" > $TMPFILE2
-	if test "$UID" = 0 ; then
-		cat $TMPFILE2 >> $TMPFILE
-	else
-		cat $TMPFILE2 > $TMPFILE
+if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a -x /usr/bin/chkstat ; then
+    if test "$UID" = 0 -o -n "$RPM_BUILD_ROOT" ; then
+	cat /etc/permissions > $TMPFILE
+	for PERMEXT in $PERMISSION_SECURITY ; do
+	    test -e /etc/permissions."$PERMEXT" &&\
+		cat /etc/permissions."$PERMEXT" >> $TMPFILE
+	done
+	# run below RPM_BUILD_ROOT regardless of UID
+	if test -n "$RPM_BUILD_ROOT" ; then
+	    if test "$CHECK_PERMISSIONS" = "set" ; then
+		/usr/bin/chkstat -root $RPM_BUILD_ROOT -set $TMPFILE
+	    elif test "$CHECK_PERMISSIONS" = "warn" ; then
+		/usr/bin/chkstat -root $RPM_BUILD_ROOT $TMPFILE
+	    fi
 	fi
-        rm -f $TMPFILE2
+	# run for / only if UID = 0
+	if test "$UID" = 0 ; then
+	    if test "$CHECK_PERMISSIONS" = "set" ; then
+		/usr/bin/chkstat -set $TMPFILE
+	    elif test "$CHECK_PERMISSIONS" = "warn" ; then
+		/usr/bin/chkstat $TMPFILE
+	    fi
+	fi
     fi
-
-    if test "$CHECK_PERMISSIONS" = "set" ; then
-        /usr/bin/chkstat -set $TMPFILE
-    elif test "$CHECK_PERMISSIONS" = "warn" ; then
-        /usr/bin/chkstat $TMPFILE
-    fi
-  fi
 fi
 
-rm -rf $TMPFILE $TMPFILE2
+rm -rf $TMPFILE
