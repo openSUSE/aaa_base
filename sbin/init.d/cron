@@ -30,7 +30,7 @@ case "$1" in
 	killproc -TERM /usr/sbin/cron || return=$rc_failed
 	echo -e "$return"
 	;;
-    retart)
+    restart)
 	$0 stop && $0 start || return=$rc_failed
 	;;
     reload)

@@ -41,7 +41,7 @@ case "$1" in
 	killproc -TERM /usr/sbin/inetd || return=$rc_failed
 	echo -e "$return"
 	;;
-    resart)
+    restart)
 	$0 stop && $0 start || return=$rc_failed
 	;;
     reload)

@@ -126,7 +126,7 @@ if test "$MAX_DAYS_FOR_LOG_FILES" -gt 0 -a -f /etc/logfiles ; then
             continue
         }
         for FILE in $FILES ; do
-            test -e $FILE && \
+            test -f $FILE && \
                 check_log_file $FILE $SIZE $MODE $OWNERSHIP
         done
     done < /etc/logfiles

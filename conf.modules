@@ -72,6 +72,8 @@ alias char-major-10    off
 options dummy0 -o dummy0
 options dummy1 -o dummy1
 
+options parport_pc io=0x378 irq=none,none
+
 alias block-major-1       rd
 alias block-major-2       floppy
 alias block-major-3       off
@@ -145,6 +147,6 @@ alias net-pf-3            off
 alias net-pf-4            off
 # alias net-pf-5            appletalk
 alias net-pf-5            off
-
 alias net-pf-17           af_package
 
+alias parport_lowlevel    parport_pc

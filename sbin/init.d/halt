@@ -57,13 +57,17 @@ sync ; sync
 swapoff -a || ECHO_RETURN=$rc_failed_up
 echo -e "$ECHO_RETURN"
 
+UMOUNT_FAILED=false
 ECHO_RETURN=$rc_done_up
 echo "Unmounting file systems"
-umount -avt noproc || ECHO_RETURN=$rc_failed_up
+umount -avt noproc || {
+    UMOUNT_FAILED=true
+    ECHO_RETURN=$rc_failed_up
+}
 echo -e "$ECHO_RETURN"
 
 
-if [ "$?" != "0" ]; then
+if [ "$UMOUNT_FAILED" = true ]; then
     echo "Oops: umount failed :-(  --  trying to remount readonly..."
     mounts=/etc/fstab
     test -r /proc/mounts && mounts=/proc/mounts

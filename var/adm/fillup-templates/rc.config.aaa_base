@@ -79,7 +79,7 @@ KBD_TTY="tty1 tty2 tty3 tty4 tty5 tty6"
 GMT="YAST_ASK"
 
 #
-# Timezone (e.g. MET)
+# Timezone (e.g. CET)
 # (this will set /usr/lib/zoneinfo/localtime)
 #
 TIMEZONE="YAST_ASK"
@@ -133,6 +133,12 @@ SETUPDUMMYDEV=yes
 # Do you want the "dynamic IP patch" to be enabled at bootup? (yes/no)
 #
 IP_DYNIP=no
+
+#
+# 2 you can configure at runtime, if the host may forward
+# IP packages or not.  Is this host a router? (yes/no)
+#
+IP_FORWARD=no
 
 
 #

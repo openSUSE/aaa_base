@@ -328,6 +328,24 @@ if test -n "$IP_DYNIP" -a "$IP_DYNIP" != no -a \
 fi
 
 #
+# Enable IP forwarding ?
+#
+if test -e /proc/sys/net/ipv4/ip_forward -a -n "$IP_FORWARD" ; then
+    ECHO_RETURN=$rc_done
+    case $IP_FORWARD in
+      yes)
+        echo -n "Enabling IP forwarding"
+        echo "1" > /proc/sys/net/ipv4/ip_forward || ECHO_RETURN=$rc_failed
+      ;;
+      *)
+        echo -n "Disabling IP forwarding"
+        echo "0" > /proc/sys/net/ipv4/ip_forward || ECHO_RETURN=$rc_failed
+      ;;
+    esac
+    echo -e "$ECHO_RETURN"
+fi
+
+#
 # insert memstat module for xosview
 #
 if test -f $MODULES_DIR/misc/memstat.o ; then
