@@ -9,7 +9,7 @@ PROMPT_FOR_CONFIRM="yes"
 # For interactive debugging of the startup process. How long
 # wait before the default answer is assumed.
 #
-CONFIRM_PROMPT_TIMEOUT="15"
+CONFIRM_PROMPT_TIMEOUT="5"
 
 #
 # If set to "yes" this enables to stop the boot process by
