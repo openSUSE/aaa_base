@@ -58,14 +58,6 @@ case "$1" in
 	}
 
 
-	#
-	# Let zic set timezone - if present.
-	#
-	if test -n "$TIMEZONE" -a -x /usr/sbin/zic ; then
-	    echo -n Setting up timezone data
-	    /usr/sbin/zic -l $TIMEZONE
-	    rc_status -v -r
-	fi
 	;;
     stop)
 	# skip / nothing to do

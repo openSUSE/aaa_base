@@ -45,6 +45,15 @@ case "$1" in
         date $(date -u +'%m%d%H%M%Y')
        rc_status
     fi
+
+    #
+    # Let zic set timezone - if present.
+    #
+    if test -n "$TIMEZONE" -a -x /usr/sbin/zic ; then
+        echo -n Setting up timezone data
+        /usr/sbin/zic -l $TIMEZONE
+    fi
+
     rc_status -v -r
    else
     echo -n Setting up the CMOS clock

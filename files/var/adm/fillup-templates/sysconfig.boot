@@ -6,7 +6,9 @@
 #
 # For interactive debugging of the startup process. If set
 # to "yes" the system will ask whether to confirm every
-# step of the boot process.
+# step of the boot process. This will however only work
+# if the keyboard is already accessable at this time,
+# eg. USB keyboards need their modules loaded first.
 #
 PROMPT_FOR_CONFIRM="no"
 
