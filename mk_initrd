@@ -119,53 +119,6 @@ EOM
 	exit
 }
 
-#
-# These are different functions for binary output of a splash file header.
-#
-
-function out_byte()
-{
- 	let x=$1
-	echo -en "`printf \\\\%o $x`"
-}
-function write_int()
-{
-	let tmp1=($1 & 255)
-	let tmp2=($1>>8)
-	let tmp2=($tmp2&255)
-	let tmp3=($1>>16)
-	let tmp3=($tmp3&255)
-	let tmp4=($1>>24)
-	let tmp4=($tmp4&255)
-	out_byte $tmp1
-	out_byte $tmp2
-	out_byte $tmp3
-	out_byte $tmp4
-}
-function write_short()
-{
-	let tmp1=($1>>8)
-	let tmp2=($1&0xff)
-	out_byte $tmp2
-	out_byte $tmp1
-}
-
-function write_header()
-{
-  	# write signature
-	echo -n "BOOTSPL1"
-	# write text x coordinate
-	write_short $1
-	# write text y coordinate
-	write_short $2
-	# write text width
-	write_short $3
-	# write text height
-	write_short $4
-	# write file length
-	write_int $5
-}
-
 # You can specify the root device via the environment variable rootdev (e.g.
 # "rootdev=/dev/hda mk_initrd").
 
@@ -600,7 +553,7 @@ xxx
       continue
     }
 
-    if [ -n "$splash" ]
+    if [ -n "$splash" -a -x /bin/splash ]
     then
 	for size in ${splash//,/ }; do
 	    bootsplash_picture="$bootsplash_picture_dir/bootsplash-$size.jpg"
@@ -608,18 +561,15 @@ xxx
 	    echo -n "Concatenating splash picture size $size to initrd... "
 	    if [ ! -r $cfgname ]
 	    then
-		echo "No config file present (expected $cfgname)."
+		echo "No config file present ($cfgname)."
 		continue
 	    fi
 	    if [ ! -r $bootsplash_picture ]
 	    then
-		echo "picture not present. (expected $bootsplash_picture)."
+		echo "picture not present ($bootsplash_picture)."
 		continue
 	    fi
-	    source $cfgname
-	    size=`wc -c<$bootsplash_picture`
-	    write_header $tx $ty $tw $th $size >> $ii
-	    cat $bootsplash_picture >> $ii
+            /bin/splash -s -f $cfgname >> $ii
 	    echo "done."
 	done
     fi

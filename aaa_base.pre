@@ -273,7 +273,7 @@ done
 
 # Backup YP_DOMAINNAME, before we remove it
 if test ! -f etc/defaultdomain ; then
-  eval `grep YP_DOMAINNAME etc/rc.config`
+  eval `grep ^YP_DOMAINNAME etc/rc.config 2>/dev/null`
   echo $YP_DOMAINNAME > etc/defaultdomain
   chmod 644 etc/defaultdomain
 fi
