@@ -67,14 +67,14 @@
 /etc/ftpaccess                         root.root         600
 /etc/ftpconversions                    root.root         600
 /etc/ftpusers                          root.root         600
-/etc/HOSTNAME                          root.root         600
+/etc/HOSTNAME                          root.root         644
 /etc/hosts                             root.root         644
 # Changing the hosts_access(5) files causes trouble with services
 # that do not run as root!
-/etc/hosts.allow                       root.root         600
-/etc/hosts.deny                        root.root         600
-/etc/hosts.equiv                       root.root         600
-/etc/hosts.lpd                         root.root         600
+/etc/hosts.allow                       root.root         644
+/etc/hosts.deny                        root.root         644
+/etc/hosts.equiv                       root.root         644
+/etc/hosts.lpd                         root.root         644
 /etc/inetd.conf                        root.root         600
 /etc/inittab                           root.root         600
 /etc/issue                             root.root         600
