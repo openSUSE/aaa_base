@@ -1,0 +1,52 @@
+#!/bin/sh
+
+INSTALL=install/doinst.sh
+
+write_header (){
+    if test \! -f $INSTALL ; then
+              echo "#!/bin/sh" > $INSTALL
+              echo "#" >> $INSTALL
+              echo "#" >> $INSTALL
+              echo "# install/doinst.sh - to be done after extraction" >> $INSTALL
+              echo "#" >> $INSTALL
+              echo "# Copyright (c) 1996,97 SuSE GmbH Nuernberg, Germany.   " >> $INSTALL
+              echo "#" >> $INSTALL
+              echo "#" >> $INSTALL
+    fi
+}
+
+change_symlink(){
+	while read input; do
+		link=`ls -l $input | awk '{ print $11 }'`
+		rm -f $input
+		if test \! -d install; then
+			mkdir install
+		fi
+        write_header
+        echo "rm -f $input 2>/dev/null || echo $input \$SLDIRERROR >&2" >> $INSTALL
+        echo "test -e $input || ln -s $link $input" >> $INSTALL
+	done
+	return
+}
+
+change_gz_symlink(){
+	while read input; do
+		link=`ls -l $input | awk '{ print $11 }'`
+		rm -f $input
+		if test \! -d install; then
+			mkdir install
+		fi
+        write_header
+		echo "rm -fr ${input}.gz" >> $INSTALL
+		echo "ln -sf ${link}.gz ${input}.gz" >> $INSTALL
+	done
+	return
+}
+
+DIR="usr/man/man? usr/X11R6/man usr/info usr/lib/teTeX/man usr/lib/teTeX/info"
+
+find $DIR \! -name "*.gz" -type l 2>/dev/null | change_gz_symlink
+find $DIR \! -name README \! -name dir \! -name localdir \! -name "*.gz" \
+    \! -type d \! -type l -exec gzip -9 \{\} \; 2>/dev/null
+find * -type l | change_symlink
+

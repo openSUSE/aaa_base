@@ -1,0 +1,132 @@
+#
+# /etc/permissions
+#
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996
+#
+#
+# This file is used by SuSEconfig and chkstat to check the permission
+# and ownership of different files and directories (if you have choosen
+# the "easy" value in PERMISSION_SECURITY in /etc/rc.config).
+#
+# Format: 
+# <file> <owner>.<group> <permission> 
+#
+
+# Directories
+/sbin/init.d                           root.root         755
+/sbin/init.d/boot.d                    root.root         755
+/sbin/init.d/rc0.d                     root.root         755
+/sbin/init.d/rc1.d                     root.root         755
+/sbin/init.d/rc2.d                     root.root         755
+/sbin/init.d/rc3.d                     root.root         755
+/sbin/init.d/rc6.d                     root.root         755
+/sbin/init.d/rcS.d                     root.root         755
+/var/spool/uucppublic                  root.root        1777
+
+#
+# 'normal' suid root programs
+#
+/usr/X11R6/bin/cardinfo                root.root        4755
+/usr/X11R6/bin/v4l-conf                root.video       4755
+/usr/X11R6/bin/rxvt                    root.tty         2755
+/usr/X11R6/bin/xtvscreen.SuSE-dynamic  root.video       4755
+/usr/X11R6/bin/xtvscreen.SuSE-static   root.video       4755
+/usr/bin/bttvgrab                      root.video       4750
+/usr/bin/chage                         root.shadow      2755
+/usr/bin/chfn                          root.shadow      4755
+/usr/bin/chkey                         root.root        4755
+/usr/bin/chsh                          root.shadow      4755
+/usr/bin/dos                           root.root        4755
+/usr/bin/expiry                        root.root        4755
+/usr/bin/gnuplot                       root.root        4755
+/bin/mount                             root.root        4755
+/usr/bin/suidperl                      root.root         755
+#/usr/bin/suidperl                     root.root        4755
+/bin/umount                            root.root        4755
+/usr/bin/zgv                           root.root        4755
+/usr/games/abuse-1.10/keydrv           root.root        4755
+/usr/games/bdash                       root.root        4755
+/usr/games/vga_klondike                root.root        4755
+/usr/games/vga_ohhell                  root.root        4755
+/usr/games/vga_solitaire               root.root        4755
+/usr/games/vga_spider                  root.root        4755
+/usr/lib/amanda/calcsize               root.root        4755
+/usr/lib/amanda/dumper                 root.root        4755
+/usr/lib/amanda/planner                root.root        4755
+/usr/lib/amanda/runtar                 root.root        4755
+/usr/lib/mc/bin/cons.saver             root.root        4755
+/usr/local/bin/spic                    root.root        4755
+/usr/sbin/amcheck                      root.root        4755
+/usr/sbin/suexec                       root.root        4755
+/opt/kde/bin/apm_proxy                 root.root        4755
+
+#
+# sgid video
+#
+/opt/kde/bin/kradio                    root.video       2755
+/usr/X11R6/bin/xawtv                   root.video       2755
+/usr/bin/radio                         root.video       2755
+
+
+#
+# KDE Binaries
+#
+/opt/kde/bin/kbanner.kss               root.shadow      2755
+/opt/kde/bin/kblankscrn.kss            root.shadow      2755
+/opt/kde/bin/kblob.kss                 root.shadow      2755
+/opt/kde/bin/kbouboule.kss             root.shadow      2755
+/opt/kde/bin/kflame.kss                root.shadow      2755
+/opt/kde/bin/kforest.kss               root.shadow      2755
+/opt/kde/bin/khop.kss                  root.shadow      2755
+/opt/kde/bin/klaser.kss                root.shadow      2755
+/opt/kde/bin/klines.kss                root.shadow      2755
+/opt/kde/bin/klissie.kss               root.shadow      2755
+/opt/kde/bin/klock                     root.shadow      2755
+/opt/kde/bin/kpolygon.kss              root.shadow      2755
+/opt/kde/bin/kpyro.kss                 root.shadow      2755
+/opt/kde/bin/krock.kss                 root.shadow      2755
+/opt/kde/bin/kscience.kss              root.shadow      2755
+/opt/kde/bin/kslip.kss                 root.shadow      2755
+/opt/kde/bin/kswarm.kss                root.shadow      2755
+/opt/kde/bin/kppp                      root.root        4755
+/opt/kde/bin/kbat.kss                  root.shadow      2755
+
+
+#
+# cdplayer programs
+#
+/opt/kde/bin/kscd                      root.disk        2755
+/usr/bin/cd-console                    root.disk        2755
+/usr/X11R6/bin/xmitsumi.SuSE-static    root.disk        2755
+/usr/X11R6/bin/xmitsumi.SuSE-dynamic   root.disk        2755
+/usr/openwin/bin/workman               root.disk        2755
+/usr/bin/workbone                      root.disk        2755
+/usr/bin/tcd                           root.disk        2755
+/usr/bin/cdda2cdr                      root.disk        2755
+/usr/bin/cdda2wav                      root.root        4755
+/usr/X11R6/bin/cda                     root.root        4755
+/usr/X11R6/bin/xmcd.SuSE-static        root.root        4755
+/usr/X11R6/bin/xmcd.SuSE-dynamic       root.root        4755
+
+
+# Files & scripts
+/etc/rc.config                         root.root         644
+/etc/minicom.users                     root.uucp         644
+/etc/minirc.dfl                        root.uucp         644
+/etc/yp.conf                           root.root         644
+/etc/permissions                       root.root         644
+/etc/permissions.secure                root.root         644
+/etc/permissions.easy                  root.root         644
+/etc/permissions.local                 root.root         644
+/etc/permissions.paranoid              root.root         644
+
+#devices
+/dev/fd0                               root.disk         666
+/dev/fd0h1440                          root.disk         666
+/dev/fd0u1440                          root.disk         666
+/dev/fd1                               root.disk         666
+/dev/fd1h1440                          root.disk         666
+/dev/fd1u1440                          root.disk         666
+

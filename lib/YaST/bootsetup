@@ -1,0 +1,346 @@
+#!/bin/bash
+
+if [ -e /usr/lib/YaST/.configured2 ] ; then
+    find /usr/lib/YaST/.configured2 -ctime +2 | xargs --no-run-if-empty -- rm -f
+fi
+
+if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
+
+    test -x /sbin/init.d/syslog && /sbin/init.d/syslog start
+
+    touch /usr/lib/YaST/.configured2
+
+    for i in /usr/info/ \
+             /usr/lib/info/ \
+             /usr/local/info/ \
+             /usr/local/lib/info/ \
+             /usr/X11R6/info/ \
+             /usr/X11R6/lib/info/ \
+             /usr/X11R6/lib/xemacs/info/ \
+             /var/adm/packages ; do
+        test -d $i && touch $i 2> /dev/null
+    done
+
+    test -e /etc/rc.config && . /etc/rc.config
+
+    echo_welcome () {
+
+        case "$LANGUAGE" in
+          german)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "                        Willkommen zu SuSE Linux"
+            echo " "
+          ;;
+          french)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "                  SuSE Linux vous souhaite la bienvenue"
+            echo " "
+          ;;
+          italian)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "                        Benvenuti da SuSE Linux"
+            echo " "
+          ;;
+          *)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "                        Welcome to SuSE Linux"
+            echo " "
+          ;;
+        esac
+    }
+
+    echo_passwd () {
+        case "$LANGUAGE" in
+          german)
+            echo "    Als erstes sollten Sie ein Passwort für den Benutzer root vergeben. "
+            echo "    Wenn Sie kein Passwort möchten, geben Sie einfach RETURN ein."
+            echo " "
+          ;;
+          french)
+            echo "    Tout d'abord, vous devriez assigner un mot de passe à l'utilisateur"
+            echo "    root.  Si vous ne voulez pas de mot de passe, appuyez simplement sur"
+            echo "    ENTRÉE."
+            echo " "
+          ;;
+          italian)
+            echo "    Per prima cosa dovreste assegnare una password all'utente root. "
+            echo "    Se non desiderate alcuna password, premete simplicemente ENTER."
+            echo " "
+          ;;
+          *)
+            echo "    You should set a password for root first. If you don't want a"
+            echo "    password for root, simply hit enter. "
+            echo " "
+          ;;
+        esac
+    }
+
+    echo_todo () {
+        case "$LANGUAGE" in
+          german)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "    Vermutlich muß YaST noch einige Dinge konfigurieren, wir starten"
+            echo "    einfach mal ;-)"
+            echo " "
+          ;;
+          french)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "    YaST a probalement encore certaines choses à configurer, démarrons"
+            echo "    tout simplement ;-)"
+            echo " "
+          ;;
+          italian)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "    YaST deve probabilmente configurare ancora alcune cose, iniziamo "
+            echo "    pure ;-)"
+            echo " "
+          ;;
+          *)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "    Probably YaST has to configure some things, so we simply start it ;-) "
+            echo " "
+          ;;
+        esac
+    }
+
+    echo_please_wait () {
+        case "$LANGUAGE" in
+          german)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo " Nun müssen noch einige Skripte laufen. Diese werden in etwa einer"
+            echo " Minute automatisch gestartet.  Eine Logdatei finden Sie dann unter"
+            echo " /var/log/Config.bootup.  Außerdem können Sie die Ausgaben auf"
+            echo " Console 9 beobachten."
+            echo " Sie können das System jetzt bereits normal benutzen. Wenn Sie "
+            echo " das System herunterfahren, bevor die Skripte beendet sind, werden "
+            echo " sie beim nächsten Hochlauf nochmal gestartet."
+            echo " "
+          ;;
+          french)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo " Quelques scripts doivent encore être exécutés. Ils seront lancés "
+            echo " automatiquement dans une minute environ."
+            echo " Vous trouverez alors un fichier de trace sous /var/log/Config.bootup."
+            echo " Vous pouvez en outre voir les affichages sur la console 9."
+            echo " Vous pouvez déjà maintenant utiliser le système normalement. Si vous"
+            echo " arrêtez le système avant que les scripts ne soient terminés, ils seront"
+            echo " de nouveau lancés lors du prochain démarrage."
+            echo " "
+          ;;
+          italian)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo " Alcuni script devono ancora essere esecutati. Verranno automaticamente"
+            echo " avviati entro un minuto circa.  Troverete allora un logfile sotto"
+            echo " /var/log/Config.bootup. Inoltre potete visualizzare il display sulla"
+            echo " console 9."
+            echo " Potete già utilizzare il sistema normalmente. Se portate giù il sistema"
+            echo " prima che gli script vengano terminati, verranno di nuovo avviati la"
+            echo " prossima volta che porterete su il sistema."
+            echo " "
+          ;;
+          *)
+            echo " "
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo " Now scripts have to be started.  They will be started in one"
+            echo " minute.  You can find a log file under /var/log/Config.bootup."
+            echo " It will also be printed on console 9."
+            echo " You can now already use your system. If you shut down the system "
+            echo " before the scripts are finished, they are executed again at the "
+            echo " next system startup."
+            echo " "
+          ;;
+        esac
+    }
+
+
+    echo_login_as_root () {
+        case "$LANGUAGE" in
+          german)
+            echo "Geben Sie jetzt \"root\" ein um sich als Benutzer root einzuloggen..."
+          ;;
+          french)
+            echo "Tapez maintenant \"root\" pour vous connecter"
+            echo "en tant qu'utilisateur root..."
+          ;;
+          *)
+            echo "Please enter \"root\" to login as user root..."
+          ;;
+        esac
+    }
+
+    press_enter () {
+        case "$LANGUAGE" in
+          german)
+            echo -n " Bitte <RETURN> drücken..."
+          ;;
+          *)
+            echo -n " Press <RETURN> to continue..."
+          ;;
+        esac
+        read < /dev/tty
+    }
+
+    echo " "
+    echo " "
+
+    echo_welcome
+
+    echo "------------------------------------------------------------------------------"
+    echo " "
+
+    PASSWD=`grep ^root: /etc/shadow | cut -d ":" -f 2`
+    if test -z "$PASSWD" ; then
+        echo_passwd
+        passwd
+    fi
+
+    echo " "
+    echo " "
+
+    echo_todo
+
+    echo "------------------------------------------------------------------------------"
+    echo " "
+
+    for i in /usr/info /usr/man /usr/X11R6/man /usr/openwin/man \
+             /usr/lib/perl5/man /usr/lib/teTeX/man /usr/local/man ; do
+        if [ ! -e /usr/lib/YaST/.DemoMode -a -d $i ] ; then
+            find $i -follow -type d 2> /dev/null | xargs touch 2> /dev/null
+        fi
+    done
+
+    # there was a bug in former releases of ps.tgz - a unreadable /etc/psdevtab
+    # can be there - this can be deleted. Recreate it simply with calling
+    # ps as root.  This procedure speeds up ps very much...
+    test -e /etc/psdevtab && rm -f /etc/psdevtab
+    ps > /dev/null 2> /dev/null
+
+    #
+    # PCMCIA might be needed to install additional packages.
+    # So we start cardmanager if it exists.
+    #
+    # ATTENTION! After finishing YaST, we need to shut down cardmanager.
+    # Otherwise system might hang when cardmanager is started on regular
+    # bootup.
+    #               hm, 11.06.1997
+
+    test -x /sbin/init.d/pcmcia && /sbin/init.d/pcmcia start
+
+    sleep 1
+    /sbin/portmap
+    /sbin/yast --nomenu
+
+    test -x /sbin/init.d/pcmcia && /sbin/init.d/pcmcia stop
+
+    echo " "
+    echo " "
+    echo " "
+    echo " "
+    clear
+
+    /sbin/SuSEconfig -quick
+
+    echo_please_wait
+
+    sleep 3
+
+    stty sane -tostop
+    (
+        exec 0<> /dev/null 1>&0 2>&0
+        /usr/bin/setsid  /lib/YaST/bootsetup.conf
+        exit 0
+    ) &
+
+    export -f press_enter
+    export LANGUAGE
+
+    rm -rf /tmp/.bootsetup$$
+    if ! mkdir /tmp/.bootsetup$$ ; then
+	echo "Warning - can't create /tmp/.bootsetup$$ - security problem!"
+	exit 1
+    fi
+
+    ( press_enter; touch /tmp/.bootsetup$$/return ) &
+    ENTER_SHELL=$!
+    while [ ! -f /tmp/.bootsetup$$/return -a -f /usr/lib/YaST/.configured2 ]
+    do
+        sleep 1
+    done
+    echo
+    rm -rf /tmp/.bootsetup$$
+    disown $ENTER_SHELL 2>/dev/null
+    kill $ENTER_SHELL 2>/dev/null
+
+    echo " "
+    echo "            Have a lot of fun!"
+    echo " "
+    echo " "
+    echo "                              Your SuSE Team"
+    echo " "
+    echo " "
+    echo " "
+
+    exec > /etc/issue-SuSE-first-run
+    #
+    # Ring the bell
+    #
+    tput bel
+
+    #
+    # Almost white border line on grey background
+    #
+    tput smacs
+    tput bold; tput setab 7; tput setaf 7
+    echo -n Ú
+    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    tput sgr0; tput setab 7; tput setaf 0
+    echo ¿
+    tput rmacs
+
+    #
+    # Red text on grey background and borders on both sides
+    #
+    echo_login_as_root | while read line ; do
+        tput bold; tput setab 7; tput setaf 7
+        tput smacs; echo -n '³'; tput rmacs; echo -n "  "
+        tput sgr0; tput setab 7; tput setaf 1
+
+        echo -n "$line" ; tput el; tput hpa 78
+
+        tput sgr0; tput setab 7; tput setaf 0
+        tput smacs; echo -n '³'; tput rmacs
+        tput setab 0; tput setaf 7; tput el
+        tput cud1
+
+    done
+
+    #
+    # Almost black border line on grey background
+    #
+    tput smacs
+    tput bold; tput setab 7; tput setaf 7
+    echo -n À
+    tput sgr0; tput setab 7; tput setaf 0
+    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    echo Ù
+    tput rmacs
+
+    tput setab 0; tput setaf 7; tput sgr0; tput cud1
+
+    exit 0
+fi
+

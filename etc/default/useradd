@@ -1,0 +1,6 @@
+GROUP=100
+HOME=/home
+INACTIVE=0
+EXPIRE=10000
+SHELL=/bin/bash
+SKEL=/etc/skel

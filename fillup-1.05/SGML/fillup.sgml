@@ -1,0 +1,143 @@
+<!doctype linuxdoc system "/home/alex/maddin/sgml/linuxdoc.dtd">
+
+  <article>
+
+      <title><bf/FILLUP/ (1)
+      <author>Martin Scherbaum, <tt/maddin@suse.de/
+      <date>v1.04, Mai 2 1996
+
+      <abstract>
+              This document describes how to use the <bf/fillup/ tool.
+      </abstract>
+
+      <p> <!-- this terminates the title page -->
+
+<sect>NAME
+<p>      
+
+	<bf/fillup/ - fill one configuration file into another
+
+      
+<sect>SYNOPSIS
+<p>      
+
+             <bf/fillup/ [options] basefile additionalfile
+<p>
+             Options:  
+<p>	     <tt/[-heqstvV] [-d char] [-c char] [-o filename]/
+
+      
+<sect>DESCRIPTION
+<p>      
+
+	This manual page documents the S.u.S.E. program <bf/fillup/.
+	<bf/fillup/ takes at least 2 arguments: a basefile and a newfile.
+	Both of them contain e.g. configuration information expressed 
+	by e.g. environment variables consisting of a variable name, 
+	an assignment delimitor and a variable value.
+	<bf/fillup/ reads both files and looks up wether variables in the new file
+	are not contained in the basefile. New variables are appended to the basefile
+	including comments preceeding the variable definition, the variable name, 
+	the assignment delimitor and the variables value. Anything between two 
+        variable statements is understood as comment even if not introduced by a
+        comment marker.
+	Logical lines connected by `\\' are copied as one line. No characters may follow
+        the line connector except white space or new line chars. 
+
+	The default delimitor is `=', the default comment marker is `&num'. Both may 
+	be altered by command line options. 
+
+	While processing the files, <bf/fillup/ will display the name of every new 
+	variable found in newfile. If <bf/fillup/ finds duplicate variables in the
+	basefile and the newfile, it will issue a warning.
+
+        The strict parsing behaviour of <bf/fillup/ concerning the end of file condition
+        may be released by using the <tt/-e/ option.
+
+<sect>OPTIONS
+<p>
+
+<descrip>
+<tag/-c char, --char char/      
+		use char as comment marker instead of default comment 
+		marker `#'.
+	         
+	<p>
+<tag/-d char, --delim char/      
+		use char as assignment delimitor instead of the default
+		delimitor `='.
+  
+        <p>
+<tag/-e, --ignoreeof/
+		ignore eof where it would not be allowed otherwise (i.e. in
+		variable names or in variable values).
+
+	<p>
+<tag/-h, --help/    	         
+		help: display a short message how to use <bf/fillup/.
+
+	<p>
+<tag/-o filename, --output filename/
+		do not append output to basefile but write output to filename 
+                instead. Previous contents of filename will be deleted!
+		
+        <p>
+<tag/-q, --quiet/
+		quiet: no output to screen except errors and warnings.
+	
+	<p>
+<tag/-s, --suppress/
+		suppress comments: do not copy the comments contained
+		in newfile to the target file, but only variables and
+                their values.
+
+        <p>
+<tag/-t, --trailing/
+                If there are comment lines at the end of the read file which are not 
+                followed by a variable statement (kind of premature end of file),
+                then transfer that comment to outfile anyway 
+
+        <p>
+<tag/-v, --verbose/
+		display any new variable on the screen while processing 
+                including assignment delimitor and variable value (stdout may 
+                be redirected)
+
+<p>
+<tag/-V, --version/
+                print the version of this <bf/fillup/ binary and exit with code 0.
+<p>
+</descrip>
+
+<sect>EXIT CODE
+<p>
+	<bf/fillup/ returns -1 on any error.
+        on successful completion, <bf/fillup/ returns the (non-negative) number of 
+        new variable lines added / written to the output file.
+
+
+<sect>HINT
+<p>
+Use -t -d ":" for /etc/passwd or /etc/groups<p>
+Use -d "=" for shell scripts (default)<p>
+To prevent the shell of interpreting your specified delimitor or comment marker 
+you better quote those characters as in the examples!
+
+
+<sect>COPYRIGHT
+<p>
+	<bf/fillup/ is copyright 1996 by S.u.S.E. GmbH, Fuerth, Germany.
+
+
+<sect>AUTHOR
+<p>
+	Martin Scherbaum, S.u.S.E. GmbH
+
+</article>
+
+
+
+
+
+
+

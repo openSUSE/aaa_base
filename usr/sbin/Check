@@ -1,0 +1,90 @@
+#!/bin/sh
+
+. /etc/profile
+. /etc/rc.config
+
+test "$UID" = 0 || {
+    echo Check does not work for normal users.
+    exit 1
+}
+
+do_gzip() {
+	while read input; do
+		if test -f $input.gz; then
+			#echo "Remove old file $input.gz"
+			rm -f $input.gz
+		fi
+		if test -L $input; then
+			link=`ls -l $input | awk '{ print $11 }'`
+			rm -f $input
+			ln -sf $link.gz $input.gz
+		else
+			gzip -f9 $input
+		fi
+		ls -l $input.gz
+	done
+	return
+}
+
+DIRS="/usr/info /usr/X11R6/lib/X11/fonts/*"
+
+OLD_IFS="$IFS"
+IFS="$IFS:"
+
+for MANDIR in $MANPATH $manpath ; do
+    DIRS="$DIRS $MANDIR"
+done
+
+IFS="$OLD_IFS"
+
+if test -n "$RPM_BUILD_ROOT" ; then
+    TDIRS=""
+    for DIR in $DIRS ; do
+        TDIRS="$TDIRS $DIR $RPM_BUILD_ROOT/$DIR"
+    done
+    DIRS="$TDIRS"
+fi
+
+
+for DIR in $DIRS ; do
+    test -d $DIR && find $DIR -name "*.Z" -type f | \
+        xargs --no-run-if-empty gunzip
+done
+
+for DIR in $DIRS ; do
+    test -d $DIR && find $DIR \! -name "*.gz" \! -name "*.Z" \
+        \! -name dir \! -name dir.old \! -name localdir \
+        \! -name whatis \! -name fonts.alias \! -name fonts.dir \
+        \! -name fonts.scale \! -name "*.spd" \! -name "*.pfa" \
+        \! -name "*.pfb" \! -name "*.phont" \! -name ".*.gz" \
+        \! -name ".*.Z" \! -name ".*.spd" \! -name ".*.pfa" \
+        \! -name ".*.pfb" \! -name ".*.phont" \! -name URW \
+        \! -type d | do_gzip
+done
+
+
+TMPFILE=`mktemp /tmp/Check.perms.XXXXXX`
+TMPFILE2=`mktemp /tmp/Check.perms.XXXXXX`
+
+if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
+        -x /usr/bin/perl -a -x /usr/bin/chkstat ; then
+
+    cat /etc/permissions > $TMPFILE
+    for PERMEXT in $PERMISSION_SECURITY ; do
+        test -e /etc/permissions."$PERMEXT" &&\
+	    cat /etc/permissions."$PERMEXT" >> $TMPFILE
+    done
+    if test -n "$RPM_BUILD_ROOT" ; then
+        cat $TMPFILE | sed -e"s:^/:$RPM_BUILD_ROOT/:" > $TMPFILE2
+        cat $TMPFILE2 >> $TMPFILE
+        rm -f $TMPFILE2
+    fi
+
+    if test "$CHECK_PERMISSIONS" = "set" ; then
+        /usr/bin/chkstat -set $TMPFILE
+    elif test "$CHECK_PERMISSIONS" = "warn" ; then
+        /usr/bin/chkstat $TMPFILE
+    fi
+fi
+
+rm -rf $TMPFILE $TMPFILE2

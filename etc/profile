@@ -1,0 +1,303 @@
+# /etc/profile
+
+# PLEASE DON'T CHANGE /etc/profile. Chances are that your changes will
+#  be lost during the next upgrade. 
+# Use /etc/profile.local for your favourite global aliases, your VISUAL and
+#  EDITOR variables, etc ...
+
+PROFILEREAD=true
+
+
+umask 022
+
+# adjust some limits (see bash(1))
+# Note: You may instead use /etc/initscript to set up ulimits and your PATH.
+#ulimit -c 20000		# only core-files less than 20 MB are written
+#ulimit -d 15000		# max data size of a program is 15 MB
+#ulimit -s 15000		# max stack size of a program is 15 MB
+#ulimit -m 30000		# max resident set size is 30 MB
+
+ulimit -Sc 0			# don't create core files
+ulimit -d unlimited
+if [ -z "$KSH_VERSION" ]; then
+    # ksh does not support this command.
+    ulimit -s unlimited
+fi
+ulimit -m unlimited
+
+
+#
+# make path more comfortable
+#
+MACHINE=`test -x /bin/uname && /bin/uname --machine`
+PATH=/usr/local/bin:/usr/bin:/usr/X11R6/bin:/bin
+for DIR in ~/bin/$MACHINE ~/bin ; do
+    test -d $DIR && PATH=$DIR:$PATH
+done
+#test "$UID" = 0 && PATH=/sbin:/usr/sbin:$PATH
+test "$UID" = 0 && PATH=/sbin:/usr/sbin:/usr/local/sbin/:$PATH
+for DIR in /usr/lib/java/bin \
+           /var/lib/dosemu \
+           /usr/games/bin \
+           /usr/games \
+           /opt/bin \
+           /opt/gnome/bin \
+           /opt/kde/bin \
+	   /usr/openwin/bin ; do
+    test -d $DIR && PATH=$PATH:$DIR
+done
+test "$UID" = 0 || PATH="$PATH:."
+export PATH
+
+#
+# set some environment variables
+#
+POVRAYOPT=-l/usr/lib/povray/include
+export POVRAYOPT
+if test -n "$TEXINPUTS" ; then
+  TEXINPUTS=":$TEXINPUTS:~/.TeX:/usr/doc/.TeX"
+else
+  TEXINPUTS=":~/.TeX:/usr/doc/.TeX"
+fi
+export TEXINPUTS
+PRINTER='lp'
+export PRINTER
+
+
+LESSCHARSET=latin1
+export LESSCHARSET
+LESS="-M -S -I"
+export LESS
+LESSKEY=/etc/lesskey.bin
+export LESSKEY
+LESSOPEN="|lesspipe.sh %s"
+export LESSOPEN
+
+MINICOM="-c on"
+export MINICOM
+
+MANPATH=/usr/local/man:/usr/share/man:/usr/man:/usr/X11R6/man
+for DIR in /usr/openwin/man \
+           /usr/man/allman \
+           /usr/man/de \
+           /usr/man/es \
+           /usr/man/fr \
+           /usr/man/it \
+           ; do
+    test -d $DIR && MANPATH=$MANPATH:$DIR
+done
+
+export MANPATH
+
+#
+# some applications do not handle the XAPPLRESDIR environment correctly,
+# when it contains more than one directory. More than one directory only
+# makes sense, when you have a client with a nfs mounted /usr and want
+# to configure applications machine dependend. Uncomment if you want this.
+#
+#XAPPLRESDIR="$XAPPLRESDIR:/var/X11R6/app-defaults:/usr/X11R6/lib/X11/app-defaults"
+#export XAPPLRESDIR
+
+#
+# set INFOPATH to tell xemacs where he can find the info files
+#
+INFODIR=/usr/local/info:/usr/info
+INFOPATH=$INFODIR
+export INFODIR INFOPATH
+
+#
+# this stuff is recommended for old motif apps.
+#
+XKEYSYMDB=/usr/X11R6/lib/X11/XKeysymDB
+export XKEYSYMDB
+XNLSPATH=/usr/X11R6/lib/X11/nls
+export XNLSPATH
+
+
+
+#HOSTNAME="`hostname`"
+#export HOSTNAME
+NNTPSERVER=`cat /etc/nntpserver 2> /dev/null`
+export NNTPSERVER
+# time until a complete key sequence must have arrived
+# ESCDELAY=2000
+# export ESCDELAY
+
+if [ -d /usr/openwin/lib ] ; then
+    OPENWINHOME=/usr/openwin
+    export OPENWINHOME
+fi
+
+if [ -x /usr/bin/dircolors ] ; then
+  #
+  # set up the color-ls environment variables:
+  #
+  if test -f ~/.dir_colors ; then
+    eval `dircolors -b ~/.dir_colors`
+  elif test -f /etc/DIR_COLORS ; then
+    eval `dircolors -b /etc/DIR_COLORS`
+  fi
+fi
+
+# do not save dupes in the bash history file
+HISTCONTROL=ignoredups
+export HISTCONTROL
+
+#
+# make sure that teTeX is found.
+#
+if [ -f /usr/lib/teTeX/texmf.cnf ] ; then
+    TETEXDIR=/usr/lib/teTeX
+    PATH=$PATH:/usr/bin/TeX
+    export TETEXDIR PATH
+fi
+
+
+# Further options for the 'ls' command are in /etc/DIR_COLORS.
+unalias ls 2>/dev/null
+if test "$UID" = 0 ; then
+    LS_OPTIONS='-a -N --color=tty -T 0';
+else
+    LS_OPTIONS='-N --color=tty -T 0';
+fi
+export LS_OPTIONS
+if test -n "$ZSH_VERSION" ; then
+    alias ls='eval /bin/ls $LS_OPTIONS'
+else
+    alias ls='ls $LS_OPTIONS'
+fi
+alias dir='ls -l'
+alias ll='ls -l'
+alias la='ls -la'
+alias l='ls -alF'
+alias ls-l='ls -l'
+# Handle emacs
+if test "$EMACS" = "t" ; then
+    LS_OPTIONS='-N --color=none -T 0';
+    tset -I -Q
+    stty cooked pass8 dec nl -echo
+fi
+alias o='less'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias +='pushd .'
+if [ -z "$KSH_VERSION" ]; then
+    alias -- -='popd'
+fi
+alias rd=rmdir
+alias md='mkdir -p'
+alias unix2dos='recode lat1..ibmpc'
+alias dos2unix='recode ibmpc..lat1'
+alias unzip='unzip -L'
+alias which='type -p'
+alias rehash='hash -r'
+alias beep='echo -en "\x07"'
+
+alias unmount='echo "Error: Try the command: umount"'
+
+function startx { /usr/X11R6/bin/startx $* 2>&1 | tee ~/.X.err ; }
+function remount { /bin/mount -o remount,$* ; }
+
+#
+# Midnight Commander needs this to run in color mode
+#
+COLORTERM=1
+export COLORTERM
+
+# for rcs
+# export VERSION_CONTROL=numbered
+
+PAGER=less
+export PAGER
+
+# I had problems using 'eval tset' instead of 'TERM=', but you might want to 
+# try it anyway. I think with the right /etc/termcap it would work great.
+# eval `SHELL=/bin/sh; tset -sQ "$TERM"`
+if [ "$TERM" = "" -o "$TERM" = "unknown" ]; then
+ TERM=linux
+fi
+
+if test -f /etc/organization ; then
+    ORGANIZATION="`cat /etc/organization`"
+    export ORGANIZATION
+fi
+
+
+#
+# nearly no known program needs $TERMCAP - 'Slang'-programs get confused
+# with a set $TERMCAP -> unset it.
+# unset TERMCAP
+
+
+#
+# set prompt
+#
+#PS1='`hostname`:`pwd`# '
+if [ "$SHELL" = "/usr/bin/pdksh" -o "$SHELL" = "/usr/bin/ksh" -o "$SHELL" = "/bin/ksh" ]; then
+    PS1="! $ "
+elif [ -n "$ZSH_VERSION" ]; then
+    # setopt chaselinks
+    if test "$UID" = 0; then
+        PS1='%n@%m:%~ # '
+    else
+        PS1='%n@%m:%~ > '
+    fi
+elif [ "$SHELL" = "/usr/bin/ash" -o "$SHELL" = "/bin/ash" ]; then
+    PS1="$ "
+elif [ -n "$BASH_VERSION" ] ; then
+    # set -P
+    set -p
+    if test "$UID" = 0 ; then
+        PS1="\h:\w # "
+    else
+        PS1="\u@\h:\w > "
+    fi
+    # PROMPT_COMMAND='PS1=`if test "$UID" = 0 ; then \
+    #         echo "\h:\`pwd -P\` # " ; \
+    #     else \
+    #         echo "\u@\h:\`pwd -P\` > " ; \
+    #     fi `'
+    # export PROMPT_COMMAND
+else
+    PS1='\h:\w \$ '
+    #PS1='\u \w \$ '
+fi
+PS2='> '
+ignoreeof=0
+export PS1 PS2 ignoreeof
+if [ -n "$KSH_VERSION" ]; then
+ if [ -r /etc/ksh.kshrc ]; then
+  . /etc/ksh.kshrc
+ fi
+ if [ -r $HOME/.kshrc ]; then
+  . $HOME/.kshrc
+ fi
+fi
+
+#
+# now source the stuff, generated by SuSEconfig
+#
+test -e /etc/SuSEconfig/profile && . /etc/SuSEconfig/profile
+
+#
+# now source profile extensions for special packages
+#
+test -d /etc/profile.d && \
+  {
+    for s in /etc/profile.d/*.sh ; do
+      test -r $s && . $s
+    done
+  }
+
+
+# source some aliases which provide help for DOS users
+#test -e /etc/profile.dos && . /etc/profile.dos
+
+#
+# and now let's look if there is a local profile (for stuff not 
+# defined by SuSE Linux, but your friendly admin)
+#
+test -e /etc/profile.local && . /etc/profile.local
+
+unset DIR
+

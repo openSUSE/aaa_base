@@ -1,0 +1,64 @@
+#! /bin/sh
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Florian La Roche <florian@suse.de>, 1996
+#	  Werner Fink <werner@suse.de>, 1996
+#
+# /sbin/init.d/inetd
+#
+
+. /etc/rc.config
+
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
+
+test $link = $base && START_INETD=yes
+test "$START_INETD" = yes || exit 0
+
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin
+export HOME=/
+
+# This seems to be ugly but our http-rman needs this environment.
+
+export MANPATH=/usr/man:/usr/X11R6/man:/usr/local/man
+if [ -d /usr/openwin ] ; then
+    export OPENWINHOME=/usr/openwin
+    export MANPATH=$MANPATH:/usr/openwin/man
+fi
+if [ -d /usr/man/de ] ; then
+    export MANPATH=/usr/man/de:$MANPATH
+fi
+
+return=$rc_done
+case "$1" in
+    start)
+	echo -n "Starting INET services (inetd)"
+	startproc /usr/sbin/inetd || return=$rc_failed
+	echo -e "$return"
+	;;
+    stop)
+	echo -n "Shutting down INET services (inetd)"
+	killproc -TERM /usr/sbin/inetd || return=$rc_failed
+	echo -e "$return"
+	;;
+    restart)
+	$0 stop && $0 start || return=$rc_failed
+	;;
+    reload)
+	echo -n "Reload INET services (inetd)"
+	killproc -HUP /usr/sbin/inetd || return=$rc_failed
+	echo -e "$return"
+	;;
+    status)
+	checkproc /usr/sbin/inetd && echo "INET up" || echo "No INET"
+	;;
+    probe)
+	test /etc/inetd.conf -nt /var/run/inetd.conf && echo reload
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status|restart|reload|probe}"
+	exit 1
+esac
+
+test "$return" = "$rc_done" || exit 1
+exit 0

@@ -1,0 +1,210 @@
+#!/bin/sh
+#
+# (C) Copyright  Florian  La Roche, <flla@stud.uni-sb.de, florian@suse.de>
+# (C) SuSE GmbH, Nuernberg, Germany 
+# See the GNU Copyright...
+
+version="0.12"
+
+ErrorExit(){
+   echo $*;
+   exit 1;
+}
+
+Usage(){
+  cat <<EOF
+pkgmake - Handle compilation and installation of source packages - $version.
+(C) Copyright Florian La Roche, <flla@stud.uni-sb.de>
+
+All source packages must be tar'd and gzip'd. Normally, they shouldn't be
+modified from the general public release. Instead, all changes for Linux
+are stored in an extra context diff. The context diff tries to install
+everything with all features included and in a good place.
+
+In the following description, "package" refers to a tar'd and gzip'd source
+code, which is in the file "package.tar.gz" and the corresponding context
+diff is in "package.dif".
+
+pkgmake extract package	Untar "package.tar.gz" and patch it with "package.dif".
+pkgmake compile package	Change into the source directory, call make for
+			"Makefile.Linux" with the target 'compile'.
+pkgmake install package	Change into the source directory and call make for
+			"Makefile.Linux" with the target 'install'.
+pkgmake diff package	Make new context diffs for that source package.
+pkgmake remove package	Remove the extracted source directory.
+
+Do a 'pkgmake info' to get some more information for creating new context diffs.
+
+EOF
+  return
+}
+
+# This function gets as input all file names that have to be changed for
+# Linux. If the file didn't exist, we create it with "touch". Then we
+# save the original source file with a call to "ci" (check in), which is
+# part of the revision control system (rcs) from GNU.
+RCS(){
+   while read input; do
+	if [ -n "$input" ]; then
+	    # Extract the directory name from the file.
+	    dir_name=`dirname $input`
+	    # Check, if the directory exists.
+	    if [ ! -d $dir_name ]; then
+		# The dir doesn't exist, create it.
+		mkdir -p $dir_name
+	    fi
+	    if [ ! -e $input ]; then
+		# If $input doesn't exist, create an empty file with "touch".
+		touch $input
+	    fi
+	    # Save the original source code with "ci".
+	    { ci -q -t-Original $input && co -q -ko -l $input ; } \
+               || ErrorExit "ci failed on $input."
+	fi
+   done
+}
+
+# Takes as parameters a list of source packages to extract.
+Extract(){
+   while read input; do
+	if [ ! -f $input.tar.gz ]; then
+		echo "Cannot find $input.tar.gz."
+	else
+		echo -n "Decompress and extract $input, "
+		tar xzf $input.tar.gz || ErrorExit "Tar failed on $input."
+		cd $input || ErrorExit "cd failed on $1."
+		for RCSFILE in `find -type f -name "*,v"` ; do
+		    echo
+		    echo -n "Found file $RCSFILE. Renaming to .orig."
+		    mv $RCSFILE $RCSFILE.orig
+                done
+		for RCSDIR in `find -type d -name RCS` ; do
+		    echo
+		    echo -n "Found directory $RCSDIR. Renaming to .orig."
+		    mv $RCSDIR $RCSDIR.orig
+		done
+                if [ ! -f ../$input.dif ]; then
+                    echo
+                    echo "Cannot find $input.dif."
+                    exit
+                fi
+                touch Makefile.Linux
+                cp Makefile.Linux Makefile.Linux.wrzlgmpflmupfl
+		MAKELINUX=`cat ../$input.dif | sed -n "/^--- Makefile.Linux/,/^---/p"`
+		if [ ${#MAKELINUX} -gt 0 ] ; then		
+		    echo "$MAKELINUX" | patch -s -p0
+		    grep ^extract: Makefile.Linux > /dev/null
+		    if [ $? -eq 0 ]; then
+		        echo "make extract:"
+		        make -f Makefile.Linux extract
+		    fi
+		else
+		    echo -n "No Makefile.Linux ... skipping, "
+		fi
+		mv Makefile.Linux.wrzlgmpflmupfl Makefile.Linux
+                if [ ! -s Makefile.Linux ] ; then
+                    rm Makefile.Linux
+                fi
+		echo -n "set up rcs, "
+		cat ../$input.dif | gawk '/^---/ { print $2 }' | RCS
+		echo "patch sources."
+		patch -s -p0 <../$input.dif || ErrorExit "Patch failed on $1."
+		cd ..
+	fi
+   done
+}
+
+# Make new context diffs for a source package.
+Diff(){
+   while read inp; do
+	echo "pkgmake rcs diffs for $inp"
+	cd $inp || ErrorExit "Cd failed on $inp."
+	find . \( -name '*,v' -o -name '.*,v' \) \
+                | sed 's/,v$//' | sed 's:^./::' | sort | \
+		xargs -r -ihugo rcsdiff -ko -q -u -L hugo hugo > ../$inp.dif
+	cd ..
+   done
+}
+
+Make(){
+   while read input; do
+	echo "###########################################################################"
+	echo "pkgmake $1 in subdir $input."
+	cd $input || ErrorExit "Cd failed on $input."
+	make $1 -f Makefile.Linux || \
+		ErrorExit "pkgmake $1 failed on $input."
+	cd ..
+   done
+}
+
+Remove(){
+   while read input; do
+	if [ -f $input.tar.gz -a -f $input.dif ]; then
+		echo "Remove directory $input."
+		rm -fr $input
+	fi
+   done
+}
+
+CheckPackages(){
+   while read input; do
+	if [ -f $input.tar.gz ]; then
+		echo $input
+	fi
+   done
+}
+
+#####################################################################
+# Main Program
+#####################################################################
+
+if [ $# = 2 ]; then
+   if [ "extract" = "$1" ]; then
+	echo $2 | Extract
+   elif [ "$1" = "compile" -o "$1" = "install" ]; then
+	echo $2 | Make $1
+   elif [ "$1" = "diff" ]; then
+	echo $2 | Diff
+   elif [ "$1" = "remove" ]; then
+	echo $2 | Remove
+   else
+	Usage
+   fi
+elif [ $# = 1 -a "$1" = "extract" ]; then
+   ls *.tar.gz | sed 's/.tar.gz$//' | Extract
+elif [ $# = 1 -a "$1" = "info" ]; then
+   cat <<EOF
+If you have a new source package, called "diff-2.6.tar.gz", extract it with
+"tar xzf diff-2.6.tar.gz". Then change into the source directory with
+"cd diff-2.6". Before you change any file in the source directory, you have
+to save the old version with "ci -l filename". Just enter "." to the
+asked question. This will create a file "filename,v", which contains the old
+source code. If you make context diffs later on, your source directory is just
+scanned for "*,v" and context diffs are generated for those files.
+If you have to create a new file, first create an empty file with "touch file"
+and then save it with "ci -l file".
+You have to create the file "Makefile.Linux", which is for GNU make, with the
+targets 'compile' and 'install'.
+'compile' just compiles everything in the source directory.
+'install' should be invoked as root, so that everything can be installed.
+EOF
+elif [ $# = 1 ]; then
+   echo -n "Checking for installed packages..."
+   find * -type d -maxdepth 0 -print | CheckPackages > Make.tmp
+   echo " Done."
+
+   if [ "$1" = "compile" -o "$1" = "install" ]; then
+	Make $1 < Make.tmp
+   elif [ "$1" = "diff" ]; then
+	Diff < Make.tmp
+   elif [ "$1" = "remove" ]; then
+	Remove < Make.tmp
+   else
+	Usage
+   fi
+   rm -f Make.tmp
+else
+  Usage
+fi
+
+exit 0

@@ -1,0 +1,324 @@
+#!/usr/bin/perl
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Werner Fink <werner@suse.de>, 1996,1997
+#
+# MAKEDIR.perl  --- Version 0.51
+#
+if ( $#ARGV > 0 ) {
+    printf(STDERR "%s: Usage:\n", $0);
+    printf(STDERR "  %s [info_dir_file]\n", $0); exit(1);
+}
+
+if ( length($ENV{'INFOPATH'}) > 0 ) {
+    @PATHS = split(/:/, $ENV{'INFOPATH'});
+}
+@PATHS=(
+#
+# /usr/info is the first in Path because it's our main info dir!
+#
+	     "/usr/info",
+#
+# Insert INFOPATH
+#
+	     @PATHS,
+	     "/usr/lib/info",
+#
+# TeTeX-Infos are looked in by symbolic links in /usr/info.
+#
+#	     "/usr/lib/teTeX/info",
+	     "/usr/local/info",
+	     "/usr/local/lib/info",
+	     "/usr/X11R6/info",
+	     "/usr/X11R6/lib/info",
+#
+# xemacs has big problems handling nodes of the same name but
+# different paths ... it's really buggy.
+#
+	     "/usr/X11R6/lib/xemacs/info",
+             "/usr/share/xemacs/info",
+);
+#
+# Special: flushing file descriptor for speed, smothing, and big results
+#
+sub flush {
+    local($old) = select(shift);
+    $| = 1;
+    print "";
+    $| = 0;
+    select($old);
+}
+
+#
+# Open the main dir file
+#
+if ( $#ARGV == 0 ) {
+    $mdir    = "$ARGV[0]";
+    $mdirbak = "$ARGV[0].bak";
+    $mdirtmp = "$ARGV[0].tmp$$";
+} else {
+    $mdir    = "$PATHS[0]/dir";
+    $mdirbak = "$PATHS[0]/dir.bak";
+    $mdirtmp = "$PATHS[0]/dir.tmp$$";
+}
+sub cleanup {
+    unlink $mdirtmp;
+    exit(1);
+}
+$SIG{'INT'} = "cleanup";
+$SIG{'TERM'} = "cleanup";
+$SIG{'HUP'} = "cleanup";
+
+if ( !-e $mdir ) { `touch $mdir 2>&1 /dev/null`; }
+
+if ( -w $mdir ) {
+    if ( -s $mdir && !-e $mdirbak ) {
+	`cp -p $mdir $mdirbak`;
+	if ( !-e $mdirbak ) { exit(1); }
+    }
+    `cp -p $mdir $mdirtmp`;
+    if ( !-e $mdirtmp ) { exit(1); }
+    $filehandle = $mdir ;
+} else {
+    printf(STDERR "%s: Warning, can not write to %s\n", $0, $mdir);
+    printf(STDERR "  ... using STDOUT!\n", $0, $mdir);
+    flush(STDERR);
+    sleep (2);
+    $filehandle = "-";
+}
+
+##
+## read info dir
+##
+@allinfo = ();
+%found   = ();
+for ( @PATHS ) {
+    @info = ();
+    $found{$_}++;
+    if ( $found{$_} > 1 ) {
+	next;
+    }
+    (-e $_) && (@info = ( -d $_ ) ? ( <$_/*> ) : ( $_ ));
+    @info = grep(/[^0-9](|\.gz)$/, @info);
+    @info = grep(!/(dir|dir\.bak|localdir|\~|\,v|\.orig)(|\.gz)$/, @info);
+    @info = sort grep(!/-\d+\./, @info);
+    push(@allinfo, @info);
+}
+##
+## end read info dir
+##
+
+sub read_entry {
+    local($file) = @_;
+    local(@buf, $add, $lines);
+    local($source) = $file =~ /\.gz$/ ? "gunzip -q -d -c $file |" : "< $file";
+
+    @buf = ();
+    $add = 0;
+    $lines = 0;
+
+    open(_FILE, $source) or warn "can't open $source\n";
+    while (<_FILE>) {
+	chomp;
+	s/^\s+//;
+	s/\s+$//;
+	if ( /^$/ ) { next; }
+	if ( /^START-INFO-DIR-ENTRY/o )  { $add = 1; next; }
+	if ( /^END-INFO-DIR-ENTRY/o )    { $add = 0; last; }
+	if ( $add == 1 ) { push(@buf, $_); $lines++; next; }
+	if ( /^^_$/ ) { last; }
+    }
+    close(_FILE);
+
+    return ($lines, @buf);
+}
+
+sub basename {
+    local($name) = @_;
+    $name =~ s!.*/!!;
+    $name =~ s/\.gz//;
+    $name =~ s/\.info//;
+    $name =~ s/\+/\\\\+/g;
+
+    return ($name);
+}
+
+sub path {
+    local($name) = @_;
+    $name =~ s!\/[^/]*$!!;
+
+    return ($name);
+}
+
+open(DIR, ">$filehandle") || die "Cannot open $filehandle\n";
+
+##
+## define top format
+##
+format DIR =
+-*- Text -*-
+This is the file /usr/info/dir, which contains the topmost node of the
+Info hierarchy.  The first time you invoke Info you start off
+looking at that node, which is (dir)Top.
+
+File: dir	Node: Top	This is the top of the INFO tree
+
+  This (the Directory node) gives a menu of major topics.
+
+  Usage in info-mode of EMACS:
+    Typing "d" returns here,       typing "?" lists all INFO commands,
+    typing "q" exits,     typing "h" gives a  primer for first-timers,
+    pressing 2nd button on a highlighted word follows cross-reference.
+
+ ---- AUTOCONFIGURED BY SuSEConfig: EDIT WITH CARE: ----
+ ---- Only descriptive text for otherwise empty topics will survive ----
+
+* Menu: The list of major topics begins on the next line.
+
+.
+##
+## end top format
+##
+write DIR; # write top format
+flush(DIR);
+
+
+$nl      = 0;
+@allbase = ();
+%found   = ();
+foreach $elem (@allinfo) {
+    $base  = "";
+    $path  = "";
+    $name  = "";
+    $desc  = "";
+    $node  = "";
+    $lines = 0;
+    @info  = ();
+    if ( -f $elem ) {
+	
+	$node =  $elem;
+	$node =~ s/\.gz$//;
+	$node =~ s/\.info$//;
+	$node =~ s!//!/!g;
+
+	$base =  basename($elem);
+	$found{$base} = 0;
+	grep($found{$_}=1, @allbase);
+
+	if ( $found{$base} > 0 ) { next; }
+	push(@allbase, $base);
+
+	($lines, @info) = &read_entry($elem);
+
+	$path =  path($elem);
+	if ( $path =~ /^$PATHS[0]$/ ) { $node = $base; }
+
+	#
+	# Read foreign or old dir files to get infomation about $base
+	# 
+	if ( $lines == 0 ) {
+	    if ( $path !~ /^$PATHS[0]$/ ) {
+		$ldir = "$path/dir";
+	    } else {
+		$ldir = $mdirtmp;
+	    }
+	    @info  = ();
+	    if ( -e $ldir && -r $ldir ) {
+		open(FILE, $ldir);
+		$add = 0;
+		while (<FILE>) {
+		    #
+		    # read next few lines if there is information ($add == 1)
+		    #
+		    if ( $add == 1 ) {
+			if ( /^\s+[^\:\*]+$/ ) {
+			    push(@info, $_); $lines++;
+			    next;
+			}
+			last;
+		    }
+		    if      ( /^\*\s+$base\:\s+\($base\)\.\s+\w/i ) {
+			$add = 1; push(@info, $_); $lines = 1;
+		    } elsif ( /^\*\s+$base\:\:\s+\w/i ) {
+			$add = 1; push(@info, $_); $lines = 1;
+		    } elsif ( /^\*\s+$base\:\s+\($base\)\.\s+$/i ) {
+			$add = 1; push(@info, $_); $lines = 0;
+		    } elsif ( /^\*\s+$base\:\:\s+$/i ) {
+			$add = 1; push(@info, $_); $lines = 0;
+		    } else {
+			next;
+		    }
+		}
+		close(FILE);
+	    }
+	}
+
+	if ( $lines > 0 ) {
+
+	    if ( $lines > 1 && $nl == 0 ) { printf(DIR "\n"); }
+	    foreach $l (@info) {
+		$first = index($l,"*");
+
+		$l =~ s/\($base\)/\($node\)/g;
+		$l =~ s/::/: \($node\)\./g;
+		$l =~ s/^(\s+)//g;
+
+		$name = "";
+		$desc = "";
+		$link = "";
+
+		($name,$desc) = split(/\.\s+/,"$l");
+
+		$name =~ s/\n//g;
+		$name =~ s/\s+$//g;
+		$name =~ s/^\s+//g;
+
+		$desc =~ s/\n//g;
+		$desc =~ s/\s+$//g;
+		$desc =~ s/^\s+//g;
+
+		if ( $first == 0 ) {
+		    ($name, $link) = split(/:/, $name);
+		    $name =~ s/\s+$//g;
+		    $link =~ s/^\s+//g;
+		    $link =~ s/\.$//g;
+		    $name = $name . ':' . ' ' . $link . '.';
+		    if ( length($name) < 16 &&
+			 length($desc) < 62 &&
+			 $lines < 2 ) {
+			printf(DIR "%-16.18s%s\n", $name, $desc);
+		    } else {
+			printf(DIR "%s\n",     $name);
+			printf(DIR "\t\t%s\n", $desc) if ( length($desc) > 0 );
+		    }
+		} else {
+		    printf(DIR     "\t\t%s\n", $name);
+		}
+	    }
+	    if ( $lines > 1 ) {
+		printf(DIR "\n"); $nl = 1;
+	    } else {
+		$nl = 0;
+	    }
+
+	} else {
+
+	    $name  = basename($node);
+	    $name =~ s!(.*)!\L$1!;
+	    $name =~ s!(.*)!\u$1!;
+	    $name  = '* ' . $name . ':';
+	    $link  = '(' . $node . ').';
+	    printf(DIR "%-0.80s %s\n", $name, $link);
+	    $nl = 0;
+
+	}
+    }
+    flush(DIR);
+}
+
+printf(DIR "\n* Locales:\n");
+close(DIR);
+if ( -e $mdirtmp ) {
+    unlink($mdirtmp);
+}
+exit 0;

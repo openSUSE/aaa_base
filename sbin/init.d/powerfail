@@ -1,0 +1,50 @@
+#! /bin/sh
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Florian La Roche <florian@suse.de>, 1996
+#	  Werner Fink <werner@suse.de>, 1996
+#
+# /sbin/init.d/powerfail
+#
+# This script is run when the UPS tells the system
+# the power has gone. Tell everybody, sync the disks
+# and drop into single user mode as fast as possible.
+# This script is also being run when the power comes
+# up again (if it does in time!)
+#
+
+. /etc/rc.config
+
+case "$1" in
+    start)
+	echo "THE POWER IS DOWN! SHUTTING DOWN SYSTEM!" | wall
+
+	# don't allow users to login
+	echo "POWER FAILURE" > /etc/nologin
+	;;
+    now)
+	# tell init to go single-user
+	trap "" SIGTERM
+	init -t5 S
+	sync
+	;;
+    stop)
+	# allow users to log in
+	rm -f /etc/nologin
+
+	# if we're not single user, don't try to restore
+	test $RUNLEVEL != S && exit 0
+
+	# go back to previous runlevel
+	init $PREVLEVEL
+
+	# allow users to log in
+	rm -f /etc/nologin
+	;;
+    *)
+	echo "Usage: $0 {start|now|stop}"
+	exit 1
+	;;
+esac
+
+exit 0

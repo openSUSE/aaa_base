@@ -1,0 +1,377 @@
+#!/usr/bin/perl
+# Copyright (C) 1994,1995 Florian La Roche
+# Copyright (C) 1996 SuSE GmbH, Nuernberg, Germany
+#
+# This script will take a list of files and package them into a
+# gzip'ped tar-file. Just put each filename into one line and say
+# 'pkgpack /absolute/path/to/list' to get list.tgz in your current directory.
+# (So you have to use an absolute path for the file list.)
+# Do this as root to get a tar-file with exactly the same owners/perms
+# as the original files.
+# Do not put a leading "/" into the listing for the root directory.
+#
+# You can also take old Slackware/SuSe description files of tar-packages
+# to make new tar-files. This script will automatically detect them
+# and skip the beginning lines until the listing of included files begins.
+#
+# Here is a sample file that could be used to package some files:
+# etc/termcap
+# etc/hosts
+# tmp/
+# bin/false
+#
+# Here is a listing of those files, if put into the tar file.
+# (This listing can also be used to make packages...) (tar tzvf file.tgz)
+# drwxr-xr-x root/root         0 Sep 28 21:48 1995 bin/
+# -rwxr-xr-x root/root       331 Aug  7 18:15 1995 bin/false
+# drwxr-xr-x root/root         0 Oct 25 15:22 1995 etc/
+# -rw-r--r-- root/root    397764 Jul 13 20:10 1995 etc/termcap
+# -rw-r--r-- root/root       131 Sep 25 12:49 1995 etc/hosts
+# drwxrwxrwt root/root         0 Oct 26 16:06 1995 tmp/
+#
+########
+#
+# Set 'PKGPACK_PACK_RPM=1' to build RPM packages instead of gzip'ped tar-files.
+#
+########
+
+$pack_rpm = $ENV{'PKGPACK_PACK_RPM'};
+$PACKRPM = "packrpm";
+#
+# Make sure, that man pages and info files are gziped.
+#
+system "Check";
+
+# Save current directory in variable $cwd .
+chop($cwd = `pwd`);
+
+# All files will be copied into this temporary directory and then
+# tar is called to make the tar-file.
+$tmpdir    = "/var/tmp/pkgpack.$$";
+$scriptdir = "/var/adm/scripts/";
+
+# A filename that will never exist. (Small hack to copy directories.)
+$nix = '______thisisnofilename';
+
+##no hardlinks##%hl = "";
+
+$user=$ENV{'PKGPACK_FORBIDDEN_USER'};
+if ( ! $user )
+    {
+    print "warning: PKGPACK_FORBIDDEN_USER not set!\n";
+    }
+
+#
+# parse args
+#
+sub Usage {
+  print "Usage: pkgpack  Inputfile [options]\n";
+  print "  Inputfile:\n";
+  print "     filelist    \n";
+  print "     tarfile       (RPM only)\n";
+  print "     directory     (RPM only)\n";
+  print "  options: \n";
+  print "     -n pkgname:   (RPM only)\n";
+  print "     -v version:   (RPM only)\n";
+  print "     -r release:   (RPM only)\n";
+  print "     -s checkfile: May contain rpm filetags (%config %doc %dir)\n";
+  print "                   Ignored if Inputfile is 'filelist'\n";
+  die "\n";
+}
+
+$packrpm_args = "";
+
+while ( ($_ = shift) ) {
+  if      ( $_ eq "-n" ) {
+    &Usage if ( $rpm_name );
+    $rpm_name = shift;
+    $packrpm_args .= " -n $rpm_name ";
+  } elsif ( $_ eq "-v" ) {
+    &Usage if ( $rpm_vers );
+    $rpm_vers = shift;
+    $packrpm_args .= " -v $rpm_vers ";
+  } elsif ( $_ eq "-r" ) {
+    &Usage if ( $rpm_rel );
+    $rpm_rel  = shift;
+    $packrpm_args .= " -r $rpm_rel ";
+  } elsif ( $_ eq "-s" ) {
+    &Usage if ( $rpm_checkfile );
+    $rpm_checkfile  = shift;
+    $packrpm_args .= " -s $rpm_checkfile ";
+  } else {
+    &Usage if ( $package );
+    $package  = $_;
+  }
+}
+
+&Usage if ( ! $package );
+
+
+#
+# Check kind of inputfile
+#
+if ( -f $package ) {
+  # check for tar file
+  if ( $package =~ /\.tgz$/ ) {
+    #########
+    print "TARFILE: $package\n";
+    system "rm -fr $tmpdir";
+    mkdir("$tmpdir",0755);
+    if (! -o $tmpdir) {
+	print STDERR "I'm not owning $tmpdir, exiting ...\n";
+	exit (1);
+    }
+    system( "tar -C $tmpdir -xvpzf $package" ) && die "tar error!";
+
+    if ( $rpm_name eq "" ) {
+      $rpm_name = $package;
+      $rpm_name =~ s/.*\///;
+      $rpm_name =~ s/\.tgz$//;
+      $packrpm_args .= " -n $rpm_name ";
+    }
+
+    $packrpm_ret = system( "$PACKRPM $tmpdir $packrpm_args" );
+
+    system "rm -fr $tmpdir";
+    exit $packrpm_ret;
+    #
+    #########
+  }
+}
+elsif ( -d $package ) {
+  #########
+  # directory -> .rpm
+  #
+  $packrpm_ret = system( "$PACKRPM $package $packrpm_args" );
+  #
+  exit $packrpm_ret;
+  #
+  #########
+}
+else {
+  # try from var/adm/packages
+  if ( ! -f "/var/adm/packages/$package" ) {
+    die "Can't find $package in /var/adm/packages\n";
+  }
+  else {
+    $package = "/var/adm/packages/$package";
+  }
+}
+
+chop($basename = `basename $package`);
+
+# change to root dir "/".
+chdir "/";
+
+system "rm -fr $tmpdir";
+system "mkdir -m755 -p $tmpdir";
+
+if ( -f "/etc/permissions" && -x "/usr/bin/chkstat" ) {
+    if ( $UID != 0 ) {
+        system "/usr/bin/chkstat /etc/permissions";
+    } else {
+        system "/usr/bin/chkstat -set /etc/permissions";
+    }
+} else {
+    print "\nYou have an old System without /etc/permissions and /usr/bin/chkstat\n";
+    print "\n\n      It's time to update...\n                               Darling :-)\n\n";
+}
+print "Extracting package $basename, please wait...\n";
+
+
+open(FILE, "$package") || die "Cannot open $package\n";
+@rpm_filetags=();
+
+# If this is a Slackware/SuSe description file of a tar-file, then
+# skip the beginning of descriptional text.
+if ( system( "grep '^FILE LIST:' $package" ) == 0 ) {
+  while (<FILE>) {
+    if (/^FILE LIST:/) {
+      last;
+    }
+  }
+}
+# If it's a rpm spec file, advance to %files
+#
+elsif ( system( "grep '^%files' $package" ) == 0 ) {
+  while (<FILE>) {
+    push( @rpm_filetags, $_ );
+    if (/^%files/) {
+      last;
+    }
+  }
+}
+
+# Make a loop over each filename.
+while (<FILE>) {
+    # Remove the last character, this should be '\n'.
+    chop;
+    # Strip leading/trailing ws
+    s|^\s+||;
+    s|\s+$||;
+
+    # If this list was generated from "tar xzvvf file.tgz > file", then
+    # remove the leading information. (Date, owner, perms, ...)
+    if (/\s\w\w\w\s.\d\s\d\d:\d\d\s\d\d\d\d\s(.*)/) {
+	$_ = $1;
+    }
+
+    # Remove anything past a ' -> '. This is probably also from
+    # a tar-listing that tells us where a symlink is pointing to.
+    s/\s+->\s.*$//;
+
+    # strip rpm special tags
+    #
+    if ( /^%(dir|doc|config|docdir)\s+/ ) {
+      push( @rpm_filetags, $_ );
+      next if ( $1 eq "docdir" );
+      $_ = $';
+    }
+
+    next if ( /^\s*$/ );
+
+    ##
+    ## Remember to use $sh_name for system
+    ##
+    $sh_name =  $_;
+    $sh_name =~ s/([^a-zA-Z0-9\/-_])/\\$1/g;
+    $sh_name =~ s/([\[\]])/\\$1/g;
+    $sh_name =~ s/([\<\>])/\\$1/g;
+
+    next if ( /^install\/$/ );
+
+    #print "<<$sh_name>>\n";
+
+    if ( /^install\/doinst.sh$/ ) {
+	system "mkdir -m755 -p $tmpdir/install";
+	system "if test -e install/doinst.sh ; then \
+                   cp install/doinst.sh $tmpdir/install/doinst.sh ; \
+                else \
+                   cp $scriptdir$basename $tmpdir/install/doinst.sh ; \
+                fi";
+	next
+    }
+
+    if ( -d $_ && ! -l $_ ) {	# is it a directory?
+        system "touch $sh_name/$nix";
+	# This is hack, "cp" won't find the file, but will make the
+	# directory anyway. By doing this, we are able to put empty
+	# dirs into a tar file.
+	system( "cp -dpP $sh_name/$nix $tmpdir 2>/dev/null 1>/dev/null" );
+	system( "rm -f $sh_name/$nix $tmpdir/$sh_name/$nix" );
+    } else {		# Take this for all other files.
+	# is the file hardlinked? If so, dont cp now, but add it
+	# to the list of files to be copied all in once
+	# @st = stat ( $_ );
+	##no hardlinks##if ( $st[3] <= 1 || -l $_ ) {
+        system( "cp -dpP $sh_name $tmpdir" );
+	##no hardlinks##} else {
+	##no hardlinks##    $hl{$st[1]} = "$hl{$st[1]} $_";
+	##no hardlinks##}
+    }
+}
+close FILE;
+
+##no hardlinks## now copy all hardlinked files at once using tar to preserve
+##no hardlinks## hardlinks
+##no hardlinks##
+##no hardlinks## disabled since hard links make problems (see ldso)
+##no hardlinks##
+##no hardlinks##foreach $key ( keys ( %hl ) ) {
+##no hardlinks##    system "tar clpf - $hl{$key} | ( cd  $tmpdir ; tar xlpf - )";
+##no hardlinks##}
+
+# Go into the temporary dir with all files.
+chdir "$tmpdir";
+
+# Change all users listed in environment variable PKGPACK_FORBIDDEN_USER
+# to root.root before packaging
+if ( $user )
+    {
+    foreach $name ( split(' ',$user) )
+	{
+	system "find . -user $name -exec chown root.root {} \\; 2>/dev/null";
+	}
+    }
+
+# if variable PKGPACK_WARN_UNREAD is set, warn if there are files or
+# directories that have restricted rights, this might be wrong
+$warn=$ENV{'PKGPACK_WARN_UNREAD'};
+if( $warn )
+    {
+    system "find . -type d -a ! -perm -005 -exec ls -ld {} \\;";
+    system "find . -type f -a ! -perm -004 -exec ls -l {} \\;";
+    }
+
+# if variable PKGPACK_WARN_NO_USER is set, warn if there are files or
+# directories that belong to an unknown user
+$warn=$ENV{'PKGPACK_WARN_NO_USER'};
+if( $warn )
+    {
+    system "find . -nouser -exec ls -ld {} \\;";
+    }
+
+if ( ! $pack_rpm ) {
+  # Invoke a shell script to delete all symlinks and let them be
+  # generated by a shell script.
+  system "ChangeSymlinks";
+}
+
+# Building the package
+print "Building the package (PKGPACK_PACK_RPM=$pack_rpm)...\n";
+
+if ( ! $pack_rpm ) {
+  CheckDoinstSh( ".", $basename ) && system "tar -clpf - * | gzip -9 > $cwd/$basename.tgz";
+  $packrpm_ret = 0;
+} else {
+  # set package name, if we have none
+  if ( $rpm_name eq "" ) {
+    $rpm_name = $basename;
+    $packrpm_args .= " -n $rpm_name ";
+  }
+  # watch out for spec file
+  if ( @rpm_filetags ) {
+    $packrpm_args .= " -s $package ";
+  }
+  chdir $cwd;
+  $packrpm_ret = system( "$PACKRPM $tmpdir $packrpm_args" );
+  print "Warning: $PACKRPM returned $packrpm_ret\n" if ( $packrpm_ret );
+}
+
+# Go into the original directory.
+chdir $cwd;
+
+# Remove all files from the temp dir.
+system "rm -fr $tmpdir";
+
+exit $packrpm_ret;
+
+##############################
+##############################
+##############################
+
+
+sub CheckDoinstSh {
+  local( $dir, $name, $RightDoinstSh );
+  ( $dir, $name ) = @_;
+  $dir           = "." unless $dir;
+  $RightDoinstSh = 1;
+
+  if ( -f "$dir/install/doinst.sh" ) {
+    print "#--------------------------------------#\n";
+    print "# Found install/doinst.sh for $name:\n";
+    print "#--------------------------------------#\n";
+    system( "cat $dir/install/doinst.sh" );
+    print "#--------------------------------------#\n";
+    print " Right doinst.sh for $name? [yYjJ] ";
+    $RightDoinstSh = <STDIN>;
+    $RightDoinstSh = 0 unless $RightDoinstSh =~ /^[yYjJ]/ ;
+  }
+
+  print "\nWon't build package..\n" unless( $RightDoinstSh );
+  $RightDoinstSh;
+}
+
+##############################
+##############################
+##############################

@@ -1,0 +1,333 @@
+#! /bin/bash
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996
+#         Werner Fink <werner@suse.de>, 1996-98
+#      
+#
+# /sbin/init.d/route		Version 0.3
+#
+
+. /etc/rc.config
+
+# Determine the base and follow a runlevel link name.
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
+
+# If not called by a runlevel directory, maybe the device
+# is given as *second* argument
+if test $link = $base -a -n "$2" ; then
+    NETCONFIG=""
+    for I in _0 _1 _2 _3; do
+        eval NETDEV=\$NETDEV$I
+        test "$2" = "$NETDEV" && NETCONFIG="$I"
+    done
+fi
+
+test -n "$NETCONFIG" -a "$NETCONFIG" != "YAST_ASK" || exit 0
+
+: ${ROUTECONF:=/etc/route.conf}
+test -f $ROUTECONF || exit 0
+declare -i n
+
+reverse ()
+{
+    local _R
+    (
+	if read -r _R ; then
+	    reverse
+	    echo -e "$_R"
+	fi
+    )
+}
+
+run_route ()
+{
+    local command="/sbin/route $@"
+    retvalue="`$command 2>&1`"
+    if test $? -ne 0 ; then
+	case "$retvalue" in
+	    SIOCADDRT:*File*exists) return ;;
+	    *)
+	esac
+	test "$ret" = "$rc_done" && echo
+	echo -e "\033[1mError while excuting:\n    $command\033[m"
+	echo    "    ${retvalue%%Usage:*}"
+	ret=$rc_failed
+    fi
+}
+
+wrong_entry ()
+{
+    test "$ret" = "$rc_done" && echo
+    echo "\033[1mWrong entry in ${ROUTECONF}\033[m"
+    echo "    $@"
+    ret=$rc_failed
+}
+
+ret=$rc_done
+todo="$1"
+sdev="$2"
+case "$todo" in
+    start|reload)
+	if test -n "$sdev" ; then
+	    echo -n "Setting up routing for $sdev (using ${ROUTECONF})"
+	else
+	    echo -n "Setting up routing (using ${ROUTECONF})"
+	fi
+	#
+	# Read possible devices out of /proc/net/dev
+	#
+	n=0
+	while read proc ; do
+	    n=$((n + 1))
+	    test $n -gt 2 || continue
+	    d=${proc%:*}
+	    case "`ifconfig ${d}`" in
+		${d}*UP*) ;;
+		${d}*) continue
+	    esac
+	    if test -n "$sdev" -a "${d}" = "$sdev" ; then
+		given=$sdev
+		break
+	    fi
+	    given="${given} ${d}"
+	done < /proc/net/dev
+	if test -n "$sdev" -a "$given" != "$sdev" ; then
+	    test "$ret" = "$rc_done" && echo
+	    echo "No interface $sdev found"
+	    ret=$rc_failed
+	fi
+	dests=$(route -n | while read dest rest ; do
+	    test $(( i = $i + 1 )) -gt 2 && echo "$dest"
+	done)
+	#
+	# Read /etc/route.conf and add routings
+	#
+	while read  des what mask iface  ; do
+	    if test -n "$sdev" ; then
+		test "$sdev" = "$iface" || continue
+	    fi
+	    case "$des" in
+	    \#*|"") ;;
+	    224.0.0.0)
+		# We are doing multicast
+		if test -e /proc/net/igmp -a "$what" = 0.0.0.0 -a "$mask" = 240.0.0.0
+		then
+		    test "$ret" = "$rc_done" && echo
+		    echo "Add multicast route 240.0.0.0 for $iface"
+		    run_route add -net 224.0.0.0 netmask 240.0.0.0 dev $iface
+		    test "$ret" = "$rc_done" && echo -n "..."
+		else
+		    test "$ret" = "$rc_done" && echo
+		    echo "Skipping multicast route 240.0.0.0 for $iface"
+		    test ! -e /proc/net/igmp  && echo "  no /proc/net/igmp available"
+		    test "$what" != 0.0.0.0   && echo "  wrong dummy entry $what in $ROUTECONF"
+		    test "$mask" != 240.0.0.0 && echo "  wrong netmask entry $mask in $ROUTECONF"
+		    ret=$rc_failed
+		fi
+		;;
+	    *)
+		for dest in $dests ; do
+		    test "$dest" = "$des" && break;
+		done
+		test "$dest" = "$des" && continue;
+		card=""
+		test -n "$iface" && card="dev $iface"
+		case "$what" in
+		"")
+		    wrong_entry "$des $what $mask $iface"
+		    ;;
+		0.0.0.0|\*)          # Add a local Network
+		    if test -z "$mask" -o -z "$iface" ; then
+			wrong_entry "$des $what $mask $iface"
+		    fi
+		    for dev in $given ; do
+			case "$iface" in
+			$dev)
+			    if test "${mask}" = 255.255.255.255 ; then
+				# ISDN/PPP auto dial
+				run_route add -host "${des}" $card
+			    else
+				run_route add -net  "${des}" netmask "${mask}" $card
+			    fi
+			;;
+			esac
+		     done
+		     ;;
+		*)
+		    case "$mask" in
+		    0.0.0.0|"")      # Add Gateway
+			run_route add "${des}" gw "${what}" $card
+			;;
+		    255.255.255.255) # Add a Host by a Gateway/Route
+			if test "$des" = "$what" ; then
+			    run_route add -host "${des}" $card
+			else
+			    run_route add -host "${des}" gw "${what}" $card
+			fi
+			;;
+		    *.*.*.*)         # Add a Network
+			run_route add -net "${des}" netmask "${mask}" gw "$what" $card
+			;;
+		    *)
+			wrong_entry "$des $what $mask $iface"
+		    esac
+		esac
+	    esac
+	done < $ROUTECONF
+	test "$ret" = "$rc_done" && echo -e "$ret" || \
+				    echo -e "Setting up routing $ret"
+	;;
+    stop)
+	ONEWAY=false
+	test "$RUNLEVEL" = "0" -o "$RUNLEVEL" = "6" && ONEWAY=true
+	if test "$CLOSE_CONNECTIONS" = "true" -a "$ONEWAY" = "true" ; then
+	    echo -n "Close all net connections"
+	    #
+	    # Close all net connection with SIGTERM
+	    #
+	    n=0
+	    tports=""
+	    uports=""
+	    dosleep=no
+	    while read prot resv send loc rest ; do
+		n=$((n + 1))
+		if test $n -gt 2 ; then
+		    test "$prot" = "tcp" && tports="${tports} ${loc#*:}"
+		    test "$prot" = "udp" && uports="${uports} ${loc#*:}"
+		fi
+	    done < <(netstat -n -tu)
+	    if test -n "${tports}" ; then
+		fuser -n tcp -TERM -k ${tports} > /dev/null
+		dosleep=yes
+	    fi
+	    if test -n "${uports}" ; then
+		fuser -n udp -TERM -k ${uports} > /dev/null
+		dosleep=yes
+	    fi
+	    test $dosleep = yes  && sleep 5
+	    #
+	    echo -e "$rc_done"
+	fi
+	if test -n "$sdev" ; then
+	    echo -n "Shutting down routing for $sdev"
+	else
+	    echo -n "Shutting down routing"
+	fi
+	#
+	# Read possible devices out of /proc/net/dev
+	#
+	n=0
+	while read proc ; do
+	    n=$((n + 1))
+	    test $n -gt 2 || continue
+	    d="${proc%:*}"
+	    case "`ifconfig ${d}`" in
+		${d}*UP*) ;;
+		${d}*) continue
+	    esac
+	    if test -n "$sdev" -a "${d}" = "$sdev" ; then
+		given=$sdev
+		break
+	    fi
+	    given="${given} ${d}"
+	done < /proc/net/dev
+	if test -n "$sdev" -a "$given" != "$sdev" ; then
+	    test "$ret" = "$rc_done" && echo
+	    echo "No interface $sdev found"
+	    ret=$rc_failed
+	fi
+	#
+	# Read /etc/route.conf reverse and delete routings
+	#
+	while read  des what mask iface  ; do
+	    if test -n "$sdev" ; then
+		test "$sdev" = "$iface" || continue
+	    fi
+	    case "$des" in
+	    \#*|"") ;;
+	    224.0.0.0)
+		# We are doing multicast
+		if test -e /proc/net/igmp -a "$what" = 0.0.0.0 -a "$mask" = 240.0.0.0
+		then
+		    echo "Delete multicast route 240.0.0.0 for $iface"
+		    run_route del -net 224.0.0.0 netmask 240.0.0.0 dev $iface
+		else
+		    test "$ret" = "$rc_done" && echo
+		    echo "Skipping multicast route 240.0.0.0 for $iface"
+		    test ! -e /proc/net/igmp  && echo "  no /proc/net/igmp available"
+		    test "$what" != 0.0.0.0   && echo "  wrong dummy entry $what in $ROUTECONF"
+		    test "$mask" != 240.0.0.0 && echo "  wrong netmask entry $mask in $ROUTECONF"
+		    ret=$rc_failed
+		fi
+		;;
+	    *)
+		card=""
+		test -n "$iface" && card="dev $iface"
+		case "$what" in
+		"")
+		    wrong_entry "$des $what $mask $iface"
+		    ;;
+		0.0.0.0|\*)          # Delete a local Network
+		    if test -z "$mask" -o -z "$iface" ; then
+			wrong_entry "$des $what $mask $iface"
+		    fi
+		    for dev in $given ; do
+			case "$iface" in
+			$dev)
+			    if test "${mask}" = 255.255.255.255 ; then
+				# ISDN/PPP auto dial
+				run_route del -host "${des}" $card
+			    else
+				run_route del -net  "${des}" netmask "${mask}" $card
+			    fi
+			    ;;
+			esac
+		    done
+		    ;;
+		*)
+		    case "$mask" in
+		    0.0.0.0|"")      # Delete Gateway
+			run_route del "${des}" gw "${what}" $card
+			;;
+		    255.255.255.255) # Delete a Host by a Gateway/Route
+			if test "$des" = "$what" ; then
+			    run_route del -host "${des}" $card
+			else
+			    run_route del -host "${des}" gw "${what}" $card
+			fi
+			;;
+		    *.*.*.*)         # Delete a Network
+			run_route del -net "${des}" netmask "${mask}" gw "$what" $card
+			;;
+		    *)
+			wrong_entry "$des $what $mask $iface"
+		    esac
+		esac
+	    esac
+	done < <(reverse < $ROUTECONF)
+	test "$ret" = "$rc_done" && echo -e "$ret" || \
+				    echo -e "Shutting down routing $ret"
+	;;
+    restart)
+	$0 stop ${2+"$sdev"} && $0 start ${2+"$sdev"} || ret=$rc_failed
+	;;
+    status)
+	n=0
+	route -n | while read des what mask f m r u iface rest ; do
+	    n=$((n + 1))
+	    test $n -gt 2 || continue
+	    test "${des}"  = "0.0.0.0" && des="default "
+	    test "${what}" = "0.0.0.0" && what="0.0.0.0 "
+	    test "${mask}" = "0.0.0.0" && mask="0.0.0.0 "
+	    echo -e "${des}\t${what}\t${mask}\t${iface}"
+	done 
+	;;
+    *)
+	echo "Usage: $0 {start|stop|reload|restart}"
+	exit 1
+esac
+
+test "$ret" = "$rc_done" || exit 1
+exit 0

@@ -1,0 +1,169 @@
+#! /bin/sh
+# Copyright (c) 1998 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Thomas Fehr <fehr@suse.de>, 1998
+#         Werner Fink <werner@suse.de>, 1998
+#
+# /sbin/bootp
+#
+
+TMPDIR=/tmp/.bootp.$$
+test -e ${TMPDIR} && rm -rf ${TMPDIR}
+
+mkdir -m 1700 $TMPDIR
+if [ $? -ne 0 -o ! -d $TMPDIR ]
+then
+    echo "$0: Can not create clean directory ${TMPDIR}."
+    exit 1
+fi
+trap 'echo "$0: Aborting ..."; rm -rf ${TMPDIR}' 1 2 3 6 7 13 15
+
+tmprc=${TMPDIR}/rc.config
+tmprt=${TMPDIR}/route.conf
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+export PATH
+OLDIFS="$IFS"
+NL='
+'
+
+BOOTPC='bootpc --timeoutwait 10 --returniffail'
+
+DEVICE=eth0
+[ -n "$1" ] && DEVICE=$1
+
+VERBOSE=0
+[ "$2" = -v ] && VERBOSE=1
+
+echo Setting up $DEVICE using bootp
+
+#
+# Broadcast
+#
+ifconfig dummy0 down
+ifconfig $DEVICE up
+route add default $DEVICE
+
+#
+# The program bootpc provides us the information in
+# bourne shell syntax like
+#
+#    SERVER='<IP adress>'
+#
+
+eval `$BOOTPC --dev $DEVICE`
+[ $? -ne 0 ] && exit 1
+
+if [ -n "$IPADDR" -a -z "$HOSTFULL" ]
+then
+    eval `$BOOTPC --in2host $IPADDR --dev $DEVICE`
+    [ $? -ne 0 ] && exit 1
+fi
+[ -n "$HOSTFULL" ] && HOSTNAME=$HOSTFULL
+
+#
+# Close device
+#
+ifconfig $DEVICE down
+
+if [ $VERBOSE -gt 0 ]
+then
+    echo SERVER=$SERVER
+    echo IPADDR=$IPADDR
+    echo NETMASK=$NETMASK
+    echo BROADCAST=$BROADCAST
+    echo NETWORK=$NETWORK
+    echo GATEWAY=$GATEWAYS
+    echo DNSSRV=$DNSSRVS
+    echo SEARCHLIST=$SEARCH
+    echo HOSTNAME=$HOSTNAME
+fi
+
+#
+# Set up network
+#
+ifconfig dummy0 down
+ifconfig dummy0 $IPADDR up
+ifconfig $DEVICE $IPADDR broadcast $BROADCAST netmask $NETMASK up
+
+#
+# Write temporary rc.config
+#
+IFS="$NL"
+while read -r line ; do
+    IFS="$OLDIFS"
+    case "$line" in
+	\#*|"")	echo "$line" ;;
+	*FQHOSTNAME=*)
+	    set -- $line
+	    if [ -n "$HOSTNAME" -a "${1%%=*}" = "FQHOSTNAME" ]
+	    then
+		echo FQHOSTNAME=\"$HOSTNAME\"
+		hostname ${HOSTNAME%%.*}
+	    else
+		echo "$line"
+	    fi	;;
+	*SEARCHLIST=*)
+	    set -- $line
+	    if [ -n "$SEARCH"   -a "${1%%=*}" = "SEARCHLIST" ]
+	    then
+		echo SEARCHLIST=\"$SEARCH\"
+	    else
+		echo "$line"
+	    fi	;;
+	*NAMESERVER=*)
+	    set -- $line
+	    if [ -n "$DNSSRVS"  -a "${1%%=*}" = "NAMESERVER" ]
+	    then
+		echo NAMESERVER=\"$DNSSRVS\"
+	    else
+		echo "$line"
+	    fi	;;
+	*)	echo "$line" ;;
+    esac
+    IFS="$NL"
+done < /etc/rc.config > $tmprc
+IFS="$OLDIFS"
+
+#
+# Write temporary route.conf
+#
+IFS="$NL"
+while read -r line ; do
+    IFS="$OLDIFS"
+    case "$line" in
+	\#*|"")	echo    "$line" ;;
+	*${DEVICE}*)
+	    set -- $line
+	    if [ -n "$NETWORK" -a -n "$NETMASK" -a "$DEVICE" = "$4" ]
+	    then
+		echo -e "$NETWORK\t\t0.0.0.0\t\t$NETMASK\t\t$DEVICE"
+	    else
+		echo    "$line"
+	    fi	;;
+	*default*)
+	    set -- $line
+	    if [ -n "$GATEWAYS" -a "default" = "$1" ]
+	    then
+		echo -e "default\t\t$GATEWAYS"
+	    else
+		echo    "$line"
+	    fi	;;
+	*)	echo    "$line" ;;
+    esac
+    IFS="$NL"
+done < /etc/route.conf > $tmprt
+IFS="$OLDIFS"
+
+#
+# Move temporary rc.config and route.conf into /etc
+#
+test -s $tmprc && mv $tmprc /etc/rc.config
+test -s $tmprt && mv $tmprt /etc/route.conf
+
+echo -n "Calling SuSEconfig..."
+/sbin/SuSEconfig --nonewpackage >/dev/null 2>&1
+echo done.
+
+rm -rf $TMPDIR
+exit 0

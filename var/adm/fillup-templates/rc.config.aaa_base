@@ -1,0 +1,703 @@
+#
+#
+# This language is used in YaST. This is also the default
+# for local users, if RC_LANG and RC_LC_ALL are not set. Root
+# uses this language if ROOT_USES_LANG is set to "YES"
+#
+LANGUAGE=
+
+#
+# Some people don't want SuSEconfig to modify the system. With this
+# entry you can disable SuSEconfig completely. 
+# Please don't contact our support if you have trouble configuring your 
+# system after having disabled SuSEconfig.  (yes/no)
+#
+ENABLE_SUSECONFIG=yes
+
+
+#
+#
+# Local users will get RC_LANG as their default language,
+# i.e. the environment variable $LANG . $LANG is the default
+# of all $LC_*-variables, as long as $LC_ALL is not set, which
+# overrules all $LC_-variables. If empty, $LANGUAGE will be used.
+# Root uses this variable only if ROOT_USES_LANG is set to "YES"
+#
+#
+RC_LANG=""
+
+#
+# This variable will overrule all LC-variables!!
+# Again, ROOT_USES_LANG has to be set to YES in order
+# to get any effect for the superuser.
+#
+RC_LC_ALL=""
+
+#
+# This defines the locale in which messages of programs and
+# libraries with i18n-support should appear if a translated
+# message catalog for the library or the program is installed.
+# It also defines yes/no answers which are defined by the locale.
+#
+RC_LC_MESSAGES=""
+
+#
+# This defines the locale for character handling and classification.
+# The locale defined here is used by the libc in functions which
+# are used to qualify if this character is an charcater which may
+# be used in an text string, if the character is e.g. lowercase
+# and it defnes upper/lowercase-mapping of foreign characters
+#
+RC_LC_CTYPE=""
+
+#
+# This defines the locale for sorting strings and characters.
+# The locale defined here is used by the libc in functions which
+# are used to qualify if a character is befor or beyond an other
+# character in the alphabet. Note: sort(1) doesn't use these
+# functions, but other application such as databases may use it.
+#
+RC_LC_COLLATE=""
+
+#
+# This defines the locale for date and time output formats.
+# i.e.: 06/09/1999 vs. 09.06.1999
+#
+RC_LC_TIME=""
+
+#
+# This defines the locale for formatting and reading numbers.
+# i.e.: 1,234.56 vs. 1.234,56
+#
+RC_LC_NUMERIC=""
+
+#
+# This defines the locale for formatting and reading money values.
+#
+RC_LC_MONETARY=""
+
+#
+# This defines if the user "root" should use the locale settings
+# which are defined here.
+#
+ROOT_USES_LANG="no"
+
+#
+# SuSEconfig can mail reports (created by YaST or included in packages)
+# to you.  Here you can set the address.  If you don't want reports to
+# be send, then simply set it to "".
+#
+MAIL_REPORTS_TO="root"
+
+#
+# There are two levels of mailing.  If you set MAIL_LEVEL it to "warn"
+# you only get the important mails.  If you set it to "all", you get
+# logs also.
+#
+MAIL_LEVEL="warn"
+
+#
+# Which device is the mouse ? (e.g. "/dev/ttyS0")
+#
+MOUSE="YAST_ASK"
+
+#
+# Which device is the modem ? (e.g. "/dev/ttyS1")
+#
+MODEM="YAST_ASK"
+
+#
+# keytable and console font
+# (e.g. "de-latin1-nodeadkeys" for KEYTABLE, empty for US settings)
+#
+KEYTABLE="de-latin1-nodeadkeys"
+
+#
+# Load this console font upon bootup:
+#
+CONSOLE_FONT=""
+
+#
+# Does your console font need a screenmap? Insert it into CONSOLE_SCREENMAP.
+#
+CONSOLE_SCREENMAP=""
+
+#
+# some fonts/keymap need a unicode map (TRANSLATION in former releases).
+# add it to CONSOLE_UNICODEMAP.
+#
+CONSOLE_UNICODEMAP=""
+
+#
+# for some fonts the console has to be initialized with CONSOLE_MAGIC.
+# CONSOLE_MAGIC can be empty or have the values "(B", ")B", "(K" or ")K".
+#
+CONSOLE_MAGIC=""
+
+
+#
+# keyboard repeat rate (2.0 - 30.0)
+# keyboard delay time in ms (250, 500, 750, 1000)
+# (If you want "kbdrate" to be executed, you have to set both of them.)
+#
+KBD_RATE=""
+KBD_DELAY=""
+
+#
+# NumLock on? ("yes" or "no")
+KBD_NUMLOCK="no"
+
+#
+# CapsLock on? ("yes" or "no")
+KBD_CAPSLOCK="no"
+
+#
+# tty's for NumLock and CapsLock 
+# example: "tty1 tty2"
+# "" for all tty's
+#
+KBD_TTY="tty1 tty2 tty3 tty4 tty5 tty6"
+
+
+#
+# Set to "-u" if your system clock is set to GMT, otherwise "".
+#
+GMT="YAST_ASK"
+
+#
+# Timezone (e.g. CET)
+# (this will set /usr/lib/zoneinfo/localtime)
+#
+TIMEZONE="YAST_ASK"
+
+#
+# start loopback networking? ("yes" or "no")
+# (this will be needed for all rpc services)
+#
+START_LOOPBACK="yes"
+
+#
+# networking
+#
+# number of network cards: "_0" for one, "_0 _1 _2 _3" for four cards
+#
+NETCONFIG="YAST_ASK"
+
+#
+# IP Adresses
+#
+IPADDR_0=""
+IPADDR_1=""
+IPADDR_2=""
+IPADDR_3=""
+
+#
+# network device names (e.g. "eth0")
+#
+NETDEV_0=""
+NETDEV_1=""
+NETDEV_2=""
+NETDEV_3=""
+
+#
+# parameteres for ifconfig, simply enter "bootp" or "dhcpclient" to use the
+# respective service for configuration
+# sample entry for ethernet:
+# IFCONFIG_0="192.168.81.38 broadcast 192.168.81.63 netmask 255.255.255.224"
+#
+IFCONFIG_0=""
+IFCONFIG_1=""
+IFCONFIG_2=""
+IFCONFIG_3=""
+
+# 
+# setup dummy network device for IPADDR_0? this is useful for non permanent
+# network connections (e.g. SLIP, PPP). Some software needs a connection
+# to FQHOSTNAME (e.g. plp). (yes, no)
+SETUPDUMMYDEV=yes
+
+#
+# Do you want the "dynamic IP patch" to be enabled at bootup? (yes/no)
+#
+IP_DYNIP=no
+
+#
+# Enable syn flood protection (see /usr/src/linux/Documentation/Configure.help)
+# (yes/no)
+#
+IP_TCP_SYNCOOKIES=yes
+
+#
+# runtime-configurable parameter: forward IP packets.
+# Is this host a router? (yes/no)
+#
+IP_FORWARD=no
+
+
+#
+# SuSEconfig can do some checks and modifications in /etc/hosts. 
+# If this is not wanted, set the following variable to 'no' (yes, no).
+#
+CHECK_ETC_HOSTS=yes
+
+#
+# If CHECK_ETC_HOSTS is set to yes, SuSEconfig sorts your
+# /etc/hosts.  But in some cases this may be unwanted.  So here is a
+# flag, where you can configure if /etc/hosts should be "beautified".
+# (yes/no)
+#
+BEAUTIFY_ETC_HOSTS=no
+
+#
+# if SORT_PASSWD_BY_UID is set to yes, SuSEconfig sorts your /etc/passwd
+# and /etc/group by uid/gid.
+#
+SORT_PASSWD_BY_UID=no
+
+
+#
+# hostname of the system (full name)
+# if zero, and bootp is used above, bootp will also set the hostname
+# (e.g. "riemann.suse.de" or "hugo.linux.de")
+# don't forget to also edit /etc/hosts for your system
+#
+FQHOSTNAME=""
+
+#
+# SuSEconfig can create and check the /etc/host.conf for you. Should this
+# be done ("yes" or "no").
+#
+CREATE_HOSTCONF="yes"
+
+#
+# Shall SuSEconfig maintain /etc/resolv.conf (needed for DNS) ? 
+# If set to yes and one of SEARCHLIST and NAMESERVER is empty,
+# it is assumed, that no DNS is wanted and /etc/resolv.conf will
+# be deleted. If yes and both are filled out, it will be created.
+# "no" leaves /etc/resolv.conf untouched.
+#
+CREATE_RESOLVCONF=yes
+
+#
+# domain searchlist that should be used in /etc/resolv.conf
+# (e.g. "suse.de linux.de uni-stuttgart.de")
+# Attention! this has to be filled out, if you want to access a name server
+#
+SEARCHLIST=""
+
+#
+# space separated list of nameservers that should be used for /etc/resolv.conf
+# give a maximum of 3 IP numbers
+# (e.g. "192.168.116.11 192.168.7.7")
+#
+NAMESERVER="YAST_ASK"
+
+#
+# Used for News-Postings.
+#
+ORGANIZATION=""
+
+#
+# News server.
+#
+NNTPSERVER="news"
+
+#
+# space separated list of irc servers
+#
+IRCSERVER=""
+
+#
+# start the inet daemon in multi-user? ("yes" or "no")
+# this is needed, if you have to telnet/rlogin to your own machine.
+# It is also needed for the man page formatter in SuSE Help system
+# and for starting the plp lp daemon.
+#
+START_INETD="YAST_ASK"
+
+#
+# have mail daemon on SMTP port? ("yes" or "no")
+# needed, if you receive email from other hosts via tcp/ip
+# not needed, if you have a uucp-only host or only out-going email.
+# If set to "yes", sendmail will be started as daemon.
+# As uucp site, you can get along with "SMTP=no", if you make
+# a "sendmail -q" call after each poll. (As rmail is queuing the mail only
+# and not delivering it...)
+#
+SMTP="no"
+
+#
+# From:-Line in email and News postings
+# (otherwise the FQDN is used)
+#
+FROM_HEADER="YAST_ASK"
+
+#
+# some programs (e.g. lynx, arena and wget) support proxies, if set in
+# environment.  SuSEconfig can add this environment variables to
+# /etc/SuSEconfig/* (sourced by /etc/profile etc.) - See
+# http://www.suse.de/Support/sdb_e/lynx_proxy.html for more details.
+# Example: HTTP_PROXY="http://proxy.provider.de:3128/"
+HTTP_PROXY=""
+
+#
+# Example: FTP_PROXY="http://proxy.provider.de:3128/"
+#
+FTP_PROXY=""
+
+#
+# Example: GOPHER_PROXY="http://proxy.provider.de:3128/"
+#
+GOPHER_PROXY=""
+
+#
+# Example: NO_PROXY="www.me.de, do.main, localhost"
+#
+NO_PROXY="localhost"
+
+
+#
+# start kernel daemon? ("yes" or "no")
+#
+START_KERNELD="yes"
+
+#
+# start cron daemon? ("yes" or "no")
+# should be left unchanged to the default "yes" entry
+#
+CRON="yes"
+
+#
+# start portmap? ("yes" or "no")
+# this is needed, if the NFS server is started or if NIS is used
+# Caution! The portmapper will be started with no regard to
+# START_PORTMAP if NFS_SERVER is set to "yes"!
+#
+START_PORTMAP="YAST_ASK"
+
+#
+# should the NFS server be started on this host? ("yes" or "no")
+# (needs activated portmapper)
+#
+NFS_SERVER="YAST_ASK"
+
+#
+# should the kernel based NFS server be started on this host
+# (instead of the user space version) ? ("yes" or "no")
+# THIS NEEDS A 2.1 KERNEL WITH NFSD SUPPORT
+#
+USE_KERNEL_NFSD="no"
+
+#
+# the kernel nfs-server supports multiple server threads
+#
+USE_KERNEL_NFSD_NUMBER="4"
+
+#
+# translates userid and goupid between server and client
+# ("yes" or "no"). Needs to be started on NFS clients for
+# certain special user-id mappings.
+#
+NFS_SERVER_UGID="no"
+
+
+#
+# should imported NFS be reexported? ("yes" or "no")
+#
+REEXPORT_NFS="no"
+
+#
+# when shutting down routing, all net connection can be closed (not useful
+# in all cases).  If CLOSE_CONNECTIONS is set to "true" /sbin/init.d/route
+# scans /proc to search for network connections and sends a term signal
+# to the processes.
+#
+CLOSE_CONNECTIONS="false"
+
+#
+# start pcnfsd (for PCNFS clients; needs activated portmapper - 
+# see man pcnfsd) (yes/no)
+#
+START_PCNFSD=no
+
+#
+# start bwnfsd (pcnfs related) (yes/no)
+#
+START_BWNFSD=no
+
+#
+# pcnfsd and bwnfsd need spool directory for lpd. Set it here.
+#
+PCNFSD_LPSPOOL=/var/spool/lpd
+
+#
+# start rwhod? NOTE: rwhod broadcasts regularly, so dial
+# on demand connections (ISDN and/or diald) might be established
+# (yes/no)
+#
+START_RWHOD=no
+
+#
+# should gpm be started on this machine? ("yes" or "no")
+#
+START_GPM="YAST_ASK"
+
+#
+# gpm will be started with these parameters
+# it won't be started in runlevel 3 (xdm)
+# (example: "-t msc -m /dev/mouse")
+#
+GPM_PARAM=""
+
+#
+# start routed (for dynamic routing - see man routed) (yes/no)
+# ATTENTION:  starting routed causes net traffic every 30 seconds.
+# If your host is connected to internet via dial-up it makes absolutely
+# no sense to activate it.
+#
+START_ROUTED=no
+
+#
+# start the named (package bind)? You have to configure the named first,
+# before you can start it (man named).
+#
+START_NAMED=no
+
+#
+# should updatedb (for locate) be started by cron.daily ("yes" or "no")
+#
+RUN_UPDATEDB=yes
+
+#
+# should mandb and whatis be recreated by cron.daily ("yes" or "no")
+#
+REINIT_MANDB=yes
+
+#
+# updatedb has a parameter "--localuser". it runs the find as this user.
+# some people think, its a security hole to run it as root (because you
+# can get information about directories you can not read normally). Some
+# think its useful to hold all files in the database. If you want full
+# information in locate db, set RUN_UPDATEDB_AS=root. If you want security
+# use RUN_UPDATEDB_AS=nobody.
+#
+RUN_UPDATEDB_AS=nobody
+
+#
+# uptdatedb normally only scans local harddisks, but can include net paths
+# in database as well. If you specify directories here, they will be scanned.
+#
+UPDATEDB_NETPATHS=""
+
+#
+# uptdatedb can skip directories for its database. The following parameter
+# says which.
+#
+UPDATEDB_PRUNEPATHS="/S.u.S.E. /mnt /cdrom /tmp /usr/tmp /var/tmp /var/spool /proc"
+
+#
+# search net paths as ? (e.g. nobody)
+#
+UPDATEDB_NETUSER=""
+
+#
+# old corefiles? should they be deleted ("yes" or "no")
+# if set to no, cron.daily will tell you, if it finds old core files.
+# please note, that this feature needs RUN_UPDATEDB to be set to "yes".
+#
+DELETE_OLD_CORE=no
+
+#
+# how old are 'old' core files? (in days)
+#
+MAX_DAYS_FOR_CORE=7
+
+#
+# should old preformated man pages be deleted (/var/catman)
+# (yes/no)
+#
+DELETE_OLD_CATMAN=yes
+
+#
+# How old are OLD preformated man pages for you? (days)
+#
+CATMAN_ATIME=7
+
+
+#
+# we have a small script to generate usr/info/dir file. This needs perl..
+# ("yes" or "no")
+#
+CREATE_INFO_DIR="yes"
+
+# 
+# SuSEconfig can call chkstat to check permissions and ownerships for
+# files and directories (using /etc/permissions). 
+# Setting to "set" will correct it, "warn" produces warnings, if 
+# something strange is found. Disable this feature with "no".
+#
+CHECK_PERMISSIONS=set
+
+#
+# SuSE Linux contains two different configurations for
+# chkstat. The differences can be found in /etc/permissions.secure
+# and /etc/permissions.easy. If you create your own configuration
+# (e.g. permissions.foo), you can enter the extension here as well.
+#
+# (easy/secure local foo whateveryouwant).
+#
+PERMISSION_SECURITY="easy local"
+
+
+#
+# How long to store old log files. If set to 0, log files will be untouched.
+# The log files below will be checked by cron.daily. The number
+# after the name means the minimum size in k, the file has to have, before
+# it will be backed up (root gets a mail, if it happens).
+#
+# /tmp/log_mg.* (1024), /var/log/wtmp (400), /var/log/isdn (4096),
+# /var/lib/xdm/xdm-errors (200), /var/spool/uucp/Log (2048),
+# /var/spool/uucp/Stats (1024), /var/log/debug (1024), /var/log/warn (1024),
+# /var/log/messages (4096), /var/log/xferlog (4096), 
+# /local/www/logs/access_log (4096), /local/www/logs/error_log (1024)
+# /var/adm/isdn.log (1024), /var/log/isdncalls (1024)
+#
+MAX_DAYS_FOR_LOG_FILES=365
+
+#
+# cron.daily can make backup the rpm database. Set the path here, and
+# cron.daily will make backup everytime it is called and the db has
+# changed.  This backups are recommended.  If you don not want this
+# feature, set it to "".
+#
+RPMDB_BACKUP_DIR=/var/adm/backup/rpmdb
+
+#
+# here you can set the maximum number of backup files for the rpm
+# database.
+#
+MAX_RPMDB_BACKUPS=5
+
+#
+# cron.daily can check for old files in tmp-dirs. It will delete all files
+# not accessed for more than MAX_DAYS_IN_TMP. If MAX_DAYS_IN_TMP is not set
+# or set to 0, this feature will be disabled. 
+#
+MAX_DAYS_IN_TMP=0
+
+#
+# You can specify in TMP_DIRS_TO_CLEAR, which directories have to be 
+# searched for old files, to be deleted.
+#
+TMP_DIRS_TO_CLEAR="/tmp /var/tmp"
+
+#
+# In OWNER_TO_KEEP_IN_TMP, you can specify, whoms file shall not be deleted.
+#
+OWNER_TO_KEEP_IN_TMP="root"
+
+#
+# Do you want to have "." in root path?  This is not recommended, but
+# many people do prefer it (yes/no).
+#
+CWD_IN_ROOT_PATH="no"
+
+
+#
+# If you want to allow root logins from other machines, set ROOT_LOGIN_REMOTE
+# to "yes". 
+#
+ROOT_LOGIN_REMOTE="no"
+
+#
+# If you want that new passwords will be checked through cracklib,
+# set PASSWD_USE_CRACKLIB to "yes".
+#
+PASSWD_USE_CRACKLIB="no"
+
+#
+# Some packages by SuSE include dynamically linked motif progs as well
+# as statically linked (*.SuSE-dynamic resp. *.SuSE-static). SuSEconfig 
+# can analyze your system and link the matching program to *.  If you
+# set this to "clean", the other binary will be deleted. (no/link/clean)
+#
+HOW_TO_HANDLE_COMMERCIAL_LIBS=link
+
+#
+# SuSEconfig can do some modifications to /etc/inittab.  If you don't want
+# this, set CHECK_INITTAB to no.  (yes/no)
+#
+CHECK_INITTAB=yes
+
+#
+# Here you can set the default Display manager (kdm/xdm/console).
+# Attention: CHECK_INITTAB has to be set to yes, to activate this feature.
+# If DISPLAYMANAGER is set to console, SuSEconfig will not bother you
+# with a missing XF86Config.
+#
+DISPLAYMANAGER=""
+
+#
+# Here you can set the default window manager (kde, fvwm, ...)
+#
+DEFAULT_WM=kde
+
+#
+# CONSOLE_SHUTDOWN determines how ctrl-alt-del is handled.
+# Attention: CHECK_INITTAB has to be set to yes, to activate this feature.
+# (ignore/reboot/halt)
+#
+CONSOLE_SHUTDOWN=reboot
+
+#
+# Should isapnp be used to initialize your PNP at bootup?  (yes/no)
+#
+START_ISAPNP=yes
+
+#
+# run the Name Service Caching Daemon at boot time? (yes/no)
+#
+START_NSCD=yes
+
+umask 022
+
+#
+# Attention! This variable PATH is NOT setting the PATH for user or root
+# shells. It is only used internally for /sbin/init.d/*, SuSEconfig and 
+# cron.daily. Please do NOT change PATH here.
+#
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
+
+##
+## Formating the boot script messages:
+##   The boot scripts should use the variables rc_done and rc_fail to
+##   symbolize their success.  See /sbin/init.d/skeleton for an example
+##   how to use these variables.
+##   rc_done_up and rc_failed_up do the same as rc_done and rc_failed
+##   but one line above (usefull for starting daemons who talk to user).
+##   The variable rc_reset is used by the master resource control script
+##   /sbin/init.d/rc to turn off all attributes and switch on the standard
+##   character set.
+##
+##    \033          is just ascii ESC
+##    \033[<NUM>G   move to column <NUM>
+##    \033[1m       switch bold on
+##    \033[31m      switch red on
+##    \033[32m      switch green on
+##    \033[33m      switch yellow on
+##    \033[m        switch color/bold off
+##
+     rc_done="\033[71G\033[32mdone\033[m"
+   rc_failed="\033[71G\033[31m\033[1mfailed\033[m"
+  rc_skipped="\033[71G\033[1mskipped\033[m"
+  rc_done_up="\033[1A$rc_done"
+rc_failed_up="\033[1A$rc_failed"
+   rc_unused="\033[71G\033[1munused\033[m"
+    rc_reset="\033[m\017"
+
+#
+# end of initial rc.config
+#
+
+

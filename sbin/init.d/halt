@@ -1,0 +1,116 @@
+#! /bin/sh
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Florian La Roche <florian@suse.de>, 1996
+#	  Werner Fink <werner@suse.de>, 1996
+#
+# /sbin/init.d/halt (and symlinked to reboot)
+#
+
+. /etc/rc.config
+
+case "$0" in
+	*halt)
+		message="The system will be halted immediately."
+		command="halt"
+		test -e /proc/apm && command="halt -p"
+		;;
+	*reboot)
+		message="Please stand by while rebooting the system..."
+		command="reboot"
+		;;
+	*)
+		echo "$0: call me as \"halt\" or \"reboot\" please!"
+		exit 1
+		;;
+esac
+
+#
+# first do local stuff
+#
+test -e /sbin/init.d/halt.local && {
+    echo Running /sbin/init.d/halt.local
+    ECHO_RETURN=$rc_done_up
+    sh /sbin/init.d/halt.local || ECHO_RETURN=$rc_failed_up
+    echo -e "$ECHO_RETURN"
+}
+
+# Write to wtmp file before unmounting /var
+$command -w 
+
+echo "Sending all processes the TERM signal..."
+killall5 -15
+echo -e "$rc_done_up"
+
+if [ "$1" = "fast" ]; then
+	sleep 1
+else
+	sleep 5
+fi
+
+echo "Sending all processes the KILL signal..."
+killall5 -9
+echo -e "$rc_done_up"
+
+ECHO_RETURN=$rc_done_up
+echo "Turning off swap"
+sync ; sync
+swapoff -a || ECHO_RETURN=$rc_failed_up
+echo -e "$ECHO_RETURN"
+setterm -bfreq 200 -blen 500 &>/dev/null
+
+mounts=/etc/fstab
+test -r /proc/mounts && mounts=/proc/mounts
+while read des fs type rest; do
+    test "$fs" = "/proc"  && continue
+    test "$type" = "proc" && umount -t proc $fs
+done < $mounts
+
+UMOUNT_FAILED=false
+ECHO_RETURN=$rc_done_up
+echo "Unmounting file systems"
+umount -avt noproc || {
+    UMOUNT_FAILED=true
+    ECHO_RETURN=$rc_failed_up
+}
+echo -e "$ECHO_RETURN"
+
+if [ "$UMOUNT_FAILED" = true ]; then
+    echo "Oops: umount failed :-(  --  trying to remount readonly..."
+    mounts=/etc/fstab
+    test -r /proc/mounts && mounts=/proc/mounts
+    while read des fs type rest; do
+        mount -v -n -o remount,ro $fs
+    done < $mounts
+
+    echo "extra sync..."
+    sync; sync
+    echo "... hope now it's ok to reboot."
+fi
+
+umount -anvt proc
+
+if test -d /etc/lvmtab.d -a -x /sbin/vgchange ; then
+    /sbin/vgchange -a n
+fi
+
+# maybe we use Multiple devices
+if test -f /etc/mdtab -a -x /sbin/mdadd ; then
+    ECHO_RETURN=$rc_done
+    echo -n "Disable Multiple Devices"
+    /sbin/mdstop -a || ECHO_RETURN=$rc_failed
+    echo -e "$ECHO_RETURN"
+fi
+
+# on umsdos fs this would lead to an error message. so direct errors to
+# /dev/null
+mount -no remount,ro / 2> /dev/null
+sync
+
+# Make reboot noise and wait a few seconds to give harddisks the chance
+# to really flush their buffers before power goes down.
+echo -en "\x07"
+sleep 2
+echo $message
+echo -en "\x07"
+exec $command -d -f
