@@ -33,7 +33,7 @@ DIRS="/usr/info /usr/share/info /usr/X11R6/lib/X11/fonts/*"
 OLD_IFS="$IFS"
 IFS="$IFS:"
 
-for MANDIR in $MANPATH $manpath ; do
+for MANDIR in $MANPATH $manpath /usr/openwin/man /opt/gnome/man ; do
     DIRS="$DIRS $MANDIR"
 done
 
