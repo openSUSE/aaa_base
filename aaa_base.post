@@ -30,7 +30,7 @@ test -f etc/inittab.rpmnew && grep sbin.init.d etc/inittab >/dev/null 2>&1 && {
 # so we have to change them here ...
 # FONT        to CONSOLE_FONT
 # TRANSLATION to CONSOLE_UNICODEMAP
-# GMT         to UTC
+# GMT         to HWCLOCK
 # replace CREATE_RESOLVCONF by comment
 # comment out NAMESERVER
 # comment out SEARCHLIST
@@ -40,7 +40,7 @@ test -f etc/inittab.rpmnew && grep sbin.init.d etc/inittab >/dev/null 2>&1 && {
 if test -s etc/rc.config ; then
     sed -e"s/^FONT=/CONSOLE_FONT=/" \
         -e"s/^TRANSLATION=/CONSOLE_UNICODEMAP=/" \
-        -e"s/^GMT=/UTC=/" \
+        -e"s/^GMT=/HWCLOCK=/" \
 	-e"s/^CREATE_RESOLVCONF=.*/# Update: SuSEconfig will no longer touch resolv.conf/" \
 	-e"s/^NAMESERVER=\(.*\)/# NAMESERVER=\1/" \
 	-e"s/^SEARCHLIST=\(.*\)/# SEARCHLIST=\1/" \
@@ -51,7 +51,7 @@ if test -s etc/rc.config ; then
     rm -f etc/rc.config.t
 fi
 # GMT might already be in sysconfig/clock
-%{rename_sysconfig_variable -f etc/sysconfig/clock GMT UTC}
+%{rename_sysconfig_variable -f etc/sysconfig/clock GMT HWCLOCK}
 # XXX uncommented temporary
 if [ -e etc/aaa_base_debug -a ! -e etc/rc.config ]; then
   cat << EOF > etc/rc.config

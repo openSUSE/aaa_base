@@ -2,7 +2,7 @@
 # Set to "-u" if your system clock is set to UTC, and to "--localtime"
 # if your clock runs that way.
 #
-UTC=""
+HWCLOCK=""
 
 #
 # Timezone (e.g. CET)
