@@ -1,5 +1,5 @@
 --- insserv.8
-+++ insserv.8	Tue Jul  2 12:48:14 2002
++++ insserv.8	2002/07/06 11:47:47
 @@ -19,7 +19,7 @@
  .RI [[ / ] path/to/init.d/ ] script \ ...
  .PP
@@ -49,7 +49,7 @@
  .TP
  .RI \fB\-r\fR\ [[ / ] path/to/init.d/ ] script\ ...
 --- insserv.c
-+++ insserv.c	Tue Jul  2 11:55:22 2002
++++ insserv.c	2002/07/06 11:47:47
 @@ -46,7 +46,7 @@
  /* The main regular search expressions */
  #define PROVIDES	COMM "provides" VALUE
@@ -78,7 +78,7 @@
  				warn("Warning, current runlevel(s) of script `%s' overwrites defaults.\n",
  				     d->d_name);
 --- insserv.conf
-+++ insserv.conf	Mon Jul  1 18:37:36 2002
++++ insserv.conf	2002/07/06 11:51:48
 @@ -1,7 +1,7 @@
  #
  # All local filesystems are mounted (done during boot phase)
@@ -88,4 +88,31 @@
  
  #
  # Low level networking (ethernet card)
-Binary files insserv-0.99/listing.o and insserv/listing.o differ
+@@ -11,7 +11,7 @@
+ #
+ # Named is operational
+ #
+-$named		named
++$named		named $network
+ 
+ #
+ # All remote filesystems are mounted (note in some cases /usr may
+@@ -26,6 +26,17 @@
+ $syslog		syslog
+ 
+ #
+-# All network daemons are running
++# All network daemons are running (this entry is OBSOLETE)
+ #
+ $netdaemons	portmap inetd
++
++#
++# SunRPC portmapper available
++#
++$portmap	portmap
++
++#
++# The system time has been set correctly
++#
++$time		boot.clock xntpd
++
