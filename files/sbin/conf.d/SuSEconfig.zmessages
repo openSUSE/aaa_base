@@ -1,0 +1,81 @@
+#! /bin/sh
+# Copyright (c) 2000-2002 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
+#
+# Author: Burchard Steinbild, 1996-97
+#         Bernhard Kaindl <bk@suse.de>, 1999
+#         Rüdiger Oertel <ro@suse.de>, 2000-01
+#
+# This module sorts the passwd and group files
+
+# check if we are started as root
+# only one of UID and USER must be set correctly
+if test "$UID" != 0 -a "$USER" != root; then
+    echo "You must be root to start $0."
+    exit 1
+fi
+
+r=$ROOT
+
+test -f $r/lib/YaST/SuSEconfig.functions || {
+    echo "ERROR - can not find $r/lib/YaST/SuSEconfig.functions!!"
+    echo "This should not happen.  Exit..."
+    exit 1
+}
+. $r/lib/YaST/SuSEconfig.functions
+
+for i in $r/etc/sysconfig/suseconfig ; do
+  if test ! -f $i ; then
+    echo "No $i found."
+    exit 1
+  fi
+
+  . $i
+done
+
+if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
+    echo "SuSEconfig is disabled in $r/etc/sysconfig/suseconfig."
+    echo "Exit..."
+    exit 0
+fi
+
+
+#
+# now look for reports and mail them
+#
+if test -z "$r" -a -x /usr/bin/mail -a -x /usr/sbin/sendmail \
+    -a -n "$MAIL_REPORTS_TO" -a "$FASTRUN" != "true" -a "$MAIL_LEVEL" != "off" ; then
+    for FILE in /var/lib/update-messages/* ; do
+        test -f $FILE || continue
+	PACKAGE=${FILE##/var/lib/update-messages/}
+        FILELIST=""
+	for MAILFILE in /usr/share/update-messages/en*/$PACKAGE \
+			/usr/share/update-messages/*/$PACKAGE ; do
+	    test -f $MAILFILE || continue
+	    case $FILELIST in
+		*$MAILFILE*)
+			;;
+		*)
+			FILELIST="$FILELIST $MAILFILE"
+			;;
+	    esac
+	done
+	if test -n "$FILELIST" ; then
+	    TMPFILE=`mktemp /tmp/update-messages.XXXXXX`
+	    test -f $TMPFILE || continue
+	    cat $FILELIST > $TMPFILE
+	    if /usr/bin/iconv --from UTF-8 --to UTF-8 < $TMPFILE > /dev/null 2>&1 ; then
+		# the file to be mailed is UTF-8 encoded
+		LC_CTYPE=en_US.UTF-8 charset=utf-8 /usr/bin/mail \
+		$MAIL_REPORTS_TO -s "SuSEconfig: message for package $PACKAGE" < $TMPFILE
+	    else
+		# the file to be mailed is ISO-8859-15 encoded
+		LC_CTYPE=de_DE@euro charset=iso-8859-15 /usr/bin/mail \
+		$MAIL_REPORTS_TO -s "SuSEconfig: message for package $PACKAGE" < $TMPFILE
+	    fi
+	    rm -f $TMPFILE
+	fi
+	rm -f $FILE
+    done
+fi
+

@@ -235,44 +235,6 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
 fi
 
 #
-# now look for reports and mail them
-#
-if test -z "$r" -a -x /usr/bin/mail -a -x /usr/sbin/sendmail \
-    -a -n "$MAIL_REPORTS_TO" -a "$FASTRUN" != "true" ; then
-    UPDATE_MESSAGES=/var/log/update-messages
-    if test "$MAIL_LEVEL" = all ; then
-        FILES_TO_MAIL="/var/adm/notify/messages/* \
-                       /var/adm/notify/warnings/* \
-                       /var/adm/notify/log/*"
-    else
-        FILES_TO_MAIL="/var/adm/notify/messages/* \
-                       /var/adm/notify/warnings/*"
-    fi
-    for FILE in $FILES_TO_MAIL ; do
-        test -f $FILE || continue
-	if /usr/bin/iconv --from UTF-8 --to UTF-8 < $FILE > /dev/null 2>&1 ; then
-	    # the file to be mailed is UTF-8 encoded
-            LC_CTYPE=en_US.UTF-8 charset=utf-8 /usr/bin/mail \
-	    $MAIL_REPORTS_TO -s "SuSEconfig: `basename $FILE`" < $FILE
-	else
-	    # the file to be mailed is ISO-8859-15 encoded
-            LC_CTYPE=de_DE@euro charset=iso-8859-15 /usr/bin/mail \
-	    $MAIL_REPORTS_TO -s "SuSEconfig: `basename $FILE`" < $FILE
-	fi
-	echo "----------------------------------------------------------------------" >> $UPDATE_MESSAGES
-	echo "----------------------------------------------------------------------" >> $UPDATE_MESSAGES
-	basename $FILE >> $UPDATE_MESSAGES
-	date >> $UPDATE_MESSAGES
-	echo "----------------------------------------" >> $UPDATE_MESSAGES
-	cat $FILE >> $UPDATE_MESSAGES
-	echo "----------------------------------------" >> $UPDATE_MESSAGES
-        rm -f $FILE
-        #sleep 2
-    done
-    rm -f /var/adm/notify/log/*
-fi
-
-#
 # we have finished and can remove our lock file.
 #
 rm -f $IS_RUNNING
