@@ -68,7 +68,7 @@ sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
 4:2345:respawn:/sbin/mingetty tty4
 5:2345:respawn:/sbin/mingetty tty5
 6:2345:respawn:/sbin/mingetty tty6
-#S0:2345:respawn:/sbin/agetty -L 9600 ttyS0 vt102
+#S0:12345:respawn:/sbin/agetty -L 9600 ttyS0 vt102
 
 #
 #
