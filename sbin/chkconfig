@@ -1,0 +1,4 @@
+#!/bin/sh
+# don't complain
+exit 0
+
