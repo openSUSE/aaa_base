@@ -8,7 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.ipconfig
 # Required-Start: 
-# X-UnitedLinux-Should-Start: boot.setup serial boot.isapnp boot.sysctl
+# X-UnitedLinux-Should-Start: boot.setup setserial boot.isapnp boot.sysctl
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
