@@ -1,8 +1,8 @@
 #
 # For interactive debugging of the startup process. If set
-# to "yes" the system will ask to confirm or not to confirm
-# every step of the boot process.
-# 
+# to "yes" the system will ask whether to confirm every
+# step of the boot process.
+#
 PROMPT_FOR_CONFIRM="yes"
 
 #
