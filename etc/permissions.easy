@@ -63,6 +63,13 @@
 /opt/kde/bin/apm_proxy                 root.root        4755
 
 #
+# sgid shadow
+#
+/sbin/unix_chkpwd                      root.shadow      2755
+/sbin/pwdb_chkpwd                      root.shadow      2755
+
+
+#
 # sgid video
 #
 /opt/kde/bin/kradio                    root.video       2755

@@ -381,6 +381,9 @@
 /usr/bin/mh/msgchk                     root.root         755
 /opt/kde/bin/apm_proxy                 root.root         755
 
+# these are sgid shadow in permissions.easy
+/sbin/unix_chkpwd                      root.shadow       755
+/sbin/pwdb_chkpwd                      root.shadow       755
 
 
 
