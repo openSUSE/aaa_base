@@ -26,21 +26,34 @@ case "$1" in
 	echo -n "Setting scheduling timeslices "
 	# Configured?
 	if test -z "$SCHED_MINTIMESLICE" -o -z "$SCHED_MAXTIMESLICE"; then
-		rc_failed 6a
+		rc_failed 6
 	# Sanity?
-	elif test $((2*$SCHED_MINTIMESLICE)) -gt $SCHED_MAXTIMESLICE; then
-		echo -n "2*$SCHED_MINTIMESLICE > $SCHED_MAXTIMESLICE"
+	elif test $((3*$SCHED_MINTIMESLICE)) -gt $SCHED_MAXTIMESLICE; then
+		echo -n "3*$SCHED_MINTIMESLICE > $SCHED_MAXTIMESLICE"
 		rc_failed 1
 	# Kernel support?
 	elif test ! -r /proc/sys/kernel/min-timeslice; then
 		echo -n "not supported by kernel ";
 		rc_failed 3
-	# Go!	
+	elif test ! -r /proc/sys/kernel/HZ; then
+		echo -n "kernel HZ unknown "
+		rc_failed 3
+	# Go!
 	else
-		echo -n "$SCHED_MINTIMESLICE "
+		# Make sure timeslice is at least as large as the minimum
+		read HZ < /proc/sys/kernel/HZ
+		MINSLICE=$((1000000/$HZ))
+		if test $MINSLICE -gt $SCHED_MINTIMESLICE; then
+			# Scale max timeslice
+			MAXSLICE=$(($SCHED_MAXTIMESLICE*$MINSLICE/$SCHED_MINTIMESLICE))
+			echo -n "$SCHED_MINTIMESLICE->$MINSLICE $SCHED_MAXTIMESLICE->$MAXSLICE"
+			SCHED_MINTIMESLICE=$MINSLICE
+			SCHED_MAXTIMESLICE=$MAXSLICE
+		else
+			echo -n "$SCHED_MINTIMESLICE $SCHED_MAXTIMESLICE "
+		fi	
 		echo $SCHED_MINTIMESLICE > /proc/sys/kernel/min-timeslice
 		rc_status
-		echo -n "$SCHED_MAXTIMESLICE "
 		echo $SCHED_MAXTIMESLICE > /proc/sys/kernel/max-timeslice
 		rc_status
 	fi

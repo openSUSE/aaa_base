@@ -103,3 +103,5 @@ application/sdp;/usr/lib/RealPlayer8/realplay "%u"
 application/x-sdp;/usr/lib/RealPlayer8/realplay "%u"
 application/vnd.rn-realmedia;/usr/lib/RealPlayer8/realplay "%u"
 image/vnd.rn-realpix;/usr/lib/RealPlayer8/realplay "%u"
+#
+application/x-java-jnlp-file;/usr/bin/javaws "%s"
