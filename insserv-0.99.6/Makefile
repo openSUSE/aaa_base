@@ -7,11 +7,11 @@
 INITDIR  =	/etc/init.d
 #INITDIR  =	/sbin/init.d
 INSCONF  =	/etc/insserv.conf
-DEBUG	 =	-DDEBUG=1
 #DESTDIR =	/tmp/root
+#DEBUG	 =	-DDEBUG=1
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.99.5
+VERSION	 =	0.99.6
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #

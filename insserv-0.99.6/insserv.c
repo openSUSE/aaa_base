@@ -154,8 +154,10 @@ typedef struct req_serv {
 /*
  * Linked list to hold hold information of services
  */
+#define SERV_KNOWN	0x0001
 typedef struct serv_struct {
     list_t	   id;
+    unsigned int opts;
     req_t         req;
     req_t         shd;
     char	order;
@@ -192,6 +194,7 @@ static serv_t * addserv(const char * serv)
 	shd_start->prev = shd_start;
 	this->req.serv = NULL;
 	this->shd.serv = NULL;
+	this->opts  = 0;
 	this->name  = xstrdup(serv);
 	this->order = 0;
 	this->lvls  = 0;
@@ -689,11 +692,16 @@ static void scan_script_locations(const char * path)
 		    continue;
 		}
 		service = current_structure(token, order, runlevel);
-		if (!service->req.serv && script_inf.required_start && script_inf.required_start != empty) {
+
+		if (service->opts & SERV_KNOWN)
+		    continue;
+		service->opts |= SERV_KNOWN;
+
+		if (script_inf.required_start && script_inf.required_start != empty) {
 		    rememberreq(service, &service->req, script_inf.required_start);
 		    requiresv(token, script_inf.required_start);
 		}
-		if (!service->shd.serv && script_inf.should_start && script_inf.should_start != empty) {
+		if (script_inf.should_start && script_inf.should_start != empty) {
 		    rememberreq(service, &service->shd, script_inf.should_start);
 		    requiresv(token, script_inf.should_start);
 		}
@@ -1174,13 +1182,14 @@ int main (int argc, char *argv[])
 			addserv(token);
 
 		if ((service = findserv(token))) {
+		    boolean known = (service->opts & SERV_KNOWN);
+		    service->opts |= SERV_KNOWN;
 
-		    if (!service->req.serv && script_inf.required_start && script_inf.required_start != empty) {
+		    if (!known && script_inf.required_start && script_inf.required_start != empty) {
 			rememberreq(service, &service->req, script_inf.required_start);
 			requiresv(token, script_inf.required_start);
 		    }
-
-		    if (!service->shd.serv && script_inf.should_start && script_inf.should_start != empty) {
+		    if (!known && script_inf.should_start && script_inf.should_start != empty) {
 			rememberreq(service, &service->shd, script_inf.should_start);
 			requiresv(token, script_inf.should_start);
 		    }
