@@ -1,0 +1,126 @@
+Dear customer,
+
+The SuSE Linux distribution contains several versions of development
+kits for developing and running java applications and several versions 
+of runtime environments only for running java applications.
+
+To be able to run java applications which need different versions of
+runtime environment or development kit, you may install several
+versions at the same time. One of these development kits or runtime
+environments is always the default while the other versions can be used
+to develope or run particular applications.
+
+Note: In the next text JDK stands for java development kit and JRE for
+      java runtime environment.
+
+
+
+The directory /etc/java contains configuration files for all installed
+JDK's and JRE's.
+
+These configuration files are used by SuSEconfig and  setDefaultJava
+scripts which will help you to set default JDK or JRE on your computer.
+
+They are also used by script setJava which will help you to use one of
+valid versions of JDK's or JRE's with your application.
+
+
+Syntax of configuration files:
+------------------------------
+1. empty lines are ignored
+2. white characters are ignored (spaces, TABs)
+3. comments are ignored, they are prefixed by hash '#'
+4. Parametrs and values are delimited by ':' or '='
+
+Available parametrs in config files (see the example config file below):
+--------------------------------------------------------------------
+
+Priority:
+    - value is an integer
+    - the JDK or JRE with higher priority is selected when there are more
+      JDKs or JREs acceptable for given parametres in the scripts setJava and
+      setDefaultJava
+    - a lower value defines higher priority
+    
+Vendor:
+    - value is a string (spaces are allowed)
+    - defines java vendor name
+    
+Version:
+    - value is composed of integers delimited by dots
+    - defines JDK or JRE version
+    
+Devel:
+    - value is either "True" or "False"
+    - value "True" defines that this java is JDK
+        
+JAVA_BINDIR:
+    - value is a path to a directory
+    - defines the path to java executables
+    - will be used for PATH and JAVA_BINDIR environment variables
+      
+JAVA_ROOT:
+    - value is a path to a directory
+    - defines the path to the java root dir
+    - is exactly the same for the JDK and the JRE of the same version
+      and vendor
+    - will be used for JAVA_ROOTDIR environment variable
+
+JAVA_HOME:
+    - value is path to directory
+    - some applications use this value to find java executables
+      in $JAVA_HOME/bin
+    - the value is usually different for JDK and JRE of the same version
+      and vendor
+    - will be used for JAVA_HOME environment variable
+      
+JRE_HOME:
+    - value is a path to a directory
+    - some applications use this value to search for java executables and
+      libraries in $JAVA_JRE/bin and $JAVA_JRE/lib
+    - the value is the same for the JDK and the JRE of the same version
+      and vendor
+    - will be used for JRE_HOME environment variable
+
+JDK_HOME:
+    - value is a path to a directory
+    - it is added as supplement to JRE_HOME
+    - it is defined for all JDKs
+    - will be used for JDK_HOME environment variable
+
+SDK_HOME:
+    - value is a path to a directory
+    - it is added as supplement to JRE_HOME
+    - it is defined for JDKs with version 1.2 and higher
+    - will be used for SDK_HOME environment variable
+
+JAVA_LINK
+    - value is a absolute or relative path to a direcotry
+    - it is used by script setDefaultJava and SuSEconfig,
+    - the link /usr/lib/java and other compatibility links will point
+      to this direcory name or to this path
+      
+      
+Example:
+# this is configutation file for JRE from Sun Microsystems, version 1.3.1
+# it is installed in /usr/lib/SunJava2-1.3.1
+
+Priority : 30
+
+Vendor   : Sun
+Version  : 1.3.1
+Devel    : False
+
+JAVA_BINDIR = /usr/lib/SunJava2-1.3.1/jre/bin
+JAVA_ROOT   = /usr/lib/SunJava2-1.3.1
+JAVA_HOME   = /usr/lib/SunJava2-1.3.1/jre
+JRE_HOME    = /usr/lib/SunJava2-1.3.1/jre
+JDK_HOME    =
+SDK_HOME    =
+
+JAVA_LINK   = SunJava2-1.3.1
+
+
+Have a lot of fun,
+
+			    Your SuSE team

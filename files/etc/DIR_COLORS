@@ -55,7 +55,7 @@ EIGHTBIT 1
 NORMAL 00       # global default, although everything should be something.
 FILE   00       # normal file
 DIR    01;34    # directory
-LINK   01;36    # symbolic link
+LINK   00;36    # symbolic link
 FIFO   40;33    # pipe
 SOCK   01;35    # socket
 DOOR   01;35    # door
@@ -79,23 +79,23 @@ EXEC 00;32
 .dll  01;32
 
 # archives or compressed
-.tar  01;31
-.tbz  01;31
-.tgz  01;31
-.rpm  01;31
-.deb  01;31
-.arj  01;31
-.taz  01;31
-.lzh  01;31
-.zip  01;31
-.zoo  01;31
-.z    01;31
-.Z    01;31
-.gz   01;31
-.bz2  01;31
-.tb2  01;31
-.tz2  01;31
-.tbz2 01;31
+.tar  00;31
+.tbz  00;31
+.tgz  00;31
+.rpm  00;31
+.deb  00;31
+.arj  00;31
+.taz  00;31
+.lzh  00;31
+.zip  00;31
+.zoo  00;31
+.z    00;31
+.Z    00;31
+.gz   00;31
+.bz2  00;31
+.tb2  00;31
+.tz2  00;31
+.tbz2 00;31
 
 # image formats
 .avi  01;35

@@ -12,6 +12,7 @@
 if [ -x /usr/lib/java/bin/java ] || [ -x /usr/lib/java/bin/jre ] ; then
   export PATH=$PATH:/usr/lib/java/bin
   export JAVA_BINDIR=/usr/lib/java/bin
+  export JAVA_ROOT=/usr/lib/java
   export JAVA_HOME=/usr/lib/java
   if [ -x /usr/lib/java/jre/bin/java ] ; then
     export JRE_HOME=/usr/lib/java/jre
@@ -34,6 +35,7 @@ else
     # it is IBMJava2-JRE or SunJava2-JRE
     export PATH=$PATH:/usr/lib/java/jre/bin
     export JAVA_BINDIR=/usr/lib/java/jre/bin
+    export JAVA_ROOT=/usr/lib/java
     export JAVA_HOME=/usr/lib/java/jre
     export JRE_HOME=/usr/lib/java/jre
     unset JDK_HOME

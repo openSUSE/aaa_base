@@ -13,47 +13,26 @@ fi
 
 r=$ROOT
 
-test -f $r/lib/YaST/SuSEconfig.functions || {
-    echo "ERROR - can not find $r/lib/YaST/SuSEconfig.functions!!"
+test -f $r/etc/sysconfig/java || {
+    echo "ERROR - can not find $r/etc/sysconfig/java!!"
     echo "This should not happen.  Exit..."
     exit 1
 }
-. $r/lib/YaST/SuSEconfig.functions
-
-for i in $r/etc/sysconfig/suseconfig $r/etc/sysconfig/java ; do
-  if test ! -f $i ; then
-    echo "No $i found."
-    exit 1
-  fi
-
-  . $i
-done
+. $r/etc/sysconfig/java
 
 test "$CREATE_JAVALINK" = "yes" || exit 0
 
-if [ -L /usr/lib/java ] ; then
-  if [ -x /usr/lib/java/bin/java ] || 
-     [ -x /usr/lib/java/bin/jre ] ||
-     [ -x /usr/lib/java/jre/bin/java ] ; then
-    # link /usr/lib/java points to valid directory
-    exit 0
-  fi
-fi
-
-# we must set link /usr/lib/java to valid jdk(sdk,jre)
-
-if [ -L /usr/lib/java ] ; then
-  rm /usr/lib/java
-fi  
-
-JAVALINKTO=
-if   [ -x /usr/lib/SunJava1/bin/jre ] ; then JAVALINKTO=/usr/lib/SunJava1
-elif [ -x /usr/lib/SunJava2/jre/bin/java ] ; then JAVALINKTO=/usr/lib/SunJava2
-elif [ -x /usr/lib/IBMJava2/jre/bin/java ] ; then JAVALINKTO=/usr/lib/IBMJava2
-fi
-
-if [ -n "$JAVALINKTO" ] ; then
-  ln -sf `linkto $JAVALINKTO` /usr/lib/java
-fi
-
-exit 0
+# create java compat links if it is not valid
+# right java is selected by priority in /etc/java/*.conf
+# /usr/lib/java
+setJava.pl link --noreplace >/dev/null 2>/dev/null
+# /usr/lib/java1
+setJava.pl link --noreplace --linkname java1 --strict --version 1.1 >/dev/null 2>/dev/null
+# /usr/lib/java2
+setJava.pl link --noreplace --linkname java2 --version 1.2 >/dev/null 2>/dev/null
+# /usr/lib/SunJava1
+setJava.pl link --noreplace --linkname SunJava1 --strict --version 1.1 --vendor Sun >/dev/null 2>/dev/null
+# /usr/lib/SunJava2
+setJava.pl link --noreplace --linkname SunJava2 --version 1.2 --vendor Sun >/dev/null 2>/dev/null
+# /usr/lib/IBMJava2
+setJava.pl link --noreplace --linkname IBMJava2 --version 1.2 --vendor IBM >/dev/null 2>/dev/null
