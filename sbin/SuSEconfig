@@ -26,6 +26,8 @@ if test "$UID" != "0" -a "$USER" != root -a -z "$ROOT" ; then
     exit 1
 fi
 
+# The environment variable ROOT indicates the root of the system to be
+# managed by SuSEconfig when that root is not '/'
 r=$ROOT
 
 

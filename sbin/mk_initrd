@@ -11,7 +11,7 @@
 #   exit code > 0
 #
 
-# Version 1.10
+# Version 1.11
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
@@ -219,7 +219,7 @@ echo "using \"$rootdev\" as root device (mounted on \"$root_dir\")"
 [ -z "$modules" ] && modules="$INITRD_MODULES"
 
 ( cd $root_dir$boot_dir ; rm -f $initrds )
-[ "$modules" -o $root_lvm -ne 1 ] || error 0 "no initrd required"
+[ "$modules" -o $root_lvm = 1 ] || error 0 "no initrd required"
 
 initrd_a=($initrds)
 
