@@ -227,7 +227,8 @@ if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
 fi
 
 
-if test -n "$CREATE_RESOLVCONF" -a "$CREATE_RESOLVCONF" = "yes" ; then
+if test -n "$CREATE_RESOLVCONF" -a "$CREATE_RESOLVCONF" = "yes" -a \
+    "$DHCLIENT" != yes ; then
     if test -z "$SEARCHLIST" -a -z "$NAMESERVER" ; then
         # user wants no DNS - delete it.
         rm -f $r/etc/resolv.conf
@@ -587,17 +588,11 @@ test -x /sbin/ldconfig -a -z "$r" -a "$CHECK_NEWPACKAGE" != false && \
 # first things, that have to be done in 'normal' systems as well as in
 # 'demo mode' system.
 #
-#
-# Now start the package skripts
-#
-if test -z "$r" ; then
-    if test "$FASTRUN" = "true" ; then
-        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.sendmail
-                     /sbin/conf.d/SuSEconfig.ypclient"
-    else
-        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.*"
-    fi
-    for SKRIPT in $SUB_SCRIPTS ; do
+if test -z "$r" -a "$FASTRUN" != "true" ; then
+    #
+    # Now start the package skripts
+    #
+    for SKRIPT in /sbin/conf.d/SuSEconfig.* ; do
         test -f $SKRIPT || continue
         case "$SKRIPT" in
           *~|*.swp|*.bak|*.sav|*.save)
@@ -610,6 +605,7 @@ if test -z "$r" ; then
         esac
     done
 fi
+
 
 #
 # Now do things, only allowed in running 'normal' system.
