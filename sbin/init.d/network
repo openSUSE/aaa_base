@@ -89,7 +89,7 @@ case "$1" in
 	test -n "$r" && echo $r
 	;;
     *)
-    echo "Usage: $0 {start|stop|status|reload|restart}"
+    echo "Usage: $0 {start|stop|status|reload|restart|probe}"
     exit 1
 esac
 
