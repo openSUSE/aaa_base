@@ -1,22 +1,4 @@
 
-#
-# Used for News-Postings.
-#
-ORGANIZATION=""
-
-#
-# News server.
-#
-NNTPSERVER="news"
-
-#
-# When shutting down routing, all net connection can be closed (not useful
-# in all cases). If CLOSE_CONNECTIONS is set to "true", /etc/init.d/route
-# will scan /proc for active network connections and send term signals
-# to the resp. processes.
-#
-CLOSE_CONNECTIONS="false"
-
 # 
 # SuSEconfig can call chkstat to check permissions and ownerships for
 # files and directories (using /etc/permissions). 

@@ -6,7 +6,8 @@
 #         Bernhard Kaindl <bk@suse.de>, 1999
 #         Rüdiger Oertel <ro@suse.de>, 2000-01
 #
-# This module checks for duplicate variables in /etc/rc.config
+# This module checks for duplicate variables in
+# /etc/rc.config and /etc/sysconfig
 
 # check if we are started as root
 # only one of UID and USER must be set correctly
@@ -23,12 +24,6 @@ test -f /lib/YaST/SuSEconfig.functions || {
     exit 1
 }
 . /lib/YaST/SuSEconfig.functions
-
-test -f /etc/rc.config || {
-    echo "No /etc/rc.config found."
-    exit 1
-}
-. /etc/rc.config
 
 #
 # safety-check: look for duplicated variables in /etc/rc.config

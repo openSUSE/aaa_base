@@ -34,7 +34,8 @@ for i in $r/etc/rc.config $r/etc/sysconfig/suseconfig ; do
 done
 
 if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
-    echo "SuSEconfig is disabled in $r/etc/rc.config. Exit..."
+    echo "SuSEconfig is disabled in $r/etc/sysconfig/suseconfig."
+    echo "Exit..."
     exit 0
 fi
 

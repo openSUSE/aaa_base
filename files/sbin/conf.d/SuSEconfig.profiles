@@ -34,7 +34,8 @@ for i in $r/etc/rc.config $r/etc/sysconfig/language $r/etc/sysconfig/windowmanag
 done
 
 if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
-    echo "SuSEconfig is disabled in $r/etc/rc.config. Exit..."
+    echo "SuSEconfig is disabled in $r/etc/sysconfig/suseconfig."
+    echo "Exit..."
     exit 0
 fi
 
@@ -43,13 +44,13 @@ fi
 #
 mkdir -p $r/etc/SuSEconfig
 echo_warning /etc/SuSEconfig/profile \
-        "# Change variables in /etc/rc.config instead." \
+        "# Change variables below /etc/sysconfig instead." \
         > $r/etc/SuSEconfig/profile.SuSEconfig
 echo_warning /etc/SuSEconfig/csh.login \
-        "# Change variables in /etc/rc.config instead." \
+        "# Change variables below /etc/sysconfig instead." \
         > $r/etc/SuSEconfig/csh.login.SuSEconfig
 echo_warning /etc/SuSEconfig/csh.cshrc \
-        "# Change variables in /etc/rc.config instead." \
+        "# Change variables below /etc/sysconfig instead." \
         > $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 
 if test "$CWD_IN_ROOT_PATH" = "yes" ; then

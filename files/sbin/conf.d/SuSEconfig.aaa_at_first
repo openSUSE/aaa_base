@@ -24,14 +24,8 @@ test -f /lib/YaST/SuSEconfig.functions || {
 }
 . /lib/YaST/SuSEconfig.functions
 
-test -f /etc/rc.config && . /etc/rc.config
 test -f /etc/sysconfig/mouse && . /etc/sysconfig/mouse
 test -f /etc/sysconfig/clock && . /etc/sysconfig/clock
-
-test -n "$ORGANIZATION" && {
-    echo "$ORGANIZATION" > /etc/organization.SuSEconfig
-    check_md5_and_move /etc/organization
-}
 
 if test -n "$TIMEZONE" -a -x /usr/sbin/zic ; then
     /usr/sbin/zic -l $TIMEZONE

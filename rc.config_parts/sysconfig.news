@@ -1,0 +1,10 @@
+#
+# Used for News-Postings.
+#
+ORGANIZATION=""
+
+#
+# News server.
+#
+NNTPSERVER="news"
+

@@ -24,7 +24,7 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 }
 . $r/lib/YaST/SuSEconfig.functions
 
-for i in $r/etc/rc.config $r/etc/sysconfig/suseconfig $r/etc/sysconfig/mail ; do
+for i in $r/etc/sysconfig/suseconfig $r/etc/sysconfig/mail $r/etc/sysconfig/news ; do
   if test ! -f $i ; then
     echo "No $i found."
     exit 1
@@ -34,11 +34,17 @@ for i in $r/etc/rc.config $r/etc/sysconfig/suseconfig $r/etc/sysconfig/mail ; do
 done
 
 if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
-    echo "SuSEconfig is disabled in $r/etc/rc.config. Exit..."
+    echo "SuSEconfig is disabled in $r/etc/sysconfig/suseconfig."
+    echo "Exit..."
     exit 0
 fi
 
 my_test_for_space $r/var/lib/news || exit 1
+
+test -n "$ORGANIZATION" && {
+    echo "$ORGANIZATION" > /etc/organization.SuSEconfig
+    check_md5_and_move /etc/organization
+}
 
 test -n "$NNTPSERVER" && {
     echo "$NNTPSERVER" > $r/etc/nntpserver.SuSEconfig
