@@ -43,7 +43,7 @@ if test "$SORT_PASSWD_BY_UID" = yes ; then
     for i in passwd group ; do
         cat $r/etc/$i | grep "^root:" > $r/etc/$i.t
         cat $r/etc/$i | grep -v "^+" | grep -v ":-[0-9]:-[0-9]:" | \
-            grep -v "^root:" | sort -n -t : +2 >> $r/etc/$i.t
+            grep -v "^root:" | sort -n -t : -k 3,3 >> $r/etc/$i.t
         test -s $r/etc/$i.t && {
             cat $r/etc/$i | grep ":-[0-9]:-[0-9]:" >> $r/etc/$i.t
             cat $r/etc/$i | grep "^+" >> $r/etc/$i.t
