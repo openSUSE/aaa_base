@@ -129,8 +129,13 @@ if test -r /proc/swaps ; then
     done
 fi
 
+
 mounts=/etc/fstab
 test -r /proc/mounts && mounts=/proc/mounts
+
+# First umount intermezzo filesystems
+test -x /usr/sbin/umountizo -a ! -z "`grep -i intermezzo <$mounts`" && /usb/sbin/umountizo >/dev/null 2>&1
+
 reverse < $mounts | \
 while read des fs type rest; do
     case "$des"  in
