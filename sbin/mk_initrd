@@ -13,11 +13,19 @@
 # on errors:
 #   exit code > 0
 #
-# Version 1.08
+# Version 1.09
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
 # (c) 1999 Heiko Eiﬂfeldt bugfix, add module parameter passing
+#
+# ChangeLog:
+#
+#  6/7/2000:	v1.09
+#    - started log
+#    - use get_kernel_version instead of file
+#    - increased initrd size to 2000k
+#
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # general configurable parameters
@@ -37,7 +45,7 @@ static_shell=/bin/ash.static
 static_insmod=/sbin/insmod.static
 
 # initrd size
-image_blocks=1500
+image_blocks=2000
 image_inodes=100
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -45,13 +53,12 @@ image_inodes=100
 
 tmp_mnt=/tmp/mnt$$
 tmp_msg=/tmp/msg$$
-tmp_magic=/tmp/magic$$
 lx_rc=$tmp_mnt/linuxrc
 is_mounted=
 
 clean_up () {
   [ "$is_mounted" ] && umount $tmp_mnt
-  rm -f $tmp_initrd $tmp_initrd.gz $tmp_msg $tmp_magic
+  rm -f $tmp_initrd $tmp_initrd.gz $tmp_msg
   [ -d $tmp_mnt ] && rmdir $tmp_mnt
 }
 
@@ -59,29 +66,6 @@ error () {
   echo "$2"
   clean_up
   exit $1
-}
-
-# write an updated magic file
-write_magic () {
-cat <<-blub >$tmp_magic
-	0x202	string		HdrS		Linux/i386 Kernel
-	>0x206	short		0x0105		setupV1 zImage
-	>0x206	short		0x0200		setupV2
-	>>0x211	byte		0		zImage
-	>>0x211	byte		1		bzImage
-	>(0x20e.s+0x205)	byte	32
-	>>(0x20e.s+0x200)	string	>\0	"%5.5s"
-	>(0x20e.s+0x206)	byte	32
-	>>(0x20e.s+0x200)	string	>\0	"%6.6s"
-	>(0x20e.s+0x207)	byte	32
-	>>(0x20e.s+0x200)	string	>\0	"%7.7s"
-	>(0x20e.s+0x208)	byte	32
-	>>(0x20e.s+0x200)	string	>\0	"%8.8s"
-	>(0x20e.s+0x209)	byte	32
-	>>(0x20e.s+0x200)	string	>\0	"%9.9s"
-	>(0x20e.s+0x20a)	byte	32
-	>>(0x20e.s+0x200)	string	>\0	"%10.10s"
-blub
 }
 
 [ "$1" = -r ] && shift
@@ -119,10 +103,6 @@ modules="$INITRD_MODULES"
 
 initrd_a=($initrds)
 
-file=file
-[ -x /usr/bin/file ] && file=/usr/bin/file
-[ -x $root_dir/usr/bin/file ] && file=$root_dir/usr/bin/file
-
 kernel_idx=0
 for k in $kernels ; do
 
@@ -130,9 +110,7 @@ for k in $kernels ; do
 
   if [ -f "$kk" ] ; then
 
-    write_magic
-
-    vv=`$file -m $tmp_magic $kk | cut -d \" -f 2`
+    vv=`/sbin/get_kernel_version $kk`
 
     ii="$root_dir$boot_dir/${initrd_a[$kernel_idx]}"
 

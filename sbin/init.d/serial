@@ -38,7 +38,7 @@ case $1 in
 	rc_status
     }
 
-    echo "Configuring serial ports"
+    echo "Configuring serial ports..."
 
     # Do wild interrupt detection (uncomment if you're brave enough to
     # attempt auto-configuration... )
@@ -213,6 +213,8 @@ case $1 in
     
 
     ${SETSERIAL} -bg ${PORTS} 2> /dev/null
+    rc_status
+    echo "Configuring serial ports"
     rc_status -v1
     ;;
   stop)

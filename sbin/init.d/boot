@@ -130,7 +130,7 @@ fi
 # fsck can need a huge amount of memory, so make sure, it is there.
 #
 echo "Activating swap-devices in /etc/fstab..."
-swapon -a
+swapon -a &> /dev/null
 rc_status -v1 -r
 
 case `uname -r` in
@@ -159,6 +159,7 @@ if test ! -f /fastboot -a -z "$fastboot" ; then
         # were corrected, but that the boot may proceed.
         # A return code of 2 or larger indicates failure.
         FSCK_RETURN=$?
+        echo "Checking file systems"
 	test $FSCK_RETURN -lt 2
 	rc_status -v1 -r
         if test $FSCK_RETURN -gt 1; then
@@ -247,6 +248,8 @@ echo "Mounting local file systems..."
 mount -fv -t proc proc /proc
 rc_status
 mount -av -t nonfs,noproc
+rc_status
+echo "Mounting local file systems"
 rc_status -v1 -r
 
 #
