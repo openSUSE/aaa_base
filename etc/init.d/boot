@@ -475,8 +475,12 @@ elif test -x /bin/dmesg ; then
 	test -s /var/log/boot.msg
 	rc_status -v1 -r
 fi
-if test -z "$SERIAL_CONSOLE" -a -x /usr/sbin/klogconsole ; then
+if -x /usr/sbin/klogconsole ; then
+   if test -z "$SERIAL_CONSOLE" ; then
 	( test -c /dev/tty10 && > /dev/tty10 ) > /dev/null 2>&1 && /usr/sbin/klogconsole -r10 
+   else
+	/usr/sbin/klogconsole -l 7 -r 0
+   fi
 fi
 
 #
