@@ -84,7 +84,7 @@ fi
 if ! [ -d etc/rc.config.d ] ; then
   mkdir -p etc/rc.config.d
 fi
-for i in lang backup displaymanager ; do
+for i in lang backup displaymanager updatedb ; do
  echo "Updating etc/$i.rc.config..."
   if [ -x bin/fillup ] ; then
     if ! [ -f etc/rc.config.d/$i.rc.config ] ; then

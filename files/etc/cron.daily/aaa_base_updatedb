@@ -53,6 +53,9 @@ if [ -n "$RUN_UPDATEDB" -a "$RUN_UPDATEDB" = "yes" -a \
     PARAMS="$PARAMS `test -n "$UPDATEDB_NETPATHS" && \
             echo --netpaths=\'$(eval echo $UPDATEDB_NETPATHS)\'`"
 
+    PARAMS="$PARAMS `test -n "$UPDATEDB_PRUNEFS" && \
+            echo --prunefs=\'$(eval echo $UPDATEDB_PRUNEFS)\'`"
+
     eval /usr/bin/updatedb $PARAMS 2> /dev/null
 fi
 
