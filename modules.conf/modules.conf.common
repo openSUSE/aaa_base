@@ -26,8 +26,8 @@ alias block-major-57   off
 # mouse (for older busmice)
 alias char-major-10    off
 
-# We want to use the new autofs4
-alias autofs           autofs4
+# If you want to use the new autofs4
+# alias autofs           autofs4
 
 # For parallel port devices, uncomment the following two lines and change
 # "frpw" to the protocol type you use
@@ -400,8 +400,6 @@ pre-remove   pppox rmmod  mssclampfw
 else
 alias char-major-108      ppp_async
 alias char-major-144      pppoe
-post-install pppoe insmod mssclampfw
-pre-remove   pppoe rmmod  mssclampfw
 endif
 
 # IrDA
