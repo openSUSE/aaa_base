@@ -142,7 +142,15 @@ if [ "$NEW_DMA" != "" ] ; then
     rm -f etc/sysconfig/ide.new
 fi
 
-
+#
+# Backup gshadow file and remove it (merge passwords into
+# /etc/group before).
+#
+if [ -f /etc/gshadow -a -x /usr/sbin/grpunconv ]; then
+  cp -p /etc/gshadow /etc/gshadow-`date "+%Y%m%d"`
+  chmod 600 /etc/gshadow-`date "+%Y%m%d"`
+  /usr/sbin/grpunconv
+fi
 
 #
 # handle password files
