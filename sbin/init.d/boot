@@ -116,7 +116,7 @@ echo -e "$ECHO_RETURN"
 
 ECHO_RETURN=$rc_done
 case `uname -r` in
-    0.*|1.*|2.0.*)
+    0.*|1.*|2.[01].*|2.2.?|2.2.10)
         echo -n "Running update (bdflush) daemon"
         /sbin/update || ECHO_RETURN=$rc_failed
         echo -e "$ECHO_RETURN"
