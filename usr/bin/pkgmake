@@ -67,11 +67,15 @@ RCS(){
 # Takes as parameters a list of source packages to extract.
 Extract(){
    while read input; do
-	if [ ! -f $input.tar.gz ]; then
-		echo "Cannot find $input.tar.gz."
+	if [ ! -f $input.tar.gz -a ! -f $input.tar.bz2 ]; then
+		echo "Cannot find $input.tar.{gz|bz2}."
 	else
 		echo -n "Decompress and extract $input, "
-		tar xzf $input.tar.gz || ErrorExit "Tar failed on $input."
+		if [ -f $input.tar.gz ]; then
+		   tar xzf $input.tar.gz || ErrorExit "Tar failed on $input."
+		else
+		   tar xIf $input.tar.bz2 || ErrorExit "Tar failed on $input."
+		fi
 		cd $input || ErrorExit "cd failed on $1."
 		for RCSFILE in `find -type f -name "*,v"` ; do
 		    echo
@@ -143,12 +147,16 @@ Remove(){
 		echo "Remove directory $input."
 		rm -fr $input
 	fi
+        if [ -f $input.tar.bz2 -a -f $input.dif ]; then
+                echo "Remove directory $input."
+                rm -fr $input
+        fi
    done
 }
 
 CheckPackages(){
    while read input; do
-	if [ -f $input.tar.gz ]; then
+	if [ -f $input.tar.gz -o -f $input.tar.bz2 ]; then
 		echo $input
 	fi
    done
@@ -172,6 +180,7 @@ if [ $# = 2 ]; then
    fi
 elif [ $# = 1 -a "$1" = "extract" ]; then
    ls *.tar.gz | sed 's/.tar.gz$//' | Extract
+   ls *.tar.bz2 | sed 's/.tar.bz2$//' | Extract
 elif [ $# = 1 -a "$1" = "info" ]; then
    cat <<EOF
 If you have a new source package, called "diff-2.6.tar.gz", extract it with
