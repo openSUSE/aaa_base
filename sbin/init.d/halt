@@ -96,7 +96,7 @@ if test -d /etc/lvmtab.d -a -x /sbin/vgchange ; then
 fi
 
 # maybe we use Multiple devices
-if test -f /etc/mdtab -a -x /sbin/mdadd ; then
+if test -f /etc/mdtab -a -x /sbin/mdstop ; then
     ECHO_RETURN=$rc_done
     echo -n "Disable Multiple Devices"
     /sbin/mdstop -a || ECHO_RETURN=$rc_failed
