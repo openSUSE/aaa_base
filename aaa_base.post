@@ -440,7 +440,7 @@ fi
 #
 # Initialize runlevel links
 #
-sbin/insserv etc/init.d/{boot.crypto,boot.setup,dummy,halt,network,nfs,nscd,pcnfsd,random,reboot,route,single,xdm}
+sbin/insserv etc/init.d/{boot.crypto,boot.setup,dummy,halt,network,nfs,nscd,random,reboot,route,single,xdm}
 ## powerfail probably needs empty header ...
 exit 0
 

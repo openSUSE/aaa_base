@@ -30,14 +30,11 @@ etc/ppp/ip-up
 etc/ppp/ip-down
 etc/init.d/boot
 etc/init.d/boot.setup
-etc/init.d/cron
 etc/init.d/dummy
 etc/init.d/halt
-etc/init.d/kerneld
 etc/init.d/network
 etc/init.d/nfs
 etc/init.d/nscd
-etc/init.d/pcnfsd
 etc/init.d/powerfail
 etc/init.d/random
 etc/init.d/route
