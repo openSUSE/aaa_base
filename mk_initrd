@@ -900,7 +900,8 @@ $zfcp_conf_contents\""
 	test -n "$modparms" && modparms=" $modparms"
         echo "echo 'Loading module $i$modparms ...'" >>$lx_rc
         echo " - insmod `printf %-19s "$i$modparms"` (${x#lib/modules/[^/]*/})"
-        echo "insmod $i$modparms" >>$lx_rc
+#       echo "insmod $i$modparms" >>$lx_rc
+        echo "insmod /$x$modparms" >>$lx_rc
         echo >>$lx_rc
       else
         echo "$i: no such module"
