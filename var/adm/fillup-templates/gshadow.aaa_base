@@ -40,4 +40,5 @@ dba:*:root:root
 localham:*:root:root
 logmastr:*:root:root
 codine:*:root:root
+dbgrp:*:root:root
 nogroup:*:root:root
