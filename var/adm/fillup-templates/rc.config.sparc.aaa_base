@@ -1,6 +1,0 @@
-#
-# If you say yes here, you are able to jump back into the Boot PROM
-# or to your SPARC.
-#
-ENABLE_STOP_A=no
-
