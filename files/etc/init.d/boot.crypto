@@ -131,7 +131,7 @@ case "$1" in
 	    case "$mopt" in
 		default|"") mopt=""	;;
 	    esac
-	    mount -t $filesys -n ${mopt:+"-o $mopt"} $loopdev $access
+	    mount -t $filesys -n ${mopt:+-o $mopt} $loopdev $access
 	    rc_status
 	    if test $? -gt 0 ; then
 		losetup -d $loopdev &> /dev/null
@@ -139,7 +139,7 @@ case "$1" in
 		#
 		# Generate entry in /etc/mtab (to enable umount to run losetup -d)
 		#
-		loopopt="loop=${loopdev},encryption=${$crypto}"
+		loopopt="loop=${loopdev},encryption=${crypto}"
 		case "$mopt" in
 		    default|"") mopt="${loopopt}"		;;
 		    *)		mopt="${loopopt},${mopt}"	;;
