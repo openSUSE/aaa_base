@@ -15,14 +15,6 @@ LANGUAGE=
 ENABLE_SUSECONFIG=yes
 
 #
-# If you say yes here, you will have some control over the system even
-# if the system crashes for example during kernel debugging.
-# Please consult /usr/src/linux/Documentation/sysrq.txt
-# for further information.
-#
-ENABLE_SYSRQ=no
-
-#
 #
 # Local users will get RC_LANG as their default language,
 # i.e. the environment variable $LANG . $LANG is the default
@@ -106,69 +98,6 @@ MAIL_REPORTS_TO="root"
 # logs also.
 #
 MAIL_LEVEL="warn"
-
-#
-# Which device is the mouse ? (e.g. "/dev/ttyS0")
-#
-MOUSE="YAST_ASK"
-
-#
-# Which device is the modem ? (e.g. "/dev/ttyS1")
-#
-MODEM="YAST_ASK"
-
-#
-# keytable and console font
-# (e.g. "de-latin1-nodeadkeys" for KEYTABLE, empty for US settings)
-#
-KEYTABLE="de-latin1-nodeadkeys"
-
-#
-# Load this console font upon bootup:
-#
-CONSOLE_FONT=""
-
-#
-# Does your console font need a screenmap? Insert it into CONSOLE_SCREENMAP.
-#
-CONSOLE_SCREENMAP=""
-
-#
-# some fonts/keymap need a unicode map (TRANSLATION in former releases).
-# add it to CONSOLE_UNICODEMAP.
-#
-CONSOLE_UNICODEMAP=""
-
-#
-# for some fonts the console has to be initialized with CONSOLE_MAGIC.
-# CONSOLE_MAGIC can be empty or have the values "(B", ")B", "(K" or ")K".
-#
-CONSOLE_MAGIC=""
-
-
-#
-# keyboard repeat rate (2.0 - 30.0)
-# keyboard delay time in ms (250, 500, 750, 1000)
-# (If you want "kbdrate" to be executed, you have to set both of them.)
-#
-KBD_RATE=""
-KBD_DELAY=""
-
-#
-# NumLock on? ("yes" or "no")
-KBD_NUMLOCK="no"
-
-#
-# CapsLock on? ("yes" or "no")
-KBD_CAPSLOCK="no"
-
-#
-# tty's for NumLock and CapsLock 
-# example: "tty1 tty2"
-# "" for all tty's
-#
-KBD_TTY="tty1 tty2 tty3 tty4 tty5 tty6"
-
 
 #
 # Set to "-u" if your system clock is set to GMT, otherwise "".
@@ -324,14 +253,6 @@ NNTPSERVER="news"
 IRCSERVER=""
 
 #
-# start the inet daemon in multi-user? ("yes" or "no")
-# this is needed, if you have to telnet/rlogin to your own machine.
-# It is also needed for the man page formatter in SuSE Help system
-# and for starting the plp lp daemon.
-#
-START_INETD="YAST_ASK"
-
-#
 # have mail daemon on SMTP port? ("yes" or "no")
 # needed, if you receive email from other hosts via tcp/ip
 # not needed, if you have a uucp-only host or only out-going email.
@@ -373,54 +294,10 @@ NO_PROXY="localhost"
 
 
 #
-# start kernel daemon? ("yes" or "no")
-#
-START_KERNELD="yes"
-
-#
 # start cron daemon? ("yes" or "no")
 # should be left unchanged to the default "yes" entry
 #
 CRON="yes"
-
-#
-# start portmap? ("yes" or "no")
-# this is needed, if the NFS server is started or if NIS is used
-# Caution! The portmapper will be started with no regard to
-# START_PORTMAP if NFS_SERVER is set to "yes"!
-#
-START_PORTMAP="YAST_ASK"
-
-#
-# should the NFS server be started on this host? ("yes" or "no")
-# (needs activated portmapper)
-#
-NFS_SERVER="YAST_ASK"
-
-#
-# should the kernel based NFS server be started on this host
-# (instead of the user space version) ? ("yes" or "no")
-# This needs a kernel >= 2.1.120 with nfsd support
-#
-USE_KERNEL_NFSD="no"
-
-#
-# the kernel nfs-server supports multiple server threads
-#
-USE_KERNEL_NFSD_NUMBER="4"
-
-#
-# translates userid and goupid between server and client
-# ("yes" or "no"). Needs to be started on NFS clients for
-# certain special user-id mappings.
-#
-NFS_SERVER_UGID="no"
-
-
-#
-# should imported NFS be reexported? ("yes" or "no")
-#
-REEXPORT_NFS="no"
 
 #
 # when shutting down routing, all net connection can be closed (not useful
@@ -445,25 +322,6 @@ START_BWNFSD=no
 # pcnfsd and bwnfsd need spool directory for lpd. Set it here.
 #
 PCNFSD_LPSPOOL=/var/spool/lpd
-
-#
-# start rwhod? NOTE: rwhod broadcasts regularly, so dial
-# on demand connections (ISDN and/or diald) might be established
-# (yes/no)
-#
-START_RWHOD=no
-
-#
-# should gpm be started on this machine? ("yes" or "no")
-#
-START_GPM="YAST_ASK"
-
-#
-# gpm will be started with these parameters
-# it won't be started in runlevel 3 (xdm)
-# (example: "-t msc -m /dev/mouse")
-#
-GPM_PARAM=""
 
 #
 # start routed (for dynamic routing - see man routed) (yes/no)
@@ -618,13 +476,6 @@ OWNER_TO_KEEP_IN_TMP="root"
 #
 CWD_IN_ROOT_PATH="no"
 
-
-#
-# If you want to allow root logins from other machines, set ROOT_LOGIN_REMOTE
-# to "yes". 
-#
-ROOT_LOGIN_REMOTE="no"
-
 #
 # If you want that new passwords will be checked through cracklib,
 # set PASSWD_USE_CRACKLIB to "yes".
@@ -640,38 +491,6 @@ PASSWD_USE_CRACKLIB="no"
 HOW_TO_HANDLE_COMMERCIAL_LIBS=link
 
 #
-# SuSEconfig can do some modifications to /etc/inittab.  If you don't want
-# this, set CHECK_INITTAB to no.  (yes/no)
-#
-CHECK_INITTAB=yes
-
-#
-# Here you can set the default Display manager (kdm/xdm/console).
-# Attention: CHECK_INITTAB has to be set to yes, to activate this feature.
-# If DISPLAYMANAGER is set to console, SuSEconfig will not bother you
-# with a missing XF86Config.
-#
-DISPLAYMANAGER=""
-
-#
-# Here you can set the default window manager (kde, fvwm, ...)
-#
-DEFAULT_WM=kde
-
-#
-# CONSOLE_SHUTDOWN determines how ctrl-alt-del is handled.
-# Attention: CHECK_INITTAB has to be set to yes, to activate this feature.
-# (ignore/reboot/halt)
-#
-CONSOLE_SHUTDOWN=reboot
-
-#
-# SERIAL_CONSOLE is used to add a serial terminal to inittab and securetty
-# The format is "ttyS0,9600" as used in the kernel commandline.
-#
-SERIAL_CONSOLE=""
-
-#
 # run the Name Service Caching Daemon at boot time? (yes/no)
 #
 START_NSCD=yes
@@ -684,37 +503,4 @@ umask 022
 # cron.daily. Please do NOT change PATH here.
 #
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
-
-
-##
-## Formating the boot script messages:
-##   The boot scripts should use the variables rc_done and rc_fail to
-##   symbolize their success.  See /sbin/init.d/skeleton for an example
-##   how to use these variables.
-##   rc_done_up and rc_failed_up do the same as rc_done and rc_failed
-##   but one line above (usefull for starting daemons who talk to user).
-##   The variable rc_reset is used by the master resource control script
-##   /sbin/init.d/rc to turn off all attributes and switch on the standard
-##   character set.
-##
-##    \033          is just ascii ESC
-##    \033[<NUM>G   move to column <NUM>
-##    \033[1m       switch bold on
-##    \033[31m      switch red on
-##    \033[32m      switch green on
-##    \033[33m      switch yellow on
-##    \033[m        switch color/bold off
-##
-     rc_done="\033[71G\033[32mdone\033[m"
-   rc_failed="\033[71G\033[31m\033[1mfailed\033[m"
-  rc_skipped="\033[71G\033[1mskipped\033[m"
-  rc_done_up="\033[1A$rc_done"
-rc_failed_up="\033[1A$rc_failed"
-   rc_unused="\033[71G\033[1munused\033[m"
-    rc_reset="\033[m\017"
-
-#
-# end of initial rc.config
-#
-
 

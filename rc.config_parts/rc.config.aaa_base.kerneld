@@ -1,0 +1,6 @@
+
+#
+# start kernel daemon? ("yes" or "no")
+#
+START_KERNELD="yes"
+
