@@ -334,7 +334,7 @@ test -n "$FQHOSTNAME" && {
 }
 test -n "$YP_DOMAINNAME" && {
     ECHO_RETURN=$rc_done
-    echo -n Setting YP up domainname
+    echo -n Setting up YP domainname
     domainname $YP_DOMAINNAME || ECHO_RETURN=$rc_failed
     echo -e "$ECHO_RETURN"
 } || domainname ""
