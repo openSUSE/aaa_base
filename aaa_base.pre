@@ -77,7 +77,7 @@ modem:x:43:
 named:x:44:
 ftp:x:49:
 man:x:62:
-users:x:500:
+users:x:100:
 nobody:x:65533:nobody
 nogroup:x:65534:nobody" > var/adm/fillup-templates/group.aaa_base
 
