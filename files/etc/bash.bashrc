@@ -185,6 +185,7 @@ case "$-" in
 	alias md='mkdir -p'
 	alias which='type -p'
 	alias rehash='hash -r'
+	alias you='yast2 online_update'
 	if test "$is" != "ksh" ; then
 	    alias beep='echo -en "\007"' 
 	else
