@@ -68,10 +68,16 @@ if test -z "$RC_LANG" ; then
                 russian)        RC_LANG=ru_RU.KOI8-R     ;;
                 brazilian)      RC_LANG=pt_BR.ISO-8859-1 ;;
                 english)        RC_LANG=en_US            ;;
-                japanese)       RC_LANG=ja_JP            ;;
                 korean)         RC_LANG=ko_KR            ;;
-                *)              RC_LANG="$DEFAULT_LANGUAGE"      ;;
         esac
+fi
+if test -z "$RC_LANG" -a -n "$DEFAULT_LANGUAGE" ; then
+  LOCALIAS=$r/usr/share/locale/locale.alias
+  if grep "$DEFAULT_LANGUAGE" $LOCALIAS >/dev/null 2>&1 ; then
+     RC_LANG=`sed -n "s/^$DEFAULT_LANGUAGE[[:space:]]*\([a-zA-Z_]*\)\..*/\1/p" $LOCALIAS`
+  else
+     RC_LANG=$DEFAULT_LANGUAGE
+  fi
 fi
 
 locale_vars="\

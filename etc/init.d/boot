@@ -64,6 +64,11 @@ else
 fi
 fi
 
+# Disable ECN if required.
+if test "$DISABLE_ECN" = "yes" -a -f /proc/sys/net/ipv4/tcp_ecn; then
+	echo "0" >/proc/sys/net/ipv4/tcp_ecn
+fi
+
 #
 # maybe we use "Multiple devices".  So initialize MD.
 #
