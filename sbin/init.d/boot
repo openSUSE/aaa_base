@@ -26,6 +26,7 @@ echo -e "$ECHO_RETURN"
 #
 if test "$START_KERNELD" = yes -a \
         -x /sbin/kerneld -a ! -e /proc/sys/kernel/modprobe ; then
+    echo -n "Starting kerneld:"
     ECHO_RETURN=$rc_done_up
     /sbin/kerneld || ECHO_RETURN=$rc_failed_up
     echo -e "$ECHO_RETURN"
@@ -118,9 +119,9 @@ case `uname -r` in
     0.*|1.*|2.0.*)
         echo -n "Running update (bdflush) daemon"
         /sbin/update || ECHO_RETURN=$rc_failed
+        echo -e "$ECHO_RETURN"
 	;;
 esac
-echo -e "$ECHO_RETURN"
 
 #
 # do fsck and start sulogin, if it fails.

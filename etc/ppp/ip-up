@@ -62,7 +62,7 @@ ippp*)
         #ipfwadm -O -a accept -P tcp -S 0/0 53 1024:65535 -D 0/0 53 -W $INTERFACE
         #ipfwadm -I -a accept -P tcp -D 0/0 53 1024:65535 -S 00/0 53 -k -W $INTERFACE
 
-        # accept conect from client to internet
+        # accept connect from client to internet
         #ipfwadm -O -a accept -P tcp -S 0/0 1024:65535 -D 0/0 -W $INTERFACE
         #ipfwadm -I -a accept -P tcp -D 0/0 1024:65535 -S 0/0 -k -W $INTERFACE
 
@@ -134,6 +134,7 @@ ppp*)
 			/sbin/init.d/nscd restart &
 		fi
 	fi
+	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local $*
         ;;
     ip-down)
 	#
@@ -153,6 +154,7 @@ ppp*)
 			/sbin/init.d/nscd restart &
 		fi
 	fi
+	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local $*
         ;;
     *)
         ;;
