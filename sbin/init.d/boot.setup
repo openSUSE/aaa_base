@@ -22,8 +22,8 @@ case "$1" in
         if test -n "$FONT" -a "$FONT" != "YAST_ASK" -a \
                 -x /usr/bin/setfont -a -x /usr/bin/loadunimap -a \
                 -d /usr/lib/kbd/consolefonts ; then
-                /usr/bin/loadunimap
                 /usr/bin/setfont $FONT
+                /usr/bin/loadunimap
         fi
         if test -n "$KBD_RATE" -a -n "$KBD_DELAY" -a -x /sbin/kbdrate; then
                 /sbin/kbdrate -r $KBD_RATE -d $KBD_DELAY
