@@ -106,7 +106,7 @@ alias midi off
 # options opl3 io=0x388
 #
 #*****************************************************************************
-#    module : es1370.o           Ensoniq 1370 Chipsatz (--> PCI64/128)
+#    module : es1370.o           Ensoniq 1370 Chipset (--> PCI64/128)
 #                                
 #                                Supported cards :
 #                                
@@ -119,7 +119,7 @@ alias midi off
 # options es1370 joystick=1
 #
 #*****************************************************************************
-#    module : es1371.o           Creative Ensoniq 1371 Chipsatz (--> PCI64/128)
+#    module : es1371.o           Creative Ensoniq 1371 Chipset (--> PCI64/128)
 #
 #                                Supported cards :
 #                                
@@ -144,7 +144,7 @@ alias midi off
 #    module : sb.o               Soundblaster 16, SB Pro + Clones
 #                                Also needed for AWE32/64 
 #
-#    Dcoumentation available in /usr/src/linux/Documentation/sound/Soundblaster
+#    Documentation available in /usr/src/linux/Documentation/sound/Soundblaster
 #    and in /usr/src/linux/drivers/sound/sb.c .
 #
 #    Possible configuration :
@@ -208,32 +208,28 @@ alias midi off
 #
 #     Creative SB16 PnP (ALSA will do isapnp itself per default):
 #
-# alias snd-card-0 snd-card-sb16
-# options snd-card-sb16 snd_index=0
+# alias snd-card-0 snd-sb16
+# options snd-sb16 snd_index=0
 #
 #     Creative SB Live! (ALSA will find it with the kernel's PCI support):
 #
-# alias snd-card-0 snd-card-emu10k1
-# options snd-card-emu10k1 snd_index=0
+# alias snd-card-0 snd-emu10k1
+# options snd-emu10k1 snd_index=0
 #
-# An other Example: IBM ThinkPad 600E with an CS423x emulated by an CS4610/11
-# In this case, the native PCI Sound is expected to not work, but some chips
-# like the CS4610/11 have a very good emulation for older ISA non-PNP cards
-# like the CS423x family. The CS4610/11 e.g. has an good emulation of the
-# CS4231/2 cards and the CS4239 card, the snd-card-cs4236 e.g. supports the
-# CS4239 emulation of the CS4610/11 in the IBM ThinkPad 600E:
+# Another Example: IBM ThinkPad 600E with a CS423x hosted by a CS4610/11
+# In this case, the native PCI Sound is expected to not work, but is
+# connected to CS4236 ISA non-PNP chip.
 #
-# alias snd-card-0         snd-card-cs4236
-# options snd-card-cs4236 snd_index=0 snd_port=0x530 snd_cport=0x538 snd_irq=5 snd_dma1=1 snd_dma2=0 snd_isapnp=0
+# alias snd-card-0         snd-cs4236
+# options snd-cs4236 snd_index=0 snd_port=0x530 snd_cport=0x538 snd_irq=5 snd_dma1=1 snd_dma2=0 snd_isapnp=0
 #
-# You MUST suppy all required snd_port, snd_irq and snd_dma parameter AND
+# You MUST supply all required snd_port, snd_irq and snd_dma parameter AND
 # the snd_isapnp=0 option to the snd-card if the card is not shown by pnpdump,
-# otherwise the ALSA driver will try to do PnP and will not find your card.
+# Otherwise the ALSA driver will try to do PnP and will not find your card.
 # 
-# This is an example of an post-install you may want use:
+# This is an example of a post-install you may want to use:
 #
-# post-install snd amixer set Master 100% unmute;amixer set PCM 100% unmute; amixer set Aux,1 100% unmute
-# (Aux,1 is the CDROM line-in in this ThinkPad 600E)
+# post-install snd amixer set Master 100% unmute;amixer set PCM 100% unmute
 #
 # For more info about the powerful amixer look into "man amixer".
 #
@@ -252,7 +248,7 @@ alias midi off
 #
 # To play a sound sample run:
 #
-# aplay /usr/share/sounds/alsa/whistle.au
+# aplay /usr/share/sounds/alsa/test.wav
 # 
 # For a list of supported soundcards look into
 # /usr/share/doc/packages/alsa/cards.txt
