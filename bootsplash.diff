@@ -1,0 +1,33 @@
+diff -urN sysconfig_parts/sysconfig.sysctl sysconfig_parts/sysconfig.sysctl
+--- sysconfig_parts/sysconfig.sysctl	Mon Jan 21 17:25:47 2002
++++ sysconfig_parts/sysconfig.sysctl	Fri Aug 16 14:05:15 2002
+@@ -33,9 +33,3 @@
+ #
+ DISABLE_ECN="yes"
+ 
+-#
+-# BOOT_SPLASH can be set to "no" to turn off the splash-screen on console 1
+-# at boot time (after kernel load).
+-#
+-BOOT_SPLASH="yes"
+-
+diff -urN aaa_base/etc/init.d/boot.proc aaa_base/etc/init.d/boot.proc
+--- aaa_base/etc/init.d/boot.proc	Mon Jul  8 10:29:45 2002
++++ aaa_base/etc/init.d/boot.proc	Fri Aug 16 14:06:41 2002
+@@ -17,6 +17,7 @@
+ 
+ . /etc/rc.status
+ . /etc/sysconfig/sysctl
++test -f /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
+ 
+ rc_reset
+ 
+@@ -48,7 +49,7 @@
+ 	# check if splashscreen should be disabled
+ 	#
+ 	if test -e /proc/splash ; then
+-	if test "$BOOT_SPLASH" = "no" ; then
++	if test "$SPLASH" = "no" ; then
+ 	    echo "0" > /proc/splash
+ 	fi
+ 	fi
