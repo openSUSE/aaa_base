@@ -55,6 +55,8 @@ setprompt ()
     then
 	(
 	    trap "exit 0" SIGTERM
+	    trap "echo" SIGINT SIGSEGV
+	    usleep 10000
 	    while test $TIMEOUT -gt 0 ; do
 		echo -en "\r${prmt}"
 		sleep 2
@@ -62,6 +64,7 @@ setprompt ()
 	    done
 	) & ppid=$!
     else
+	usleep 10000
 	echo -en "\r${prmt}"
 	ppid=0
     fi
@@ -89,8 +92,14 @@ case "$1" in
 	    # Each loop is a new try
 	    #
 	    rc_status
-	    main_status=$?
+	    if test $? -gt 0 ; then
+		main_status=1
+	    fi
 	    rc_reset
+	    #
+	    # Does the user want to skip current entry?
+	    #
+	    doskip=0
 	    #
 	    # Seeking for crypto modules
 	    #
@@ -137,12 +146,19 @@ case "$1" in
 			read -p " ([${extd}yes${norm}]/${extd}no${norm}) " prolo < $REDIRECT
 			case "$prolo" in
 			    [yY][eE][sS]|"")	continue 2 ;;
-			    [nN][oO])		break    2 ;;
+			    [nN][oO]) doskip=1; break    2 ;;
 			esac
 		    done
 		fi
 		break
 	    done
+	    #
+	    # Does the user have skipped this entry?
+	    #
+	    if test $doskip -gt 0 ; then
+		losetup -d $loopdev &> /dev/null || true
+		continue
+	    fi
 	    #
 	    # Check for valid super blocks
 	    #
@@ -153,10 +169,9 @@ case "$1" in
 	    esac
 	    rc_status
 	    if test $? -gt 0 ; then
-		losetup -d $loopdev &> /dev/null
+		losetup -d $loopdev &> /dev/null || true
 		continue
 	    fi
-
 	    #
 	    # Checking the structure on the loop device
 	    #
@@ -218,7 +233,9 @@ case "$1" in
 	    # Each loop is a new try
 	    #
 	    rc_status
-	    main_status=$?
+	    if test $? -gt 0 ; then
+		main_status=1
+	    fi
 	    rc_reset
 	    #
 	    # Umount loop device
