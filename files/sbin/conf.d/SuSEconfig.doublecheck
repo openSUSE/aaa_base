@@ -29,15 +29,16 @@ test -f /lib/YaST/SuSEconfig.functions || {
 # safety-check: look for duplicated variables in /etc/rc.config
 #
 MYTMP=`mktemp -d /tmp/rcconfigchk.XXXXXX`
-find /etc/rc.config /etc/sysconfig -type f -maxdepth 1 \
- \! -name "*.rpmsave" \! -name "*.rpmorig" \
- | xargs grep -vh "^#" | grep "=" | cut -d= -f1 | sort | uniq -d \
+FIND_CMD="find /etc/rc.config /etc/sysconfig -type f -maxdepth 1 \
+ ! -name \"*.rpmsave\" ! -name \"*.rpmorig\" ! -name \"*~\" \
+ ! -name \"*.old\" ! -name \"*.tmp\" ! -name \"*.orig\" \
+ ! -name \"*.sav\" ! -name \"*.org\" "
+
+$FIND_CMD | xargs grep -vh "^#" | grep "=" | cut -d= -f1 | sort | uniq -d \
   > $MYTMP/toomuch
 if [ -s $MYTMP/toomuch ] ; then
   while read DOUBLE ; do
-    find /etc/rc.config /etc/sysconfig -type f -maxdepth 1 \
-        \! -name "*.rpmsave" \! -name "*.rpmorig" \
-        | xargs grep -H "^$DOUBLE=" >> $MYTMP/toomuch.out
+    $FIND_CMD | xargs grep -H "^$DOUBLE=" >> $MYTMP/toomuch.out
   done < $MYTMP/toomuch
   echo "This is a warning message." > $MYTMP/rc.config_check
   echo "The following variables seem to be doubled in /etc/rc.config" >> $MYTMP/rc.config_check

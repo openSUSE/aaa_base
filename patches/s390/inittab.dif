@@ -1,6 +1,6 @@
---- etc/inittab	2001/09/17 13:01:21	1.1
-+++ etc/inittab	2001/09/17 13:01:31
-@@ -42,14 +42,7 @@
+--- etc/inittab	2002/04/25 10:49:58	1.1
++++ etc/inittab	2002/04/25 11:01:23
+@@ -41,14 +41,7 @@
  
  # what to do in single-user mode
  ls:S:wait:/etc/init.d/rc S
@@ -16,7 +16,7 @@
  
  # what to do when power fails/returns
  pf::powerwait:/etc/init.d/powerfail start
-@@ -60,32 +53,8 @@
+@@ -59,29 +52,8 @@
  # for ARGO UPS
  sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
  
@@ -30,9 +30,6 @@
 -4:2345:respawn:/sbin/mingetty tty4
 -5:2345:respawn:/sbin/mingetty tty5
 -6:2345:respawn:/sbin/mingetty tty6
--#
--# warning: the line containing agetty will be overwritten by SuSEconfig
--# unless CHECK_INITTAB in /etc/rc.config is set to "no"
 -#
 -#S0:12345:respawn:/sbin/agetty -L 9600 ttyS0 vt102
 -

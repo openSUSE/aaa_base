@@ -16,10 +16,3 @@ CHECK_PERMISSIONS=set
 #
 PERMISSION_SECURITY="easy local"
 
-#
-# CONSOLE_SHUTDOWN determines how ctrl-alt-del is handled.
-# Attention: CHECK_INITTAB has to be set to "yes", to activate this
-# feature. (ignore/reboot/halt)
-#
-CONSOLE_SHUTDOWN=reboot
-

@@ -84,6 +84,9 @@ if [ -x bin/fillup ] ; then
   bin/fillup -q -t -r -i -d "=" etc/rc.config var/adm/fillup-templates/rc.config.aaa_base.oldstat /dev/null
   test -s etc/rc.config.new && mv etc/rc.config.new etc/rc.config
 fi
+%{remove_and_set -n security CONSOLE_SHUTDOWN}
+%{remove_and_set -n suseconfig CHECK_INITTAB}
+
 if ! [ -d etc/sysconfig ] ; then
   mkdir -p etc/sysconfig
 fi
@@ -385,7 +388,8 @@ if [ -n "$OLDMODCONF" ] ; then
     echo -n "Checking old modules.conf..."
     rm -f etc/modules.conf.aa.sed
     rm -f etc/modules.conf.aa.add
-    KEEPOPTIONS="tuner|bttv|ctc|iucv|xpram"
+    KEEPOPTIONS="tuner|bttv|iucv|xpram"
+    DROPOPTIONS="ctc|qeth|lcs"
     while read field orig target ; do
       case $field in
 	alias)
@@ -408,6 +412,8 @@ if [ -n "$OLDMODCONF" ] ; then
       case $field in
 	options)
 	  eval 'case $orig in
+	    '"$DROPOPTIONS"')
+		;;
 	    '"$KEEPOPTIONS"')
 		echo -n "$field:$orig..."
 		echo "s@^options $orig \(.*\)@# options $orig \1@" \

@@ -42,15 +42,5 @@ alias block-major-35	  xpram
 
 prune LICENSE.OCO
 
-#
-# Only kernel 2.2 uses module options for the channel device drivers,
-# so we put them in this check. Put your ctc/lcs/qeth module parms here:
-#
-if `kernelversion` == "2.2"
-options ctc
-options lcs
-options qeth
-endif
-
 # end of s390 part for modules.conf
 
