@@ -33,7 +33,8 @@ test -f /etc/rc.config || {
 # safety-check: look for duplicated variables in /etc/rc.config
 #
 MYTMP=`mktemp -d /tmp/rcconfigchk.XXXXXX`
-ls -d /etc/rc.config /etc/sysconfig/* | grep -v ".rpmorig$" | grep -v ".rpmsave$" | grep -v "/network" \
+find /etc/rc.config /etc/sysconfig -type f -maxdepth 1 \
+ \! -name "*.rpmsave" \! -name "*.rpmorig" \
  | xargs grep -vh "^#" | grep "=" | cut -d= -f1 | sort | uniq -d \
   > $MYTMP/toomuch
 if [ -s $MYTMP/toomuch ] ; then
