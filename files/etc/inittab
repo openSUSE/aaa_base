@@ -5,7 +5,7 @@
 #
 # Author: Florian La Roche <feedback@suse.de>, 1996
 #
-# This is the main configuration file of /etc/init, which
+# This is the main configuration file of /sbin/init, which
 # is executed by the kernel on startup. It describes what
 # scripts are used for the different run-levels.
 #
