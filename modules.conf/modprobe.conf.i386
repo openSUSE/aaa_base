@@ -42,13 +42,4 @@ remove binfmt_misc { umount /proc/sys/fs/binfmt_misc; } ; /sbin/modprobe -r --ig
 # required for DRI support on SiS chips
 options sisfb             mode=none mem=12288
 
-########################################################################
-# AGP
-########################################################################
-
-install mga    { /sbin/modprobe -k agpgart; } ; /sbin/modprobe --ignore-install mga
-install r128   { /sbin/modprobe -k agpgart; } ; /sbin/modprobe --ignore-install r128
-install radeon { /sbin/modprobe -k agpgart; } ; /sbin/modprobe --ignore-install radeon
-options agpgart agp_try_unsupported=1
-
 # end of i386 part for modprobe.conf

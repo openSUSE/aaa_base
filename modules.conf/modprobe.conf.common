@@ -180,7 +180,6 @@ install char-major-10-134 /bin/true
 install char-major-10-135 /bin/true
 alias char-major-10-175   agpgart
 alias char-major-10-181   toshiba
-alias char-major-10-240   agpgarti810
 alias char-major-10-250   sonypi
 options sonypi            minor=250
 install char-major-15     /bin/true
