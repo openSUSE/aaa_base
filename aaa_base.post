@@ -93,6 +93,13 @@ fi
 %{insserv_force_if_yast boot.loadmodules boot.sched}
 ## powerfail probably needs empty header ...
 
+# add Kill-links in boot.d if needed:
+for i in proc localfs swap clock ldconfig ipconfig klog idedma localnet crypto loadmodules sched ; do
+    if [ -f /etc/init.d/boot.d/S??boot.$i -a ! -f /etc/init.d/boot.d/K??boot.$i ] ; then
+%{insserv_force_if_yast boot.$i}
+    fi
+done
+
 #
 # remove old stuff from rc.config
 if [ -x bin/fillup -a -f etc/rc.config ] ; then

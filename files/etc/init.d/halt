@@ -53,20 +53,6 @@ case "$0" in
 esac
 
 #
-# helper shell function
-#
-reverse ()
-{
-    local _line
-    while read -r _line ; do
-        reverse
-        echo "$_line"
-        break
-    done
-}
-
-
-#
 # first do local stuff
 #
 rc_reset
@@ -99,6 +85,11 @@ echo "Sending all processes the KILL signal..."
 killall5 -9
 echo -e "$rc_done_up"
 
+#
+# call modules in boot.d via K* symlinks
+# (reverse sequence)
+#
+
 if test -d /etc/init.d/boot.d/ ; then
     for i in /etc/init.d/boot.d/K*; do
         test -f $i || continue
@@ -111,107 +102,6 @@ if test -d /etc/init.d/boot.d/ ; then
         fi
     done
 fi
-
-
-### now in boot.clock
-if test "$HOSTTYPE" = "s390" ; then
-    HWCLOCK_ACCESS=no
-fi
-if test "$HWCLOCK_ACCESS" != "no" ; then
-	echo -n "Set Hardware Clock to the current System Time"
-        # write back to hardware clock and calculate adjtime
-	/sbin/hwclock --systohc $HWCLOCK
-	rc_status -v -r
-fi
-### end in boot.clock
-
-### now in boot.swap
-echo "Turning off swap"
-sync ; sync
-rc_reset
-swapoff -a &> /dev/null
-rc_status -v1 -r
-# Something forgotten?
-if test -r /proc/swaps ; then
-    # Use cat and a pipe because swapoff changes
-    # /proc/swaps during direct read call
-    cat /proc/swaps | \
-    while read des rest ; do
-	test "$des" = "Filename" && continue
-	swapoff $des &> /dev/null
-    done
-fi
-### end in boot.swap
-
-### now in boot.localfs
-mounts=/etc/fstab
-test -r /proc/mounts && mounts=/proc/mounts
-
-# First umount intermezzo filesystems
-test -x /usr/sbin/umountizo -a ! -z "`grep -i intermezzo <$mounts`" && /usb/sbin/umountizo >/dev/null 2>&1
-
-reverse < $mounts | \
-while read des fs type rest; do
-    case "$des"  in
-	""|\#*)	   continue ;;
-	/dev/loop*)
-		   umount $fs
-		   losetup $des &> /dev/null
-		   test $? -eq 0 && losetup -d $des ;;
-    esac
-    case "$fs"   in
-	/proc)     continue ;;
-	/dev/pts)  continue ;;
-	/dev)      continue ;;
-	/dev/shm)  continue ;;
-    esac
-    case "$type" in
-	proc)      umount -t proc     $fs ;;
-	devpts)    umount -t devpts   $fs ;;
-	devfs)     umount -t devfs    $fs ;;
-	shm)       umount -t shm      $fs ;;
-	usbfs)     umount -t usbfs    $fs ;;
-	usbdevfs)  umount -t usbdevfs $fs ;;
-    esac
-done
-
-UMOUNT_FAILED=false
-echo "Unmounting file systems"
-umount -avt noproc,nonfs,nosmbfs || {
-    rc_status
-    UMOUNT_FAILED=true
-}
-rc_status -v1 -r
-
-if test "$UMOUNT_FAILED" = true ; then
-    echo "Oops: umount failed :-(  --  trying to remount readonly..."
-    mounts=/etc/fstab
-    test -r /proc/mounts && mounts=/proc/mounts
-    # Use cat and a pipe because umount changes
-    # /proc/mounts during direct read call
-    cat $mounts | \
-    while read des fs type rest; do
-	case "$des" in ""|\#*) continue ;; esac
-	case "$type" in
-	    swap)     continue ;; # No umount on swap devices
-	    proc)     continue ;; # Required
-	    nfs)      continue ;; # Avoid hanging reboot/halt
-	    smbfs)    continue ;; # Avoid hanging reboot/halt
-	esac
-        mount -v -n -o remount,ro $fs
-    done
-
-    echo "extra sync..."
-    sync; sync
-    echo "... hope now it's ok to reboot."
-fi
-### end in boot.localfs
-
-### now in boot.lvm
-if test -d /etc/lvmtab.d -a -x /sbin/vgchange ; then
-    /sbin/vgchange -a n
-fi
-### end in boot.lvm
 
 umount -anvt proc
 

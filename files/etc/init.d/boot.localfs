@@ -26,6 +26,18 @@ fi
 
 export FSCK_MAX_INST
 
+# helper shell function
+#
+reverse ()
+{
+    local _line
+    while read -r _line ; do
+	reverse
+	echo "$_line"
+	break
+    done
+}
+
 rc_reset
 
 case "$1" in
