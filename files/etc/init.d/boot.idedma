@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 2002 SuSE Linux AG, Nuernberg, Germany. All rights reserved.
+# Copyright (c) 2002, 2003 SuSE Linux AG, Nuernberg, Germany. All rights reserved.
 #
 # File: /etc/init.d/boot.idedma
 # Author: Ladislav Slezak <lslezak@suse.cz>
@@ -29,56 +29,29 @@ rc_reset
 
 # enable/disable DMA mode
 function idedma_main() {
-    devices_not_found=""
-    devices_error=""
-
-    if [ "$DEVICES_FORCE_IDE_DMA_ON" == "" -a "$DEVICES_FORCE_IDE_DMA_OFF" == "" ]; then
+    if [ "$DEVICES_FORCE_IDE_DMA" == "" ] ; then
 	exit 0;
     fi
 
-    echo -n "Setting up IDE DMA mode"
+    echo "Setting up IDE DMA mode"
 
-    if [ "$DEVICES_FORCE_IDE_DMA_ON" != "" ]; then
-	echo -n -e "\nForce IDE DMA mode on: "
-
-	for dev in $DEVICES_FORCE_IDE_DMA_ON; do
-	    if [ -e /proc/ide/$dev ] ; then
-		    if $HDPARM -d 1 /dev/$dev 2>/dev/null >&2; then
-			echo -n " $dev"
+	for dev in $DEVICES_FORCE_IDE_DMA ; do
+	    echo $dev |
+	    (
+		IFS=":"
+		# get device and DMA mode
+		while read DEVICE MODE ; do
+		    # set DMA mode by hdparm utility
+		    if [ $MODE == "off" ] ; then
+			$HDPARM -d 0 $DEVICE || rc_failed
+		    elif [ $MODE == "on" ] ; then
+			$HDPARM -d 1 $DEVICE || rc_failed
 		    else
-			devices_error="$devices_error $dev"
+			$HDPARM -d 1 -X $MODE $DEVICE || rc_failed
 		    fi
-	    else
-		devices_not_found="$devices_not_found $dev"
-	    fi
+		done
+	    )
 	done
-    fi
-
-    if [ "$DEVICES_FORCE_IDE_DMA_OFF" != "" ]; then
-	echo -n -e "\nForce IDE DMA mode off: "
-
-	for dev in $DEVICES_FORCE_IDE_DMA_OFF; do
-	    if [ -e /proc/ide/$dev ] ; then
-		    if $HDPARM -d 0 /dev/$dev 2>/dev/null >&2; then
-			echo -n " $dev"
-		    else
-			devices_error="$devices_error $dev"
-		    fi
-	    else
-		devices_not_found="$devices_not_found $dev"
-	    fi
-	done
-    fi
-    
-    if [ "$devices_not_found" != "" ]; then
-	echo -n -e "\nDevice not found: $devices_not_found"
-	rc_failed
-    fi
-
-    if [ "$devices_error" != "" ]; then
-	echo -n -e "\nFailed setting DMA: $devices_error"
-	rc_failed
-    fi
 
     rc_status -v
 }
