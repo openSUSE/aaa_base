@@ -54,6 +54,7 @@ if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
     *)      DO_CONFIRM=    ;;
     esac
     unset answer
+    echo
 fi
 export DO_CONFIRM
 

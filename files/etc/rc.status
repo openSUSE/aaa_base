@@ -231,6 +231,7 @@ function rc_confirm()
 	*)	 echo; continue
 	esac
     done
+    echo
     return $ret
 }
 

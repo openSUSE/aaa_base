@@ -8,16 +8,22 @@
 #   and its symbolic link
 # /(usr/)sbin/rcFOO
 #
-# LSB compliant service control script; see http://www.linuxbase.org/spec/
-# 
 # Template system startup script for some example service/daemon FOO
+#
+# LSB compatible service control script; see http://www.linuxbase.org/spec/
+# 
+# Note: This template uses functions rc_XXX defined in /etc/rc.status on
+# UnitedLinux (UL) based Linux distributions. If you want to base your 
+# script on this template and ensure that it works on non UL based LSB 
+# compliant Linux distributions, you either have to provide the rc.status
+# functions from UL or change the script to work without them.
 #
 ### BEGIN INIT INFO
 # Provides:          FOO
-# Required-Start:    $syslog $remote_fs $time
-# X-UnitedLinux-Should-Start: ypbind sendmail postfix
+# Required-Start:    $syslog $remote_fs
+# X-UnitedLinux-Should-Start: $time ypbind sendmail
 # Required-Stop:     $syslog $remote_fs
-# X-UnitedLinux-Should-Stop:  ypbind sendmail postfix
+# X-UnitedLinux-Should-Stop: $time ypbind sendmail
 # Default-Start:     3 5
 # Default-Stop:      0 1 2 6
 # Short-Description: FOO XYZ daemon providing ZYX
@@ -34,9 +40,9 @@
 # 
 # Notes on Required-Start/X-UnitedLinux-Should-Start:
 # * There are two different issues that are solved by Required-Start
-#    and X-UnitedLinux-Should_start
+#    and X-UnitedLinux-Should-Start
 # (a) Hard dependencies: This is used by the runlevel editor to determine
-#     which service absolutely need to be started to make the start of
+#     which services absolutely need to be started to make the start of
 #     this service make sense. Example: nfsserver should have
 #     Required-Start: portmap
 #     Also, required services are started before the dependent ones.
@@ -49,7 +55,8 @@
 #     in parallel). The tag X-UnitedLinux-Should-Start: is used for this.
 #     It tells, that if a service is available, it should be started
 #     before. If not, never mind.
-# * You can use names of services (contents of their provides section)
+# * When specifying hard dependencies or ordering requirements, you can 
+#   use names of services (contents of their Provides: section)
 #   or pseudo names starting with a $. The following ones are available
 #   according to LSB (1.1):
 #	$local_fs		all local file systems are mounted
@@ -72,8 +79,8 @@
 # * The services specified in the stop tags 
 #   (Required-Stop/X-UnitedLinux-Should-Stop)
 #   specify which services need to be still running when this service
-#   is shut down. Often the entries there are just copies from the
-#   respective start tag.
+#   is shut down. Often the entries there are just copies or a subset 
+#   from the respective start tag.
 #
 # Note on runlevels: 
 # 0 - halt/poweroff 			6 - reboot
@@ -82,7 +89,10 @@
 # 
 # Note on script names:
 # http://www.linuxbase.org/spec/refspecs/LSB_1.2.0/gLSB/scrptnames.html
-# A registry will be set up to manage the init script namespace.
+# A registry has been set up to manage the init script namespace.
+# http://www.lanana.org/
+# Please use the names already registered or register one or use a
+# vendor prefix.
 
 
 # Check for missing binaries (stale symlinks should not happen)
@@ -140,10 +150,7 @@ case "$1" in
     start)
 	echo -n "Starting FOO "
 	## Start daemon with startproc(8). If this fails
-	## the echo return value is set appropriate.
-
-	# NOTE: startproc returns 0, even if service is 
-	# already running to match LSB spec.
+	## the return value is set appropriately by startproc.
 	startproc $FOO_BIN
 
 	# Remember status and be verbose
@@ -152,7 +159,7 @@ case "$1" in
     stop)
 	echo -n "Shutting down FOO "
 	## Stop daemon with killproc(8) and if this fails
-	## set echo the echo return value.
+	## killproc sets the return value according to LSB.
 
 	killproc -TERM $FOO_BIN
 
@@ -227,6 +234,7 @@ case "$1" in
     probe)
 	## Optional: Probe for the necessity of a reload, print out the
 	## argument to this init script which is required for a reload.
+	## Note: probe is not (yet) part of LSB (as of 1.2)
 
 	test /etc/FOO/FOO.conf -nt /var/run/FOO.pid && echo reload
 	;;
