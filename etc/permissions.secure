@@ -36,6 +36,8 @@
 /usr/X11R6/bin/rxvt                    root.tty          755
 /usr/X11R6/bin/xtvscreen.SuSE-dynamic  root.video        755
 /usr/X11R6/bin/xtvscreen.SuSE-static   root.video        755
+/usr/X11R6/lib/adamem/cvem             root.root         755
+/usr/X11R6/lib/adamem/adamem           root.root         755
 /usr/bin/bttvgrab                      root.video        755
 /usr/bin/chage                         root.shadow       755
 /usr/bin/chkey                         root.root         755

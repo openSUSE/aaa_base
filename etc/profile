@@ -55,9 +55,9 @@ export PATH
 POVRAYOPT=-l/usr/lib/povray/include
 export POVRAYOPT
 if test -n "$TEXINPUTS" ; then
-  TEXINPUTS=":$TEXINPUTS:~/.TeX:/usr/doc/.TeX"
+  TEXINPUTS=":$TEXINPUTS:~/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
 else
-  TEXINPUTS=":~/.TeX:/usr/doc/.TeX"
+  TEXINPUTS=":~/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
 fi
 export TEXINPUTS
 

@@ -112,6 +112,8 @@
 /usr/X11R6/bin/xbombs                  root.game        2755
 /usr/X11R6/bin/xemacs                  root.root        1755
 /usr/X11R6/bin/xmris                   root.game        2755
+/usr/X11R6/lib/adamem/cvem             root.root        4755
+/usr/X11R6/lib/adamem/adamem           root.root        4755
 /usr/bin/emacs                         root.root        1755
 /usr/bin/inews                         news.news        2755
 /usr/bin/man                           man.root         4755
