@@ -61,7 +61,6 @@ mysql:x:60:2:MySQL database admin:/var/lib/mysql:/bin/false
 dpbox:x:61:56:DpBox account:/var/spool/dpbox:/bin/false
 vscan:x:65:65534:Vscan account:/var/spool/vscan:/bin/false
 wnn:x:66:100:Wnn system account:/var/lib/wnn:/bin/false
-pop:x:67:100:POP admin:/var/lib/pop:/bin/false
 perforce:x:68:60:Perfoce admin:/var/lib/perforce:/bin/false
 sapdb:x:69:61:SAPDB demo account:/var/opt/sapdb:/bin/bash
 db4web:x:70:100:DB4Web account:/opt/db4web:/bin/bash
