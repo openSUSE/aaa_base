@@ -32,6 +32,12 @@
 #
 # ChangeLog:
 #
+# 19/8/2002:    v1.29
+# - fixed use_pivot_root:
+# - use_pivot_root for root device specified via LABEL= or UUID= in
+#   root_dir/etc/fstab
+# - scan both /proc/mounts (for LVM check) and /etc/fstab (for LABEL=...)
+# - make existing checks use the results of this scan
 #
 # 15/7/2002:	v1.28
 #  - explicit -t ext2 for mounting initrd
@@ -359,12 +365,19 @@ tmp_initrd_small=${tmp_initrd}_small
 # for LVM detection.
 
 # find the root device in /etc/fstab
-while read fstab_device fstab_mountpoint fstab_type fstab_options dummy
+while read \
+    fstab_device \
+    fstab_mountpoint \
+    fstab_type \
+    fstab_options \
+    dummy
   do
   test "$fstab_mountpoint" = "/" && break
-done < <(sed '
+done < <(
+    # remove comments and empty lines
+    sed < $root_dir/etc/fstab '
     s,#.*,,
-    /^[[:space:]]*$/d' < $root_dir/etc/fstab ) ||
+    /^[[:space:]]*$/d'  ) ||
 error 1 "no '/' mountpoint specified in root_dir/etc/fstab."
 
 case $fstab_device in
@@ -383,9 +396,8 @@ case $fstab_device in
 	;;
 esac
 
-echo "root_dir: $root_dir"
-# determine the root device from the $root_dir, if it is not given
-# explicitely
+# if the root device is not given explicitely determine it from the
+# $root_dir
 if [ -z "$rootdev" ] ; then
     while read \
 	proc_mounts_device \
@@ -395,9 +407,15 @@ if [ -z "$rootdev" ] ; then
 	dummy
       do
       test "$proc_mounts_mountpoint" = "$root_dir" && break
-    done < /proc/mounts ||
-    error 1 "no root device given and nothing mounted below root_dir."
-
+    done < <(
+	# list the actually mounted filesystems from behind (the last
+	# one rules) .  a plain tac /proc/mounts did not work.
+	cat /proc/mounts | tac
+    ) || {
+	error 1 "\
+no root device given and nothing mounted below root_dir."
+    }
+    # we found a mounted root device
     rootdev=$proc_mounts_device
 fi
 
@@ -468,11 +486,13 @@ grep -q '^[[:space:]]*options[[:space:]]\+dasd' $root_dir/etc/modules.conf && da
 #test "$zipl_conf_with_dasd" -o "$dasd_modules_conf" && do_dasd=1
 
 ###################################################################
-# determine the filesystem type of the mounted root
-x1=`cat /etc/fstab /proc/mounts 2>/dev/null | grep -E "$rootdev[[:space:]]" | tail -1`
-rootfstype=`echo $x1 | cut -f 3 -d " "`
+# check the filesystem type of the mounted root
 
-test "$rootfstype" = "$fstab_type" || error 1 "filesystem types for mounted root and fstab root mismatch"
+test "$proc_mounts_type" = "$fstab_type" || {
+    error 1 "
+filesystem types for mounted root <$proc_mounts_type>
+and fstab root <$fstab_type> mismatch."
+}
 
 # [ "$fstab_type" = ext3 ] && use_pivot_root=1
 case "$fstab_type" in
