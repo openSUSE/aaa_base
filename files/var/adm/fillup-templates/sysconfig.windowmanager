@@ -1,6 +1,6 @@
 ## Path:	Desktop/Window manager
 ## Description:	
-## Type:	string(kde,fvwm,gnome)
+## Type:	string(kde,fvwm,gnome,windowmaker)
 ## Default:	kde
 ## Config:      profiles,kde,susewm
 #
