@@ -12,15 +12,22 @@
 case "$0" in
 	*halt)
 		message="The system will be halted immediately."
-		command="halt"
-		if test -e /proc/apm ; then
-		    command="halt -p"
-		else
-		    read cmdline < /proc/cmdline
-		    case "$cmdline" in
-			*apm=smp-power-off*)  command="halt -p" ;;
-		    esac
-		fi
+		case `/bin/uname -m` in
+                    i?86)
+                        command="halt"
+                        if test -e /proc/apm ; then
+                            command="halt -p"
+                        else
+                            read cmdline < /proc/cmdline
+                            case "$cmdline" in
+                                *apm=smp-power-off*)  command="halt -p" ;;
+                            esac
+                        fi
+                        ;;
+                    *)
+                        command="halt -p"
+                        ;;
+                esac
 		;;
 	*reboot)
 		message="Please stand by while rebooting the system..."
