@@ -190,12 +190,29 @@ markList
 );
 
 static
+BOOLEAN
+checkForClassifier
+(
+    VariableBlock_t      * list, 
+    char                 * variableName,
+    BlockClass_t           classifier
+);
+
+static 
+BOOLEAN 
+checkForAssignment 
+( 
+    VariableBlock_t      * list, 
+    char                 * variableName
+); 
+
+static
 void
 handleEqualVariableBlockIdentifiers
 (
     void
 );
-
+
 static
 void
 setNext
@@ -209,6 +226,13 @@ void
 evaluateTrailingComments
 (
     void
+);
+
+static
+void
+writeBaseFileHeader
+(
+    FILE                      * filePointer
 );
 
 static
@@ -591,31 +615,46 @@ getVariable
     else
     {
         offsetVariableName = lineIndex;
+        offsetDelimiter = lineIndex;
         lineIndex = lineIndex +
             consumePossibleVariableName( 
                 delimiterString[ 0 ], 
                 &Line[ lineIndex ], 
                 lineLength - lineIndex );
-        offsetDelimiter = lineIndex;
 
-        if( ( ( lineIndex + stringLength( delimiterString ) ) < lineLength ) &&
-            ( Equal == 
-              compareStringsExactly( delimiterString, &Line[ lineIndex ] ) ) )
+        if( lineIndex == offsetDelimiter )
         {
-            /* this is an assignment */
-            if( getVNumberOfCommentLines( outputBuffer ) > 0 )
-            {
-                setVClassifier( outputBuffer, CompleteVariableBlock );
-            }
-            else
-            {
-                setVClassifier( outputBuffer, AssignmentBlock );
-            }
+            /* this is unspecified behaviour because   */
+            /* consumePossibleVariableName() == 0      */
+
+            /* last line starts with optional white spaces    */
+            /* followed by something that's neither a comment */
+            /* nor a possible variable name                   */
+            setVClassifier( outputBuffer, UndefinedBlock );
         }
         else
         {
-            /* this a variable */
-            setVClassifier( outputBuffer, VariableNameBlock );
+            offsetDelimiter = lineIndex;
+
+            if( ( ( lineIndex + stringLength( delimiterString ) ) < lineLength ) &&
+                ( Equal == 
+                  compareStringsExactly( delimiterString, &Line[ lineIndex ] ) ) )
+            {
+                /* this is an assignment */
+                if( getVNumberOfCommentLines( outputBuffer ) > 0 )
+                {
+                    setVClassifier( outputBuffer, CompleteVariableBlock );
+                }
+                else
+                {
+                    setVClassifier( outputBuffer, AssignmentBlock );
+                }
+            }
+            else
+            {
+                /* this a variable, maybe followed by something */
+                setVClassifier( outputBuffer, VariableNameBlock );
+            }
         }
         currentLengthOfBlock = getVLength( outputBuffer );
         setVOffsetOfVariableName( outputBuffer,  
@@ -1006,6 +1045,97 @@ markList
     }
 }
 
+/*------------- checkForClassifier ------------*\
+|
+|   Purpose:  Here a variable block list is checked
+|             for a specific evaluation class.
+|
+\* -------------------------------------------------*/
+
+static
+BOOLEAN
+checkForClassifier
+(
+    VariableBlock_t      * list, 
+    char                 * variableName,
+    BlockClass_t           classifier
+)
+{
+    BOOLEAN                returnValue;
+    char                   buffer[ cfg_MaxVariableLength ];
+
+    returnValue = FALSE;
+
+    copyVariableName( list, buffer );
+    while( ( list != NULL ) && 
+           ( Equal == compareStrings( variableName, buffer ) ) )
+    {
+        if( classifier == getVClassifier( list ) )
+        {
+            returnValue = TRUE;
+            break;
+        }
+        else
+        {
+            list = getVSucc( list );
+            if( list != NULL ) copyVariableName( list, buffer );
+        }
+    }
+
+    return( returnValue );
+}
+
+/*--------------- checkForAssignment ---------------*\
+|
+|   Purpose:  Here a variable block list is checked
+|             whether the last line holds an assignemnt.
+|             For ignoreDefinites option only the
+|             variable name has to be provided.
+|
+\* -------------------------------------------------*/
+
+static
+BOOLEAN
+checkForAssignment
+(
+    VariableBlock_t      * list, 
+    char                 * variableName
+)
+{
+    BOOLEAN                returnValue;
+
+    returnValue = FALSE;
+
+    if( TRUE == checkForClassifier( list, variableName, CompleteVariableBlock ) )
+    {
+        returnValue = TRUE;
+    }
+    else if( TRUE == checkForClassifier( list, variableName, AssignmentBlock ) )
+    {
+        returnValue = TRUE;
+    }
+    else if( ( TRUE == queryParameter( IgnoreDefinites ) ) &&
+             ( TRUE == checkForClassifier( list, variableName, VariableNameBlock ) ) )
+    {
+        returnValue = TRUE;
+    }
+    else if( ( VariableNameBlock == getVClassifier( list ) )  &&
+           ( Equal == compareStrings( variableName, "test" ) ) )
+    {
+        /* this is a very special case for /etc/rc.config -
+           a historical relict:
+           ##
+           ## Formatting the boot script messages, see /etc/rc.status.
+           ## Source /etc/rc.status if rc_done isn't defined
+           ##
+           test "$rc_done"= = = -a -e /etc/rc.status && . /etc/rc.status
+         */
+        returnValue = TRUE;
+    }
+
+    return( returnValue );
+}
+
 /*------ handleEqualVariableBlockIdentifiers -------*\
 |
 |   Purpose:  Here the functionality is located concerning the options --remove
@@ -1027,12 +1157,15 @@ handleEqualVariableBlockIdentifiers
     copyVariableName( headOfBaseFileList, firstBuffer );
     copyVariableName( headOfAdditionalFileList, secondBuffer );
 
-    /* all three conditions are fullfilled */
-    if( ( headOfBaseFileList != NULL ) &&
-        ( headOfAdditionalFileList != NULL ) &&
-        ( Equal == compareStrings( firstBuffer, secondBuffer ) ) )
+    /* the following three conditions are fullfilled:           */
+    /* ( headOfBaseFileList != NULL )                           */
+    /* ( headOfAdditionalFileList != NULL )                     */ 
+    /* ( Equal == compareStrings( firstBuffer, secondBuffer ) ) */
+
+    if( TRUE == queryParameter( Exchange ) )
     {
-        if( TRUE == queryParameter( Exchange ) )
+        if( ( TRUE == checkForAssignment( headOfBaseFileList, firstBuffer ) ) &&
+            ( TRUE == checkForAssignment( headOfAdditionalFileList, secondBuffer ) ) )
         {
             if( TRUE == queryParameter( Remove) )
             {
@@ -1045,8 +1178,19 @@ handleEqualVariableBlockIdentifiers
             displayVerbose( "base", headOfBaseFileList );
             setVEvaluationClass( headOfAdditionalFileList, Output );
             displayVerbose( "additional", headOfAdditionalFileList );
+        } 
+        else
+        {
+            setVEvaluationClass( headOfBaseFileList, Output );
+            displayVerbose( "base", headOfBaseFileList );
+            setVEvaluationClass( headOfAdditionalFileList, Ignored );
+            displayVerbose( "additional", headOfAdditionalFileList );
         }
-        else    /* ( TRUE == queryParameter( Maintain ) ) */
+    }
+    else    /* ( TRUE == queryParameter( Maintain ) ) */
+    {
+        if( ( TRUE == checkForAssignment( headOfBaseFileList, firstBuffer ) ) &&
+            ( TRUE == checkForAssignment( headOfAdditionalFileList, secondBuffer ) ) )
         {
             if( TRUE == queryParameter( Remove) )
             {
@@ -1058,6 +1202,29 @@ handleEqualVariableBlockIdentifiers
             }
             displayVerbose( "base", headOfBaseFileList );
             setVEvaluationClass( headOfAdditionalFileList, Ignored );
+            displayVerbose( "additional", headOfAdditionalFileList );
+        }
+        else
+        {
+            if( FALSE == checkForAssignment( headOfBaseFileList, firstBuffer ) )
+            {
+                /* doesn't make sense to add only CommentedVariableBlocks */
+                setVEvaluationClass( headOfBaseFileList, IgnoredButRemoved );
+            }
+            else
+            {
+                setVEvaluationClass( headOfBaseFileList, Ignored );
+            }
+            displayVerbose( "base", headOfBaseFileList );
+            if( FALSE == checkForAssignment( headOfAdditionalFileList, secondBuffer ) )
+            {
+                /* doesn't make sense to add only CommentedVariableBlocks */
+                setVEvaluationClass( headOfAdditionalFileList, Ignored );
+            }
+            else
+            {
+                setVEvaluationClass( headOfAdditionalFileList, Output );
+            }
             displayVerbose( "additional", headOfAdditionalFileList );
         }
     }
@@ -1419,7 +1586,9 @@ writeBaseFileHeader
                /* the criterion is a newline character next */
                if( '\n' == baseFileHeader[ endOfHeader + 1 ] )
                {
-                   endOfHeader++;
+                   /* take also the newline itself */
+                   endOfHeader += 2;
+                   if( length < endOfHeader ) endOfHeader = 0; /*error*/
                    break;
                }
            }
@@ -1444,13 +1613,13 @@ writeBaseFileHeader
         case CompleteVariableBlock:
         case CommentedVariableBlock:
              {
-                 displayVerboseString( "\nHeader is written\n" );
+                 displayVerboseString( "Header is written\n" );
                  writeVariableBlock( baseFileHeader, endOfHeader, filePointer );
              } break;
 
         case TrailingCommentBlock:
              {
-                 displayVerboseString( "\nSingle trailing comment as header is written\n" );
+                 displayVerboseString( "Single trailing comment as header is written\n" );
                  writeVariableBlock( baseFileHeader, endOfHeader, filePointer );
              } break;
              
@@ -1498,7 +1667,7 @@ writeOutput
                     if( TrailingCommentBlock == getVClassifier( listPointer ) )
                     {
                        /* new functionality for fillup-1.10:           */
-                       /* only if basefile variables should be removed */
+                       /* if basefile variables should be removed      */
                        /* and basefile holds only a trailing comment   */
                        /* which includes a header                      */
                        /* this header is preserved within basefile.new.*/
@@ -1547,7 +1716,32 @@ writeOutput
     if( FileOpened == openFileForWriting( outputFileName, &filePointer ) )
     {
         listPointer = baseFileBlock;
-        for( index = 0; index < numberOfUsedBaseBlocks; index++ )
+        evaluationClass = getVEvaluationClass( listPointer );
+        switch( evaluationClass )
+        {
+            case Output:
+            case OutputButRemoved:
+                displayVerbose( "base", listPointer );
+                getVBeginOfBlock( listPointer, &variableBlock );
+                writeVariableBlock( variableBlock,
+                    getVLength( listPointer ), filePointer );
+                break;
+
+            case Ignored:
+                if( TrailingCommentBlock == getVClassifier( listPointer ) )
+                {
+                   /* new functionality for fillup-1.10:           */
+                   /* if basefile holds only a trailing comment    */
+                   /* which includes a header                      */
+                   /* this header is preserved within basefile.    */
+                   writeBaseFileHeader( filePointer );
+                }
+
+            default: break;
+        }
+
+        listPointer++;
+        for( index = 1; index < numberOfUsedBaseBlocks; index++ )
         {
             evaluationClass = getVEvaluationClass( listPointer );
             switch( evaluationClass )

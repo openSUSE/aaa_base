@@ -45,3 +45,4 @@ Evaluating base file:    ->  Ignored  -  TrailingCommentBlock
 Evaluating additional file:    ->  Ignored  -  TrailingCommentBlock
 
 Now the output file is displayed
+Single trailing comment as header is written
