@@ -1,16 +1,3 @@
-
-#
-# Set to "-u" if your system clock is set to GMT, and to "--localtime"
-# if your clock runs that way.
-#
-GMT="YAST_ASK"
-
-#
-# Timezone (e.g. CET)
-# (this will set /usr/lib/zoneinfo/localtime)
-#
-TIMEZONE="YAST_ASK"
-
 #
 # Name of the printer queue used when 'lpr' is invoked with no '-P'
 #

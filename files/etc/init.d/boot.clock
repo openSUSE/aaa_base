@@ -14,7 +14,7 @@
 ### END INIT INFO
 
 . /etc/rc.status
-. /etc/rc.config
+. /etc/sysconfig/clock
 #
 # set and adjust the CMOS clock
 if test "$HOSTTYPE" = "s390" ; then

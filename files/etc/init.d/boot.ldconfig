@@ -14,7 +14,7 @@
 ### END INIT INFO
 
 . /etc/rc.status
-. /etc/rc.config
+. /etc/sysconfig/clock
 #
 # Let ld.so rebuild its cache.
 # But do some tests before if it is really needed (bs@suse.de 01/2000)

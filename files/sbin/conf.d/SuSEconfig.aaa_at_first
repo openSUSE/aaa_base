@@ -29,6 +29,7 @@ test -f /etc/rc.config || {
 }
 . /etc/rc.config
 test -f /etc/sysconfig/mouse && . /etc/sysconfig/mouse
+test -f /etc/sysconfig/clock && . /etc/sysconfig/clock
 
 test -n "$ORGANIZATION" && {
     echo "$ORGANIZATION" > /etc/organization.SuSEconfig
