@@ -67,7 +67,8 @@ _file_ ()
     gs|ghostview)	e='!*.+(eps|EPS|ps|PS|pdf|PDF)'		;;
     gv)			e='!*.+(eps|EPS|ps|PS|ps.gz|pdf|PDF)'	;;
     acroread|xpdf)	e='!*.+(pdf|PDF)'			;;
-    dvips|xdvi)		e='!*.+(dvi|DVI)'			;;
+    dvips)		e='!*.+(dvi|DVI)'			;;
+    xdvi)		e='!*.+(dvi|dvi.gz|DVI|DVI.gz)'		;;
     tex|latex)		e='!*.+(tex|TEX|texi|latex)'		;;
     *)			e='!*'
     esac
@@ -77,7 +78,7 @@ _file_ ()
     IFS="$o"
 }
 
-complete -d -X '.*' -F _file_		compress \
+complete -d -X '.[^./]*' -F _file_	compress \
 					bzip2 \
 					bunzip2 \
 					gzip \

@@ -21,9 +21,31 @@
 test "$PREVLEVEL" = "$RUNLEVEL" && exit 0
 
 #
-# Comming from runlevel 1 we do not need to enter S
+# Coming from runlevel 1 we do not need to enter S
 #
 test "$PREVLEVEL" = "1" -a "$RUNLEVEL" = "S" && exit 0
+
+#
+# Coming from runlevel S we have to check if the system was
+# booted cold into single user mode and call /etc/init.d/boot.  
+#
+if test "$PREVLEVEL" = "S" -a -x /sbin/runlevel ; then
+    # Double check
+    utmp=$(LC_ALL=POSIX /sbin/runlevel 2> /dev/null)
+    dpts="no"
+    proc="no"
+    if test -e /proc/mounts ; then
+	proc="yes"
+	while read des fs type rest; do
+	    case "$fs" in /dev/pts) dpts="yes" ;; esac
+	done < /proc/mounts
+    fi
+    unset des fs type rest
+    if test "$utmp" = "unknown" -a "$dpts" = "no" ; then
+	test "$proc" = "yes" && umount -n -t proc
+	/etc/init.d/boot
+    fi
+fi
 
 #
 # Avoid being interrupted by child or keyboard
