@@ -37,7 +37,7 @@ case "$1" in
 	#
 	unset HAVE_SHM
 	while read dev type; do
-	    test "$type" = "shm" && HAVE_SHM=1
+	    test "$type" = "tmpfs" && HAVE_SHM=1
 	done < /proc/filesystems
 	if test ! -z "$HAVE_SHM"; then
 	    # SHMFS_SIZE is set in /etc/sysconfig/kernel
@@ -49,7 +49,7 @@ case "$1" in
 	    ECHO_RETURN=$rc_done
 	    test -d /dev/shm || mkdir /dev/shm
 	    echo -n "Mounting shared memory FS on /dev/shm"
-	    mount -t tmpfs $SHMFS_OPTIONS shmfs /dev/shm || ECHO_RETURN=$rc_failed
+	    mount -t tmpfs $SHMFS_OPTIONS tmpfs /dev/shm || ECHO_RETURN=$rc_failed
 	    echo -e $ECHO_RETURN
 	fi
 	#unset HAVE_SHM
