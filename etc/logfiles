@@ -30,8 +30,8 @@
 /var/log/xferlog               +4096k   640      root.root
 /var/spool/smail/log/logfile    +512k   644      root.root
 /var/spool/smail/log/paniclog   +128k   644      root.root
-/var/spool/uucp/Log            +2048k   644      uucp.uucp
-/var/spool/uucp/Stats          +1024k   644      uucp.uucp
+/var/log/uucp/Log            +2048k   644      uucp.uucp
+/var/log/uucp/Stats          +1024k   644      uucp.uucp
 # syslog
 /var/log/allmessages           +4096k   640      root.root
 /var/log/messages              +4096k   640      root.root

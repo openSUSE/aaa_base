@@ -117,8 +117,8 @@ for i in $prerc/K${rex}*; do
     # Stop the services of the previous runlevel if they are missed
     # within the current (new) runlevel.
 
-    $i stop; stat=$?
-    case $stat in
+    $i stop; status=$?
+    case $status in
 	[1-4])	 failed="${failed}  ${service}" ;;
 	[56])	skipped="${skipped} ${service}" ;;
 	[07]|*)	;;
@@ -126,7 +126,7 @@ for i in $prerc/K${rex}*; do
     echo -en "$rc_reset"
 
     # Log to /var/log/boot.msg
-    blogger "'$start stop' exits with status $stat"
+    blogger "'$start stop' exits with status $status"
 done
 
 for i in $runrc/S${rex}*; do
@@ -146,8 +146,8 @@ for i in $runrc/S${rex}*; do
     # Start the services of the current (new) runlevel if they are missed
     # within the previous runlevel.
 
-    $i start; stat=$?
-    case $stat in
+    $i start; status=$?
+    case $status in
 	[1-47])	 failed="${failed}  ${service}" ;;
 	[56])	skipped="${skipped} ${service}" ;;
 	0|*)	;;
@@ -155,7 +155,7 @@ for i in $runrc/S${rex}*; do
     echo -en "$rc_reset"
 
     # Log to /var/log/boot.msg
-    blogger "'$start start' exits with status $stat"
+    blogger "'$start start' exits with status $status"
 done
 
 #
