@@ -1,10 +1,4 @@
 #
-# Source the /etc/profile
-#
-setopt nonomatch
-source /etc/profile
-unsetopt nonomatch
-#
 # zsh line editing
 #
 : ${ZSHEDIT:="emacs"}

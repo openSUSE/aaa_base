@@ -1,7 +1,9 @@
 # /etc/bash.bashrc for SuSE Linux
 #
 # PLEASE DO NOT CHANGE /etc/bash.bashrc There are chances that your changes
-# will be lost during system upgrades.
+# will be lost during system upgrades.  Instead use /etc/bash.bashrc.local
+# for your local settings, favourite global aliases, VISUAL and EDITOR
+# variables, etc ...
 
 #
 # Check which shell is reading this file
@@ -213,6 +215,14 @@ case "$-" in
     fi
     ;;
 esac
+
+if test "$is" != "ash" ; then
+    #
+    # And now let's see if there is a local bash.bashrc
+    # (for options defined by your sysadmin, not SuSE Linux)
+    #
+    test -s /etc/bash.bashrc.local && . /etc/bash.bashrc.local
+fi
 
 #
 # End of /etc/bash.bashrc

@@ -8,7 +8,6 @@
 #
 
 shopt -s extglob
-shopt -s cdspell
 
 function _cd_ ()
 {
