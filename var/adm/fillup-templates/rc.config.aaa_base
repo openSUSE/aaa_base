@@ -64,7 +64,11 @@ RC_LC_CTYPE=""
 # character in the alphabet. Note: sort(1) doesn't use these
 # functions, but other application such as databases may use it.
 #
-RC_LC_COLLATE=""
+# To keep bash and possibly other apps from misbehavour because
+# of mixed upper/lowercase sorting with locales, you should keep
+# this at POSIX and just set it for the apps that need it:
+#
+RC_LC_COLLATE="POSIX"
 
 #
 # This defines the locale for date and time output formats.
