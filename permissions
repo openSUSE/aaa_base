@@ -126,3 +126,19 @@
 /etc/shadow                            root.shadow       640
 /etc/shadow-                           root.shadow       640
 /etc/init.d                            root.root         755
+
+#
+# terminal emulators
+# This and future SuSE products have support for the utempter, a small helper
+# program that does the utmp/wtmp update work with the necessary rights.
+# The use of utempter obsoletes the need for sgid bits on terminal emulator
+# binaries. We mention screen here, but all other terminal emulators have
+# moved here, with modes set to 0755.
+/opt/kde/bin/konsole                    root.root        755
+/opt/kde2/bin/konsole                   root.root        755
+/opt/kde3/bin/konsole                   root.root        755
+/usr/X11R6/bin/xterm                    root.root        755
+/usr/X11R6/bin/kterm                    root.root        755
+# fixme: needs completion.
+
+
