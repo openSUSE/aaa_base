@@ -268,12 +268,6 @@ NO_PROXY="localhost"
 CLOSE_CONNECTIONS="false"
 
 #
-# Start the named (package bind)? You have to configure the named first,
-# before you can start it (man named).
-#
-START_NAMED=no
-
-#
 # Should updatedb (for locate) be started by cron.daily ("yes" or "no")
 #
 RUN_UPDATEDB=yes
