@@ -9,35 +9,34 @@
 #                     JDK_HOME, SDK_HOME
 #
 
-if [ -x /usr/lib/java/bin/java ] || [ -x /usr/lib/java/bin/jre ] ; then
-  export PATH=$PATH:/usr/lib/java/bin
-  export JAVA_BINDIR=/usr/lib/java/bin
-  export JAVA_ROOT=/usr/lib/java
-  export JAVA_HOME=/usr/lib/java
-  if [ -x /usr/lib/java/jre/bin/java ] ; then
-    export JRE_HOME=/usr/lib/java/jre
+if [ -x /usr/lib/jvm/java/bin/java ] || [ -x /usr/lib/jvm/java/bin/jre ] ; then
+  export JAVA_BINDIR=/usr/lib/jvm/java/bin
+  export JAVA_ROOT=/usr/lib/jvm/java
+  export JAVA_HOME=/usr/lib/jvm/java
+  if [ -x /usr/lib/jvm/java/jre/bin/java ] ; then
+    export JRE_HOME=/usr/lib/jvm/java/jre
   else
-    export JRE_HOME=/usr/lib/java
+    export JRE_HOME=/usr/lib/jvm/java
   fi        
   unset JDK_HOME
   unset SDK_HOME
-  if [ -x /usr/lib/java/bin/javac ] ; then
+  if [ -x /usr/lib/jvm/java/bin/javac ] ; then
     # it is development kit 
-    if [ -x /usr/lib/java/bin/jre ] ; then
-      export JDK_HOME=/usr/lib/java
+    if [ -x /usr/lib/jvm/java/bin/jre ] ; then
+      export JDK_HOME=/usr/lib/jvm/java
     else
-      export JDK_HOME=/usr/lib/java
-      export SDK_HOME=/usr/lib/java
+      export JDK_HOME=/usr/lib/jvm/java
+      export SDK_HOME=/usr/lib/jvm/java
     fi
   fi
 else
-  if [ -x /usr/lib/java/jre/bin/java ] ; then
+  if [ -x /usr/lib/jvm/java/jre/bin/java ] ; then
     # it is IBMJava2-JRE or SunJava2-JRE
-    export PATH=$PATH:/usr/lib/java/jre/bin
-    export JAVA_BINDIR=/usr/lib/java/jre/bin
-    export JAVA_ROOT=/usr/lib/java
-    export JAVA_HOME=/usr/lib/java/jre
-    export JRE_HOME=/usr/lib/java/jre
+    export PATH=$PATH:/usr/lib/jvm/java/jre/bin
+    export JAVA_BINDIR=/usr/lib/jvm/java/jre/bin
+    export JAVA_ROOT=/usr/lib/jvm/java
+    export JAVA_HOME=/usr/lib/jvm/java/jre
+    export JRE_HOME=/usr/lib/jvm/java/jre
     unset JDK_HOME
     unset SDK_HOME
   fi

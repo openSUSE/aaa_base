@@ -22,31 +22,29 @@ test -f $r/etc/sysconfig/java || {
 
 test "$CREATE_JAVALINK" = "yes" || exit 0
 
-# link various alternative files and directories (man pages, compat links, etc.)
-# the right java is selected by the priority defined in /etc/java/*.conf;
-# there are also saved all information about available alternatives;
-# note that the main link /usr/lib/java is created also if it is not
-# explicitly defined in /etc/java/*.conf
-setJava.pl link --noreplace --alljavas >/dev/null 2>&1
+# add compatibility link
+if [ -L /usr/lib/jvm/java ]; then
+  ln -s /usr/lib/jvm/java /usr/lib/java;
+fi
 
-# the following comands are obsolete by the previous one now and are only
-# useful if the base compat links are not defined in /etc/java/*.conf
+# create java compat links if it is not valid
+# right java is selected by priority in /etc/java/*.conf
 # /usr/lib/java
-setJava.pl link --noreplace >/dev/null 2>/dev/null
-# /usr/lib/java1
-setJava.pl link --noreplace --linkname java1 --strict --version 1.1 >/dev/null 2>/dev/null
-# /usr/lib/java2
-setJava.pl link --noreplace --linkname java2 --version 1.2 >/dev/null 2>/dev/null
-# /usr/lib/SunJava1
-setJava.pl link --noreplace --linkname SunJava1 --strict --version 1.1 --vendor Sun >/dev/null 2>/dev/null
-# /usr/lib/SunJava2
-setJava.pl link --noreplace --linkname SunJava2 --version 1.2 --vendor Sun >/dev/null 2>/dev/null
-# /usr/lib/IBMJava2
-setJava.pl link --noreplace --linkname IBMJava2 --version 1.2 --vendor IBM >/dev/null 2>/dev/null
-# /usr/lib/BlackdownJava2
-setJava.pl link --noreplace --linkname BlackdownJava2 --version 1.2 --vendor Blackdown >/dev/null 2>/dev/null
-# /usr/lib/BEAJava2
-setJava.pl link --noreplace --linkname BEAJava2 --version 1.2 --vendor BEA >/dev/null 2>/dev/null
-
-# create compat links if only Blackdown's JRE is installed
-test -x /usr/lib/BlackdownJava2/manPagesCompatLinks && /usr/lib/BlackdownJava2/manPagesCompatLinks
+#setJava.pl link --noreplace >/dev/null 2>/dev/null
+## /usr/lib/java1
+#setJava.pl link --noreplace --linkname java1 --strict --version 1.1 >/dev/null 2>/dev/null
+## /usr/lib/java2
+#setJava.pl link --noreplace --linkname java2 --version 1.2 >/dev/null 2>/dev/null
+## /usr/lib/SunJava1
+#setJava.pl link --noreplace --linkname SunJava1 --strict --version 1.1 --vendor Sun >/dev/null 2>/dev/null
+## /usr/lib/SunJava2
+#setJava.pl link --noreplace --linkname SunJava2 --version 1.2 --vendor Sun >/dev/null 2>/dev/null
+## /usr/lib/IBMJava2
+#setJava.pl link --noreplace --linkname IBMJava2 --version 1.2 --vendor IBM >/dev/null 2>/dev/null
+## /usr/lib/BlackdownJava2
+#setJava.pl link --noreplace --linkname BlackdownJava2 --version 1.2 --vendor Blackdown >/dev/null 2>/dev/null
+## /usr/lib/BEAJava2
+#setJava.pl link --noreplace --linkname BEAJava2 --version 1.2 --vendor BEA >/dev/null 2>/dev/null
+#
+## create compat links if only Blackdown's JRE is installed
+#test -x /usr/lib/BlackdownJava2/manPagesCompatLinks && /usr/lib/BlackdownJava2/manPagesCompatLinks
