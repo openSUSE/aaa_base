@@ -28,6 +28,15 @@ fi
 RUN_XFTCACHE=false
 
 if test "$CHECK_NEWPACKAGE" != false -a -x /usr/X11R6/bin/mkfontdir ; then
+
+    # search whether true CID-keyed fonts are available
+    # in /usr/share/ghostscript/Resource and if yes make them
+    # available to X11 as well:
+    if [ -x /usr/sbin/cidfont-x11-config ]; then
+	echo "configure X11 to use available CID-keyed fonts ..."
+	/usr/sbin/cidfont-x11-config
+    fi
+
     for FDIR in /usr/X11R6/lib/X11/fonts/truetype \
                 /usr/X11R6/lib/X11/fonts/TTF \
                 /usr/X11R6/lib/X11/fonts/Type1 \
