@@ -15,7 +15,7 @@ do_gzip() {
 			rm -f $input.gz
 		fi
 		if test -L $input; then
-			link=`ls -l $input | awk '{ print $11 }'`
+			link=`perl -e 'print readlink($ARGV[0]);' -- "$input"`
 			test -d $link && continue
 			test -d $RPM_BUILD_ROOT/$link && continue
 			rm -f $input
