@@ -79,3 +79,12 @@ if [ -x /usr/X11R6/bin/xftcache -a $RUN_XFTCACHE = "true" ]; then
     /usr/X11R6/bin/xftcache
 fi
 
+if [ -x /usr/X11R6/bin/xset ]; then
+    /usr/X11R6/bin/xset fp rehash > /dev/null 2>&1
+fi
+
+XFS_BIN=/usr/X11R6/bin/xfs
+if checkproc $XFS_BIN ; then
+   echo "Reloading config file of X Font Server"
+   killproc $XFS_BIN -USR1  # re-read config file
+fi
