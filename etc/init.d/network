@@ -48,6 +48,14 @@ test -n "$NETCONFIG" -a "$NETCONFIG" != "YAST_ASK" || exit 0
 rc_status
 case "$1" in
     start)
+	# Workaround for ethernet driver modules. Try to load
+	# them in correct order even if a device is disabled.
+	for I in _0 _1 _2 _3; do
+	    eval NETDEV=\$NETDEV$I
+	    case $NETDEV in
+		eth[0-9]) ifconfig $NETDEV > /dev/null 2>&1 || true
+	    esac
+	done
 	for I in $NETCONFIG; do
 	    eval NETDEV=\$NETDEV$I
 	    eval IFCONFIG=\$IFCONFIG$I
@@ -61,7 +69,7 @@ case "$1" in
 		    continue
 		    ;;
 	    esac
-	    case $NETDEV in
+	    case "$NETDEV" in
 		ippp*|ppp*|isdn*)
 		    # Will be done in i4l boot scripts, therefore
 		    continue
@@ -100,7 +108,7 @@ case "$1" in
 		    continue
 		    ;;
 	    esac
-	    case $NETDEV in
+	    case "$NETDEV" in
 		ippp*|ppp*|isdn*)
 		    # Will be done in i4l boot scripts, therefore
 		    continue
@@ -128,12 +136,12 @@ case "$1" in
 	for I in $NETCONFIG; do
 	    eval NETDEV=\$NETDEV$I
 	    eval IFCONFIG=\$IFCONFIG$I
-	    case $IFCONFIG in
+	    case "$IFCONFIG" in
 		dhcpclient)
 		    continue
 		    ;;
 	    esac
-	    case $NETDEV in
+	    case "$NETDEV" in
 		ippp*|ppp*|isdn*)
 		    # Should be done in i4l boot scripts, therefore
 		    continue
@@ -155,7 +163,7 @@ case "$1" in
 	r=""
 	for I in $NETCONFIG; do
 	    eval NETDEV=\$NETDEV$I
-	    case $NETDEV in
+	    case "$NETDEV" in
 		ippp*|ppp*|isdn*)	;;
 		*)
 		    case "`ifconfig $NETDEV 2>&1`" in

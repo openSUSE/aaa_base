@@ -30,6 +30,9 @@
 #
 # ChangeLog:
 #
+# 07/9/2001:    v1.19
+#  - add "splashanim" feature.
+#
 # 14/8/2001:	v1.18
 #  - run 'raidautorun' only if raid is used
 #  - add xor module if missing
@@ -97,7 +100,8 @@ usage() {
           -d root_device   root device, defaults to the device from which
                            the root_dir is mounted; overwrites the rootdev
                            enviroment variable if set
-
+	  -s               Add splash animation and bootscreen to initrd.
+			   
         root_dir:          the directory the root partition is mounted to
                            defaults to "/" 
 EOM
@@ -125,8 +129,9 @@ kernels=""
 initrds=""
 modules=""
 boot_dir=""
+splash=0
 
-while getopts :hk:i:m:b:d: a ; do
+while getopts :hsk:i:m:b:d: a ; do
 	case $a in
 		\:|\?)	case $OPTARG in
 				k)	echo "-k requires kernel list parameter"
@@ -156,6 +161,8 @@ while getopts :hk:i:m:b:d: a ; do
 		d)	rootdev=$OPTARG
 			;;
 		h)	usage
+			;;
+		s)	splash=1
 			;;
 	esac
 done
@@ -194,6 +201,10 @@ fi
 
 static_shell=/bin/ash.static
 static_insmod=/sbin/insmod.static
+static_fbmngplay=/bin/fbmngplay
+
+bootsplash_anim=/usr/share/splash/device.mng
+bootsplash_picture=/usr/share/splash/bootsplash.jpg
 
 # maximum initrd size
 image_blocks=10000
@@ -346,6 +357,18 @@ for k in $kernels ; do
     cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console,md0} $tmp_mnt/dev
     cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 4 "no static shell"
     cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 5 "no static insmod"
+    echo "here"
+    if [ $splash -eq 1 ]
+    then
+    	echo -n "Adding bootsplash animation... "
+    	cp $static_fbmngplay $tmp_mnt/bin/fbmngplay 2>/dev/null || \
+		error 6 "no splashanim package installed?"
+	cp $bootsplash_anim $tmp_mnt 2>/dev/null || \
+		error 7 "splash animation not found."
+	echo "done."
+    fi
+    
+    
     if [ $root_lvm -eq 1 ]
     then
 	mkdir $tmp_mnt/{lib,etc,proc}
@@ -367,6 +390,12 @@ for k in $kernels ; do
     echo "export PATH=/bin" >>$lx_rc
     echo >>$lx_rc
 
+    if [ $splash -eq 1 ]
+    then
+    	echo "fbmngplay -b -x 878 -y 35 `basename $bootsplash_anim` &" >> $lx_rc
+	echo "" >>$lx_rc
+    fi
+    
     chmod 755 $lx_rc
 
     for i in $modules; do
@@ -438,6 +467,14 @@ for k in $kernels ; do
       continue
     }
 
+    if [ $splash -eq 1 ]
+    then
+    	echo -n "Concatenating splash picture to initrd... "
+	echo "BOOTSPLASH">>$ii
+	cat $bootsplash_picture >> $ii
+	echo "done."
+    fi
+    
     clean_up
 
   else

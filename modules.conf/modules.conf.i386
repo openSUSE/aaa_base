@@ -23,5 +23,25 @@ pre-install r128   /sbin/modprobe "-k" "agpgart"
 pre-install radeon /sbin/modprobe "-k" "agpgart"
 options agpgart agp_try_unsupported=1
 
+# Linux-ABI
+if `kernelversion` == "2.2"
+alias char-major-30       iBCS
+alias binfmt-332          iBCS
+alias binfmt-518          iBCS
+alias binfmt-002c         iBCS
+else
+alias char-major-30       abi-ibcs
+alias binfmt-332          abi-ibcs
+alias binfmt-518          abi-ibcs
+alias binfmt-002c         abi-ibcs
+alias personality-1       abi-ibcs
+alias personality-2       abi-ibcs
+alias personality-3       abi-sco
+alias personality-4       abi-wyse
+alias personality-5       abi-ibcs
+alias personality-7       abi-ibcs
+alias personality-13      abi-solaris
+alias personality-14      abi-uw7
+endif
 
 # end of i386 part for modules.conf
