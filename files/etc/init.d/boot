@@ -59,11 +59,6 @@ fi
 . /etc/rc.status
 . /etc/sysconfig/boot
 
-# reasonable start values for bootsplash progress.
-export progress=0                                                              
-export sscripts=45                                                             
-export kscripts=45                                                             
-
 echo -n "System Boot Control: "
 echo "Running $0"
 
@@ -151,6 +146,50 @@ skipped=""
 callord=""
 
 #
+# Initialize boosplash progressbar variables
+#
+SPLASHCFG=
+SPLASH=yes
+THEME=
+export SPLASHCFG SPLASH
+test -f /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
+test -x /sbin/splash -a -w /proc/splash || SPLASH=no
+test -n "$THEME" -a -d "/etc/bootsplash/themes/$THEME" || SPLASH=no
+if test "$SPLASH" = yes ; then
+  splashstatus="`cat /proc/splash 2>/dev/null`"
+  test "$splashstatus" = "${splashstatus/on}" && SPLASH=no
+fi
+if test "$SPLASH" = yes ; then
+  SPLASHCFG="/etc/bootsplash/themes/$THEME/config/bootsplash-`fbresolution`.cfg"
+  test -f "$SPLASHCFG" || SPLASH=no
+fi
+SPLASHNUM=0
+if test "$SPLASH" = yes ; then
+    SPLASHSTART=100
+    SPLASHEND=13107
+    for i in $bootrc/S${rex}*; do
+        test -x "$i" || continue
+        SPLASHNUM=$(( $SPLASHNUM + 1 ))
+    done
+fi
+
+function splashtrigger () {
+    test "$SPLASH" = yes || return
+    /sbin/splash -p $SPLASHSTART -t "$1" "$SPLASHCFG"
+}
+
+function splashprogress() {
+    test "$SPLASH" = yes || return
+    test "$SPLASHNUM" -ge 1 || SPLASHNUM=1
+    SPLASHDIFF=$(( ( $SPLASHEND - $SPLASHSTART ) / $SPLASHNUM ))
+    SPLASHSTART=$(( $SPLASHSTART + $SPLASHDIFF ))
+    SPLASHNUM=$(( $SPLASHNUM - 1 ))
+    /sbin/splash -p $SPLASHSTART -t "$1" "$SPLASHCFG"
+}
+
+splashtrigger "rlchange B"
+
+#
 # Check if we are able to use make for booting
 #
 test -s /etc/init.d/.depend.boot || USE_MAKE="no"
@@ -172,7 +211,12 @@ test "$DO_CONFIRM"   = "yes" && startpar=""
 if test "$USE_MAKE" = "yes" -a -n "$startpar" ; then
 
     startopt="-p4 -t 20 -T 3"
-    test -x /sbin/splash -a "$SPLASH" != "no" && startopt="$startopt -S"
+    if test "$SPLASH" = yes ; then
+	SPLASHDIFF=$(( $SPLASHEND - $SPLASHSTART ))
+	startopt="$startopt -S $SPLASHSTART:$SPLASHDIFF"
+	SPLASHSTART=$SPLASHEND
+	SPLASHNUM=0
+    fi
 
     eval $($startpar $startopt -M boot)
     failed="${failed:+$failed }$failed_service"
@@ -182,14 +226,12 @@ if test "$USE_MAKE" = "yes" -a -n "$startpar" ; then
     unset startopt startpar
 
 elif test -d ${bootrc}/ ; then
-    for i in ${bootrc}/S*; do
+    for i in ${bootrc}/S${rex}*; do
 	test -f $i || continue
 
 	B=${i##*/}
 	script=${B#*S$rex}
 	B=${B%$script}
-
-	rc_splash "$script start"
 
 	if test "$DO_CONFIRM" = "yes" ; then
 	    rc_confirm -t 5 "Start bootup script ${script}" < $REDIRECT > $REDIRECT 2>&1
@@ -212,6 +254,7 @@ elif test -d ${bootrc}/ ; then
 	    fi
 	    status=$?
 	    echo -en "$rc_reset"
+	    splashprogress "$script start"
 
 	    case $status in
 	    [1-4])   failed="${failed:+$failed }$script"   ;;
@@ -247,8 +290,23 @@ if test -n "$startpar" ; then
 	if test ${#p[@]} -eq 1 ; then
 	    ${p} start
 	    status=($?)
+	    service=${p##*/}
+	    service=${service#*[SK]$rex}
+	    splashprogress "$service start"
 	else
-	    status=($($startpar -t 30 -T 3 -a start ${p[@]}))
+	    if test "$SPLASH" = yes ; then
+		SPLASHOLDSTART=$SPLASHSTART
+		for i in ${p[@]} ; do
+		    test "$SPLASHNUM" -ge 1 || SPLASHNUM=1
+		    SPLASHDIFF=$(( ( $SPLASHEND - $SPLASHSTART ) / $SPLASHNUM ))
+		    SPLASHSTART=$(( $SPLASHSTART + $SPLASHDIFF ))
+		    SPLASHNUM=$(( $SPLASHNUM - 1 ))
+		done
+		SPLASHDIFF=$(( $SPLASHSTART - $SPLASHOLDSTART ))
+		status=($($startpar -S "$SPLASHOLDSTART:$SPLASHDIFF" -t 30 -T 3 -a start ${p[@]}))
+	    else
+		status=($($startpar -t 30 -T 3 -a start ${p[@]}))
+	    fi
 	fi
 	echo -en "$rc_reset"
 	blogger "exit status of (${p[@]##*S$rex}) is (${status[@]})"
@@ -264,6 +322,9 @@ if test -n "$startpar" ; then
 	done
     done
 fi
+
+SPLASHSTART=$SPLASHEND
+splashtrigger "rlreached B"
 
 #
 # Be verbose and print stats
@@ -291,7 +352,7 @@ if test -f /etc/init.d/boot.local ; then
     echo "Running /etc/init.d/boot.local"
     /bin/sh /etc/init.d/boot.local
     rc_status -v1 -r
-    rc_splash "boot.local start"
+    splashtrigger "boot.local"
 fi
 
 #
@@ -321,7 +382,7 @@ stty $otty
 #
 if test -f /var/lib/YaST2/runme_at_boot ; then
     HOSTTYPE=$(uname -m)
-    rc_splash "YaST"
+    splashtrigger "YaST"
     exec 0<> $REDIRECT 1>&0 2>&0
     # if yast2 failed, this ensures proper system setup
     touch /var/lib/YaST2/run_suseconfig

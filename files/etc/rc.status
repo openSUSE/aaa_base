@@ -300,19 +300,8 @@ function rc_active ()
     return 1
 }
 
-# Check whether splash screen animations are installed.
-test -f /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
-
-if test -x /sbin/splash -a "$SPLASH" != "no" ; then
-    function rc_splash()
-    {
-	/sbin/splash "$1"
-	: $((progress++))
-    }
-else
-    function rc_splash()
-    {
-	: $((progress++))
-    }
-fi
+function rc_splash()
+{
+    return 0
+}
 

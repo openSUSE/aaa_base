@@ -60,7 +60,6 @@ case "$1" in
 	echo "Activating remaining swap-devices in /etc/fstab..."
 	swapon -a &> /dev/null
 	rc_status -v1 -r
-	rc_splash "fsck stop"
 	;;
     stop)
 	echo "Turning off swap"

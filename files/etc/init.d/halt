@@ -20,8 +20,6 @@
 trap "echo" SIGINT SIGSEGV SIGQUIT SIGTERM
 set +e
 
-rc_splash "reboot"
-
 case "$0" in
 	*halt)
 		message="The system will be halted immediately."

@@ -153,7 +153,6 @@ test -r $FOO_CONFIG || { echo "$FOO_CONFIG not existing";
 #      rc_reset         clear both the local and overall rc status
 #      rc_exit          exit appropriate to overall rc status
 #      rc_active        checks whether a service is activated by symlinks
-#      rc_splash arg    sets the boot splash screen to arg (if active)
 . /etc/rc.status
 
 # Reset status of this service

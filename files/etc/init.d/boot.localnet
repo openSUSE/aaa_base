@@ -22,8 +22,6 @@ rc_reset
 
 case "$1" in
   start)
-	rc_splash "bootnetwork start"
-
 	# clean up old yp bindings
 	rm -f /var/yp/binding/*.[12]
 	
