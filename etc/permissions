@@ -186,6 +186,8 @@
 /etc/TextConfig                        root.root         644
 /etc/XF86Config                        root.root         644
 /etc/adjtime                           root.root         644
+/etc/aliases                           root.root         644
+/etc/aliases.db                        root.root         644
 /etc/at.deny                           root.root         644
 /etc/conf.modules                      root.root         644
 /etc/csh.cshrc                         root.root         644

@@ -112,8 +112,6 @@
 
 # Files & scripts
 /etc/rc.config                         root.root         600
-/etc/aliases                           root.root         640
-/etc/aliases.db                        root.root         640
 /etc/minicom.users                     root.uucp         640
 /etc/minirc.dfl                        root.uucp         640
 /etc/yp.conf                           root.root         600
