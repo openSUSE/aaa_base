@@ -179,12 +179,16 @@ sync
 # to really flush their buffers before power goes down.
 if test -n "$REDIRECT" ; then
     sleep 1
-    echo -en '\033[11;500]'
-    for tone in 524 491 440 393 349 328 295 ; do
-	echo -en "\033[10;${tone}]\a"
-	usleep 125000
-    done
-    echo -en "\033[10;262]"
+    if test "$DO_QUINT" = "yes" ; then
+	for tone in 524 491 440 393 349 328 295 ; do
+	    echo -en "\033[10;${tone}]\a"
+	    usleep 125000
+	done
+	echo -en "\033[10;262]"
+    else
+	echo -en "\033[10;440]\a"
+	usleep 250000
+    fi
 else
     echo -en "\a"
     sleep 2

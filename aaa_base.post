@@ -415,9 +415,9 @@ fi
 GPG_IMPORT_FAIL=false
 if test -f root/.gnupg/pubring.gpg ; then
    if test -x usr/bin/gpg ; then
-      usr/bin/gpg --export --armor --keyring root/.gnupg/suse_build_key \
+      chroot . usr/bin/gpg --export --armor --keyring root/.gnupg/suse_build_key \
          build@suse.de | usr/bin/gpg --import || true
-      if ! usr/bin/gpg --list-keys build@suse.de >/dev/null 2>&1 ; then
+      if ! chroot . usr/bin/gpg --list-keys build@suse.de >/dev/null 2>&1 ; then
          GPG_IMPORT_FAIL=true
       fi
    fi

@@ -442,13 +442,15 @@ if ls /etc/resolv.conf.saved.by.* &>/dev/null ; then
 fi
 
 if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
-  echo -n "Cleaning tmp dirs $TMP_DIRS_TO_CLEAR"
+  echo -n "Cleaning temporary directories $TMP_DIRS_TO_CLEAR"
   for CURDIR in $TMP_DIRS_TO_CLEAR ; do
     find $CURDIR -printf '%P\n' | ( cd $CURDIR ; xargs rm -rf )
   done
-  mkdir -p /tmp/.X11-unix
-  chown root.root /tmp /tmp/.X11-unix /var/tmp /var/tmp/vi.recover
-  chmod 1777 /tmp /tmp/.X11-unix /var/tmp /var/tmp/vi.recover
+  for CURDIR in /tmp /tmp/.X11-unix /var/tmp /var/tmp/vi.recover ; do
+	test -d $CURDIR || mkdir -p $CURDIR
+	chown root.root $CURDIR
+	chmod 1777 $CURDIR
+  done
   rc_status -v -r
 fi
 

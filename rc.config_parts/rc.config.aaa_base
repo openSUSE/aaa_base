@@ -474,3 +474,14 @@ START_CRYPTO_FILESYSTEMS="yes"
 #
 MODIFY_RESOLV_CONF_DYNAMICALLY="yes"
 
+#
+# This variable contains the list of modules to be added to the initial
+# ramdisk by calling the script "mk_initrd"
+# (like drivers for scsi-controllers, for lvm or reiserfs)
+#
+INITRD_MODULES=""
+
+#
+# Set to "yes" to play a quint tone sequence at system halt or reboot
+#
+DO_QUINT="no"

@@ -17,20 +17,20 @@ fi
 
 test -n "$ROOT" && exit 0
 
-JAVALINKTO=`rpm -q java java2 ibmjava2  IBMJava2-SDK 2>/dev/null | sed s,-[^-]*$,,g | head -n 1`
-JRELINKTO=`rpm -q javarunt ibmjre2 IBMJava2-JRE 2>/dev/null | sed s,-[^-]*$,,g | head -n 1`
+JAVALINKTO=`rpm -q java java2 IBMJava2-SDK ibmjava2 2>/dev/null | sed s,-[^-]*-[^-]*$,,g | head -n 1`
+JRELINKTO=`rpm -q javarunt IBMJava2-JRE ibmjre2 2>/dev/null | sed s,-[^-]*-[^-]*$,,g | head -n 1`
 if ! test -z "$JAVALINKTO" ; then
    test -L /usr/lib/java && rm /usr/lib/java
    TARGETDIR=`rpm -ql $JAVALINKTO|grep ^/usr/lib/jdk[^/]|head -n 1|cut -d/ -f 4`
-   ln -sf $TARGETDIR /usr/lib/java
+   ln -sf "$TARGETDIR" /usr/lib/java
 fi
 if ! test -z "$JRELINKTO" ; then
    test -L /usr/lib/jre && rm /usr/lib/jre
    TARGETDIR=`rpm -ql $JRELINKTO|grep ^/usr/lib/jre[^/]|head -n 1|cut -d/ -f 4`
-   if test $JRELINKTO = ibmjre2 ; then
-           ln -sf $TARGETDIR/jre /usr/lib/jre
+   if test $JRELINKTO = IBMJava2-JRE -o $JRELINKTO = ibmjre2 ; then
+           ln -sf "$TARGETDIR/jre" /usr/lib/jre
    else
-           ln -sf $TARGETDIR /usr/lib/jre
+           ln -sf "$TARGETDIR" /usr/lib/jre
    fi
 fi
 

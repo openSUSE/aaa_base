@@ -395,9 +395,15 @@ debug "(3) INVALID_BACKUPS: $INVALID_BACKUPS"
 # according stack as before and then take the last element of it.
 CHOOSEN_BACKUP=`echo "$INVALID_BACKUPS" | (read a b; echo "$a")`
 SUCC_BACKUP=`read_field_backup "$CHOOSEN_BACKUP"`
+unset LOOP_STOP
 while [ -r "$SUCC_BACKUP" ] ; do
+  LOOP_STOP="$LOOP_STOP $SUCC_BACKUP"
   CHOOSEN_BACKUP="$SUCC_BACKUP"
   SUCC_BACKUP=`read_field_backup "$CHOOSEN_BACKUP"`
+  # detect a loop
+  for a in $LOOP_STOP; do
+    test "$a" = "$SUCC_BACKUP" && SUCC_BACKUP=""
+  done
 done
 # IMHO this should be the at least dynamically modified file of all invalid
 # backups. 
