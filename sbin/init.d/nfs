@@ -28,7 +28,9 @@ done < /etc/fstab
 case `uname -r` in
    0.*|1.*|2.0.*) RPCSTATD="" ; RPCLOCKD="" ;;
    *)
+      test -x /usr/sbin/rpc.statd && RPCSTATD=/usr/sbin/rpc.statd
       test -x /usr/sbin/rpc.kstatd && RPCSTATD=/usr/sbin/rpc.kstatd
+      test -x /usr/sbin/rpc.lockd && RPCLOCKD=/usr/sbin/rpc.lockd
       test -x /usr/sbin/rpc.klockd && RPCLOCKD=/usr/sbin/rpc.klockd
       ;;
 esac

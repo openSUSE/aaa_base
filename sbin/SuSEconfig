@@ -13,6 +13,9 @@
 # Change ROOT_LOGIN_REMOTE support to edit PAM config files.
 # Thorsten Kukuk <kukuk@suse.de>, 1999
 #
+# Move PAM configuration into SuSEconfig.pam
+# Thorsten Kukuk <kukuk@suse.de>, 2000
+#
 
 echo "Started the SuSE-Configuration Tool."
 
@@ -668,51 +671,6 @@ if test "$SORT_PASSWD_BY_UID" = yes ; then
         rm $r/etc/$i.t
     done
 fi
-
-#
-# Now set ROOT_LOGIN_REMOTE.
-#
-if test -n "$ROOT_LOGIN_REMOTE" ; then
-    if test "$ROOT_LOGIN_REMOTE" = "yes" ; then
-        cat $r/etc/pam.d/login | \
-            sed 's@^[[:space:]]*auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)@#&@' \
-            > $r/etc/pam.d/login.SuSEconfig
-        cat $r/etc/pam.d/rlogin | \
-            sed 's@^[[:space:]]*auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)@#&@' \
-            > $r/etc/pam.d/rlogin.SuSEconfig
-    else
-        cat $r/etc/pam.d/login | \
-            sed 's@^[[:space:]]*#[[:space:]]*\(auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)\)@\1@' \
-            > $r/etc/pam.d/login.SuSEconfig
-        cat $r/etc/pam.d/rlogin | \
-            sed 's@^[[:space:]]*#[[:space:]]*\(auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)\)@\1@' \
-            > $r/etc/pam.d/rlogin.SuSEconfig
-    fi
-    check_md5_and_move $r/etc/pam.d/login
-    check_md5_and_move $r/etc/pam.d/rlogin
-fi
-
-#
-# Now set PASSWD_USE_CRACKLIB.
-#
-if test -n "$PASSWD_USE_CRACKLIB" ; then
-    for program in login rlogin passwd sshd gdm ; do
-    	if test -f $r/etc/pam.d/$program ; then
-	    if test "$PASSWD_USE_CRACKLIB" = "yes" ; then
-		sed '\@^[[:space:]]*password[[:space:]].*[/[:space:]]pam_pwcheck.so@ {
-     		   s@[[:space:]]*use_cracklib@@g
-     		   s@$@ use_cracklib@
-   		}' < $r/etc/pam.d/$program > $r/etc/pam.d/$program.SuSEconfig
-	    else
-		sed '\@^[[:space:]]*password[[:space:]].*[/[:space:]]pam_pwcheck.so@ {
-     		   s@[[:space:]]*use_cracklib@@g
-   		}' < $r/etc/pam.d/$program > $r/etc/pam.d/$program.SuSEconfig
-	    fi
-	    check_md5_and_move $r/etc/pam.d/$program
-	fi
-    done
-fi
-
 
 #
 # check login mode
