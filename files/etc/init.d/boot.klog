@@ -43,6 +43,10 @@ case "$1" in
 	    /usr/sbin/klogconsole -l 7 -r 0
 	fi
     fi
+    #
+    # Say blogd that I/O is possible now
+    #
+    killproc -IO /sbin/blogd
    ;;
   stop)
     rc_failed 3
@@ -59,10 +63,4 @@ case "$1" in
 esac
 
 rc_exit
-
-
-#
-# Say blogd that I/O is possible now
-#
-killproc -IO /sbin/blogd
 
