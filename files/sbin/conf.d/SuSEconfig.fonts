@@ -13,27 +13,34 @@ fi
 
 test -n "$ROOT" && exit 0
 
+LC_ALL=POSIX
+
 # test if not mounted readonly
 touch /usr/X11R6/lib/X11/fonts 2>/dev/null || exit 0
 
 if test "$CHECK_NEWPACKAGE" != false -a -x /usr/X11R6/bin/mkfontdir ; then
     for FDIR in /usr/X11R6/lib/X11/fonts/truetype \
+                /usr/X11R6/lib/X11/fonts/TTF \
+                /usr/X11R6/lib/X11/fonts/Type1 \
 		/usr/X11R6/lib/X11/fonts/CID ; do
 	if test -d $FDIR ; then
             FSHORT=${FDIR##/usr/X11R6/lib/X11/fonts/}
-	    echo "Updating fonts.scale for $FSHORT"
-	    echo 0 > $FDIR/fonts.scale
-	    for FONTS_SCALE in $( find $FDIR -follow -name "fonts.scale.*" )
-	    do
-		case $FONTS_SCALE in 
-                    *~|*.swp|*.bak|*.sav|*.save|*.rpmsave|*.rpmorig|*.rpmnew)
-                        continue
-                        ;;
-                    *)
-		        cat $FONTS_SCALE >> $FDIR/fonts.scale
-                        ;;
-                esac
-	    done
+	    FONTS_SCALE_LIST=$( find $FDIR -follow -name "fonts.scale.*" )
+	    if [ -n "$FONTS_SCALE_LIST" ] ; then
+                echo "Updating fonts.scale for $FSHORT"
+		echo 0 > $FDIR/fonts.scale
+		for FONTS_SCALE in $FONTS_SCALE_LIST
+		do
+		    case $FONTS_SCALE in 
+			*~|*.swp|*.bak|*.sav|*.save|*.rpmsave|*.rpmorig|*.rpmnew)
+			    continue
+			    ;;
+			*)
+			    grep -v "^[[:space:]]*$" $FONTS_SCALE >> $FDIR/fonts.scale
+			    ;;
+		    esac
+		done
+	    fi
 	fi
     done
     MKXPARMS=""
