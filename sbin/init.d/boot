@@ -76,6 +76,15 @@ if test -f /etc/mdtab -a -x /sbin/mdadd ; then
 fi
 
 #
+# If we use a serial console, don't use the fsck progress bar
+#
+if [ -z "$SERIAL_CONSOLE" ]; then
+   FSCK_PROGRESSBAR="-C"
+else
+   FSCK_PROGRESSBAR=""
+fi
+
+#
 # Find and activate volume groups (HM 1/1/1999)
 #
 if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
@@ -87,7 +96,7 @@ if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
 	esac
     done < /etc/fstab
 
-    fsck -C -a -t $type /
+    fsck $FSCK_PROGRESSBAR -a -t $type /
     FSCK_RETURN=$?
     # A return code of 1 indicates that file system errors
     # were corrected, but that the boot may proceed.
@@ -154,7 +163,7 @@ if test ! -f /fastboot -a -z "$fastboot" ; then
     mount -n -o remount,ro / 2> /dev/null
     if test $? = 0; then
         echo "Checking file systems..."
-        fsck -C -A -a $FSCK_FORCE
+        fsck $FSCK_PROGRESSBAR -A -a $FSCK_FORCE
         # A return code of 1 indicates that file system errors
         # were corrected, but that the boot may proceed.
         # A return code of 2 or larger indicates failure.

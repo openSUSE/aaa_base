@@ -1,0 +1,59 @@
+--- lib/YaST/bootsetup
++++ lib/YaST/bootsetup	2000/08/05 16:09:46
+@@ -305,56 +305,6 @@
+     echo " "
+     echo " "
+ 
+-    exec > /etc/issue-SuSE-first-run
+-    #
+-    # Ring the bell
+-    #
+-    tput bel
+-
+-    #
+-    # Almost white border line on grey background
+-    #
+-    tput smacs
+-    tput bold; tput setab 7; tput setaf 7
+-    echo -n Ú
+-    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+-    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+-    tput sgr0; tput setab 7; tput setaf 0
+-    echo ¿
+-    tput rmacs
+-
+-    #
+-    # Red text on grey background and borders on both sides
+-    #
+-    echo_login_as_root | while read line ; do
+-        tput bold; tput setab 7; tput setaf 7
+-        tput smacs; echo -n '³'; tput rmacs; echo -n "  "
+-        tput sgr0; tput setab 7; tput setaf 1
+-
+-        echo -n "$line" ; tput el; tput hpa 78
+-
+-        tput sgr0; tput setab 7; tput setaf 0
+-        tput smacs; echo -n '³'; tput rmacs
+-        tput setab 0; tput setaf 7; tput el
+-        tput cud1
+-
+-    done
+-
+-    #
+-    # Almost black border line on grey background
+-    #
+-    tput smacs
+-    tput bold; tput setab 7; tput setaf 7
+-    echo -n À
+-    tput sgr0; tput setab 7; tput setaf 0
+-    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+-    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+-    echo -n Ù
+-    tput rmacs
+-
+-    tput setab 0; tput setaf 7; tput sgr0; tput cud1
+-    echo
+-
+     exit 0
+ fi
+ 
