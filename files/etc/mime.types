@@ -44,7 +44,6 @@ application/powerpoint		ppt
 application/remote-printing
 application/rtf			rtf
 application/slate
-application/smil		smi smil
 application/wita
 application/wordperfect5.1	wp5
 application/vnd.wap.wbxml	wbxml
@@ -81,7 +80,6 @@ application/x-netcdf		nc cdf
 application/x-ns-proxy-autoconfig	pac
 application/x-perl		pl pm
 application/x-rad		rad
-# The standard is that rpm is audio/x-pn-realaudio-plugin... oh well...
 application/x-rpm		rpm spm
 application/x-sh		sh
 application/x-shar		shar
@@ -106,8 +104,6 @@ audio/midi			mid midi kar
 audio/mpeg			mpga mp2 mp3
 audio/x-mpegurl			m3u
 audio/x-aiff			aif aifc aiff
-audio/x-pn-realaudio		ra ram
-audio/x-pn-realaudio-plugin
 audio/x-realaudio		ra
 audio/x-wav			wav
 chemical/x-pdb			pdb
@@ -161,3 +157,14 @@ video/x-msvideo			avi
 video/x-sgi-movie		movie
 x-conference/x-cooltalk		ice
 x-world/x-vrml			wrl vrml
+audio/x-pn-realaudio rmm ram
+audio/vnd.rn-realaudio ra
+application/smil smi smil
+text/vnd.rn-realtext rt
+video/vnd.rn-realvideo rv
+image/vnd.rn-realflash rf swf
+application/x-shockwave-flash2-preview rf swf
+application/sdp sdp
+application/x-sdp sdp
+application/vnd.rn-realmedia rm
+image/vnd.rn-realpix rp
