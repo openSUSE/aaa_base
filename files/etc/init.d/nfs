@@ -22,6 +22,7 @@
 . /etc/rc.status
 
 nfs=no
+LDCONFIG_NEEDED=0
 while read  where what type options rest  ; do
     case "$where" in
 	\#*|"") ;;
@@ -29,7 +30,18 @@ while read  where what type options rest  ; do
 	    *noauto*) ;;
 	    *) if test "$type" = "nfs" ; then
 		    nfs=yes
-		    break
+		    case "$where" in
+			/usr*|/opt*)
+				LDCONFIG_NEEDED=1
+				break
+				;;
+			*)
+				if grep -q "^$where" /etc/ld.so.conf; then
+				    LDCONFIG_NEEDED=1
+				    break;
+				fi
+				;;
+		    esac
 		fi ;;
 	    esac
     esac
@@ -53,12 +65,16 @@ case "$1" in
 	#        Therefore we do _NOT_ use an ampersand!
 	#
 	  mount -at nfs
-	  rc_status
-	  sleep 1
 	#
     	# generate new list of available shared libraries
 	#
-	  ldconfig -X 2>/dev/null
+	  if test "$LDCONFIG_NEEDED" -gt 0; then
+	      rc_status
+	      sleep 1
+	      # check if ld.so.cache needs to be refreshed
+	      /etc/init.d/boot.ldconfig start > /dev/null 2>&1
+	  fi
+
 	  rc_status -v
 	else
 	  rc_status -u
