@@ -28,7 +28,9 @@
 /var/X11R6/scores                      root.root        1777
 /var/catman                            man.root          755
 /var/cron                              root.root         700
+/var/spool/cron			       root.root	 700
 /var/cron/tabs                         root.root         700
+/var/spool/cron/tabs		       root.root	 700
 /var/lib/xdm/authdir                   root.root         700
 /var/lib/xdm/authdir/authfiles         root.root         700
 /var/lock                              root.uucp         775
