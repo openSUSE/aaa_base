@@ -64,6 +64,7 @@ test -r /proc/mounts && mounts=/proc/mounts
 while read des fs type rest; do
     test "$fs" = "/proc"  && continue
     test "$type" = "proc" && umount -t proc $fs
+    test "$type" = "devpts" && umount -t devpts $fs
 done < $mounts
 
 UMOUNT_FAILED=false
