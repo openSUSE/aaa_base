@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.28
+# Version 1.30
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 #         Susanne Oberhauser  <froh@suse.de>
@@ -32,6 +32,10 @@
 #
 # ChangeLog:
 #
+# 21/8/2002:    v1.30
+# - uuid/label: detect real device with fsck hack
+# - pivot_root: almost completely rewritten, now honors root= kernel
+#   option
 # 19/8/2002:    v1.29
 # - fixed use_pivot_root:
 # - use_pivot_root for root device specified via LABEL= or UUID= in
@@ -135,10 +139,10 @@ usage() {
           -h               This Text.
           -k "kernel list" list of kernel images for which initrd files
                            are created (relative to boot_dir)
-                           defaults to "vmlinuz vmlinuz.suse"
+                           defaults to "vmlinuz vmlinuz.shipped"
           -i "initrd list" list of file names (relativ to boot_dir) for
                            the initrd; position have match to "kernel list"
-                           defaults to "initrd initrd.suse"
+                           defaults to "initrd initrd.shipped"
           -m "module list" modules to include in initrd, defaults to
                            INITRD_MODULES variable in /etc/sysconfig/kernel
           -b boot_dir      boot dir, defaults to "/boot"
@@ -173,9 +177,9 @@ EOF
 # general configurable parameters
 
 # the kernel images to use; must be in $boot_dir
-kernels_default="vmlinuz vmlinuz.suse"
+kernels_default="vmlinuz vmlinuz.shipped"
 # initial ram disks (corresponding to $kernels); dto. in $boot_dir
-initrds_default="initrd initrd.suse"
+initrds_default="initrd initrd.shipped"
 
 kernels=""
 initrds=""
@@ -255,7 +259,10 @@ shift `expr $OPTIND - 1`
 [ "x$splash" = xoff ] && splash=
 if [ "x$splash" = xauto ] ; then
     splash=
-    for vga in `test -f $root_dir/etc/lilo.conf && sed -n -e '/^[	]*#/d' -e 's/[	]*vga[	]*='//p <$root_dir/etc/lilo.conf`; do
+    vgascan=/dev/null
+    test -f $root_dir/etc/lilo.conf && vgascan="$vgascan $root_dir/etc/lilo.conf"
+    test -f $root_dir/boot/grub/menu.lst && vgascan="$vgascan $root_dir/boot/grub/menu.lst"
+    for vga in `cat $vgascan | sed -n -e '/^[ 	]*#/d' -e 's/^.*[ 	]*vga[ 	]*=[ 	]*\([0-9x]*\).*$/\1/p'` ; do
 	splashsize=
 	case $vga in
 	    785|786|0x311|0x312) splashsize=640x480   ;;
@@ -358,80 +365,40 @@ tmp_initrd_small=${tmp_initrd}_small
 
 ###################################################################
 
-# mkinitrd assumes, the root device is mentioned in root_dir/etc/fstab
-# and is currently
-#
-# the former is necessary for LABEL= and UUID= support, the latter is
-# for LVM detection.
-
-# find the root device in /etc/fstab
-while read \
-    fstab_device \
-    fstab_mountpoint \
-    fstab_type \
-    fstab_options \
-    dummy
-  do
-  test "$fstab_mountpoint" = "/" && break
-done < <(
-    # remove comments and empty lines
-    sed < $root_dir/etc/fstab '
-    s,#.*,,
-    /^[[:space:]]*$/d'  ) ||
-error 1 "no '/' mountpoint specified in root_dir/etc/fstab."
-
-case $fstab_device in
-    LABEL=*)
-	eval $fstab_device
-	mount_device="-L $LABEL"
-	use_pivot_root=1
-	;;
-    UUID=*)
-	eval $fstab_device
-	mount_device="-U $UUID"
-	use_pivot_root=1
-	;;
-    *)
-	mount_device=$fstab_device
-	;;
-esac
-
-# if the root device is not given explicitely determine it from the
-# $root_dir
 if [ -z "$rootdev" ] ; then
-    while read \
-	proc_mounts_device \
-	proc_mounts_mountpoint \
-	proc_mounts_type \
-	proc_pounts_options \
-	dummy
-      do
-      test "$proc_mounts_mountpoint" = "$root_dir" && break
-    done < <(
-	# list the actually mounted filesystems from behind (the last
-	# one rules) .  a plain tac /proc/mounts did not work.
-	cat /proc/mounts | tac
-    ) || {
-	error 1 "\
-no root device given and nothing mounted below root_dir."
+  # no rootdev specified, get current root from /etc/fstab
+  while read fstab_device fstab_mountpoint fstab_type fstab_options dummy ; do
+    test "$fstab_mountpoint" = "/" && {
+      rootdev="$fstab_device"
+      rootfstype="$fstab_type"
+      break
     }
-    # we found a mounted root device
-    rootdev=$proc_mounts_device
+  done < <( sed -e '/^[ 	]*#/d' < $root_dir/etc/fstab)
+else
+  # get type from /etc/fstab or /proc/mounts (actually not needed)
+  x1=`cat /etc/fstab /proc/mounts 2>/dev/null | grep -E "$rootdev[[:space:]]" | tail -1`
+  rootfstype=`echo $x1 | cut -f 3 -d " "`
 fi
 
-test "$rootdev" = "$proc_mounts_device" || {
-    echo "\
-warning: given root device <$rootdev> and probed root device
-from /proc/mounts <$proc_mounts_device> mismatch"
-}
+test -z "$rootdev" && error 1 "no '/' mountpoint specified in $root_dir/etc/fstab."
+
+realrootdev="$rootdev"
+case "$rootdev" in
+  LABEL=*|UUID=*)
+    use_pivot_root=1
+    # get real root via fsck hack
+    realrootdev=`fsck -N "$rootdev" | sed -ne '2s/.* \/dev/\/dev/p' | sed -e 's/  *//g'`
+    test -n "$realrootdev" || error 1 "could not expand $rootdev to real device."
+    ;;
+esac
 
 # no mk_initrd without a root device
 [ "$rootdev" ] || error 1 "usage: mk_initrd [root_dir]"
 
 # check if the root device is an lvm device
 root_lvm=0
-if [ -b "$rootdev" ] ; then
-    major=`ls -l "$rootdev" | sed -e "s/.* \\([0-9]\+\\), *[0-9]\+.*/\\1/"`
+if [ -b "$realrootdev" ] ; then
+    major=`ls -l "$realrootdev" | sed -e "s/.* \\([0-9]\+\\), *[0-9]\+.*/\\1/"`
     [ "$major" -ne 58 ] || root_lvm=1
 fi
 
@@ -486,20 +453,10 @@ grep -q '^[[:space:]]*options[[:space:]]\+dasd' $root_dir/etc/modules.conf && da
 #test "$zipl_conf_with_dasd" -o "$dasd_modules_conf" && do_dasd=1
 
 ###################################################################
-# check the filesystem type of the mounted root
 
-test "$proc_mounts_type" = "$fstab_type" || {
-    error 1 "
-filesystem types for mounted root <$proc_mounts_type>
-and fstab root <$fstab_type> mismatch."
-}
-
-# [ "$fstab_type" = ext3 ] && use_pivot_root=1
-case "$fstab_type" in
-    jfs) use_pivot_root=1;;
-esac
-
-echo "using \"$rootdev\" as root device (mounted on \"$root_dir\" as \"$fstab_type\")"
+x=
+test "$rootdev" != "$realrootdev" && x=" ($realrootdev)"
+echo "using \"$rootdev\"$x as root device (mounted on \"$root_dir\" as \"$rootfstype\")"
 
 # get INITRD_MODULES as set by YaST
 [ -f "$root_dir/etc/sysconfig/kernel" ] && . $root_dir/etc/sysconfig/kernel
@@ -517,7 +474,7 @@ fi
 #
 # on s390 the initrd is always needed as long as we don't set the
 # initrd flag in /etc/zipl.conf with YaST.
-[ "$modules" -o "$root_lvm" = 1 -o -n "$oem" -o -n "$splash" -o "$arch" = s390 ] || {
+[ "$modules" -o "$root_lvm" = 1 -o "$use_pivot_root" = 1 -o -n "$oem" -o -n "$splash" -o "$arch" = s390 ] || {
   ( cd $root_dir$boot_dir ; rm -f $initrds )
   error 0 "no initrd required"
 }
@@ -712,14 +669,18 @@ for k in $kernels ; do
 
     if [ "$use_pivot_root" ] ; then
       echo " - pivot root support"
-      cp -a $root_dir/bin/mkdir $tmp_mnt/bin
       cp -a $root_dir/sbin/pivot_root $tmp_mnt/bin
+      cp -a $root_dir/bin/cat $tmp_mnt/bin
+      mkdir -p $tmp_mnt/mnt
     fi
 
     if [ "$has_jfs" ] ; then
       echo " - JFS recovery support"
+      cp -a $root_dir/sbin/fsck $tmp_mnt/bin
       cp -a $root_dir/sbin/fsck.jfs $tmp_mnt/bin
       cp -a $root_dir/lib/libpthread.so.* $tmp_mnt/lib
+      cp -a $root_dir/lib/libext2fs.so.* $tmp_mnt/lib
+      cp -a $root_dir/lib/libcom_err.so.* $tmp_mnt/lib
     fi
 
     if [ "$do_zfcp" ] ; then
@@ -789,51 +750,55 @@ for k in $kernels ; do
     [ -n "$oem" ] && cat $oem >> $lx_rc
 
     if [ "$has_jfs" ] ; then
-	# this test can go away when the lookup via LABEL/UUID is
-	# implemented for jfs:
-	test "$rootdev" = "$fstab_device" || {
-	    oops 9 "mount per LABEL= or UUID= is not supported on jfs."
-	    continue
-	}
-	echo "fsck.jfs $rootdev" >>$lx_rc
+	echo "fsck $rootdev" >>$lx_rc
     fi
 
     if [ "$use_pivot_root" ] ; then
-	echo " - pivot root to mount device $mount_device"
 	cat >>$lx_rc <<EOF
 # mount proc for /proc/sys/kernel/real-root-dev and /proc/partitions
-# (mount(8))
-mount -tproc none /proc
-# tell the kernel the major *256 + minor of the root device to prevent
-# a panic later (magic)
-#echo 512 > /proc/sys/kernel/real-root-dev
+opt="-oro"
+rootdev="$rootdev"
+root=
+nopivot=
+mount -n -tproc none /proc
+# bug in ash, need cat
+for o in \`cat /proc/cmdline\` ; do
+  test "\$o" = rw && opt=
+  case \$o in
+    root=ROOT=*) root="\$o" ;;
+    root=LABEL=*) root="\$o" ;;
+    root=*) nopivot=1
+  esac
+done
+if test -n "\$nopivot" ; then
+  umount -n /proc
+  exit 0
+fi
 
+if test -n "\$root" ; then
+  # sed free programming
+  echo "\$root" > /.root
+  oifs="\$IFS"
+  IFS="="
+  read dummy rootdev < /.root
+  IFS="\$oifs"
+fi
 
+# tell kernel root is /dev/ram0, prevents remount after initrd
+echo 256 > /proc/sys/kernel/real-root-dev
 # mount the actual root device below /mnt
-mkdir -p /mnt
-mount -n -oro -t $fstab_type $mount_device /mnt
-
-umount /proc
-
-# pivot initrd and actual root.  This is a function, so the shell has
-# parsed it completely before doing the pivot_root(2).
-pivot_root_and_initrd ()
-{
-    cd /mnt
-    if test -d initrd
-    then
-       PIVOT_DIR=initrd
-       AFTER_MOUNT="exit"
-    else
-       PIVOT_DIR=tmp
-       AFTER_MOUNT="umount /tmp; exit"
-    fi
-    pivot_root . \$PIVOT_DIR
-    exec sh -c "\$AFTER_MOUNT" <dev/console >dev/console 2>&1
-}
-
-pivot_root_and_initrd
-# NOT REACHED
+echo "Mounting root \$rootdev"
+mount -n \$opt \$rootdev /mnt || exit 1
+umount -n /proc
+# do pivot-root call
+cd /mnt
+exec <dev/console >dev/console 2>&1
+if test -d initrd ; then
+   exec pivot_root . initrd
+else
+   pivot_root . tmp
+   exec bin/umount -n /tmp
+fi
 EOF
     fi
 

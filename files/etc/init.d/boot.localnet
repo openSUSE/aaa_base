@@ -56,7 +56,7 @@ case "$1" in
 	unset XDOMAINNAME
 
 	test -x /sbin/ifup -a -f /etc/sysconfig/network/ifcfg-lo && {
-	    echo -n Setting up loopback interface
+	    echo -n "Setting up loopback interface "
 	    /sbin/ifup lo
             rc_status -v -r
 	}
