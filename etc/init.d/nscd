@@ -136,7 +136,7 @@ case "$1" in
 
 	# If it supports signalling:
 	echo -n "Reload Name Service Cache Daemon"
-	killproc -HUP $NSCD_BIN
+	rc_failed 3
 	rc_status -v
 	;;
     status)

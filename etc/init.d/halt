@@ -93,6 +93,28 @@ echo "Sending all processes the KILL signal..."
 killall5 -9
 echo -e "$rc_done_up"
 
+if test "$HOSTTYPE" = "s390" ; then
+    HWCLOCK_ACCESS=no
+fi
+if test "$HWCLOCK_ACCESS" != "no" ; then
+    echo -n "Set Hardware Clock to the current System Time:"
+    CLOCKCMD=hwclock
+    while read line; do
+        case "$line" in
+                *MTX\ Plus*) CLOCKCMD="hwclock --mtxplus --directisa" ;;
+                *PReP\ Dual\ MTX*) CLOCKCMD="hwclock --mtxplus --directisa" ;;
+        esac
+    done < /proc/cpuinfo
+    if test "$GMT" != "YAST_ASK" ; then
+        # write back to hardware clock and calculate adjtime
+	$CLOCKCMD --systohc $GMT
+	rc_status
+    fi
+    rc_status -v -r
+fi
+
+
+
 echo "Turning off swap"
 sync ; sync
 rc_reset
