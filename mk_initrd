@@ -503,7 +503,7 @@ has_nls=
 has_qdio=
 for i in $modules ; do
   case $i in
-    raid[01]|linear) do_raid=1 ;;
+    raid[01]|linear|multipath) do_raid=1 ;;
     raid5) do_raid=1 do_raid5=1 ;;
     zfcp) do_zfcp=1 ; has_zfcp=1;;
     dasd) do_dasd=1 ; has_dasd=1;;
