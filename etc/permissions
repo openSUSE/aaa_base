@@ -253,6 +253,95 @@
 /usr/bin/faxrunq                       root.root         700
 
 #
+# Startup scripts
+#
+/sbin/init.d/abuild                    root.root         744
+/sbin/init.d/acct                      root.root         744
+/sbin/init.d/adabas                    root.root         744
+/sbin/init.d/apache                    root.root         744
+/sbin/init.d/apmd                      root.root         744
+/sbin/init.d/argo                      root.root         744
+/sbin/init.d/argus                     root.root         744
+/sbin/init.d/arkeia                    root.root         744
+/sbin/init.d/at                        root.root         744
+/sbin/init.d/atalk                     root.root         744
+/sbin/init.d/autofs                    root.root         744
+/sbin/init.d/axnet                     root.root         744
+/sbin/init.d/boot                      root.root         744
+/sbin/init.d/boot.d                    root.root         744
+/sbin/init.d/boot.setup                root.root         744
+/sbin/init.d/cdb                       root.root         744
+/sbin/init.d/cipe                      root.root         744
+/sbin/init.d/cron                      root.root         744
+/sbin/init.d/dhclient                  root.root         744
+/sbin/init.d/dhcp                      root.root         744
+/sbin/init.d/dhcrelay                  root.root         744
+/sbin/init.d/diald                     root.root         744
+/sbin/init.d/dummy                     root.root         744
+/sbin/init.d/firewall                  root.root         744
+/sbin/init.d/functions                 root.root         744
+/sbin/init.d/gpm                       root.root         744
+/sbin/init.d/halt                      root.root         744
+/sbin/init.d/hylafax                   root.root         744
+/sbin/init.d/i4l                       root.root         744
+/sbin/init.d/i4l_hardware              root.root         744
+/sbin/init.d/inetd                     root.root         744
+/sbin/init.d/inn                       root.root         744
+/sbin/init.d/ipfwadm                   root.root         744
+/sbin/init.d/ircd                      root.root         744
+/sbin/init.d/kbd                       root.root         744
+/sbin/init.d/kerneld                   root.root         744
+/sbin/init.d/ldap                      root.root         744
+/sbin/init.d/lpd                       root.root         744
+/sbin/init.d/masquerade                root.root         744
+/sbin/init.d/mysql                     root.root         744
+/sbin/init.d/named                     root.root         744
+/sbin/init.d/network                   root.root         744
+/sbin/init.d/nfs                       root.root         744
+/sbin/init.d/nfsserver                 root.root         744
+/sbin/init.d/ntopd                     root.root         744
+/sbin/init.d/nwe                       root.root         744
+/sbin/init.d/pcmcia                    root.root         744
+/sbin/init.d/pcnfsd                    root.root         744
+/sbin/init.d/postgres                  root.root         744
+/sbin/init.d/powerfail                 root.root         744
+/sbin/init.d/quota                     root.root         744
+/sbin/init.d/quotad                    root.root         744
+/sbin/init.d/radiusd                   root.root         744
+/sbin/init.d/random                    root.root         744
+/sbin/init.d/rc                        root.root         744
+/sbin/init.d/reboot                    root.root         744
+/sbin/init.d/rinetd                    root.root         744
+/sbin/init.d/route                     root.root         744
+/sbin/init.d/routed                    root.root         744
+/sbin/init.d/rpc                       root.root         744
+/sbin/init.d/rwhod                     root.root         744
+/sbin/init.d/rx                        root.root         744
+/sbin/init.d/sendmail                  root.root         744
+/sbin/init.d/serial                    root.root         744
+/sbin/init.d/single                    root.root         744
+/sbin/init.d/skeleton                  root.root         744
+/sbin/init.d/smb                       root.root         744
+/sbin/init.d/snifflic                  root.root         744
+/sbin/init.d/snmpd                     root.root         744
+/sbin/init.d/squid                     root.root         744
+/sbin/init.d/sshd                      root.root         744
+/sbin/init.d/svgatext                  root.root         744
+/sbin/init.d/synchro                   root.root         744
+/sbin/init.d/syslog                    root.root         744
+/sbin/init.d/virtuoso                  root.root         744
+/sbin/init.d/vshopdb                   root.root         744
+/sbin/init.d/wwwoffle                  root.root         744
+/sbin/init.d/xdm                       root.root         744
+/sbin/init.d/xinetd                    root.root         744
+/sbin/init.d/xntpd                     root.root         744
+/sbin/init.d/ypclient                  root.root         744
+/sbin/init.d/yppasswdd                 root.root         744
+/sbin/init.d/ypserv                    root.root         744
+/sbin/init.d/ypxfrd                    root.root         744
+
+
+#
 # 'normal stuff' (e.g. former suid stuff)
 #
 /usr/X11R6/bin/SuperProbe              root.root         755
