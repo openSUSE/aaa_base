@@ -69,6 +69,9 @@ case "$1" in
    #
    # Enable IPv6 forwarding ?
    #
+   case $IPV6_FORWARD in
+      yes) /sbin/modprobe ipv6 >/dev/null 2>&1 ;;
+   esac
    if test -e /proc/sys/net/ipv6/conf/all/forwarding -a -n "$IPV6_FORWARD" ; then
     case $IPV6_FORWARD in
       yes)
