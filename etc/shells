@@ -3,6 +3,7 @@
 /bin/bash1
 /bin/csh
 /bin/false
+/bin/ksh
 /bin/sh
 /bin/tcsh
 /bin/true
