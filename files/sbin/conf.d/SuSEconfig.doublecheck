@@ -33,7 +33,7 @@ test -f /etc/rc.config && RCCONFIG="/etc/rc.config"
 FIND_CMD="find $RCCONFIG /etc/sysconfig -type f -maxdepth 1 \
  ! -name \"*.rpmsave\" ! -name \"*.rpmorig\" ! -name \"*~\" \
  ! -name \"*.old\" ! -name \"*.tmp\" ! -name \"*.orig\" \
- ! -name \"*.sav\" ! -name \"*.org\" "
+ ! -name \"*.sav\" ! -name \"*.org\" ! -name \"*,v\" "
 
 eval $FIND_CMD | xargs grep -vh "^#" | grep "=" | cut -d= -f1 | sort | uniq -d \
   > $MYTMP/toomuch
