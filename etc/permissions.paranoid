@@ -194,6 +194,7 @@
 /usr/bin/screen                        root.trusted     4750
 /usr/bin/screen-3.7.1                  root.trusted     4750
 /usr/bin/screen-3.7.3                  root.trusted     4750
+/usr/bin/screen-3.7.6                  root.trusted     4750
 # No need for this suid root, or ?
 /usr/bin/ssh                           root.root        755
 /usr/local/bin/ssh                           root.root        755
