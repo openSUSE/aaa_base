@@ -64,8 +64,8 @@ check_log_file () {
         -exec rm -f "$1".o \; \
         -exec cp "$1" "$1".o \; \
         -exec cp /dev/null "$1" \; \
-        -exec chmod $3 "$1" \; \
-        -exec chown $4 "$1" \; 
+        -exec chmod $3 "$1" "$1.o" \; \
+        -exec chown $4 "$1" "$1.o" \; 
 
     if test -f "$1".o; then
 
@@ -127,12 +127,12 @@ fi
 
 # Delete too old nvi-saved files.
 if test -d /var/tmp/vi.recover; then
-	find /var/tmp/vi.recover -type f -mtime +7 -exec rm -f -- {} \;
+    find /var/tmp/vi.recover -type f -mtime +7 -exec rm -f -- {} \;
 fi
 
 # Recover nvi-saved files.
 if test -x /usr/sbin/recover.nvi; then
-	/usr/sbin/recover.nvi
+    /usr/sbin/recover.nvi
 fi
 
 #
@@ -145,18 +145,18 @@ if [ "$MAX_DAYS_IN_TMP" -gt 0 ] ; then
     done
 
     for TMP_DIR in $TMP_DIRS_TO_CLEAR ; do
-        for DEL_FILE in `find $TMP_DIR $OMIT \( -type f -o -type l \) \
+        for DEL_FILE in `find $TMP_DIR/. $OMIT \( -type f -o -type l \) \
                          -atime +$MAX_DAYS_IN_TMP | sort -r` ; do
             rm -f $DEL_FILE
             DEL_DIR=`dirname $DEL_FILE`
-            if [ "$DEL_DIR" != "$TMP_DIR" ] ; then
+            if [ "$DEL_DIR" != "$TMP_DIR/." ] ; then
                 rmdir $DEL_DIR 2> /dev/null
             fi
         done
     done
-    for DEL_DIR in `find $TMP_DIR $OMIT \( -type d \) \
+    for DEL_DIR in `find $TMP_DIR/. $OMIT \( -type d \) \
                     -ctime +$MAX_DAYS_IN_TMP | sort -r` ; do
-        if [ "$DEL_DIR" != "$TMP_DIR" ] ; then
+        if [ "$DEL_DIR" != "$TMP_DIR/." ] ; then
             rmdir $DEL_DIR 2> /dev/null
         fi
     done

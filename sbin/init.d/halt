@@ -13,6 +13,7 @@ case "$0" in
 	*halt)
 		message="The system will be halted immediately."
 		command="halt"
+		test -e /proc/apm && command="halt -p"
 		;;
 	*reboot)
 		message="Please stand by while rebooting the system..."

@@ -6,7 +6,7 @@
 #         Werner Fink <werner@suse.de>, 1996
 #         Burchard Steinbild <bs@suse.de>, 1996
 #
-# /sin/init.d/boot
+# /sbin/init.d/boot
 #
 # first script to be executed from init on system startup
 #

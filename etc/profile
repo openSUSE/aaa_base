@@ -34,6 +34,7 @@ for DIR in /usr/openwin/bin \
            /var/lib/dosemu \
            /usr/games/bin \
            /usr/games \
+           /opt/bin \
            /opt/gnome/bin \
            /opt/kde/bin ; do
     test -d $DIR && PATH=$PATH:$DIR

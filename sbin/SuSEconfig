@@ -202,13 +202,20 @@ if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
     NET_DEVICE_FOUND=false
 
     if test -n "$NETCONFIG" -a "$NETCONFIG" != "YAST_ASK" ; then
+        NICKNAME_PRINTED=false
         for I in $NETCONFIG ; do
             eval IPADDR=\$IPADDR$I
             if test -n "$IPADDR" ; then
                 test -x /usr/bin/cut && \
                     IPADDR=`echo "$IPADDR              " | /usr/bin/cut -c -15`
-                grep -w ${IPADDR} $r/etc/hosts > /dev/null || \
-                    echo "$IPADDR	$FQHOSTNAME 	$NICKNAME" >> $r/etc/hosts
+                grep -w ${IPADDR} $r/etc/hosts > /dev/null || {
+                    if test "$NICKNAME_PRINTED" = false ; then
+                        echo "$IPADDR	$FQHOSTNAME 	$NICKNAME" >> $r/etc/hosts
+                        NICKNAME_PRINTED=true
+                    else
+                        echo "$IPADDR	$FQHOSTNAME" >> $r/etc/hosts
+                    fi
+                }
                 echo "$IPADDR" >> $OLDHOSTENTRY
                 NET_DEVICE_FOUND=true
             fi

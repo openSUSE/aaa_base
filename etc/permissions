@@ -175,6 +175,7 @@
 /var/log/wtmp                          root.tty          664
 /var/log/xdm.errors                    root.root         640
 /var/run/utmp                          root.tty          664
+/var/lib/gdm                           gdm.shadow        750
 /var/spool/atjobs/.SEQ                 at.at             600
 /var/spool/atjobs/.lockfile            at.at             600
 

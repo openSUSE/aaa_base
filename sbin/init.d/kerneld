@@ -5,7 +5,7 @@
 # Author: Burchard Steinbild <bs@suse.de>, 1996
 #	  
 #
-# /sin/init.d/kerneld
+# /sbin/init.d/kerneld
 #
 
 . /etc/rc.config
