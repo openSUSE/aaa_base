@@ -8,7 +8,7 @@ set noautoindent
 " suchen case-insenitiv
 set ignorecase
 
-" weiss nicht mehr ...
+" Koordinatenanzeige aktivieren
 set ruler
 
 " shell to start with !
