@@ -224,6 +224,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     test -x /sbin/init.d/pcmcia && /sbin/init.d/pcmcia start
 
     sleep 1
+    /sbin/portmap
     /sbin/yast --nomenu
 
     test -x /sbin/init.d/pcmcia && /sbin/init.d/pcmcia stop
