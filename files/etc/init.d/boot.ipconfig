@@ -1,0 +1,62 @@
+#! /bin/sh
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# /etc/init.d/boot.ipconfig
+#
+### BEGIN INIT INFO
+# Provides:          boot.ipconfig
+# Required-Start:    serial boot.setup boot.isapnp
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       run ip configuration hooks
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/rc.config
+#
+# Enable "dynamic IP patch"
+#
+if test -n "$IP_DYNIP" -a "$IP_DYNIP" != no -a \
+    -e /proc/sys/net/ipv4/ip_dynaddr ; then
+    echo -n "Enabling dynamic IP patch"
+    case "$IP_DYNIP" in
+	yes)    echo 7         ; ECHO_RETURN=$rc_done ;;
+	[1-9])  echo $IP_DYNIP ; ECHO_RETURN=$rc_done ;;
+	*)      ECHO_RETURN=" invalid IP_DYNIP=$IP_DYNIP $rc_skipped" ;;
+    esac > /proc/sys/net/ipv4/ip_dynaddr || ECHO_RETURN=$rc_failed
+    echo -e "$ECHO_RETURN"
+fi
+
+#
+# Enable syn flood protection
+#
+if test -n "$IP_TCP_SYNCOOKIES" -a "$IP_TCP_SYNCOOKIES" != no -a \
+    -e /proc/sys/net/ipv4/tcp_syncookies ; then
+    echo -n "Enabling syn flood protection"
+    case "$IP_TCP_SYNCOOKIES" in
+        yes)    echo 1         ; ECHO_RETURN=$rc_done ;;
+        *)      ECHO_RETURN=" invalid IP_TCP_SYNCOOKIES=$IP_TCP_SYNCOOKIES $rc_skipped" ;;
+    esac > /proc/sys/net/ipv4/tcp_syncookies || ECHO_RETURN=$rc_failed
+    echo -e "$ECHO_RETURN"
+fi
+
+
+#
+# Enable IP forwarding ?
+#
+if test -e /proc/sys/net/ipv4/ip_forward -a -n "$IP_FORWARD" ; then
+    case $IP_FORWARD in
+      yes)
+        echo -n "Enabling IP forwarding"
+        echo "1" > /proc/sys/net/ipv4/ip_forward
+      ;;
+      *)
+        echo -n "Disabling IP forwarding"
+        echo "0" > /proc/sys/net/ipv4/ip_forward
+      ;;
+    esac
+    rc_status -v -r
+fi
+

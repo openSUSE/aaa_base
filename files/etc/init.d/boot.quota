@@ -1,0 +1,32 @@
+#! /bin/sh
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# /etc/init.d/boot.quota
+#
+### BEGIN INIT INFO
+# Provides:          boot.quota
+# Required-Start:    boot.crypto boot.swap boot.clock
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       check quotas if necessary (if fsck returned 1)
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/rc.config
+#
+#
+# reinit quota, if fsck has returned value != 0
+#
+
+if test -e /fsck_corrected_errors -a -n "$START_QUOTA" -a "$START_QUOTA"="yes" ; then
+    # Check quota and then turn quota on.
+    if test -x /sbin/quotacheck ; then
+        echo "Checking quotas. This may take some time."
+        /sbin/quotacheck -avug
+	rc_status -v1 -r
+    fi
+fi
+
+

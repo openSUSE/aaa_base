@@ -1,0 +1,54 @@
+#! /bin/sh
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# /etc/init.d/boot.proc
+#
+### BEGIN INIT INFO
+# Provides:          boot.proc
+# Required-Start:    
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       sets some procfs values
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/rc.config
+#
+# check if sysrq should be enabled
+#
+if test -e /proc/sys/kernel/sysrq ; then
+if test "$ENABLE_SYSRQ" = yes ; then
+    echo "1" > /proc/sys/kernel/sysrq 
+else
+    echo "0" > /proc/sys/kernel/sysrq 
+fi
+fi
+
+#
+# check if STOP-A should be enabled
+#
+if test -e /proc/sys/kernel/stop-a ; then
+if test "$ENABLE_STOP_A" = yes ; then
+    echo "1" > /proc/sys/kernel/stop-a
+else
+    echo "0" > /proc/sys/kernel/stop-a
+fi
+fi
+
+#
+# check if splashscreen should be disabled
+#
+if test -e /proc/splash ; then
+if test "$BOOT_SPLASH" = "no" ; then
+    echo "0" > /proc/splash
+fi
+fi
+
+# Disable ECN if required.
+if test "$DISABLE_ECN" = "yes" -a -f /proc/sys/net/ipv4/tcp_ecn; then
+	echo "0" >/proc/sys/net/ipv4/tcp_ecn
+fi
+
+rc_splash "fsck start"

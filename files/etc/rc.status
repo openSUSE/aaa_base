@@ -31,6 +31,10 @@
 #    \015          carriage return (without newline)
 #
 
+# check whether splash screen animations are installed.
+_rc_splash=0
+test -x /bin/splash && _rc_splash=1
+
 if test -z "$LINES" -o -z "$COLUMNS" ; then
     eval `stty size 2>/dev/null | (read L C; \
 	  echo LINES=${L:-24} COLUMNS=${C:-80})`
@@ -196,4 +200,8 @@ function rc_failed ()
 function rc_exit ()
 {
     exit $_rc_status_all
+}
+function rc_splash()
+{
+    test "$BOOT_SPLASH" != "no" && test "$_rc_splash" -eq 1 && /bin/splash "$1"
 }

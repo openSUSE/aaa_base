@@ -115,6 +115,9 @@ for i in $prerc/K${rex}*; do
     test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
     test -x "$1"  && continue
 
+    # send information to splash icon viewer.
+    rc_splash  "$i stop"
+
     # Log to /var/log/boot.msg
     blogger "$i stop"
 
@@ -143,6 +146,9 @@ for i in $runrc/S${rex}*; do
     set -- $prerc/K$rex$service
     test $# -gt 1 && echo -e "$attn$prerc/: more than one link for service $service$norm"
     test -x "$1"  && continue
+
+    # send information to splash icon viewer.
+    rc_splash  "$i start"
 
     # Log to /var/log/boot.msg
     blogger "$i start"
@@ -175,6 +181,9 @@ done
 #    FAIL : 7 - program is not running (doing "start")
 #    OK   : 7 - program is not running (doing "stop")
 #
+
+rc_splash "master"
+
 echo -n "Master Resource Control: "
 echo -e "runlevel ${RUNLEVEL} has been ${stat}${extd}reached${norm}"
 if test -n "$failed" ; then

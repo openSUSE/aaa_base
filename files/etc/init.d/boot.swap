@@ -1,0 +1,44 @@
+#! /bin/sh
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# /etc/init.d/boot.swap
+#
+### BEGIN INIT INFO
+# Provides:          boot.swap
+# Required-Start:    boot.lvm boot.localfs boot.crypto
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       start rest of swap devices and shmfs
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/rc.config
+
+#
+# After mounting we may activate swap files in /etc/fstab
+# .. this should work know with the new swapon behavio(u)r
+#
+echo "Activating remaining swap-devices in /etc/fstab..."
+swapon -a &> /dev/null
+rc_status -v1 -r
+rc_splash "fsck stop"
+
+
+#
+# mount shmfs is necessary (2.4 kernels)
+#
+unset HAVE_SHM
+while read dev type; do
+    test "$type" = "shm" && HAVE_SHM=1
+done < /proc/filesystems
+if test ! -z "$HAVE_SHM"; then
+    ECHO_RETURN=$rc_done
+    test -d /dev/shm || mkdir /dev/shm
+    echo -n "Mount SHM FS on /dev/shm"
+    mount -t shm shmfs /dev/shm || ECHO_RETURN=$rc_failed
+    echo -e $ECHO_RETURN
+fi	    
+#unset HAVE_SHM
+

@@ -1,0 +1,73 @@
+#! /bin/sh
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# /etc/init.d/boot.localnet
+#
+### BEGIN INIT INFO
+# Provides:          boot.localnet
+# Required-Start:    boot.quota boot.ldconfig boot.loopback
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       setup hostname and yp and do cleanup
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/rc.config
+
+rc_splash "bootnetwork start"
+
+# clean up old yp bindings
+rm -f /var/yp/binding/*.[12]
+
+#
+# set hostname and domainname
+#
+test -n "$FQHOSTNAME" && {
+    echo -n Setting up hostname
+    hostname ${FQHOSTNAME%%.*}
+    rc_status -v -r
+}
+test -n "$YP_DOMAINNAME" && {
+    echo -n Setting up YP domainname
+    domainname $YP_DOMAINNAME
+    rc_status -v -r
+} || domainname ""
+
+#
+# clean up
+#
+rm -rf /tmp/screens 2>/dev/null
+rm -f /var/lock/* /var/lock/*/* /tmp/.X*lock \
+      /var/run/*  /var/run/*/*  /var/spool/uucp/LCK* \
+      /var/run/utmp /fsck_corrected_errors 2>/dev/null
+echo -n > /var/run/utmp
+chmod 664 /var/run/utmp
+chown root.tty /var/run/utmp
+# Restore a possibly dynamically modified /etc/resolv.conf
+if ls /etc/resolv.conf.saved.by.* &>/dev/null ; then
+    echo "/sbin/modify_resolvconf:"
+    /sbin/modify_resolvconf cleanup
+    echo -e "$rc_done_up"
+fi
+
+if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
+  echo -n "Cleaning temporary directories $TMP_DIRS_TO_CLEAR"
+  for CURDIR in $TMP_DIRS_TO_CLEAR ; do
+    find $CURDIR -printf '%P\0' | ( cd $CURDIR ; xargs -0 rm -rf )
+  done
+  for CURDIR in /tmp /tmp/.X11-unix /var/tmp /var/tmp/vi.recover ; do
+	test -d $CURDIR || mkdir -p $CURDIR
+	chown root.root $CURDIR
+	chmod 1777 $CURDIR
+  done
+  rc_status -v -r
+fi
+
+#
+# there could be a new kernel version.  reinit /etc/psdevtab, to be sure.
+#
+rm -f /etc/psdevtab
+test -x /bin/ps && /bin/ps > /dev/null 2> /dev/null
+

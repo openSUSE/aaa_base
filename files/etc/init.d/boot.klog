@@ -1,0 +1,45 @@
+#! /bin/sh
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# /etc/init.d/boot.klog
+#
+### BEGIN INIT INFO
+# Provides:          boot.klog
+# Required-Start:    boot.loopback serial boot.setup boot.isapnp
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       dump kernel messages
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/rc.config
+# Read all kernel messages generated until now and put them in one file.
+test -s /var/log/boot.msg && mv -f /var/log/boot.msg /var/log/boot.omsg
+if test -x /sbin/klogd ; then
+	echo Creating /var/log/boot.msg
+	/sbin/klogd -s -o -n -f /var/log/boot.msg
+	/bin/sleep 1
+	test -s /var/log/boot.msg
+	rc_status -v1 -r
+elif test -x /bin/dmesg ; then
+	echo Creating /var/log/boot.msg
+	/bin/dmesg -s16384 > /var/log/boot.msg
+	/bin/sleep 1
+	test -s /var/log/boot.msg
+	rc_status -v1 -r
+fi
+if test -x /usr/sbin/klogconsole ; then
+   if test -z "$SERIAL_CONSOLE" ; then
+	( test -c /dev/tty10 && > /dev/tty10 ) > /dev/null 2>&1 && /usr/sbin/klogconsole -r10 
+   else
+	/usr/sbin/klogconsole -l 7 -r 0
+   fi
+fi
+
+#
+# Say blogd that I/O is possible now
+#
+killproc -IO /sbin/blogd
+

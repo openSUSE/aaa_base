@@ -10,7 +10,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.setup
-# Required-Start:    serial
+# Required-Start:    boot.ldconfig boot.loopback serial
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:

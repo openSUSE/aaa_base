@@ -1,0 +1,35 @@
+#! /bin/sh
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# /etc/init.d/boot.loopback
+#
+### BEGIN INIT INFO
+# Provides:          boot.loopback
+# Required-Start:    boot.clock boot.quota boot.ldconfig
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       start loopback device
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/rc.config
+
+#
+# initialize loopback device
+#
+if test "$START_LOOPBACK" = yes; then
+    echo -n Setting up loopback device
+    ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
+    rc_status
+    case `uname -r` in
+    0.*|1.*|2.[012].*)
+	route add -net 127.0.0.0 netmask 255.0.0.0 dev lo
+	rc_status
+        ;;
+    esac
+    rc_status -v -r
+fi
+
+

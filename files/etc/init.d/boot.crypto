@@ -8,9 +8,9 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.crypto
-# Required-Start:    
+# Required-Start:    boot.md boot.lvm boot.localfs
 # Required-Stop:
-# Default-Start:
+# Default-Start:     B
 # Default-Stop:
 # Description:       Enable crypto file systems before leaving boot phase
 ### END INIT INFO

@@ -1,0 +1,156 @@
+#! /bin/sh
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# /etc/init.d/boot.localfs
+#
+### BEGIN INIT INFO
+# Provides:          boot.localfs
+# Required-Start:    boot.proc boot.ibmsis boot.md boot.lvm
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       check and mount local filesystems
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/rc.config
+#
+#
+# fsck may need a huge amount of memory, so make sure, it is there.
+#
+echo "Activating swap-devices in /etc/fstab..."
+swapon -a &> /dev/null
+rc_status -v1 -r
+
+case `uname -r` in
+    0.*|1.*|2.[01].*|2.2.?|2.2.10)
+        echo -n "Running update (bdflush) daemon"
+        /sbin/update
+        rc_status -v -r
+	;;
+esac
+
+#
+# If we use a serial console, don't use the fsck progress bar
+#
+if test -z "$SERIAL_CONSOLE" -o "$HOSTTYPE" = "s390" ; then
+   FSCK_PROGRESSBAR="-C"
+else
+   FSCK_PROGRESSBAR=""
+fi
+
+
+#
+# do fsck and start sulogin, if it fails.
+#
+FSCK_RETURN=0
+if test ! -f /fastboot -a -z "$fastboot" ; then
+    FSCK_FORCE=""
+    test -f /forcefsck && FSCK_FORCE="-f"
+    # on an umsdos root fs this mount will fail, so direct error messages 
+    # to /dev/null.
+    # this seems to be ugly, but should not really be a problem.
+    mount -n -o remount,ro / 2> /dev/null
+    if test $? = 0; then
+        echo "Checking file systems..."
+        fsck $FSCK_PROGRESSBAR -A -a $FSCK_FORCE
+        # A return code of 1 indicates that file system errors
+        # were corrected, but that the boot may proceed.
+        # A return code of 2 or larger indicates failure.
+        FSCK_RETURN=$?
+	test $FSCK_RETURN -lt 2
+	rc_status -v1 -r
+        if test $FSCK_RETURN -gt 1; then
+	    # Stop blogd since we reboot after sulogin
+	    killproc -QUIT /sbin/blogd
+	    if test -x /etc/init.d/kbd ; then
+		/etc/init.d/kbd start
+	    fi
+            echo
+            echo "fsck failed.  Please repair manually and reboot. The root"
+            echo "file system is currently mounted read-only. To remount it"
+            echo "read-write do:"
+            echo
+            echo "   bash# mount -n -o remount,rw /"
+            echo
+            echo "Attention: Only CONTROL-D will reboot the system in this"
+            echo "maintanance mode. shutdown or reboot will not work."
+            echo
+            PS1="(repair filesystem) # "
+            export PS1
+            /sbin/sulogin /dev/console
+
+            # if the user has mounted something rw, this should be umounted
+            echo "Unmounting file systems (ignore error messages)"
+            umount -avn
+
+            # on umsdos fs this would lead to an error message. so direct 
+            # errors to /dev/null
+            mount -no remount,ro / 2> /dev/null
+
+            sync
+            reboot -f
+        fi
+        sync
+        mount -n -o remount,rw /
+	test $FSCK_RETURN -gt 0 && touch /fsck_corrected_errors
+    else
+	mounts=/etc/mtab
+	test -r /proc/mounts && mounts=/proc/mounts
+	while read des fs type rest; do
+	    case "$fs" in
+	        /) break ;;
+	        *)       ;;
+	    esac
+	done < $mounts
+
+	if test "$fs" = / -a "$type" != "umsdos" ; then
+	    echo
+	    echo '*** ERROR!  Cannot fsck because root is not read-only!'
+	    echo
+	fi
+    fi
+else
+    echo "File systems are NOT being checked."
+    mount -n -o remount,rw /
+fi
+
+#
+# clean up
+#
+rm -f /etc/mtab* /etc/nologin /nologin /fastboot /forcefsck /success
+
+#
+# initialize database for kerneld.  This should be done earlier, but
+# could cause a lot of trouble with damaged file systems.
+# restart of kerneld will be done by /etc/init.d/kerneld
+# 
+MODULES_DIR=/lib/modules/`uname -r` 
+if test -x /sbin/depmod -a -d $MODULES_DIR ; then
+    for i in $MODULES_DIR/* $MODULES_DIR/*/* /etc/modules.conf ; do
+        test -e $i || continue
+        if test $i -nt $MODULES_DIR/modules.dep ; then
+            rm -f $MODULES_DIR/modules.dep
+            break
+        fi
+    done
+    if test ! -e $MODULES_DIR/modules.dep ; then
+        echo -n Setting up $MODULES_DIR
+        /sbin/depmod -a > /dev/null 2>&1
+	rc_status -v -r
+    fi
+fi
+
+#
+# Mount local filesystems in '/etc/fstab' (and create an entry
+# for / and /proc).
+#
+echo "Mounting local file systems..."
+mount -fv -t proc proc /proc
+rc_status
+mount -fv -t devpts $optpts devpts /dev/pts
+rc_status
+mount -av -t nonfs,noproc,nodevpts
+rc_status -v1 -r
+
