@@ -86,8 +86,8 @@ if test ! -f /fastboot -a -z "$fastboot" ; then
         # were corrected, but that the boot may proceed.
         # A return code of 2 or larger indicates failure.
         FSCK_RETURN=$?
-        test $FSCK_RETURN -gt 0 && ECHO_RETURN=$rc_failed_up
         if test $FSCK_RETURN -gt 1; then
+            echo -e "$rc_failed_up"
             if test -x /sbin/init.d/kbd ; then
                 /sbin/init.d/kbd start
             fi
