@@ -14,10 +14,10 @@
 #
 ### BEGIN INIT INFO
 # Provides:          FOO
-# Required-Start:    $syslog $remote_fs
-# X-UnitedLinux-Should-Start: $time ypbind sendmail
+# Required-Start:    $syslog $remote_fs $time
+# X-UnitedLinux-Should-Start: ypbind sendmail postfix
 # Required-Stop:     $syslog $remote_fs
-# X-UnitedLinux-Should-Stop: $time ypbind sendmail
+# X-UnitedLinux-Should-Stop:  ypbind sendmail postfix
 # Default-Start:     3 5
 # Default-Stop:      0 1 2 6
 # Short-Description: FOO XYZ daemon providing ZYX
