@@ -13,10 +13,11 @@
 # on errors:
 #   exit code > 0
 #
-# Version 1.05
+# Version 1.07
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
+# (c) 1999 Heiko Eißfeldt bugfix, add module parameter passing
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # general configurable parameters
@@ -126,74 +127,84 @@ kernel_idx=0
 for k in $kernels ; do
 
   kk="$root_dir$boot_dir/$k"
-  [ -f "$kk" ] || error 2 "no such kernel image: \"$kk\""
 
-  write_magic
+  if [ -f "$kk" ] ; then
 
-  vv=`$file -m $tmp_magic $kk | cut -d \" -f 2`
+    write_magic
 
-  ii="$root_dir$boot_dir/${initrd_a[$kernel_idx]}"
+    vv=`$file -m $tmp_magic $kk | cut -d \" -f 2`
 
-  echo "creating initrd \"$ii\" for kernel \"$kk\" ($vv)"
+    ii="$root_dir$boot_dir/${initrd_a[$kernel_idx]}"
 
-  [ -d "$root_dir/lib/modules/$vv/misc" ] || error 3 "no version \"$vv\" modules found"
+    echo "creating initrd \"$ii\" for kernel \"$kk\" ($vv)"
 
-  mkdir $tmp_mnt
+    [ -d "$root_dir/lib/modules/$vv/misc" ] || error 3 "no version \"$vv\" modules found"
 
-  dd if=/dev/zero of=$tmp_initrd bs=1k count=$image_blocks 2>/dev/null
-  mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd 2>/dev/null
+    mkdir $tmp_mnt
 
-  mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || { 
-    if [ -f /lib/loop.o ] ; then
-      insmod /lib/loop.o
-      mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || {
+    dd if=/dev/zero of=$tmp_initrd bs=1k count=$image_blocks 2>/dev/null
+    mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd 2>/dev/null
+    tune2fs -i 0 $tmp_initrd >/dev/null 2>&1
+
+    mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || { 
+      if [ -f /lib/loop.o ] ; then
+        insmod /lib/loop.o
+        mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || {
+          error 4 "failed to mount image"
+        }
+      else
         error 4 "failed to mount image"
-      }
-    else
-      error 4 "failed to mount image"
-    fi
-  }
-  is_mounted=1
-
-  rmdir $tmp_mnt/lost+found
-  mkdir $tmp_mnt/{bin,dev}
-  cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console} $tmp_mnt/dev
-  cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 5 "no static shell"
-  cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 6 "no static insmod"
-
-  echo '#! /bin/sh' >$lx_rc
-  echo >>$lx_rc
-  echo "export PATH=/bin" >>$lx_rc
-  echo >>$lx_rc
-
-  chmod 755 $lx_rc
-
-  for i in $modules; do
-    x=`cd $root_dir ; find lib/modules/$vv/ -name $i.o`
-    if [ "$x" ] ; then
-      echo "adding module \"/$x\""
-      tar -C $root_dir -cf - $x 2>/dev/null | tar -C $tmp_mnt -xpf - 2>/dev/null
-      if [ $? != 0 ] ; then
-        error 7 "initrd too small"
       fi
-      echo "echo \"Loading module $i ...\"" >>$lx_rc
-      echo "insmod $i" >>$lx_rc
-      echo >>$lx_rc
-    else
-      error 8 "no such module: $i"
-    fi
-  done
+    }
+    is_mounted=1
 
-  umount $tmp_mnt
-  is_mounted=
+    rmdir $tmp_mnt/lost+found
+    mkdir $tmp_mnt/{bin,dev}
+    cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console} $tmp_mnt/dev
+    cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 5 "no static shell"
+    cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 6 "no static insmod"
 
-  gzip -9 $tmp_initrd
+    echo '#! /bin/sh' >$lx_rc
+    echo >>$lx_rc
+    echo "export PATH=/bin" >>$lx_rc
+    echo >>$lx_rc
 
-  cp $tmp_initrd.gz $ii || error 9 "failed to install initrd"
+    chmod 755 $lx_rc
 
-  kernel_idx=$((kernel_idx+1))
+    for i in $modules; do
+      x=`cd $root_dir ; find lib/modules/$vv/ -name $i.o`
+      if [ "$x" ] ; then
+        echo "adding module \"/$x\""
+        tar -C $root_dir -cf - $x 2>/dev/null | tar -C $tmp_mnt -xpf - 2>/dev/null
+        if [ $? != 0 ] ; then
+          error 7 "initrd too small"
+        fi
+        modparms=`grep "options $i" "$root_dir"/etc/modules.conf`
+        modparms="${modparms#* * }"
+        echo "echo \"Loading module $i $modparms ...\"" >>$lx_rc
+        echo "insmod $i $modparms" >>$lx_rc
+        echo >>$lx_rc
+      else
+        error 8 "no such module: $i"
+      fi
+    done
 
-  clean_up
+    umount $tmp_mnt
+    is_mounted=
+
+    gzip -9 $tmp_initrd
+
+    cp $tmp_initrd.gz $ii || error 9 "failed to install initrd"
+
+    kernel_idx=$((kernel_idx+1))
+
+    clean_up
+
+  else
+
+    echo "no kernel image \"$k\""
+
+  fi
 
 done
 
