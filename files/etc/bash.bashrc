@@ -94,7 +94,7 @@ case "$-" in
     #
     case "$is" in
     bash)
-	# Returns short path (last two directoeries)
+	# Returns short path (last two directories)
 	spwd () {
 	  ( IFS=/
 	    set $PWD
@@ -103,14 +103,17 @@ case "$-" in
 	    else
 		eval echo \"..\${$(($#-1))}/\${$#}\"
 	    fi ) ; }
-	# Returns short path (last 18 characters)
+	# Set xterm prompt with short path (last 18 characters)
 	ppwd () {
-	    local _w="$(dirs +0)"
-	    if test ${#_w} -le 18 ; then
-		echo "$_w"
-	    else
-		echo "...${_w:$((${#_w}-18))}"
-	    fi ; }
+	    local _t="$1" _w _x
+	    test -n "$_t"    || return
+	    test "${_t#tty}" = $_t && _t=pts/$_t
+	    test -O /dev/$_t || return
+	    _w="$(dirs +0)"
+	    _x="${_w//[^x]/x}"
+	    test ${#_x} -le 18 || _w="/...${_w:$((${#_x}-18))}"
+	    echo -en "\e]2;${USER}@${HOST}:${_w}\007\e]1;${HOST}\007" > /dev/$_t
+	    }
 	# If set: do not follow sym links
 	# set -P
 	#
@@ -122,17 +125,12 @@ case "$-" in
 	else
 	    _u="\u@\h"
 	    _p=">"
-	    if test \( "$TERM" = "xterm" -o "${TERM#screen}" != "$TERM" \) -a -z "$EMACS" ; then
-		_t="\[\e]2;\u@\h:\$(ppwd)\007\e]1;\h\007\]"
+	    if test \( "$TERM" = "xterm" -o "${TERM#screen}" != "$TERM" \) \
+		    -a -z "$EMACS" -a -n "$DISPLAY"
+	    then
+		_t="\$(ppwd \l)"
 	    fi
 	fi
-	case $(locale charmap) in
-		UTF-8)
-		    _t=""
-		;;
-		*)
-		;;
-	esac
 	# With full path on prompt
 	PS1="${_t}${_u}:\w${_p} "
 #	# With short path on prompt

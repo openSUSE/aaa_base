@@ -9,7 +9,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.crypto
-# Required-Start:    boot.localfs
+# Required-Start:    boot.localfs boot.klog
 # Should-Start: boot.md boot.lvm
 # Required-Stop:
 # Default-Start:     B
@@ -46,6 +46,34 @@ redirect ()
 }
 
 restore () { stty $otty < $REDIRECT; }
+
+ppid=0
+prmt=""
+setprompt ()
+{
+    if test -t 1 -a "$TERM" != "raw" -a "$TERM" != "dumb" && stty size <&1 > /dev/null 2>&1
+    then
+	(
+	    trap "exit 0" SIGTERM
+	    while test $TIMEOUT -gt 0 ; do
+		echo -en "\r${prmt}"
+		sleep 2
+		: $((TIMEOUT-=2))
+	    done
+	) & ppid=$!
+    else
+	echo -en "\r${prmt}"
+	ppid=0
+    fi
+}
+
+unsetprompt ()
+{
+    local ret=$?
+    test $ppid -gt 0 && kill -15 $ppid
+    ppid=0
+    return $ret
+}
 
 rc_reset
 main_status=0
@@ -84,11 +112,13 @@ case "$1" in
 		# Setting up loop device
 		#
 		if test -n "$info" ; then
-		    echo -n "${extd}Please enter passphrase for \"$info\" ($physdev). ${norm}"
+		    prmt="${extd}Please enter passphrase for \"$info\" ($physdev). ${norm}"
 		else
-		    echo -n "${extd}Please enter passphrase for $physdev. ${norm}"
+		    prmt="${extd}Please enter passphrase for $physdev. ${norm}"
 		fi
+		setprompt
 		losetup -t $TIMEOUT -e $crypto $loopdev $physdev < $REDIRECT > $REDIRECT 2>&1
+		unsetprompt
 		rc_status
 		test $? -ne 0 && continue 2
 

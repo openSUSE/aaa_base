@@ -7,7 +7,6 @@
 ### BEGIN INIT INFO
 # Provides:          boot.klog
 # Required-Start:    boot.localfs
-# Should-Start: setserial boot.isapnp
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
