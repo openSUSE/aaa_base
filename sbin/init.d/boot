@@ -37,7 +37,7 @@ fi
 if test -f /etc/mdtab -a -x /sbin/mdadd ; then
     ECHO_RETURN=$rc_done_up
     echo "Initializing Multiple Devices..."
-    /sbin/mdadd -ar || MDADD_RETURN=1 && MDADD_RETURN=0
+    /sbin/mdadd -ar && MDADD_RETURN=0 || MDADD_RETURN=1
     if test $MDADD_RETURN != 0 ; then
         if test  -x /sbin/ckraid ; then
             echo "Initializing Multiple Devices failed.  Trying to recover it..."
