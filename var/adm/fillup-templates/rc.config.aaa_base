@@ -123,6 +123,11 @@ IFCONFIG_3=""
 # to FQHOSTNAME (e.g. plp). (yes, no)
 SETUPDUMMYDEV=yes
 
+#
+# Do you want the "dynamic IP patch" to be enabled at bootup? (yes/no)
+#
+IP_DYNIP=no
+
 
 #
 # SuSEconfig can do some checks and modifications for /etc/hosts. 
@@ -214,6 +219,35 @@ SMTP="no"
 FROM_HEADER="YAST_ASK"
 
 #
+# some programms (e.g. lynx, arena and wget) support proxies, if set in
+# environment.  SuSEconfig can add this environment variables to
+# /etc/SuSEconfig/* (sourced by /etc/profile etc.) - See
+# http://www.suse.de/Support/sdb_e/lynx_proxy.html for more details.
+# Example: HTTP_PROXY="http://proxy.provider.de:3128/"
+HTTP_PROXY=""
+
+#
+# Example: FTP_PROXY="http://proxy.provider.de:3128/"
+#
+FTP_PROXY=""
+
+#
+# Example: GOPHER_PROXY="http://proxy.provider.de:3128/"
+#
+GOPHER_PROXY=""
+
+#
+# Example: NO_PROXY="www.me.de, do.main, localhost"
+#
+NO_PROXY=""
+
+#
+# Example: HTTP_PROXY="http://proxy.provider.de:3128/"
+#
+HTTP_PROXY=""
+
+
+#
 # start kernel daemon? ("yes" or "no")
 #
 START_KERNELD="yes"
@@ -227,6 +261,8 @@ CRON="yes"
 #
 # start portmap? ("yes" or "no")
 # this is needed, if the NFS server is started or if NIS is used
+# Attention! If NFS_SERVER is set to "yes", START_PORTMAP will be
+# ignored and portmap will be startet in any case.
 #
 START_PORTMAP="YAST_ASK"
 

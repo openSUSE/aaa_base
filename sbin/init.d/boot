@@ -215,6 +215,14 @@ if test -d /proc/sys/fs/binfmt_misc ; then
 fi
 
 #
+# Enable "dynamic IP patch"
+#
+if test "$IP_DYNIP" = yes -a -e /proc/sys/net/ipv4/ip_dynaddr ; then
+    echo Enabling dynamic IP patch...
+    echo 7 > /proc/sys/net/ipv4/ip_dynaddr
+fi
+
+#
 # insert memstat module for xosview
 #
 if test -f $MODULES_DIR/misc/memstat.o ; then

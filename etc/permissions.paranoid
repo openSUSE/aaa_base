@@ -77,7 +77,6 @@
 # Needed for fnet
 /etc/aliases                           root.root         644
 /etc/aliases.db                        root.root         644
-/etc/lilo.conf                         root.root         600
 /etc/minicom.users                     root.uucp         640
 /etc/minirc.dfl                        root.uucp         640
 /etc/yp.conf                           root.root         600

@@ -165,6 +165,7 @@
 /etc/psdevtab                          root.root         664
 /etc/shadow                            root.shadow       640
 /etc/gshadow                           root.shadow       640
+/etc/lilo.conf                         root.root         600
 /etc/ppp/chap-secrets                  root.root         600
 /etc/ppp/pap-secrets                   root.root         600
 /var/lib/uucp/taylor_config/call       uucp.uucp         440

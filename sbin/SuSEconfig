@@ -147,8 +147,8 @@ if test -e $IS_RUNNING ; then
         echo
         echo "Giving up..."
         echo
-        echo "ps -a | grep SuSEconfig"
-        ps -a | grep SuSEconfig
+        echo "ps a | grep SuSEconfig"
+        ps a | grep SuSEconfig
         echo
         echo "If You think, there is no other SuSEconfig running, please call"
         echo
@@ -189,7 +189,9 @@ if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
     NICKNAME=`echo $FQHOSTNAME | sed -e"s:\..*::"`
     echo $NICKNAME > $r/etc/HOSTNAME.SuSEconfig
     check_md5_and_move $r/etc/HOSTNAME
-    
+
+    NET_DEVICE_FOUND=false
+
     if test -n "$NETCONFIG" -a "$NETCONFIG" != "YAST_ASK" ; then
         for I in $NETCONFIG ; do
             eval IPADDR=\$IPADDR$I
@@ -199,12 +201,13 @@ if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
                 grep -w ${IPADDR} $r/etc/hosts > /dev/null || \
                     echo "$IPADDR	$FQHOSTNAME 	$NICKNAME" >> $r/etc/hosts
                 echo "$IPADDR" >> $OLDHOSTENTRY
+                NET_DEVICE_FOUND=true
             fi
         done
     fi
 
     # to get plp to work, we have to add hostname to localhost.
-    if test -z "$NETCONFIG" ; then
+    if test "$NET_DEVICE_FOUND" = false -a "$NETCONFIG" != "YAST_ASK" ; then
         grep -vw $FQHOSTNAME $r/etc/hosts > $r/etc/hosts.tmp
         echo "127.0.0.2      	$FQHOSTNAME 	$NICKNAME" >> $r/etc/hosts.tmp
         cp -p $r/etc/hosts.tmp $r/etc/hosts
@@ -358,14 +361,15 @@ fi
 #
 mkdir -p $r/etc/SuSEconfig
 echo_warning /etc/SuSEconfig/profile \
-        "# Change CWD_IN_ROOT_PATH or LANGUAGE in /etc/rc.config instead." \
+        "# Change variables in /etc/rc.config instead." \
         > $r/etc/SuSEconfig/profile.SuSEconfig
 echo_warning /etc/SuSEconfig/csh.login \
-        "# Change CWD_IN_ROOT_PATH in /etc/rc.config instead." \
+        "# Change variables in /etc/rc.config instead." \
         > $r/etc/SuSEconfig/csh.login.SuSEconfig
 echo_warning /etc/SuSEconfig/csh.cshrc \
-        "# Change LANGUAGE in /etc/rc.config instead." \
+        "# Change variables in /etc/rc.config instead." \
         > $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+
 if test "$CWD_IN_ROOT_PATH" = "yes" ; then
     echo "test \"\$UID\" = 0 && PATH=\"\$PATH:.\"" \
         >> $r/etc/SuSEconfig/profile.SuSEconfig
@@ -395,6 +399,31 @@ if test -n "$DOC_HOST" ; then
     echo "SUSE_DOC_HOST=$DOC_HOST" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export SUSE_DOC_HOST" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv SUSE_DOC_HOST $DOC_HOST" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/maxwell ; then
+    echo "MAXHOME=/usr/lib/maxwell" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export MAXHOME" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv MAXHOME /usr/lib/maxwell" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -n "$HTTP_PROXY" ; then
+    echo "http_proxy=$HTTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export http_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv http_proxy $HTTP_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -n "$FTP_PROXY" ; then
+    echo "ftp_proxy=$FTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export ftp_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv ftp_proxy $FTP_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -n "$GOPHER_PROXY" ; then
+    echo "gopher_proxy=$GOPHER_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export gopher_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv gopher_proxy $GOPHER_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -n "$NO_PROXY" ; then
+    echo "no_proxy='$NO_PROXY'" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export no_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv no_proxy '$NO_PROXY'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 check_md5_and_move $r/etc/SuSEconfig/profile
 check_md5_and_move $r/etc/SuSEconfig/csh.login

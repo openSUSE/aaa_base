@@ -71,7 +71,6 @@
 /etc/rc.config                         root.root         644
 /etc/aliases                           root.root         644
 /etc/aliases.db                        root.root         644
-/etc/lilo.conf                         root.root         644
 /etc/minicom.users                     root.uucp         644
 /etc/minirc.dfl                        root.uucp         644
 /etc/yp.conf                           root.root         644

@@ -51,6 +51,9 @@ pn::powerfailnow:/sbin/init.d/powerfail now
 #pn::powerfail:/sbin/init.d/powerfail now
 po::powerokwait:/sbin/init.d/powerfail  stop
 
+# for ARGO UPS
+sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
+
 # getty-programs for the normal runlevels
 # <id>:<runlevels>:<action>:<process>
 # The "id" field  MUST be the same as the last
