@@ -93,7 +93,7 @@ rc_reset
 swapoff -a &> /dev/null
 rc_status -v1 -r
 # setterm writes its sequences to stdout
-setterm -bfreq 200 -blen 500 2>/dev/null
+setterm -bfreq 440 -blen 500 2>/dev/null
 
 mounts=/etc/fstab
 test -r /proc/mounts && mounts=/proc/mounts
