@@ -185,7 +185,7 @@ case "$-" in
     else
 	unalias ls 2>/dev/null
 	if test "$is" = "zsh" ; then
-	    alias ls='eval /bin/ls $LS_OPTIONS'
+	    alias ls='/bin/ls $=LS_OPTIONS'
 	else
 	    alias ls='/bin/ls $LS_OPTIONS'
 	fi
