@@ -9,6 +9,7 @@
 .\" man_db distribution.
 .\"
 .\" Wed Apr  4 17:36:33 CEST 2001 Peter Poeml (poeml@suse.de)
+.\" Fri Sep 21 07:08:22 CEST 2001 Christian Zoz (zoz@suse.de)
 .\" 
 .TH modify_resolvconf 8 "Thu Mar 15 2001" "0.1" "modify_resolvconf"
 .SH NAME
@@ -24,22 +25,22 @@ modify_resolvconf \- modify /etc/resolv.conf
 .LP
 \fBmodify_resolvconf\fP
 .IR modify
-.B \-s \fI<service>\fP \-p \fI<process>\fP \-f \fI<path to script>\fP \-t \fI<text>\fP\||\fI-\fP [ \-l \fI<list of search domains>\fP ] [ \-d \fI<domainname>\fP \||\ \-n \fI<list of nameservers>\fP ] [ \-o \|| \-a \fI<pathname of file>\fP ] [ \-e \fI<string>\fP ] [ \-v ] [ \-q ]
+.B \-s \fI<service>\fP \-t \fI<text>\fP\||\fI-\fP [ \-p \fI<process>\fP ] [ \-i \fI<pid>\fP ] [ \-f \fI<filename of script>\fP ] [ \-e \fI<extension>\fP ] [ \-l \fI<list of search domains>\fP \||\ \-d \fI<domainname>\fP ] [ \-n \fI<list of nameservers>\fP ] [ \-a \fI<filename>\fP ] [ \-o \fI<filename>\fP ] [ \-\-resolv ] [ \-\-named ] [ \-\-no_restart ] [ \-v ] [ \-q ]
 .\" 
 .LP
 \fBmodify_resolvconf\fP
 .IR restore
-.B \-s \fI<service>\fP [ \-e \fI<string>\fP ] [ \-o \fI<pathname of file>\fP ] [ \-k ] [ \-v ] [ \-q ]
-.\" 
-.LP
-\fBmodify_resolvconf\fP
-.IR check
-.B [ \-v ] [ \-q ]
+.B \-s \fI<service>\fP [ \-e \fI<extension>\fP ] [ \-n \fIshow\fP ] [ \-o \fI<filename>\fP ] [ \-k ] [ \-\-resolv ] [ \-\-named ] [ \-\-no_restart ] [ \-v ] [ \-q ]
 .\" 
 .LP
 \fBmodify_resolvconf\fP
 .IR cleanup
-.B [ \-v ] [ \-q ]
+.B [ \-n \fIshow\tP ] [ \-o \fI<filename>\fP ] [ \-k ] [ \-\-resolv ] [ \-\-named ] [ \-\-no_restart ] [ \-v ] [ \-q ]
+.\" 
+.LP
+\fBmodify_resolvconf\fP
+.IR check
+.B [ \-\-resolv ] [ \-\-named ] [ \-v ] [ \-q ]
 .\" 
 .LP
 \fBmodify_resolvconf\fP
@@ -49,36 +50,56 @@ modify_resolvconf \- modify /etc/resolv.conf
 .\" 
 .SH DESCRIPTION
 .B modify_resolvconf
-can be used by programs that have to change resolv.conf dynamically. It provides a means to do that in a consistent way accross the system. The idea is to
+can be used by programs that have to change \fI/etc/resolv.conf\fP or
+\fI/etc/named.conf\fP dynamically (temporarily). It provides a means to do that
+in a consistent way accross the system. The idea is to
 .TP
 \- make a backup
-that can be restored later. Therefore, a fixed naming scheme is used (see below).
+that can be restored later. Therefore, a fixed naming scheme is used (see
+below). Every modification creates a new backup. These will be restored correctly even if it happens in another sequence. If a service crashes, there is a way to clean up stale modification and to restore the original configuration.
 .TP
 \- add an informational header
-to the new resolv.conf that informs the user (or other programs) who changed the file, why it was done how to avoid it in the future. This header is automatically created by
+to the new configuration file that informs the user (or other programs) that is was changed temporarily, who changed
+the file, why it was done and how to avoid it in the future. This header is
+automatically created by
 .B modify_resolvconf
-and is therefore standardized. This again allows certain programs (e.g. YaST) to handle a temporary resolv.conf.
-The presence of this header is also used by
-.B modify_resolvconf
-to recognize that resolv.conf is temporary or not.
-
+and is therefore standardized. It is just the presence of this header what marks it as temporarily modified.
+.\" This again allows certain programs (e.g. YaST) to handle a temporary \fI/etc/resolv.conf\fP (\fI/etc/named.conf\fP).
+.TP
+\- trigger needed actions
+like restarting named if \fI/etc/named.conf\fP was changed or copy a modified \fI/etc/resolv.conf\fP
+to postfix's chroot environment.
 .PP
+It is recommended to make use of
+.B modify_resolvconf
+in every script that modifies \fI/etc/resolv.conf\fP or \fI/etc/named.conf\fP temporarily. It should not be used to write a definitive version of these files (e.g. by YaST or some installation tool). 
+
 The naming scheme used for backup copies is:
 
-.B /etc/resolv.conf.saved.by.<service name>.<private extension>
+.B /etc/resolv.conf.saved.by.<service name>.<extension>
 
 where
 .B service name
 is one of e.g. dhclient, dhcpcd, pppd, ipppd, pcmcia, hotplug (these are the major candidates) and
 .B
 private extension
-might optionally be used by the service itself for special reasons.
+might optionally be used by the service itself if it modifies twice, e.g. for different interfaces.
 
-.br
-This naming scheme allows restoring resolv.conf at boottime after a crash of the
+This naming scheme allows restoring \fI/etc/resolv.conf\fP at boottime after a crash of the
 system or at starttime of the service (after a crash of the service).
 
-In SuSE's \fI/etc/rc.config\fP, there is a variable named \fBMODIFY_RESOLV_CONF_DYNAMICALLY\fP which can be used to allow/disallow dynamic changes to resolv.conf systemwide (this has to be honoured by the respecting programs of course).
+.B modify_resolvconf
+can be controlled with two variables in SuSE's \fI/etc/rc.config\fP. With
+\fBMODIFY_RESOLV_CONF_DYNAMICALLY\fP you can allow/disallow dynamic changes to
+\fI/etc/resolv.conf\fP. If you like \fI/etc/named.conf\fP to be modified instead, then set
+\fBMODIFY_NAMED_CONF_DYNAMICALLY\fP to yes. Since it makes not much sense to write the same nameservers to both files \fBMODIFY_NAMED_CONF_DYNAMICALLY\fP
+has a higher priority then \fBMODIFY_RESOLV_CONF_DYNAMICALLY\fP. 
+
+Programs which use 
+.B modify_resolvconf
+don't need to respect these variables. They should call 
+.B modify_resolvconf
+just always.
 
 .\"
 .\"                ACTIONS
@@ -86,16 +107,42 @@ In SuSE's \fI/etc/rc.config\fP, there is a variable named \fBMODIFY_RESOLV_CONF_
 .SH ACTIONS
 .TP
 .B modify
-write a new resolv.conf with the supplied data and create a backup of the old one.
+write a new \fI/etc/resolv.conf\fP or \fI/etc/named.conf\fP with the supplied data and create a backup of the old one.
 .TP
 .B restore
-take a backup (if it exists) and rename it to \fI/etc/resolv.conf\fP, and remove all other backups of the given service (resolv.conf.saved.by.<service>*).
+take a backup of the given service (if it exists) and restore it to the
+modified file. This might be \fI/etc/resolv.conf\fP or \fI/etc/named.conf\fP itself or another
+backup which was made in between by any other service. E.g. pcmcia modified
+\fI/etc/resolv.conf\fP for an ethernet interface and after that ppp modifies it again for
+a modem connection. If you then eject the pcmcia card but keep the modem
+connection, the backup made by pcmcia will be restored to the backup made by
+ppp and leave the \fI/etc/resolv.conf\fP or \fI/etc/named.conf\fP modified by ppp untouched.
+.br
+If no extension was given it will remove all other backups of the given service (resolv.conf.saved.by.<service>*).
 .TP
 .B cleanup
-remove all backups of resolv.conf.saved.by.* while trying to restore the original one.
+remove all backups of \fI/etc/resolv.conf\fP and \fI/etc/named.conf\fP while trying to restore the
+original ones. It does so for both \fI/etc/resolv.conf\fP and \fI/etc/named.conf\fP independently of
+the settings of the rc.config variables. If you want to clean up only for one
+of these then use the
+.B --resolv 
+or
+.B --named 
+option.
 .TP
 .B check
-return 0 if resolv.conf has not been modified dynamically and write a status message to stderr. If resolv.conf has been modified dynamically, it returns 1 and echoes the text contained in the Info: tag to stderr.
+return 0 if \fI/etc/resolv.conf\fP has not been modified dynamically and write a status
+message to stderr. If \fI/etc/resolv.conf\fP has been modified dynamically, it returns 1
+and echoes the text contained in the Info: tag to stderr.
+br.
+Note that it always
+checks \fI/etc/resolv.conf\fP independently of the settings of the rc.config variables. If
+you want to check \fI/etc/named.conf\fP then use
+.B --named
+. This behavior is necessary,
+because in certain situations you are interested in the state of exactly one of
+these configuration files. E.g. if YaST wants to set new definitive values to \fI/etc/resolv.conf\fP, it has to check if \fI/etc/resolv.conf\fP is modified currently and is not interested if \fI/etc/named.conf\fP was changed even if
+\fBMODIFY_NAMED_CONF_DYNAMICALLY\fP was set.
 .\" 
 .\"                    OPTIONS
 .\" 
@@ -104,20 +151,23 @@ return 0 if resolv.conf has not been modified dynamically and write a status mes
 .B \-s, \-\-service \fI<service>
 name of the service that requests the modification. This will used for the name of the backup, and it is put into the Modified_by tag of the info header (see example below).
 .TP
+.B \-e, \-\-extension \fI<string>
+appends an additional extension to the backup filename (this can be used by a service to create more than one backup like for different ppp devices)
+.TP
 .B \-p, \-\-process \fI<process>
-name of the daemon (if applicable)
+name of the daemon that causes the modification (if applicable)
 .TP
 .B \-i, \-\-pid \fI<pid>
-process ID of the daemon (if applicable)
+process ID of the daemon that causes the modification (if applicable)
 .TP
-.B \-f, \-\-script \fI<path to script>
-some script located at \fI<path to script>\fP that might be used by the daemon to request the modification
+.B \-f, \-\-script \fI<filename>
+some script is used by the daemon to request the modification
 .TP
 .B \-t, \-\-text \fI<text>
-a text that explains why the change was done and how to prevent it in the future. If \fI-\fP is given as \fI<text>\fP, the text is read from stdin.
+a text written to the informational header that explains why the change was done and how to prevent it in the future. If \fI-\fP is given as \fI<text>\fP, the text is read from stdin.
 .TP
 .B \-l, \-\-searchlist \fI<list of search domains>
-specifies a list of domains, separated by spaces and protected by quotes, to be written to resolv.conf as searchlist
+specifies a list of domains, separated by spaces and protected by quotes, to be written to \fI/etc/resolv.conf\fP as searchlist
 .TP
 .B \-d, \-\-domain \fI<domainname>
 the domain to be used
@@ -125,17 +175,27 @@ the domain to be used
 .B \-n, \-\-nameservers \fI<list of nameservers>
 the (space separated and quoted if necessary) list of nameservers to be used
 .TP
-.B \-e, \-\-extension \fI<string>
-appends an additional extension to the backup filename (this can be used by a service to create more than one backup like for different ppp devices)
+.B \-o, \-\-save_now \fI<filename>
+saves the current \fI/etc/resolv.conf\fP (\fI/etc/named.conf\fP) to the specified file. This may be used if you are interested in the modification after restore or cleanup. Alternatively you can use
+.B --save_later 
+when modifying.
 .TP
-.B \-o, \-\-save_now \fI<pathname of file>
-creates an additional backup with the specified filename
-.TP
-.B \-a, \-\-save_later \fI<pathname of file>
-inserts an additional tag into the informational header specifying a filename to use for an additional backup to be done at restore time.
+.B \-a, \-\-save_later \fI<filename>
+inserts an additional tag into the informational header specifying a filename to use for an backup of the modified configuration file to be done at restore time. Alternatively you can use
+.B --save_now
+when restoring or cleaning up.
 .TP
 .B \-k, \-\-keep
-if used with restore, --keep puts the current resolver data into the resolv.conf that is being restored.
+if used with restore or cleanup it keeps the current (modified) resolver settings.
+.TP
+.B \-\-resolv
+restores, cleans up or checks \fI/etc/resolv.conf\fP independently of the settings of the rc.config variables. This variable is ignored with 'modify'.
+.TP
+.B \-\-named
+restores, cleans up or checks \fI/etc/named.conf\fP independently of the settings of the rc.config variables. This variable is ignored with 'modify'.
+.TP
+.B \-\-no_restart
+does not trigger any actions like restarting named or copying \fI/etc/resolv.conf\fP to the chroot environment of postfix.
 .TP
 .B \-v, \-\-verbose
 be verbose
@@ -146,7 +206,7 @@ show synopsis
 .\"                    EXAMPLE
 .\" 
 .SH EXAMPLE
-This is an example for the resolv.conf that 
+This is an example for the \fI/etc/resolv.conf\fP that
 .B modify_resolvconf 
 would create:
 
@@ -193,12 +253,14 @@ nameserver 10.10.0.2
 .\"
 .SH BUGS
 .br
-save_later does not work properly if restoring one resolv.conf out of a stack of backups.
+save_later does not work properly if restoring one \fI/etc/resolv.conf\fP out of a stack of backups.
+.br
+Currently modify_resolvconf is dog slow, but this will be enhanced in further versions.
 .\"
 .\"                SEE ALSO
 .\"
 .SH "SEE ALSO"
-.BR resolv.conf (5)
+.BR resolv.conf(5), named,conf(5)
 .\"
 .\"                AUTHOR
 .\"
@@ -206,4 +268,4 @@ save_later does not work properly if restoring one resolv.conf out of a stack of
 .br
 Christian Zoz <zoz@suse.de>
 .br
-Manual page by Peter Poeml <poeml@suse.de>.
+Manual page by Peter Poeml <poeml@suse.de> and Christian Zoz <zoz@suse.de>.
