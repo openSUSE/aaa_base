@@ -133,7 +133,7 @@
 /dev/fd1h1440                          root.disk         660
 /dev/fd1u1440                          root.disk         660
 
-
-
-
+# these are sgid shadow in permissions.easy
+/sbin/unix_chkpwd                      root.shadow       755
+/sbin/pwdb_chkpwd                      root.shadow       755
 

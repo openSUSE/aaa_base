@@ -55,7 +55,11 @@ check_log_file () {
     }
 
     if test -f "$1".o; then
-
+        if test -n "$5" ; then
+          if test -x /sbin/init.d/$5 ; then
+            /sbin/init.d/$5 reload
+          fi
+        fi
         echo -n "Saving file "
 
         DATESTRING=`date +"%Y%m%d"`
@@ -87,11 +91,6 @@ check_log_file () {
         echo
 	df -k .
 	echo
-	if test -n "$5" ; then
-          if test -x /sbin/init.d/$5 ; then
-            /sbin/init.d/$5 reload
-          fi
-	fi
     fi
 }
 

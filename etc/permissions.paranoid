@@ -198,7 +198,7 @@
 # We do not really need it. Else, we could make it executable
 # only through a 750 directory root.trusted.
 /usr/bin/gpasswd                       root.shadow      4750
-# WHY ON HELL was gnuplot suid root !!!!!  because it uses svgalib
+# gnuplot was suid root because it uses svgalib
 /usr/bin/gnuplot                       root.root        755
 /usr/bin/ncpmount                      root.trusted     4750
 /usr/bin/ncpumount                     root.trusted     4750
@@ -206,7 +206,7 @@
 /usr/bin/newgrp                        root.trusted     4750
 # This one we keep.
 /usr/bin/passwd                        root.shadow      4755
-# I hate the following group.
+# following are the r-commands
 /usr/bin/rcp                           root.root        4755
 /usr/bin/rlogin                        root.root        4755
 /usr/bin/rsh                           root.root        4755
@@ -228,7 +228,7 @@
 # Default permissions where almost ok.
 /usr/sbin/dip                          root.dialout     4750
 /usr/sbin/pppd                         root.ppp     4750
-# Printing system full of holes
+# Printing system is not fully trustable
 /usr/bin/lpq                          root.trusted        4750
 /usr/bin/lpr                          root.trusted        4750
 /usr/bin/lprm                          root.trusted        4750
@@ -260,10 +260,8 @@
 /usr/X11R6/bin/xemacs                  root.root        755
 /usr/X11R6/bin/xmris                   root.game        2755
 # The default config would allow any local user to dial out
-# to sites listed in the uucp config. Bad, bad, bad.
+# to sites listed in the uucp config.
 /usr/bin/cu                            uucp.uucp        555
-# WHY should emacs be suid root ?
-/usr/bin/emacs                         root.root        755
 /usr/bin/inews                         news.news        2755
 /usr/bin/man                           man.root         4755
 # You need to be in group modem for this to be useful anyway.
@@ -289,7 +287,7 @@
 /usr/lib/uucp/uucico                   uucp.uucp        555
 /usr/lib/uucp/uuxqt                    uucp.uucp        555
 /usr/local/bin/yahtzee                 root.game        2755
-# I hate this.
+# 
 /usr/sbin/smail                        root.root        6555
 
 #

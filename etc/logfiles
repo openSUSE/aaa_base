@@ -12,6 +12,7 @@
 /var/log/allmessages           +4096k   640      root.root
 /var/log/autobuild             +4096k   644      root.root
 /var/log/debug                 +1024k   640      root.root
+/var/log/fetchmail             +1024k   640      root.root
 /var/log/httpd.access_log      +4096k   644      root.root     apache
 /var/log/httpd.error_log       +1024k   644      root.root     apache
 /var/log/isdn                  +4096k   644      root.root
