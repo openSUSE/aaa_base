@@ -74,7 +74,7 @@ fi
 # Initialize runlevel links
 #
 %{fillup_and_insserv -psy boot.crypto START_CRYPTO_FILESYSTEMS}
-%{fillup_and_insserv -py nscd halt nfs random reboot single xdm boot.clock boot.ibmsis boot.ipconfig boot.klog boot.ldconfig boot.localfs boot.localnet boot.proc boot.quota boot.swap }
+%{fillup_and_insserv -py nscd halt nfs random reboot single xdm boot.clock boot.ibmsis boot.ipconfig boot.klog boot.ldconfig boot.localfs boot.localnet boot.proc boot.quota boot.swap boot.idedma}
 ## powerfail probably needs empty header ...
 
 # hack: DEFAULT_LANGUAGE was the first variable in rc.config

@@ -35,22 +35,6 @@ test -x /sbin/blogd && /sbin/blogd $REDIRECT
 export REDIRECT
 
 
-### call boot.proc     (sets some procfs values)
-### call boot.ibmsis   (update firmware and devices for ibmsis controllers)
-### call boot.md       (start multiple devices)
-### call boot.lvm      (start logical volumes)
-### call boot.localfs  (check and mount local filesystems)
-### call boot.crypto   (Enable crypto file systems before leaving boot phase)
-### call boot.swap     (start rest of swap devices and shmfs)
-### call boot.clock    (set cmos clock)
-### call boot.quota    (check quotas if needed)
-### call boot.ldconfig (run ldconfig if needed)
-### call boot.localnet (setup hostname and yp and do cleanup) 
-### call serial (from setserial package)
-### call boot.setup    (setup kbd and kbd leds)
-### call boot.isapnp   (start ISA-PnP)
-### call boot.klog     (dump kernel messages)
-### call boot.ipconfig (run ip configuration hooks)
 #
 # start bootup client scripts.
 #

@@ -6,7 +6,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.proc
-# Required-Start:    
+# Required-Start:    boot.idedma
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
