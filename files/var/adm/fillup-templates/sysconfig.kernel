@@ -1,6 +1,7 @@
 ## Path:	System/Kernel
 ## Description:	Modules to load from initrd
 ## Type:	string
+## Command:     /sbin/mkinitrd
 #
 # This variable contains the list of modules to be added to the initial
 # ramdisk by calling the script "mk_initrd"
