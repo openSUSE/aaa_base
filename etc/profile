@@ -12,7 +12,7 @@ umask 022
 #ulimit -s 15000		# max stack size of a program is 15 MB
 #ulimit -m 30000		# max resident set size is 30 MB
 
-ulimit -c 0                     # don't create core files
+ulimit -Sc 0                     # don't create core files
 ulimit -d unlimited
 if [ -z "$KSH_VERSION" ]; then
     # ksh does not support this command.
