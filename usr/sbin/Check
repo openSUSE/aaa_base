@@ -59,6 +59,7 @@ for DIR in $DIRS ; do
         \! -name "*.pfb" \! -name "*.phont" \! -name ".*.gz" \
         \! -name ".*.Z" \! -name ".*.spd" \! -name ".*.pfa" \
         \! -name ".*.pfb" \! -name ".*.phont" \! -name URW \
+        \! -name "*.ttf" \! -name "*.TTF" \
         \! -type d | do_gzip
 done
 
