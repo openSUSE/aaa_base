@@ -51,10 +51,14 @@ case "$1" in
 	# do fsck and start sulogin, if it fails.
 	#
 	FSCK_RETURN=0
-	DES_OK=1
+	MAY_FSCK=1
 
 	# we may get ROOTFS_BLKDEV passed from initrd, skip extra actions
 	if [ -n "$ROOTFS_BLKDEV" ]  ; then
+	    if [ -n "$ROOTFS_REALDEV" ]  ; then
+		ROOTFS_BLKDEV=$ROOTFS_REALDEV
+	    fi
+	else
 	    # /dev/shm is already there, call blkid might be needed
 	    if [ -x /sbin/blkid ] ; then
 		/sbin/blkid -c /dev/shm/tmp_blkid.tab > /dev/null
@@ -65,13 +69,17 @@ case "$1" in
 	    ROOTFS_BLKDEV=`fsck -T -N / 2>/dev/null`
 	    ROOTFS_BLKDEV=${ROOTFS_BLKDEV%% }
 	    ROOTFS_BLKDEV=${ROOTFS_BLKDEV##* }
-	    DES_OK=0
+	    MAY_FSCK=0
 	    if test -n "$ROOTFS_BLKDEV" -a "$ROOTFS_BLKDEV" != "/" -a -b "$ROOTFS_BLKDEV" ; then
-		DES_OK=1
+		MAY_FSCK=1
 	    fi
         fi
 	#
-	if test ! -f /fastboot -a -z "$fastboot" -a $DES_OK -eq 1 ; then
+	if test "$ROOTFS_FSCK" = "0" -a ! -f /forcefsck ] ; then
+	    # already checked and ok, skip the rest
+            MAY_FSCK=0
+        fi
+	if test ! -f /fastboot -a -z "$fastboot" -a $MAY_FSCK -eq 1 ; then
 	    FSCK_FORCE=""
 	    test -f /forcefsck && FSCK_FORCE="-f"
 
@@ -80,12 +88,16 @@ case "$1" in
 	    # this seems to be ugly, but should not really be a problem.
 	    mount -n -o remount,ro / 2> /dev/null
 	    if test $? = 0; then
-	        echo "Checking root file system..."
-	        fsck $FSCK_PROGRESSBAR -a $FSCK_FORCE $ROOTFS_BLKDEV
-	        # A return code of 1 indicates that file system errors
-	        # were corrected, but that the boot may proceed.
-	        # A return code of 2 or larger indicates failure.
-	        FSCK_RETURN=$?
+		if test -n "$ROOTFS_FSCK" ; then
+		    FSCK_RETURN=$ROOTFS_FSCK
+		else
+		    echo "Checking root file system..."
+		    fsck $FSCK_PROGRESSBAR -a $FSCK_FORCE $ROOTFS_BLKDEV
+		    # A return code of 1 indicates that file system errors
+		    # were corrected, but that the boot may proceed.
+		    # A return code of 2 or larger indicates failure.
+		    FSCK_RETURN=$?
+		fi
 		test $FSCK_RETURN -lt 4
 		rc_status -v1 -r
 		if test $FSCK_RETURN -gt 1 -a $FSCK_RETURN -lt 4 ; then

@@ -75,7 +75,7 @@ echo '# start of i18n support'       >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo '# start of i18n support'       >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 
 echo 'if test -z "$SSH_SENDS_LOCALE" ; then' >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo 'if (\! ${?SSH_SENDS_LOCALE} ) then'    >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+echo 'if (! ${?SSH_SENDS_LOCALE} ) then'    >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 
 locale_vars="\
 LANG         \

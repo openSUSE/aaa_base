@@ -14,6 +14,7 @@
 ### END INIT INFO
 
 . /etc/rc.status
+. /etc/sysconfig/boot
 
 rc_reset
 
@@ -38,9 +39,9 @@ case "$1" in
 	if test -x /sbin/showconsole ; then
 		if test "`/sbin/showconsole`" = /dev/tty1 ; then
 		    ( test -c /dev/tty10 && > /dev/tty10 ) > /dev/null 2>&1 \
-			&& /usr/sbin/klogconsole -r10 
+			&& /usr/sbin/klogconsole $KLOGCONSOLE_PARAMS -r10 
 		else
-		    /usr/sbin/klogconsole -l 7 -r 0
+		    /usr/sbin/klogconsole $KLOGCONSOLE_PARAMS -r 0
 		fi
 	fi
     elif test -x /bin/dmesg ; then

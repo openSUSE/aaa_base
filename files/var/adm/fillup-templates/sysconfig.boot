@@ -56,3 +56,11 @@ FLOW_CONTROL="no"
 # system.
 #
 FSCK_MAX_INST="10"
+
+## Type:        string
+## Default:     ""
+#
+# Set additional parameters for klogconsole, e.g. "-l 7"
+#
+KLOGCONSOLE_PARAMS=""
+
