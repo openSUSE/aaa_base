@@ -216,6 +216,7 @@ export COLORTERM
 if test -z "$_SUSECONFIG_PROFILE" ; then
     # read only once
     readonly _SUSECONFIG_PROFILE=true
+    export _SUSECONFIG_PROFILE
     test -e /etc/SuSEconfig/profile && . /etc/SuSEconfig/profile
 fi
 

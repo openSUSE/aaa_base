@@ -232,7 +232,7 @@ shift `expr $OPTIND - 1`
 [ "x$splash" = xoff ] && splash=
 if [ "x$splash" = xauto ] ; then
     splash=
-    for vga in `sed -ne 's/[ 	]*vga[ 	]*='//p </etc/lilo.conf 2>/dev/null`; do
+    for vga in `test -f /etc/lilo.conf && sed -ne 's/[ 	]*vga[ 	]*='//p </etc/lilo.conf`; do
 	splashsize=
 	case $vga in
 	    785|786|0x311|0x312) splashsize=640x480   ;;
