@@ -38,4 +38,5 @@ fix:*:root:root,informix
 oinstall:*:root:root
 dba:*:root:root
 localham:*:root:root
+logmastr:*:root:root
 nogroup:*:root:root
