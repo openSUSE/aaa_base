@@ -14,11 +14,10 @@ link=${base#*[SK][0-9][0-9]}
 test $link = $base && SETUPDUMMYDEV=yes
 test "$NETCONFIG" != "YAST_ASK" -a "$SETUPDUMMYDEV" = "yes" || exit 0
 
-if grep -q dummy: /proc/net/dev ; then
-    dummy=dummy
-else
-    dummy=dummy0
-fi
+dummy=dummy; 
+while read  i j ; 
+    do test $i = "dummy:" && dummy=dummy0;
+done < /proc/net/dev
 ethdev=""
 defdev=""
 ipdef=""
