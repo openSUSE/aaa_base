@@ -138,13 +138,13 @@ export TEXINPUTS
 # Configure the default pager on SuSE Linux
 #
 if test -z "$LESS" ; then
-    LESS="-M"
+    LESS="-M -S -I"
     LESSKEY=/etc/lesskey.bin
     LESSOPEN="lessopen.sh %s"
     LESSCLOSE="lessclose.sh %s %s"
     LESS_ADVANCED_PREPROCESSOR="no"
     PAGER=less
-    export LESSOPEN LESSCLOSE LESS LESSKEY PAGER
+    export LESSOPEN LESSCLOSE LESS LESSKEY PAGER LESS_ADVANCED_PREPROCESSOR
 fi
 
 #
