@@ -129,6 +129,12 @@ CONSOLE_SHUTDOWN=reboot
 #
 SERIAL_CONSOLE=""
 
+#
+# BOOT_SPLASH can be set to "no" to turn off the splash-screen on console 1
+# at boot time (after kernel load).
+#
+BOOT_SPLASH="yes"
+
 ##
 ## Formatting the boot script messages, see /etc/rc.status.
 ## Source /etc/rc.status if rc_done isn't defined

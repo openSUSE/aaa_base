@@ -67,6 +67,14 @@ else
 fi
 fi
 
+#
+# check if splashscreen should be disabled
+#
+if test -e /proc/splash ; then
+if test "$BOOT_SPLASH" = "no" ; then
+    echo "0" > /proc/splash
+fi
+
 # Disable ECN if required.
 if test "$DISABLE_ECN" = "yes" -a -f /proc/sys/net/ipv4/tcp_ecn; then
 	echo "0" >/proc/sys/net/ipv4/tcp_ecn
