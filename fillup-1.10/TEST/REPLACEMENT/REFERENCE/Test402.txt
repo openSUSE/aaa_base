@@ -6,22 +6,12 @@
 
 
 #
-# [4] Balzac, Honore de (1799 - 1850)
+# [2] Andersch, Alfred (1914-1980)
 #
-BAUTHOR=Balzac
-
-
-#
-# [7] Cankar, Ivan (1876 - 1918)
-#
-CAUTHOR=Cankar
+AAUTHOR=Andersch
 
 
 #
-# [10] Dickens, Charles (1812 - 1870)
+# [14] Eliot, Thomas Stearns (1888 - 1965)
 #
-DAUTHOR=Dickens
-
-
-# this is a trailing comment
-
+EAUTHOR=Eliot

@@ -5,7 +5,7 @@ OUT=./OUT
 DIF=./DIFFERENCE
 
 
-all:	Test1 Test2 Test3 Test4 Test5
+all:	Test1 Test2 Test3 Test4 Test5 Test6
 	@echo ""
 	@echo "If subdirectory $(DIF) is empty the test has been successful"
 	@echo ""
@@ -16,8 +16,9 @@ all:	Test1 Test2 Test3 Test4 Test5
 Test1:	Test100 Test101 Test102 Test103 Test104
 Test2:  Test200 Test201
 Test3:  Test300 Test301
-Test4:  Test400 Test401
+Test4:  Test400 Test401 Test402
 Test5:  Test500 Test501
+Test6:  Test600
 
 
 Test100: fillup
@@ -171,6 +172,20 @@ Test401: fillup
 	Evaluate 401
 	@echo "---------------------------"
 
+Test402: fillup
+	@echo "---------------------------"
+	rm -f authors.*
+	./CreateAuthors HEADER
+	mv authors.text ./authors.base
+	./CreateAuthors 2 14
+	mv authors.text ./authors.add
+	$(TESTOBJ) -t -r authors.base authors.add authors.outfile
+	-diff $(REF)/Test402.txt authors.outfile > TestDifference.txt
+	Evaluate 402
+	-diff $(REF)/Test402.newtxt authors.base.new > TestDifference.txt
+	Evaluate 402
+	@echo "---------------------------"
+
 Test500: fillup
 	@echo "---------------------------"
 	rm -f authors.*
@@ -198,6 +213,21 @@ Test501: fillup
 	-diff $(REF)/Test501.newtxt authors.base.new > TestDifference.txt
 	Evaluate 501
 	@echo "---------------------------"
+
+Test600: fillup
+	@echo "---------------------------"
+	rm -f authors.*
+	./CreateAuthors 1 7 
+	mv authors.text ./authors.base
+	./CreateAuthors 5 13 trailer
+	mv authors.text ./authors.add
+	$(TESTOBJ) -r -i authors.base authors.add authors.outfile
+	-diff $(REF)/Test600.txt authors.outfile > TestDifference.txt
+	Evaluate 600
+	-diff $(REF)/Test600.newtxt authors.base.new > TestDifference.txt
+	Evaluate 600
+	@echo "---------------------------"
+
 
 
 fillup: $(TESTOBJ)

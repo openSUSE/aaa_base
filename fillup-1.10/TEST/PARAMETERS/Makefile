@@ -86,8 +86,8 @@ Test206:
 Test207: 
 	@echo "---------------------------"
 	$(TESTOBJ) -V infile addfile outfile 2> Test.txt
-	cp Test.txt $(OUT)/Test207.txt
-	-diff $(REF)/Test207.txt Test.txt > TestDifference.txt
+	cat Test.txt | grep -v "compiled" > $(OUT)/Test207.txt
+	-diff $(REF)/Test207.txt $(OUT)/Test207.txt > TestDifference.txt
 	Evaluate 207
 	rm -f Test.txt
 	@echo "---------------------------"
@@ -258,8 +258,8 @@ Test236:
 Test237: 
 	@echo "---------------------------"
 	$(TESTOBJ) --version infile addfile outfile 2> Test.txt
-	cp Test.txt $(OUT)/Test237.txt
-	-diff $(REF)/Test237.txt Test.txt > TestDifference.txt
+	cat Test.txt | grep -v "compiled" > $(OUT)/Test237.txt
+	-diff $(REF)/Test237.txt $(OUT)/Test237.txt > TestDifference.txt
 	Evaluate 237
 	rm -f Test.txt
 	@echo "---------------------------"
