@@ -119,35 +119,10 @@ skipped=""
 callord=""
 
 #
-# The call shell function
+# Do we stop/start script in parallel?
 #
-call ()
-{
-    local script=${1#*S$rex}
-    local status
-
-    rc_splash "$script start"
-    blogger   "$script start"
-
-    if test -x "$1" ; then
-	# Active boot scripts, should have their own messages
-	$1 start <> $CONSOLE 2>&0 1>&0
-	status=$?
-    else
-	# Old boot scripts, may not have any message
-        echo Running $1	<> $CONSOLE 2>&0 1>&0
-	/bin/sh $1 b	<> $CONSOLE 2>&0 1>&0
-	rc_status -v1	<> $CONSOLE 2>&0 1>&0
-	status=$?
-	rc_status -r
-    fi
-    echo -en "$rc_reset" > $CONSOLE
-
-    blogger "'$script start' exits with status $status"
-
-    test -p /dev/stdin && cat -
-    echo $script=$status
-}
+startpar=$(type -p startpar)
+test "$RUN_PARALLEL" = "yes" || startpar=""
 
 #
 # Start bootup client scripts.
@@ -169,31 +144,70 @@ if test -d ${bootrc}/ ; then
 	    esac
 	fi
 
-	# Current vector
-	eval cur=\${$B}
-	test -n "$cur" || callord="${callord:+"$callord "}$B"
+	if test -z "$startpar" ; then
+	    blogger "$script start"
 
-	# Remember scripts
-	start="call ${bootrc}/$B$script"
-	eval $B="\${cur:+$start\|}\${cur:-$start}"
+	    if test -x "$i" ; then
+		$i start
+	    else
+	        echo Running $i
+		/bin/sh $i b
+		rc_status -v1 -r
+	    fi
+	    status=$?
+	    echo -en "$rc_reset"
+
+	    case $status in
+	    [1-4])   failed="${failed:+$failed }$script"   ;;
+	    [56])   skipped="${skipped:+$skipped }$script" ;;
+	    [07]|*) ;;
+	    esac
+
+	    blogger "'$script start' exits with status $status"
+	else
+	    # Parallel boot only for valid scripts
+	    test -x $i || continue
+
+	    # Current vector
+	    eval cur=\${$B}
+	    test -n "$cur" || callord="${callord:+$callord }$B"
+
+	    # Remember scripts
+	    eval $B="\${cur:+$i }\${cur:-$i}"
+	fi
     done
 fi
 
 #
 # Call the scripts in correct order
 #
-for p in $callord ; do
-    eval p="\${$p}"
+if test -n "$startpar" ; then
+    declare -i s
+    for p in $callord ; do
+	vect=$p
+	eval p=(\${$p})
 
-    while read x ; do
-	case "${x#*=}" in
-	    [1-47])  failed="${failed:+"$failed "}${x%=*}" ;;
-	    [56])   skipped="${skipped:+"$skipped "}${x%=*}" ;;
-	    0|*)    ;;
-	esac
-    done < <(eval $p)
+	blogger "run boot scripts (${p[@]##*S$rex})"
+	if test ${#p[@]} -eq 1 ; then
+	    ${p} start
+	    status=($?)
+	else
+	    status=($($startpar -t 30 -T 3 -a start ${p[@]}))
+	fi
+	echo -en "$rc_reset"
+	blogger "exit status of (${p[@]##*S$rex}) is (${status[@]})"
 
-done
+	s=0
+	for script in ${p[@]##*S$rex} ; do
+	    case "${status[$s]}" in
+	    [1-4])  failed="${failed:+$failed }$script"   ;;
+	    [56])  skipped="${skipped:+$skipped }$script" ;;
+	    0|*)   ;;
+	    esac
+	    : $((s++))
+	done
+    done
+fi
 
 echo -n "System Boot Control: "
 echo -e "The system has been ${stat}${extd}setup${norm}"

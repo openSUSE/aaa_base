@@ -200,25 +200,10 @@ skipped=""
 callord=""
 
 #
-# The call shell function
+# Do we stop/start services in parallel?
 #
-call ()
-{
-    local serv=${1#*[KS]$rex}
-    local status
-
-    rc_splash "$serv $2"
-    blogger   "$serv $2"
-
-    $@ <> $CONSOLE 2>&0 1>&0
-    status=$?
-    echo -en "$rc_reset" > $CONSOLE
-
-    blogger "'$serv $2' exits with status $status"
-
-    test -p /dev/stdin && cat -
-    echo $serv=$status
-}
+startpar=$(type -p startpar)
+test "$RUN_PARALLEL" = "yes" || startpar=""
 
 #
 # First check and test services of previous and current (new) runlevel.
@@ -236,13 +221,27 @@ for i in $prerc/K${rex}*; do
     test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
     test -x "$1"  && continue
 
-    # Current vector
-    eval cur=\${$K}
-    test -n "$cur" || callord="${callord:+"$callord "}$K"
+    if test -z "$startpar" ; then
+	rc_splash "$service stop"
+	blogger "$service stop"
+	$i stop; status=$?
+	echo -en "$rc_reset"
 
-    # Remember services
-    stop="call $prerc/$K$service stop"
-    eval $K="\${cur:+$stop\|}\${cur:-$stop}"
+	case $status in
+	[1-4])	 failed="${failed:+$failed }$service"	;;
+	[56])	skipped="${skipped:+$skipped }$service" ;;
+	[07]|*)	;;
+	esac
+
+	blogger "'$service stop' exits with status $status"
+    else
+	# Current vector
+	eval cur=\${$K}
+	test -n "$cur" || callord="${callord:+$callord }$K"
+
+	# Remember services
+	eval $K="\${cur:+$i }\${cur:-$i}"
+    fi
 done
 
 for i in $runrc/S${rex}*; do
@@ -270,13 +269,27 @@ for i in $runrc/S${rex}*; do
 	esac
     fi
 
-    # Current vector
-    eval cur=\${$S}
-    test -n "$cur" || callord="${callord:+"$callord "}$S"
+    if test -z "$startpar" ; then
+	rc_splash "$service start"
+	blogger "$service start"
+	$i start; status=$?
+        echo -en "$rc_reset"
 
-    # Remember services
-    start="call $runrc/$S$service start"
-    eval $S="\${cur:+$start\|}\${cur:-$start}"
+	case "$status" in
+	[1-47])	 failed="${failed:+$failed }$service"	;;
+	[56])	skipped="${skipped:+$skipped }$service" ;;
+	0|*)	;;
+	esac
+
+	blogger "'$service start' exits with status $status"
+    else
+	# Current vector
+	eval cur=\${$S}
+	test -n "$cur" || callord="${callord:+$callord }$S"
+
+	# Remember services
+	eval $S="\${cur:+$i }\${cur:-$i}"
+    fi
 done
 
 #
@@ -285,28 +298,49 @@ done
 # Start the services of the current (new) runlevel if they are missed
 # within the previous runlevel.
 #
-for p in $callord ; do
-    todo=$p
-    eval p="\${$p}"
+if test -n "$startpar" ; then
+    declare -i s
+    for p in $callord ; do
+	vect=$p
+	eval p=(\${$p})
 
-    while read x ; do
-	case $todo in
-	K*)
-	    case "${x#*=}" in
-		[1-4])	 failed="${failed:+"$failed "}${x%=*}" ;;
-		[56])	skipped="${skipped:+"$skipped "}${x%=*}" ;;
-		[07]|*)	;;
-	    esac ;;
-	S*)
-	    case "${x#*=}" in
-		[1-47])	 failed="${failed:+"$failed "}${x%=*}" ;;
-		[56])	skipped="${skipped:+"$skipped "}${x%=*}" ;;
-		0|*)	;;
-	    esac ;;
+	case $vect in
+	K*) todo=stop  ;;
+	S*) todo=start ;;
 	esac
-    done < <(eval $p)
 
-done
+	blogger "$todo services (${p[@]##*[SK]$rex})"
+	if test ${#p[@]} -eq 1 ; then
+	    ${p} $todo
+	    status=($?)
+	else
+	    status=($($startpar -t 20 -T 3 -a $todo ${p[@]}))
+	fi
+	echo -en "$rc_reset"
+	blogger "exit status of (${p[@]##*[SK]$rex}) is (${status[@]})"
+
+	s=0
+	for service in ${p[@]##*[SK]$rex} ; do
+	    case $todo in
+	    stop)
+		rc_splash "$service stop"
+		case "${status[$s]}" in
+		[1-4])	 failed="${failed:+$failed }$service"	;;
+		[56])	skipped="${skipped:+$skipped }$service" ;;
+		[07]|*)	;;
+		esac ;;
+	    start)
+		rc_splash "$service start"
+		case "${status[$s]}" in
+		[1-47])	 failed="${failed:+$failed }$service"	;;
+		[56])	skipped="${skipped:+$skipped }$service" ;;
+		0|*)	;;
+		esac ;;
+	    esac
+	    : $((s++))
+	done
+    done
+fi
 
 #
 # Inform the users
