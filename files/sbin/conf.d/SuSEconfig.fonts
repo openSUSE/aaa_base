@@ -18,6 +18,11 @@ LC_ALL=POSIX
 # test if not mounted readonly
 touch /usr/X11R6/lib/X11/fonts 2>/dev/null || exit 0
 
+TIMESTAMP=/var/adm/SuSEconfig/lastrun.SuSEconfig.fonts
+if [ ! -f "$TIMESTAMP" ]; then
+    touch "$TIMESTAMP"
+fi
+
 if test "$CHECK_NEWPACKAGE" != false -a -x /usr/X11R6/bin/mkfontdir ; then
     for FDIR in /usr/X11R6/lib/X11/fonts/truetype \
                 /usr/X11R6/lib/X11/fonts/TTF \
@@ -51,15 +56,17 @@ if test "$CHECK_NEWPACKAGE" != false -a -x /usr/X11R6/bin/mkfontdir ; then
     if [ -d /usr/X11R6/lib/X11/fonts/encodings/large ] ; then
         MKXPARMS="$MKXPARMS -e /usr/X11R6/lib/X11/fonts/encodings/large"
     fi
-    for FDIR in `/usr/bin/find /usr/X11R6/lib/X11/fonts/* -type d` ; do
-        if [ ! -f $FDIR/fonts.dir -o $FDIR -nt $FDIR/fonts.dir ] ; then
+    FDIRLIST=`/usr/bin/find /usr/X11R6/lib/X11/fonts/* -type d`
+    for FDIR in $FDIRLIST ; do
+        if [ ! -f $FDIR/fonts.dir \
+	       -o $FDIR -nt $TIMESTAMP -o $FDIR -ot $TIMESTAMP ] ; then
             FSHORT=${FDIR##/usr/X11R6/lib/X11/fonts/}
-            if [ -x /usr/X11R6/bin/mkfontdir ] ; then
-                echo "Updating X11 font directory $FSHORT..."
-                /usr/X11R6/bin/mkfontdir $MKXPARMS $FDIR
-            fi
+            echo "Updating X11 font directory $FSHORT..."
+            /usr/X11R6/bin/mkfontdir $MKXPARMS $FDIR
         fi
     done
+    touch $TIMESTAMP
+    touch -r $TIMESTAMP $FDIRLIST
 fi
 
 if [ -x /usr/X11R6/bin/xftcache ]; then
