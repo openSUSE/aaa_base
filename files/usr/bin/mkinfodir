@@ -1,10 +1,10 @@
 #!/usr/bin/perl
-# Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 1996-2003 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
-# Author: Werner Fink <werner@suse.de>, 1996,1997
+# Author: Werner Fink <werner@suse.de>, 1996,1997,2003
 #
-# MAKEDIR.perl  --- Version 0.51
+# MAKEDIR.perl  --- Version 0.54
 #
 
 use bytes;
@@ -114,38 +114,6 @@ for ( @PATHS ) {
     @info = sort grep(!/-\d+\./, @info);
     push(@allinfo, @info);
 }
-##
-## end read info dir
-##
-
-sub read_entry {
-    local($file) = @_;
-    local(@buf, $add, $lines);
-    local($source) = $file =~ /\.gz$/ ? "gunzip -q -d -c $file 2>/dev/null |" : "< $file";
-
-    @buf = ();
-    $add = 0;
-    $lines = 0;
-    open(_FILE, $source) or warn "can't open $source\n";
-    while (<_FILE>) {
-	chomp;
-	if ( /^($|File:)/ ) { last; }
-	s/^\s+//;
-	s/\s+$//;
-	if ( /^INFO-DIR-SECTION/o )  {
-	    s/^INFO-DIR-SECTION\s+//;
-	    push(@buf, join('=', "Sec", $_));
-	    next;
-	}
-	if ( /^$/ ) { next; }
-	if ( /^START-INFO-DIR-ENTRY/o )  { $add = 1; next; }
-	if ( /^END-INFO-DIR-ENTRY/o )    { $add = 0; next; }
-	if ( $add == 1 ) { push(@buf, $_); $lines++; next; }
-    }
-    close(_FILE);
-
-    return ($lines, @buf);
-}
 
 sub basename {
     local($name) = @_;
@@ -162,6 +130,192 @@ sub path {
     $name =~ s!\/[^/]*$!!;
 
     return ($name);
+}
+
+##
+##
+## Global section titles used as keys
+##
+##
+@sec = ();
+
+#
+# Reformat if required
+#
+sub do_format {
+    local($node, @buf) =  @_;
+    local($base) =  basename($node);
+    local($path) =  path($node);
+    local($name) = "";
+    local($desc) = "";
+    local($link) = "";
+    local($l, $first, @ent);
+
+    $node =~ s/\.gz$//;
+    $node =~ s/\.info$//;
+    $node =~ s!//!/!g;
+
+    if ( $path =~ /^$PATHS[0]$/ ) { $node = $base; }
+
+    @ent = ();
+    foreach $l (@buf) {
+	$first = index($l,"*");
+
+	$l =~ s/\($base\)/\($node\)/g;
+	$l =~ s/::/: \($node\)\./g;
+
+	$name = "";
+	$desc = "";
+	$link = "";
+
+	($name,$desc) = split(/\.\s+/,"$l");
+
+	$name =~ s/\n//g;
+	$name =~ s/\s+$//g;
+	$name =~ s/^\s+//g;
+
+	$desc =~ s/\n//g;
+	$desc =~ s/\s+$//g;
+	$desc =~ s/^\s+//g;
+
+	if ( $first == 0 ) {
+	    $l =~ s/^(\s+)//g;
+	    ($name, $link) = split(/:/, $name);
+	    $name =~ s/\s+$//g;
+	    $link =~ s/^\s+//g;
+	    $link =~ s/\.$//g;
+	    $name = $name . ':' . ' ' . $link . '.';
+	    if ( length($l) > 80 ) {
+		if ( length($name) < 16 && length($desc) < 62) {
+		     $l = sprintf("%-16.18s%s", $name, $desc);
+		} else {
+		    if ( length($desc) > 0 ) {
+			$l = sprintf("%s\n\t\t%s", $name, $desc);
+		    } else {
+			$l = sprintf("%s", $name);
+		    }
+		}
+	    }
+	}
+	push(@ent, $l);
+    }
+    return join("\n", @ent);
+}
+
+#
+# No info for entry found, use old or make a new one
+#
+sub guess_missed {
+    local($node) =  @_;
+    local($base) =  basename($node);
+    local($path) =  path($node);
+    local($cur)  = "default";
+    local($ldir);
+    local(@buf, $add, $lines);
+
+    $node =~ s/\.gz$//;
+    $node =~ s/\.info$//;
+    $node =~ s!//!/!g;
+
+    if ( $path =~ /^$PATHS[0]$/ ) { $node = $base; }
+
+    if ( $path !~ /^$PATHS[0]$/ ) {
+	$ldir = "$path/dir";
+    } else {
+	$ldir = $mdirtmp;
+    }
+
+    @buf = ();
+    if ( -e $ldir && -r $ldir ) {
+	open(FILE, $ldir);
+	$add = 0;
+	while (<FILE>) {
+	    #
+	    # read next few lines if there is information ($add == 1)
+	    #
+	    if ( $add == 1 ) {
+		if ( /^\s+[^\:\*]+$/ ) {
+		    push(@buf, $_); $lines++;
+		    next;
+		}
+		last;
+	    }
+	    if      ( /^\*\s+$base\:\s+\($base\)\.\s+\w/i ) {
+		$add = 1; push(@buf, $_); $lines = 1;
+	    } elsif ( /^\*\s+$base\:\:\s+\w/i ) {
+		$add = 1; push(@buf, $_); $lines = 1;
+	    } elsif ( /^\*\s+$base\:\s+\($base\)\.\s+$/i ) {
+		$add = 1; push(@buf, $_); $lines = 0;
+	    } elsif ( /^\*\s+$base\:\:\s+$/i ) {
+		$add = 1; push(@buf, $_); $lines = 0;
+	    } else {
+		next;
+	    }
+	}
+	close(FILE);
+    }
+
+    if ($lines > 0) {
+	$sec{$cur} = join("\n", $sec{$cur}, do_format($node, @buf));
+    } else {
+	$base =~ s!(.*)!\L$1!;
+	$base =~ s!(.*)!\u$1!;
+	$base  = '* ' . $base . ':';
+	$sec{$cur} = join("\n", $sec{$cur},
+		sprintf("%-0.80s %s\n", $base, '(' . $node . ').'));
+    }
+}
+
+#
+# read info file for entry in dir file
+#
+sub read_entry {
+    local($file) = @_;
+    local($add, $lines, @buf);
+    local($cur) = "default";
+    local($source) = $file =~ /\.gz$/ ? "gunzip -q -d -c $file 2>/dev/null |" : "< $file";
+    local(@buf);
+
+    $add = 0;
+    $lines = 0;
+    @buf = ();
+    open(_FILE, $source) or warn "can't open $source\n";
+    while (<_FILE>) {
+	chomp;
+	s/\s+$//;
+	last if ( /^($|File:)/ );
+	next if ( /^$/ );
+	if ( /^INFO-DIR-SECTION/o )  {
+	    s/^INFO-DIR-SECTION\s+//;
+	    $cur = $_;
+	    next;
+	}
+	if ( /^START-INFO-DIR-ENTRY/o ) {
+	    $add = 1;
+	    push(@buf, "\n") if ( $cur =~ /default/ );
+	    next;
+	}
+	if ( /^END-INFO-DIR-ENTRY/o ) {
+	    $add = 0;
+	    $sec{$cur} = join("\n", $sec{$cur}, do_format($file, @buf));
+	    next;
+	}
+	if ( $add == 1 ) {
+	    $lines++;
+	    push(@buf, $_);
+	    next;
+	}
+    }
+    close(_FILE);
+
+    guess_missed($file) if ( $lines == 0 );
+}
+
+#
+# Do all the stuff
+#
+foreach $elem (@allinfo) {
+    read_entry($elem) if ( -f $elem );
 }
 
 open(DIR, "$filehandle") or die "Cannot open $filehandle\n";
@@ -197,150 +351,21 @@ File: dir	Node: Top	This is the top of the INFO tree
 write DIR; # write top format
 flush(DIR);
 
+@sec = sort keys %sec;
+@keys = keys %sec;
 
-$nl      = 0;
-@allbase = ();
-%found   = ();
-foreach $elem (@allinfo) {
-    $base  = "";
-    $path  = "";
-    $name  = "";
-    $desc  = "";
-    $node  = "";
-    $lines = 0;
-    @info  = ();
-    if ( -f $elem ) {
-	
-	$node =  $elem;
-	$node =~ s/\.gz$//;
-	$node =~ s/\.info$//;
-	$node =~ s!//!/!g;
-
-	$base =  basename($elem);
-	$found{$base} = 0;
-	grep($found{$_}=1, @allbase);
-
-	if ( $found{$base} > 0 ) { next; }
-	push(@allbase, $base);
-
-	($lines, @info) = &read_entry($elem);
-
-	$path =  path($elem);
-	if ( $path =~ /^$PATHS[0]$/ ) { $node = $base; }
-
-	#
-	# Read foreign or old dir files to get infomation about $base
-	# 
-	if ( $lines == 0 ) {
-	    if ( $path !~ /^$PATHS[0]$/ ) {
-		$ldir = "$path/dir";
-	    } else {
-		$ldir = $mdirtmp;
-	    }
-	    @info  = ();
-	    if ( -e $ldir && -r $ldir ) {
-		open(FILE, $ldir);
-		$add = 0;
-		while (<FILE>) {
-		    #
-		    # read next few lines if there is information ($add == 1)
-		    #
-		    if ( $add == 1 ) {
-			if ( /^\s+[^\:\*]+$/ ) {
-			    push(@info, $_); $lines++;
-			    next;
-			}
-			last;
-		    }
-		    if      ( /^\*\s+$base\:\s+\($base\)\.\s+\w/i ) {
-			$add = 1; push(@info, $_); $lines = 1;
-		    } elsif ( /^\*\s+$base\:\:\s+\w/i ) {
-			$add = 1; push(@info, $_); $lines = 1;
-		    } elsif ( /^\*\s+$base\:\s+\($base\)\.\s+$/i ) {
-			$add = 1; push(@info, $_); $lines = 0;
-		    } elsif ( /^\*\s+$base\:\:\s+$/i ) {
-			$add = 1; push(@info, $_); $lines = 0;
-		    } else {
-			next;
-		    }
-		}
-		close(FILE);
-	    }
-	}
-
-	if ( $lines > 0 ) {
-
-	    if ( $lines > 1 && $nl == 0 ) { printf(DIR "\n"); }
-	    $sec = "";
-	    foreach $l (@info) {
-
-		if ( $l =~ /^Sec=/ ) {
-		    $sec =~ s/^Sec=//;
-		    next;
-		}
-
-		$first = index($l,"*");
-
-		$l =~ s/\($base\)/\($node\)/g;
-		$l =~ s/::/: \($node\)\./g;
-		$l =~ s/^(\s+)//g;
-
-		$name = "";
-		$desc = "";
-		$link = "";
-
-		($name,$desc) = split(/\.\s+/,"$l");
-
-		$name =~ s/\n//g;
-		$name =~ s/\s+$//g;
-		$name =~ s/^\s+//g;
-
-		$desc =~ s/\n//g;
-		$desc =~ s/\s+$//g;
-		$desc =~ s/^\s+//g;
-
-		if ( $first == 0 ) {
-		    ($name, $link) = split(/:/, $name);
-		    $name =~ s/\s+$//g;
-		    $link =~ s/^\s+//g;
-		    $link =~ s/\.$//g;
-		    $name = $name . ':' . ' ' . $link . '.';
-		    if ( length($name) < 16 &&
-			 length($desc) < 62 &&
-			 $lines < 2 ) {
-			printf(DIR "%-16.18s%s\n", $name, $desc);
-		    } else {
-			printf(DIR "%s\n",     $name);
-			printf(DIR "\t\t%s\n", $desc) if ( length($desc) > 0 );
-		    }
-		} else {
-		    printf(DIR     "\t\t%s\n", $name);
-		}
-	    }
-	    if ( $lines > 1 ) {
-		printf(DIR "\n"); $nl = 1;
-	    } else {
-		$nl = 0;
-	    }
-
-	} else {
-
-	    $name  = basename($node);
-	    $name =~ s!(.*)!\L$1!;
-	    $name =~ s!(.*)!\u$1!;
-	    $name  = '* ' . $name . ':';
-	    $link  = '(' . $node . ').';
-	    printf(DIR "%-0.80s %s\n", $name, $link);
-	    $nl = 0;
-
-	}
+while ($#keys >= 0) {
+    $cur = pop(@keys);
+    if ( $cur =~ /default/ ) {
+	printf(DIR "\nVarious Utilities");
+    } else {
+	printf(DIR "\n%s", $cur);
     }
-    flush(DIR);
+    printf(DIR "%s\n", $sec{$cur});
 }
 
 printf(DIR "\n* Locales:\n");
 close(DIR);
-if ( -e $mdirtmp ) {
-    unlink($mdirtmp);
-}
+
+unlink($mdirtmp) if ( -e $mdirtmp );
 exit 0;
