@@ -241,7 +241,19 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
 
     sleep 1
     /sbin/portmap
-    /sbin/yast --nomenu
+
+    # check if we are on a serial console=ttyS* and set vt102
+    test -f /proc/cmdline && \
+       grep -i console < /proc/cmdline > /dev/null && \
+       TERM_TEMP=$(sed -e 's/^.*onsole=//' -e 's/[ ,].*$//' < /proc/cmdline)
+    case $TERM_TEMP in
+       ttyS*)
+               TERM=vt102 /sbin/yast --nomenu
+               ;;
+       *)
+               /sbin/yast --nomenu
+               ;;
+    esac
 
     test -x /sbin/init.d/pcmcia && /sbin/init.d/pcmcia stop
 

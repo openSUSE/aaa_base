@@ -368,10 +368,10 @@ done < /proc/cpuinfo
 test "$GMT" != "YAST_ASK" && $CLOCKCMD --hctosys $GMT
 rc_status
 test -f /etc/adjtime || echo "0.0 0 0.0" > /etc/adjtime
-test "$GMT" != "YAST_ASK"  -a "$START_XNTPD" != "yes" && {
+if test "$GMT" != "YAST_ASK"  -a "$START_XNTPD" != "yes" ; then
     $CLOCKCMD --adjust $GMT
     rc_status
-}
+fi
 rc_status -v -r
 
 #
