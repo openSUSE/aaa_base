@@ -298,7 +298,7 @@ rm -f /etc/mtab* /etc/nologin /nologin /fastboot
 # 
 MODULES_DIR=/lib/modules/`uname -r` 
 if test -x /sbin/depmod -a -d $MODULES_DIR ; then
-    for i in $MODULES_DIR/* $MODULES_DIR/*/* /etc/conf.modules ; do
+    for i in $MODULES_DIR/* $MODULES_DIR/*/* /etc/modules.conf ; do
         test -e $i || continue
         if test $i -nt $MODULES_DIR/modules.dep ; then
             rm -f $MODULES_DIR/modules.dep
@@ -583,6 +583,12 @@ if test -e /var/adm/setup/setup.newinst -o -e /usr/lib/YaST/.configured2 ; then
     fi
 fi
 
+
+#
+# Stop blogd
+#
+killproc -QUIT /sbin/blogd
+
 #
 # Let YaST2 finish its installation, if you installed with YaST2
 #
@@ -590,11 +596,6 @@ if test -f /var/lib/YaST2/runme_at_boot ; then
     test -x     /lib/YaST2/bin/YaST2.firstboot &&     /lib/YaST2/bin/YaST2.firstboot
     test -x /usr/lib/YaST2/bin/YaST2.firstboot && /usr/lib/YaST2/bin/YaST2.firstboot
 fi
-
-#
-# Stop blogd
-#
-killproc -QUIT /sbin/blogd
 
 rc_reset
 exit 0

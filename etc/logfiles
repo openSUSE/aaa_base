@@ -51,5 +51,5 @@
 /var/log/radius.log            +1024k   640      root.root      radiusd
 /var/log/radwatch.log          +1024k   640      root.root      
 /var/log/radwtmp               +2048k   640      root.root      radiusd
-
+/var/lib/perforce/log          +1024k   700      perforce.perforce  p4d
 

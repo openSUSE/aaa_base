@@ -303,7 +303,6 @@
 /etc/XF86Config                        root.root         644
 /etc/adjtime                           root.root         644
 /etc/at.deny                           root.root         644
-/etc/conf.modules                      root.root         644
 /etc/csh.cshrc                         root.root         644
 /etc/csh.login                         root.root         644
 /etc/diphosts                          root.root         644
@@ -333,6 +332,7 @@
 /etc/login.defs                        root.root         644
 /etc/magic                             root.root         644
 /etc/man_db.config                     root.root         644
+/etc/modules.conf                      root.root         644
 /etc/motd                              root.root         644
 /etc/mtab                              root.root         644
 /etc/mtools                            root.root         644

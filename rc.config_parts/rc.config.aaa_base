@@ -214,20 +214,6 @@ SORT_PASSWD_BY_UID=no
 FQHOSTNAME=""
 
 #
-# domain searchlist that should be used in /etc/resolv.conf
-# (e.g. "suse.de linux.de uni-stuttgart.de")
-# Attention! this has to be filled out, if you want to access a name server
-#
-SEARCHLIST=""
-
-#
-# space separated list of nameservers that should be used for /etc/resolv.conf
-# give a maximum of 3 IP numbers
-# (e.g. "192.168.116.11 192.168.7.7")
-#
-NAMESERVER="YAST_ASK"
-
-#
 # Used for News-Postings.
 #
 ORGANIZATION=""

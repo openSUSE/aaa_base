@@ -335,12 +335,12 @@ test "$CHECK_INITTAB" = yes && {
     test -f $r/etc/X11/XF86Config && XCONFIGFILE=/etc/X11/XF86Config
     if [ ! -r $r/$XCONFIGFILE -a "$DISPLAYMANAGER" != console ]; then
         echo -n "XFree86 not configured yet! No graphical login. "
-        echo "Check $XCONFIGFILE."
+        echo "Check /etc/X11/XF86Config or /etc/XF86Config."
         DISPLAYMANAGER=none
     fi
 
     case "$DISPLAYMANAGER" in
-        kdm|KDM|xdm|XDM|gdm|GDM) INITRL=5;;
+        kdm|KDM|xdm|XDM|gdm|GDM|wdm) INITRL=5;;
         *)               INITRL=3;;
     esac
 

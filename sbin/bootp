@@ -19,6 +19,7 @@ fi
 trap 'echo "$0: Aborting ..."; rm -rf ${TMPDIR}' 1 2 3 6 7 13 15
 
 tmprc=${TMPDIR}/rc.config
+tmprs=${TMPDIR}/resolv.conf
 tmprt=${TMPDIR}/route.conf
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
@@ -103,27 +104,22 @@ while read -r line ; do
 	    else
 		echo "$line"
 	    fi	;;
-	*SEARCHLIST=*)
-	    set -- $line
-	    if [ -n "$SEARCH"   -a "${1%%=*}" = "SEARCHLIST" ]
-	    then
-		echo SEARCHLIST=\"$SEARCH\"
-	    else
-		echo "$line"
-	    fi	;;
-	*NAMESERVER=*)
-	    set -- $line
-	    if [ -n "$DNSSRVS"  -a "${1%%=*}" = "NAMESERVER" ]
-	    then
-		echo NAMESERVER=\"$DNSSRVS\"
-	    else
-		echo "$line"
-	    fi	;;
 	*)	echo "$line" ;;
     esac
     IFS="$NL"
 done < /etc/rc.config > $tmprc
 IFS="$OLDIFS"
+
+if [ -n "$DNSSRVS" ] ; then
+   echo "# /etc/resolv.conf" > $tmprs
+   echo "# written by /sbin/bootp" >> $tmprs
+   for NRSV in $DNSSRVS ; do
+      echo "nameserver $NRSV" >> $tmprs
+   done
+   if [ -n "$SEARCH" ] ; then
+      echo "search $SEARCH" >> $tmprs
+   fi
+fi
 
 #
 # Write temporary route.conf
@@ -159,6 +155,7 @@ IFS="$OLDIFS"
 # Move temporary rc.config and route.conf into /etc
 #
 test -s $tmprc && mv $tmprc /etc/rc.config
+test -s $tmprs && mv $tmprs /etc/resolv.conf
 test -s $tmprt && mv $tmprt /etc/route.conf
 
 echo -n "Calling SuSEconfig..."
