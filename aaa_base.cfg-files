@@ -21,8 +21,6 @@ etc/runlevel.fallback
 etc/shells
 etc/ttytype
 etc/zshrc
-etc/ppp/ip-up
-etc/ppp/ip-down
 etc/init.d/boot
 etc/init.d/boot.setup
 etc/init.d/dummy
