@@ -40,6 +40,7 @@ test -x $FOO_BIN || exit 5
 #      rc_status -v     ditto but be verbose in local rc status
 #      rc_status -v -r  ditto and clear the local rc status
 #      rc_failed        set local and overall rc status to failed
+#      rc_failed <num>  set local and overall rc status to <num><num>
 #      rc_reset         clear local rc status (overall remains)
 #      rc_exit          exit appropriate to overall rc status
 . /etc/rc.status
@@ -49,12 +50,12 @@ rc_reset
 
 # Return values acc. to LSB for all commands but status:
 # 0 - success
-# 1 - misc error
-# 2 - invalid or excess args
-# 3 - unimplemented feature (e.g. reload)
+# 1 - generic or unspecified error
+# 2 - invalid or excess argument(s)
+# 3 - unimplemented feature (e.g. "reload")
 # 4 - insufficient privilege
-# 5 - program not installed
-# 6 - program not configured
+# 5 - program is not installed
+# 6 - program is not configured
 # 7 - program is not running
 # 
 # Note that starting an already running service, stopping
@@ -68,7 +69,7 @@ case "$1" in
 	## Start daemon with startproc(8). If this fails
 	## the echo return value is set appropriate.
 
-	# startproc should return 0, even if service is 
+	# NOTE: startproc return 0, even if service is 
 	# already running to match LSB spec.
 	startproc $FOO_BIN
 
@@ -116,7 +117,6 @@ case "$1" in
 	## Otherwise:
 	#$0 stop  &&  $0 start
 	#rc_status
-
 	;;
     reload)
 	## Like force-reload, but if daemon does not support
@@ -128,8 +128,9 @@ case "$1" in
 	#touch /var/run/FOO.pid
 	rc_status -v
 	
-	# If it does not support reload:
-	#exit 3
+	## Otherwise if it does not support reload:
+	#rc_failed 3
+	#rc_status -v
 	;;
     status)
 	echo -n "Checking for FOO: "
@@ -142,18 +143,9 @@ case "$1" in
 	# 2 - service dead, but /var/lock/ lock file exists
 	# 3 - service not running
 
-	# If checkproc would return LSB compliant ret values,
-	# things could be a little bit easier here. This will 
-	# probably soon be the case ...
-	checkproc $FOO_BIN; rc=$?
-	if test $rc = 0; then echo "OK"
-	else echo "No process" 
-		if test -e /var/run/FOO.pid;
-		then exit 1
-		else exit 3
-		fi
-	fi
-	#rc_status
+	# NOTE: checkproc returns LSB compliant status values.
+	checkproc $FOO_BIN
+	rc_status -v
 	;;
     probe)
 	## Optional: Probe for the necessity of a reload,

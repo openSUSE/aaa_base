@@ -6,13 +6,13 @@
 
 LOG_BUFFER_SIZE	= 65536
 BOOT_LOGFILE	= /var/log/boot.msg
-#BLOGGER		= 1
+BOOT_FIFO	= /dev/blog
 
 #DEBUG	 =	-DDEBUG=1
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.7
+VERSION	 =	0.9
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #
@@ -29,7 +29,8 @@ else
 endif
 	 CFLAGS = -O2 $(COPTS) $(DEBUG) -D_GNU_SOURCE \
 		  -DLOG_BUFFER_SIZE=$(LOG_BUFFER_SIZE) \
-		  -DBOOT_LOGFILE=\"$(BOOT_LOGFILE)\" -Wall -pipe
+		  -DBOOT_LOGFILE=\"$(BOOT_LOGFILE)\" \
+		  -D_PATH_BLOG_FIFO=\"$(BOOT_FIFO)\" -Wall -pipe
 	  CLOOP = -funroll-loops
 ifeq ($(BLOGGER),1)
 	 CFLAGS := $(CFLAGS) -DBLOGGER
@@ -45,20 +46,20 @@ endif
    INSTCONFLAGS = -c -m 0644
 	INSTCON = install $(INSTDOCFLAGS)
 	   LINK = ln -sf
+	     AR = ar rusv
+	     SO = echo .so man8/
 
 #
 	SDOCDIR = $(DESTDIR)/usr/share/man/man8
 	SBINDIR = $(DESTDIR)/sbin
 	CONFDIR = $(DESTDIR)/etc
 	 LSBDIR = $(DESTDIR)/usr/lib/lsb
+	 LIBDIR = $(DESTDIR)/usr/lib
+	 INCDIR = $(DESTDIR)/usr/include
 #
 #
 #
-ifeq ($(BLOGGER),1)
 TODO	=	showconsole blogd blogger
-else
-TODO	=	showconsole blogd
-endif
 
 all: $(TODO)
 
@@ -68,27 +69,38 @@ libconsole.o:	libconsole.c libconsole.h
 libblogger.o:	libblogger.c libblogger.h
 	$(CC) $(CFLAGS) $(CLOOP) -c $<
 
+libblogger.a:	libblogger.o
+	$(AR) $@ $^
+
 showconsole:	showconsole.c libconsole.o
 	$(CC) $(CFLAGS) $(CLOOP) -o $@ $^
 
 blogd:	blogd.c libconsole.o
 	$(CC) $(CFLAGS) $(CLOOP) -o $@ $^ -lutil
 
-blogger:	blogger.c libblogger.o
+blogger:	blogger.c libblogger.a
 	$(CC) $(CFLAGS) $(CLOOP) -o $@ $^
 
 clean:
-	$(RM) *.o *~ showconsole blogd blogger
+	$(RM) *.o *.a *~ showconsole blogd blogger
 
 install:	$(TODO)
 	$(MKDIR)   $(SBINDIR)
 	$(MKDIR)   $(SDOCDIR)
 	$(MKDIR)   $(CONFDIR)
 	$(MKDIR)   $(LSBDIR)
+	$(MKDIR)   $(LIBDIR)
+	$(MKDIR)   $(INCDIR)
 	$(INSTBIN) showconsole   $(SBINDIR)/
+	$(LINK)    showconsole   $(SBINDIR)/setconsole
+	$(INSTBIN) blogger       $(SBINDIR)/
+	$(INSTDOC) blogger.8     $(SDOCDIR)/
 	$(INSTDOC) showconsole.8 $(SDOCDIR)/
+	$(SO)showconsole.8 >     $(SDOCDIR)/setconsole.8
 	$(INSTBIN) blogd         $(SBINDIR)/
 	$(INSTDOC) blogd.8       $(SDOCDIR)/
+	$(INSTCON) libblogger.a  $(LIBDIR)/
+	$(INSTCON) libblogger.h  $(INCDIR)/
 
 #
 # Make distribution
@@ -106,6 +118,7 @@ FILES	= README         \
 	  blogd.c        \
 	  blogd.8        \
 	  blogger.c      \
+	  blogger.8      \
 	  showconsole-$(VERSION).lsm
 
 dest:

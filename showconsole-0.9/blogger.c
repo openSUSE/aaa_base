@@ -2,25 +2,22 @@
 #include <unistd.h>
 #include "libblogger.h"
 
-/*
- * This does not work on serial console
- */
 int main(int argc, char * argv[])
 {
     int c, lvl = 'n';
 
     while ((c = getopt(argc, argv, "ndfsu")) != -1) {
 	switch (c) {
-	case 'n':
-	case 'd':
-	case 'f':
-	case 's':
-	case 'u':
+	case B_NOTICE:
+	case B_DONE:
+	case B_FAILED:
+	case B_SKIPPED:
+	case B_UNUSED:
 	    lvl = c;
 	    break;
 	case '?':
 	default:
-	    lvl = 'n';
+	    lvl = B_NOTICE;
 	    break;
 	}
     }
@@ -30,12 +27,16 @@ int main(int argc, char * argv[])
     if (!argc)
 	exit(0);
 
-    if (bootlog_h(lvl) < 0)
-	exit(0);
     c = argc;
-    while (c--)
-	bootlog_m(argv[c]);
-    bootlog_e();
+    if (bootlog(lvl, argv[0]) < 0)
+	exit(0);
+
+    argv++;
+    argc--;
+
+    for (c = 0; c < argc; c++)
+	bootlog(-1, " %s", argv[c]);
+    bootlog(-1, "\n");
 
     return 0;
 }

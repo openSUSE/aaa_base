@@ -102,6 +102,7 @@ static void (*saved_sigint)  = SIG_DFL;
 static void (*saved_sigquit) = SIG_DFL;
 static void (*saved_sigterm) = SIG_DFL;
 static volatile sig_atomic_t signaled = 0;
+
 static void sighandle(int sig)
 {
     signaled = sig;
@@ -175,12 +176,14 @@ int main(int argc, char *argv[])
 
     if ((flags = fcntl(fd, F_GETFL)) < 0)
 	error("can not get terminal flags: %s\n", strerror(errno));
-    flags &= ~(O_NONBLOCK);
+    flags &= ~(O_NONBLOCK|O_NOCTTY);
     if (fcntl(fd, F_GETFL, flags) < 0)
 	error("can not set terminal flags: %s\n", strerror(errno));
 
     if (tcgetattr(fd, &t) < 0)
 	error("can not get terminal parameters: %s\n", strerror(errno));
+    cfsetispeed(&t, B38400);
+    cfsetospeed(&t, B38400);
 
     w.ws_row = 0;
     w.ws_col = 0;
@@ -227,11 +230,10 @@ int main(int argc, char *argv[])
 	exit(0);
     }
 
-    prepareIO(reconnect, pidfile);
-    do {
-	safeIO(0, 1);
-    } while (!signaled);
-    closeIO(0, 1);
+    prepareIO(reconnect, pidfile, 0, 1);
+    while (!signaled)
+	safeIO();
+    closeIO();
 
     close(pts);
     rmfpid();

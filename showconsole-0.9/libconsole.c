@@ -4,10 +4,15 @@
 #ifndef  BOOT_LOGFILE
 # define BOOT_LOGFILE		"/var/log/boot.msg"
 #endif
+#ifndef  _PATH_BLOG_FIFO
+# define _PATH_BLOG_FIFO	"/dev/blog"
+#endif
 #include <sys/time.h>
 #include <sys/types.h> /* Defines the macros major and minor */
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -88,16 +93,21 @@ out:
 static void (*vc_reconnect)(int fd) = NULL;
 static inline void safeout (int fd, const char *ptr, size_t s)
 {
+    int saveerr = errno;
+
     while (s > 0) {
 	ssize_t p = write (fd, ptr, s);
 	if (p < 0) {
 	    if (errno == EPIPE)
 		exit (0);
-	    if (errno == EINTR || errno == EAGAIN)
+	    if (errno == EINTR || errno == EAGAIN) {
+		errno = 0;
 		continue;
+	    }
 	    if (errno == EIO && vc_reconnect) {
 		(*vc_reconnect)(fd);
 		vc_reconnect = NULL;
+		errno = 0;
 		continue;
 	    }
 	    error("Can not write to fd %d: %s\n", fd, strerror(errno));
@@ -105,21 +115,56 @@ static inline void safeout (int fd, const char *ptr, size_t s)
 	ptr += p;
 	s -= p;
     }
+    errno = saveerr;
 }
 
 /*
- * Once used: safe in
+ * Twice used: safe in
  */
 static inline ssize_t safein  (int fd, char *ptr, size_t s)
 {
+    int saveerr = errno;
     ssize_t r = 0;
-    do {
-	r = read (fd, ptr, s);
-    } while (r < 0 && (errno == EINTR || errno == EAGAIN));
+    size_t  t;
 
-    if (r < 0)
-	error("Can not from fd %d: %s\n", fd, strerror(errno));
+    if ((ioctl(fd, FIONREAD, (int*)&t) < 0) || (t == 0)) {
+	fd_set check;
+	struct timeval zero = {0, 0};
 
+	do {
+	    FD_ZERO (&check);
+	    FD_SET (fd, &check);
+
+	    /* Avoid deadlock: do not read if nothing is in there */
+	    if (select(fd + 1, &check, (fd_set*)0, (fd_set*)0, &zero) <= 0)
+		break;
+
+	    r = read (fd, ptr, s);
+
+	} while (r < 0 && (errno == EINTR || errno == EAGAIN));
+
+	/* Do not exit on a broken FIFO */
+	if (r < 0 && errno != EPIPE)
+	    error("Can not read from fd %d: %s\n", fd, strerror(errno));
+
+	goto out;
+    }
+
+    while (t > 0) {
+	ssize_t p = read (fd, ptr, t);
+	if (p < 0) {
+	    if (errno == EINTR || errno == EAGAIN) {
+		errno = 0;
+		continue;
+	    }
+	    error("Can not read from fd %d: %s\n", fd, strerror(errno));
+	}
+	ptr += p;
+	r += p;
+	t -= p;
+    }
+out:
+    errno = saveerr;
     return r;
 }
 
@@ -134,12 +179,6 @@ enum {	ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
 static unsigned int state = ESnormal;
 static int npar = 0, nl = 0;
 
-#ifdef BLOGGER
-/*
- * If 1 use sequences handled but not used by console.c
- */
-static int blogger = 0;
-#endif
 static void parselog(FILE * log, const char *buf, const size_t s)
 {
     int c;
@@ -237,35 +276,6 @@ static void parselog(FILE * log, const char *buf, const size_t s)
 		state = ESnormal;
 	    else
 		state = ESnormal;
-#ifdef BLOGGER
-	    if (c>='0'&&c<='9') {
-		blogger = 1;
-		if (!nl)
-		    fputc('\n', log);
-		switch (c) {
-		case 1:
-		default:
-		    fprintf(log, "<notice>");
-		    break;
-		case 2:
-		    fprintf(log, "<done>");
-		    break;
-		case 3:
-		    fprintf(log, "<failed>");
-		    break;
-		case 4:
-		    fprintf(log, "<skipped>");
-		    break;
-		case 5:
-		    fprintf(log, "<unused>");
-		    break;
-		}
-	    } else {
-		if (blogger)
-		    fputc('\n', log);
-		blogger = 0;
-	    }
-#endif
 	    break;
 	case ESpalette:
 	    if ((c>='0'&&c<='9') || (c>='A'&&c<='F') || (c>='a'&&c<='f')) {
@@ -299,10 +309,6 @@ static void parselog(FILE * log, const char *buf, const size_t s)
 	    state = ESnormal;
 	    break;
 	case ESfunckey:
-#ifdef BLOGGER
-	    if (blogger)
-		fputc(c, log);
-#endif
 	case EShash:
 	case ESsetG0:
 	case ESsetG1:
@@ -330,7 +336,8 @@ static char * out = ring;
  * Signal control for writing on log file
  */
 static void (*save_sigio) = SIG_DFL;
-static int nsigio = -1;
+static volatile sig_atomic_t nsigio = -1;
+
 static void sigio(int sig)
 {
     (void)signal(sig, save_sigio);
@@ -341,78 +348,105 @@ static void sigio(int sig)
  * The stdio file pointer for our log file
  */
 static FILE * flog = NULL;
-
-#ifdef NEWBLOGGER
-static sigset_t ttin;
-static void sigttin(int sig)
-{
-    sigprocmask (SIG_BLOCK, &ttin, NULL);
-    parselog(flog, "Signal TTIN\n", sizeof(char)*strlen("Signal TTIN\n"));
-    sigprocmask (SIG_UNBLOCK, &ttin, NULL);
-}
-#endif
+static int fdwrite = -1;
+static int fdread  = -1;
+static int fdfifo  = -1;
 
 /*
  * Prepare I/O
  */
 static void (*rw_connect)(void) = NULL;
-void prepareIO(void (*rfunc)(int), void (*cfunc)(void))
-{
-#ifdef NEWBLOGGER
-    struct sigaction act;
-#endif
+static const char *fifo_name = _PATH_BLOG_FIFO;
 
+void prepareIO(void (*rfunc)(int), void (*cfunc)(void), const int in, const int out)
+{
     vc_reconnect = rfunc;
     rw_connect   = cfunc;
+    fdread  = in;
+    fdwrite = out;
 
-#ifdef NEWBLOGGER
-    act.sa_handler = sigttin;
-    act.sa_flags   = SA_RESTART;
-    if (sigemptyset (&act.sa_mask))
-	error("can not set empty signal set: %s\n", strerror(errno));
-    if (sigaddset   (&act.sa_mask, SIGTTIN))
-	error("can not set add TTIN to signal set: %s\n", strerror(errno));
-    if (sigaction (SIGTTIN, &act, NULL))
-	error("can not set signal action: %s\n", strerror(errno));
-    ttin = act.sa_mask;
-#endif
+    if (fifo_name && fdfifo < 0) {
+	struct stat st;
+	if (!stat(fifo_name, &st) && S_ISFIFO(st.st_mode)) {
+	    if ((fdfifo = open(fifo_name, O_RDWR)) < 0)
+		warn("can not open named fifo %s: %s\n", fifo_name, strerror(errno));
+	}
+    }
+}
+
+/*
+ * Seek for input, more input ...
+ */
+static void more_input (struct timeval *timeout)
+{
+    fd_set watch;
+    int nfds, wfds;
+
+    FD_ZERO (&watch);
+    FD_SET (fdread, &watch);
+
+    if (fdfifo > 0) {
+	FD_SET (fdfifo, &watch);
+	wfds = (fdread > fdfifo ? fdread : fdfifo) + 1;
+    } else
+	wfds = fdread + 1;
+
+    nfds = select(wfds, &watch, (fd_set*)0, (fd_set*)0, timeout);
+
+    if (nfds < 0) {
+	if (errno != EINTR)
+	    error ("select(): %s\n", strerror(errno));
+	goto out;
+    }
+
+    if (!nfds)
+	goto out;
+
+    if (FD_ISSET(fdread, &watch)) {
+	ssize_t cnt = safein(fdread, in, end - in);
+	char * tmp = in;
+
+	safeout(fdwrite, in, cnt);	/* Write copy of input to real tty */
+	tcdrain(fdwrite);
+	in += cnt;
+
+	if (tmp < out && in > out)
+	    out = in;
+	if (in  >= end)
+	    in  = ring;
+	if (out >= end)
+	    out = ring;
+    }
+
+    if (fdfifo > 0 && FD_ISSET(fdfifo, &watch)) {
+	ssize_t cnt = safein(fdfifo, in, PIPE_BUF);
+	char * tmp = in;
+
+	in += cnt;			/* NO copy of input from fifo to tty */
+
+	if (tmp < out && in > out)
+	    out = in;
+	if (in  >= end)
+	    in  = ring;
+	if (out >= end)
+	    out = ring;
+    }
+    errno = 0;
+out:
 }
 
 /*
  *  The main routine for blogd.
  */
-void safeIO (const int fdread, const int fdwrite)
+void safeIO (void)
 {
-    fd_set watch;
     struct timeval timeout;
     ssize_t todo;
     static int log = -1;
 
-    FD_ZERO (&watch);
-    FD_SET (fdread, &watch);
-
     timeout.tv_sec  = 5;
     timeout.tv_usec = 0;
-
-    if (select(fdread + 1, &watch, (fd_set*)0, (fd_set*)0, &timeout) == 1) {
-	ssize_t cnt;
-	if ((cnt = read(fdread, in, end - in)) >= 0) {
-	    char * tmp = in;
-
-	    safeout(fdwrite, in, cnt);	/* Write copy of input to real tty */
-	    in += cnt;
-
-	    if (tmp < out && in > out)
-		out = in;
-	    if (in  >= end)
-		in  = ring;
-	    if (out >= end)
-		out = ring;
-	} else {
-	    if (errno != EINTR && errno != EAGAIN)
-		error("Can not write to fd %d: %s\n", fdread, strerror(errno));
-	}
-    }
+    more_input(&timeout);
 
     if (!nsigio) /* signal handler set but no signal recieved */
 	goto out;
@@ -442,11 +476,12 @@ void safeIO (const int fdread, const int fdwrite)
     else
 	todo = end - out;
 
-    parselog(flog, out, todo);
-    out += todo;
-
-    if (out >= end)
-	out = ring;
+    if (todo) {
+	parselog(flog, out, todo);
+	out += todo;
+	if (out >= end)
+	    out = ring;
+    }
 out:
     if (nsigio < 0) { /* signal handler not set, so do it */
 	save_sigio = signal(SIGIO, sigio);
@@ -457,38 +492,19 @@ out:
 /*
  *
  */
-void closeIO(const int fdread, const int fdwrite)
+void closeIO(void)
 {
-    fd_set watch;
     struct timeval timeout;
     ssize_t todo;
 
-    FD_ZERO (&watch);
-    FD_SET (fdread, &watch);
+    /* Maybe we've catched a signal, therefore */
+    fflush(flog);			/* Clear out stdio buffers   */
+    fdatasync(fileno(flog));		/* and throw it out	     */
+    (void)tcdrain(fdwrite);		/* Hold in sync with console */
 
-    timeout.tv_sec  = 2;
-    timeout.tv_usec = 0;
-
-    if (select(fdread + 1, &watch, (fd_set*)0, (fd_set*)0, &timeout) == 1) {
-	ssize_t cnt;
-	if ((cnt = read(fdread, in, end - in)) >= 0) {
-	    char * tmp = in;
-
-	    safeout(fdwrite, in, cnt);	/* Write copy of input to real tty */
-	    in += cnt;
-
-	    if (tmp < out && in > out)
-		out = in;
-	    if (in  >= end)
-		in  = ring;
-	    if (out >= end)
-		out = ring;
-	} else {
-	    if (errno != EINTR && errno != EAGAIN)
-		error("Can not write to fd %d: %s\n", fdread, strerror(errno));
-	}
-    }
-    (void)fdatasync(fdwrite);
+    timeout.tv_sec  = 0;
+    timeout.tv_usec = 5*100*1000;	/* A half second */
+    more_input(&timeout);
 
     if (!flog)
 	goto out;
@@ -498,13 +514,18 @@ void closeIO(const int fdread, const int fdwrite)
     else
 	todo = end - out;
 
-    parselog(flog, out, todo);
-    out += todo;
+    if (todo) {
+	parselog(flog, out, todo);
+	out += todo;
+	if (out >= end)
+	    out = ring;
+    }
 
     if (!nl)
 	fputc('\n', flog);
 
     (void)fclose(flog);
+    (void)tcdrain(fdwrite);
 out:
 }
 

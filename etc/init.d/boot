@@ -118,6 +118,7 @@ fi
 if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
     echo "Run file system check on root for LVM activation"
     while read des fs type rest; do
+	case "$des" in ""|\#*) continue ;; esac
 	case "$fs" in
 	    /) break ;;
 	    *)       ;;
@@ -128,7 +129,7 @@ if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
     # on first startup of a system with a lvm root device lvm /dev entries 
     # may not exist at this time, so skip fsck in this case
     # skip fsck also for reiserfs case
-    if [ -f "$des" -a "$type" != "reiserfs" ]  
+    if test "$fs" = / -a -f "$des" -a "$type" != "reiserfs"
     then
 	fsck $FSCK_PROGRESSBAR -a -t $type /
 	FSCK_RETURN=$?
@@ -136,6 +137,8 @@ if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
     # A return code of 1 indicates that file system errors
     # were corrected, but that the boot may proceed.
     # A return code of 2 or larger indicates failure.
+    test $FSCK_RETURN -lt 2
+    rc_status -v1 -r
     if test $FSCK_RETURN -gt 1 ; then
 	# Stop blogd since we reboot after sulogin
 	killproc -QUIT /sbin/blogd
@@ -176,7 +179,7 @@ if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
 fi
 
 #
-# fsck can need a huge amount of memory, so make sure, it is there.
+# fsck may need a huge amount of memory, so make sure, it is there.
 #
 echo "Activating swap-devices in /etc/fstab..."
 swapon -a &> /dev/null
@@ -253,9 +256,9 @@ if test ! -f /fastboot -a -z "$fastboot" ; then
 	    esac
 	done < $mounts
 
-	if test "$type" != "umsdos" ; then
+	if test "$fs" = / -a "$type" != "umsdos" ; then
 	    echo
-	    echo "*** ERROR!  Cannot fsck because root is not read-only!"
+	    echo '*** ERROR!  Cannot fsck because root is not read-only!'
 	    echo
 	fi
     fi
@@ -322,6 +325,14 @@ rc_status
 mount -fv -t devpts $optpts devpts /dev/pts
 rc_status
 mount -av -t nonfs,noproc,nodevpts
+rc_status -v1 -r
+
+#
+# After mounting we may activate swap files in /etc/fstab
+# .. this should work know with the new swapon behavio(u)r
+#
+echo "Activating remaining swap-devices in /etc/fstab..."
+swapon -a &> /dev/null
 rc_status -v1 -r
 
 #

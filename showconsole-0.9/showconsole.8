@@ -11,9 +11,13 @@
 .OS SuSE Linux
 .SH NAME
 Showconsole \- determines the underlying tty of stdin
+.br
+Setconsole \- sets the underlying tty of /dev/console
 .SH SYNOPSIS
 .\"
 .B showconsole
+.PP
+.B setconsole /dev/tty<xy> < /dev/console
 .SH DESCRIPTION
 .B showconsole
 determines the underlying character device of
@@ -24,6 +28,15 @@ This can be used on
 as current character device to
 get the real
 character device back.
+.PP
+.B setconsole
+sets the underlying tty of the system console
+.IR /dev/console.
+This requires that the standard input is identical
+with
+.I /dev/console
+and exactly one argument, a valid character device
+is given.
 \."
 .SH BUGS
 .B showconsole

@@ -1,9 +1,9 @@
 #! /bin/bash
 #
-# Copyright (c) 1996-2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996-2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de> 1996
-#	  Werner Fink <werner@suse.de> 1994-99,2000
+#	  Werner Fink <werner@suse.de> 1994-99,2000-2001
 #
 # /etc/init.d/rc   --    The Master Resource Control Script
 #
@@ -55,8 +55,8 @@ if test $COLUMNS -gt 0 ; then
     # VGA
     if test "$RUNLEVEL" = "0" -o "$RUNLEVEL" = "6" ; then
 	case "$REDIRECT" in /dev/tty[1-9]*)
-	    REDIRECT=/dev/tty1
-	    chvt="`type -p chvt && echo ${REDIRECT#*tty}`"
+	    export REDIRECT=/dev/tty1
+	    setconsole $REDIRECT < $CONSOLE
 	esac
     fi
 else
@@ -95,6 +95,7 @@ runrc=/etc/init.d/rc${RUNLEVEL}.d
 prerc=/etc/init.d/rc${PREVLEVEL}.d
 rex="[0-9][0-9]"
 failed=""
+skipped=""
 
 #
 # First check and test services of previous and current (new) runlevel.
@@ -110,14 +111,22 @@ for i in $prerc/K${rex}*; do
     test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
     test -x "$1"  && continue
 
+    # Log to /var/log/boot.msg
+    blogger "$start stop"
+
     # Stop the services of the previous runlevel if they are missed
     # within the current (new) runlevel.
-    #
-    $i stop || failed="${failed} ${service}"
-    echo -n -e "$rc_reset"
 
-    # Some services changes to their last vc, change back
-    $chvt 2>/dev/null
+    $i stop; stat=$?
+    case $stat in
+	[1-4])	 failed="${failed}  ${service}" ;;
+	[56])	skipped="${skipped} ${service}" ;;
+	[07]|*)	;;
+    esac
+    echo -en "$rc_reset"
+
+    # Log to /var/log/boot.msg
+    blogger "'$start stop' exits with status $stat"
 done
 
 for i in $runrc/S${rex}*; do
@@ -131,16 +140,36 @@ for i in $runrc/S${rex}*; do
     test $# -gt 1 && echo -e "$attn$prerc/: more than one link for service $service$norm"
     test -x "$1"  && continue
 
-    #
+    # Log to /var/log/boot.msg
+    blogger "$start start"
+
     # Start the services of the current (new) runlevel if they are missed
     # within the previous runlevel.
-    #
-    $i start || failed="${failed} ${service}"
-    echo -n -e "$rc_reset"
+
+    $i start; stat=$?
+    case $stat in
+	[1-47])	 failed="${failed}  ${service}" ;;
+	[56])	skipped="${skipped} ${service}" ;;
+	0|*)	;;
+    esac
+    echo -en "$rc_reset"
+
+    # Log to /var/log/boot.msg
+    blogger "'$start start' exits with status $stat"
 done
 
 #
 # Inform the users
+#   Reaction on LSB return values:
+#    OK   : 0 - success
+#    FAIL : 1 - generic or unspecified error
+#    FAIL : 2 - invalid or excess argument(s)
+#    FAIL : 3 - unimplemented feature (e.g. "reload")
+#    FAIL : 4 - insufficient privilege
+#    SKIP : 5 - program is not installed
+#    SKIP : 6 - program is not configured
+#    FAIL : 7 - program is not running (doing "start")
+#    OK   : 7 - program is not running (doing "stop")
 #
 echo -n "Master Resource Control: "
 echo -e "runlevel ${RUNLEVEL} has been ${stat}${extd}reached${norm}"
@@ -149,6 +178,12 @@ if test -n "$failed" ; then
     echo -n  "Failed services in runlevel ${RUNLEVEL}: "
     test $n -lt 41 && echo -en "\033[${COLUMNS}C\033[${n}D"
     echo -e  "${warn}${failed}${norm}"
+fi
+if test -n "$skipped" ; then
+    n=$((${#skipped} + 2))
+    echo -n  "Skipped services in runlevel ${RUNLEVEL}: "
+    test $n -lt 41 && echo -en "\033[${COLUMNS}C\033[${n}D"
+    echo -e  "${warn}${skipped}${norm}"
 fi
 
 #

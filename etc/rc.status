@@ -43,23 +43,31 @@ export LINES COLUMNS
         stat=`echo -en "\015${esc}[${COLUMNS}C${esc}[10D"`
 
 if test "$TERM" != "raw" ; then
-     rc_done="${stat}${done} done${norm}"
-   rc_failed="${stat}${warn} failed${norm}"
-  rc_skipped="${stat}${attn} skipped${norm}"
+     rc_done="${stat}${done}done${norm}"
+  rc_already="${stat}${done}already${norm}"
+   rc_failed="${stat}${warn}failed${norm}"
+   rc_missed="${stat}${warn}missed${norm}"
+  rc_skipped="${stat}${attn}skipped${norm}"
+  rc_running="${stat}${done}running${norm}"
+     rc_dead="${stat}${warn}dead${norm}"
+   rc_unused="${stat}${extd}unused${norm}"
   rc_done_up="${esc}[1A${rc_done}"
 rc_failed_up="${esc}[1A${rc_failed}"
-   rc_unused="${stat}${extd} unused${norm}"
     rc_reset="${norm}"
-     rc_save="${esc}7"
+     rc_save=`echo -en "\015${esc}7"`
   rc_restore="${esc}8"
     function rc_cuu () { echo -en "\033[${1}A"; }
 else
-     rc_done="  done"
-   rc_failed="  failed"
-  rc_skipped="  skipped"
+     rc_done="..done"
+  rc_already="..already"
+   rc_failed="..failed"
+   rc_missed="..missed"
+  rc_skipped="..skipped"
+  rc_running="..running"
+     rc_dead="..dead"
+   rc_unused="..unused"
   rc_done_up="${rc_done}"
 rc_failed_up="${rc_failed}"
-   rc_unused="  unused"
     rc_reset=""
      rc_save=""
   rc_restore=""
@@ -68,11 +76,12 @@ fi
 
 _rc_status=0
 _rc_status_all=0
+_rc_todo=$1
 function rc_check ()
 {
     _rc_check_ret=$?
-    test $_rc_check_ret -eq 0 || _rc_status=1
-    test $_rc_status    -eq 0 || _rc_status_all=1
+    test $_rc_check_ret -eq 0 || _rc_status=$_rc_check_ret
+    test $_rc_status    -eq 0 || _rc_status_all=$_rc_status
     return $_rc_check_ret
 }
 function rc_reset ()
@@ -81,6 +90,8 @@ function rc_reset ()
     rc_check
     return 0
 }
+
+if   test "$_rc_todo" = "status" ; then
 function rc_status ()
 {
     for i ; do
@@ -88,26 +99,80 @@ function rc_status ()
 	"") rc_check ;;
 	-v|-v[1-9]|-v[1-9][0-9])
 	    rc_check
-	    test -n "${i#-v}" && { echo -en "$rc_save"; rc_cuu ${i#-v}; }
-	    test $_rc_status -gt 0 && echo -e "$rc_failed" || echo -e "$rc_done"
-	    test -n "${i#-v}" && echo -en "$rc_restore"
-	    ;;
+	    echo -en "$rc_save"
+	    test -n "${i#-v}" && rc_cuu ${i#-v}
+	    case "$_rc_status" in
+	    0)	echo -e "$rc_running"   ;; # service running
+	    1)	echo -e "$rc_dead" 1>&2 ;; # service dead (no pid file)
+	    2)	echo -e "$rc_dead" 1>&2 ;; # service dead (no lock if any)
+	    3)	echo -e "$rc_unused"	;; # service not running
+	    esac
+	    echo -en "$rc_restore" ;;
 	-r) rc_reset ;;
-	-s) echo -e "$rc_skipped"  ; return 0 ;;
-	-u) echo -e "$rc_unused"   ; return 0 ;;
 	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
 	esac
     done
-
     return $_rc_status
 }
+elif test -n "$_rc_todo" ; then
+function rc_status ()
+{
+    for i ; do
+	case "$i" in
+	"") rc_check ;;
+	-v|-v[1-9]|-v[1-9][0-9])
+	    rc_check
+	    echo -en "$rc_save"
+	    test -n "${i#-v}" && rc_cuu ${i#-v}
+	    case "$_rc_status" in
+	    0)	echo -e "$rc_done"	   ;; # success
+	    1)	echo -e "$rc_failed"  1>&2 ;; # generic or unspecified error
+	    2)	echo -e "$rc_failed"  1>&2 ;; # invalid or excess args
+	    3)	echo -e "$rc_missed"  1>&2 ;; # unimplemented feature
+	    4)	echo -e "$rc_failed"  1>&2 ;; # insufficient privilege
+	    5)	echo -e "$rc_skipped" 1>&2 ;; # program is not installed
+	    6)	echo -e "$rc_unused"  1>&2 ;; # program is not configured
+	    7)	test "$_rc_todo" = "stop"  && \
+		echo -e "$rc_already"	   || \
+		echo -e "$rc_failed"  1>&2 ;; # program is not running
+	    esac
+	    echo -en "$rc_restore" ;;
+	-r) rc_reset ;;
+	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
+	esac
+    done
+    return $_rc_status
+}
+else
+function rc_status ()
+{
+    for i ; do
+	case "$i" in
+	"") rc_check ;;
+	-v|-v[1-9]|-v[1-9][0-9])
+	    rc_check
+	    echo -en "$rc_save"
+	    test -n "${i#-v}" && rc_cuu ${i#-v}
+	    test $_rc_status -gt 0 && echo -e "$rc_failed" || echo -e "$rc_done"
+	    echo -en "$rc_restore" ;;
+	-r) rc_reset ;;
+	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
+	esac
+    done
+    return $_rc_status
+}
+fi
+
 function rc_failed ()
 {
-    _rc_status=1
+    case "$1" in
+    [0-7]) _rc_status=$1 ;;
+    "")    _rc_status=1
+    esac
     rc_check
-    return 1
+    return $_rc_status
 }
 function rc_exit ()
 {
-    test $_rc_status_all -ne 0 && exit 1 || exit 0
+    exit $_rc_status_all
 }
