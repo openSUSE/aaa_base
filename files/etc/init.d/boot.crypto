@@ -67,7 +67,7 @@ case "$1" in
 	    # Seeking for crypto modules
 	    #
 	    case "$crypto" in
-		twofish)  modprobe loop_fish2 ;;
+		twofish*)  modprobe loop_fish2 ;;
 	    esac
 	    rc_status
 	    test $? -ne 0 && continue
