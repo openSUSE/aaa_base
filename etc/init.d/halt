@@ -22,7 +22,7 @@ case "$0" in
 		case `/bin/uname -m` in
                     i?86)
                         command="halt"
-                        if test -e /proc/apm ; then
+                        if test -e /proc/apm -o -e /proc/sys/acpi ; then
                             command="halt -p"
                         else
                             read cmdline < /proc/cmdline

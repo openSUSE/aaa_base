@@ -1,0 +1,446 @@
+#!/bin/bash
+#
+#
+# post.sh - to be done after extraction
+#
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.
+#
+#
+#
+# to make shure, var/lib/YaST/bin/bootsetup runs fine, delete
+# usr/lib/YaST/.configured2
+test -e usr/lib/YaST/.configured2 && rm -f usr/lib/YaST/.configured2
+#
+# there are some installation with an etc/psdevtab, which is only readable
+# for root - this slows ps for any other user. starting ps as root, creates
+# it, when it doesn't exist (readable). So simply delete it.
+#
+test -e etc/psdevtab && rm -f etc/psdevtab
+#
+# the following rc.config-variables changed their names during the releases,
+# so we have to change them here ...
+# FONT        to CONSOLE_FONT
+# TRANSLATION to CONSOLE_UNICODEMAP
+# LANGUAGE    to DEFAULT_LANGUAGE
+# replace CREATE_RESOLVCONF by comment
+# comment out NAMESERVER
+# comment out SEARCHLIST
+# delete umask line
+#
+if test -s etc/rc.config ; then
+    sed -e"s/^FONT=/CONSOLE_FONT=/" \
+        -e"s/^TRANSLATION=/CONSOLE_UNICODEMAP=/" \
+	-e"s/^CREATE_RESOLVCONF=.*/# Update: SuSEconfig will no longer touch resolv.conf/" \
+	-e"s/^NAMESERVER=\(.*\)/# NAMESERVER=\1/" \
+	-e"s/^SEARCHLIST=\(.*\)/# SEARCHLIST=\1/" \
+	-e"s/^umask .*//" \
+	-e"s/^test \$rc_done=/test \"\$rc_done\"=/" \
+        -e"s/^LANGUAGE=/DEFAULT_LANGUAGE=/" etc/rc.config \
+    > etc/rc.config.t && mv etc/rc.config.t etc/rc.config
+    rm -f etc/rc.config.t
+fi
+if [ ! -e etc/rc.config ]; then
+ echo "#
+# /etc/rc.config
+#
+# Copyright (c) 1996,98 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Werner Fink <werner@suse.de>, 1996
+#         Burchard Steinbild <bs@suse.de>, 1996
+#
+# Configuration database for shell scripts in /etc/init.d, /sbin/SuSEconfig
+# and /etc/cron.daily/aaa_base
+#
+# Please edit this file and execute /sbin/SuSEconfig to configure everything.
+# Also don't forget to edit the following files:
+#       - /etc/lilo.conf
+#       - /etc/fstab
+#       - /etc/profile
+#       - /etc/hosts
+#
+" > etc/rc.config
+ cat var/adm/fillup-templates/rc.config.aaa_base >> etc/rc.config
+ chmod 644 etc/rc.config
+else
+ echo "Updating etc/rc.config..."
+ if [ -x bin/fillup ] ; then
+  bin/fillup -q -d "=" etc/rc.config var/adm/fillup-templates/rc.config.aaa_base
+  bin/fillup -q -t -r -i -d "=" etc/rc.config var/adm/fillup-templates/rc.config.aaa_base.oldstat /dev/null
+  test -s etc/rc.config.new && mv etc/rc.config.new etc/rc.config
+ else
+  echo "ERROR: fillup not found. This should not happen. Please compare"
+  echo "etc/rc.config and var/adm/fillup-templates/rc.config.aaa_base "
+  echo "and update by hand."
+ fi
+fi
+if [ -x bin/fillup ] ; then
+    for i in passwd group shadow gshadow ; do
+        test -e var/adm/fillup-templates/$i.aaa_base || continue
+        if [ -e etc/$i ] ; then
+            cp etc/$i etc/$i.t
+            cat etc/$i | grep -v "^+" > etc/$i.tt
+            test -s etc/$i.tt && mv etc/$i.tt etc/$i
+        else
+            touch etc/$i
+        fi
+        if [ -e var/adm/fillup-templates/$i.aaa_base ] ; then
+            echo -n "Updating etc/$i..."
+            cp etc/$i etc/$i.aaa_tmp
+            bin/fillup -q -d ":" etc/$i var/adm/fillup-templates/$i.aaa_base
+            if cmp -s etc/$i etc/$i.aaa_tmp ; then
+                echo "unchanged"
+            else
+                echo "modified"
+            fi
+            rm -f etc/$i.aaa_tmp
+        else
+            echo "Cannot find var/adm/fillup-templates/$i.aaa_base. strange..."
+        fi
+        if [ -e etc/$i.t ] ; then
+            grep "^+" etc/$i.t >> etc/$i
+            rm -f etc/$i.t etc/$i.tt
+        fi
+        case $i in
+          *shadow)
+            chmod 640 etc/$i
+	    chgrp shadow etc/$i
+          ;;
+        esac
+    done
+else
+ echo "ERROR: fillup not found. This should not happen."
+fi
+#
+# If we have a NIS system, we have to make sure, that "^+" is at the end
+# of passwd.
+#
+grep -v "^+" etc/passwd > etc/passwd.tmp
+grep "^+" etc/passwd >> etc/passwd.tmp
+test -s etc/passwd.tmp && cat etc/passwd.tmp > etc/passwd
+rm -f etc/passwd.tmp
+#
+# make sure that nobody and nogroup are set to 65534 (we had -2 in former times)#
+for i in etc/passwd etc/group ; do
+    cat $i | sed -e"s/:-2:/:65534:/g" -e"s/:-2:/:65534:/g" > $i.t
+    test -s $i.t && {
+        cat $i.t > $i
+    }
+    rm -f $i.t
+    chmod 644 $i
+done
+#
+# create mtab if it does not exist
+#
+touch etc/mtab
+#
+# make sure that several log files exist
+#
+if test ! -d var/log ; then
+    mkdir -p var/log
+fi
+touch var/log/faillog
+chmod 600 var/log/faillog
+touch root/.bash_history
+chmod 600 root/.bash_history
+chown root.root var/log/faillog
+touch var/log/lastlog
+chmod 644 var/log/lastlog
+chown root.root var/log/lastlog
+touch var/log/wtmp
+chmod 664 var/log/wtmp
+chown root.tty var/log/wtmp
+if test -e usr/sbin/usradd.local -a ! -e usr/sbin/useradd.local ; then
+    cp usr/sbin/usradd.local usr/sbin/useradd.local
+fi
+if test ! -e usr/sbin/useradd.local ; then
+    mkdir -p usr/sbin
+    cat << EOT > usr/sbin/useradd.local
+#!/bin/bash
+#
+# Here you can add your own stuff, that should be done for every new user.
+#
+# When you create a new user with YaST, this script will be called
+# with the new login name as parameter.  The rest of data can be taken
+# from /etc/passwd.
+#
+EOT
+    chmod 744 usr/sbin/useradd.local
+fi
+if test -e usr/sbin/usrdel.local -a ! -e usr/sbin/userdel.local ; then
+    cp usr/sbin/usrdel.local usr/sbin/userdel.local
+fi
+if test ! -e usr/sbin/userdel.local ; then
+    mkdir -p usr/sbin
+    cat << EOT > usr/sbin/userdel.local
+#!/bin/bash
+#
+# Here you can add your own stuff, that should be done for every user who
+# will be deleted.
+#
+# When you delete a user with YaST, this script will be called
+# with the login name as parameter.  The rest of data can be taken
+# from /etc/passwd.
+#
+EOT
+    chmod 744 usr/sbin/userdel.local
+fi
+
+##
+## generate permissions.local
+##
+if test -e etc/permissions.local.rpmorig -a ! -e etc/permissions.local ; then
+   mv etc/permissions.local.rpmorig etc/permissions.local
+fi
+if test ! -e etc/permissions.local ; then
+   cat << EOT > etc/permissions.local
+#
+# /etc/permissions.local
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Roman Drahtmueller <draht@suse.de>, 2001
+#
+# This file is used by SuSEconfig and chkstat to check or set the modes
+# and ownerships of files and directories in the installation.
+#
+# In particular, this file will not be touched during an upgrade of the
+# SuSE Linux installation. It is designed to be a placeholder for local
+# additions by the administrator of the system to reflect filemodes
+# of locally installed packages (usually under /opt/local or /usr/local).
+#
+# Format:
+# <file> <owner>.<group> <permission>
+#
+# Please see the file /etc/permissions for general usage hints of the
+# /etc/permissions* files.
+# Keep in mind that this file (/etc/permissions.local) is being used by
+# default by SuSEconfig, the shell script that is used by yast and yast2
+# after package installation and configuration changes to make the changes
+# effective for the respective packages (eg generating the "real"
+# configuration files).
+# Always check if there are no conflicts between your \"local\" changes here
+# and the settings in the other permissions files by calling
+# \"SuSEconfig\" as root!
+#
+# example:
+#/usr/local/bin/mtr         root.root       4755
+EOT
+   chmod 644 etc/permissions.local
+fi
+##
+##
+##
+XSUSE_FOUND=""
+for i in XSuSE_AT3D XSuSE_Matrox XSuSE_NVidia \
+         XSuSE_Trident XSuSE_Tseng XSuSE_Mach64 \
+         XSuSE_Elsa_GLoria XSuSE_SiS ; do
+    test -f usr/X11R6/bin/$i -a ! -L usr/X11R6/bin/$i && XSUSE_FOUND="$XSUSE_FOUND $i"
+done
+if test -n "$XSUSE_FOUND" ; then
+    mkdir -p var/adm/notify/messages
+    cat << EOT > var/adm/notify/messages/XSuSE-Server
+Hallo,  (english text below)
+Ihr System enthaelt die/den aelteren SuSE Server $XSUSE_FOUND.
+Diese Server sind mittlerweile in die XFree86 Version eingeflossen.
+Wenn Sie die neue Version installiert haben, koennen Sie mittels XF86Setup
+auf die neue Version umsteigen.
+Hello,
+your system contains the old SuSE Server $XSUSE_FOUND.
+These servers are now part of the XFree86 servers.  If you have installed
+the new version, you can switch to it using XF86Setup.
+Have a lot of fun...
+                          Your SuSE Team
+EOT
+fi
+XSERVER_FOUND=false
+for i in usr/X11R6/bin/XF86_* ; do
+    test -f $i && XSERVER_FOUND=true
+    # no need for this message if we have the Xwrapper already
+    test -x usr/X11R6/bin/Xwrapper && XSERVER_FOUND=false
+    # no need for this message for XFree86-4.0
+    test -x usr/X11R6/bin/XFree86 && XSERVER_FOUND=false
+done
+if test "$XSERVER_FOUND" = "true" ; then
+    mkdir -p var/adm/notify/messages
+    cat << EOT > var/adm/notify/messages/Xwrapper
+Hallo,  (english text below)
+Seit der Version 3.3.2 von XFree86 werden bei den XServern keine
+suid root Bits mehr gesetzt.  Stattdessen werden diese Server mittels
+Xwrapper gestartet.  Wenn Sie das Paket aaa_base updaten ohne auch
+die neue Version des XFree86 zu installieren, koennen Sie nicht ohne
+weiteres mittels startx das X11 System starten (Starten mittels xdm
+geht weiterhin).
+Moegliche Loesungen sind:
+1.  Neues XFree86 verwenden.
+oder
+2.  Aendern sie in der Datein /etc/permissions in der Zeile mit Ihrem
+    Server (/usr/X11R6/bin/XF86_*) 755 auf 4755 und rufen Sie SuSEconfig auf.
+Eine weitere "Fehlermoeglichkeit" ist die Existenz einer .xserverrc im Home-
+Verzeichnis des Benutzers.  Wenn Sie dort den Xwrapper statt des X-Servers
+starten, sollte auch dieses Skript wieder funktionieren.
+Hi,
+Since version 3.3.2 of XFree86 the servers are not set suid root anymore.
+startx does now use Xwrapper to start the server.  If you have updated
+aaa_base without updating the XFree86, startx will not work (xdm does
+still work).
+Solutions:
+1.  Install new XFree86.
+or
+2.  Change the entry for your Server in /etc/permissions
+    (/usr/X11R6/bin/XF86_*) from 755 to 4755 and run SuSEconfig.
+A existing ~/.xserverrc also can make trouble.  Start Xwrapper instead
+of the X-Server and it should work again.
+Have a lot of fun...
+                          Your SuSE Team
+EOT
+fi
+OLD_FW_FOUND=false
+test -x usr/sbin/rcmasquerade && OLD_FW_FOUND=true
+if test $OLD_FW_FOUND = true ; then
+    mkdir -p var/adm/notify/messages
+    cat << EOT > var/adm/notify/messages/Old_Firewall
+Hallo,  (english text below)
+anscheinend ist in Ihrem System das alte SuSE-Firewall Paket installiert.
+Aufgrund diverser Probleme mit diesen Skripten wurde dieses Paket nicht
+mehr weitergeführt. Sie finden auf den CDs das Paket firewals, und dessen
+Doku (nach Installation) unter /usr/doc/packages/firewals.
+Um bestehende Systeme nicht zu zerstören, lassen wir diese Konfiguration
+unverändert, empfehlen aber, das alte firewall-Paket nicht mehr zu verwenden.
+Hi,
+obviously you have installed the old SuSE-firewall package in your system.
+Due to various problems with this package it has been discontinued. You
+can find the package firewals on the CDs and (after installation) its
+documentation in /usr/doc/packages/firewals.
+To avoid destroying working installations, we will leave this configuration
+unchanged, but we strongly discourage further use of the old firewall-package.
+Have a lot of fun...
+                          Your SuSE Team
+EOT
+fi
+HOME_TMP_FOUND=false
+grep ":/tmp:" etc/passwd > /dev/null 2>&1 && HOME_TMP_FOUND=true
+if test "$HOME_TMP_FOUND" = "true" ; then
+    mkdir -p var/adm/notify/messages
+    cat << EOT > var/adm/notify/messages/tmp_as_homedir_is_unsafe
+Hallo,  (english text below)
+Ihr System enthält gemäss /etc/passwd noch Benutzer, für die /tmp als
+Home-Verzeichnis angegeben ist. Da dies ein potentielles Sicherheitsrisiko
+darstellt, empfehlen wir, diese Home-Verzeichnisse nach /var/lib/$USERNAME
+zu verlegen, indem Sie das Feld zwischen dem 5. und 6. Doppelpunkt in der
+entsprechenden Zeile von /etc/passwd anpassen.
+Hi,
+your system has (according to /etc/password) users with /tmp as home-
+directory. Since this implies a potential security risk, we recommend to
+change these home-directories to /var/lib/$USERNAME by editing the field
+between the fifth and sixth colon in the respective lines of /etc/passwd.
+EOT
+fi
+if test -d sbin/init.d -a ! -L sbin/init.d ; then
+    cat << EOT > var/adm/notify/messages/moved_initscripts
+Hallo,  (english text below)
+um größtmögliche Konformität mit den LSB-Drafts zu erreichen,
+wurde die Lage der init-Skripten ab SuSE Linux 7.1 geändert. Diese
+Skripten finden sich ab sofort in /etc/init.d. Eigene Skripten sollten
+dorthin verschoben und an die dortigen Gegebenheiten angepasst werden.
+Weitere Informationen finden sich in der Datei /etc/init.d/README.
+Hi,
+in order to reach the best possible conformity with the LSB drafts,
+starting with SuSE Linux 7.1, the init-scripts will be located below
+/etc/init.d. Local scripts should be moved to this location and adapted
+to that environment. Further information can be found in /etc/init.d/README.
+EOT
+fi
+#
+# Now do the ugly part.  Delete mess from former times...
+#
+if test -L usr/i486-linux-libc6/lib/libqimgio.so ; then
+    rm -f usr/i486-linux-libc6/lib/libqimgio.so
+fi
+# try to preserve some values from previous modules.conf
+OLDMODCONF=""
+if [ -f etc/conf.modules.rpmsave ] ; then
+    OLDMODCONF="etc/conf.modules.rpmsave"
+fi
+if [ -f etc/modules.conf.rpmsave ] ; then
+    OLDMODCONF="etc/modules.conf.rpmsave"
+fi
+if [ -n "$OLDMODCONF" ] ; then
+    echo -n "Checking old modules.conf..."
+    rm -f etc/modules.conf.aa.sed
+    rm -f etc/modules.conf.aa.add
+    KEEPOPTIONS="tuner"
+    while read field orig target ; do
+      case $field in
+	alias)
+	  case $orig in
+	    eth0|eth1|tr0|scsi_hostadapter|usb-hostadapter|char-major-14\
+	    |char-major-116|sound|snd-card-[0-9]|sound-slot-[0-9]\
+	    |sound-service-[0-9]-[0-9]|sound-service-[0-9]-[0-9][0-9]|midi)
+	      if [ "$target" != "off" ] ; then
+		echo -n "$orig..."
+		echo "s@^alias $orig \(.*\)@# alias $orig \1@" \
+		  >> etc/modules.conf.aa.sed
+		echo "alias $orig $target" >> etc/modules.conf.aa.add
+		KEEPOPTIONS="$KEEPOPTIONS${KEEPOPTIONS:+|}$target"
+	      fi ;;
+	  esac ;;
+	options)
+	  eval 'case $orig in
+	    '"$KEEPOPTIONS"')
+		echo -n "$field:$orig..."
+		echo "s@^options $orig \(.*\)@# options $orig \1@" \
+		  >> etc/modules.conf.aa.sed
+		echo "options $orig $target" >> etc/modules.conf.aa.add
+		;;
+	  esac'
+      esac
+    done < $OLDMODCONF
+    if [ -f etc/modules.conf.aa.sed ] ; then
+      sed -f etc/modules.conf.aa.sed etc/modules.conf > etc/modules.conf.aa.tmp
+      if [ -f etc/modules.conf.aa.tmp ] ; then
+	mv etc/modules.conf.aa.tmp etc/modules.conf
+      fi
+      rm -f etc/modules.conf.aa.sed
+    fi
+    if [ -f etc/modules.conf.aa.add ] ; then
+      echo -n "copying entries..."
+      echo -e "\n# copied entries from old installation\n" >> etc/modules.conf
+      cat etc/modules.conf.aa.add >> etc/modules.conf
+      rm -f etc/modules.conf.aa.add
+    fi
+    echo "done"
+fi
+GPG_IMPORT_FAIL=false
+if test -f root/.gnupg/pubring.gpg ; then
+   if test -x usr/bin/gpg ; then
+      usr/bin/gpg --export --armor --keyring root/.gnupg/suse_build_key \
+         build@suse.de | usr/bin/gpg --import || true
+      if ! usr/bin/gpg --list-keys build@suse.de >/dev/null 2>&1 ; then
+         GPG_IMPORT_FAIL=true
+      fi
+   fi
+else
+   cp root/.gnupg/suse_build_key root/.gnupg/pubring.gpg
+fi
+if test "$GPG_IMPORT_FAIL" = "true" ; then
+    mkdir -p var/adm/notify/messages
+    cat << EOT > var/adm/notify/messages/add_build_gpg_key
+Hallo,  (english text below)
+leider konnte der gpg Key für SuSE-pakete nicht importiert werden.
+Die Datei, die den entsprechenden Key enthält, findet sich in
+/root/.gnupg/suse_build_key.
+Dieser Key ist erforderlich um die von SuSE gebauten RPMs auf
+Echtheit zu überprüfen.
+Hi,
+unfortunately the import of the gpg-key for suse built packages failed.
+The file containing the key can be found in /root/.gnupg/suse_build_key.
+This key is necessary to check the SuSE built RPMs for authenticity.
+EOT
+fi
+#
+# Initialize runlevel links
+#
+sbin/insserv etc/init.d/{boot.crypto,boot.setup,dummy,halt,network,nfs,nscd,pcnfsd,random,reboot,route,single,xdm}
+## powerfail probably needs empty header ...
+exit 0
+

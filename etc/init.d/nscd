@@ -1,21 +1,27 @@
 #! /bin/sh
-# Copyright (c) 1995-1998 SuSE GmbH Nuernberg, Germany.
+# Copyright (c) 1995-2001 SuSE GmbH Nuernberg, Germany.
 #
-# Author: ro@suse.de
+# Author: Ruediger Oertel <feedback@suse.de>
+#         Thorsten Kukuk  <feedback@suse.de>
 #
-# /etc/init.d/nscd
-#   and its symbolic  link
+# init.d/nscd
+#
+#   and symbolic its link
+#
 # /usr/sbin/rcnscd
 #
+# System startup script for the NIS daemon
+#
 ### BEGIN INIT INFO
-# Provides:          nscd
-# Required-Start:    $remote_fs xntpd $named $syslog
+# Provides: nscd
+# Required-Start: $remote_fs xntpd $named $syslog
 # Required-Stop:
-# Default-Start:     3 5
-# Default-Stop:
-# Description:       Name service cache
+# Default-Start:  3 5
+# Default-Stop:   0 1 2 6
+# Description:    Start Name Service Cache Daemon
 ### END INIT INFO
 
+# Source SuSE config
 . /etc/rc.status
 . /etc/rc.config
 
@@ -26,62 +32,145 @@ link=${base#*[SK][0-9][0-9]}
 # Force execution if not called by a runlevel directory.
 test $link = $base && START_NSCD=yes
 test "$START_NSCD" = yes || exit 0
-test -x /usr/sbin/nscd || exit 0
+
+NSCD_BIN=/usr/sbin/nscd
+test -x $NSCD_BIN || exit 5
+
+# Shell functions sourced from /etc/rc.status:
+#      rc_check         check and set local and overall rc status
+#      rc_status        check and set local and overall rc status
+#      rc_status -v     ditto but be verbose in local rc status
+#      rc_status -v -r  ditto and clear the local rc status
+#      rc_failed        set local and overall rc status to failed
+#      rc_reset         clear local rc status (overall remains)
+#      rc_exit          exit appropriate to overall rc status
+. /etc/rc.status
+
+# First reset status of this service
+rc_reset
+
+# Return values acc. to LSB for all commands but status:
+# 0 - success
+# 1 - misc error
+# 2 - invalid or excess args
+# 3 - unimplemented feature (e.g. reload)
+# 4 - insufficient privilege
+# 5 - program not installed
+# 6 - program not configured
+#
+# Note that starting an already running service, stopping
+# or restarting a not-running service as well as the restart
+# with force-reload (in case signalling is not supported) are
+# considered a success.
 
 case `/bin/uname -r` in
     0.*|1.*|2.0.*|2.1.*)
-        echo No Name Service Cache Daemon started - needs at least kernel version 2.2.
-        exit 0
+        echo -n "Name Service Cache Daemon needs at least kernel version 2.2."
+        rc_status -s
+	exit 1
     ;;
 esac
 
-rc_reset
 case "$1" in
     start)
 	echo -n "Starting Name Service Cache Daemon"
+	# Should we start the daemon in secure mode ?
+        secure=` cat /etc/nsswitch.conf | while read curline ; do
+          table=${curline%:*}
+          entries=${curline##$table:}
+          table=${table%%[^a-z]*}
+          case $table in
+            passwd*|group*|hosts)
+              for entry in $entries ; do
+                case $entry in
+                  nisplus*)
+                    /usr/sbin/nscd_nischeck $table || echo "-S $table,yes"
+                  ;;
+                esac
+              done
+            ;;
+          esac
+        done`
 
-	secure=` cat /etc/nsswitch.conf | while read curline ; do
-	  table=${curline%:*}
-	  entries=${curline##$table:}
-	  table=${table%%[^a-z]*}
-	  case $table in
-	    passwd*|group*|hosts)
-	      for entry in $entries ; do
-		case $entry in
-		  nisplus*)
-		    /usr/sbin/nscd_nischeck $table || echo "-S $table,yes"
-		  ;;
-		esac
-	      done
-	    ;;
-	  esac
-	done`
+	## Start daemon with startproc(8). If this fails
+	## the echo return value is set appropriate.
+	startproc $NSCD_BIN $secure
 
-	startproc /usr/sbin/nscd $secure
+	# Remember status and be verbose
 	rc_status -v
 	;;
     stop)
 	echo -n "Shutting down Name Service Cache Daemon"
-	killproc -TERM /usr/sbin/nscd
+	## Stop daemon with killproc(8) and if this fails
+	## set echo the echo return value.
+
+	killproc -TERM $NSCD_BIN
+
+	# Remember status and be verbose
 	rc_status -v
 	;;
     restart)
-	## If first returns OK call the second, if first or
-	## second command fails, set echo return value.
-	$0 stop; sleep 1  &&  $0 start
+	## Stop the service and regardless of whether it was
+	## running or not, start it again.
+	$0 stop
+	$0 start
+
+	# Remember status and be quiet
 	rc_status
 	;;
-    reload)
+    force-reload)
+	## Signal the daemon to reload its config. Most daemons
+	## do this on signal 1 (SIGHUP).
+	## If it does not support it, restart.
+
+	echo "Reload Name Service Cache Daemon"
+	## if it supports it:
+        #killproc -HUP $NSCD_BIN
+	#rc_status -v
 	$0 stop  &&  $0 start
 	rc_status
 	;;
+    reload)
+	## Like force-reload, but if daemon does not support
+	## signalling, do nothing (!)
+
+	# If it supports signalling:
+	echo -n "Reload Name Service Cache Daemon"
+	killproc -HUP $NSCD_BIN
+	rc_status -v
+	;;
     status)
 	echo -n "Checking for Name Service Cache Daemon: "
+	## Check status with checkproc(8), if process is running
+	## checkproc will return with exit status 0.
 
-	checkproc /usr/sbin/nscd && echo OK || echo No process
+	# Status has a slightly different for the status command:
+	# 0 - service running
+	# 1 - service dead, but /var/run/  pid  file exists
+	# 2 - service dead, but /var/lock/ lock file exists
+	# 3 - service not running
+
+	# If checkproc would return LSB compliant ret values,
+	# things could be a little bit easier here. This will
+	# probably soon be the case ...
+	checkproc $NSCD_BIN; rc=$?
+	if test $rc = 0; then echo "OK"
+	else echo "No process"
+		if test -e /var/run/nscd.pid;
+		then exit 1
+		else exit 3
+		fi
+	fi
+	#rc_status
+	;;
+    probe)
+	## Optional: Probe for the necessity of a reload,
+	## give out the argument which is required for a reload.
+
+	test /etc/nscd.conf -nt /var/run/nscd.pid && echo reload
 	;;
     *)
-	echo "Usage: $0 {start|stop|status|restart|reload}"
+	echo "Usage: $0 {start|stop|status|restart|force-reload|reload|probe}"
 	exit 1
 	;;
 esac

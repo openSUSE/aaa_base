@@ -70,8 +70,9 @@ case "$1" in
 	ifconfig $dummy down
 	rc_status -v
 	;;
-    reload|restart)
-	$0 stop && $0 start
+    reload|force-reload|restart)
+	$0 stop
+	$0 start
 	rc_status
 	;;
     status)

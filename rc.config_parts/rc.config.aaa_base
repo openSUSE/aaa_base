@@ -263,13 +263,6 @@ GOPHER_PROXY=""
 #
 NO_PROXY="localhost"
 
-
-#
-# start cron daemon? ("yes" or "no")
-# should be left unchanged to the default "yes" entry
-#
-CRON="yes"
-
 #
 # when shutting down routing, all net connection can be closed (not useful
 # in all cases).  If CLOSE_CONNECTIONS is set to "true" /etc/init.d/route

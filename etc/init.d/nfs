@@ -85,7 +85,10 @@ case "$1" in
 	test "$nfs" = "yes" && rc_status -v
 	;;
     restart)
-	$0 stop && $0 start
+        ## Stop the service and regardless of whether it was
+	## running or not, start it again.
+	$0 stop
+	$0 start
 	rc_status
 	;;
     status)

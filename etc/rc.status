@@ -127,18 +127,19 @@ function rc_status ()
 	    echo -en "$rc_save"
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    case "$_rc_status" in
-	    0)	echo -e "$rc_done"	   ;; # success
-	    1)	echo -e "$rc_failed"  1>&2 ;; # generic or unspecified error
-	    2)	echo -e "$rc_failed"  1>&2 ;; # invalid or excess args
-	    3)	echo -e "$rc_missed"  1>&2 ;; # unimplemented feature
-	    4)	echo -e "$rc_failed"  1>&2 ;; # insufficient privilege
-	    5)	echo -e "$rc_skipped" 1>&2 ;; # program is not installed
-	    6)	echo -e "$rc_unused"  1>&2 ;; # program is not configured
+	    0)	echo -en "$rc_done"	   ;; # success
+	    1)	echo -en "$rc_failed"  1>&2 ;; # generic or unspecified error
+	    2)	echo -en "$rc_failed"  1>&2 ;; # invalid or excess args
+	    3)	echo -en "$rc_missed"  1>&2 ;; # unimplemented feature
+	    4)	echo -en "$rc_failed"  1>&2 ;; # insufficient privilege
+	    5)	echo -en "$rc_skipped" 1>&2 ;; # program is not installed
+	    6)	echo -en "$rc_unused"  1>&2 ;; # program is not configured
 	    7)	test "$_rc_todo" = "stop"  && \
-		echo -e "$rc_failed"	   || \
-		echo -e "$rc_running" 1>&2 ;; # program is not running
+		echo -en "$rc_failed"	   || \
+		echo -en "$rc_running" 1>&2 ;; # program is not running
 	    esac
-	    echo -en "$rc_restore" ;;
+	    echo -en "$rc_restore"
+	    test -z "${i#-v}" && echo ;;
 	-r) rc_reset ;;
 	-s) echo -e "$rc_skipped" 1>&2 ; rc_failed 5 ;;
 	-u) echo -e "$rc_unused"  1>&2 ; rc_failed 6 ;;
@@ -157,8 +158,9 @@ function rc_status ()
 	    rc_check
 	    echo -en "$rc_save"
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
-	    test $_rc_status -gt 0 && echo -e "$rc_failed" || echo -e "$rc_done"
-	    echo -en "$rc_restore" ;;
+	    test $_rc_status -gt 0 && echo -en "$rc_failed" || echo -en "$rc_done"
+	    echo -en "$rc_restore"
+	    test -z "${i#-v}" && echo ;;
 	-r) rc_reset ;;
 	-s) echo -e "$rc_skipped"  ; return 0 ;;
 	-u) echo -e "$rc_unused"   ; return 0 ;;

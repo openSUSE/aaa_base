@@ -1,0 +1,280 @@
+#!/bin/bash
+#
+# /boot should be the first directory.  This increases the probability, that
+# lilo stuff lies before 1024 cyl.
+mkdir -p boot
+#
+# make sure, tmp directories do exist
+#
+for i in tmp var/tmp ; do
+    test -d $i || {
+        if test -L $i ; then
+            echo "Error! $i is a dangling symlink."
+            echo
+            ls -l $i
+            echo
+            echo "To avoid big problems this link has to be deleted and a directory"
+            echo "will be created.  Remember to fix it after installation."
+            echo
+            rm -f $i
+        elif test -f $i ; then
+            echo "$i is a file.  This makes no sense.  Moving it to $i.save."
+            mv -v $i $i.save
+        fi
+        mkdir -p $i
+    }
+done
+#
+# now create a var/adm/fillup-templates/passwd.aaa_base.
+# If etc/passwd does not exist, copy
+# var/adm/fillup-templates/passwd.aaa_base to etc/passwd.
+# deleted db2 groups and users were uids 46,47,48 and gids 46,47,48
+#
+mkdir -p etc
+touch etc/mtab
+mkdir -p var/adm/fillup-templates
+echo "root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/bin/bash
+daemon:x:2:2:daemon:/sbin:/bin/bash
+lp:x:4:7:lp daemon:/var/spool/lpd:/bin/bash
+news:x:9:13:News system:/etc/news:/bin/bash
+uucp:x:10:14:Unix-to-Unix CoPy system:/etc/uucp:/bin/bash
+games:x:12:100::/var/games:/bin/bash
+man:x:13:2::/var/cache/man:/bin/bash
+at:x:25:25::/var/spool/atjobs:/bin/bash
+postgres:x:26:2:Postgres Database Admin:/var/lib/pgsql:/bin/bash
+lnx:x:27:27:LNX Database Admin:/usr/lib/lnx:/bin/bash
+mdom:x:28:28:Mailing list agent:/usr/lib/majordomo:/bin/bash
+yard:x:29:29:YARD Database Admin:/usr/lib/YARD:/bin/bash
+wwwrun:x:30:65534:Daemon user for apache:/var/lib/wwwrun:/bin/bash
+squid:x:31:65534:WWW proxy squid:/var/squid:/bin/bash
+fax:x:33:14:Facsimile Agent:/var/spool/fax:/bin/bash
+gnats:x:34:65534:Gnats Gnu Backtracking System:/usr/lib/gnats:/bin/bash
+adabas:x:36:100:Adabas-D Database Admin:/usr/lib/adabas:/bin/bash
+amanda:x:37:6:Amanda Admin:/var/lib/amanda:/bin/bash
+ixess:x:38:29:IXware Admin:/usr/lib/ixware:/bin/bash
+irc:x:39:65534:IRC Daemon:/usr/lib/ircd:/bin/bash
+ftp:x:40:2:ftp account:/usr/local/ftp:/bin/bash
+firewall:x:41:31:firewall account:/var/lib/firewall:/bin/false
+informix:x:43:34:Informix Database Admin:/usr/lib/informix:/bin/bash
+named:x:44:44:Nameserver Daemon:/var/named:/bin/bash
+virtuoso:x:45:100:Virtuoso Admin:/opt/virtuoso-lite:/bin/bash
+fnet:x:49:14:FidoNet:/var/spool/fnet:/bin/bash
+gdm:x:50:15:Gnome Display Manager:/var/lib/gdm:/bin/bash
+postfix:x:51:51:Postfix:/var/spool/postfix:/bin/false
+cyrus:x:96:12:User for Imapd:/usr/cyrus:/bin/bash
+nps:x:53:100:NPS admin:/opt/nps:/bin/bash
+skyrix:x:54:100:SKYRIX admin:/opt/skyrix/skyrix36:/bin/bash
+dbmaker:x:55:52:Dbmaker Database Admin:/usr/lib/dbmaker:/bin/bash
+fixadm:x:56:53:Linux Fincancial Suite Admin:/opt/fsuite/home/fixadm:/bin/ksh
+fib:x:57:53:Linux Fincancial Suite fib:/opt/fsuite/home/fib:/bin/ksh
+fixlohn:x:58:53:Linux Fincancial Suite fixlohn:/opt/fsuite/home/fixlohn:/bin/ksh
+oracle:x:59:54:Oracle User:/opt/oracle:/bin/bash
+mysql:x:60:2:MySQL Database User:/var/lib/mysql:/bin/false
+dpbox:x:61:56:DpBox User:/var/spool/dpbox:/bin/false
+ingres:x:62:3:Ingres DataBase administrator:/opt/tngfw/ingres:/bin/bash
+codadmin:x:63:58:Codine Administrator:/var/lib/codadmin:/bin/bash
+zope:x:64:2:Zope Server:/var/lib/zope:/bin/false
+vscan:x:65:65534:vscan user:/var/spool/vscan:/bin/false
+wnn:x:66:100:Wnn System Account:/var/lib/wnn:/bin/false
+pop:x:67:100:pop admin:/var/lib/pop:/bin/false
+perforce:x:68:60:perfoce admin:/var/lib/perforce:/bin/false
+nobody:x:65534:65534:nobody:/var/lib/nobody:/bin/bash" > var/adm/fillup-templates/passwd.aaa_base
+echo "root:x:0:root
+bin:x:1:root,bin,daemon
+daemon:x:2:
+sys:x:3:
+tty:x:5:
+disk:x:6:
+lp:x:7:
+wwwadmin:x:8:
+kmem:x:9:
+wheel:x:10:
+mail:x:12:cyrus
+news:x:13:news
+uucp:x:14:uucp,fax,root,fnet
+shadow:x:15:root,gdm
+dialout:x:16:root
+audio:x:17:root
+at:x:25:at
+lnx:x:27:
+mdom:x:28:
+yard:x:29:
+dosemu:x:30:
+firewall:x:31:
+public:x:32:
+video:x:33:
+informix:x:34:informix
+game:x:40:
+xok:x:41:
+trusted:x:42:
+modem:x:43:
+named:x:44:named
+postfix:x:51:postfix
+dbmaker:x:52:
+fix:x:53:informix
+oinstall:x:54:
+dba:x:55:oracle
+localham:x:56:dpbox
+logmastr:x:57:
+codine:x:58:codadmin
+maildrop:x:59:
+perforce:x:60:perforce
+users:x:100:
+nogroup:x:65534:root" > var/adm/fillup-templates/group.aaa_base
+if test ! -e etc/passwd ; then
+  cp var/adm/fillup-templates/passwd.aaa_base etc/passwd
+else
+  cat etc/passwd | grep -v "^news:" | grep -v "^uucp:" | grep -v "^man:" > etc/passwd.t
+  cat etc/passwd.t > etc/passwd
+  rm -f etc/passwd.t
+  test -x /bin/fillup && \
+    /bin/fillup -q -d ":" etc/passwd var/adm/fillup-templates/passwd.aaa_base
+fi
+if test ! -e etc/group ; then
+  cp var/adm/fillup-templates/group.aaa_base etc/group
+else
+  test -x /bin/fillup && \
+    /bin/fillup -q -d ":" etc/group var/adm/fillup-templates/group.aaa_base
+fi
+# fix permissions if this script is called with strange umask
+chmod 644 etc/passwd
+chmod 644 etc/group
+if test -d sbin/init.d -a ! -L sbin/init.d ; then
+   if test -L etc/init.d ; then
+     rm -f etc/init.d
+   fi
+fi
+#
+# we have several local files, that changed over the time.  Check the
+# existing one, if they contain real data.  If not, delete them.
+#
+for LOCALFILE in root/bin/cron.daily.local \
+		etc/init.d/boot.local \
+		etc/init.d/halt.local \
+		etc/permissions.local.rpmsave \
+		etc/permissions.local.rpmorig \
+		etc/permissions.local \
+		sbin/init.d/boot.local \
+		sbin/init.d/halt.local \
+		usr/sbin/usradd.local \
+		usr/sbin/usrdel.local \
+		usr/sbin/useradd.local \
+		usr/sbin/userdel.local ; do
+    test -f $LOCALFILE || continue
+    LOCALFILE_CONTAINS_DATA=false
+    while read LINE ; do
+        case "$LINE" in
+          "#"*)
+          ;;
+          "echo "*">"*)
+            LOCALFILE_CONTAINS_DATA=true
+          ;;
+          "echo "*)
+          ;;
+          ". /etc/rc.config")
+          ;;
+          "exit "*)
+          ;;
+          "")
+          ;;
+          *)
+            LOCALFILE_CONTAINS_DATA=true
+          ;;
+        esac
+    done < $LOCALFILE
+    test "$LOCALFILE_CONTAINS_DATA" = false && rm -f $LOCALFILE
+done
+mkdir -p etc/init.d
+echo "#! /bin/sh
+#
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Werner Fink <werner@suse.de>, 1996
+#         Burchard Steinbild <bs@suse.de>, 1996
+#
+# /etc/init.d/boot.local
+#
+# script with local commands to be executed from init on system startup
+#
+. /etc/rc.config
+#
+# Here you should add things, that should happen directly after booting
+# before we're going to the first run level.
+#
+" > etc/init.d/boot.local.new
+if [ ! -e etc/init.d/boot.local ] ; then
+  if [ -e sbin/init.d/boot.local ] ; then
+    mv sbin/init.d/boot.local etc/init.d/boot.local
+  fi
+fi
+test -e etc/init.d/boot.local || mv etc/init.d/boot.local.new etc/init.d/boot.local
+rm -f etc/init.d/boot.local.new
+chmod 744 etc/init.d/boot.local
+echo "#! /bin/sh
+#
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Werner Fink <werner@suse.de>, 1998
+#         Burchard Steinbild <bs@suse.de>, 1998
+#
+# /etc/init.d/halt.local
+#
+# script with local commands to be executed from init on system shutdown
+#
+. /etc/rc.config
+#
+# Here you should add things, that should happen directly before shuting
+# down.
+#
+" > etc/init.d/halt.local.new
+if [ ! -e etc/init.d/halt.local ] ; then
+  if [ -e sbin/init.d/halt.local ] ; then
+    mv sbin/init.d/halt.local etc/init.d/halt.local
+  fi
+fi
+test -e etc/init.d/halt.local || mv etc/init.d/halt.local.new etc/init.d/halt.local
+rm -f etc/init.d/halt.local.new
+chmod 744 etc/init.d/halt.local
+mkdir -p etc
+for LINK in usr/X11R6/lib/X11 var/X11R6/lib/fonts usr/lib/mgetty+sendfax \
+    usr/man/cat? usr/X11R6/man/cat? usr/openwin/man/cat? usr/lib/news ; do
+    if test -L $LINK ; then
+        echo "Found forbidden/oldish Link: $LINK ...deleting"
+        rm -f $LINK
+    fi
+done
+#
+# old var/X11R6/lib stuff?
+#
+if test -d var/X11R6/lib -a ! -L var/X11R6/lib ; then
+    echo
+    echo "Found old style var/X11R6/lib. Moving to var/X11R6/lib.old..."
+    if [ -e var/X11R6/lib.old ] ; then
+        echo "var/X11R6/lib.old exists. giving up..."
+    else
+        mv var/X11R6/lib var/X11R6/lib.old
+        echo "Trying to copy to usr/X11R6/lib/X11. This leads to incorrect "
+        echo "harddisk space computation in YaST. Good Luck..."
+        test -e usr/X11R6/lib/X11 || mkdir -p usr/X11R6/lib/X11
+        if [ -d usr/X11R6/lib/X11 -a ! -L usr/X11R6/lib/X11 ] ; then
+            ( cd var/X11R6/lib.old ; \
+              tar cfp - . | tar xfpC - ../../../usr/X11R6/lib/X11 )
+            echo done...
+        else
+            echo "usr/X11R6/lib/X11 is no directory. giving up..."
+        fi
+    fi
+fi
+for DIR in etc/rc.d usr/X11 ; do
+    if test -d $DIR -a ! -L $DIR ; then
+        echo -n "Found oldish directory /$DIR.  "
+        if test -d $DIR.old ; then
+            echo /$DIR.old already exist. Can not move /$DIR to it.
+        else
+            echo Moving it to /$DIR.old
+            mv $DIR $DIR.old
+        fi
+    fi
+done
+

@@ -56,7 +56,7 @@ case "$1" in
 	    #
 	    # Checking the structure on the loop device
 	    #
-	    fsck -a -t $loopdev
+	    fsck -a -t $filesys $loopdev
 	    FSCK_RETURN=$?
 	    test $FSCK_RETURN -lt 2
 	    rc_status

@@ -78,17 +78,19 @@ case "$1" in
 	rc_status -v
 	;;
     restart)
-	$0 stop && $0 start
+	$0 stop
+        $0 start
 	rc_status
 	;;
-    reload)
+    reload|force-reload)
 	echo -n "Reload service $DM"
-	killproc -HUP  $DISPLAYMANAGER || return=$rc_failed
-	echo -e "$return"
+	killproc -HUP  $DISPLAYMANAGER
+	rc_status -v
 	;;
     status|check)
 	echo -n "Checking for service ${DM}: "
-	checkproc $DISPLAYMANAGER && echo "is running" || echo "is NOT running"
+	checkproc $DISPLAYMANAGER
+	rc_status -v
 	;;
     probe)
 	XDMDIR=/usr/X11R6/lib/X11/xdm
@@ -99,7 +101,7 @@ case "$1" in
 	fi
 	;;
     *)
-	echo "Usage: $0 {start|stop|status|restart|reload|probe}"
+	echo "Usage: $0 {start|stop|status|restart|reload|force-reload|probe}"
 	exit 1
 esac
 rc_exit
