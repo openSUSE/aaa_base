@@ -74,7 +74,7 @@ case "$-" in
     # Some useful functions
     #
     startx  () { /usr/X11R6/bin/startx ${1+"$@"} 2>&1 | tee $HOME/.X.err ; }
-    remount () { /bin/mount -o remount ${1+"$@"} ; }
+    remount () { /bin/mount -o remount,${1+"$@"} ; }
 
     #
     # Set prompt to something useful

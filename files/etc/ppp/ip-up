@@ -20,20 +20,32 @@ fi
 TERM=raw
 export TERM
 
-. /etc/rc.config
+test -e /etc/sysconfig/network/options && . /etc/sysconfig/network/options
+
+check_srv() {
+	RLVL=`/sbin/runlevel | sed 's/. //'`
+	test -L /etc/init.d/rc${RLVL}.d/S??$1 && return 0
+	return 1
+}	
 
 start_firewall() {
 	case `uname -r` in
-	    2.[34].*)
-		if test "$START_FW2" = yes ; then
-		    /sbin/SuSEfirewall2
+	    2.[345].*)
+		if check_srv SuSEfirewall2_setup; then
+		    /sbin/SuSEfirewall2 start
 		else
-		    test "$START_FW" = yes && /sbin/SuSEfirewall
+		  if check_srv SuSEfirewall_setup; then
+		    /sbin/SuSEfirewall start
+		  fi
 		fi
 		;;
-	    *)  test "$START_FW" = yes && /sbin/SuSEfirewall
+	    *)  
+		if check_srv SuSEfirewall_setup; then
+		    /sbin/SuSEfirewall start
+		fi
 		;;
 	esac
+	# KG: Probably not correct any more: Should check symlinks as well
 	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
 }
 
