@@ -4,7 +4,7 @@
 # All rights reserved.
 #
 # Author: Florian La Roche, 1996
-#	  Werner Fink <werner@suse.de> 1994-99,2000-2003
+#	  Werner Fink <werner@suse.de> 1994-99,2000-2004
 #
 # Please send feedback to http://www.suse.de/feedback
 #
@@ -221,12 +221,37 @@ skipped=""
 callord=""
 
 #
+# Check if we are able to use make for booting
+#
+test -s /etc/init.d/.depend.start || USE_MAKE="no"
+test -s /etc/init.d/.depend.stop  || USE_MAKE="no"
+test -s /etc/init.d/Makefile	  || USE_MAKE="no"
+type -p make &> /dev/null	  || USE_MAKE="no"
+test "$DO_CONFIRM"   = "yes"	  && USE_MAKE="no"
+
+#
 # Do we stop/start services in parallel?
 #
 startpar=$(type -p startpar)
 test "$RUN_PARALLEL" = "yes" || startpar=""
 test "$DO_CONFIRM"   = "yes" && startpar=""
+test "$USE_MAKE"     = "yes" && startpar=""
 
+#
+# Stop/Start services with make
+#
+if test "$USE_MAKE" = "yes" ; then
+
+    test "$RUN_PARALLEL" = "yes" && J=-j
+    case `uname -r` in
+    *-smp) L='-l 8' ;;
+    *)	   L='-l 4' ;;
+    esac
+    make -kirR $J $L -f /etc/init.d/Makefile MODE=stop
+    make -kirR $J $L -f /etc/init.d/Makefile MODE=start
+    unset J L
+
+else
 #
 # First check and test services of previous and current (new) runlevel.
 #
@@ -313,6 +338,7 @@ for i in $runrc/S${rex}*; do
 	eval $S="\${cur:+$i }\${cur:-$i}"
     fi
 done
+fi
 
 #
 # Stop the services of the previous runlevel if they are missed

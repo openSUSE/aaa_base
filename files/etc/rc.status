@@ -145,6 +145,7 @@ function rc_status ()
 {
     rc_check
     _rc_status_ret=$_rc_status
+    local i
     for i ; do
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])
@@ -184,6 +185,7 @@ function rc_status ()
 	# is success if we stop service
 	test "$_rc_status" -eq 7 && rc_failed 0 ;;
     esac
+    local i
     for i ; do
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])
@@ -220,6 +222,7 @@ function rc_status ()
 {
     rc_check
     _rc_status_ret=$_rc_status
+    local i
     for i ; do
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])

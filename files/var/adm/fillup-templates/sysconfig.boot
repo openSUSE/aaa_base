@@ -27,6 +27,15 @@ CONFIRM_PROMPT_TIMEOUT="5"
 RUN_PARALLEL=yes
 
 ## Type:	yesno
+## Default:	yes
+#
+# Run all scripts or rather start/stop all services
+# by using the make command and if RUN_PARALLEL is
+# set to "yes" just use the -j option of make
+#
+USE_MAKE=yes
+
+## Type:	yesno
 ## Default:	no
 #
 # If set to "yes" this enables to stop the boot process by
