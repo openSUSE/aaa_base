@@ -32,7 +32,9 @@ case "$1" in
 	startproc $PORTMAP || return=$rc_failed
 	/bin/sleep 1
         if test "$NFS_SERVER_UGID" = yes; then
+	   if test -x /usr/sbin/rpc.ugidd ; then
             startproc /usr/sbin/rpc.ugidd       || return=$rc_failed
+           fi
         fi
 	echo -e "$return"
 	;;

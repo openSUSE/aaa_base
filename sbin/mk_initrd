@@ -10,7 +10,7 @@
 # on errors:
 #   exit code > 0
 #
-# Version 1.01
+# Version 1.02
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
@@ -39,7 +39,6 @@ image_inodes=100
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # should be nothing to change below...
 
-tmp_initrd=/tmp/initrd$$
 tmp_mnt=/tmp/mnt$$
 tmp_msg=/tmp/msg$$
 lx_rc=$tmp_mnt/linuxrc
@@ -62,6 +61,11 @@ error () {
 root_dir="$1"
 [ "$root_dir" ] || root_dir=/
 
+LD_LIBRARY_PATH=$root_dir/lib:$root_dir/usr/lib
+tmp_initrd=$root_dir/tmp/initrd$$
+
+cp -f /proc/mounts /etc/mtab
+
 x1=`mount 2>/dev/null | grep "on $root_dir "`
 x2=`echo \`echo "$x1" | wc -l\``
 x3=`echo "$x1" | cut -f 1 -d " "`
@@ -73,10 +77,11 @@ root_dev=
 
 echo "using \"$root_dev\" as root device (mounted on \"$root_dir\")"
 
-. $root_dir/etc/rc.config
+[ -f "$root_dir/etc/rc.config" ] && . $root_dir/etc/rc.config
 
 modules="$INITRD_MODULES"
 
+( cd $root_dir$boot_dir ; rm -f $initrds )
 [ "$modules" ] || error 0 "no initrd required"
 
 initrd_a=($initrds)
@@ -87,7 +92,7 @@ for k in $kernels ; do
   kk="$root_dir$boot_dir/$k"
   [ -f "$kk" ] || error 2 "no such kernel image: \"$kk\""
 
-  vv=`head -c 10000 $kk | strings | egrep '^[0-9]\.[0-9]\.[0-9]+' | cut -d " " -f 1`
+  vv=`head -c 10000 $kk | $root_dir/usr/bin/strings | egrep '^[0-9]\.[0-9]\.[0-9]+' | cut -d " " -f 1`
 
   ii="$root_dir$boot_dir/${initrd_a[$kernel_idx]}"
 
@@ -99,6 +104,7 @@ for k in $kernels ; do
 
   dd if=/dev/zero of=$tmp_initrd bs=1k count=$image_blocks 2>/dev/null
   mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd 2>/dev/null
+  insmod /lib/loop.o
 
   mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || { 
     error 4 "failed to mount image"
@@ -107,8 +113,8 @@ for k in $kernels ; do
 
   mkdir $tmp_mnt/{bin,dev}
   cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console} $tmp_mnt/dev
-  cp $root_dir/$static_shell $tmp_mnt/bin/sh 2>/dev/null || error 5 "no static shell"
-  cp $root_dir/$static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 6 "no static insmod"
+  cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 5 "no static shell"
+  cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 6 "no static insmod"
 
   echo '#! /bin/sh' >$lx_rc
   echo >>$lx_rc

@@ -394,9 +394,10 @@ USE_KERNEL_NFSD_NUMBER="4"
 
 #
 # translates userid and goupid between server and client
-# ("yes" or "no"). Needs to be started on NFS clients.
+# ("yes" or "no"). Needs to be started on NFS clients for
+# certain special user-id mappings.
 #
-NFS_SERVER_UGID="yes"
+NFS_SERVER_UGID="no"
 
 
 #
