@@ -75,12 +75,12 @@ fi
 #
 %{fillup_and_insserv -ps dummy SETUPDUMMYDEV }
 %{fillup_and_insserv -psy boot.crypto START_CRYPTO_FILESYSTEMS boot.loopback START_LOOPBACK }
-%{fillup_and_insserv -py nscd halt network nfs random reboot route single xdm boot.clock boot.ibmsis boot.ipconfig boot.klog boot.ldconfig boot.localfs boot.localnet boot.lvm boot.md boot.proc boot.quota boot.swap }
+%{fillup_and_insserv -py nscd halt network nfs random reboot route single xdm boot.clock boot.ibmsis boot.ipconfig boot.klog boot.ldconfig boot.localfs boot.localnet boot.proc boot.quota boot.swap }
 ## powerfail probably needs empty header ...
 
 # hack: DEFAULT_LANGUAGE was the first variable in rc.config
 # and we want to move it out
-awk 'BEGIN { i=0; } /^$/ { if (i==0) { print "DUMMY_SEPARATOR=dummy\n" ; i++ ; next } else { print } } { print } ' etc/rc.config > etc/rc.config.new
+awk 'BEGIN { i=0; } /^$/ { if (i==0) { print "DUMMY_SEPARATOR=dummy\n" ; i++ ; next } else { print } } { print } ' etc/rc.config > etc/rc.config.new 2>/dev/null
 mv etc/rc.config.new etc/rc.config
 #
 # remove old stuff from rc.config (oldstuff only has removed variables)
@@ -101,6 +101,7 @@ done
 # hack: remove the separator line again
 grep -v "^DUMMY_SEPARATOR" etc/rc.config > etc/rc.config.new
 mv etc/rc.config.new etc/rc.config
+
 #
 # handle password files
 #
