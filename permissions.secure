@@ -106,6 +106,7 @@
 /etc/motd                              root.root         644
 /etc/mtab                              root.root         644
 /etc/rmtab                             root.root         644
+/etc/opiekeys                          root.root         600
 /etc/ppp                               root.dialout      750
 /etc/ppp/chap-secrets                  root.root         600
 /etc/ppp/pap-secrets                   root.root         600
@@ -143,6 +144,9 @@
 /usr/bin/chage                         root.shadow      4755
 /usr/bin/chsh                          root.shadow      4755
 /usr/bin/expiry                        root.shadow      4755
+# opie password system
+/bin/opiepasswd                        root.root        4755
+/bin/opiesu                            root.root        4755
 # NIS+: "trusted" only.
 /usr/bin/chkey                         root.trusted     4750
 # the default configuration of the sudo package in SuSE distribution is to
@@ -175,6 +179,13 @@
 # mixed section: most of it is disabled in this permissions.secure:
 #
 #########################################################################
+# rpm subsystem:
+/usr/src/packages/SOURCES              root.root         755
+/usr/src/packages/BUILD                root.root         755
+/usr/src/packages/RPMS                 root.root         755
+/usr/src/packages/SPECS                root.root         755
+/usr/src/packages/SRPMS                root.root         755
+#
 /opt/score/deploy/bin.linux-suse/scremote.exe   root.root 4755
 /opt/score/bin/bin.linux-suse/scrun.exe root.root       4755
 # mostly from series beo:
@@ -293,6 +304,10 @@
 /usr/X11R6/bin/cardinfo                 root.root       0755
 # if smail is installed:
 /usr/sbin/smail                         root.root       6555
+# phoenix, commercial package
+# The package won't work with these files closed.
+/usr/lib/phoenix/License                root.root        644
+/usr/lib/phoenix/basic/address.txt      root.root        644
 
 
 #
@@ -302,6 +317,8 @@
 /bin/ping6                              root.root       4755
 /usr/bin/bing                           root.trusted    4750
 /usr/sbin/traceroute                    root.root       4755
+# mtr is linked against ncurses. For dialout only.
+/usr/sbin/mtr                           root.dialout    4750
 /usr/bin/rcp                            root.root       4755
 /usr/bin/rlogin                         root.root       4755
 /usr/bin/rsh                            root.root       4755
