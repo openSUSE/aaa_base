@@ -81,7 +81,8 @@ TMPFILE=`mktemp /tmp/Check.perms.XXXXXX`
 TMPFILE2=`mktemp /tmp/Check.perms.XXXXXX`
 
 if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
-        -x /usr/bin/perl -a -x /usr/bin/chkstat -a "$UID" = 0 ; then
+        -x /usr/bin/perl -a -x /usr/bin/chkstat ; then
+  if test "$UID" = 0 -o -n "$RPM_BUILD_ROOT" ; then
 
     cat /etc/permissions > $TMPFILE
     for PERMEXT in $PERMISSION_SECURITY ; do
@@ -103,6 +104,7 @@ if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
     elif test "$CHECK_PERMISSIONS" = "warn" ; then
         /usr/bin/chkstat $TMPFILE
     fi
+  fi
 fi
 
 rm -rf $TMPFILE $TMPFILE2
