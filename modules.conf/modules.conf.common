@@ -389,6 +389,8 @@ alias char-major-96       pt
 alias char-major-97       pg
 alias char-major-107      3dfx
 alias char-major-109      lvm-mod
+# remove this if sound is configured
+alias char-major-116      off
 
 # ppp over ethernet
 # the kernel 2.2 uses pppox
