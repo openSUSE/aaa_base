@@ -400,7 +400,7 @@ alias char-major-144      pppox
 post-install pppox insmod mssclampfw
 pre-remove   pppox rmmod  mssclampfw
 else
-alias char-major-108      ppp_async
+alias char-major-108      ppp_generic
 alias char-major-144      pppoe
 alias net-pf-24           pppoe
 endif

@@ -1,12 +1,12 @@
 .\"
 .\" SuSE man page route.conf
-.\" Copyright (c) 1997,2000 SuSE GmbH Nuernberg, Germany.   
+.\" Copyright (c) 1997,2000,2001 SuSE GmbH Nuernberg, Germany.   
 .\" please send bugfixes or comments to feedback@suse.de.
 .\"
 .\" Author: Werner Fink        <werner@suse.de>
 .\"
 .\"
-.TH ROUTE.CONF 5 "January 28, 2000" "Version 0.3" "Configuration for routing table"
+.TH ROUTE.CONF 5 "October 11, 2001" "Version 0.4" "Configuration for routing table"
 .\"
 .UC 5
 .SH NAME
@@ -23,7 +23,7 @@ is parsed by the run level script
 .I /etc/init.d/route
 which is linked in as service into a run level
 with network. The default run levels are
-.BR 2\  and\  3 .
+.BR 3\  and\  5 .
 The syntax is similar to the output of the command
 .PP
 .RS
@@ -55,12 +55,15 @@ The third column gives the netmask for a remote
 host or remote network behind a gateway.
 For a host behind a gateway this reads
 .BR 255.255.255.255 .
+The line for the the default gateway requires the dummy address
+.BR 0.0.0.0 .
 .PP
 The fourth column gives the name of the device interface
 of the local networks (i.e. lo, eth0, eth0:1, eth1,
 sdn0, ppp0, dummy0, ...) or the special name
 .B reject
-for routes which should been rejected by the kernel.
+for routes which should been rejected by the kernel. Do not
+forget the device interface at the line of the default gateway.
 .PP
 Any remaining columns, if given, are appended to the route command.  This
 makes it possible to pass special options for this route. Columns
@@ -84,15 +87,15 @@ An example with common network interfaces and some static routes:
 #
 # Default gateway
 #
-default             204.127.235.41
+default           204.127.235.41    0.0.0.0            eth0
 #
 # Host behind a gateway
 #
-207.68.156.51     207.68.145.45     255.255.255.255
+207.68.156.51     207.68.145.45     255.255.255.255    eth1
 #
 # Net behind a gateway
 #
-192.168.0.0       207.68.156.51     255.255.0.0
+192.168.0.0       207.68.156.51     255.255.0.0        eth1
 #
 # Do not accept this route (gateway is a dummy)
 #
@@ -113,10 +116,20 @@ connection.
 #
 127.0.0.0         0.0.0.0           255.255.255.0      lo
 193.102.150.13    0.0.0.0           255.255.255.255    ippp0
-default           193.102.150.13
+default           193.102.150.13    0.0.0.0            ippp0
 
 .fi
 .PP
+.\"
+.SH NOTES
+Newer kernel will set the route entries for the local host automatically
+with the given IP addresses on e.g. the
+.I ifconfig
+comand line call in the
+.B /etc/init.d/network
+script.  You may remove or comment out those entries from the
+.I /etc/route.conf
+configuration file.
 .\"
 .SH START and STOP
 .PP
@@ -137,7 +150,7 @@ and cleared by:
 An other way is to change the run level with:
 .PP
 .RS
-.B init 1
+.B init 2
 .RE
 .PP
 to level
@@ -146,13 +159,13 @@ to level
 and shwitch back with
 .PP
 .RS
-.B init 2
+.B init 3
 .RE
 .PP
 to the run level with network or with
 .PP
 .RS
-.B init 3
+.B init 5
 .RE
 .PP
 to the run level with network and
