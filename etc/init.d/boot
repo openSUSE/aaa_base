@@ -82,6 +82,20 @@ if test "$DISABLE_ECN" = "yes" -a -f /proc/sys/net/ipv4/tcp_ecn; then
 fi
 
 #
+# iSeries: native I/O SCSI disks
+#
+if test -d /proc/scsi/ibmsis; then
+	# we need write access (sisupdate: /dev/ibmsisX, scsidev: /dev/sdX)
+	echo "Remounting root file system (/) read/write for scsidev..."
+	mount -n -o remount,rw /
+	# update firmware
+	if [ -x /sbin/sisupdate ]; then echo Running sisupdate...; /sbin/sisupdate; else echo /sbin/sisupdate not found; fi
+	# register devices
+	if [ -x /bin/scsidev    ]; then echo Running scsidev...;   /bin/scsidev;    else echo /bin/scsidev not found; fi
+	mount -n -o remount,ro /
+fi
+
+#
 # maybe we use "Multiple devices".  So initialize MD.
 #
 if test -f /etc/raidtab -a -x /sbin/raid0run ; then

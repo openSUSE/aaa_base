@@ -2,7 +2,7 @@
 #
 # PLEASE DO NOT CHANGE /etc/profile. There are chances that your changes
 # will be lost during system upgrades. Instead use /etc/profile.local for
-# your your local settings, favourite global aliases, VISUAL and EDITOR
+# your local settings, favourite global aliases, VISUAL and EDITOR
 # variables, etc ...
 
 #
@@ -25,8 +25,11 @@ fi
 # Initialize terminal
 #
 if test -t 1 ; then
-    test -z "${TERM}"	       && { TERM=linux; export TERM; }
-    test "${TERM}" = "unknown" && { TERM=linux; export TERM; }
+    test -z "${TERM}"		&& { TERM=linux; export TERM; }
+    test "${TERM}" = "unknown"	&& { TERM=linux; export TERM; }
+    # use vt100 on iSeries virtual console
+    test -d /proc/iSeries && test -x /usr/bin/tty && test "`tty`" = /dev/tty1 \
+				&& { TERM=vt100; export TERM; }
     test -x /bin/stty	  && /bin/stty sane cr0 pass8 dec
     test -x /usr/bin/tset && /usr/bin/tset -I -Q
 fi
