@@ -57,10 +57,8 @@
 #
 # 'normal' suid root programs
 #
-/bin/mount                             root.root        4755
 /bin/ping                              root.root        4755
 /bin/su                                root.root        4755
-/bin/umount                            root.root        4755
 /opt/kde/bin/kvt                       root.tty         4755
 /sbin/cardctl                          root.root        4755
 /sbin/isdnbutton                       root.root        4755
