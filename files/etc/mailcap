@@ -78,6 +78,7 @@ text/html; w3m -dump %s; copiousoutput; nametemplate=%s.html
 application/x-gunzip; gunzip -c %s; copiousoutput
 application/x-gzip; gunzip -c %s; copiousoutput
 application/x-bunzip2; bunzip2 -c %s; copiousoutput
+application/x-bzip2; bunzip2 -c %s; copiousoutput
 # Archive directory
 application/x-tar-gz; gunzip -c %s | tar -tf -; copiousoutput
 # Using gs to display postscript is dangerous as postscript may
