@@ -49,4 +49,13 @@ endif
 # required for DRI support on SiS chips
 options sisfb             mode=none mem=12288
 
+########################################################################
+# AGP
+########################################################################
+
+pre-install mga    /sbin/modprobe "-k" "agpgart"
+pre-install r128   /sbin/modprobe "-k" "agpgart"
+pre-install radeon /sbin/modprobe "-k" "agpgart"
+options agpgart agp_try_unsupported=1
+
 # end of i386 part for modules.conf

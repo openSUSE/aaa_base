@@ -346,13 +346,4 @@ alias tap15               ethertap
 # don't try to reset isa-pnp cards on startup
 options isa-pnp isapnp_reset=0
 
-########################################################################
-# AGP
-########################################################################
-
-pre-install mga    /sbin/modprobe "-k" "agpgart"
-pre-install r128   /sbin/modprobe "-k" "agpgart"
-pre-install radeon /sbin/modprobe "-k" "agpgart"
-options agpgart agp_try_unsupported=1
-
 # end of common part for modules.conf

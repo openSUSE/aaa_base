@@ -1,4 +1,4 @@
-# begin of ia64 part for modules.conf
+# begin of x86_64 part for modules.conf
 
 alias char-major-4        serial
 alias char-major-5        serial
@@ -17,5 +17,5 @@ pre-install r128   /sbin/modprobe "-k" "agpgart"
 pre-install radeon /sbin/modprobe "-k" "agpgart"
 options agpgart agp_try_unsupported=1
 
-# end of ia64 part for modules.conf
+# end of x86_64 part for modules.conf
 
