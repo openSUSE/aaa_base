@@ -474,11 +474,24 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 #
 CREATE_JAVALINK="yes"
 
+#
 # This variable determines if encrypted filesystems are automatically 
 # activated on bootup. Since this requires the input of the crypto passwort, 
 # this might be unwanted in certain situations where you want to be sure the 
 # machine should boot automatically without any user intervention. If you 
 # set this variable to "no", encrypted filesystems need to be mounted 
 # manually by "/etc/init.d/boot.crypto start".
+#
 START_CRYPTO_FILESYSTEMS="yes"
+
+#
+# There are some services (ppp, ippp, dhclient, pcmcia, hotplug) that have to
+# change the /etc/resolv.conf dynamically at certain times.  E.g. if ppp/ippp
+# establishes a connection and is supplied by the peer with a list of
+# nameservers. Or pcmcia needs to set the correct nameserver for the choosen
+# configuration scheme. If you don't like these services to change
+# /etc/resolv.conf at all, then set this variable to "no".
+# If unsure, leave it as the default wich is "yes".
+#
+MODIFY_RESOLV_CONF_DYNAMICALLY="yes"
 

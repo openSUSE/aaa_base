@@ -1,0 +1,194 @@
+'\" t
+.\" ** The above line should force tbl to be a preprocessor **
+.\" Man page for modify_resolvconf
+.\"
+.\" Copyright (C), 2001
+.\"
+.\" You may distribute under the terms of the GNU General Public
+.\" License as specified in the file COPYING that comes with the
+.\" man_db distribution.
+.\"
+.\" Wed Apr  4 17:36:33 CEST 2001 Peter Poeml (poeml@suse.de)
+.\" 
+.TH modify_resolvconf 8 "Thu Mar 15 2001" "0.1" "modify_resolvconf"
+.SH NAME
+modify_resolvconf \- modify /etc/resolv.conf
+.SH SYNOPSIS
+.\" 
+.\"                   The general command line
+.\" 
+.\" \fBmodify_resolvconf\fP
+.\" .IR action
+.\" .IR options
+.\"                   Detailed Synopsis
+.LP
+\fBmodify_resolvconf\fP
+.IR modify
+.B \-s \fI<service>\fP \-p \fI<process>\fP \-f \fI<path to script>\fP \-t \fI<text>\fP\||\fI-\fP [ \-l \fI<list of search domains>\fP ] [ \-d \fI<domainname>\fP ] [ \-n \fI<list of nameservers>\fP ] [ \-o \|| \-a \fI<pathname of file>\fP ]
+.\" 
+.LP
+\fBmodify_resolvconf\fP
+.IR restore
+.B \-s \fI<service>\fP
+.\" 
+.LP
+\fBmodify_resolvconf\fP
+.IR cleanup
+.\" 
+.LP
+\fBmodify_resolvconf\fP
+.B \-h, \-\-help
+.\" 
+.\"                    DESCRIPTION
+.\" 
+.SH DESCRIPTION
+.B modify_resolvconf
+can be used by programs that have to change resolv.conf dynamically. It provides a means to do that in a consistent way accross the system. The idea is to
+.TP
+\- make a backup
+that can be restored later. Therefore, a fixed naming scheme is used (see below).
+.TP
+\- add an informational header
+to the new resolv.conf that informs the user (or other programs) who changed the file, why it was done how to avoid it in the future. This header is automatically created by
+.B modify_resolvconf
+and is therefore standardized. This again allows certain programs (e.g. YaST) to handle a temporary resolv.conf.
+
+.PP
+The naming scheme used for backup copies is:
+
+.B /etc/resolv.conf.saved.by.<service name>.<private extension>
+
+where
+.B service name
+is one of e.g. dhclient, dhcpcd, pppd, ipppd, pcmcia, hotplug (these are the major candidates) and
+.B
+private extension
+might optionally be used by the service itself for special reasons.
+
+.br
+This naming scheme allows restoring resolv.conf at boottime after a crash of the
+system or at starttime of the service (after a crash of the service).
+
+In SuSE's \fI/etc/rc.config\fP, there is a variable named \fBMODIFY_RESOLV_CONF_DYNAMICALLY\fP which can be used to allow/disallow dynamic changes to resolv.conf systemwide (this has to be honoured by the respecting programs of course).
+
+.\"
+.\"                ACTIONS
+.\"
+.SH ACTIONS
+.TP
+.B modify
+write a new resolv.conf with the supplied data and create a backup of the old one
+.TP
+.B restore
+take a backup and rename it to \fI/etc/resolv.conf\fP
+.TP
+.B cleanup
+FIXME
+.\" 
+.\"                    OPTIONS
+.\" 
+.SH OPTIONS
+.TP
+.B \-s, \-\-service \fI<service>
+name of the service that requests the modification. This will used for the name of the backup, and it is put into the Modified_by tag of the info header (see example below).
+.TP
+.B \-p, \-\-process \fI<process>
+name of the daemon (if applicable)
+.TP
+.B \-i, \-\-pid \fI<pid>
+process ID of the daemon (if applicable)
+.TP
+.B \-f, \-\-script \fI<path to script>
+some script located at \fI<path to script>\fP that might be used by the daemon to request the modification
+.TP
+.B \-t, \-\-text \fI<text>
+a text that explains why the change was done and how to prevent it in the future. If \fI-\fP is given as \fI<text>\fP, the text is read from stdin.
+.TP
+.B \-l, \-\-searchlist \fI<list of search domains>
+specifies a list of domains, separated by spaces and protected by quotes, to be written to resolv.conf as searchlist
+.TP
+.B \-d, \-\-domain \fI<domainname>
+the domain to be used
+.TP
+.B \-n, \-\-nameservers \fI<list of nameservers>
+the (space separated and quoted if necessary) list of nameservers to be used
+.TP
+.B \-o, \-\-save_now \fI<pathname of file>
+FIXME
+.TP
+.B \-a, \-\-save_later \fI<pathname of file>
+FIXME
+.TP
+.B \-k, \-\-keep
+FIXME
+.TP
+.B \-v, \-\-verbose
+be verbose
+.TP
+.B \-h, \-\-help
+show synopsis
+.\" 
+.\"                    EXAMPLE
+.\" 
+.SH EXAMPLE
+This is an example for the resolv.conf that 
+.B modify_resolvconf 
+would create:
+
+### BEGIN INFO
+.br
+#
+.br
+# Modified_by:  dhcpcd
+.br
+# Backup:       /etc/resolv.conf.saved.by.dhclient
+.br
+# Process:      /sbin/dhcpcd
+.br
+# Process_id:   12345
+.br
+# Script:
+.br
+#
+.br
+# Info:         blabla
+.br
+#               ...
+.br
+#
+.br
+### END INFO
+.br
+search suse.de
+.br
+nameserver 10.10.10.1
+.br
+nameserver 10.10.11.1
+.br
+
+.LP
+.\"
+.\"                FILES
+.\"
+.SH FILES
+.TP
+.I /etc/resolv.conf
+.\"
+.\"                BUGS
+.\"
+.SH BUGS
+.br
+save_now, save_later are not yet implemented. The private extension is not implemented.
+.\"
+.\"                SEE ALSO
+.\"
+.SH "SEE ALSO"
+.BR resolv.conf (5)
+.\"
+.\"                AUTHOR
+.\"
+.SH AUTHOR
+.br
+Christian Zoz <zoz@suse.de>
+.br
+Manual page by Peter Poeml <poeml@suse.de>.

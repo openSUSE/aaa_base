@@ -46,20 +46,16 @@ ippp*)
 	# Get the nameservers (works with ipppd option ms-get-dns):
 
 	if [ -n "$MS_DNS1" -a "$START_NAMED" != "yes" ]; then
-		rm -f /etc/ppp/resolv.prev
-		if [ -f /etc/resolv.conf ]; then
-			cp -p /etc/resolv.conf /etc/ppp/resolv.prev
-			grep domain /etc/ppp/resolv.prev > /etc/resolv.conf
-			grep search /etc/ppp/resolv.prev >> /etc/resolv.conf
-			echo "nameserver $MS_DNS1" >> /etc/resolv.conf
-			echo "nameserver $MS_DNS2" >> /etc/resolv.conf
-			echo "Modified /etc/resolv.conf for DNS at $INTERFACE"
-		else
-			echo "nameserver $MS_DNS1" >> /etc/resolv.conf
-			echo "nameserver $MS_DNS2" >> /etc/resolv.conf
-			chmod 644 /etc/resolv.conf
-			echo "Installed /etc/resolv.conf for DNS at $INTERFACE"
-		fi
+                /sbin/modify_resolvconf modify -s ipppd -p ipppd \
+                  -f /etc/ppp/ip-up -n "$MS_DNS1 $MS_DNS2" -t - << EOT
+                  This is a temporary resolv.conf created by ipppd. The previous
+                  file has been saved as <see "Backup: field above>. It will be
+                  restored when ippp disconnects.
+
+                  If you don't like ipppd to change your nameserver settings
+                  then set MODIFY_RESOLV_CONF_DYNAMICALLY=no in /etc/rc.config
+                  or remove the option ms-get-dns from /etc/ppp/options.ippp*.
+EOT
 	fi
 
 	#
@@ -104,13 +100,7 @@ ippp*)
 	# Restore the nameservers (got with ipppd option ms-get-dns):
 
 	if [ -n "$MS_DNS1" -a "$START_NAMED" != "yes" ]; then
-		if [ -f /etc/ppp/resolv.prev ]; then
-			cp -fp /etc/ppp/resolv.prev /etc/resolv.conf
-			echo "Restored original /etc/resolv.conf"
-		#else
-		#	rm -f /etc/resolv.conf
-		#	echo "Deinstalled /etc/resolv.conf"
-		fi
+                /sbin/modify_resolvconf restore -s ipppd
 	fi
 
 	# restart interface

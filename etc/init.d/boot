@@ -434,6 +434,12 @@ rm -f /var/run/utmp
 echo -n > /var/run/utmp
 chmod 664 /var/run/utmp
 chown root.tty /var/run/utmp
+# Restore a possibly dynamically modified /etc/resolv.conf
+if ls /etc/resolv.conf.saved.by.* &>/dev/null ; then
+    echo "/sbin/modify_resolvconf:"
+    /sbin/modify_resolvconf cleanup
+    echo -e "$rc_done_up"
+fi
 
 #
 # there could be a new kernel version.  reinit /etc/psdevtab, to be sure.
