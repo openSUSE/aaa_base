@@ -11,7 +11,6 @@ set echo_style=both
 #
 setenv OPENWINHOME /usr/openwin
 setenv HELPPATH $OPENWINHOME/lib/help
-setenv MINICOM "-c on"
 set tmp=/usr/man
 foreach man ( /usr/local/man \
               /usr/X11R6/man \
@@ -314,8 +313,7 @@ if ($?_complete) then
 			     print0 printf not a and o or)"/ \
 			n/*/d/
 
-    complete kill	c/-/S/ c/%/j/ \
-			'n/*/`ps -h $LOGNAME | awk '"'"'{print $1}'"'"'`/'
+    complete kill	c/-/S/ c/%/j/ 'n/*/`ps xh | cut -d " " -f 1`/'
     complete -%*	c/%/j/			# fill in the jobs builtin
     complete {fg,bg,stop}	c/%/j/ p/1/"(%)"//
 

@@ -116,7 +116,11 @@ if ( -f $package ) {
     #########
     print "TARFILE: $package\n";
     system "rm -fr $tmpdir";
-    system "mkdir -m755 -p $tmpdir";
+    mkdir("$tmpdir",0755);
+    if (! -o $tmpdir) {
+	print STDERR "I'm not owning $tmpdir, exiting ...\n";
+	exit (1);
+    }
     system( "tar -C $tmpdir -xvpzf $package" ) && die "tar error!";
 
     if ( $rpm_name eq "" ) {

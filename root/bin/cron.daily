@@ -36,19 +36,19 @@ mkdir $TMPDIR || {
 }
 export TMPDIR
 
-if [ -f /usr/lib/teTeX/texmf.cnf ] ; then
-    TETEXDIR=/usr/lib/teTeX
-    PATH=$PATH:/usr/bin/TeX
-    export TETEXDIR PATH
-fi
-
-
 #
 # get information from /etc/rc.config
 #
 if [ -f /etc/rc.config ] ; then
     . /etc/rc.config
 fi
+
+if [ -f /usr/lib/teTeX/texmf.cnf ] ; then
+    TETEXDIR=/usr/lib/teTeX
+    PATH=$PATH:/usr/bin/TeX
+    export TETEXDIR PATH
+fi
+
 
 test -n "$MAX_DAYS_FOR_LOG_FILES" && export MAX_DAYS_FOR_LOG_FILES
 

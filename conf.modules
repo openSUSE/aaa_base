@@ -105,7 +105,7 @@ alias char-major-6        lp
 alias char-major-9        st
 alias char-major-10-135   off
 alias char-major-14       off
-# alias char-major-14       sound
+alias char-major-14       sound
 alias char-major-19       cyclades
 alias char-major-20       cyclades
 alias char-major-21       sg
@@ -121,6 +121,7 @@ alias char-major-76       specialix
 alias char-major-81       bttv
 alias char-major-96       pt
 alias char-major-97       pg
+alias char-major-107      3dfx
 
 alias binfmt-332          iBCS
 alias binfmt-518          iBCS

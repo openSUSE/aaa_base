@@ -37,8 +37,8 @@ if [ -x "`type -p keygen`" ] ; then
 	EOF
     cookie=
 
-    exec X $dspnum -auth $auth $args
+    exec Xwrapper $dspnum -auth $auth $args
 else
-    exec X $dspnum $args
+    exec Xwrapper $dspnum $args
 fi
 
