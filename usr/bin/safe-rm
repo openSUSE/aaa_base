@@ -3,6 +3,7 @@
 test ${1:0:1} == "/" || { echo "usage: $0 _absolute_path_to_file" ; exit 1;  }
 DIRNAME=${1//\/.\//\/}
 DIRNAME=${DIRNAME%/*}
-cd -P "$DIRNAME" || exit
-test "$PWD" == "$DIRNAME" && rm -f \"$1\"
+cd -P "$DIRNAME" || { echo "$0: no symlinks allowed in the path of $1" ; exit 1; }
+test "$PWD" == "$DIRNAME" || exit 1
+/bin/rm -f -- "$1"
 

@@ -12,9 +12,6 @@
 # Author: Burchard Steinbild <bs@suse.de>, 1996
 #         Florian La Roche <florian@suse.de>, 1996
 #
-#
-#
-
 
 #
 # paranoia settings
@@ -30,25 +27,23 @@ if [ -f /etc/rc.config ] ; then
     . /etc/rc.config
 fi
 
-test "$MAX_DAYS_IN_TMP" -gt 0 2> /dev/null || MAX_DAYS_IN_TMP=0
-export MAX_DAYS_IN_TMP
+test "$MAX_DAYS_IN_TMP" -gt 0 2> /dev/null || exit 0
 #
 # Delete apropriate files in tmp directories.
 #
-if [ "$MAX_DAYS_IN_TMP" -gt 0 ] ; then
-    OMIT=""
-    for i in $OWNER_TO_KEEP_IN_TMP ; do
-        OMIT="$OMIT  ( ! -user $i )"
-    done
+OMIT=""
+for i in $OWNER_TO_KEEP_IN_TMP ; do
+    OMIT="$OMIT  ( ! -user $i )"
+done
 
-    for TMP_DIR in $TMP_DIRS_TO_CLEAR ; do
-      test -x /usr/bin/safe-rm && {
-      find $TMP_DIR/. $OMIT ! -type d \
-        -atime +$MAX_DAYS_IN_TMP -exec /usr/bin/safe-rm {} \;
-      }
-      find $TMP_DIR/. $OMIT -depth -type d -empty -mindepth 1 \
-        -mtime +$MAX_DAYS_IN_TMP -exec rmdir {} \;
-    done
-fi
+for TMP_DIR in $TMP_DIRS_TO_CLEAR ; do
+  test -x /usr/bin/safe-rm && {
+  find $TMP_DIR/. $OMIT ! -type d \
+    -atime +$MAX_DAYS_IN_TMP -exec /usr/bin/safe-rm {} \;
+  } || echo "Error: Can not find /usr/bin/safe-rm"
+  find $TMP_DIR/. $OMIT -depth -type d -empty -mindepth 1 \
+    -mtime +$MAX_DAYS_IN_TMP -exec rmdir {} \;
+done
 
 exit 0
+
