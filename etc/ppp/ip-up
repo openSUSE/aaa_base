@@ -129,6 +129,9 @@ ppp*)
 			cp /etc/ppp/resolv.conf /etc
                         echo "Installed /etc/resolv.conf for DNS at $INTERFACE"
 		fi
+		if [ "$START_NSCD" = yes ]; then
+			/sbin/init.d/nscd restart &
+		fi
 	fi
         ;;
     ip-down)
@@ -144,6 +147,9 @@ ppp*)
 		else
 			rm -f /etc/resolv.conf
 			echo "Deinstalled /etc/resolv.conf"
+		fi
+		if [ "$START_NSCD" = yes ]; then
+			/sbin/init.d/nscd restart &
 		fi
 	fi
         ;;
