@@ -485,7 +485,7 @@ test -z "$WINDOWMANAGER" -a -n "$DEFAULT_WM" && {
 test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/kde
 echo "test -z \"\$WINDOWMANAGER\" && WINDOWMANAGER=$WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo "export WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo "test -z \"\$WINDOWMANAGER\" && setenv WINDOWMANAGER $WINDOWMANAGER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+echo "if ( ! \${?WINDOWMANAGER} ) setenv WINDOWMANAGER $WINDOWMANAGER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 
 
 check_md5_and_move $r/etc/SuSEconfig/profile

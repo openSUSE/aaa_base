@@ -83,11 +83,14 @@ endif
 # source extensions for special packages
 #
 if ( -d /etc/profile.d ) then
+  set _tmp=${?nonomatch}
+  set nonomatch
   foreach s ( /etc/profile.d/*.csh )
     if ( -r $s ) then
       source $s
     endif
   end
+  if ( ! ${_tmp} ) unset nonomatch
 endif
 #
 #
