@@ -24,17 +24,13 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 }
 . $r/lib/YaST/SuSEconfig.functions
 
-test -f $r/etc/rc.config || {
-    echo "No $r/etc/rc.config found."
+for i in $r/etc/rc.config $r/etc/sysconfig/language $r/etc/sysconfig/displaymanager ; do
+  test -f $i || {
+    echo "No $i found."
     exit 1
-}
-. $r/etc/rc.config
-
-test -f $r/etc/sysconfig/language || {
-    echo "No $r/etc/sysconfig/language found."
-    exit 1
-}
-. $r/etc/sysconfig/language
+  }
+  . $i
+done
 
 if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
     echo "SuSEconfig is disabled in $r/etc/rc.config. Exit..."

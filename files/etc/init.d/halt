@@ -197,6 +197,11 @@ if test -f /etc/mdtab -a -x /sbin/mdstop ; then
     /sbin/mdstop -a
     rc_status -v1 -r
 fi
+if test -f /etc/raidtab -a -x /sbin/raidstop ; then
+    echo -n "Disable Multiple Devices"
+    /sbin/raidstop -a
+    rc_status -v1 -r
+fi
 
 # on umsdos fs this would lead to an error message, so direct errors to
 # /dev/null
