@@ -81,7 +81,7 @@ case "$todo" in
 	#
 	while read  des what mask iface  ; do
 	    if test -n "$sdev" ; then
-		test "$sdev" == "$iface" || continue
+		test "$sdev" = "$iface" || continue
 	    fi
 	    case "$des" in
 	    \#*|"") ;;
@@ -179,7 +179,7 @@ case "$todo" in
 	    fi
 	    test $dosleep = yes  && sleep 5
 	    #
-	    echo "$rc_done"
+	    echo -e "$rc_done"
 	fi
 	if test -n "$sdev" ; then
 	    echo -n "Shutting down routing for $sdev"
@@ -209,7 +209,7 @@ case "$todo" in
 	#
 	while read  des what mask iface  ; do
 	    if test -n "$sdev" ; then
-		test "$sdev" == "$iface" || continue
+		test "$sdev" = "$iface" || continue
 	    fi
 	    case "$des" in
 	    \#*|"") ;;
