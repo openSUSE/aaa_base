@@ -1,0 +1,8 @@
+#!/bin/sh
+
+test ${1:0:1} == "/" || { echo "usage: $0 _absolute_path_to_file" ; exit 1;  }
+DIRNAME=${1//\/.\//\/}
+DIRNAME=${DIRNAME%/*}
+cd -P "$DIRNAME" || exit
+test "$PWD" == "$DIRNAME" && rm -f \"$1\"
+
