@@ -8,7 +8,6 @@
 ### BEGIN INIT INFO
 # Provides:          boot.proc
 # Required-Start:
-# X-UnitedLinux-Should-Start: boot.idedma
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:

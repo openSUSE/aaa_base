@@ -8,7 +8,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.idedma
-# Required-Start:
+# Required-Start:    boot.loadmodules
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
