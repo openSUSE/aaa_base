@@ -310,7 +310,11 @@ case "$todo" in
 	rc_status -v
 	;;
     restart)
-	$0 stop ${2+"$sdev"} && $0 start ${2+"$sdev"}
+	# Ingore failing stop, the administrator
+	# may has edited /etc/route.conf ...
+	$0 stop  ${2+"$sdev"}
+	rc_status
+	$0 start ${2+"$sdev"}
 	rc_status
 	;;
     status)
