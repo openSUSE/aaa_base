@@ -200,8 +200,8 @@ NETDEV_2=""
 NETDEV_3=""
 
 #
-# parameteres for ifconfig, if you put "bootp" into it, bootp will
-# be used to configure it
+# parameteres for ifconfig, simply enter "bootp" or "dhcpclient" to use the
+# respective service for configuration
 # sample entry for ethernet:
 # IFCONFIG_0="192.168.81.38 broadcast 192.168.81.63 netmask 255.255.255.224"
 #
