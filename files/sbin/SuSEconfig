@@ -105,8 +105,7 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 echo "Reading $r/etc/rc.config and updating the system..."
 
 for i in $r/etc/rc.config \
-	 $r/etc/sysconfig/suseconfig \
-	 $r/etc/sysconfig/mail ; do
+	 $r/etc/sysconfig/suseconfig ; do
   test -f $i && . $i
 done
 
@@ -242,8 +241,7 @@ fi
 #
 # now look for reports and mail them
 #
-if test -z "$r" -a -n "$SENDMAIL_TYPE" \
-    -a -x /usr/bin/mail -a -x /usr/sbin/sendmail \
+if test -z "$r" -a -x /usr/bin/mail -a -x /usr/sbin/sendmail \
     -a -n "$MAIL_REPORTS_TO" -a "$FASTRUN" != "true" ; then
     if test "$MAIL_LEVEL" = all ; then
         FILES_TO_MAIL="/var/adm/notify/messages/* \
