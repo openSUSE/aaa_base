@@ -82,7 +82,8 @@ if test -n "$XHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
     for if_conf in /etc/sysconfig/network/ifcfg-* ; do
         test -f $if_conf || continue
         . $if_conf
-	if test -n "$IPADDR" -a "$IPADDR" != "127.0.0.1" ; then
+	if test -n "$IPADDR" -a "$IPADDR" != "127.0.0.1" \
+		-a "$IPADDR" != "0.0.0.0" ; then
 	    test -x /usr/bin/cut && \
 		IPADDR=`echo "$IPADDR              " | /usr/bin/cut -c -15`
 	    grep -w ${IPADDR} $r/etc/hosts > /dev/null || {

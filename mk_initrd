@@ -31,6 +31,10 @@
 # ChangeLog:
 #
 #
+# 21/3/2002:	v1.25
+#  - add /sbin/fsck.jfs if jfs.o is loaded
+#  - added '-t' option to use a different tmp directory
+#
 # 25/2/2002:	v1.24
 #  - there might be more than one module with the same name; we take
 #    just the first one we find, assuming they are identical anyway
@@ -120,7 +124,8 @@ usage() {
                            enviroment variable if set
 	  -s size          Add splash animation and bootscreen to initrd.
 	  -o file          Add OEM resize support.
-			   
+	  -t tmp_dir       tmp dir, defaults to "/tmp"
+
         root_dir:          the directory the root partition is mounted to
                            defaults to "/" 
 EOM
@@ -151,7 +156,7 @@ boot_dir=""
 splash="auto"
 oem=""
 
-while getopts :hk:i:m:b:d:o:s: a ; do
+while getopts :hk:i:m:b:d:o:s:t: a ; do
 	case $a in
 		\:|\?)	case $OPTARG in
 				k)	echo "-k requires kernel list parameter"
@@ -167,6 +172,8 @@ while getopts :hk:i:m:b:d:o:s: a ; do
 				s)	echo "-s requires image size(s)"
 					;;
 				o)	echo "-o requires oem grow script"
+					;;
+				t)	echo "-t requires tmp dir parameter"
 					;;
 				*)  echo "Unknown option: -$OPTARG"
 					echo "Try mk_initrd -h"
@@ -187,6 +194,8 @@ while getopts :hk:i:m:b:d:o:s: a ; do
 		o)	oem=$OPTARG
 			;;
 		s)	splash=$OPTARG
+			;;
+		t)	tmp_dir=$OPTARG
 			;;
 		h)	usage
 			;;
@@ -247,6 +256,10 @@ if [ "$arch" = ppc -a "$kernels_default" = vmlinux ] ; then
   [ ! -f "$boot_dir/vmlinux" ] && kernels_default="vmlinuz"
 fi
 
+# *full* paths
+[ -z "$tmp_dir" ] && tmp_dir=/tmp
+
+
 static_shell=/bin/ash.static
 static_insmod=/sbin/insmod.static
 static_fbmngplay=/bin/fbmngplay
@@ -260,9 +273,11 @@ image_inodes=2000
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # should be nothing to change below...
 
-tmp_mnt=/tmp/mnt$$
+PATH=/sbin:/usr/sbin:$PATH
+
+tmp_mnt=$tmp_dir/mnt$$
 tmp_mnt_small=${tmp_mnt}_small
-tmp_msg=/tmp/msg$$
+tmp_msg=$tmp_dir/msg$$
 lx_rc=$tmp_mnt/linuxrc
 is_mounted=
 is_mounted_small=
@@ -292,7 +307,7 @@ oops () {
 [ -n "$1" ] && root_dir="$1"
 [ "$root_dir" ] || root_dir=/
 
-tmp_initrd=$root_dir/tmp/initrd$$
+tmp_initrd=$root_dir/$tmp_dir/initrd$$
 tmp_initrd_small=${tmp_initrd}_small
 
 x1=`mount 2>/dev/null | grep "on $root_dir " | tail -1`
@@ -307,14 +322,6 @@ fi
 if [ -b "$rootdev" ] ; then
     major=`ls -l "$rootdev" | sed -e "s/.* \\([0-9]\+\\), *[0-9]\+.*/\\1/"`
     [ "$major" -ne 58 ] || root_lvm=1
-fi
-
-if [ $root_lvm -eq 1 ]
-then
-    echo root device is LVM
-    static_shell=/bin/ash
-    static_insmod=/sbin/insmod
-    image_inodes=6000
 fi
 
 if [ "$root_dir" != / ] ; then
@@ -350,20 +357,31 @@ fi
 do_raid=
 do_raid5=
 has_xor=
+has_jfs=
+has_nls=
 for i in $modules ; do
   case $i in
     raid[01]|linear) do_raid=1 ;;
     raid5) do_raid=1 do_raid5=1 ;;
     xor) has_xor=1 ;;
+    jfs) has_jfs=1 ;;
+    nls_iso8859-1) has_nls=1 ;;
   esac
 done
 
 # raid5 needs xor
 [ "$do_raid5" -a ! "$has_xor" ] && modules="xor $modules"
 
-if [ "$root_lvm" = 1 ] ; then
-  # add lvm-mod if missing
-  echo " $modules " | grep -q " lvm-mod " || modules="lvm-mod $modules"
+# jfs needs nls_iso8859-1
+[ "$has_jfs" -a ! "$has_nls" ] && modules="$modules nls_iso8859-1"
+
+need_libc=
+[ "$root_lvm" = 1 -o -n "$oem" -o "$use_pivot_root" -o "$has_jfs" ] && need_libc=1
+
+if [ "$need_libc" ] ; then
+  static_shell=/bin/ash
+  static_insmod=/sbin/insmod
+  image_inodes=7000
 fi
 
 initrd_a=($initrds)
@@ -412,57 +430,42 @@ for k in $kernels ; do
     cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console,md0} $tmp_mnt/dev
     cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 4 "no static shell"
     cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 5 "no static insmod"
-    #if [ -n "$splash" ]
-    #then
-    #	echo -n "Adding bootsplash animation... "
-    #	cp $static_fbmngplay $tmp_mnt/bin/fbmngplay 2>/dev/null || \
-	#	error 6 "no splashanim package installed?"
-	#cp $bootsplash_anim $tmp_mnt 2>/dev/null || \
-	#	error 7 "splash animation not found."
-	#echo "done."
-    #fi
     
-    
-    if [ $root_lvm -eq 1 ]
-    then
-	mkdir $tmp_mnt/{lib,etc,proc}
-	touch $tmp_mnt/etc/fstab
-	cp -a $root_dir/dev/lvm  $tmp_mnt/dev
-	cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
-	cp -a $root_dir/dev/dasd* $tmp_mnt/dev
-	cp -a $root_dir/dev/{i2o,ida,cciss,rd} $tmp_mnt/dev
-	cp -a $root_dir/lib/ld-*so* $tmp_mnt/lib
-	cp -a $root_dir/lib/liblvm*.so* $tmp_mnt/lib
-	cp -a $root_dir/lib/libc.so.6 $tmp_mnt/lib
-	cp -a $root_dir/lib/libz.so.1* $tmp_mnt/lib
-	cp -a $root_dir/sbin/{vgscan,vgchange}  $tmp_mnt/bin
-	cp -a $root_dir/bin/{rm,mount,umount}  $tmp_mnt/bin
+    if [ "$need_libc" ] ; then
+      mkdir -p $tmp_mnt/{lib,etc,proc,mnt}
+      touch $tmp_mnt/etc/fstab
+      cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
+      cp -a $root_dir/dev/dasd* $tmp_mnt/dev 2>/dev/null
+      cp -a $root_dir/dev/{i2o,ida,cciss,rd} $tmp_mnt/dev
+      cp -a $root_dir/lib/ld-*so* $tmp_mnt/lib
+      cp -a $root_dir/lib/libc.so.6 $tmp_mnt/lib
+      cp -a $root_dir/lib/libz.so.1* $tmp_mnt/lib
+      cp -a $root_dir/bin/{sleep,rm,mount,umount} $tmp_mnt/bin
     fi
 
-    if [ -n "$oem" ]
-    then
-	echo "Adding OEM resize support"
-	mkdir -p $tmp_mnt/{lib,etc,proc}
-	touch $tmp_mnt/etc/fstab
-	cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
-	cp -a $root_dir/lib/ld-*so* $tmp_mnt/lib
-	cp -a $root_dir/lib/libc.so.6 $tmp_mnt/lib
-	cp -a $root_dir/lib/libz.so.1* $tmp_mnt/lib
-	cp -a $root_dir/sbin/{sfdisk,resize_reiserfs}  $tmp_mnt/bin
-	cp -a $root_dir/bin/{sleep,mount,umount,cp,cat,sed}  $tmp_mnt/bin
-	cp -a $root_dir/usr/bin/expr  $tmp_mnt/bin
+    if [ $root_lvm -eq 1 ] ; then
+      echo "Adding LVM support"
+      cp -a $root_dir/dev/lvm  $tmp_mnt/dev
+      cp -a $root_dir/lib/liblvm*.so* $tmp_mnt/lib
+      cp -a $root_dir/sbin/{vgscan,vgchange} $tmp_mnt/bin
+    fi
+
+    if [ -n "$oem" ] ; then
+      echo "Adding OEM resize support"
+      cp -a $root_dir/sbin/{sfdisk,resize_reiserfs} $tmp_mnt/bin
+      cp -a $root_dir/bin/{cp,cat,sed} $tmp_mnt/bin
+      cp -a $root_dir/usr/bin/expr  $tmp_mnt/bin
     fi
 
     if [ "$use_pivot_root" ] ; then
-	mkdir -p $tmp_mnt/{lib,etc,proc,mnt}
-	touch $tmp_mnt/etc/fstab
-	cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
-	cp -a $root_dir/lib/ld-*so* $tmp_mnt/lib
-	cp -a $root_dir/lib/libc.so.6 $tmp_mnt/lib
-	cp -a $root_dir/lib/libz.so.1* $tmp_mnt/lib
-	cp -a $root_dir/bin/{mount,umount}  $tmp_mnt/bin
-	cp -a $root_dir/bin/{rm,mkdir} $tmp_mnt/bin
-	cp -a $root_dir/sbin/pivot_root $tmp_mnt/bin
+      cp -a $root_dir/bin/mkdir $tmp_mnt/bin
+      cp -a $root_dir/sbin/pivot_root $tmp_mnt/bin
+    fi
+
+    if [ "$has_jfs" ] ; then
+      echo "Adding JFS recovery support"
+      cp -a $root_dir/sbin/fsck.jfs $tmp_mnt/bin
+      cp -a $root_dir/lib/libpthread.so.* $tmp_mnt/lib
     fi
 
     echo '#! /bin/sh' >$lx_rc
@@ -470,12 +473,6 @@ for k in $kernels ; do
     echo "export PATH=/bin" >>$lx_rc
     echo >>$lx_rc
 
-    #if [ -n "$splash" ]
-    #then
-    #	echo "fbmngplay -b -x 878 -y 35 `basename $bootsplash_anim` &" >> $lx_rc
-	#echo "" >>$lx_rc
-    #fi
-    
     chmod 755 $lx_rc
 
     for i in $modules; do
@@ -522,6 +519,10 @@ for k in $kernels ; do
     fi
 
     [ -n "$oem" ] && cat $oem >> $lx_rc
+
+    if [ "$has_jfs" ] ; then
+      echo "fsck.jfs $rootdev" >>$lx_rc
+    fi
 
     if [ "$use_pivot_root" ] ; then
       cat >>$lx_rc <<xxx
