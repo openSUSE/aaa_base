@@ -23,6 +23,7 @@ etc/runlevel.fallback
 etc/shells
 etc/ttytype
 etc/zshrc
+etc/ppp/ip-up
 sbin/init.d/boot
 sbin/init.d/boot.setup
 sbin/init.d/cron
