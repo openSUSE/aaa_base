@@ -78,6 +78,7 @@ export MINICOM
 
 MANPATH=/usr/local/man:/usr/share/man:/usr/man:/usr/X11R6/man
 for DIR in /usr/openwin/man \
+           /usr/share/man/allman \
            /usr/man/allman \
            /usr/man/de \
            /usr/man/es \
