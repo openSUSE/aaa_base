@@ -27,7 +27,7 @@ case "$0" in
                         else
                             read cmdline < /proc/cmdline
                             case "$cmdline" in
-                                *apm=smp-power-off*)  command="halt -p" ;;
+                                *apm=smp-power-off*|*apm=power-off*)  command="halt -p" ;;
                             esac
                         fi
                         ;;

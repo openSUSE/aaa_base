@@ -37,13 +37,13 @@
 #
 # the test line specifies that this viewer should only be used if
 # the display variable is set.
-image/jpeg; xv %s;  test=test -n "$DISPLAY"
+image/jpeg; display %s;  test=test -n "$DISPLAY"
 
 # The following sends all other image subtypes to xloadimage
 #image/*; xloadimage %s; ;  test=test -n "$DISPLAY"
 
 # The following sends all other image subtypes to xv
-image/*; xv %s; ;  test=test -n "$DISPLAY"
+image/*; display %s; ;  test=test -n "$DISPLAY"
 
 
 # If you have an interactive Postscript interpreter, you should think carefully 

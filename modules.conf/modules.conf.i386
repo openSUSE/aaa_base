@@ -18,8 +18,9 @@ alias char-major-10-170 thinkpad
 # options thinkpad enable_smapi=0
 
 # agpgart is i386 only right now
-pre-install mga  modprobe "-k" "agpgart"
-pre-install r128 modprobe "-k" "agpgart"
+pre-install mga    /sbin/modprobe "-k" "agpgart"
+pre-install r128   /sbin/modprobe "-k" "agpgart"
+pre-install radeon /sbin/modprobe "-k" "agpgart"
 options agpgart agp_try_unsupported=1
 
 
