@@ -3,6 +3,9 @@
 #
 # Author: Burchard Steinbild <bs@suse.de>, 1996-97
 #         Florian La Roche <florian@suse.de>, 1996
+# i18n support added by Aleksey Smirnov <smi@logic.ru>
+#  & Aleksey Novodvorsky <aen@logic.ru> from IPLabs Linux Team, Moscow.
+# Attention! The shell must be restarted before localisation takes effect!
 #
 
 echo "Started the SuSE-Configuration Tool."
@@ -349,15 +352,138 @@ if test "$CWD_IN_ROOT_PATH" = "yes" ; then
     echo "if ( \"\$uid\" == \"0\" ) set path=( \$path . )" \
         >> $r/etc/SuSEconfig/csh.login.SuSEconfig
 fi
-if test "$LANGUAGE" = "german" ; then
-    echo "LC_CTYPE=de_DE" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export LC_CTYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv LC_CTYPE de_DE" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-else
-    echo "LC_CTYPE=en_GB" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export LC_CTYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv LC_CTYPE en_GB" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
+
+#The following lines are to be changed (IPLabs)
+#if test "$LANGUAGE" = "german" ; then
+#    echo "LC_CTYPE=de_DE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+#    echo "export LC_CTYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+#    echo "setenv LC_CTYPE de_DE" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+#else
+#    echo "LC_CTYPE=en_GB" >> $r/etc/SuSEconfig/profile.SuSEconfig
+#    echo "export LC_CTYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+#    echo "setenv LC_CTYPE en_GB" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+#fi
+
+#added by IPLabs
+case "$LANGUAGE" in
+        german)
+#           echo "LC_CTYPE=de_DE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+#           echo "export LC_CTYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig   
+#           echo "setenv LC_CTYPE de_DE" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+            echo "LANG=de_DE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+            echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+            echo "setenv LANG de_DE" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+
+        ;;
+        russian)
+           ln -sf /usr/share/locale/ru_SU /usr/share/locale/ru_RU.KOI8-R
+#           echo "LC_CTYPE=ru_RU.KOI8-R" >> $r/etc/SuSEconfig/profile.SuSEconfig
+#           echo "export LC_CTYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "LANG=ru_RU.KOI8-R" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+#           echo "setenv LC_CTYPE ru_RU.KOI8-R" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+           echo "setenv LANG ru_RU.KOI8-R" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+
+        brazilian)
+           echo "LANG=pt_BR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig  
+           echo "setenv LANG pt_BR" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+
+        czech)
+           echo "LANG=cs_CZ" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig  
+           echo "setenv LANG cs_CZ" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+
+        danish)
+           echo "LANG=da_DK" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig  
+           echo "setenv LANG da_DK" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+
+        dutch)
+           echo "LANG=nl_NL" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig  
+           echo "setenv LANG nl_NL" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+
+        english)
+           echo "LANG=en_GB" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG en_GB" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+
+        french)
+           echo "LANG=fr_FR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig  
+           echo "setenv LANG fr_FR" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+        greek)
+           ln -sf /usr/share/locale/gr_GR /usr/share/locale/el_GR
+           echo "LANG=el_GR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG el_GR" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+        hungarian)
+           echo "LANG=hu_HU" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG hu_HU" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+        indonesian)
+           echo "LANG=id_ID" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG id_ID" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+        italian)
+           echo "LANG=it_IT" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG it_IT" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+        polish)
+           echo "LANG=pl_PL" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG pl_PL" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+        portuguese)
+           echo "LANG=pt_PT" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG pt_PT" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+
+        romanian)
+           echo "LANG=ro_RO" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG ro_RO" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+
+        slovak)
+           echo "LANG=sk_SK" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG sk_SK" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+        spanish)
+           echo "LANG=es_ES" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG es_ES" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+        turkish)
+           echo "LANG=tr_TR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG tr_TR" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+
+        *)
+           echo "LANG=POSIX" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "export LANG" >> $r/etc/SuSEconfig/profile.SuSEconfig
+           echo "setenv LANG POSIX" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+        ;;
+
+esac
+export LANG=$LANGUAGE
+# end of i18n support
+
 if test -n "$FROM_HEADER" ; then
     echo "FROM_HEADER=\"$FROM_HEADER\"" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export FROM_HEADER" >> $r/etc/SuSEconfig/profile.SuSEconfig
