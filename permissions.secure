@@ -56,8 +56,6 @@
 # Directories
 #
 # closed:
-/usr/postgres/data/base                postgres.daemon   700
-/usr/postgres/data/files               postgres.daemon   750
 /usr/lib/ircd                          irc.root          700
 # No games:
 /var/X11R6/scores                      root.root        0750
