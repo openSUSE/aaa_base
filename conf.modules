@@ -314,6 +314,8 @@ alias char-major-97       pg
 alias char-major-107      3dfx
 # IrDA
 alias char-major-161	  ircomm-tty
+# USB
+alias char-major-166	  acm
 
 alias binfmt-332          iBCS
 alias binfmt-518          iBCS
