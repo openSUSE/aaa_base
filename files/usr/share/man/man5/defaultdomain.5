@@ -1,0 +1,55 @@
+.\" Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.
+.\"
+.\" Author: Thorsten Kukuk <feedback@suse.de>
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License
+.\" version 2 as published by the Free Software Foundation.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.TH DEFAULTDOMAIN 5 2002-01-16 "SuSE Linux" "Linux Programmer's Manual"
+.SH NAME
+defaultdomain \- file which contains the NIS/YP domain name
+.SH DESCRIPTION
+\fB/etc/defaultdomain\fP is used by the boot scripts to set
+the NIS/YP domain name for a system as returned by the
+.BR getdomainname (2)
+function. The file contains one line with the name of the domain.
+
+.LP
+Unlike DNS hostnames and domain names, the NIS domain name is
+case-sensitive! The NIS domain name must not be the same as the
+DNS domain name, but for some services like NIS+ it should be the
+same.
+
+.LP
+Even if the domain name is often called NIS/YP domain name, it is
+also used from other protocols, not only NIS/YP.
+.SH FILES
+/etc/defaultdomain
+/etc/init.d/boot.localnet
+.SH "SEE ALSO"
+.BR domainname (1),
+.BR init.d (7),
+.BR init (8),
+.BR nisdomainname (1),
+.BR ypdomainname (1),
+.BR ypbind (8),
+.BR ypserv (8),
+.BR ypwhich (1)
+.SH COPYRIGHT
+2002 SuSE Linux AG Nuernberg, Germany.
