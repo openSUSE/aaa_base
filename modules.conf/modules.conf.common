@@ -199,7 +199,11 @@ alias char-major-49       riscom8
 alias char-major-67       coda
 alias char-major-75       specialix
 alias char-major-76       specialix
-alias char-major-81       bttv
+alias char-major-81       videodev
+alias char-major-81-0     off
+alias char-major-81-1     off
+alias char-major-81-2     off
+alias char-major-81-3     off
 
 alias char-major-83       vtx
 options vtx quiet=1
@@ -238,7 +242,7 @@ alias char-major-161	  ircomm-tty
 # USB
 ########################################################################
 
-alias char-major-166	  acm
+alias char-major-166	  off # done by hotplug
 
 ########################################################################
 # Moxa Multiport Serial Boards
