@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1995-2001 SuSE GmbH Nuernberg, Germany.
+# Copyright (c) 1995-2002 SuSE GmbH Nuernberg, Germany.
 #
 # Author: Ruediger Oertel <feedback@suse.de>
 #         Thorsten Kukuk  <feedback@suse.de>
@@ -131,27 +131,8 @@ case "$1" in
 	;;
     status)
 	echo -n "Checking for Name Service Cache Daemon: "
-	## Check status with checkproc(8), if process is running
-	## checkproc will return with exit status 0.
-
-	# Status has a slightly different for the status command:
-	# 0 - service running
-	# 1 - service dead, but /var/run/  pid  file exists
-	# 2 - service dead, but /var/lock/ lock file exists
-	# 3 - service not running
-
-	# If checkproc would return LSB compliant ret values,
-	# things could be a little bit easier here. This will
-	# probably soon be the case ...
-	checkproc $NSCD_BIN; rc=$?
-	if test $rc = 0; then echo "OK"
-	else echo "No process"
-		if test -e /var/run/nscd.pid;
-		then exit 1
-		else exit 3
-		fi
-	fi
-	#rc_status
+	checkproc $NSCD_BIN
+	rc_status -v
 	;;
     probe)
 	## Optional: Probe for the necessity of a reload,

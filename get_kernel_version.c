@@ -1,5 +1,4 @@
-/* Copyright (C) 2000 SuSE GmbH, Nuremberg.
-   Author: Thorsten Kukuk <kukuk@suse.de>
+/* Copyright (C) 2000-2002 SuSE GmbH, Nuremberg.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -130,11 +129,11 @@ main (int argc, char *argv[])
 
       if(
         !fseek(fp, ofs, SEEK_SET) &&
-        fread(buffer, 1, 0x20, fp) == 0x20
+        fread(buffer, 1, MAX_VERSION_LENGTH, fp) == MAX_VERSION_LENGTH
       ) {
         char *s = buffer;
 
-        for(s[0x20] = 0; *s; s++) if(*s == ' ') { *s = 0; break; }
+        for(s[MAX_VERSION_LENGTH] = 0; *s; s++) if(*s == ' ') { *s = 0; break; }
         if(*buffer) {
           found = 1;
           printf("%s\n", buffer);
