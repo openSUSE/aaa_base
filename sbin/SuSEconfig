@@ -884,13 +884,19 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
             fi
         fi
 
-        for i in 100dpi Type1 75dpi cyrillic misc Speedo local ; do
-            FDIR=/usr/X11R6/lib/X11/fonts/$i
+	for FDIR in /usr/X11R6/lib/X11/fonts/* ; do
             if test -d $FDIR -a -x /usr/X11R6/bin/mkfontdir -a \
                 "$CHECK_NEWPACKAGE" != false ; then
                 if [ ! -f $FDIR/fonts.dir -o $FDIR -nt $FDIR/fonts.dir ] ; then
                     echo "Updating X11 font directory $i..."
-                    /usr/X11R6/bin/mkfontdir $FDIR
+                    MKXPARMS=""
+                    if [ -d /usr/X11R6/lib/X11/fonts/encodings ] ; then
+                       MKXPARMS="-e /usr/X11R6/lib/X11/fonts/encodings"
+                    fi
+                    if [ -d /usr/X11R6/lib/X11/fonts/encodings/large ] ; then
+                       MKXPARMS="$MKXPARMS -e /usr/X11R6/lib/X11/fonts/encodings/large"
+                    fi
+                    /usr/X11R6/bin/mkfontdir $MKXPARMS $FDIR
                 fi
             fi
         done
