@@ -124,6 +124,14 @@
 /etc/permissions.paranoid              root.root         600
 
 
+#devices
+/dev/fd0                               root.disk         660
+/dev/fd0h1440                          root.disk         660
+/dev/fd0u1440                          root.disk         660
+/dev/fd1                               root.disk         660
+/dev/fd1h1440                          root.disk         660
+/dev/fd1u1440                          root.disk         660
+
 
 
 
