@@ -177,7 +177,7 @@ unset noglob
 # Prompting and Xterm title
 #
 set prompt="%B%m%b %C2%# "
-alias cwdcmd 'echo "Directory: $cwd"'
+alias cwdcmd '(echo "Directory: $cwd" > /dev/tty)'
 if ( -o /dev/$tty && -x /usr/bin/biff ) /usr/bin/biff y
 #
 if ( ${?WINDOWID} && ${?EMACS} == 0 ) then
