@@ -112,7 +112,7 @@ test -x $FOO_BIN || { echo "$FOO_BIN not installed";
 
 # Check for existence of needed config file and read it
 FOO_CONFIG=/etc/sysconfig/FOO
-test -r $FOO_CONFIG || {echo "$FOO_CONFIG not existing";
+test -r $FOO_CONFIG || { echo "$FOO_CONFIG not existing";
 	if [ "$1" = "stop" ]; then exit 0;
 	else exit 6; fi; }
 
