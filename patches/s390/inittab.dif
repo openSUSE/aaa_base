@@ -1,0 +1,62 @@
+--- etc/inittab	Mon Jun 26 01:19:45 2000
++++ etc/inittab	Mon Jun 26 01:24:41 2000
+@@ -38,14 +38,7 @@
+ 
+ # what to do in single-user mode
+ ls:S:wait:/sbin/init.d/rc S
+-~~:S:respawn:/sbin/sulogin
+-
+-# what to do when CTRL-ALT-DEL is pressed
+-ca::ctrlaltdel:/sbin/shutdown -r -t 4 now
+-
+-# special keyboard request (Alt-UpArrow)
+-# look into the kbd-0.90 docs for this
+-kb::kbrequest:/bin/echo "Keyboard Request -- edit /etc/inittab to let this work."
++~~:S:respawn:/sbin/sulogin /dev/console
+ 
+ # what to do when power fails/returns
+ pf::powerwait:/sbin/init.d/powerfail    start
+@@ -53,42 +46,9 @@
+ #pn::powerfail:/sbin/init.d/powerfail now
+ po::powerokwait:/sbin/init.d/powerfail  stop
+ 
+-# for ARGO UPS
+-sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
+-
+ # getty-programs for the normal runlevels
+ # <id>:<runlevels>:<action>:<process>
+ # The "id" field  MUST be the same as the last
+ # characters of the device (after "tty").
+-1:01236:respawn:/sbin/mingetty --noclear tty1
+-2:01236:respawn:/sbin/mingetty tty2
+-3:01236:respawn:/sbin/mingetty tty3
+-4:01236:respawn:/sbin/mingetty tty4
+-5:01236:respawn:/sbin/mingetty tty5
+-6:01236:respawn:/sbin/mingetty tty6
+-#S0:01236:respawn:/sbin/agetty -L 9600 ttyS0
+-
+-#
+-#
+-#  Note: Do not use tty7 in runlevel 3, this virtual line
+-#  is occupied by the programm xdm.
+-#
+-
+-#  This is for the package xdmsc, after installing and
+-#  and configuration you should remove the comment character
+-#  from the following line:
+-#7:2:respawn:+/sbin/init.d/rx tty7
+-
+-
+-
+-# modem getty.
+-# mo:23:respawn:/usr/sbin/mgetty -s 38400 modem
+-
+-# fax getty (hylafax)
+-# mo:23:respawn:/usr/lib/fax/faxgetty /dev/modem
+-
+-# vbox (voice box) getty
+-# I6:23:respawn:/usr/sbin/vboxgetty -d /dev/ttyI6
+-# I7:23:respawn:/usr/sbin/vboxgetty -d /dev/ttyI7
++1:01236:respawn:/sbin/sulogin /dev/console
+ 
+-# end of /etc/inittab
