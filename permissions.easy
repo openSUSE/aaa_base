@@ -479,7 +479,7 @@
 #
 /usr/lib/news/bin/rnews                 news.uucp       4755
 /usr/lib/news/bin/startinnfeed          root.news       4755
-/usr/lib/news/bin/inndstart             root.news       4755
+/usr/lib/news/bin/inndstart             root.news       4754
 /usr/lib/news/bin/inews                 news.news       6755
 /usr/lib/news/bin/input/newsspool       news.news       6555
 
