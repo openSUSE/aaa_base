@@ -71,7 +71,7 @@ ippp*)
 		/sbin/modify_resolvconf modify -s ipppd -e "$INTERFACE" \
 		    -p ipppd -f /etc/ppp/ip-up -n "$MS_DNS1 $MS_DNS2" -t - << EOT
 		    If you do not like the ipppd to change your nameserver
-		    settings remove the option USEPEERDNS for this connection 
+		    settings remove the option USEPEERDNS for this connection
 EOT
 	fi
 	# ip_resend hook
@@ -105,7 +105,7 @@ EOT
 	# /etc/fetchmailrc and can use UUCP to fetch mail over TCP/IP, provided
 	# that UUCP is configured properly. Last not least it also calls sendmail
 	# to send any queued mail. Uncomment the line below.
-	test "$RUN_POLL_TCPIP" = "no" || /etc/ppp/poll.tcpip
+	test "$RUN_POLL_TCPIP" = "no" || /etc/ppp/poll.tcpip &
 
 	# call ip-up.local if it exists and is executable:
 	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local "$@"
@@ -194,7 +194,7 @@ EOT
 	# that UUCP is configured properly. Last not least it also calls sendmail
 	# to send any queued mail.
 	test -n "$IPPARAM" -a -z "${IPPARAM##*no_poll_tcpip*}" || \
-	    /etc/ppp/poll.tcpip
+	    /etc/ppp/poll.tcpip &
 
 	# call ip-up.local if it exists and is executable:
 	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local "$@"
