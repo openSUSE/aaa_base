@@ -52,3 +52,27 @@
  
  	if (service) {
  	    if (script_inf.default_start && script_inf.default_start != empty) {
+diff -ur insserv-0.9.orig/insserv.8 insserv-0.9/insserv.8
+--- insserv-0.9.orig/insserv.8	Tue Jul 31 14:48:42 2001
++++ insserv.8	Wed Aug  8 13:25:43 2001
+@@ -110,7 +110,7 @@
+ 
+  # All remote filesystems are mounted
+  # (in some cases /usr may be remote).
+- $remote_fs      $local_fs nfs
++ $remote_fs      $local_fs nfs xntpd
+ 
+  # System logger is operational
+  $syslog         syslog
+diff -ur insserv-0.9.orig/insserv.conf insserv-0.9/insserv.conf
+--- insserv-0.9.orig/insserv.conf	Tue Jul 31 14:48:42 2001
++++ insserv.conf	Wed Aug  8 13:26:47 2001
+@@ -18,7 +18,7 @@
+ # be remote. Most applications that care will probably require
+ # both $local_fs and $remote_fs)
+ #
+-$remote_fs	$local_fs nfs
++$remote_fs	$local_fs nfs xntpd
+ 
+ #
+ # System logger is operational

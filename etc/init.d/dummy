@@ -55,7 +55,7 @@ else
 fi
 
 test -n "$dev" || exit 0
-test "$dev" = "dhcpclient" && exit 0
+test "$dev" = "dhcpclient" -a "$1" != "status" && exit 0
 
 rc_reset
 case "$1" in
@@ -76,7 +76,12 @@ case "$1" in
 	rc_status
 	;;
     status)
-	ifconfig $dummy
+	echo -n "Checking status for dummy device:"
+	case "`ifconfig $dummy 2>&1`" in
+	    ${dummy}*UP*) ;;
+	    ${dummy}*) rc_failed 3 ;;
+	esac
+	rc_status -v
 	;;
     probe)
 	probe="`ifconfig $dummy 2>&1`"

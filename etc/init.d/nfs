@@ -92,9 +92,21 @@ case "$1" in
 	rc_status
 	;;
     status)
-	mount -t nfs | while read from x point rest ; do
-	    echo -e "$from\033[50G$point"
-	done
+	echo -n "Checking for mounted nfs shared (from /etc/fstab):"
+	test "$nfs" = "yes" && {
+	  while read  where what type options rest  ; do
+	    case "$where" in
+	      \#*|"") ;;
+	      *) case "$options" in
+		   *noauto*) ;;
+		   *) if test "$type" = "nfs" ; then
+			grep -q "$where $what nfs" /proc/mounts || rc_failed 3
+		      fi ;;
+		 esac
+	    esac
+          done < /etc/fstab
+        }
+        rc_status -v
 	;;
     *)
 	echo "Usage: $0 {start|stop|status|reload|restart}"
