@@ -43,7 +43,7 @@ uucp:x:10:14:Unix-to-Unix CoPy system:/etc/uucp:/bin/bash
 games:x:12:100:Games account:/var/games:/bin/bash
 man:x:13:62:Manual pages viewer:/var/cache/man:/bin/bash
 wwwrun:x:30:65534:WWW daemon apache:/var/lib/wwwrun:/bin/bash
-ftp:x:40:50:FTP account:/usr/local/ftp:/bin/bash
+ftp:x:40:50:FTP account:/srv/ftp:/bin/bash
 named:x:44:44:Nameserver daemon:/var/named:/bin/bash
 nobody:x:65534:65533:nobody:/var/lib/nobody:/bin/bash" \
  > var/adm/fillup-templates/passwd.aaa_base
@@ -101,8 +101,9 @@ while read LINE ; do
 	>> var/adm/fillup-templates/gshadow.aaa_base
 done < var/adm/fillup-templates/group.aaa_base
 
+# re-do these users on update, their home-dir was changed
 if test -e etc/passwd ; then
-  grep -v "^news:\|^uucp:\|^man:" etc/passwd > etc/passwd.t
+  grep -v "^news:\|^uucp:\|^man:\|^ftp:" etc/passwd > etc/passwd.t
   cat etc/passwd.t > etc/passwd
   rm -f etc/passwd.t
 fi
