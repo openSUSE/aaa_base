@@ -7,6 +7,7 @@
 /bin/sh
 /bin/tcsh
 /bin/true
+/bin/zsh
 /usr/bin/csh
 /usr/bin/ksh
 /usr/bin/passwd
