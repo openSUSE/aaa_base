@@ -1,31 +1,4 @@
 #
-# Should mandb and whatis be recreated by cron.daily ("yes" or "no")
-#
-REINIT_MANDB=yes
-
-#
-# Should old corefiles they be deleted? ("yes" or "no")
-# If set to 'no', cron.daily will tell you if it finds old core files.
-# NOTE: This feature requires RUN_UPDATEDB to be set to "yes".
-#
-DELETE_OLD_CORE=no
-
-#
-# Maximum age of core files (in days)
-#
-MAX_DAYS_FOR_CORE=7
-
-#
-# Should old preformatted man pages (in /var/catman) be deleted? (yes/no)
-#
-DELETE_OLD_CATMAN=yes
-
-#
-# How long should old preformatted man pages be kept before deletion? (days)
-#
-CATMAN_ATIME=7
-
-#
 # cron.daily can check for old files in tmp-dirs. It will delete all files
 # not accessed for more than MAX_DAYS_IN_TMP. If MAX_DAYS_IN_TMP is not set
 # or set to 0, this feature will be disabled. 

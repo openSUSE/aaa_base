@@ -61,9 +61,9 @@ if test -n "$CREATE_INFO_DIR" -a "$CREATE_INFO_DIR" = "yes" ; then
     fi
 fi
 
-if test -x /usr/bin/mandb ; then
-    echo "Processing index files of all manpages..."
-    /usr/bin/mandb -q -s
-fi
+#if test -x /usr/bin/mandb ; then
+#    echo "Processing index files of all manpages..."
+#    /usr/bin/mandb -q -s
+#fi
 
 

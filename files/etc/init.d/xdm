@@ -41,6 +41,9 @@ do
 done
 
 PIDFILE=""
+KDEROOTHOME=/root/.kdm
+export KDEROOTHOME
+
 case "$DISPLAYMANAGER" in
     kdm|kde|KDM|KDE)	 PIDFILE="-p /var/run/xdm.pid"
 			 DISPLAYMANAGER=/opt/kde/bin/kdm
