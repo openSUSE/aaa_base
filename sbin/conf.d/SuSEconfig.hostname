@@ -1,0 +1,111 @@
+#! /bin/sh
+# Copyright (c) 2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996-97
+#         Bernhard Kaindl <bk@suse.de>, 1999
+#         Rüdiger Oertel <ro@suse.de>, 2000-01
+#
+# This module generates /etc/HOSTNAME and /etc/hosts
+
+# check if we are started as root
+# only one of UID and USER must be set correctly
+if test "$UID" != 0 -a "$USER" != root; then
+    echo "You must be root to start $0."
+    exit 1
+fi
+
+r=$ROOT
+
+test -f $r/lib/YaST/SuSEconfig.functions || {
+    echo "ERROR - can not find $r/lib/YaST/SuSEconfig.functions!!"
+    echo "This should not happen.  Exit..."
+    exit 1
+}
+. $r/lib/YaST/SuSEconfig.functions
+
+test -f $r/etc/rc.config || {
+    echo "No $r/etc/rc.config found."
+    exit 1
+}
+. $r/etc/rc.config
+
+if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
+    echo "SuSEconfig is disabled in $r/etc/rc.config. Exit..."
+    exit 0
+fi
+
+# set LIBDIR if not set already
+: ${LIBDIR=$r/var/adm/SuSEconfig}
+# OLDHOSTENTRY must be a file name placed in LIBDIR
+OLDHOSTENTRY=$LIBDIR/oldhostentry
+
+if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
+    #
+    # maybe there was another name or IP Adress before. When it has been
+    # changed, this could lead into trouble, if it stays in /etc/hosts.
+    #
+    if test -e $OLDHOSTENTRY ; then
+        for OLDENTRY in `cat $OLDHOSTENTRY` ; do
+            cat $r/etc/hosts | grep -vw "$OLDENTRY" > $r/etc/hosts.wrzl
+            cp -p $r/etc/hosts.wrzl $r/etc/hosts
+            rm -f $r/etc/hosts.wrzl
+        done
+        rm -f $OLDHOSTENTRY
+    fi
+
+    #
+    # check, if we have localhost defined...
+    #
+    grep localhost $r/etc/hosts > /dev/null 2>&1
+    if test $? -eq 1 ; then
+        echo -e "\n127.0.0.1       localhost" >> $r/etc/hosts
+    fi
+
+    echo $FQHOSTNAME >> $OLDHOSTENTRY
+    NICKNAME=`echo $FQHOSTNAME | sed -e"s:\..*::"`
+    echo $NICKNAME > $r/etc/HOSTNAME.SuSEconfig
+    check_md5_and_move $r/etc/HOSTNAME
+
+    NET_DEVICE_FOUND=false
+
+    if test -n "$NETCONFIG" -a "$NETCONFIG" != "YAST_ASK" ; then
+        NICKNAME_PRINTED=false
+        for I in $NETCONFIG ; do
+            eval IPADDR=\$IPADDR$I
+            if test -n "$IPADDR" ; then
+                test -x /usr/bin/cut && \
+                    IPADDR=`echo "$IPADDR              " | /usr/bin/cut -c -15`
+                grep -w ${IPADDR} $r/etc/hosts > /dev/null || {
+                    if test "$NICKNAME_PRINTED" = false ; then
+                        echo "$IPADDR	$FQHOSTNAME 	$NICKNAME" >> $r/etc/hosts
+                        NICKNAME_PRINTED=true
+                    else
+                        echo "$IPADDR	$FQHOSTNAME" >> $r/etc/hosts
+                    fi
+                }
+                echo "$IPADDR" >> $OLDHOSTENTRY
+                NET_DEVICE_FOUND=true
+            fi
+        done
+    fi
+
+    # to get plp to work, we have to add hostname to localhost.
+    if test "$NET_DEVICE_FOUND" = false -a "$NETCONFIG" != "YAST_ASK" ; then
+        grep -vw $FQHOSTNAME $r/etc/hosts > $r/etc/hosts.tmp
+        echo "127.0.0.2      	$FQHOSTNAME 	$NICKNAME" >> $r/etc/hosts.tmp
+        cp -p $r/etc/hosts.tmp $r/etc/hosts
+        rm -f $r/etc/hosts.tmp
+    fi
+
+    #
+    # now beautify /etc/hosts
+    #
+    if test "$BEAUTIFY_ETC_HOSTS" = yes ; then
+        grep "^#" $r/etc/hosts > $r/etc/hosts.wrzl
+        echo >> $r/etc/hosts.wrzl
+        echo >> $r/etc/hosts.wrzl
+        grep -v "^#" $r/etc/hosts | grep -v "^\$" | sort >> $r/etc/hosts.wrzl
+        mv $r/etc/hosts.wrzl $r/etc/hosts
+    fi
+fi
+
