@@ -57,7 +57,7 @@ named:x:44:44:Nameserver daemon:/var/named:/bin/bash
 fnet:x:49:14:FidoNet account:/var/spool/fnet:/bin/bash
 gdm:x:50:15:Gnome Display Manager daemon:/var/lib/gdm:/bin/bash
 postfix:x:51:51:Postfix daemon:/var/spool/postfix:/bin/false
-cyrus:x:96:12:IMAP daemon:/usr/cyrus:/bin/bash
+cyrus:x:96:12:IMAP daemon:/usr/lib/cyrus:/bin/bash
 oracle:x:59:54:Oracle database admin:/opt/oracle:/bin/bash
 mysql:x:60:2:MySQL database admin:/var/lib/mysql:/bin/false
 dpbox:x:61:56:DpBox account:/var/spool/dpbox:/bin/false
