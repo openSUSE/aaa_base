@@ -88,12 +88,14 @@ function rc_status ()
 	"") rc_check ;;
 	-v|-v[1-9]|-v[1-9][0-9])
 	    rc_check
-	    echo -en "$rc_save"
+	    # do not use save/restore cursor,
+	    # sometime linux console can not do that.
+	    # echo -en "$rc_save"
 	    if test -n "${i#-v}" && test "${i#-v}" -gt 0 2>/dev/null ; then
 		test "$TERM" != "raw" && echo -en "\033[${i#-v}A"
 	    fi
 	    test $_rc_status -gt 0 && echo -e "$rc_failed" || echo -e "$rc_done"
-	    echo -en "$rc_restore"
+	    # echo -en "$rc_restore"
 	    ;;
 	-r) rc_reset ;;
 	-s) echo -e "$rc_skipped"  ; return 0 ;;
