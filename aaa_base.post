@@ -31,10 +31,10 @@ fi
 # so we have to change them here ...
 # FONT        to CONSOLE_FONT
 # TRANSLATION to CONSOLE_UNICODEMAP
-# LANGUAGE    to DEFAULT_LANGUAGE
 # replace CREATE_RESOLVCONF by comment
 # comment out NAMESERVER
 # comment out SEARCHLIST
+# comment out LANGUAGE
 # delete umask line
 #
 if test -s etc/rc.config ; then
@@ -45,7 +45,7 @@ if test -s etc/rc.config ; then
 	-e"s/^SEARCHLIST=\(.*\)/# SEARCHLIST=\1/" \
 	-e"s/^umask .*//" \
 	-e"s/^test \$rc_done=/test \"\$rc_done\"=/" \
-        -e"s/^LANGUAGE=/DEFAULT_LANGUAGE=/" etc/rc.config \
+        -e"s/^LANGUAGE=/# LANGUAGE=/" etc/rc.config \
     > etc/rc.config.t && mv etc/rc.config.t etc/rc.config
     rm -f etc/rc.config.t
 fi
