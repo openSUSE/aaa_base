@@ -45,12 +45,10 @@ man:x:13:62:Manual pages viewer:/var/cache/man:/bin/bash
 postgres:x:26:2:Postgres database admin:/var/lib/pgsql:/bin/bash
 mdom:x:28:28:Mailing list agent:/usr/lib/majordomo:/bin/bash
 wwwrun:x:30:65534:WWW daemon apache:/var/lib/wwwrun:/bin/bash
-squid:x:31:65534:WWW proxy squid:/var/squid:/bin/bash
 fax:x:33:14:Facsimile agent:/var/spool/fax:/bin/bash
 gnats:x:34:65534:Gnats GNU backtracking system:/usr/lib/gnats:/bin/bash
 adabas:x:36:100:Adabas-D database admin:/usr/lib/adabas:/bin/bash
 amanda:x:37:6:Amanda admin:/var/lib/amanda:/bin/bash
-irc:x:39:65534:IRC daemon:/usr/lib/ircd:/bin/bash
 ftp:x:40:2:FTP account:/usr/local/ftp:/bin/bash
 firewall:x:41:31:Firewall account:/var/lib/firewall:/bin/false
 named:x:44:44:Nameserver daemon:/var/named:/bin/bash

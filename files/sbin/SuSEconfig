@@ -252,6 +252,7 @@ fi
 #
 if test -z "$r" -a -x /usr/bin/mail -a -x /usr/sbin/sendmail \
     -a -n "$MAIL_REPORTS_TO" -a "$FASTRUN" != "true" ; then
+    UPDATE_MESSAGES=/var/log/update-messages
     if test "$MAIL_LEVEL" = all ; then
         FILES_TO_MAIL="/var/adm/notify/messages/* \
                        /var/adm/notify/warnings/* \
@@ -264,6 +265,13 @@ if test -z "$r" -a -x /usr/bin/mail -a -x /usr/sbin/sendmail \
         test -f $FILE || continue
         cat $FILE | /usr/bin/mail $MAIL_REPORTS_TO \
             -s "SuSEconfig: `basename $FILE`"
+	echo "----------------------------------------------------------------------" >> $UPDATE_MESSAGES
+	echo "----------------------------------------------------------------------" >> $UPDATE_MESSAGES
+	basename $FILE >> $UPDATE_MESSAGES
+	date >> $UPDATE_MESSAGES
+	echo "----------------------------------------" >> $UPDATE_MESSAGES
+	cat $FILE >> $UPDATE_MESSAGES
+	echo "----------------------------------------" >> $UPDATE_MESSAGES
         rm -f $FILE
         sleep 2
     done
