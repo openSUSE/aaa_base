@@ -57,7 +57,7 @@ case "$1" in
 
 	test -x /sbin/ifup -a -f /etc/sysconfig/network/ifcfg-lo && {
 	    echo -n "Setting up loopback interface "
-	    /sbin/ifup lo -o rc
+	    /sbin/ifup lo -o rc manual
             rc_status -v -r
 	}
 	

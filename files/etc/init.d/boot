@@ -133,7 +133,13 @@ export DO_CONFIRM
 # Export the real device in variable REDIRECT.
 #
 test -x /sbin/blogd -a -n "$REDIRECT" && /sbin/blogd $REDIRECT
-: ${REDIRECT:=/dev/tty}
+if test -z "$REDIRECT" ; then
+    if (echo -n > /dev/tty) 2>/dev/null ; then
+	REDIRECT=/dev/tty
+    else
+	REDIRECT=/dev/console
+    fi
+fi
 
 #
 # Common used variables

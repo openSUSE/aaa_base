@@ -24,8 +24,14 @@ set +e
 
 # Redirect to real device (e.g. in case of boot logging)
 : ${CRYPTOTAB:=/etc/cryptotab}
-: ${REDIRECT:=/dev/tty}
 : ${TIMEOUT:=120}
+if test -z "$REDIRECT" ; then
+    if (echo -n > /dev/tty) 2>/dev/null ; then
+	REDIRECT=/dev/tty
+    else
+	REDIRECT=/dev/console
+    fi
+fi
 test -s $CRYPTOTAB || exit 0
 type -p losetup &> /dev/null || exit 0
 
