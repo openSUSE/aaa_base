@@ -11,6 +11,7 @@
 
 #include <pwd.h>
 #include <string.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -494,6 +495,7 @@ static void scan_script_locations(const char * path)
 	while ((d = readdir(rcdir)) != NULL) {
 	    char * ptr = d->d_name;
 	    char order = 0;
+	    uintptr_t begin = (uintptr_t)NULL; /* Remember address of ptr handled by strsep() */
 
 	    if (*ptr != 'S')
 		continue;
@@ -508,6 +510,7 @@ static void scan_script_locations(const char * path)
 	    if (!script_inf.provides || script_inf.provides == empty)
 		script_inf.provides = xstrdup(ptr);
 
+	    begin = (uintptr_t)script_inf.provides;
 	    while ((token = strsep(&script_inf.provides, delimeter)) && *token) {
 		if (*token == '$') {
 		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
@@ -515,6 +518,14 @@ static void scan_script_locations(const char * path)
 		}
 		current_structure(token, order, runlevel);
 	    }
+	    script_inf.provides = (char*)begin;
+
+	    xreset(script_inf.provides);
+	    xreset(script_inf.required_start);
+	    xreset(script_inf.required_stop);
+	    xreset(script_inf.default_start);
+	    xreset(script_inf.default_stop);
+	    xreset(script_inf.description);
 	}
 	popd();
 	closedir(rcdir);
@@ -755,6 +766,7 @@ int main (int argc, char *argv[])
 	serv_t * service = NULL;
 	char * end;
 	char * token;
+	uintptr_t begin = (uintptr_t)NULL;  /* Remember address of ptr handled by strsep() */
 	errno = 0;
 
 	/* d_type seems not to work, therefore use stat(2) */
@@ -866,6 +878,8 @@ int main (int argc, char *argv[])
 	 */
 	if (!service) {
 	    char * provides = xstrdup(script_inf.provides);
+
+	    begin = (uintptr_t)provides;
 	    while ((token = strsep(&provides, delimeter)) && *token) {
 		if (*token == '$') {
 		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
@@ -878,6 +892,7 @@ int main (int argc, char *argv[])
 		if ((service = findserv(token)))
 			break;
 	    }
+	    provides = (char*)begin;
 	    free(provides);
 	}
 
@@ -903,7 +918,7 @@ int main (int argc, char *argv[])
 	     */
 	}
 
-	if (chkfor(d->d_name, argv, argc)) {
+	if (chkfor(d->d_name, argv, argc) && !defaults) {
 	    if (argr[curr_argc]) {
 		char * ptr = argr[curr_argc];
 		struct _mark {
@@ -936,6 +951,7 @@ int main (int argc, char *argv[])
 	    }
 	}
 
+	begin = (uintptr_t)script_inf.provides;
 	while ((token = strsep(&script_inf.provides, delimeter)) && *token) {
 	    if (*token == '$') {
 		warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
@@ -958,6 +974,7 @@ int main (int argc, char *argv[])
 	     * required_stop and default_stop arn't used in SuSE Linux.
 	     */
 	}
+	script_inf.provides = (char*)begin;
     }
     /* Reset remaining pointers */
     xreset(script_inf.provides);
