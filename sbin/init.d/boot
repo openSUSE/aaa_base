@@ -83,7 +83,7 @@ if test ! -f /fastboot -a -z "$fastboot" ; then
     if test $? = 0; then
         ECHO_RETURN=$rc_done_up
         echo "Checking file systems..."
-        fsck -A -a
+        fsck -C -A -a
         # A return code of 1 indicates that file system errors
         # were corrected, but that the boot may proceed.
         # A return code of 2 or larger indicates failure.
