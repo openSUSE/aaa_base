@@ -20,6 +20,7 @@
 . /etc/rc.config
 
 nfs=no
+test "$START_AUTOFS" = yes && nfs=yes
 while read  where what type options rest  ; do
     case "$where" in
 	\#*|"") ;;
@@ -38,8 +39,10 @@ case `uname -r` in
    *)
       test -x /usr/sbin/rpc.statd && RPCSTATD=/usr/sbin/rpc.statd
       test -x /usr/sbin/rpc.kstatd && RPCSTATD=/usr/sbin/rpc.kstatd
+      test -x /sbin/rpc.statd && RPCSTATD=/sbin/rpc.statd
       test -x /usr/sbin/rpc.lockd && RPCLOCKD=/usr/sbin/rpc.lockd
       test -x /usr/sbin/rpc.klockd && RPCLOCKD=/usr/sbin/rpc.klockd
+      test -x /sbin/rpc.lockd && RPCLOCKD=/sbin/rpc.lockd
       ;;
 esac
 

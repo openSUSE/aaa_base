@@ -17,13 +17,13 @@ options parport_pc io=0x3bc irq=none,none
 # you need the module named "audio" instead of dmasound
 #*****************************************************************************
 
-if `cat /proc/bus/usb/devices 2>/dev/null | grep  -i audio`
-alias pmacsound audio
-elseif `uname -r` = 2.2.18
-alias pmacsound dmasound
-else
-alias pmacsound dmasound_awacs
-endif
+#if `cat /proc/bus/usb/devices 2>/dev/null | grep  -i audio`
+#alias pmacsound audio
+#elseif `kernelversion` == "2.2"
+#alias pmacsound dmasound
+#else
+#alias pmacsound dmasound_pmac
+#endif
 
 # alias char-major-14 pmacsound
 # alias sound pmacsound

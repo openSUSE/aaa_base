@@ -394,7 +394,7 @@ alias char-major-109      lvm
 # ppp over ethernet
 # the kernel 2.2 uses pppox
 # the kernel 2.4 uses pppoe
-if `uname -r | cut -f -2 -d .` = 2.2
+if `kernelversion` == "2.2"
 alias char-major-144      pppox
 post-install pppox insmod mssclampfw
 pre-remove   pppox rmmod  mssclampfw
@@ -457,7 +457,7 @@ alias sl1                 slip
 
 # the kernel 2.2 uses ppp.o as ppp driver,
 # the kernel 2.4 uses ppp_generic.o
-if `uname -r | cut -f -2 -d .` = 2.2
+if `kernelversion` == "2.2"
 alias ppp0                ppp
 alias ppp1                ppp
 else
