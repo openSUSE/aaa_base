@@ -11,6 +11,10 @@
 alias eth0             off
 alias scsi_hostadapter off
 
+# only used for Mylex or Compaq Raid as module
+alias block-major-48   off
+alias block-major-72   off
+
 # mouse (for older busmice)
 alias char-major-10    off
 
