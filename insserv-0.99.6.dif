@@ -31,3 +31,20 @@
  		    continue;
  		}
  
+--- listing.c
++++ listing.c	Wed Sep  4 13:23:20 2002
+@@ -239,7 +239,13 @@
+ 	    if (skip && target == skip) {
+ 		if (!remembernode(skip))
+ 		    warn("There is a loop at service %s\n",  skip->name);
+-		break;		/* Cross over detected */
++		else
++				/* More than two loops are crossing over?
++				 * Emergeny exit */
++		    if (!remembernode(tmp))
++			error("There is a loop at service %s\n",  tmp->name);
++
++		break;		/* Cross over of two loops detected */
+ 	    }
+ 
+ 	    __follow(target, tmp, deep, offset);
