@@ -88,6 +88,11 @@ if [ -x /usr/X11R6/bin/xftcache -a $RUN_XFTCACHE = "true" ]; then
     /usr/X11R6/bin/xftcache
 fi
 
+if [ -x /usr/X11R6/bin/fc-cache -a $RUN_XFTCACHE = "true" ]; then
+    echo "create fonts.cache files ..."
+    /usr/X11R6/bin/fc-cache
+fi
+
 if [ -x /usr/X11R6/bin/xset ]; then
     case "$DISPLAY" in
 	:[0-9]*)
