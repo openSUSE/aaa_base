@@ -78,10 +78,18 @@ case "$1" in
 	    /sbin/modify_resolvconf cleanup
 	    echo -e "$rc_done_up"
 	fi
-	
+	# delete temp files
+	# If $CLEAR_TMP_DIRS_AT_BOOTUP = yes, delete files in
+	# $TMP_DIRS_TO_CLEAR, if $CLEAR_TMP_DIRS_AT_BOOTUP starts with a "/"
+	# delete files in those dirs instead.
+	CLEAR_DIRS="$TMP_DIRS_TO_CLEAR"
+	if [ "${CLEAR_TMP_DIRS_AT_BOOTUP:0:1}" = "/" ]; then
+	  CLEAR_DIRS="$CLEAR_TMP_DIRS_AT_BOOTUP"
+	  CLEAR_TMP_DIRS_AT_BOOTUP=yes
+	fi
 	if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
-	  echo -n "Cleaning temporary directories $TMP_DIRS_TO_CLEAR"
-	  for CURDIR in $TMP_DIRS_TO_CLEAR ; do
+	  echo -n "Cleaning temporary directories $CLEAR_DIRS"
+	  for CURDIR in $CLEAR_DIRS ; do
 	    find $CURDIR -printf '%P\0' | ( cd $CURDIR ; xargs -0 rm -rf )
 	  done
 	  for CURDIR in /tmp /tmp/.X11-unix /tmp/.ICE-unix \

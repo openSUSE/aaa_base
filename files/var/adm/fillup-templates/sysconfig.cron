@@ -25,12 +25,17 @@ TMP_DIRS_TO_CLEAR="/tmp /var/tmp"
 #
 OWNER_TO_KEEP_IN_TMP="root"
 
-## Type:	yesno
+## Type:	string
 ## Default:	no
 #
 # "Set this to "yes" to entirely remove (rm -rf) all  files and subdirectories
 # from the temporary directories defined in TMP_DIRS_TO_CLEAR on bootup.
 # Please note, that this feature ignores OWNER_TO_KEEP_IN_TMP - all files will
 # be removed without exception."
+#
+# If this is set to a list of directories (i.e. starts with a "/"), these
+# directories will be cleared instead of those listed in TMP_DIRS_TO_CLEAR.
+# This can be used to clear directories at boot as well as clearing unused
+# files out of other directories.
 #
 CLEAR_TMP_DIRS_AT_BOOTUP="no"
