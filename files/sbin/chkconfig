@@ -152,11 +152,16 @@ sub allservices {
   return sort @services;
 }
 
+
+my $force;
+
 #
 # run insserv
 #
 sub insserv {
-  my $r = system("/sbin/insserv", @_);
+  my @i = ("/sbin/insserv");
+  push @i, "-f" if $force;
+  my $r = system(@i, @_);
   if ($r == -1) {
     printf STDERR "/sbin/insserv: $!\n";
   } elsif ($r) {
@@ -184,9 +189,11 @@ usage:
         chkconfig -e|--edit  [names]            (configure services)
         chkconfig -s|--set   [name state]...    (configure services)
         chkconfig -l|--list [--deps] [names]    (shows the links)
+        chkconfig -c|--check name [state]       (check state)
         chkconfig -a|--add   [names]            (runs insserv)
         chkconfig -d|--del   [names]            (runs insserv -r)
         chkconfig -h|--help                     (print usage)
+        chkconfig -f|--force ...                (call insserv with -f)
 
         chkconfig [name]           same as chkconfig -t
         chkconfig name state...    same as chkconfig -s name state
@@ -199,7 +206,9 @@ if (!GetOptions('list|l'   => \&addmode,
                 'del|d'    => \&addmode,
                 'edit|e'   => \&addmode,
                 'help|h'   => \&addmode,
-                'set|s' => \&addmode,
+                'set|s'    => \&addmode,
+                'check|c'  => \&addmode,
+                'force|f'  => \$force,
                 'deps'     => \$printdeps
    )) {
   usage();
@@ -215,13 +224,42 @@ if (@ARGV) {
   @services = @ARGV;
   $mode = @services == 1 ? 't' : 's' if $mode eq '';
 } else {
+  die("Please specify a service to check\n") if $mode eq 'c';
   @services = allservices() if $mode ne 's';
 }
 $mode = 't' if $mode eq '';
 
-initlinks() if $mode eq 'e' || $mode eq 't' || $mode eq 's';
+initlinks() if $mode eq 'e' || $mode eq 't' || $mode eq 's' || $mode eq 'c';
 
 my %current = ();
+
+if ($mode eq 'c') {
+  die("Please specify only one service to check\n") if @services > 2;
+  $s = $services[0];
+  my $want;
+  if (@services == 1) {
+    $want = `runlevel`;
+    chomp($want);
+    die("Can't determine current runlevel\n") unless $want =~ s/^. (.)$/$1/;
+  } else {
+    $want = $services[1];
+  }
+  $want = lc($want);
+  exit 0 if $want eq 'off';
+  if ($want eq 'on') {
+    $want = getdef($s);
+  } else {
+    $want =~ s/s/S/g;
+    $want =~ s/b/B/g;
+    $want = join('', sort split('', $want));
+    die("illegal runlevel specified for $s: $1\n") if $want =~ /([^0123456SB])/;
+  }
+  my $l;
+  for $l (split('', $want)) {
+    exit 1 unless $links{$l}->{$s};
+  }
+  exit 0;
+}
 
 if ($mode eq 'e' || $mode eq 't') {
   my ($fh, $tmpname);
@@ -249,6 +287,7 @@ if ($mode eq 'e' || $mode eq 't') {
 if ($mode eq 's') {
   my $usestdin = !@services;
   my $ln = 0;
+  $force = 1 if @services != 2;		# hack
   do {
     if ($usestdin) {
       while (<STDIN>) {

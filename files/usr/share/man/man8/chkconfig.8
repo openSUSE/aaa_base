@@ -24,6 +24,11 @@ chkconfig \- enable or disable system services
 .RI [ names ]
 .br
 .B chkconfig
+.B -c|--check
+.I name
+.RI [ state ]
+.br
+.B chkconfig
 .B -l|--list
 .RB [ --deps ]
 .RI [ names ]
@@ -73,12 +78,24 @@ If no services are specified, chkconfig reads lines from standard
 input. Each line must consist of a service/state pair. As this is
 exactly the output of the terse list mode, this can be used to
 reconfigure a service specification saved by a former run.
+
+If the option
+.B -f
+or
+.B --force
+is also given, insserv is called with a '-f' option.
 .SH EDIT MODE
 This mode is a combination of the terse list mode and set mode.
 It writes the state of all specified services (or all known
 services, if no service was provided) into a temporary file,
 starts an editor and re-configures all services to reflect the
 states of the changed temporary file.
+.SH CHECK MODE
+This mode can be used to check the state of a service.
+chkconfig exits with a return code of '0' if the service is enabled
+in all of the specified runlevels, otherwise the exit status
+is '1'. If chkconfig is called with only a service name the
+current runlevel of the system is used for checking.
 .SH LIST MODE
 List mode prints for each specified service a line that consists
 of the service name and for runlevels zero to six
