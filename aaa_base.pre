@@ -101,7 +101,7 @@ done < var/adm/fillup-templates/group.aaa_base
 
 # re-do these users on update, their home-dir was changed
 if test -e etc/passwd ; then
-  grep -v "^news:\|^uucp:\|^man:\|^ftp:" etc/passwd > etc/passwd.t
+  grep -v "^news:\|^uucp:\|^man:\|^ftp:.*:.usr.local.ftp:" etc/passwd > etc/passwd.t
   cat etc/passwd.t > etc/passwd
   rm -f etc/passwd.t
 fi
