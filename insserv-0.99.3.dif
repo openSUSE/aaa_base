@@ -32,7 +32,20 @@
  
 --- insserv.c
 +++ insserv.c	Mon Aug 12 15:22:35 2002
-@@ -1190,9 +1190,9 @@
+@@ -954,9 +954,10 @@
+ 	    *argr = ++token;
+ 	}
+ 
+-	if (stat(*argv, &st_script) < 0) {
+-	    if (errno != ENOENT)
++	if ((*argv)[0] == '/' || ((*argv)[0] == '.' && (*argv)[1] == '/')) {
++	    if ( stat(*argv, &st_script) < 0)
+ 		error("%s: %s\n", *argv, strerror(errno));
++	} else {
+ 	    pushd(path);
+ 	    if (stat(*argv, &st_script) < 0)
+ 		error("%s: %s\n", *argv, strerror(errno));
+@@ -1190,9 +1191,9 @@
  		    if (chkfor(d->d_name, argv, argc) && !ignore) {
  			boolean ok = true;
  			if (del)
@@ -44,7 +57,7 @@
  			if (!ok)
  			    error("exiting now!\n");
  		    }
-@@ -1262,7 +1262,10 @@
+@@ -1262,7 +1263,10 @@
  	    if (*token == '$')
  		continue;
  
