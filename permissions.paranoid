@@ -235,6 +235,7 @@
 /sbin/cardctl                           root.trusted    0755
 # use it as root if you must:
 /usr/X11R6/bin/dga                      root.root       0755
+# screen savers:
 /usr/X11R6/bin/xlock                    root.shadow     0755
 # don't link sgid shadow program against complex G/X libs.
 # xlock must not crash. Disabled xlock-mesa.
@@ -285,6 +286,8 @@
 # video editor. package mainactr, series pay
 /opt/MainActor/MainActor                root.root       0755
 /opt/MainActor/MainView                 root.root       0755
+# conferencing system: some buffer overflows in there...
+/usr/bin/bayonne_wrapper                root.root        755
 # override package modes: lpc does not need to be suid root
 # for users:
 /usr/bin/lpc                            root.root        755
@@ -298,6 +301,10 @@
 # The package won't work with these files closed.
 /usr/lib/phoenix/License                root.root        644
 /usr/lib/phoenix/basic/address.txt      root.root        644
+# apcupsd shouldn't need suid root
+/sbin/apcupsd                           root.root        755
+/usr/sbin/apcupsd                       root.root        755
+
 
 
 #
@@ -337,8 +344,6 @@
 /usr/sbin/dip                          root.dialout     0755
 /usr/sbin/pppd                         root.dialout     0750
 /usr/sbin/pppoedsp                     root.dialout     0750
-# access to ttyS?: make it sgid uucp.
-/opt/kde/bin/kppp                      root.uucp        0755
 /usr/sbin/isdnctrl                     root.uucp        0750
 
 
@@ -422,26 +427,27 @@
 # (all of them are disabled in permissions.secure except for 
 # the helper programs)
 #
-# Some have more libraries linked than my terminal has lines.
-/opt/kde/bin/ktvision                   root.video      0755
-/opt/kde/bin/ktuner                     root.video      0755
-/opt/kde/bin/konsole_grantpty           root.root       0755
-/opt/kde/bin/kreatecd                   root.root       0755
-/opt/kde/bin/apm_proxy                  root.root       0755
-/opt/kde/bin/kradio                     root.video      0755
-/opt/kde/bin/kwintv                     root.video      0755
-# getting group id disk means root. See modes of disk device files!
-/opt/kde/bin/kscd                       root.disk       0755
-# This has a meaning:
-/opt/kde/bin/kdesud                     root.nogroup    0755
-/opt/kde/bin/kv4lsetup                  root.video      0755
-/opt/kde/bin/kcheckpass                 root.shadow     2755
-/usr/bin/kv4lsetup                      root.video      0755
-/opt/kde2/bin/kv4lsetup                 root.video      0755
-/opt/kde2/bin/kdesud                    root.nogroup    0755
-/opt/kde2/bin/konsole_grantpty          root.root       0755
+# arts wrapper, normally suid root:
+/opt/kde3/bin/artswrapper               root.root       0755
 /opt/kde2/bin/artswrapper               root.root       0755
-/opt/kde2/bin/kcheckpass                root.shadow     0755
+# set this to suid root (4755) if you're running shadow via NIS:
+/opt/kde3/bin/kcheckpass                root.shadow     2755
+# getting group id disk means root. See modes of disk device files!
+/opt/kde3/bin/kscd                      root.disk       0755
+# This has a meaning:
+/opt/kde3/bin/kdesud                    root.nogroup    2755
+/opt/kde2/bin/kdesud                    root.nogroup    2755
+/opt/kde3/bin/kv4lsetup                 root.video      0755
+/opt/kde2/bin/kv4lsetup                 root.video      0755
+/usr/bin/kv4lsetup                      root.video      0755
+# devpts obsoletes this:
+/opt/kde3/bin/konsole_grantpty          root.root       0755
+/opt/kde2/bin/konsole_grantpty          root.root       0755
+/opt/kde3/bin/kreatecd_rootwrapper      root.root       0755
+/opt/kde2/bin/kpac_dhcp_helper          root.root       0755
+/opt/kde3/bin/kpac_dhcp_helper          root.root       0755
+/opt/kde2/bin/kradio                    root.video      0755
+/opt/kde2/bin/kwintv                    root.video      0755
 
 
 #
@@ -598,7 +604,7 @@
 /usr/games/abuse.console                root.root       0755
 # SpaceBoom: not in SuSE-7.1 any more:
 /usr/games/SpaceBoom/SpaceBoom          root.root       0755
-/usr/games/bin/synaesthesia             root.root       0755
+/usr/games/synaesthesia                 root.root       0755
 /usr/games/sasteroids                   root.game       0755
 /usr/games/snake                        games.game      0755
 /usr/games/wtf                          games.game      0755
