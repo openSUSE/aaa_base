@@ -59,6 +59,13 @@ swapoff -a || ECHO_RETURN=$rc_failed_up
 echo -e "$ECHO_RETURN"
 setterm -bfreq 200 -blen 500 &>/dev/null
 
+mounts=/etc/fstab
+test -r /proc/mounts && mounts=/proc/mounts
+while read des fs type rest; do
+    test "$fs" = "/proc"  && continue
+    test "$type" = "proc" && umount -t proc $fs
+done < $mounts
+
 UMOUNT_FAILED=false
 ECHO_RETURN=$rc_done_up
 echo "Unmounting file systems"
@@ -68,12 +75,11 @@ umount -avt noproc || {
 }
 echo -e "$ECHO_RETURN"
 
-
 if [ "$UMOUNT_FAILED" = true ]; then
     echo "Oops: umount failed :-(  --  trying to remount readonly..."
     mounts=/etc/fstab
     test -r /proc/mounts && mounts=/proc/mounts
-    while read des fs rest; do
+    while read des fs type rest; do
         mount -v -n -o remount,ro $fs
     done < $mounts
 
@@ -84,6 +90,9 @@ fi
 
 umount -anvt proc
 
+if test -x /sbin/vgchange ; then
+    /sbin/vgchange -an
+fi
 
 # maybe we use Multiple devices
 if test -f /etc/mdtab -a -x /sbin/mdadd ; then

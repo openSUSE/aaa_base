@@ -36,6 +36,7 @@ if ( length($ENV{'INFOPATH'}) > 0 ) {
 # different paths ... it's really buggy.
 #
 	     "/usr/X11R6/lib/xemacs/info",
+             "/usr/share/xemacs/info",
 );
 #
 # Special: flushing file descriptor for speed, smothing, and big results

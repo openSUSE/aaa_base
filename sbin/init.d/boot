@@ -54,6 +54,57 @@ if test -f /etc/mdtab -a -x /sbin/mdadd ; then
 fi
 
 #
+# Find and activate volume groups (HM 1/1/1999)
+#
+if test -x /sbin/vgscan -a -x /sbin/vgchange ; then
+    echo "Run file syetem check on root for LVM activation"
+    while read des fs type rest; do
+	case "$fs" in
+	    /) break ;;
+	    *)       ;;
+	esac
+    done < /etc/fstab
+
+    fsck -C -a -t $type /
+    FSCK_RETURN=$?
+    # A return code of 1 indicates that file system errors
+    # were corrected, but that the boot may proceed.
+    # A return code of 2 or larger indicates failure.
+    if test $FSCK_RETURN -gt 1 ; then
+	echo
+	echo "fsck for root file system (/) failed."
+	echo "Please repair it manually and reboot."
+	echo "The root file system is currently mounted read-only."
+	echo
+	echo "Attention: Only CONTROL-D will reboot the system in this"
+	echo "maintanance mode. shutdown or reboot will not work."
+	echo
+	PS1="(repair filesystem) # "
+	export PS1
+	/sbin/sulogin /dev/console
+
+	# if the user has mounted something rw, this should be umounted
+	echo "Unmounting file systems (ignore error messages)"
+	umount -avn
+
+	# on umsdos fs this would lead to an error message. so direct
+	# errors to /dev/null
+	mount -no remount,ro / 2> /dev/null
+
+	sync
+	reboot -f
+    else
+	echo "Remounting root file system (/) read/write for vgscan..."
+	mount -n -o remount,rw /
+	echo "Scanning for LVM volume groups..."
+	/sbin/vgscan
+	mount -n -o remount,ro /
+	echo "Activating LVM volume groups..."
+	/sbin/vgchange -ay
+    fi
+fi
+
+#
 # fsck can need a huge amount of memory, so make sure, it is there.
 #
 ECHO_RETURN=$rc_done_up
@@ -105,8 +156,7 @@ if test ! -f /fastboot -a -z "$fastboot" ; then
             echo
             PS1="(repair filesystem) # "
             export PS1
-            # XXX /sbin/sulogin /dev/console
-            /sbin/sulogin /dev/tty1
+            /sbin/sulogin /dev/console
 
             # if the user has mounted something rw, this should be umounted
             echo "Unmounting file systems (ignore error messages)"
