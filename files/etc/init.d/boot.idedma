@@ -32,7 +32,7 @@ function idedma_main() {
     devices_not_found=""
     devices_error=""
 
-    echo -n "IDE DMA mode setup"
+    echo -n "Setting up IDE DMA mode"
 
     if [ "$DEVICES_FORCE_IDE_DMA_ON" != "" ]; then
 	echo -n -e "\nForce IDE DMA mode on: "

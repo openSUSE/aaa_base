@@ -35,7 +35,7 @@ case "$1" in
 	    XHOSTNAME=`cat /etc/HOSTNAME`
 	}
 	test -n "$XHOSTNAME" && {
-	    echo -n Setting up hostname
+	    echo -n Setting up hostname \'$XHOSTNAME\'
 	    hostname ${XHOSTNAME%%.*}
 	    rc_status -v -r
 	}
@@ -44,7 +44,7 @@ case "$1" in
 	test -f /etc/defaultdomain && {
 	    XDOMAINNAME=`cat /etc/defaultdomain`
 	}
-	echo -n Setting up domainname
+	echo -n Setting up domainname \'$XDOMAINNAME\'
 	domainname "$XDOMAINNAME"
 	rc_status -v -r
 	
@@ -63,7 +63,7 @@ case "$1" in
 	chown root.tty /var/run/utmp
 	# Restore a possibly dynamically modified /etc/resolv.conf
 	if ls /etc/resolv.conf.saved.by.* &>/dev/null ; then
-	    echo "/sbin/modify_resolvconf:"
+	    echo "Cleaning up using /sbin/modify_resolvconf:"
 	    /sbin/modify_resolvconf cleanup
 	    echo -e "$rc_done_up"
 	fi

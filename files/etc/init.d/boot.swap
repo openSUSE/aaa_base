@@ -41,7 +41,7 @@ case "$1" in
 	if test ! -z "$HAVE_SHM"; then
 	    ECHO_RETURN=$rc_done
 	    test -d /dev/shm || mkdir /dev/shm
-	    echo -n "Mount SHM FS on /dev/shm"
+	    echo -n "Mounting shared memory FS on /dev/shm"
 	    mount -t shm shmfs /dev/shm || ECHO_RETURN=$rc_failed
 	    echo -e $ECHO_RETURN
 	fi	    

@@ -50,7 +50,7 @@ case "$1" in
 	done
 
 	test -x /sbin/ldconfig -a "$LDCONFIG_NEEDED" = true && {
-	    echo -n "Starting ldconfig (setting up /etc/ld.so.cache)"
+	    echo -n "Setting up linker cache (/etc/ld.so.cache) using ldconfig"
 	    { /sbin/ldconfig -X 2>/dev/null || \
 	        { echo ; echo -e "ldconfig $rc_failed" ; } ; } &
 	    rc_status -v -r
