@@ -868,17 +868,19 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
 
         if test -n "$CREATE_INFO_DIR" -a "$CREATE_INFO_DIR" = "yes" -a \
             "$CHECK_NEWPACKAGE" != false ; then
-            if test -x /usr/bin/perl -a -d /usr/info/ ; then
-                if test ! -f /usr/info/dir -o /usr/info/dir -ot /usr/info/ \
-                    -o /usr/info/dir -ot /usr/lib/info/ \
-                    -o /usr/info/dir -ot /usr/local/info/ \
-                    -o /usr/info/dir -ot /usr/local/lib/info/ \
-                    -o /usr/info/dir -ot /usr/X11R6/info/ \
-                    -o /usr/info/dir -ot /usr/X11R6/lib/info/ \
-                    -o /usr/info/dir -ot /usr/X11R6/lib/xemacs/info/ \
+            if test -x /usr/bin/perl -a -d /usr/share/info/ ; then
+                if test ! -f /usr/share/info/dir \
+                    -o /usr/share/info/dir -ot /usr/share/info/ \
+                    -o /usr/share/info/dir -ot /usr/info/ \
+                    -o /usr/share/info/dir -ot /usr/lib/info/ \
+                    -o /usr/share/info/dir -ot /usr/local/info/ \
+                    -o /usr/share/info/dir -ot /usr/local/lib/info/ \
+                    -o /usr/share/info/dir -ot /usr/X11R6/info/ \
+                    -o /usr/share/info/dir -ot /usr/X11R6/lib/info/ \
+                    -o /usr/share/info/dir -ot /usr/X11R6/lib/xemacs/info/ \
                     ; then
-                    my_test_write /usr/info && {
-                        echo "Creating /usr/info/dir..."
+                    my_test_write /usr/share/info && {
+                        echo "Creating /usr/share/info/dir..."
                         /usr/bin/mkinfodir
                     }
                 fi

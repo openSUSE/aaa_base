@@ -60,8 +60,8 @@ run_route ()
 wrong_entry ()
 {
     test "$ret" = "$rc_done" && echo
-    echo "\033[1mWrong entry in ${ROUTECONF}\033[m"
-    echo "    $@"
+    echo -e "\033[1mWrong entry in ${ROUTECONF}\033[m"
+    echo    "    $@"
     ret=$rc_failed
 }
 

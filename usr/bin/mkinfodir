@@ -15,8 +15,9 @@ if ( length($ENV{'INFOPATH'}) > 0 ) {
 }
 @PATHS=(
 #
-# /usr/info is the first in Path because it's our main info dir!
+# /usr/share/info is the first in Path because it's our main info dir!
 #
+	     "/usr/share/info",
 	     "/usr/info",
 #
 # Insert INFOPATH
