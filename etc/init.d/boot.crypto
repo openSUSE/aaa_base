@@ -49,6 +49,7 @@ case "$1" in
 	    #
 	    # Setting up loop device
 	    #
+	    echo -n "Please enter password for $physdev. "
 	    losetup -e $crypto $loopdev $physdev
 	    rc_status
 	    test $? -ne 0 && continue
