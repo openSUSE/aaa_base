@@ -10,9 +10,11 @@ if ( -o /dev/$tty && ${?prompt} ) then
     # Console
     if ( ! ${?TERM} )           setenv TERM linux
     if ( "$TERM" == "unknown" ) setenv TERM linux
-    # No tset available on SlackWare
-    if ( -x "`which stty`" ) stty sane cr0 pass8 dec
-    if ( -x "`which tset`" ) tset -I -Q
+    if ( ! ${?SSH_TTY} ) then
+	# No tset available on SlackWare
+	if ( -x "`which stty`" ) stty sane cr0 pass8 dec
+	if ( -x "`which tset`" ) tset -I -Q
+    endif
     unsetenv TERMCAP
     settc km yes
 endif
