@@ -2,7 +2,9 @@
 # Copyright (c) 1995-2002 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
-# Author: Kurt Garloff <feedback@suse.de>
+# Author: Kurt Garloff
+#
+# Please send feedback to http:/www.suse.de/feedback
 #
 # /etc/init.d/FOO
 #   and its symbolic link

@@ -2,8 +2,10 @@
 # Copyright (c) 1995-2002 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
-# Author: Ruediger Oertel <feedback@suse.de>
-#         Thorsten Kukuk  <feedback@suse.de>
+# Author: Ruediger Oertel
+#         Thorsten Kukuk
+#
+# Please send feedback to http:/www.suse.de/feedback
 #
 # init.d/nscd
 #

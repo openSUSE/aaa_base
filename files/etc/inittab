@@ -3,7 +3,8 @@
 #
 # Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.  All rights reserved.
 #
-# Author: Florian La Roche <feedback@suse.de>, 1996
+# Author: Florian La Roche, 1996
+# Please send feedback to http:/www.suse.de/feedback
 #
 # This is the main configuration file of /sbin/init, which
 # is executed by the kernel on startup. It describes what

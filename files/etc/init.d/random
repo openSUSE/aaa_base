@@ -2,8 +2,10 @@
 # Copyright (c) 1998-2002 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
-# Author: Burchard Steinbild <feedback@suse.de>, 1998
+# Author: Burchard Steinbild, 1998
 #         originally from Theodore Ts'o <tytso@mit.edu>
+#
+# Please send feedback to http:/www.suse.de/feedback
 #
 # /etc/init.d/random
 #

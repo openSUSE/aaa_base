@@ -189,7 +189,7 @@ echo "#! /bin/sh
 # Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.  All rights reserved.
 #
 # Author: Werner Fink <werner@suse.de>, 1996
-#         Burchard Steinbild <feedback@suse.de>, 1996
+#         Burchard Steinbild, 1996
 #
 # /etc/init.d/boot.local
 #
@@ -212,7 +212,7 @@ echo "#! /bin/sh
 # Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.  All rights reserved.
 #
 # Author: Werner Fink <werner@suse.de>, 1998
-#         Burchard Steinbild <feedback@suse.de>, 1998
+#         Burchard Steinbild, 1998
 #
 # /etc/init.d/halt.local
 #

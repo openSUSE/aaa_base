@@ -1,7 +1,7 @@
 #
 #    /etc/profile.d/alljava.csh
 #
-# send feedback to feedback@suse.de
+# send feedback to http:/www.suse.de/feedback
 
 #
 # This script sets some environment variables for default java.

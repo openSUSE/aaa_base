@@ -69,7 +69,7 @@ if [ -e etc/aaa_base_debug -a ! -e etc/rc.config ]; then
 # All rights reserved.
 #
 # Author: Werner Fink <werner@suse.de>, 1996
-#         Burchard Steinbild <feedback@suse.de>, 1996
+#         Burchard Steinbild, 1996
 #
 # The configuration databases for shell scripts in /etc/init.d,
 # /sbin/SuSEconfig and /etc/cron.daily/suse.de-* can now be found

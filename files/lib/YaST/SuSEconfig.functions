@@ -2,8 +2,9 @@
 # Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
-# Author: Burchard Steinbild <feedback@suse.de>, 1996-97
-#         Florian La Roche <feedback@suse.de>, 1996
+# Author: Burchard Steinbild, 1996-97
+#         Florian La Roche, 1996
+# Please send feedback to http:/www.suse.de/feedback
 #
 
 test -z "$MD5DIR" && {
