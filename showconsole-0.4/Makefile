@@ -1,17 +1,17 @@
 #
-# Makefile for compiling insserv tool
+# Makefile for compiling console tools
 #
 # Author: Werner Fink,  <werner@suse.de>
 #
 
-INITDIR  =	/etc/init.d
-#INITDIR  =	/sbin/init.d
-INSCONF  =	/etc/insserv.conf
+LOG_BUFFER_SIZE	= 65536
+BOOT_LOGFILE	= /var/log/boot.msg
+
 #DEBUG	 =	-DDEBUG=1
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.6
+VERSION	 =	0.4
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #
@@ -27,7 +27,8 @@ else
 	  COPTS = -fomit-frame-pointer -fschedule-insns2
 endif
 	 CFLAGS = -O2 $(COPTS) $(DEBUG) -D_GNU_SOURCE \
-		  -DINITDIR=\"$(INITDIR)\" -DINSCONF=\"$(INSCONF)\" -Wall -pipe
+		  -DLOG_BUFFER_SIZE=$(LOG_BUFFER_SIZE) \
+		  -DBOOT_LOGFILE=\"$(BOOT_LOGFILE)\" -Wall -pipe
 	  CLOOP = -funroll-loops
 	     CC = gcc
 	     RM = rm -f
@@ -49,65 +50,68 @@ endif
 #
 #
 #
-TODO	=	insserv
+TODO	=	showconsole blogd
 
 all: $(TODO)
 
-listing.o:	listing.c listing.h
+libconsole.o:	libconsole.c libconsole.h
 	$(CC) $(CFLAGS) $(CLOOP) -c $<
 
-insserv:	insserv.c listing.o
+showconsole:	showconsole.c libconsole.o
 	$(CC) $(CFLAGS) $(CLOOP) -o $@ $^
 
+blogd:	blogd.c libconsole.o
+	$(CC) $(CFLAGS) $(CLOOP) -o $@ $^ -lutil
+
 clean:
-	$(RM) *.o *~ insserv
+	$(RM) *.o *~ showconsole blogd
 
 install:	$(TODO)
 	$(MKDIR)   $(SBINDIR)
 	$(MKDIR)   $(SDOCDIR)
 	$(MKDIR)   $(CONFDIR)
 	$(MKDIR)   $(LSBDIR)
-	$(INSTBIN) insserv        $(SBINDIR)/
-	$(INSTDOC) insserv.8      $(SDOCDIR)/
-	$(INSTCON) insserv.conf   $(CONFDIR)/
-	$(LINK)    /sbin/insserv  $(LSBDIR)/install_initd
-	$(INSTBIN) init-functions $(LSBDIR)/
+	$(INSTBIN) showconsole   $(SBINDIR)/
+	$(INSTDOC) showconsole.8 $(SDOCDIR)/
+	$(INSTBIN) blogd         $(SBINDIR)/
+	$(INSTDOC) blogd.8       $(SDOCDIR)/
 
 #
 # Make distribution
 #
 FILES	= README         \
 	  COPYING        \
+	  OTHERS         \
 	  Makefile       \
-	  listing.c      \
-	  listing.h      \
-	  insserv.8      \
-	  insserv.c      \
-	  insserv.conf   \
-	  init-functions \
-	  insserv-$(VERSION).lsm
+	  libconsole.c   \
+	  libconsole.h   \
+	  showconsole.8  \
+	  showconsole.c  \
+	  blogd.c        \
+	  blogd.8        \
+	  showconsole-$(VERSION).lsm
 
 dest:
-	$(MKDIR) insserv-$(VERSION)
+	$(MKDIR) showconsole-$(VERSION)
 	@echo -e 'Begin3\n\
-Title:		insserv tool for boot scripts\n\
+Title:		console tools for boot scripts\n\
 Version:	$(VERSION)\n\
 Entered-date:	$(DATE)\n\
-Description:	Used for enabling of installed boot scripts\n\
-x 		by scanning comment headers which are LSB conform.\n\
-Keywords:	boot service control, LSB\n\
+Description:	Used for fetch the real device in boot scripts\n\
+x 		running on /dev/console.\n\
+Keywords:	boot control\n\
 Author:		Werner Fink <werner@suse.de>\n\
 Maintained-by:	Werner Fink <werner@suse.de>\n\
 Primary-site:	sunsite.unc.edu /pub/Linux/system/daemons/init\n\
-x		@UNKNOWN insserv-$(VERSION).tar.gz\n\
+x		@UNKNOWN showconsole-$(VERSION).tar.gz\n\
 Alternate-site:	ftp.suse.com /pub/projects/init\n\
 Platforms:	Linux with System VR2 or higher boot scheme\n\
 Copying-policy:	GPL\n\
-End' | sed 's@^ @@g;s@^x@@g' > insserv-$(VERSION).lsm
-	cp $(FILES) insserv-$(VERSION)
-	tar -c -zf  insserv-$(VERSION).tar.gz insserv-$(VERSION)/
-	$(RMDIR)    insserv-$(VERSION)
-	set -- `gzip -l insserv-$(VERSION).tar.gz | tail -1` ; \
-	sed "s:@UNKNOWN:$$1:" < insserv-$(VERSION).lsm > \
-	insserv-$(VERSION).lsm.tmp ; \
-	mv insserv-$(VERSION).lsm.tmp insserv-$(VERSION).lsm
+End' | sed 's@^ @@g;s@^x@@g' > showconsole-$(VERSION).lsm
+	cp $(FILES) showconsole-$(VERSION)
+	tar -c -zf  showconsole-$(VERSION).tar.gz showconsole-$(VERSION)/
+	$(RMDIR)    showconsole-$(VERSION)
+	set -- `gzip -l showconsole-$(VERSION).tar.gz | tail -1` ; \
+	sed "s:@UNKNOWN:$$1:" < showconsole-$(VERSION).lsm > \
+	showconsole-$(VERSION).lsm.tmp ; \
+	mv showconsole-$(VERSION).lsm.tmp showconsole-$(VERSION).lsm

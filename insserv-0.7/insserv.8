@@ -10,7 +10,7 @@
 .UC 8
 .OS SuSE Linux
 .SH NAME
-Insserv \- Enable a installed system init script
+Insserv \- Enable an installed system init script
 .SH SYNOPSIS
 .\"
 .B insserv
@@ -27,7 +27,7 @@ Insserv \- Enable a installed system init script
 .RI [[ / ] path/to/init.d/script ]
 .SH DESCRIPTION
 .B insserv
-enables a installed system init script (`boot script')
+enables an installed system init script (`boot script')
 by reading the comment header of the script, e.g.:
 .sp 1
 .in +1l
@@ -44,11 +44,11 @@ by reading the comment header of the script, e.g.:
 .in -1l
 .sp 1
 and calculating the dependencies between all scripts.
-Hereby the
+Please note, that the
 .B Required-Stop
 and
 .B Default-Stop
-is ignored because the SuSE boot script concept
+are ignored in SuSE Linux, because the SuSE boot script concept
 uses a differential link scheme (see
 .IR init.d (7)).
 With known dependencies and runlevel(s)
@@ -121,15 +121,15 @@ Remove the listed scripts from all runlevels.
 .SH ARGUMENTS
 .TP
 .RI [[ / ] path/to/init.d/ ]
-Relative or absolute path to the init base directory.
-This defaults to
+Relative or absolute path to the init scripts base directory.
+For the SuSE Linux boot concept, this defaults to
 .I /etc/init.d/
-the path of the SuSE boot concept (LSB conform).
+in compliance with the LSB specification.
 In this case
 .B insserv
 does not add or remove a script to the runlevels
 declared in the script headers, but may re-order the
-runlevels if order of the currently enabled scripts
+runlevels if the order of the currently enabled scripts
 has changed.
 Note that if a relative path is used
 .B insserv
@@ -137,31 +137,31 @@ has to be called from the root directory.
 .TP
 .RI [[ / ] path/to/init.d/ ] script\ ...
 List of scripts which have to be added to
-the runlevels.  If a path is used it
-should the absolute or relative path
-to the location of the boot scripts.
+the runlevels. If a path is used it
+should point to the absolute or relative
+location of the boot scripts.
 .B insserv
-checks the existence of any of the scripts.
+checks for the existence of these scripts.
 .TP
 .RI \fB\-r\fR\ [[ / ] path/to/init.d/ ] script\ ...
-List of scripts which have to be removed from
-the runlevels.  If a path is used it
-should the absolute or relative path
-to the location of the boot scripts.
+List of scripts which should be removed from
+the runlevels. If a path is used it
+should point to the absolute or relative
+location of the boot scripts.
 .B insserv
-checks the existence of any of the scripts.
+checks for the existence of these scripts.
 \."
 .SH BUGS
 Boot script sometimes misses comments.
 .SH FILES
 .TP
 .I /etc/insserv.conf
-configuration file of
+configuration file for
 .B insserv
 which defines the LSB System Facilities.
 .TP
 .I /etc/init.d/
-path to the SuSE boot concept script base directory as
+path to the SuSE boot script base directory as
 required by the Linux Standard Base Specification (LSB).
 .\"
 .SH SEE ALSO

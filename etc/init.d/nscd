@@ -9,7 +9,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          nscd
-# Required-Start:    xntpd route nfs named syslog
+# Required-Start:    $remote_fs xntpd $named $syslog
 # Required-Stop:
 # Default-Start:     3 5
 # Default-Stop:

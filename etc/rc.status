@@ -40,15 +40,15 @@ export LINES COLUMNS
         done="${esc}[1;32m"
         attn="${esc}[1;33m"
         norm=`echo -en "${esc}[m\017"`
-        stat=`echo -en "\015${esc}[${COLUMNS}C${esc}[9D"`
+        stat=`echo -en "\015${esc}[${COLUMNS}C${esc}[10D"`
 
 if test "$TERM" != "raw" ; then
-     rc_done="${stat}${done}done${norm}"
-   rc_failed="${stat}${warn}failed${norm}"
-  rc_skipped="${stat}${attn}skipped${norm}"
+     rc_done="${stat}${done} done${norm}"
+   rc_failed="${stat}${warn} failed${norm}"
+  rc_skipped="${stat}${attn} skipped${norm}"
   rc_done_up="${esc}[1A${rc_done}"
 rc_failed_up="${esc}[1A${rc_failed}"
-   rc_unused="${stat}${extd}unused${norm}"
+   rc_unused="${stat}${extd} unused${norm}"
     rc_reset="${norm}"
      rc_save="${esc}7"
   rc_restore="${esc}8"

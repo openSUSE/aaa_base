@@ -8,7 +8,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          pcnfsd
-# Required-Start:    portmap nfs syslog
+# Required-Start:    $remote_fs portmap $syslog
 # Required-Stop:
 # Default-Start:     3 5
 # Default-Stop:

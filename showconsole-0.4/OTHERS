@@ -1,0 +1,34 @@
+#define __KERNEL__ /* ugly ugly */
+#include <linux/tty.h>
+#include <linux/kdev_t.h>
+
+int main(void)
+{
+	char buf[0x2000]; /* avoid stack overflow if the kernel struct
+			     will enlarge over the time. New fields
+			     will be added to the end. */
+	struct tty_struct * tty = (struct tty_struct *) buf;
+	int console;
+
+	if ((console = open("/dev/console", O_RDWR)) < 0)
+		perror("open"), exit(1);
+	if (ioctl(console, TIOCTTYGSTRUCT, tty) < 0)
+		perror("ioctl"), exit(1);
+	if (close(console) < 0)
+		perror("close"), exit(1);
+
+	printf("major %d, minor %d\n", MAJOR(tty->device), MINOR(tty->device));
+
+	return 0;
+}
+--- drivers/char/console.c~	Wed Dec  1 19:17:51 1999
++++ drivers/char/console.c	Mon Feb 21 22:22:59 2000
+@@ -2140,6 +2140,8 @@
+ 			return 0;
+ 		case 12:	/* get fg_console */
+ 			return fg_console;
++		case 13:	/* get kmsg redirect */
++			return kmsg_redirect;
+ 	}
+ 	return -EINVAL;
+ }

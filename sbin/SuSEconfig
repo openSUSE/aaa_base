@@ -578,7 +578,7 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
 	        PACKS=`for j in $PACKS ; do echo $j ; done | /usr/bin/sort -u`
 	    }
 	    RPMPACKS=(`rpm -q $PACKS 2> /dev/null`)
-	    RPMPACKS=(${RPMPACKS[*]%%-*})
+	    RPMPACKS=(${RPMPACKS[*]%-*-*})
             for i in ${RPMPACKS[*]} ; do
                 test -e /etc/permissions.d/$i && \
                     PERMISSIONS_FILES="$PERMISSIONS_FILES /etc/permissions.d/$i"

@@ -9,7 +9,7 @@
 #
 ## BEGIN INIT INFO
 # Provides:          cron
-# Required-Start:    xntpd nfs sendmail syslog
+# Required-Start:    $remote_fs $syslog xntpd sendmail
 # Required-Stop:
 # Default-Start:     2 3 5
 # Default-Stop:

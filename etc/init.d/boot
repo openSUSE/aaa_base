@@ -21,6 +21,16 @@ echo -n "Mounting /proc device"
 mount -n -t proc proc /proc
 rc_status -v -r
 
+echo -n "Mounting /dev/pts"
+optpts="-o mode=0620,gid=5"
+mount -n -t devpts $optpts devpts /dev/pts
+rc_status -v1 -r
+
+#
+# Start blogd, requires /proc and /dev/pts
+#
+test -x /sbin/blogd && /sbin/blogd
+
 #
 # possibly there are file systems on devices, which need a kernel 
 # module to be loaded.  So start kerneld as early as possible.
@@ -114,6 +124,11 @@ if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
     # were corrected, but that the boot may proceed.
     # A return code of 2 or larger indicates failure.
     if test $FSCK_RETURN -gt 1 ; then
+	# Stop blogd since we reboot after sulogin
+	killproc -QUIT /sbin/blogd
+	if test -x /etc/init.d/kbd ; then
+	    /etc/init.d/kbd start
+	fi
 	echo
 	echo "fsck for root file system (/) failed."
 	echo "Please repair it manually and reboot."
@@ -184,9 +199,11 @@ if test ! -f /fastboot -a -z "$fastboot" ; then
 	test $FSCK_RETURN -lt 2
 	rc_status -v1 -r
         if test $FSCK_RETURN -gt 1; then
-            if test -x /etc/init.d/kbd ; then
-                /etc/init.d/kbd start
-            fi
+	    # Stop blogd since we reboot after sulogin
+	    killproc -QUIT /sbin/blogd
+	    if test -x /etc/init.d/kbd ; then
+		/etc/init.d/kbd start
+	    fi
             echo
             echo "fsck failed.  Please repair manually and reboot. The root"
             echo "file system is currently mounted read-only. To remount it"
@@ -290,30 +307,12 @@ fi
 echo "Mounting local file systems..."
 mount -fv -t proc proc /proc
 rc_status
-mount -av -t nonfs,noproc
+mount -fv -t devpts $optpts devpts /dev/pts
+rc_status
+mount -av -t nonfs,noproc,nodevpts
 rc_status
 echo "Mounting local file systems"
 rc_status -v1 -r
-
-#
-# mount /dev/pts if not done by /etc/fstab.
-#
-DEV_PTS_MOUNTED=false
-mounts=/etc/mtab
-test -r /proc/mounts && mounts=/proc/mounts
-while read des fs type rest; do
-    case "$fs" in
-        /dev/pts) DEV_PTS_MOUNTED=true ; break ;;
-        *)       ;;
-    esac
-done < $mounts
-
-if test $DEV_PTS_MOUNTED = false ; then
-    echo -n Mounting /dev/pts.
-    mount -t devpts -ogid=5 -omode=0620 devpts /dev/pts
-    rc_status -v1 -r
-fi
-
 
 #
 # reinit quota, if fsck has returned value != 0
@@ -458,12 +457,14 @@ fi
 rm -f /var/log/boot.msg
 if test -x /usr/sbin/klogd ; then
         echo Creating /var/log/boot.msg
+	mv /var/log/boot.msg /var/log/boot.omsg
         /usr/sbin/klogd -s -o -n -f /var/log/boot.msg
         /bin/sleep 1
         test -s /var/log/boot.msg
 	rc_status -v1 -r
 elif test -x /bin/dmesg ; then
 	echo Creating /var/log/boot.msg
+	mv /var/log/boot.msg /var/log/boot.omsg
 	/bin/dmesg -s16384 > /var/log/boot.msg
 	/bin/sleep 1
 	test -s /var/log/boot.msg
@@ -473,6 +474,10 @@ if test -z "$SERIAL_CONSOLE" -a -x /usr/sbin/klogconsole ; then
 	( test -c /dev/tty10 && > /dev/tty10 ) > /dev/null 2>&1 && /usr/sbin/klogconsole -r10 
 fi
 
+#
+# Say blogd that I/O is possible now
+#
+killproc -IO /sbin/blogd
 
 #
 # enable DEXE binary format
@@ -569,6 +574,11 @@ if test -f /var/lib/YaST2/runme_at_boot ; then
     test -x     /lib/YaST2/bin/YaST2.firstboot &&     /lib/YaST2/bin/YaST2.firstboot
     test -x /usr/lib/YaST2/bin/YaST2.firstboot && /usr/lib/YaST2/bin/YaST2.firstboot
 fi
+
+#
+# Stop blogd
+#
+killproc -QUIT /sbin/blogd
 
 rc_reset
 exit 0

@@ -9,7 +9,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:       nfs
-# Required-Start: portmap
+# Required-Start: $network portmap
 # Required-Stop:
 # Default-Start:  3 5
 # Default-Stop:

@@ -1,24 +1,26 @@
 #! /bin/sh
 # Copyright (c) 1995-2000 SuSE GmbH Nuernberg, Germany.
 #
-# Author: 
+# Author: Kurt Garloff <feedback@suse.de>
 #
-# /etc/init.d/<skeleton>
+# init.d/FOO
 #
 #   and symbolic its link
 #
-# /usr/sbin/rc<skeleton>
+# /sbin/rcFOO
+#
+# System startup script for the nessus backend nessusd
 #
 ### BEGIN INIT INFO
-# Provides:
-# Required-Start:
-# Required-Stop:
-# Default-Start:
-# Default-Stop:
-# Description:
+# Provides: FOO
+# Required-Start: $remote_fs $syslog
+# Required-Stop:  $remote_fs $syslog
+# Default-Start:  3 5
+# Default-Stop:   0 1 2 6
+# Description:    Start FOO to allow XY and provide YZ.
 ### END INIT INFO
 
-. /etc/rc.status
+# Source SuSE config
 . /etc/rc.config
 
 # Determine the base and follow a runlevel link name.
@@ -29,6 +31,9 @@ link=${base#*[SK][0-9][0-9]}
 test $link = $base && START_FOO=yes
 test "$START_FOO" = yes || exit 0
 
+FOO_BIN=/usr/sbin/FOO
+test -x $FOO_BIN || exit 5
+
 # Shell functions sourced from /etc/rc.status:
 #      rc_check         check and set local and overall rc status
 #      rc_status        check and set local and overall rc status
@@ -37,71 +42,127 @@ test "$START_FOO" = yes || exit 0
 #      rc_failed        set local and overall rc status to failed
 #      rc_reset         clear local rc status (overall remains)
 #      rc_exit          exit appropriate to overall rc status
+. /etc/rc.status
 
 # First reset status of this service
 rc_reset
+
+# Return values acc. to LSB for all commands but status:
+# 0 - success
+# 1 - misc error
+# 2 - invalid or excess args
+# 3 - unimplemented feature (e.g. reload)
+# 4 - insufficient privilege
+# 5 - program not installed
+# 6 - program not configured
+# 7 - program is not running
+# 
+# Note that starting an already running service, stopping
+# or restarting a not-running service as well as the restart
+# with force-reload (in case signalling is not supported) are
+# considered a success.
+
 case "$1" in
     start)
-	echo -n "Starting service foo"
+	echo -n "Starting FOO"
 	## Start daemon with startproc(8). If this fails
 	## the echo return value is set appropriate.
 
-	#startproc /usr/sbin/foo
+	# startproc should return 0, even if service is 
+	# already running to match LSB spec.
+	startproc $FOO_BIN
 
 	# Remember status and be verbose
 	rc_status -v
 	;;
     stop)
-	echo -n "Shutting down service foo"
+	echo -n "Shutting down FOO"
 	## Stop daemon with killproc(8) and if this fails
 	## set echo the echo return value.
 
-	#killproc -TERM /usr/sbin/foo
+	killproc -TERM $FOO_BIN
 
 	# Remember status and be verbose
 	rc_status -v
 	;;
-    restart)
-	## If first returns OK call the second, if first or
-	## second command fails, set echo return value.
+    try-restart)
+	## Stop the service and if this succeeds (i.e. the 
+	## service was running before), start it again.
 	$0 stop  &&  $0 start
 
 	# Remember status and be quiet
 	rc_status
 	;;
-    reload)
-	## Choose ONE of the following two cases:
+    restart)
+	## Stop the service and regardless of whether it was
+	## running or not, start it again.
+	$0 stop
+	$0 start
 
-	## First possibility: A few services accepts a signal
-	## to reread the (changed) configuration.
+	# Remember status and be quiet
+	rc_status
+	;;
+    force-reload)
+	## Signal the daemon to reload its config. Most daemons
+	## do this on signal 1 (SIGHUP).
+	## If it does not support it, restart.
 
-	#echo -n "Reload service foo"
-	#killproc -HUP /usr/sbin/foo
-	#rc_status -v
+	echo -n "Reload service FOO"
+	## if it supports it:
+	killproc -HUP $FOO_BIN
+	#touch /var/run/FOO.pid
+	rc_status -v
 
-	## Exclusive possibility: Some services must be stopped
-	## and started to force a new load of the configuration.
-
+	## Otherwise:
 	#$0 stop  &&  $0 start
+	#rc_status
 
-	# Remember status and be verbose
-	#rc_status -v
+	;;
+    reload)
+	## Like force-reload, but if daemon does not support
+	## signalling, do nothing (!)
+
+	# If it supports signalling:
+	echo -n "Reload service FOO"
+	killproc -HUP $FOO_BIN
+	#touch /var/run/FOO.pid
+	rc_status -v
+	
+	# If it does not support reload:
+	#exit 3
 	;;
     status)
-	echo -n "Checking for service foo: "
+	echo -n "Checking for FOO: "
 	## Check status with checkproc(8), if process is running
 	## checkproc will return with exit status 0.
 
-	#checkproc /usr/sbin/foo && echo OK || echo No process
+	# Status has a slightly different for the status command:
+	# 0 - service running
+	# 1 - service dead, but /var/run/  pid  file exists
+	# 2 - service dead, but /var/lock/ lock file exists
+	# 3 - service not running
+
+	# If checkproc would return LSB compliant ret values,
+	# things could be a little bit easier here. This will 
+	# probably soon be the case ...
+	checkproc $FOO_BIN; rc=$?
+	if test $rc = 0; then echo "OK"
+	else echo "No process" 
+		if test -e /var/run/FOO.pid;
+		then exit 1
+		else exit 3
+		fi
+	fi
+	#rc_status
 	;;
     probe)
 	## Optional: Probe for the necessity of a reload,
 	## give out the argument which is required for a reload.
 
-	#test /etc/foo.conf -nt /var/run/foo.pid && echo reload
+	test /etc/FOO/FOO.conf -nt /var/run/FOO.pid && echo reload
 	;;
     *)
-	echo "Usage: $0 {start|stop|status|restart|reload[|probe]}"
+	echo "Usage: $0 {start|stop|status|try-restart|restart|force-reload|reload|probe}"
 	exit 1
 	;;
 esac

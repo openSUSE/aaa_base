@@ -7,7 +7,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          routed
-# Required-Start:    route syslog
+# Required-Start:    $remote_fs $syslog
 # Required-Stop:
 # Default-Start:     3 5
 # Default-Stop:

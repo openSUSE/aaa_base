@@ -36,7 +36,7 @@ sleep 5
 while true ; do
     test     "$START_XNTPD" = "yes"        && break
     test -x   /usr/sbin/ntpdate            || break
-    checkproc /usr/sbin/xntpd &> /dev/null || break
+    checkproc /usr/sbin/xntpd &> /dev/null && break
     test -n  "$XNTPD_INITIAL_NTPDATE"      || break
     /usr/sbin/ntpdate -s $XNTPD_INITIAL_NTPDATE
     break
