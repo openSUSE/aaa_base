@@ -482,7 +482,7 @@ int main (int argc, char *argv[])
 		error("%s: %s\n", argv[c], strerror(errno));
 	    pushd(path);
 	    if (stat(argv[c], &st_script) < 0)
-		error("%s: %s\n", *argv, strerror(errno));
+		error("%s: %s\n", argv[c], strerror(errno));
 	    popd();
 	}
 	if ((base = strrchr(argv[c], '/'))) {

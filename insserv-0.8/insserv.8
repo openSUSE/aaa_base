@@ -23,7 +23,10 @@ Insserv \- Enable an installed system init script
 .B -r
 .RI [[ / ] path/to/init.d/ ] script \ ...
 .PP
-.B /usr/lib/lsb/install_initd
+.RB [ /usr ] /lib/lsb/install_initd
+.RI [[ / ] path/to/init.d/script ]
+.PP
+.RB [ /usr ] /lib/lsb/remove_initd
 .RI [[ / ] path/to/init.d/script ]
 .SH DESCRIPTION
 .B insserv

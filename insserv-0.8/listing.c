@@ -458,11 +458,11 @@ void runlevels(const char * this, const char * lvl)
     while ((token = strsep(&tmp, delimeter))) {
 	if (!*token || strlen(token) != 1)
 	    continue;
-	if (!strpbrk(token, "0123456SB"))
+	if (!strpbrk(token, "0123456sSbB"))
 	    continue;
-	if (*token == 'S')
+	if (*token == 'S' || *token == 's')
 	    num = 7;
-	else if (*token == 'B')
+	else if (*token == 'B' || *token == 'b')
 	    num = 8;
 	else
 	    num = atoi(token);

@@ -80,5 +80,5 @@ endif
 #endif
 #
 # last but not least
-date
+if ( -o /dev/$tty && ${?prompt} ) date
 ##

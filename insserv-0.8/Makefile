@@ -11,7 +11,7 @@ INSCONF  =	/etc/insserv.conf
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.7
+VERSION	 =	0.8
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #
@@ -45,7 +45,8 @@ endif
 	SDOCDIR = $(DESTDIR)/usr/share/man/man8
 	SBINDIR = $(DESTDIR)/sbin
 	CONFDIR = $(DESTDIR)/etc
-	 LSBDIR = $(DESTDIR)/usr/lib/lsb
+	 LSBDIR = $(DESTDIR)/lib/lsb
+      OLDLSBDIR = $(DESTDIR)/usr/lib/lsb
 #
 #
 #
@@ -70,9 +71,11 @@ install:	$(TODO)
 	$(INSTBIN) insserv        $(SBINDIR)/
 	$(INSTDOC) insserv.8      $(SDOCDIR)/
 	$(INSTCON) insserv.conf   $(CONFDIR)/
-	$(LINK)    /sbin/insserv  $(LSBDIR)/install_initd
 	$(INSTCON) init-functions $(LSBDIR)/
+	$(INSTBIN) install_initd  $(LSBDIR)/
 	$(INSTBIN) remove_initd   $(LSBDIR)/
+	$(RMDIR)   $(OLDLSBDIR)/
+	$(LINK)    ../../lib      $(OLDLSBDIR)
 
 #
 # Make distribution
@@ -87,6 +90,7 @@ FILES	= README         \
 	  insserv.conf   \
 	  init-functions \
 	  remove_initd   \
+	  install_initd  \
 	  insserv-$(VERSION).lsm
 
 dest:

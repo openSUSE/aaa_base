@@ -75,6 +75,7 @@ ippp*)
 	# started here:
 	#
         test "$START_FW" = yes && /sbin/SuSEfirewall
+	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
 
 	#
 	# You may choose to use a default firewall script, configured for
@@ -135,6 +136,7 @@ ippp*)
 	# started here:
 	#
         test "$START_FW" = yes && /sbin/SuSEfirewall
+	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
 
 	# call ip-down.local if it exists and is executable:
 	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local "$@"
@@ -176,7 +178,8 @@ ppp*)
 	# started here:
 	#
         test "$START_FW" = yes && /sbin/SuSEfirewall
-	
+	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
+
 	#
 	# You may choose to use a default firewall script, configured for
 	# the standard dialup user(install package ipchains):
@@ -208,6 +211,7 @@ ppp*)
 	# started here:
 	#
         test "$START_FW" = yes && /sbin/SuSEfirewall
+	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
 
 	# call ip-down.local if it exists and is executable:
 	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local "$@"
