@@ -6,7 +6,7 @@
 set noautoindent
 
 " suchen case-insenitiv
-set ignorecase
+" set ignorecase
 
 " Koordinatenanzeige aktivieren
 set ruler
@@ -19,10 +19,6 @@ set showmatch
 
 " anzeige INSERT/REPLACE/...
 set showmode
-
-" einrueckung
-set shiftwidth=8
-set tabstop=8
 
 " Tastatur-Belegung fuer diverse  vi's
 " Autor: Werner Fink   <werner@suse.de> 
