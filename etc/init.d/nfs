@@ -88,7 +88,7 @@ case "$1" in
 	  rc_status -v
 	fi
 	;;
-    restart)
+    restart|force-reload)
         ## Stop the service and regardless of whether it was
 	## running or not, start it again.
 	$0 stop
@@ -115,7 +115,7 @@ case "$1" in
         rc_status -v
 	;;
     *)
-	echo "Usage: $0 {start|stop|status|reload|restart}"
+	echo "Usage: $0 {start|stop|status|reload|force-reload|restart}"
 	exit 1
 esac
 rc_exit
