@@ -76,7 +76,7 @@ check_log_file () {
 
         echo -n "Saving file "
 
-        DATESTRING=`date +"%y%m%d"`
+        DATESTRING=`date +"%Y%m%d"`
 
         NEWNAME="$1"-$DATESTRING
         NUMBER=2
@@ -103,6 +103,8 @@ check_log_file () {
         echo "The following backup(s) do exist now:"
         ls -l "$1"-[0-9]*
         echo
+	df -k .
+	echo
 	if test -n "$5" ; then
           if test -x /sbin/init.d/$5 ; then
             /sbin/init.d/$5 reload
@@ -197,7 +199,7 @@ if test -n "$RPMDB_BACKUP_DIR" -a -e /var/lib/rpm/packages.rpm ; then
         OLD_MD5="`cat $RPMDB_BACKUP_DIR/rpmdb_recent_md5`"
     NEW_MD5="`cat /var/lib/rpm/packages.rpm | md5sum`"
     if test "$OLD_MD5" != "$NEW_MD5" ; then
-        DATESTRING=`date +"%y%m%d"`
+        DATESTRING=`date +"%Y%m%d"`
 
         NEWNAME=$RPMDB_BACKUP_DIR/packages.rpm-$DATESTRING
         NUMBER=2
