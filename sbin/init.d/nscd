@@ -23,7 +23,7 @@ test -x /usr/sbin/nscd || exit 0
 return=$rc_done
 case "$1" in
     start)
-	echo -n "Starting Name Switch Cache Daemon"
+	echo -n "Starting Name Service Cache Daemon"
 
 	secure=` cat /etc/nsswitch.conf | while read curline ; do
 	  table=${curline%:*}
@@ -47,7 +47,7 @@ case "$1" in
 	echo -e "$return"
 	;;
     stop)
-	echo -n "Shutting down Name Switch Cache Daemon"
+	echo -n "Shutting down Name Service Cache Daemon"
 
 	killproc -TERM /usr/sbin/nscd || return=$rc_failed
 
@@ -74,7 +74,7 @@ case "$1" in
 	$0 stop  &&  $0 start  ||  return=$rc_failed
 	;;
     status)
-	echo -n "Checking for Name Switch Cache Daemon: "
+	echo -n "Checking for Name Service Cache Daemon: "
 
 	checkproc /usr/sbin/nscd && echo OK || echo No process
 	;;

@@ -120,13 +120,14 @@ ppp*)
 	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf ]; then
 		rm -f /etc/ppp/resolv.prev
 		if [ -f /etc/resolv.conf ]; then
-			cp /etc/resolv.conf /etc/ppp/resolv.prev
+			cp -p /etc/resolv.conf /etc/ppp/resolv.prev
 			grep domain /etc/ppp/resolv.prev > /etc/resolv.conf
 			grep search /etc/ppp/resolv.prev >> /etc/resolv.conf
 			cat /etc/ppp/resolv.conf /etc >> /etc/resolv.conf
 			echo "Modified /etc/resolv.conf for DNS at $INTERFACE"
 		else
 			cp /etc/ppp/resolv.conf /etc
+			chmod 644 /etc/resolv.conf
                         echo "Installed /etc/resolv.conf for DNS at $INTERFACE"
 		fi
 		if [ "$START_NSCD" = yes ]; then
@@ -142,7 +143,7 @@ ppp*)
 	#
 	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf ]; then
 		if [ -f /etc/ppp/resolv.prev ]; then
-			cp -f /etc/ppp/resolv.prev /etc/resolv.conf
+			cp -fp /etc/ppp/resolv.prev /etc/resolv.conf
 			echo "Restored original /etc/resolv.conf"
 		else
 			rm -f /etc/resolv.conf
