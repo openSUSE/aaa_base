@@ -291,7 +291,6 @@
 /usr/lib/uucp/uuxqt                    uucp.uucp        555
 /usr/local/bin/yahtzee                 root.game        2755
 # I hate this.
-/usr/sbin/sendmail                     root.root        6555
 /usr/sbin/smail                        root.root        6555
 
 #
@@ -370,7 +369,6 @@
 /etc/protocols                         root.root         644
 /etc/resolv.conf                       root.root         644
 /etc/rpc                               root.root         644
-/etc/sendmail.cf                       root.root         644
 /etc/services                          root.root         644
 /etc/shells                            root.root         644
 /etc/shells.in                         root.root         644

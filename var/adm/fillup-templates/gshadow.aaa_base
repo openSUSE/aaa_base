@@ -37,4 +37,5 @@ dbmaker:*:root:root
 fix:*:root:root,informix
 oinstall:*:root:root
 dba:*:root:root
+localham:*:root:root
 nogroup:*:root:root

@@ -25,8 +25,11 @@ while read  where what type options rest  ; do
 done < /etc/fstab
 
 case `uname -r` in
-   0.*|1.*|2.0.*) RPCSTATD="" ;;
-   *) test -x /usr/sbin/rpc.kstatd && RPCSTATD=/usr/sbin/rpc.kstatd
+   0.*|1.*|2.0.*) RPCSTATD="" ; RPCLOCKD="" ;;
+   *)
+      test -x /usr/sbin/rpc.kstatd && RPCSTATD=/usr/sbin/rpc.kstatd
+      test -x /usr/sbin/rpc.klockd && RPCLOCKD=/usr/sbin/rpc.klockd
+      ;;
 esac
 
 return=$rc_done
@@ -34,6 +37,7 @@ case "$1" in
     start|reload)
 	test "$nfs" = "yes" || exit 0;
 
+	test -n "$RPCLOCKD" && startproc $RPCLOCKD
 	test -n "$RPCSTATD" && startproc $RPCSTATD
 	echo -n "Importing Net File System (NFS)"
 	# Mount all auto NFS devices (-> nfs(5) and mount(8) )

@@ -126,7 +126,6 @@
 /usr/lib/uucp/uucico                   uucp.uucp        6555
 /usr/lib/uucp/uuxqt                    uucp.uucp        6555
 /usr/local/bin/yahtzee                 root.game        2755
-/usr/sbin/sendmail                     root.root        6555
 /usr/sbin/smail                        root.root        6555
 
 #
@@ -231,7 +230,6 @@
 /etc/resolv.conf                       root.root         644
 /etc/rmtab                             root.root         644
 /etc/rpc                               root.root         644
-/etc/sendmail.cf                       root.root         644
 /etc/services                          root.root         644
 /etc/shells                            root.root         644
 /etc/shells.in                         root.root         644
@@ -312,7 +310,6 @@
 /sbin/init.d/rpc                       root.root         744
 /sbin/init.d/rwhod                     root.root         744
 /sbin/init.d/rx                        root.root         744
-/sbin/init.d/sendmail                  root.root         744
 /sbin/init.d/serial                    root.root         744
 /sbin/init.d/single                    root.root         744
 /sbin/init.d/skeleton                  root.root         744
@@ -379,7 +376,6 @@
 /usr/bin/mh/inc                        root.root         755
 /usr/bin/mh/msgchk                     root.root         755
 /opt/kde/bin/apm_proxy                 root.root         755
-/var/spool/mqueue                      root.root         755
 
 
 

@@ -42,7 +42,8 @@ case "$1" in
 	test "$USE_KERNEL_NFSD_NUMBER" -gt 0 && PARAMS="$USE_KERNEL_NFSD_NUMBER"
 
 	echo -n "Starting kernel based NFS server"
-        /usr/sbin/rpc.klockd                               || return=$rc_failed
+	checkproc -n lockd || \
+		/usr/sbin/rpc.klockd                       || return=$rc_failed
 	checkproc /usr/sbin/rpc.kstatd || \
 		startproc /usr/sbin/rpc.kstatd             || return=$rc_failed
 	/usr/sbin/kexportfs -r 			           || return=$rc_failed
