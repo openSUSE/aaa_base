@@ -35,7 +35,7 @@ if test -O "$tty" -a -n "$PS1"; then
 	test -x /usr/bin/tset && /usr/bin/tset -I -Q
     fi
     # on iSeries virtual console, detect screen size and terminal
-    if test -d /proc/iSeries -a "$tty" = "/dev/tty1" ; then
+    if test -d /proc/iSeries -a \( "$tty" = "/dev/tty1" -o "$tty" = "/dev/console" \) ; then
         LINES=24; COLUMNS=80; export LINES COLUMNS TERM
         test -x /bin/initviocons && { eval `/bin/initviocons -e`; }
     fi
