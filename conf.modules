@@ -10,6 +10,8 @@
 
 alias eth0             off
 alias scsi_hostadapter off
+
+# mouse (for older busmice)
 alias char-major-10    off
 
 alias parport_lowlevel    parport_pc
