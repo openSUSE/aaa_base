@@ -94,9 +94,11 @@ fi
 #
 if test -z "$PROFILEREAD" ; then
     PATH=/usr/local/bin:/usr/bin:/usr/X11R6/bin:/bin
-    for dir in $HOME/bin/$CPU $HOME/bin ; do
-	test -d $dir && PATH=$dir:$PATH
-    done
+    if test "$HOME" != "/" : then
+	for dir in $HOME/bin/$CPU $HOME/bin ; do
+	    test -d $dir && PATH=$dir:$PATH
+	done
+    fi
     test "$UID" = 0 && PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
     for dir in  /var/lib/dosemu \
 		/usr/games \
