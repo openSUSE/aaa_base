@@ -1,7 +1,0 @@
-
----- 19.3.2002 ---
-
-if basefile holds only a trailing comment which includes a 
-header this header is preserved within basefile. 
-
-

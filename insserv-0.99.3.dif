@@ -30,3 +30,29 @@
 -$time		boot.clock xntpd
 +$time		boot.clock +xntpd
  
+--- insserv.c
++++ insserv.c	Mon Aug 12 15:22:35 2002
+@@ -1190,9 +1190,9 @@
+ 		    if (chkfor(d->d_name, argv, argc) && !ignore) {
+ 			boolean ok = true;
+ 			if (del)
+-			    ok = chkdependencies(d->d_name);
++			    ok = chkdependencies(token);
+ 			else
+-			    ok = chkrequired(d->d_name);
++			    ok = chkrequired(token);
+ 			if (!ok)
+ 			    error("exiting now!\n");
+ 		    }
+@@ -1262,7 +1262,10 @@
+ 	    if (*token == '$')
+ 		continue;
+ 
+-	    runlevels(token, script_inf.default_start);
++	    if (service && del)
++		runlevels(token, lvl2str(service->lvls));
++	    else
++		runlevels(token, script_inf.default_start);
+ 
+ 	    /*
+ 	     * required_stop, should_stop, and default_stop arn't used in SuSE Linux.
