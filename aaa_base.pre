@@ -79,6 +79,7 @@ vscan:x:65:65534:vscan user:/var/spool/vscan:/bin/false
 wnn:x:66:100:Wnn System Account:/var/lib/wnn:/bin/false
 pop:x:67:100:pop admin:/var/lib/pop:/bin/false
 perforce:x:68:60:perfoce admin:/var/lib/perforce:/bin/false
+sapdb:x:69:61:SAPDB demo user:/var/opt/sapdb:/bin/false
 nobody:x:65534:65534:nobody:/var/lib/nobody:/bin/bash" > var/adm/fillup-templates/passwd.aaa_base
 echo "root:x:0:root
 bin:x:1:root,bin,daemon
@@ -120,6 +121,7 @@ logmastr:x:57:
 codine:x:58:codadmin
 maildrop:x:59:
 perforce:x:60:perforce
+sapdb:x:61:sapdb
 users:x:100:
 nogroup:x:65534:root" > var/adm/fillup-templates/group.aaa_base
 if test ! -e etc/passwd ; then

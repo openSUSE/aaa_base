@@ -34,9 +34,10 @@ dbmaker:*:root:root
 fix:*:root:root,informix
 oinstall:*:root:root
 dba:*:root:root
-localham:*:root:root
+localham:*:root:root,dpbox
 logmastr:*:root:root
-codine:*:root:root
+codine:*:root:root,codadmin
 maildrop:*:root:root
-perforce:*:root:root
+perforce:*:root:root,perforce
+sapdb:*:root:root,sapdb
 nogroup:*:root:root

@@ -4,8 +4,6 @@
 # Author: Christian Zoz <zoz@suse.de>
 #
 # TODO:
-# -> usage of private extension not implemented
-#    - perhaps use it for two-stage backup when dialing on demand
 # -> Perhaps respect START_NAMED?
 
 RESOLVCONF=/etc/resolv.conf
@@ -20,6 +18,7 @@ usage () {
   action:  modify, restore, cleanup or check
   options:                               mandatory for:
     -s|--service <service>               modify, restore
+    -e|--extension <string>
     -p|--process <process>               modify
     -i|--pid <pid>
     -f|--script <pathname of script>     modify
@@ -110,13 +109,14 @@ chmod 644 $RESOLVCONF
 # Note that we use `"$@"' to let each command-line parameter expand to a 
 # separate word. The quotes around `$@' are essential!
 # We need TEMP as the `eval set --' would nuke the return value of getopt.
-TEMP=`getopt -o s:p:i:f:t:l:d:n:qvho:a:k --long \
-service:,process:,pid:,script:,text:,searchlist:,domain:,nameservers:,\
-quiet,verbose,help,save_now:,save_later:,keep \
+TEMP=`getopt -o s:e:p:i:f:t:l:d:n:qvho:a:k --long \
+service:,extension:,process:,pid:,script:,text:,searchlist:,domain:,\
+nameservers:,quiet,verbose,help,save_now:,save_later:,keep \
 -n "  $PROGNAME" -- "$@"`
 test $? != 0 && usage
 
-# Now set the parsed args
+# Now set the parsed args but save the original commandline for recursive calls
+COMMANDLINE="$@"
 # Note the quotes around `$TEMP': they are essential!
 eval set -- "$TEMP"
 # echo "$TEMP"
@@ -124,7 +124,7 @@ eval set -- "$TEMP"
 while true ; do
   case "$1" in
     -s|--service) SERVICE="$2"; shift 2;;
-#    -e|--extension) EXT="$2"; shift 2;;
+    -e|--extension) EXT="$2"; shift 2;;
     -p|--process) PROC="$2"; shift 2;;
     -i|--pid) PID="$2"; shift 2;;
     -f|--script) SCRIPT="$2"; shift 2;;
@@ -152,11 +152,12 @@ ACTION=$1
 
 case $ACTION in
   modify)
-    case "$SERVICE" in
-      dhclient|dhcpcd|pppd|ipppd|pcmcia|hotplug) ;;
-      *) usage "service must be one of dhclient dhcpcd" \
-               " pppd ipppd pcmcia hotplug";;
-    esac
+#z#    case "$SERVICE" in
+#z#      dhclient|dhcpcd|pppd|ipppd|pcmcia|hotplug) ;;
+#z#      *) usage "service must be one of dhclient dhcpcd" \
+#z#               " pppd ipppd pcmcia hotplug";;
+#z#    esac
+    test -z "$SERVICE" && usage "a vaild service must be set with --service"
 
     if [ "$SERVICE" != "hotplug" ] ; then
       if [ -z "$PROC" ] ; then
@@ -213,15 +214,16 @@ case $ACTION in
     fi
     ;;
   restore) 
-    case "$SERVICE" in
-      dhclient|dhcpcd|pppd|ipppd|pcmcia|hotplug) ;;
-      *) usage "service must be one of dhclient dhcpcd" \
-               " pppd ipppd pcmcia hotplug";;
-    esac
+#z#    case "$SERVICE" in
+#z#      dhclient|dhcpcd|pppd|ipppd|pcmcia|hotplug) ;;
+#z#      *) usage "service must be one of dhclient dhcpcd" \
+#z#               " pppd ipppd pcmcia hotplug";;
+#z#    esac
+    test -z "$SERVICE" && usage "a vaild service must be set with --service"
     ;;
   cleanup|check)
     # ignore all options
-    SERVICE="$ACTION"
+#z#    SERVICE="$ACTION"
     KEEP=""
     SAVENOW=""
     ;;
@@ -237,7 +239,7 @@ test -n "$EXT" && BACKUP="${BACKUP}.${EXT}"
 
 MODIFY=`sed -n "/^[[:space:]]*MODIFY_RESOLV_CONF_DYNAMICALLY=/s/^.*=\|\"//gp" \
                                                                  /etc/rc.config`
-if [ -n "$MODIFY" -a "$MODIFY" != "yes" ] ; then
+if [ -n "$MODIFY" -a "$MODIFY" != "yes" -a "$ACTION" != "check" ] ; then
   if [ "$ACTION" = "cleanup" ] ; then
     ls $BACKUP* &>dev/null &&
       log "Not cleaning up $RESOLVCONF backups due to " \
@@ -283,128 +285,134 @@ if [ -e $RESOLVCONF ] ; then
 fi
 
 ###########################################################
-# Find the the most rationale of all available backups
+# Divide all available backups
 ###########################################################
-# If resolv.conf was modified and there are backups, then:
-# - if RC_BACKUP exists delete all other backups
-# - if RC_BACKUP does not exist, do some research on these backups and
-#   choose the best as RC_BACKUP. Then delete all other backups.
-# If resolv.conf was not modified delete all backups.
-# If there is no backup leave resolv.conf untouched
-# !!! Note that the meaning of RC_BACKUP is changing: !!!
-# !!! Up to now it was the filename found in the info block. !!!
-# !!! After this section it will contain the name of the choosen backup. !!!
+# Check all existing backups and divide them into valid direct, valid indirect
+# and invalid backups.
+# "all existing backups" = all files /etc/resolv.conf.saved.by.* and all
+#                          files found in the backup field of another
+#                          valid backup
+# "valid direct" = file which the backup entry in resolv.conf points to
+# "valid indirect" = file which the backup entry of another valid backup
+#                    points to
+# "invalid" = files /etc/resolv.conf.saved.by.* which are not valid
+# All valid backups build a stack of files. These files are stored in three
+# variables:
+# DIRECT_BACKUP: Contains the only valid direct backup.
+# INDIRECT_BACKUPS: Contains all indirect backups except the last of the stack.
+#                  Files are ordered like the stack. The first is the backup
+#                  of the valid direct backup.
+# LAST_BACKUP: Contains the last file of the stack of valid indirect backups.
+#              This file does not contain an info block or has an invalid
+#              entry in its backup field.
+# INVALID_BACKUPS: Contains all invalid backups sorted in chronological
+# order, the newest first. This files are only used if there is no valid
+# backup, but resolv.conf was modified dynamically.
 
-# get all backups except $RC_BACKUP in chronoligical order, the newest first
-for a in `ls -t ${RESOLVCONF}.saved.by* 2>/dev/null`; do
-  test "$a" = "$RC_BACKUP" && continue
-  OTHER_BACKUPS="$OTHER_BACKUPS $a"
-done
-debug "OTHER_BACKUPS: $OTHER_BACKUPS"
-test -e "$RC_BACKUP" || RC_BACKUP=""
-debug "RC_BACKUP: $RC_BACKUP"
+read_field_backup () { 
+ls "$*" &>/dev/null || return
+BAFI=`\
+sed -n "/### BEGIN INFO/,/### END INFO/s/^[[:space:]#]*Backup:[[:space:]]*//p" \
+"$*"`
+ls "$BAFI" 2>/dev/null
+}
 
-# If the current resolv.conf does not contain an info block it seems not 
-# to be modified or manually written by the admin and we will remove all 
-# backups. This should suit all actions:
-# -> modify: we make a new backup
-# -> restore: there is nothing to restore in this case
-# -> cleanup: there is nothing to restore in this case
-if [ -z "$RC_BLOCK" ] ; then
-  # RC_BACKUP is empty too, so all possible backups are in OTHER_BACKUPS
-  TO_DELETE="$OTHER_BACKUPS"
-  DELINFO="\"$ACTION\" found unmodified $RESOLVCONF."
-elif [ -n "$OTHER_BACKUPS" ] ; then
-  # Now there is an info block but RC_BACKUP may be empty.
-  if [ -n "$RC_BACKUP" ] ; then
-    # It is possible that the backup contains an info block, too. (Even this
-    # cannot happen with the current version of this script, there are some
-    # problematic enhancements pending that could possible cause such a fault.)
-    # So we are going to build a chain of backups and delete the chain elements
-    # from OTHER_BACKUPS.
-    NEXT_BACKUP="$RC_BACKUP"
-    RC_BACKUP=""
-    while [ -n "$NEXT_BACKUP" ] ; do
-      # BCHAIN contains all elements except the last ...
-      BCHAIN="$BCHAIN $RC_BACKUP"
-      # ... which is always in RC_BACKUP
-      RC_BACKUP="$NEXT_BACKUP"
-      NEXT_BACKUP=`sed -n "/### BEGIN INFO/,/### END INFO/s/^[[:space:]#]*Backup:[[:space:]]*//p" $NEXT_BACKUP`
-      if [ ! -e "$NEXT_BACKUP" ] ; then
-        NEXT_BACKUP="" 
-        break
-      fi
-      OTHER_BACKUPS=`\
-      for a in $OTHER_BACKUPS; do
-        test "$a" != "$NEXT_BACKUP" && echo "$a"
-      done`
+# get all backups in chronoligical order, the newest first
+ALL_BACKUPS=`ls -t ${RESOLVCONF}.saved.by* \
+                     $(read_field_backup ${RESOLVCONF}*) \
+               2>/dev/null | uniq`
+test -r "$RC_BACKUP" && DIRECT_BACKUP="$RC_BACKUP"
+debug "(0) DIRECT_BACKUP: $DIRECT_BACKUP"
+debug "(0) ALL_BACKUPS: $ALL_BACKUPS"
+
+if [ -n "$ALL_BACKUPS" ] ; then
+  # At first put all except DIRECT_BACKUP from ALL_BACKUPS to INVALID_BACKUPS
+  INVALID_BACKUPS=`\
+  for a in $ALL_BACKUPS; do
+    test "$a" != "$DIRECT_BACKUP" && echo "$a"
+  done`
+  # Then we are going to build a chain of backups and delete the chain elements
+  # from INVALID_BACKUPS.
+  NEXT_BACKUP=`read_field_backup "$DIRECT_BACKUP"`
+  while [ -r "$NEXT_BACKUP" ] ; do
+    debug "(searching stack) NEXT_BACKUP=$NEXT_BACKUP"
+    # At first delete NEXT_BACKUP from INVALID_BACKUPS
+    INVALID_BACKUPS=`\
+    for a in $INVALID_BACKUPS; do
+      test "$a" != "$NEXT_BACKUP" && echo "$a"
+    done`
+    # INDIRECT_BACKUPS contains all elements except the last ...
+    INDIRECT_BACKUPS="$INDIRECT_BACKUPS $LAST_BACKUP"
+    # ... which is always in LAST_BACKUP
+    LAST_BACKUP="$NEXT_BACKUP"
+    NEXT_BACKUP=`read_field_backup "$NEXT_BACKUP"`
+    # Detect a loop
+    for a in $DIRECT_BACKUP $INDIRECT_BACKUPS $LAST_BACKUP; do
+      test "$NEXT_BACKUP" = "$a" && NEXT_BACKUP=""
     done
-    # Now we that we found the end of a backup chain we delete all othe backups
-    debug "BCHAIN: $BCHAIN"
-    TO_DELETE="$BCHAIN $OTHER_BACKUPS"
-    DELINFO="\"$ACTION\" found a backup that was directly or indirectly mentioned in $RESOLVCONF. All other backups will be deleted."
+  done
+  debug "(1) DIRECT_BACKUP: $DIRECT_BACKUP"
+  debug "(1) INDIRECT_BACKUPS: $INDIRECT_BACKUPS"
+  debug "(1) LAST_BACKUP: $LAST_BACKUP"
+  debug "(1) INVALID_BACKUPS: $INVALID_BACKUPS"
+fi
+
+# The remaining invalid backups have to be reordered. First all backups 
+# without an infoblock then those with info block, both groups
+# still chronologically ordered.
+unset IB_1 IB_2 IB_3
+for a in $INVALID_BACKUPS; do
+  b=`sed -n "/### BEGIN INFO/,/### END INFO/p" $a`
+  if [ -z "$b" ] ; then
+    IB_1="$IB_1 $a"
   else
-    # Here we have backups but none is written in current resolv.conf.
-    # These backups are chronologically ordered.
-    # Therefore we look which are named by the current calling service.
-    COUNT=0
-    TMP="$OTHER_BACKUPS"
-    OTHER_BACKUPS=""
-    for a in $TMP; do
-      if echo $a | grep "$SERVICE" &>/dev/null; then
-        SER_BACKUP="$SER_BACKUP $a"
-        COUNT=$((COUNT+1))
-      else
-        OTHER_BACKUPS="$OTHER_BACKUPS $a"
-      fi
-    done
-    debug "OTHER_BACKUPS: $OTHER_BACKUPS"
-    debug "SER_BACKUP: $SER_BACKUP"
-    debug "COUNT: $COUNT"
-    # if the result is exactly one file we take this and do _not_ look if it 
-    # contains an info block or not.
-    if [ "$COUNT" = 1 ] ; then
-      RC_BACKUP="$SER_BACKUP"
-      TO_DELETE="$OTHER_BACKUPS"
-      DELINFO="\"$ACTION\" found one backup named by the calling service $SERVICE, deleting all other backups."
-    else
-      # if there are many of them we delete OTHER_BACKUPS and take these as
-      # new OTHER_BACKUPS, from which we still have to choose one.
-      DI="no backup"; DII="all"
-      if [ "$COUNT" -gt 1 ] ; then
-        TO_DELETE="$OTHER_BACKUPS"
-        OTHER_BACKUPS="$SER_BACKUP"
-        DI="many backups"; DII="these"
-      fi
-      # if there is none we have still to choose from all OTHER_BACKUPS.
-      # Now we simply take the newest that does not contain an info block or
-      # if all have this block just take the newest.
-      RC_BACKUP=`echo "$OTHER_BACKUPS" | (read a b; echo $a)`
-      for a in $OTHER_BACKUPS; do
-        b=`sed -n "/### BEGIN INFO/,/### END INFO/p" $a`
-        test -n "$b" && continue
-        RC_BACKUP="$a"
-        DIII="that does not contain an info block "
-        break
-      done
-      # Still put all not selected files to TO_DELETE
-      for a in $OTHER_BACKUPS; do
-        test "$a" = "$RC_BACKUP" && continue
-        TO_DELETE="$TO_DELETE $a"
-      done
-      DELINFO="\"$ACTION\" found ${DI} named by the calling service \"$SERVICE\" and choosed the newest backup ${DIII}from ${DII} backups."
-    fi
+    IB_2="$IB_2 $a"
   fi
-fi
-if [ -n "$TO_DELETE" ] ; then
-  log "$DELINFO"
-  log "will remove the following stale backups of $RESOLVCONF:"
-  log "$TO_DELETE"
-  rm $TO_DELETE 2>/dev/null
-fi
-# !!! From now on RC_BACKUP contains the name of the single existing backup or
-# !!! it is empty if there is no backup.
-  
+done
+INVALID_BACKUPS="$IB_1 $IB_2"
+debug "(2) INVALID_BACKUPS: $INVALID_BACKUPS"
+# Then we select all backups with the correct service in the filename. We now
+# have two groups, both ordered as before.
+# Then we split the first group in those which additionally contain the
+# given extension in the filename still sustainig the old order.
+unset IB_1 IB_2 IB_3
+for a in $INVALID_BACKUPS; do
+  if echo $a | grep "$SERVICE" &>/dev/null; then
+    if echo $a | grep "$SERVICE.$EXT" &>/dev/null; then
+      IB_1="$IB_1 $a"
+    else
+      IB_2="$IB_2 $a"
+    fi
+  else
+    IB_3="$IB_3 $a"
+  fi
+done
+INVALID_BACKUPS="$IB_1 $IB_2 $IB_3"
+debug "(3) INVALID_BACKUPS: $INVALID_BACKUPS"
+# Now the list starts with backups that fit most regarding the  name of the
+# backup and then at first these which seem to be backups of unmodified files.
+# Now we choose the first one. If it has an info block we try to find an
+# according stack as before and then take the last element of it.
+CHOOSEN_BACKUP=`echo "$INVALID_BACKUPS" | (read a b; echo "$a")`
+SUCC_BACKUP=`read_field_backup "$CHOOSEN_BACKUP"`
+while [ -r "$SUCC_BACKUP" ] ; do
+  CHOOSEN_BACKUP="$SUCC_BACKUP"
+  SUCC_BACKUP=`read_field_backup "$CHOOSEN_BACKUP"`
+done
+# IMHO this should be the at least dynamically modified file of all invalid
+# backups. 
+INVALID_BACKUPS="$CHOOSEN_BACKUP $INVALID_BACKUPS"
+# We delete all other invalid ones immediately.
+#for a in $INVALID_BACKUPS; do
+#  MSG="removing invalid backups: "
+#  if [ "$a" != "$CHOOSEN_BACKUP" ] ; then
+#    rm $a
+#    log "$MSG$a"
+#    MSG="                          "
+#  fi
+#done
+debug "(4) INVALID_BACKUPS: $INVALID_BACKUPS"
+
 ###########################################################
 # Finally execute the requested action
 ###########################################################
@@ -412,19 +420,21 @@ fi
 # If there is a resolv.conf and --save_now was set then lets do it:
 test -n "$SAVENOW" -a -e "$RESOLVCONF" && cp --backup=t $RESOLVCONF $SAVENOW
 
+debug "BACKUP=$BACKUP"
 case $ACTION in
   modify)
-    if [ -n "$RC_BACKUP" ] ; then
-      if [ "$RC_BACKUP" != "$BACKUP" ] ; then
-        mv $RC_BACKUP $BACKUP
-      fi
-    else
-      # maybe there is no resolv.conf
-      test -e $RESOLVCONF && cp $RESOLVCONF $BACKUP
+    # maybe there is no resolv.conf or current resolv.conf points to
+    # the same backup file that should be used now
+    # We don't copy resolv.conf if there is an valid backup of the same 
+    # service with the same private extension or ...
+    for a in $DIRECT_BACKUP $INDIRECT_BACKUPS $LAST_BACKUP; do
+      test "$BACKUP" = "$a" && SAVE="no"
+    done
+    # ... there isn't any
+    if [ -e $RESOLVCONF -a "$SAVE" != "no" ] ; then
+       cp $RESOLVCONF $BACKUP
+       debug "$RESOLVCONF saved to $BACKUP"
     fi
-#    test -z "$DNS" && DNS="$RC_DNS"
-#    test -z "$SEARCH" && SEARCH="$RC_SEARCH"
-#    test -z "$DOMAIN" && DOMAIN="$RC_DOMAIN"
     # Only one of $DOMAIN and $SEARCH does contain something
     if [ -n "$DOMAIN" ] ; then
       RC_REST=`echo "$RC_REST" |
@@ -444,22 +454,106 @@ case $ACTION in
     fi
     write_resolvconf
     log "Service $SERVICE modified $RESOLVCONF. See info block in this file"
-    ;;
-  restore|cleanup)
+   ;;
+  restore)
     # If __save_later was set when modifying then we save the temporary
     # resolv.conf
     test -n "$RC_SAVELATER" -a -e "$RESOLVCONF" &&
       cp --backup=t $RESOLVCONF $RC_SAVELATER
-    if [ -n "$RC_BACKUP" ] ; then
+    # We only restore if a backup with the correct name (already in $BACKUP) 
+    # exists. If this backup is valid we have to save the integrity of a 
+    # possibly existing backup stack. If this backup is invalid (= not part
+    # of a stack) then we just restore it, even if we invalidate an existing
+    # stack.
+    if [ -e "$BACKUP" ] ; then
+      # Now we search the possibly existing stack and store the two 
+      # predecessors and one successor of it. 
+      # Don't remove the empty entry ("") from the list.
+      for a in $RESOLVCONF $DIRECT_BACKUP $INDIRECT_BACKUPS \
+               $LAST_BACKUP ""; do
+        P="$C"
+        C="$S"
+        S="$a"
+        test "$C" = "$BACKUP" && break
+      done
+      # If we did not found the Backup in the stack of valid backups, we
+      # write BACKUP to C and set RESOLVCONF as its predecessor (P). Because
+      # the Backup can have a successor even if it is called invalid, we have
+      # to look for it.
+      if [ "$C" != "$BACKUP" ] ; then
+        P="$RESOLVCONF"
+        C="$BACKUP"
+        S=`read_field_backup "$BACKUP"`
+      fi
+      debug "(restore) P=$P C=$C S=$S"
+      # If we were called with --keep, we don't restore the backup but
+      # keep the temporary settings. 
       if [ "$KEEP" = "yes" ] ; then
-        rm $RC_BACKUP
-        log "Service $SERVICE forced to keep the modified resolver information"
-      else
-        mv $RC_BACKUP $RESOLVCONF 
-        log "Service $SERVICE restored $RESOLVCONF\n  from backup $RC_BACKUP"
+        # We have to keep the resolver settings, but not the meta information
+        # in the info block. There are two cases:
+	# 1) The Backup (C) was the last in the stack (S="") then we remove the
+	#    info block from its predecessor (P) and remove C.
+        # 2) The Backup has itself a backup (S!="") then we have to replace the
+        #    info block in the predecessor (P) with that from the Backup (C),
+        #    but keep everything else from P. And remove C. 
+        cp $P $TMPFILE 
+        if [ "$S" = "" ] ; then
+          sed "/### BEGIN INFO/,/### END INFO/d" $TMPFILE > $P
+          log "kept $P and removed info block"
+        else
+          sed -n "/### BEGIN INFO/,/### END INFO/p" $C > $P
+          sed "/### BEGIN INFO/,/### END INFO/d" $TMPFILE >> $P
+          log "kept $P and changed info block"
+        fi
+        rm $C
+        log "removed $C"
+        rm $TMPFILE
+      else 
+        # Don't keep the temporary settings, restore.
+        # All we have to do is to move the Backup (C) to its predecessor (P),
+        # because the backup field of the previous predecessor already points
+        # to the filename of P and the backup field of C what then will be in
+        # P points to S (if existing).
+        mv $C $P
+        log "restored $C to $P"
+      fi
+    else
+      # If no extension was given we search for backup files of the calling
+      # service with private extensions and call us recursivle for every
+      # found extension.
+      if [ "$EXT" = "" ] ; then
+        for a in `ls -t "$BACKUP"*`; do
+          EXT=${a##$BACKUP.}
+          $0 $COMMANDLINE -e "$EXT"
+        done
+        if [ "$EXT" != "" ] ; then
+          exit
+        fi
+      fi
+      log "no matching backup found, left everything alone"
+    fi
+    ;;
+  cleanup)
+    # If $RESOLVCONF was modified (= RC_BLOCK nonempty) we have to restore it
+    if [ -n "$RC_BLOCK" ] ; then
+      # If --save_later was set when modifying then we save the temporary
+      # resolv.conf
+      test -n "$RC_SAVELATER" -a -e "$RESOLVCONF" &&
+        cp --backup=t $RESOLVCONF $RC_SAVELATER
+      # Search the most reasonable backup. That is (if existing) the LAST_BACKUP
+      # then the DIRECT_BACKUP and last the first one of INVALID_BACKUPS
+      BACKUP=`echo "$LAST_BACKUP $DIRECT_BACKUP $INVALID_BACKUPS" \
+              | (read a b; echo $a)`
+      if [ -e "$BACKUP" ] ; then
+        mv $BACKUP $RESOLVCONF
+        log "restored $RESOLVCONF from $BACKUP"
       fi
     fi
-    # After restoring resolc.conf it should not contain an INFO block that
+    # Now we remove all backups
+    MSG=`rm -v $LAST_BACKUP $INDIRECT_BACKUPS $DIRECT_BACKUP \
+               $INVALID_BACKUPS 2>/dev/null`
+    test -n "$MSG" && log "Deleted the following stale backups: $MSG"
+    # After cleaning up resolc.conf should not contain an INFO block that
     # marks it as modified. If it somehow happens that it has it, we remove it.
     if grep "### BEGIN INFO" $RESOLVCONF 2>/dev/null; then
       cp $RESOLVCONF $TMPFILE
