@@ -122,7 +122,7 @@ if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
     # on first startup of a system with a lvm root device lvm /dev entries 
     # may not exist at this time, so skip fsck in this case
     # skip fsck also for reiserfs case
-    if [ -f $des -a "$type" != "reiserfs" ]  
+    if [ -f "$des" -a "$type" != "reiserfs" ]  
     then
 	fsck $FSCK_PROGRESSBAR -a -t $type /
 	FSCK_RETURN=$?
