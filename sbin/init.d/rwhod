@@ -6,6 +6,7 @@
 # /sbin/init.d/rwhod
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 base=${0##*/}
@@ -14,29 +15,28 @@ link=${base#*[SK][0-9][0-9]}
 test $link = $base && START_RWHOD=yes
 test "$START_RWHOD" = yes || exit 0
 
-return=$rc_done
+rc_reset
 case "$1" in
     start)
 	echo -n "Starting rwho daemon"
-	startproc /usr/sbin/rwhod || return=$rc_failed
-	/bin/sleep 1
-	echo -e "$return"
+	startproc /usr/sbin/rwhod
+	rc_status -v
+	sleep 1
 	;;
     stop)
 	echo -n "Shutting down rwho service"
-	killproc -TERM /usr/sbin/rwhod || return=$rc_failed
-	echo -e "$return"
+	killproc -TERM /usr/sbin/rwhod
+	rc_status -v
 	;;
     reload|restart)
-	$0 stop && $0 start || return=$rc_failed
+	$0 stop && $0 start
+	rc_status
 	;;
     status)
 	checkproc /usr/sbin/rwhod && echo OK || echo No process
 	;;
     *)
-	echo "Usage: $0 {start|stop|reload|restart}"
+	echo "Usage: $0 {start|stop|reload|restart|status}"
 	exit 1
 esac
-
-test "$return" = "$rc_done" || exit 1
-exit 0
+rc_exit

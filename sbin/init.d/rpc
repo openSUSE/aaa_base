@@ -7,6 +7,7 @@
 # /sbin/init.d/rpc
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 base=${0##*/}
@@ -21,7 +22,7 @@ else
     PORTMAP=/usr/sbin/portmap
 fi
 
-return=$rc_done
+rc_reset
 case "$1" in
     start)
 	checkproc $PORTMAP && {
@@ -29,25 +30,29 @@ case "$1" in
 	    echo -n "Re-"
         }
 	echo -n "Starting RPC portmap daemon"
-	startproc $PORTMAP || return=$rc_failed
+	startproc $PORTMAP
+	rc_status
 	/bin/sleep 1
         if test "$NFS_SERVER_UGID" = yes; then
 	   if test -x /usr/sbin/rpc.ugidd ; then
-            startproc /usr/sbin/rpc.ugidd       || return=$rc_failed
+            startproc /usr/sbin/rpc.ugidd
+	    rc_status
            fi
         fi
-	echo -e "$return"
+	rc_status -v
 	;;
     stop)
 	if test -x /usr/sbin/rpc.ugidd ; then
-	  killproc -TERM /usr/sbin/rpc.ugidd      || return=$rc_failed
+	  killproc -TERM /usr/sbin/rpc.ugidd
+	  rc_status
 	fi
 	echo -n "Shutting down RPC services"
-	killproc -TERM $PORTMAP || return=$rc_failed
-	echo -e "$return"
+	killproc -TERM $PORTMAP
+	rc_status -v
 	;;
     restart|reload)
-	$0 stop && $0 start || return=$rc_failed
+	$0 stop && $0 start
+	rc_status
 	;;
     status)
         status="OK"
@@ -57,9 +62,7 @@ case "$1" in
 	checkproc $PORTMAP && echo "OK" || echo "portmapper down"
 	;;
     *)
-	echo "Usage: $0 {start|stop}"
+	echo "Usage: $0 {start|restart|reload|status|stop}"
 	exit 1
 esac
-
-test "$return" = "$rc_done" || exit 1
-exit 0
+rc_exit

@@ -121,34 +121,11 @@ CONSOLE_SHUTDOWN=reboot
 SERIAL_CONSOLE=""
 
 ##
-## Formating the boot script messages:
-##   The boot scripts should use the variables rc_done and rc_fail to
-##   symbolize their success.  See /sbin/init.d/skeleton for an example
-##   how to use these variables.
-##   rc_done_up and rc_failed_up do the same as rc_done and rc_failed
-##   but one line above (usefull for starting daemons who talk to user).
-##   The variable rc_reset is used by the master resource control script
-##   /sbin/init.d/rc to turn off all attributes and switch on the standard
-##   character set.
+## Formating the boot script messages, see /etc/rc.status.
+## Source /etc/rc.status if rc_done isn't defined
 ##
-##    \033          is just ascii ESC
-##    \033[<NUM>G   move to column <NUM>
-##    \033[1m       switch bold on
-##    \033[31m      switch red on
-##    \033[32m      switch green on
-##    \033[33m      switch yellow on
-##    \033[m        switch color/bold off
-##
-     rc_done="\033[71G\033[32mdone\033[m"
-   rc_failed="\033[71G\033[31m\033[1mfailed\033[m"
-  rc_skipped="\033[71G\033[1mskipped\033[m"
-  rc_done_up="\033[1A$rc_done"
-rc_failed_up="\033[1A$rc_failed"
-   rc_unused="\033[71G\033[1munused\033[m"
-    rc_reset="\033[m\017"
+test $rc_done= = = -a -e /etc/rc.status && . /etc/rc.status
 
 #
 # end of initial rc.config
 #
-
-

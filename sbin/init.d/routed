@@ -6,6 +6,7 @@
 # /sbin/init.d/routed
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 base=${0##*/}
@@ -14,29 +15,28 @@ link=${base#*[SK][0-9][0-9]}
 test $link = $base && START_ROUTED=yes
 test "$START_ROUTED" = "yes" || exit 0
 
-return=$rc_done
+rc_reset
 case "$1" in
     start)
 	echo -n "Starting routed"
-	startproc /usr/sbin/routed || return=$rc_failed
+	startproc /usr/sbin/routed
+	rc_status -v
 	sleep 1
-	echo -e "$return"
 	;;
     stop)
 	echo -n "Shutting down routed"
-	killproc -TERM /usr/sbin/routed || return=$rc_failed
-	echo -e "$return"
+	killproc -TERM /usr/sbin/routed
+	rc_status -v
 	;;
     restart|reload)
-	$0 stop && $0 start || return=$rc_failed
+	$0 stop && $0 start
+	rc_status
 	;;
     status)
         route -n
 	;;
     *)
-	echo "Usage: $0 {start|stop}"
+	echo "Usage: $0 {start|restart|reload|status|stop}"
 	exit 1
 esac
-
-test "$return" = "$rc_done" || exit 1
-exit 0
+rc_exit

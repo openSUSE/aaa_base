@@ -103,7 +103,16 @@ ippp*)
         #    SENDMAIL_EXPENSIVE="yes"
         #    SENDMAIL_NOCANONIFY="yes"
         #/usr/bin/fetchmail -a -v >>/var/log/fetchmail 2>&1 &
-		  #/usr/sbin/sendmail -q &
+	#/usr/sbin/sendmail -q &
+
+	# Alternate you could use the tcpip pool script.
+	# The script can set system time and date with ntpdate
+	# (variable XNTPD_INITIAL_NTPDATE in /etc/rc.config),
+	# it supports fetchmail with a system wide /etc/fetchmailrc,
+	# it is able to fetch mail with UUCP over TCP/IP if UUCP is
+	# configured appropriate, and at least it runs sendmail.
+	#
+	# /etc/ppp/poll.tcpip
 
 	# call ip-up.local if it exists and is executable:
 	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local $*

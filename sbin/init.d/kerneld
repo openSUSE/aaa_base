@@ -8,6 +8,7 @@
 # /sbin/init.d/kerneld
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 base=${0##*/}
@@ -26,23 +27,24 @@ if test ! -d $MODLIB ; then
     exit 0
 fi
 
-return=$rc_done_up
+rc_reset
 case "$1" in
     start)
 	checkproc /sbin/kerneld && {
             killproc /sbin/kerneld 2> /dev/null
 	    echo -n "Re-"
         }
-	/sbin/kerneld || return=$rc_failed_up
-	echo -e "$return"
+	/sbin/kerneld
+	rc_status -v1
 	;;
     stop)
 	echo "Stopping kerneld"
-	killproc -TERM /sbin/kerneld || return=$rc_failed_up
-	echo -e "$return"
+	killproc -TERM /sbin/kerneld
+	rc_status -v1
 	;;
     restart|reload)
-	$0 stop && $0 start || return=$rc_failed_up
+	$0 stop && $0 start
+	rc_status
 	;;
     status)
 	checkproc /sbin/kerneld && echo "OK" || echo "No process"
@@ -52,5 +54,4 @@ case "$1" in
 	exit 1
     ;;
 esac
-
-exit 0
+rc_exit

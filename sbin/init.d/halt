@@ -7,6 +7,7 @@
 # /sbin/init.d/halt (and symlinked to reboot)
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 case "$0" in
@@ -42,11 +43,11 @@ esac
 #
 # first do local stuff
 #
+rc_reset
 test -e /sbin/init.d/halt.local && {
     echo Running /sbin/init.d/halt.local
-    ECHO_RETURN=$rc_done_up
-    sh /sbin/init.d/halt.local || ECHO_RETURN=$rc_failed_up
-    echo -e "$ECHO_RETURN"
+    /bin/sh /sbin/init.d/halt.local
+    rc_status -v1 -r
 }
 
 # Write to wtmp file before unmounting /var
@@ -66,11 +67,11 @@ echo "Sending all processes the KILL signal..."
 killall5 -9
 echo -e "$rc_done_up"
 
-ECHO_RETURN=$rc_done_up
 echo "Turning off swap"
 sync ; sync
-swapoff -a || ECHO_RETURN=$rc_failed_up
-echo -e "$ECHO_RETURN"
+rc_reset
+swapoff -a
+rc_status -v1 -r
 setterm -bfreq 200 -blen 500 &>/dev/null
 
 mounts=/etc/fstab
@@ -82,13 +83,12 @@ while read des fs type rest; do
 done < $mounts
 
 UMOUNT_FAILED=false
-ECHO_RETURN=$rc_done_up
 echo "Unmounting file systems"
 umount -avt noproc || {
     UMOUNT_FAILED=true
-    ECHO_RETURN=$rc_failed_up
+    rc_status
 }
-echo -e "$ECHO_RETURN"
+rc_status -v1 -r
 
 if [ "$UMOUNT_FAILED" = true ]; then
     echo "Oops: umount failed :-(  --  trying to remount readonly..."
@@ -111,13 +111,12 @@ fi
 
 # maybe we use Multiple devices
 if test -f /etc/mdtab -a -x /sbin/mdstop ; then
-    ECHO_RETURN=$rc_done
     echo -n "Disable Multiple Devices"
-    /sbin/mdstop -a || ECHO_RETURN=$rc_failed
-    echo -e "$ECHO_RETURN"
+    /sbin/mdstop -a
+    rc_status -v1 -r
 fi
 
-# on umsdos fs this would lead to an error message. so direct errors to
+# on umsdos fs this would lead to an error message, so direct errors to
 # /dev/null
 mount -no remount,ro / 2> /dev/null
 sync

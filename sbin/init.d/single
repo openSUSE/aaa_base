@@ -2,77 +2,46 @@
 # Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
-#	  Werner Fink <werner@suse.de>, 1996,98
+#	  Werner Fink <werner@suse.de>, 1996,98,2000
 #	  Burchard Steinbild <bs@suse.de>, 1996
 #
 # /sbin/init.d/single
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
+rc_reset
 case "$1" in
     start)
-        if test -d /usr/lib/kbd/consolefonts -a \
-           -n "$CONSOLE_FONT" -a "$CONSOLE_FONT" != "YAST_ASK" ; then
-            if test -x /usr/bin/setfont ; then
-                ECHO_RETURN=$rc_done_up
-                echo Loading console font $CONSOLE_FONT
-                /usr/bin/setfont $CONSOLE_FONT || ECHO_RETURN=$rc_failed_up
-                echo -e "$ECHO_RETURN"
-            fi
-            if test -n "$CONSOLE_UNICODEMAP" -a \
-                "$CONSOLE_UNICODEMAP" != "none" -a \
-                -x /usr/bin/setfont ; then
-                ECHO_RETURN=$rc_done_up
-                echo Loading unimap $CONSOLE_UNICODEMAP
-                /usr/bin/setfont -u $CONSOLE_UNICODEMAP || ECHO_RETURN=$rc_failed_up
-                echo -e "$ECHO_RETURN"
-            fi
-            if test -n "$CONSOLE_SCREENMAP" -a \
-                "$CONSOLE_SCREENMAP" != "none" -a \
-                -x /usr/bin/setfont ; then
-                ECHO_RETURN=$rc_done_up
-                echo Loading screenmap $CONSOLE_SCREENMAP
-                /usr/bin/setfont -m $CONSOLE_SCREENMAP || ECHO_RETURN=$rc_failed_up
-                echo -e "$ECHO_RETURN"
-            fi
-            if test -n "$CONSOLE_MAGIC" -a "$CONSOLE_MAGIC" != "none" ; then
-                ECHO_RETURN=$rc_done_up
-                echo Setting up console ttys
-                for i in /dev/tty[1-6]; do
-                     echo -en "\033$CONSOLE_MAGIC" > $i || ECHO_RETURN=$rc_failed_up
-                done
-                echo -e "$ECHO_RETURN"
-            fi
-        fi
-        if test -n "$KBD_RATE" -a -n "$KBD_DELAY" -a -x /sbin/kbdrate; then
-                ECHO_RETURN=$rc_done_up
-                /sbin/kbdrate -r $KBD_RATE -d $KBD_DELAY || \
-                        ECHO_RETURN=$rc_failed_up
-                echo -e "$ECHO_RETURN"
-        fi
-        echo "Sending all processes the TERM signal..."
-        killall5 -15
-        echo -e "$rc_done_up"
-        sleep 3
-        echo "Sending all processes the KILL signal..."
-        killall5 -9
-        echo -e "$rc_done_up"
+	if test -n "$KBD_RATE" -a -n "$KBD_DELAY" -a -x /sbin/kbdrate; then
+	    echo Setting keyboard repeat rate and delay time
+	    /sbin/kbdrate -r $KBD_RATE -d $KBD_DELAY
+	    rc_status -v1
+	fi
+	echo "Sending all processes the TERM signal..."
+	killall5 -15
+	echo -e "$rc_done_up"
+	sleep 3
+	echo "Sending all processes the KILL signal..."
+	killall5 -9
+	echo -e "$rc_done_up"
+	#
+	# If we're not in single user mode we should go down there.
+	#
+	test -n "$RUNLEVEL" -a "$RUNLEVEL" != "S" && init S
 	;;
     stop)
-        ECHO_RETURN=$rc_done
 	case `uname -r` in
             0.*|1.*|2.[01].*|2.2.?|2.2.10)
-	        echo -n "Running update (bdflush) daemon"
-	        /sbin/update || ECHO_RETURN=$rc_failed
-	        echo -e "$ECHO_RETURN"
+		echo -n "Running update (bdflush) daemon"
+		/sbin/update
+		rc_status -v1
 		;;
 	esac
-        echo -e "$ECHO_RETURN"
 	;;
     *)
 	echo "Usage: $0 {start|stop}"
 	exit 1
 esac
-
-exit 0
+rc_exit

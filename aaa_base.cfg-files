@@ -20,6 +20,7 @@ etc/permissions.local
 etc/permissions.paranoid
 etc/permissions.secure
 etc/profile
+etc/rc.status
 etc/runlevel.fallback
 etc/shells
 etc/ttytype
@@ -32,7 +33,6 @@ sbin/init.d/dummy
 sbin/init.d/halt
 sbin/init.d/inetd
 sbin/init.d/kerneld
-sbin/init.d/makerunlvl
 sbin/init.d/network
 sbin/init.d/nfs
 sbin/init.d/nfsserver
@@ -45,4 +45,3 @@ sbin/init.d/rpc
 sbin/init.d/serial
 sbin/init.d/single
 sbin/init.d/xdm
-

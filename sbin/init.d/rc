@@ -1,8 +1,9 @@
 #! /bin/bash
-# Copyright (c) 1996-98 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
-# Author: Florian La Roche <florian@suse.de>, 1996
-#	  Werner Fink <werner@suse.de>, 1994,96,98,99
+# Copyright (c) 1996-2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Florian La Roche <florian@suse.de> 1996
+#	  Werner Fink <werner@suse.de> 1994-99,2000
 #
 # /sbin/init.d/rc   --    The Master Resource Control Script
 #
@@ -13,8 +14,17 @@
 # stop that feature.
 #
 
-# avoid being interrupted by child or keyboard
-trap "echo" SIGINT
+#
+# On previous runlevel identical with current runlevel do not
+# re-examine current runlevel.
+#
+test "$PREVLEVEL" = "$RUNLEVEL" && exit 0
+
+#
+# Avoid being interrupted by child or keyboard
+#
+trap "echo" SIGINT SIGSEGV SIGTERM
+set +e
 
 #
 # Get terminal size of standard input of the system console
@@ -24,18 +34,6 @@ set -- $(stty size < $CONSOLE)
   LINES=$1
 COLUMNS=$2
 export LINES COLUMNS CONSOLE
-
-#
-# Configuration
-#
-
-. /etc/rc.config
-
-#
-# On previous runlevel identical with current runlevel
-# do not re-examine current runlevel.
-#
-test "$PREVLEVEL" = "$RUNLEVEL" && exit 0
 
 #
 # This redirects all rc messages during reboot and halt
@@ -54,74 +52,93 @@ else
 fi
 
 #
+# Configuration and coloring of the boot messages
+#
+
+. /etc/rc.status
+. /etc/rc.config
+
+#
 # Redirect I/O of this script and its childs
 #
 exec 0<> $CONSOLE 1>&0 2>&0
 
 #
-# Set onlcr to avoid staircase effect and do not lock scrolling
+# Save old terminal settings and set -nl to avoid staircase
+# effect, do not lock scrolling, and avoid break characters.
 #
-stty onlcr -ixon 0>&1
-
-#     \033[1m       switch bold on
-#     \033[31m      switch red on
-#     \033[32m      switch green on
-#     \033[33m      switch yellow on
-#     \033[m        switch color/bold off
-extd="\033[1m"
-warn="\033[1m"
-norm="\033[m"
-stat="\033[71G"
+otty=$(stty -g)
+stty -nl -ixon ignbrk -brkint 0>&1
 
 echo -n "Master Resource Control: "
 echo -n "previous runlevel: $PREVLEVEL, "
-echo -e "switching to runlevel: ${extd}${RUNLEVEL}${norm}"
+echo -e "switching to runlevel: ${stat}${extd}${RUNLEVEL}${norm}"
 
-curdir=/sbin/init.d/rc$RUNLEVEL.d
-prevdir=/sbin/init.d/rc$PREVLEVEL.d
+runrc=/sbin/init.d/rc${RUNLEVEL}.d
+prerc=/sbin/init.d/rc${PREVLEVEL}.d
 rex="[0-9][0-9]"
-
 failed=""
+
 #
-# run the KILL scripts of the previous runlevel
+# First check and test services of previous and current (new) runlevel.
 #
-for i in $prevdir/K*; do
+for i in $prerc/K${rex}*; do
     test -x "$i" || continue
 
-    # don't run the kill script, if the new runlevel has a start script
-    start=${i##*/K$rex}
-    set -- $curdir/S$rex$start
-    test -n "$2" && echo -e "$0: more than one start link\n -- $@"
-    test -f $1 && continue
+    #
+    # Don't stop service if the new runlevel requires the service.
+    #
+    service=${i#*/K$rex}
+    set -- $runrc/S$rex$service
+    test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
+    test -x "$1"  && continue
 
-    $i stop || failed="${failed} ${start}"
-    echo -n -e "$rc_reset"
-done
-#
-# run the START scripts of the current (new) runlevel
-#
-for i in $curdir/S*; do
-    test -x "$i" || continue
-
-    # don't run start script, if previous runlevel had a kill script
-    start=${i##*/S$rex}
-    set -- $prevdir/K$rex$start
-    test -n "$2" && echo -e "$0: more than one kill link\n -- $@"
-    test -f $1 && continue
-
-    $i start || failed="${failed} ${start}"
+    # Stop the services of the previous runlevel if they are missed
+    # within the current (new) runlevel.
+    #
+    $i stop || failed="${failed} ${service}"
     echo -n -e "$rc_reset"
 done
 
+for i in $runrc/S${rex}*; do
+    test -x "$i" || continue
+
+    #
+    # Don't start service if previous runlevel includes the service.
+    #
+    service=${i#*/S$rex}
+    set -- $prerc/K$rex$service
+    test $# -gt 1 && echo -e "$attn$prerc/: more than one link for service $service$norm"
+    test -x "$1"  && continue
+
+    #
+    # Start the services of the current (new) runlevel if they are missed
+    # within the previous runlevel.
+    #
+    $i start || failed="${failed} ${service}"
+    echo -n -e "$rc_reset"
+done
+
+#
+# Inform the users
+#
 echo -n "Master Resource Control: "
+echo -e "runlevel ${RUNLEVEL} has been ${stat}${extd}reached${norm}"
 if test -n "$failed" ; then
-    echo
-    echo -n "Failed services in runlevel ${RUNLEVEL}:"
-    echo -e "${extd}${failed}${norm}"
-else
-    echo -e "runlevel ${RUNLEVEL} has been ${stat}${warn}reached${norm}"
+    n=$((${#failed} + 2))
+    echo -n  "Failed services in runlevel ${RUNLEVEL}: "
+    test $n -lt 41 && echo -en "\033[${COLUMNS}C\033[${n}D"
+    echo -e  "${warn}${failed}${norm}"
 fi
 
+#
+# Restore old terminal settings
+#
+stty $otty 0>&1
+
+#
+# For the first logon on a virtual console.
+#
 test -e /etc/issue-SuSE-first-run && {
     cat /etc/issue-SuSE-first-run
     rm -f /etc/issue-SuSE-first-run 2>/dev/null

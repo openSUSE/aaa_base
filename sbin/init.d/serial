@@ -21,11 +21,12 @@
 # manual configuration lines to avoid trouble.
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
-return=$rc_done_up
+rc_reset
 case $1 in
-  start)
+  start|b)
     cd /dev
 
     SETSERIAL="/sbin/setserial -b"
@@ -34,7 +35,7 @@ case $1 in
     run_setserial ()
     {
 	$SETSERIAL $@
-	test $? -ne 0 && return=$rc_failed_up
+	rc_status
     }
 
     echo "Configuring serial ports"
@@ -212,14 +213,12 @@ case $1 in
     
 
     ${SETSERIAL} -bg ${PORTS} 2> /dev/null
-    echo -e "$return"
+    rc_status -v1
     ;;
   stop)
     ;;
   *)
     echo "usage: serial {start|stop}"
     ;;
-  esac
-
-test "$return" = "$rc_done_up" || exit 1
-exit 0
+esac
+rc_exit

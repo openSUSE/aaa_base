@@ -6,6 +6,7 @@
 # /sbin/init.d/dummy
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 base=${0##*/}
@@ -48,22 +49,22 @@ fi
 test -n "$dev" || exit 0
 test "$dev" = "dhcpclient" && exit 0
 
-return=$rc_done
+rc_reset
 case "$1" in
     start)
 	echo -n "Setting up $dummy device"
 	ifconfig $dummy $ipaddr netmask 255.255.255.255 up  && \
-	route add -host $ipaddr metric 1 dev $dummy  || \
-	return=$rc_failed 
-	echo -e "$return"
+	route add -host $ipaddr metric 1 dev $dummy
+	rc_status -v
 	;;
     stop)
 	echo -n "Removing $dummy device"
-	ifconfig $dummy down || return=$rc_failed
-	echo -e "$return"
+	ifconfig $dummy down
+	rc_status -v
 	;;
     reload|restart)
-	$0 stop && $0 start || return=$rc_failed
+	$0 stop && $0 start
+	rc_status
 	;;
     status)
 	ifconfig $dummy
@@ -79,6 +80,4 @@ case "$1" in
     echo "Usage: $0 {start|stop|restart|reload|status|probe}"
     exit 1
 esac
-
-test "$return" = "$rc_done" || exit 1
-exit 0
+rc_exit

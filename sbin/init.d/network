@@ -10,6 +10,7 @@
 # /sbin/init.d/network
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 # Determine the base and follow a runlevel link name.
@@ -36,7 +37,7 @@ fi
 
 test -n "$NETCONFIG" -a "$NETCONFIG" != "YAST_ASK" || exit 0
 
-return=$rc_done
+rc_status
 case "$1" in
     start)
 	for I in $NETCONFIG; do
@@ -58,10 +59,9 @@ case "$1" in
 		    continue
 		    ;;
 		*)
-		    return=$rc_done_up
 		    echo "Setting up network device $NETDEV"
-		    ifconfig $NETDEV $IFCONFIG || return=$rc_failed_up
-		    echo -e "$return"
+		    ifconfig $NETDEV $IFCONFIG
+		    rc_status -v1
 		    ;;
 	    esac
 	done
@@ -99,13 +99,14 @@ case "$1" in
 		    ;;
 		*)
 		    echo -n "Shutting down network device $NETDEV"
-		    ifconfig $NETDEV down || return=$rc_failed
-		    echo -e "$return"
+		    ifconfig $NETDEV down
+		    rc_status -v
 	    esac
 	done
 	;;
     restart|reload)
-	$0 stop ${2+"$2"} && $0 start ${2+"$2"} || return=$rc_failed
+	$0 stop ${2+"$2"} && $0 start ${2+"$2"}
+	rc_status
 	;;
     status)
 	for I in $NETCONFIG; do
@@ -139,6 +140,4 @@ case "$1" in
     echo "Usage: $0 {start|stop|status|reload|restart|probe}"
     exit 1
 esac
-
-test "$return" = "$rc_done" -o "$return" = "$rc_done_up" || exit 1
-exit 0
+rc_exit

@@ -8,6 +8,7 @@
 # /sbin/init.d/nfs
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 nfs=no
@@ -32,7 +33,7 @@ case `uname -r` in
       ;;
 esac
 
-return=$rc_done
+rc_reset
 case "$1" in
     start|reload)
 	test "$nfs" = "yes" || exit 0;
@@ -52,13 +53,14 @@ case "$1" in
 	#  Note: Some people importing the /usr partition.
 	#        Therefore we do _NOT_ use an ampersand!
 	#
-	mount -at nfs || return=$rc_failed
+	mount -at nfs
+	rc_status
 	sleep 1
 	#
     	# generate new list of available shared libraries
 	#
 	ldconfig -X 2>/dev/null
-	echo -e "$return"
+	rc_status -v
 	;;
     stop)
 	test "$nfs" = "yes" && echo -n "Remove Net File System (NFS)"
@@ -67,10 +69,11 @@ case "$1" in
 	#
 	umount -at nfs &
 	sleep 2
-	test "$nfs" = "yes" && echo -e "$return"
+	test "$nfs" = "yes" && rc_status -v
 	;;
     restart)
-	$0 stop && $0 start || return=$rc_failed
+	$0 stop && $0 start
+	rc_status
 	;;
     status)
 	mount -t nfs | while read from x point rest ; do
@@ -81,6 +84,4 @@ case "$1" in
 	echo "Usage: $0 {start|stop|status|reload|restart}"
 	exit 1
 esac
-
-test "$return" = "$rc_done" || exit 1
-exit 0
+rc_exit

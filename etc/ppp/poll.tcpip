@@ -1,0 +1,91 @@
+#!/bin/bash
+#
+# /etc/ppp/poll.tcpip
+#
+# Script for polling mail and news, setting system
+# time, and sending mails over temporary TCP/IP connections.
+#
+# Author: Werner Fink <werner@suse.de>
+# 
+
+#
+# Check our lock file
+#
+test -e /var/run/poll.lock && exit 0
+trap 'echo' SIGHUP SIGINT SIGQUIT
+trap 'rm -f /var/run/poll.lock; exit 1' SIGTRAP SIGBUS SIGKILL SIGPIPE SIGTERM
+trap 'rm -f /var/run/poll.lock; exit 0' EXIT
+echo $$ > /var/run/poll.lock
+
+#
+# Check resources and settings
+#
+. /etc/rc.config
+test -r /etc/rc.config.d/xntp.rc.config && \
+. /etc/rc.config.d/xntp.rc.config
+
+#
+# Time to get a stable connenction
+#
+sleep 5
+
+#
+# Now set system time if we have some NTP servers
+# and no running xntp.
+#
+while true ; do
+    test     "$START_XNTPD" = "yes"        && break
+    test -x   /usr/sbin/ntpdate            || break
+    checkproc /usr/sbin/xntpd &> /dev/null || break
+    test -n  "$XNTPD_INITIAL_NTPDATE"      || break
+    /usr/sbin/ntpdate -s $XNTPD_INITIAL_NTPDATE
+    break
+done
+
+#
+# Do we get mails via UUCP over TCP/IP?
+# Note that we only support taylor configuration.
+# We seek for the available systems which are
+# connected with TCP/IP to do a UUCP file transfer.
+#
+while true ; do
+    test -x   /usr/lib/uucp/uucico         || break
+    test -r   /etc/uucp/call               || break
+    test -r   /etc/uucp/sys                || break
+    systems=""
+    while read sys login passwd rest ; do
+	case "$sys" in
+	    \#|"") continue ;;
+	    *)     systems="$systems $sys"
+	esac
+    done < /etc/uucp/call
+    for sys in $systems ; do
+	type=$(sed -n "
+	    /^system[[:space:]]\+$sys/,/^\(system\|\$\)/ {
+		s/^port\W\+\(\w\+\)\$/\1/p
+	    }" < /etc/uucp/sys)
+	test "$type" = tcp || continue
+	/usr/lib/uucp/uucico -c -D -S $sys
+    done
+    break
+done
+
+#
+# Do we get mails with fetchmail over pop3/imap?
+# We support only a system wide configuration
+# file /etc/fetchmailrc.
+#
+while true ; do
+    test -x   /usr/bin/fetchmail           || break
+    test -r   /etc/fetchmailrc             || break
+    /usr/bin/fetchmail -f /etc/fetchmailrc
+    break
+done
+
+#
+# Let's throw our mails out here.
+#
+/usr/sbin/sendmail -q
+
+# 
+exit 0

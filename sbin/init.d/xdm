@@ -39,26 +39,27 @@ test ! -x "$DISPLAYMANAGER" && DISPLAYMANAGER=/usr/X11R6/bin/xdm
 
 DM=${DISPLAYMANAGER##*/}
 
-return=$rc_done
+rc_reset
 case "$1" in
     start)
 	echo -n "Starting service $DM"
-	startproc $DISPLAYMANAGER || return=$rc_failed
+	startproc $DISPLAYMANAGER || rc_failed
 	# After a crash or a kill signal we may have
-	# a wrong owner ship of /dev/console
-	if test "$return" = "$rc_done" ; then
-	    chown root:tty /dev/console /dev/tty0
-	    chmod 622      /dev/console /dev/tty0
+	# a wrong owner ship of /dev/xconsole
+	if rc_status ; then
+	    chown root:tty /dev/xconsole /dev/tty0
+	    chmod 622      /dev/xconsole /dev/tty0
 	fi
-	echo -e "$return"
+	rc_status -v
 	;;
     stop)
 	echo -n "Shutting down service $DM"
-	killproc -TERM $DISPLAYMANAGER || return=$rc_failed
-	echo -e "$return"
+	killproc -TERM $DISPLAYMANAGER
+	rc_status -v
 	;;
     restart)
-	$0 stop && $0 start || return=$rc_failed
+	$0 stop && $0 start
+	rc_status
 	;;
     reload)
 	echo -n "Reload service $DM"
@@ -81,6 +82,4 @@ case "$1" in
 	echo "Usage: $0 {start|stop|status|restart|reload|probe}"
 	exit 1
 esac
-
-test "$return" = "$rc_done" || exit 1
-exit 0
+rc_exit

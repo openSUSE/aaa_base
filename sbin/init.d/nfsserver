@@ -8,6 +8,7 @@
 # /sbin/init.d/nfsserver
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 base=${0##*/}
@@ -28,7 +29,7 @@ esac
 
 test -x /usr/sbin/rpc.kmountd || USE_KERNEL_NFSD="no"
 
-return=$rc_done
+rc_reset
 case "$1" in
     start)
       checkproc $PORTMAP
@@ -42,23 +43,27 @@ case "$1" in
 	test "$USE_KERNEL_NFSD_NUMBER" -gt 0 && PARAMS="$USE_KERNEL_NFSD_NUMBER"
 
 	echo -n "Starting kernel based NFS server"
-	checkproc -n lockd || \
-		/usr/sbin/rpc.klockd                       || return=$rc_failed
-	checkproc /usr/sbin/rpc.kstatd || \
-		startproc /usr/sbin/rpc.kstatd             || return=$rc_failed
-	/usr/sbin/kexportfs -r 			           || return=$rc_failed
-	startproc /usr/sbin/rpc.kmountd --no-nfs-version 3 || return=$rc_failed
-	/usr/sbin/rpc.knfsd $PARAMS		           || return=$rc_failed
+	checkproc -n lockd || /usr/sbin/rpc.klockd
+	rc_status
+	checkproc /usr/sbin/rpc.kstatd || startproc /usr/sbin/rpc.kstatd
+	rc_status
+	/usr/sbin/kexportfs -r
+	rc_status
+	startproc /usr/sbin/rpc.kmountd --no-nfs-version 3
+	rc_status
+	/usr/sbin/rpc.knfsd $PARAMS
+	rc_status -v
       else
 	test -x /usr/sbin/rpc.mountd || exit 0
 	PARAMS=""
 	test "$REEXPORT_NFS" = yes && PARAMS="--re-export"
 
 	echo -n "Starting NFS server"
-	startproc /usr/sbin/rpc.mountd $PARAMS  || return=$rc_failed
-	startproc /usr/sbin/rpc.nfsd   $PARAMS  || return=$rc_failed
+	startproc /usr/sbin/rpc.mountd $PARAMS
+	rc_status
+	startproc /usr/sbin/rpc.nfsd   $PARAMS
+	rc_status -v
       fi
-      echo -e "$return"
       ;;
     stop)
       if test "$USE_KERNEL_NFSD" = yes ; then
@@ -66,20 +71,26 @@ case "$1" in
 
 	echo -n "Shutting down kernel based NFS server"
 	/usr/sbin/kexportfs -au
-	killproc -n -KILL nfsd                  || return=$rc_failed
-	killproc    -TERM /usr/sbin/rpc.kmountd || return=$rc_failed
+	killproc -n -KILL nfsd
+	rc_status
+	killproc    -TERM /usr/sbin/rpc.kmountd
+	rc_status
 	killproc -n -KILL lockd
+	rc_status
 	killproc    -TERM /usr/sbin/rpc.kstatd
+	rc_status -v
       else
 	test -x /usr/sbin/rpc.mountd || exit 0
         echo -n "Shutting down NFS server"
-        killproc -TERM /usr/sbin/rpc.mountd     || return=$rc_failed
-        killproc -TERM /usr/sbin/rpc.nfsd       || return=$rc_failed
+        killproc -TERM /usr/sbin/rpc.mountd
+	rc_status
+        killproc -TERM /usr/sbin/rpc.nfsd
+	rc_status -v
       fi
-      echo -e "$return"
       ;;
     restart)
-      $0 stop && $0 start || return=$rc_failed
+      $0 stop && $0 start
+      rc_status
       ;;
     reload)
       if test "$USE_KERNEL_NFSD" = yes ; then
@@ -87,10 +98,11 @@ case "$1" in
 	/usr/sbin/kexportfs -r
       else
         echo -n "Reload NFS server"
-        killproc -HUP /usr/sbin/rpc.mountd      || return=$rc_failed
-        killproc -HUP /usr/sbin/rpc.nfsd        || return=$rc_failed
+        killproc -HUP /usr/sbin/rpc.mountd
+	rc_status
+        killproc -HUP /usr/sbin/rpc.nfsd
+	rc_status -v
       fi
-      echo -e "$return"
       ;;
     status)
       status="NFS server up"
@@ -109,6 +121,4 @@ case "$1" in
     echo "Usage: $0 {start|stop|status|reload|restart}"
     exit 1
 esac
-
-test "$return" = "$rc_done" || exit 1
-exit 0
+rc_exit

@@ -1,0 +1,116 @@
+#
+# Formating the boot script messages:
+#   The boot scripts should use the variables rc_done and rc_fail to
+#   symbolize their success.  See /sbin/init.d/skeleton for an example
+#   how to use the shell function rc_status and rc_reset.
+#   Internally these function uses the variables rc_done and rc_failed.
+#   rc_done_up and rc_failed_up do the same as rc_done and rc_failed
+#   but one line above (usefull for starting daemons who talk to user).
+#   The variable rc_reset is used by the master resource control script
+#   /sbin/init.d/rc to turn off all attributes and switch on the standard
+#   character set.
+#
+#    \033          ascii ESCape
+#    \033[<NUM>G   move to column <NUM> (linux console, xterm, not vt100)
+#    \033[<NUM>C   move <NUM> columns forward but only upto last column
+#    \033[<NUM>D   move <NUM> columns backward but only upto first column
+#    \033[<NUM>A   move <NUM> rows up
+#    \033[<NUM>B   move <NUM> rows down
+#    \033[1m       switch bold on
+#    \033[31m      switch red on
+#    \033[32m      switch green on
+#    \033[33m      switch yellow on
+#    \033[m        switch color/bold off
+#    \017          exit alternate mode (xterm, vt100, linux console)
+#    \033[10m      exit alternate mode (linux console)
+#    \015          carriage return (without newline)
+#
+
+if test -z "$LINES" -o -z "$COLUMNS" ; then
+    eval `stty size 2>/dev/null | \
+	(read L C; echo LINES=${L:-24} COLUMNS=${C:-80})`
+fi
+export LINES COLUMNS
+if test $LINES -eq 0 -o $COLUMNS -eq 0 ; then
+    LINES=24
+    COLUMNS=80
+fi
+
+	 esc=`echo -en "\033"`
+        extd="${esc}[1m"
+        warn="${esc}[31m"
+        done="${esc}[32m"
+        attn="${esc}[33m"
+        norm=`echo -en "${esc}[m\017"`
+        stat=`echo -en "\015${esc}[${COLUMNS}C${esc}[9D"`
+
+if test "$TERM" != "raw" ; then
+     rc_done="${stat}${done}${extd}done${norm}"
+   rc_failed="${stat}${warn}${extd}failed${norm}"
+  rc_skipped="${stat}${attn}${extd}skipped${norm}"
+  rc_done_up="${esc}[1A${rc_done}"
+rc_failed_up="${esc}[1A${rc_failed}"
+   rc_unused="${stat}${extd}unused${norm}"
+    rc_reset="${norm}"
+     rc_save=`echo -en "\015\0337"`
+  rc_restore=`echo -en "\0338"`
+else
+     rc_done="  done"
+   rc_failed="  failed"
+  rc_skipped="  skipped"
+  rc_done_up="${rc_done}"
+rc_failed_up="${rc_failed}"
+   rc_unused="  unused"
+    rc_reset=""
+     rc_save=""
+  rc_restore=""
+fi
+
+_rc_status=0
+_rc_status_all=0
+function rc_check ()
+{
+    _rc_check_ret=$?
+    test $_rc_check_ret -eq 0 || _rc_status=1
+    test $_rc_status    -eq 0 || _rc_status_all=1
+    return $_rc_check_ret
+}
+function rc_reset ()
+{
+    _rc_status=0
+    rc_check
+    return 0
+}
+function rc_status ()
+{
+    for i ; do
+	case "$i" in
+	"") rc_check ;;
+	-v|-v[1-9]|-v[1-9][0-9])
+	    rc_check
+	    echo -en "$rc_save"
+	    if test -n "${i#-v}" && test "${i#-v}" -gt 0 2>/dev/null ; then
+		test "$TERM" != "raw" && echo -en "\033[${i#-v}A"
+	    fi
+	    test $_rc_status -gt 0 && echo -e "$rc_failed" || echo -e "$rc_done"
+	    echo -en "$rc_restore"
+	    ;;
+	-r) rc_reset ;;
+	-s) echo -e "$rc_skipped"  ; return 0 ;;
+	-u) echo -e "$rc_unused"   ; return 0 ;;
+	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
+	esac
+    done
+
+    return $_rc_status
+}
+function rc_failed ()
+{
+    _rc_status=1
+    rc_check
+    return 1
+}
+function rc_exit ()
+{
+    test $_rc_status_all -ne 0 && exit 1 || exit 0
+}

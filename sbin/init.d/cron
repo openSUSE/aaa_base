@@ -3,11 +3,12 @@
 # Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
-#	  Werner Fink <werner@suse.de>, 1996
+#	  Werner Fink <werner@suse.de>, 1996,2000
 #
 # /sbin/init.d/cron
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 base=${0##*/}
@@ -18,20 +19,21 @@ test "$CRON" = yes || exit 0
 
 test -x /usr/sbin/cron || exit 0
 
-return=$rc_done
+rc_reset
 case "$1" in
     start)
         echo -n "Starting CRON daemon"
-	startproc /usr/sbin/cron || return=$rc_failed
-	echo -e "$return"
+	startproc /usr/sbin/cron
+	rc_status -v
 	;;
     stop)
 	echo -n "Shutting down CRON daemon"
-	killproc -TERM /usr/sbin/cron || return=$rc_failed
-	echo -e "$return"
+	killproc -TERM /usr/sbin/cron
+	rc_status -v
 	;;
     restart)
-	$0 stop && $0 start || return=$rc_failed
+	$0 stop && $0 start
+	rc_status
 	;;
     reload)
 	# CRON will examine when a crontab file was modified
@@ -47,6 +49,4 @@ case "$1" in
 	echo "Usage: $0 {start|stop|status|restart}"
 	exit 1
 esac
-
-test "$return" = "$rc_done" || exit 1
-exit 0
+rc_exit

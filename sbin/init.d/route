@@ -8,6 +8,7 @@
 # /sbin/init.d/route		Version 0.6
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 # Determine the base and follow a runlevel link name.
@@ -50,24 +51,24 @@ run_route ()
 	    SIOCADDRT:*File*exists) return ;;
 	    *)
 	esac
-	test "$ret" = "$rc_done" && echo
+	rc_status && echo
 	echo -e "\033[1mError while excuting:\n    $command\033[m"
 	echo    "    ${retvalue%%Usage:*}"
-	ret=$rc_failed
+	rc_failed
     fi
 }
 
 wrong_entry ()
 {
-    test "$ret" = "$rc_done" && echo
+    rc_status && echo
     echo -e "\033[1mWrong entry in ${ROUTECONF}\033[m"
     echo    "    $@"
-    ret=$rc_failed
+    rc_failed
 }
 
-ret=$rc_done
 todo="$1"
 sdev="$2"
+rc_reset
 case "$todo" in
     start|reload)
 	if test -n "$sdev" ; then
@@ -93,9 +94,9 @@ case "$todo" in
 	    given="${given} ${d}"
 	done < /proc/net/dev
 	if test -n "$sdev" -a "$given" != "$sdev" ; then
-	    test "$ret" = "$rc_done" && echo
+	    rc_status && echo
 	    echo "No interface $sdev found"
-	    ret=$rc_failed
+	    rc_failed
 	fi
 	n=0 # declared as integer
 	while read  des what mask iface  ; do
@@ -119,17 +120,17 @@ case "$todo" in
 		# We are doing multicast
 		if test -e /proc/net/igmp -a "$what" = 0.0.0.0 -a "$mask" = 240.0.0.0
 		then
-		    test "$ret" = "$rc_done" && echo
+		    rc_status && echo
 		    echo "Add multicast route 240.0.0.0 for $iface"
 		    run_route add -net 224.0.0.0 netmask 240.0.0.0 dev $iface $opts
-		    test "$ret" = "$rc_done" && echo -n "..."
+		    rc_status && echo -n "..."
 		else
-		    test "$ret" = "$rc_done" && echo
+		    rc_status && echo
 		    echo "Skipping multicast route 240.0.0.0 for $iface"
 		    test ! -e /proc/net/igmp  && echo "  no /proc/net/igmp available"
 		    test "$what" != 0.0.0.0   && echo "  wrong dummy entry $what in $ROUTECONF"
 		    test "$mask" != 240.0.0.0 && echo "  wrong netmask entry $mask in $ROUTECONF"
-		    ret=$rc_failed
+		    rc_failed
 		fi
 		;;
 	    *)
@@ -183,8 +184,8 @@ case "$todo" in
 		esac
 	    esac
 	done < $ROUTECONF
-	test "$ret" = "$rc_done" && echo -e "$ret" || \
-				    echo -e "Setting up routing $ret"
+	rc_status || echo -n "Setting up routing"
+	rc_status -v
 	;;
     stop)
 	ONEWAY=false
@@ -239,9 +240,9 @@ case "$todo" in
 	    given="${given} ${d}"
 	done < /proc/net/dev
 	if test -n "$sdev" -a "$given" != "$sdev" ; then
-	    test "$ret" = "$rc_done" && echo
+	    rc_status && echo
 	    echo "No interface $sdev found"
-	    ret=$rc_failed
+	    rc_failed
 	fi
 	#
 	# Read /etc/route.conf reverse and delete routings
@@ -263,12 +264,12 @@ case "$todo" in
 		    echo "Delete multicast route 240.0.0.0 for $iface"
 		    run_route del -net 224.0.0.0 netmask 240.0.0.0 dev $iface
 		else
-		    test "$ret" = "$rc_done" && echo
+		    rc_status && echo
 		    echo "Skipping multicast route 240.0.0.0 for $iface"
 		    test ! -e /proc/net/igmp  && echo "  no /proc/net/igmp available"
 		    test "$what" != 0.0.0.0   && echo "  wrong dummy entry $what in $ROUTECONF"
 		    test "$mask" != 240.0.0.0 && echo "  wrong netmask entry $mask in $ROUTECONF"
-		    ret=$rc_failed
+		    rc_failed
 		fi
 		;;
 	    *)
@@ -315,11 +316,12 @@ case "$todo" in
 		esac
 	    esac
 	done < <(reverse < $ROUTECONF)
-	test "$ret" = "$rc_done" && echo -e "$ret" || \
-				    echo -e "Shutting down routing $ret"
+	rc_status || echo -n "Shutting down routing"
+	rc_status -v
 	;;
     restart)
-	$0 stop ${2+"$sdev"} && $0 start ${2+"$sdev"} || ret=$rc_failed
+	$0 stop ${2+"$sdev"} && $0 start ${2+"$sdev"}
+	rc_status
 	;;
     status)
 	n=0 # declared as integer
@@ -335,6 +337,4 @@ case "$todo" in
 	echo "Usage: $0 {start|stop|reload|restart}"
 	exit 1
 esac
-
-test "$ret" = "$rc_done" || exit 1
-exit 0
+rc_exit

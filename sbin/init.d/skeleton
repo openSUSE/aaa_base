@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1995-1998 SuSE GmbH Nuernberg, Germany.
+# Copyright (c) 1995-2000 SuSE GmbH Nuernberg, Germany.
 #
 # Author: 
 #
@@ -10,6 +10,7 @@
 # /sbin/rc<skeleton>
 #
 
+. /etc/rc.status
 . /etc/rc.config
 
 # Determine the base and follow a runlevel link name.
@@ -20,31 +21,45 @@ link=${base#*[SK][0-9][0-9]}
 test $link = $base && START_FOO=yes
 test "$START_FOO" = yes || exit 0
 
-# The echo return value for success (defined in /etc/rc.config).
-return=$rc_done
+# Shell functions sourced from /etc/rc.status:
+#      rc_check         check and set local and overall rc status
+#      rc_status        check and set local and overall rc status
+#      rc_status -v     ditto but be verbose in local rc status
+#      rc_status -v -r  ditto and clear the local rc status
+#      rc_failed        set local and overall rc status to failed
+#      rc_reset         clear local rc status (overall remains)
+#      rc_exit          exit appropriate to overall rc status
+
+# First reset status of this service
+rc_reset
 case "$1" in
     start)
 	echo -n "Starting service foo"
 	## Start daemon with startproc(8). If this fails
 	## the echo return value is set appropriate.
 
-	#startproc /usr/sbin/foo || return=$rc_failed
+	#startproc /usr/sbin/foo
 
-	echo -e "$return"
+	# Remember status and be verbose
+	rc_status -v
 	;;
     stop)
 	echo -n "Shutting down service foo"
 	## Stop daemon with killproc(8) and if this fails
 	## set echo the echo return value.
 
-	#killproc -TERM /usr/sbin/foo || return=$rc_failed
+	#killproc -TERM /usr/sbin/foo
 
-	echo -e "$return"
+	# Remember status and be verbose
+	rc_status -v
 	;;
     restart)
 	## If first returns OK call the second, if first or
 	## second command fails, set echo return value.
-	$0 stop  &&  $0 start  ||  return=$rc_failed
+	$0 stop  &&  $0 start
+
+	# Remember status and be quiet
+	rc_status
 	;;
     reload)
 	## Choose ONE of the following two cases:
@@ -53,13 +68,16 @@ case "$1" in
 	## to reread the (changed) configuration.
 
 	#echo -n "Reload service foo"
-	#killproc -HUP /usr/sbin/foo || return=$rc_failed
-	#echo -e "$return"
+	#killproc -HUP /usr/sbin/foo
+	#rc_status -v
 
 	## Exclusive possibility: Some services must be stopped
 	## and started to force a new load of the configuration.
 
-	#$0 stop  &&  $0 start  ||  return=$rc_failed
+	#$0 stop  &&  $0 start
+
+	# Remember status and be verbose
+	#rc_status -v
 	;;
     status)
 	echo -n "Checking for service foo: "
@@ -79,7 +97,4 @@ case "$1" in
 	exit 1
 	;;
 esac
-
-# Inform the caller not only verbosely and set an exit status.
-test "$return" = "$rc_done" || exit 1
-exit 0
+rc_exit
