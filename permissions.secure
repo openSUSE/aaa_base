@@ -78,6 +78,8 @@
 /var/squid                             squid.root        755
 /var/squid/cache                       squid.root        755
 /var/squid/logs                        squid.root        755
+/var/run/smpppd                        root.dialout      750
+/var/lib/smpppd                        root.root         700
 
 
 #
@@ -321,6 +323,7 @@
 /bin/ping6                              root.root       4755
 /usr/bin/bing                           root.trusted    4750
 /usr/sbin/traceroute                    root.root       4755
+/usr/sbin/traceroute6                   root.root       4755
 # mtr is linked against ncurses. For dialout only.
 /usr/sbin/mtr                           root.dialout    4750
 /usr/bin/rcp                            root.root       4755
