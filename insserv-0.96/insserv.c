@@ -474,6 +474,7 @@ static void scan_script_locations(const char * path)
 	DIR  * rcdir;
 	struct dirent *d;
 	char * token;
+	struct stat st_script;
 
 	switch (runlevel) {
 	    case 0: rcd = "rc0.d/";  break;
@@ -504,6 +505,11 @@ static void scan_script_locations(const char * path)
 		continue;
 	    order = atoi(ptr);
 	    ptr += 2;
+
+	    if (stat(d->d_name, &st_script) < 0) {
+		xremove(d->d_name);	/* dangling sym link */
+		continue;
+	    }
 
 	    scan_script_defaults(d->d_name);
 	    if (!script_inf.provides || script_inf.provides == empty)
@@ -1081,9 +1087,9 @@ int main (int argc, char *argv[])
 	    ptr += 2;
 
 	    if (stat(d->d_name, &st_script) < 0)
-		xremove(d->d_name);
+		xremove(d->d_name);	/* dangling sym link */
 
-	    if (notincluded(ptr, runlevel))
+	    if (defaults && notincluded(ptr, runlevel))
 		xremove(d->d_name);
 	}
 
