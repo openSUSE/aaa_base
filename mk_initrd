@@ -126,7 +126,7 @@ usage() {
         options:
           -h               This Text.
           -k "kernel list" list of kernel images for which initrd files
-                           are created (relativ to boot_dir)
+                           are created (relative to boot_dir)
                            defaults to "vmlinuz vmlinuz.suse"
           -i "initrd list" list of file names (relativ to boot_dir) for
                            the initrd; position have match to "kernel list"
@@ -144,6 +144,17 @@ usage() {
         root_dir:          the directory the root partition is mounted to
                            defaults to "/" 
 EOM
+	case $arch in
+	    s390*)
+		cat <<EOF
+
+If the zfcp module is configured in root_dir/etc/zfcp.conf, mk_initrd
+will add zfcp support to the initrd as well.
+
+EOF
+# TODO: The root_device may be specified as /dev/*, LABEL=, UUID=.
+		;;
+	esac
 	exit
 }
 
@@ -155,14 +166,8 @@ EOM
 
 # the kernel images to use; must be in $boot_dir
 kernels_default="vmlinuz vmlinuz.suse"
-arch=`uname -m`
-arch=${arch/ppc64/ppc}
-[ "$arch" = ppc ] && kernels_default="vmlinux"
-test -d /proc/iSeries && kernels_default="vmlinux64"
-
 # initial ram disks (corresponding to $kernels); dto. in $boot_dir
 initrds_default="initrd initrd.suse"
-[ "$arch" = ppc ] && initrds_default="initrd"
 
 kernels=""
 initrds=""
@@ -170,6 +175,23 @@ modules=""
 boot_dir=""
 splash="auto"
 oem=""
+
+# architecture dependend changes:
+arch=`uname -m`
+arch=${arch/ppc64/ppc}
+arch=${arch/s390x/s390}
+case $arch in
+    ppc)
+	kernels_default="vmlinux"
+	initrds_default="initrd"
+	test -d /proc/iSeries && kernels_default="vmlinux64"
+	;;
+    s390)
+	kernels_default="kernel/image"
+	initrds_default="initrd"
+	splash=off
+	;;
+esac
 
 while getopts :hk:i:m:b:d:o:s:t: a ; do
 	case $a in
@@ -221,6 +243,7 @@ shift `expr $OPTIND - 1`
 [ -n "$1" ] && root_dir="$1"
 [ "$root_dir" ] || root_dir=/
 
+# handle splash screen
 [ "x$splash" = xoff ] && splash=
 if [ "x$splash" = xauto ] ; then
     splash=
@@ -238,6 +261,7 @@ if [ "x$splash" = xauto ] ; then
     splash=${splash#,}
 fi
 
+# check that $kernels and $initrds are both set or both unset
 if [ -n "$kernels" ] ; then
    if [ -z "$initrds" ] ; then
       echo "you have to specify -k and -i or none"
@@ -320,23 +344,29 @@ oops () {
   clean_up
 }
 
+# working directories
 tmp_initrd=$root_dir/$tmp_dir/initrd$$
 tmp_initrd_small=${tmp_initrd}_small
 
-x1=`mount 2>/dev/null | grep "on $root_dir " | tail -1`
-x2=`echo \`echo "$x1" | wc -l\``
-x3=`echo "$x1" | cut -f 1 -d " "`
-
-root_lvm=0
+# get root device from the $root_dir, if it is not given explicitely
 if [ -z "$rootdev" ] ; then
+    x1=`mount 2>/dev/null | grep "on $root_dir " | tail -1`
+    x2=`echo \`echo "$x1" | wc -l\``
+    x3=`echo "$x1" | cut -f 1 -d " "`
     [ "$x2" = 1 -a -b "$x3" ] && rootdev="$x3"
 fi
 
+# no mk_initrd without a root device
+[ "$rootdev" ] || error 1 "usage: mk_initrd [root_dir]"
+
+# check if the root device is an lvm device
+root_lvm=0
 if [ -b "$rootdev" ] ; then
     major=`ls -l "$rootdev" | sed -e "s/.* \\([0-9]\+\\), *[0-9]\+.*/\\1/"`
     [ "$major" -ne 58 ] || root_lvm=1
 fi
 
+# take the static utilities from root_dir, if they are present there. why so???
 if [ "$root_dir" != / ] ; then
   LD_LIBRARY_PATH=$root_dir/usr/lib
   PATH=$root_dir/usr/bin:$PATH
@@ -344,8 +374,11 @@ if [ "$root_dir" != / ] ; then
   [ -x "$root_dir$static_insmod" ] && static_insmod="$root_dir$static_insmod"
 fi
 
-[ "$rootdev" ] || error 1 "usage: mk_initrd [root_dir]"
+# check if zfcp is needed
+# TODO: / FIXME check for non-empty root_dir/etc/zfcp.conf
+cat /proc/modules | grep "^zfcp" && do_zfcp=1
 
+# determine the filesystem type of root
 x1=`cat /etc/fstab /proc/mounts 2>/dev/null | grep -E "$rootdev[[:space:]]" | tail -1`
 rootfstype=`echo $x1 | cut -f 3 -d " "`
 
@@ -353,13 +386,21 @@ rootfstype=`echo $x1 | cut -f 3 -d " "`
 
 echo "using \"$rootdev\" as root device (mounted on \"$root_dir\" as \"$rootfstype\")"
 
+# get INITRD_MODULES as set by YaST
 [ -f "$root_dir/etc/sysconfig/kernel" ] && . $root_dir/etc/sysconfig/kernel
 
 [ -z "$modules" ] && modules="$INITRD_MODULES"
 
+###################################################################
+# add modules required by features
 if [ "$root_lvm" = 1 ] ; then
   # add lvm-mod if missing
   echo " $modules " | grep -q " lvm-mod " || modules="lvm-mod $modules"
+fi
+
+if [ "$do_zfcp" = 1 ] ; then
+  # add zfcp-mod if missing
+  echo " $modules " | grep -q " zfcp " || modules="zfcp $modules"
 fi
 
 [ "$modules" -o "$root_lvm" = 1 -o -n "$oem" -o -n "$splash" ] || {
@@ -367,20 +408,26 @@ fi
   error 0 "no initrd required"
 }
 
+# set flags for modules
 do_raid=
 do_raid5=
 has_xor=
 has_jfs=
 has_nls=
+has_qdio=
 for i in $modules ; do
   case $i in
     raid[01]|linear) do_raid=1 ;;
     raid5) do_raid=1 do_raid5=1 ;;
+    zfcp) do_zfcp=1 ;;
     xor) has_xor=1 ;;
     jfs) has_jfs=1 ;;
     nls_iso8859-1) has_nls=1 ;;
+    qdio) has_qdio=1 ;;
   esac
 done
+
+# expand module dependencies
 
 # raid5 needs xor
 [ "$do_raid5" -a ! "$has_xor" ] && modules="xor $modules"
@@ -388,8 +435,12 @@ done
 # jfs needs nls_iso8859-1
 [ "$has_jfs" -a ! "$has_nls" ] && modules="$modules nls_iso8859-1"
 
+# zfcp needs qdio
+[ "$do_zfcp" -a ! "$has_qdio" ] && modules="qdio $modules"
+
+###################################################################
 need_libc=
-[ "$root_lvm" = 1 -o -n "$oem" -o "$use_pivot_root" -o "$has_jfs" ] && need_libc=1
+[ "$root_lvm" = 1 -o -n "$oem" -o "$use_pivot_root" -o "$has_jfs" -o "$do_zfcp" ] && need_libc=1
 
 if [ "$need_libc" ] ; then
   static_shell=/bin/ash
@@ -397,6 +448,7 @@ if [ "$need_libc" ] ; then
   image_inodes=7000
 fi
 
+# put the initrds in an array
 initrd_a=($initrds)
 
 exit_code=0
@@ -404,13 +456,16 @@ exit_code=0
 kernel_idx=0
 for k in $kernels ; do
 
+  # the kernel
   kk="$root_dir$boot_dir/$k"
   kk="${kk/#\/\///}"
 
   if [ -f "$kk" ] ; then
 
+    # the kernel version
     vv=`/sbin/get_kernel_version $kk`
 
+    # the initrd
     ii="$root_dir$boot_dir/${initrd_a[$kernel_idx]}"
     ii="${ii/#\/\///}"
 
@@ -423,11 +478,13 @@ for k in $kernels ; do
       continue
     }
 
+    # create an empty initrd
     mkdir $tmp_mnt
     dd if=/dev/zero of=$tmp_initrd bs=1k count=$image_blocks 2>/dev/null
     mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd 2>/dev/null 1>&2
     tune2fs -i 0 $tmp_initrd >/dev/null 2>&1
 
+    # mount it
     mount -t ext2 -oloop $tmp_initrd $tmp_mnt 2>/dev/null || { 
       if [ -f /lib/loop.o ] ; then
         insmod /lib/loop.o
@@ -440,6 +497,7 @@ for k in $kernels ; do
     }
     is_mounted=1
 
+    # fill the initrd
     rmdir $tmp_mnt/lost+found
     mkdir $tmp_mnt/{bin,dev}
     cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console,md*} $tmp_mnt/dev
@@ -473,6 +531,7 @@ for k in $kernels ; do
     fi
 
     if [ "$use_pivot_root" ] ; then
+      echo " - pivot root support"
       cp -a $root_dir/bin/mkdir $tmp_mnt/bin
       cp -a $root_dir/sbin/pivot_root $tmp_mnt/bin
     fi
@@ -483,6 +542,12 @@ for k in $kernels ; do
       cp -a $root_dir/lib/libpthread.so.* $tmp_mnt/lib
     fi
 
+    if [ "$do_zfcp" ] ; then
+      echo " - zfcp support"
+      cp -a --parents $root_dir/bin/cat       $tmp_mnt/
+      cp -a --parents $root_dir/etc/zfcp.conf $tmp_mnt/
+    fi
+
     echo '#! /bin/sh' >$lx_rc
     echo >>$lx_rc
     echo "export PATH=/bin" >>$lx_rc
@@ -490,6 +555,7 @@ for k in $kernels ; do
 
     chmod 755 $lx_rc
 
+    # copy the modules to the initrd
     for i in $modules; do
       # Note: we rely on module names being unique here. While this is true
       # so far there _are_ modules that are just links to others with the
@@ -517,6 +583,13 @@ for k in $kernels ; do
 #        continue 2
       fi
     done
+    if [ "$do_zfcp" ] ; then
+      echo " - zfcp support"
+      echo "echo \"zfcp ...\" " >>$lx_rc
+      echo "cat /etc/zfcp.conf > /proc/scsi/zfcp/add_map" >>$lx_rc
+      echo "echo \"done ...\" " >>$lx_rc
+    fi
+
     if [ "$do_raid" ] ; then
       echo " - raidautorun"
       echo "echo \"raidautorun ...\" " >>$lx_rc
@@ -540,14 +613,11 @@ for k in $kernels ; do
 
     if [ "$use_pivot_root" ] ; then
       cat >>$lx_rc <<xxx
-mount -n -t proc proc /proc
-mount -n -t $rootfstype $rootdev /mnt
-rm -f /mnt/.initrd 2>/dev/null
-mkdir -p /mnt/.initrd
+mkdir -p /mnt
+mount -n -oro -t $rootfstype $rootdev /mnt
 cd /mnt
-pivot_root . .initrd
-umount -n /.initrd/proc
-exec sh -c 'umount -n /.initrd ; rmdir /.initrd ; mount -n -oremount,ro /' </dev/console >/dev/console 2>&1
+pivot_root . tmp
+exec sh -c 'umount -n /tmp' </dev/console >/dev/console 2>&1
 xxx
     fi
 
