@@ -64,7 +64,16 @@ EOT
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#
-	test "$START_FW" = yes && /sbin/SuSEfirewall
+	if test "$START_FW" = yes ; then
+	    case `/sbin/kernelversion` in
+		2.4)
+			/sbin/SuSEfirewall2
+			;;
+		*)
+			/sbin/SuSEfirewall
+			;;
+	    esac
+	fi
 	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
 
 	#
@@ -113,7 +122,16 @@ EOT
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#
-	test "$START_FW" = yes && /sbin/SuSEfirewall
+	if test "$START_FW" = yes ; then
+	    case `/sbin/kernelversion` in
+		2.4)
+			/sbin/SuSEfirewall2
+			;;
+		*)
+			/sbin/SuSEfirewall
+			;;
+	    esac
+	fi
 	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
 
 	# call ip-down.local if it exists and is executable:
@@ -152,7 +170,16 @@ EOT
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#
-	test "$START_FW" = yes && /sbin/SuSEfirewall
+	if test "$START_FW" = yes ; then
+	    case `/sbin/kernelversion` in
+		2.4)
+			/sbin/SuSEfirewall2
+			;;
+		*)
+			/sbin/SuSEfirewall
+			;;
+	    esac
+	fi
 	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
 	
 	#
@@ -180,7 +207,16 @@ EOT
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#
-	test "$START_FW" = yes && /sbin/SuSEfirewall
+	if test "$START_FW" = yes ; then
+	    case `/sbin/kernelversion` in
+		2.4)
+			/sbin/SuSEfirewall2
+			;;
+		*)
+			/sbin/SuSEfirewall
+			;;
+	    esac
+	fi
 	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
 
 	# call ip-down.local if it exists and is executable:

@@ -10,7 +10,16 @@
 shopt -s extglob
 shopt -s cdspell
 
-complete -A directory		cd rmdir pushd mkdir chroot chrootx
+function _cd_ ()
+{
+    local c=${COMP_WORDS[COMP_CWORD]}
+    case "$c" in
+    \~*) COMPREPLY=($(compgen -u "$c")) ;;
+    *)   COMPREPLY=($(compgen -d "$c")) ;;
+    esac
+}
+
+complete -A directory -F _cd_	cd rmdir pushd mkdir chroot chrootx
 complete -A directory -A file	chown chgrp chmod chattr ln
 complete -A directory -A file	more cat less strip grep vi ed
 
