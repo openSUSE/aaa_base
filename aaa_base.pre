@@ -115,8 +115,8 @@ if test -e etc/passwd ; then
 fi
 
 for file in passwd group ; do
+ if test -f etc/$file ; then
   # like fillup, but : is the only separator
-  touch etc/$file
   rm -f etc/$file.add
   sort +0 -1 -t: -u etc/$file var/adm/fillup-templates/$file.aaa_base \
   | sort +0 -1 -t: etc/$file - | uniq -u > etc/$file.add
@@ -124,6 +124,9 @@ for file in passwd group ; do
   rm -f etc/$file.add
   # fix permissions if this script is called with strange umask
   chmod 644 etc/$file
+ else
+  cat var/adm/fillup-templates/$file.aaa_base > etc/$file
+ fi
 done
 
 if test -d sbin/init.d -a ! -L sbin/init.d ; then

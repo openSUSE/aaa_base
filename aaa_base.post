@@ -96,7 +96,7 @@ done
 for i in passwd group shadow gshadow ; do
     test -e var/adm/fillup-templates/$i.aaa_base || continue
     echo -n "Updating etc/$i..."
-    touch etc/$i
+  if test -f etc/$i ; then  
     cp etc/$i etc/$i.tmp
     rm -f etc/$i.add
     sort +0 -1 -t: -u etc/$i var/adm/fillup-templates/$i.aaa_base \
@@ -114,6 +114,9 @@ for i in passwd group shadow gshadow ; do
     grep "^+" etc/$i >> etc/$i.tmp
     test -s etc/$i.tmp && cat etc/$i.tmp > etc/$i
     rm -f etc/$i.tmp
+  else
+    cat var/adm/fillup-templates/$i.aaa_base > etc/$i
+  fi
 done
 # check/fix owner and permission of shadow files
 for i in etc/shadow etc/group ; do
