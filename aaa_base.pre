@@ -101,16 +101,8 @@ done < var/adm/fillup-templates/group.aaa_base
 
 # etc/passwd update
 if test -e etc/passwd ; then
-  sed " 
-	# re-do these users on update, their home-dir was changed
-	 /^news:\|^uucp:\|^man:\|^ftp:.*:.usr.local.ftp:/d
-
-	# change group of wwwrun: nogroup -> www
-        s|^wwwrun:x:30:65534:|wwwrun:x:30:8:|
-
-	# change login shell of wwwrun
-	s|^\(wwwrun:x:30:8:.*:\)/bin/bash|\1/bin/false|
-  " < etc/passwd > etc/passwd.t
+  grep -v "^news:\|^uucp:\|^man:\|^ftp:.*:.usr.local.ftp:\|^wwwrun:" \
+    etc/passwd > etc/passwd.t
   cat etc/passwd.t > etc/passwd
   rm -f etc/passwd.t
 fi
