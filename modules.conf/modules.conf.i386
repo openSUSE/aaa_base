@@ -46,4 +46,7 @@ post-install binfmt_misc mount -t binfmt_misc none /proc/sys/fs/binfmt_misc
 pre-remove binfmt_misc umount /proc/sys/fs/binfmt_misc
 endif
 
+# required for DRI support on SiS chips
+options sisfb             mode=none mem=12288
+
 # end of i386 part for modules.conf
