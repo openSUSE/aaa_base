@@ -1,5 +1,5 @@
 --- SRC/parser.c
-+++ SRC/parser.c	2002/01/28 12:37:57
++++ SRC/parser.c	2002/01/29 15:45:38
 @@ -388,8 +388,10 @@
      {
          Counter = 1;
@@ -13,7 +13,7 @@
                 ( *buffer != delimiterStart ) )
          {
              Counter++;
-@@ -1348,6 +1350,37 @@
+@@ -1348,6 +1350,39 @@
      }       
  }
  
@@ -38,6 +38,8 @@
 +    {
 +       if( '\n' == baseFileHeader[ loop ] )
 +       {
++           if( 0 == loop ) break;   /* empty header */
++
 +           if( '\n' == baseFileHeader[ loop+1 ] )
 +           {
 +               writeVariableBlock( baseFileHeader, loop+1, filePointer );
@@ -51,7 +53,7 @@
  /*------------------ writeOutput -------------------*/
  
  static
-@@ -1375,7 +1408,23 @@
+@@ -1375,7 +1410,23 @@
          &&  ( FileOpened == openFileForWriting( newBaseFileName, &filePointer ) ) )
          {
              listPointer = baseFileBlock;
@@ -76,7 +78,7 @@
              {
                  evaluationClass = getVEvaluationClass( listPointer );
                  switch( evaluationClass )
-@@ -1400,7 +1449,24 @@
+@@ -1400,7 +1451,24 @@
      if( FileOpened == openFileForWriting( outputFileName, &filePointer ) )
      {
          listPointer = baseFileBlock;
