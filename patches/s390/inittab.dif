@@ -1,6 +1,6 @@
---- etc/inittab	Mon Jun 26 01:19:45 2000
-+++ etc/inittab	Mon Jun 26 01:24:41 2000
-@@ -38,14 +38,7 @@
+--- etc/inittab	2001/03/27 10:47:48	1.1
++++ etc/inittab	2001/03/27 10:52:35
+@@ -40,14 +40,7 @@
  
  # what to do in single-user mode
  ls:S:wait:/etc/init.d/rc S
@@ -16,24 +16,21 @@
  
  # what to do when power fails/returns
  pf::powerwait:/etc/init.d/powerfail    start
-@@ -53,42 +46,9 @@
- #pn::powerfail:/etc/init.d/powerfail now
- po::powerokwait:/etc/init.d/powerfail  stop
+@@ -58,30 +51,8 @@
+ # for ARGO UPS
+ sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
  
--# for ARGO UPS
--sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
--
- # getty-programs for the normal runlevels
- # <id>:<runlevels>:<action>:<process>
- # The "id" field  MUST be the same as the last
- # characters of the device (after "tty").
--1:123:respawn:/sbin/mingetty --noclear tty1
--2:123:respawn:/sbin/mingetty tty2
--3:123:respawn:/sbin/mingetty tty3
--4:123:respawn:/sbin/mingetty tty4
--5:123:respawn:/sbin/mingetty tty5
--6:123:respawn:/sbin/mingetty tty6
--#S0:123:respawn:/sbin/agetty -L 9600 ttyS0
+-# getty-programs for the normal runlevels
+-# <id>:<runlevels>:<action>:<process>
+-# The "id" field  MUST be the same as the last
+-# characters of the device (after "tty").
+-1:2345:respawn:/sbin/mingetty --noclear tty1
+-2:2345:respawn:/sbin/mingetty tty2
+-3:2345:respawn:/sbin/mingetty tty3
+-4:2345:respawn:/sbin/mingetty tty4
+-5:2345:respawn:/sbin/mingetty tty5
+-6:2345:respawn:/sbin/mingetty tty6
+-#S0:12345:respawn:/sbin/agetty -L 9600 ttyS0 vt102
 -
 -#
 -#
@@ -44,19 +41,11 @@
 -#  This is for the package xdmsc, after installing and
 -#  and configuration you should remove the comment character
 -#  from the following line:
--#7:2:respawn:+/etc/init.d/rx tty7
+-#7:3:respawn:+/etc/init.d/rx tty7
 -
 -
--
--# modem getty.
--# mo:23:respawn:/usr/sbin/mgetty -s 38400 modem
--
--# fax getty (hylafax)
--# mo:23:respawn:/usr/lib/fax/faxgetty /dev/modem
--
--# vbox (voice box) getty
--# I6:23:respawn:/usr/sbin/vboxgetty -d /dev/ttyI6
--# I7:23:respawn:/usr/sbin/vboxgetty -d /dev/ttyI7
-+1:01236:respawn:/sbin/sulogin /dev/console
++# on S/390 enable console login in all runlevels
++1:012356:respawn:/sbin/sulogin /dev/console
  
--# end of /etc/inittab
+ # modem getty.
+ # mo:235:respawn:/usr/sbin/mgetty -s 38400 modem
