@@ -1404,7 +1404,6 @@ writeBaseFileHeader
                /* the criterion is a newline character next */
                if( '\n' == baseFileHeader[ endOfHeader + 1 ] )
                {
-                   endOfHeader++;
                    break;
                }
            }
@@ -1435,8 +1434,11 @@ writeBaseFileHeader
 
         case TrailingCommentBlock:
              {
-                 displayVerboseString( "\nSingle trailing comment as header is written\n" );
-                 writeVariableBlock( baseFileHeader, endOfHeader, filePointer );
+                 if( 1 == numberOfUsedBaseBlocks )
+                 {
+                     displayVerboseString( "\nSingle trailing comment as header is written\n" );
+                     writeVariableBlock( baseFileHeader, endOfHeader, filePointer );
+                 } 
              } break;
              
         default: break;   /* do nothing */
@@ -1474,6 +1476,7 @@ writeOutput
             switch( evaluationClass )
             {
                 case Output:
+                case Ignored:
                     displayVerbose( "base", listPointer );
                     getVBeginOfBlock( listPointer, &variableBlock );
                     writeVariableBlock( variableBlock, getVLength( listPointer ), filePointer );

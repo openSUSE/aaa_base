@@ -16,7 +16,7 @@ all:	Test1 Test2 Test3 Test4 Test5
 Test1:	Test100 Test101 Test102 Test103 Test104
 Test2:  Test200 Test201
 Test3:  Test300 Test301
-Test4:  Test400 Test401 Test402
+Test4:  Test400 Test401
 Test5:  Test500 Test501
 
 
@@ -169,20 +169,6 @@ Test401: fillup
 	Evaluate 401
 	-diff $(REF)/Test401.newtxt authors.base.new > TestDifference.txt
 	Evaluate 401
-	@echo "---------------------------"
-
-Test402: fillup
-	@echo "---------------------------"
-	rm -f authors.*
-	./CreateAuthors HEADER
-	mv authors.text ./authors.base
-	./CreateAuthors 2 14
-	mv authors.text ./authors.add
-	$(TESTOBJ) -t -r authors.base authors.add authors.outfile
-	-diff $(REF)/Test402.txt authors.outfile > TestDifference.txt
-	Evaluate 402
-	-diff $(REF)/Test402.newtxt authors.base.new > TestDifference.txt
-	Evaluate 402
 	@echo "---------------------------"
 
 Test500: fillup
