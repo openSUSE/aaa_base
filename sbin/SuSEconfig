@@ -436,6 +436,11 @@ if test -d $r/usr/lib/crisp/macros ; then
     echo "export CRPATH" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv CRPATH /usr/lib/crisp/macros" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
+if test -d $r/usr/lib/cint ; then
+    echo "CINTSYSDIR=/usr/lib/cint" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export CINTSYSDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv CINTSYSDIR /usr/lib/cint" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
 if test -d $r/usr/lib/maxwell ; then
     echo "MAXHOME=/usr/lib/maxwell" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export MAXHOME" >> $r/etc/SuSEconfig/profile.SuSEconfig
