@@ -527,7 +527,7 @@ case $ACTION in
       # service with private extensions and call us recursivle for every
       # found extension.
       if [ "$EXT" = "" ] ; then
-        for a in `ls -t "$BACKUP"*`; do
+        for a in `ls -t "$BACKUP"* 2>/dev/null`; do
           EXT=${a##$BACKUP.}
           $0 $COMMANDLINE -e "$EXT"
         done
@@ -536,6 +536,20 @@ case $ACTION in
         fi
       fi
       log "no matching backup found, left everything alone"
+    fi
+    # If there is no backup left, make sure that $RESOLVCONF does not contain
+    # an info block
+    if [ -z "`ls ${RESOLVCONF}.saved.by.* $LAST_BACKUP $INDIRECT_BACKUPS \
+                 $DIRECT_BACKUP $INVALID_BACKUPS 2>/dev/null`" ] ; then
+      if grep -qs "### BEGIN INFO" $RESOLVCONF 2>/dev/null; then
+        log "removing info block from $RESOLVCONF, because there is" \
+            "no backup left"
+        TMPFILE=`mktemp /tmp/mdfrc.XXXXXX`
+        cp -p $RESOLVCONF $TMPFILE
+        sed "/### BEGIN INFO/,/### END INFO/d" $TMPFILE >  $RESOLVCONF
+        rm $TMPFILE
+        chmod 644 $RESOLVCONF
+      fi
     fi
     ;;
   cleanup)
@@ -560,7 +574,7 @@ case $ACTION in
     test -n "$MSG" && log "Deleted the following stale backups: $MSG"
     # After cleaning up resolc.conf should not contain an INFO block that
     # marks it as modified. If it somehow happens that it has it, we remove it.
-    if grep "### BEGIN INFO" $RESOLVCONF 2>/dev/null; then
+    if grep -qs "### BEGIN INFO" $RESOLVCONF 2>/dev/null; then
       TMPFILE=`mktemp /tmp/mdfrc.XXXXXX`
       cp -p $RESOLVCONF $TMPFILE
       sed "/### BEGIN INFO/,/### END INFO/d" $TMPFILE >  $RESOLVCONF
