@@ -46,13 +46,12 @@ do
     fi
 done
 
-PIDFILE=""
+PIDFILE="/var/run/xdm.pid"
 KDEROOTHOME=/root/.kdm
 export KDEROOTHOME
 
 case "$DISPLAYMANAGER" in
-    kdm|kde|KDM|KDE)	 PIDFILE="-p /var/run/xdm.pid"
-			 DISPLAYMANAGER=/opt/kde3/bin/kdm ;;
+    kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde3/bin/kdm ;;
     xdm) DISPLAYMANAGER=/usr/X11R6/bin/xdm ;;
     gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/bin/gdm ;;
     wdm|WDM)		 DISPLAYMANAGER=/usr/X11R6/bin/wdm ;;
@@ -80,7 +79,7 @@ case "$1" in
 		ln -snf $PIDFILE /etc/X11/xdm/xdm-pid
 		ln -snf /var/log/xdm.errors /etc/X11/xdm/xdm-errors
 	fi 
-	startproc $PIDFILE $DISPLAYMANAGER || rc_failed
+	startproc -p $PIDFILE $DISPLAYMANAGER || rc_failed
 	# After a crash or a kill signal we may have
 	# a wrong owner ship of /dev/xconsole
 	if rc_status ; then
@@ -103,7 +102,7 @@ case "$1" in
 		rm -f /etc/X11/xdm/xdm-pid
 		rm -f /etc/X11/xdm/xdm-errors
 	fi
-	killproc $PIDFILE -TERM $DISPLAYMANAGER
+	killproc -p $PIDFILE -TERM $DISPLAYMANAGER
 	rc_status -v
 	;;
     restart)
@@ -113,12 +112,12 @@ case "$1" in
 	;;
     reload|force-reload)
 	echo -n "Reload service $DM"
-	killproc $PIDFILE -HUP  $DISPLAYMANAGER
+	killproc -p $PIDFILE -HUP  $DISPLAYMANAGER
 	rc_status -v
 	;;
     status|check)
 	echo -n "Checking for service ${DM}: "
-	checkproc $PIDFILE $DISPLAYMANAGER
+	checkproc -p $PIDFILE $DISPLAYMANAGER
 	rc_status -v
 	;;
     probe)
