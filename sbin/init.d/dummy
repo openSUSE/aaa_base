@@ -46,6 +46,7 @@ else
 fi
 
 test -n "$dev" || exit 0
+test "$dev" = "dhcpclient" && exit 0
 
 return=$rc_done
 case "$1" in

@@ -116,9 +116,9 @@ ippp*)
 		if [ -f /etc/ppp/resolv.prev ]; then
 			cp -fp /etc/ppp/resolv.prev /etc/resolv.conf
 			echo "Restored original /etc/resolv.conf"
-		else
-			rm -f /etc/resolv.conf
-			echo "Deinstalled /etc/resolv.conf"
+		#else
+		#	rm -f /etc/resolv.conf
+		#	echo "Deinstalled /etc/resolv.conf"
 		fi
 	fi
 
