@@ -75,14 +75,16 @@ case "$1" in
 	    fi
         fi
 	#
-	if test "$ROOTFS_FSCK" = "0" -a ! -f /forcefsck ] ; then
+        FSCK_FORCE=""
+	if test -f /forcefsck ; then
+	    FSCK_FORCE="-f"
+	    ROOTFS_FSCK=""
+        fi
+	if test "$ROOTFS_FSCK" = "0" ; then
 	    # already checked and ok, skip the rest
             MAY_FSCK=0
         fi
 	if test ! -f /fastboot -a -z "$fastboot" -a $MAY_FSCK -eq 1 ; then
-	    FSCK_FORCE=""
-	    test -f /forcefsck && FSCK_FORCE="-f"
-
 	    # on an umsdos root fs this mount will fail,
 	    # so direct error messages to /dev/null.
 	    # this seems to be ugly, but should not really be a problem.
@@ -155,9 +157,13 @@ case "$1" in
 	    unset BLKID_FILE
 	    rm -f /dev/shm/tmp_blkid.tab
 	else
-	    echo "root file system (/) is NOT being checked."
-	    mount -n -o remount,rw /
+	    if test "$ROOTFS_FSCK" != "0" ; then
+		echo "root file system (/) is NOT being checked."
+		mount -n -o remount,rw /
+	    fi
 	fi
+	# unmount devfs passed from initrd
+	umount /lib/klibc/dev || true
 	rm -f /etc/mtab*
 	mount -f /
 	;;
