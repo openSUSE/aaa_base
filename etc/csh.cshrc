@@ -171,6 +171,13 @@ if ( -o /dev/$tty && ${?DISPLAY} ) then
   set prompt="%C2%# "
 endif
 #
+# tcsh help system does search for uncompressed helps file
+# within the cat directory system of a old manual page system.
+# Therefore we use whatis as alias for this helpcommand
+#
+alias helpcommand whatis
+
+#
 # Are we a tcsh?
 #
 if ($?tcsh) then
