@@ -37,6 +37,7 @@
 /usr/X11R6/bin/xtvscreen.SuSE-static   root.video        755
 /usr/bin/bttvgrab                      root.video        755
 /usr/bin/chage                         root.shadow       755
+/usr/bin/chkey                         root.root         755
 /usr/bin/chfn                          root.shadow       755
 /usr/bin/chsh                          root.shadow       755
 /usr/bin/dos                           root.root         755

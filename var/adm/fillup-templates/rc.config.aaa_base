@@ -1,5 +1,5 @@
 #
-# Which language should be used
+# Which language should be used by YaST
 #
 LANGUAGE=
 
@@ -11,6 +11,74 @@ LANGUAGE=
 #
 ENABLE_SUSECONFIG=yes
 
+#
+# This variable will get local users as their $LANG variable.
+# Setting this variable also for daemons and the root user
+# is controlled by the variables INIT_SCRIPT_USE_LANG and 
+# ROOT_USES_LANG.
+#
+# $LANG is the default of all $LC_*-variables, as long as
+# $LC_ALL is not set, which overrules all $LC_-variables.
+#
+RC_LANG="POSIX"
+
+#
+# This varible will get local users as their $LC_ALL variable.
+# Setting this variable also for daemons and the root user
+# is controlled by the variables INIT_SCRIPT_USE_LANG and 
+# ROOT_USES_LANG.
+# If it is set, it overrules all $LC_-variables incl. $LANG
+#
+RC_LC_ALL=""
+
+#
+# This defines the locale in which messages of programs and
+# libraries with i18n-support should appear if a translated
+# message catalog for the library or the program is installed.
+# It also defines yes/no answers which are defined by the locale.
+#
+RC_LC_MESSAGES=""
+
+#
+# This defines the locale for character handling and classification.
+# The locale defined here is used by the libc in functions which
+# are used to qualify if this character is an charcater which may
+# be used in an text string, if the character is e.g. lowercase
+# and it defnes upper/lowercase-mapping of foreign characters
+#
+RC_LC_CTYPE=""
+
+#
+# This defines the locale for sorting strings and characters.
+# The locale defined here is used by the libc in functions which
+# are used to qualify if a character is befor or beyond an other
+# character in the alphabet. Note: sort(1) doesn't use these
+# functions, but other application such as databases may use it.
+#
+RC_LC_COLLATE=""
+
+#
+# This defines the locale for formatting date and time output.
+# i.e.: 06/09/1999 vs. 09.06.1999
+#
+RC_LC_TIME=""
+
+#
+# This defines the locale for formatting and reading numbers.
+# i.e.: 1,234.56 vs. 1.234,56
+#
+RC_LC_NUMERIC=""
+
+#
+# This defines the locale for formatting and reading money values.
+#
+RC_LC_MONETARY=""
+
+#
+# This defines if the user "root" should use the locale settings
+# which are defined here.
+#
+ROOT_USES_LANG="no"
 
 #
 # SuSEconfig can mail reports (created by YaST or included in packages)
