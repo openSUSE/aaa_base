@@ -1,6 +1,7 @@
+# s390 has just one console and no local keyboard
 --- etc/inittab	2001/03/27 10:47:48	1.1
 +++ etc/inittab	2001/03/27 10:52:35
-@@ -40,14 +40,7 @@
+@@ -39,14 +39,7 @@
  
  # what to do in single-user mode
  ls:S:wait:/etc/init.d/rc S
@@ -15,8 +16,8 @@
 +~~:S:respawn:/sbin/sulogin /dev/console
  
  # what to do when power fails/returns
- pf::powerwait:/etc/init.d/powerfail    start
-@@ -58,30 +51,8 @@
+ pf::powerwait:/etc/init.d/powerfail start
+@@ -58,28 +51,8 @@
  # for ARGO UPS
  sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
  
@@ -33,7 +34,6 @@
 -#S0:12345:respawn:/sbin/agetty -L 9600 ttyS0 vt102
 -
 -#
--#
 -#  Note: Do not use tty7 in runlevel 3, this virtual line
 -#  is occupied by the programm xdm.
 -#
@@ -42,7 +42,6 @@
 -#  and configuration you should remove the comment character
 -#  from the following line:
 -#7:3:respawn:+/etc/init.d/rx tty7
--
 -
 +# on S/390 enable console login in all runlevels
 +1:012356:respawn:/sbin/sulogin /dev/console
