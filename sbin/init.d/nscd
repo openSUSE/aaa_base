@@ -25,7 +25,24 @@ case "$1" in
     start)
 	echo -n "Starting Name Switch Cache Daemon"
 
-	startproc /usr/sbin/nscd || return=$rc_failed
+	secure=` cat /etc/nsswitch.conf | while read curline ; do
+	  table=${curline%:*}
+	  entries=${curline##$table:}
+	  table=${table%[^a-z]}
+	  case $table in
+	    passwd|group|hosts)
+	      for entry in $entries ; do
+		case $entry in
+		  nisplus*)
+		    /usr/sbin/nscd_nischeck $table || echo "-S $table,yes"
+		  ;;
+		esac
+	      done
+	    ;;
+	  esac
+	done`
+
+	startproc /usr/sbin/nscd $secure || return=$rc_failed
 
 	echo -e "$return"
 	;;
