@@ -103,7 +103,7 @@ check_log_file () {
         echo "The following backup(s) do exist now:"
         ls -l "$1"-[0-9]*
         echo
-	if test -n $5 ; then
+	if test -n "$5" ; then
           if test -x /sbin/init.d/$5 ; then
             /sbin/init.d/$5 reload
           fi
