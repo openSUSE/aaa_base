@@ -378,7 +378,7 @@ fi
 #
 # zFCP
 #
-cat /proc/modules | grep "^zfcp" && do_zfcp=1
+cat /proc/modules | grep -q "^zfcp" && do_zfcp=1
 
 zfcp_conf_contents=0
 test -f $root_dir/etc/zfcp.conf && zfcp_conf_contents=$(sed -s '
@@ -392,15 +392,22 @@ test $zfcp_conf_contents -ne 0 && do_zfcp=1
 #
 # DASD
 #
-cat /proc/modules | grep "^dasd" && do_dasd=1
+cat /proc/modules | grep -q -e "^dasd_mod" && do_dasd=1
 
 # the dasd module has to be configured in root_dir/etc/zipl.conf or
 # with a parameter in modules.conf
 
-grep -q '^[[:space:]]*parameters=.*dasd=' $root_dir/etc/zipl.conf && zipl_conf_with_dasd=1
+test -f $root_dir/etc/zipl.conf && {
 
-grep '^[[:space:]]*parameters=' $root_dir/etc/zipl.conf |
-grep -qv 'dasd=' && zipl_conf_no_dasd=1
+    # check for zipl boot parameters with dasd= and check for
+    # parameters without dasd=.  if both are present, warn below.
+
+    grep -q '^[[:space:]]*parameters=.*dasd=' $root_dir/etc/zipl.conf \
+	&& zipl_conf_with_dasd=1
+
+    grep '^[[:space:]]*parameters=' $root_dir/etc/zipl.conf \
+	| grep -qv 'dasd=' && zipl_conf_no_dasd=1
+}
 
 grep -q '^[[:space:]]*options[[:space:]]\+dasd' $root_dir/etc/modules.conf && dasd_modules_conf=1
 
@@ -429,16 +436,6 @@ if [ "$root_lvm" = 1 ] ; then
   echo " $modules " | grep -q " lvm-mod " || modules="lvm-mod $modules"
 fi
 
-if [ "$do_zfcp" = 1 ] ; then
-  # add zfcp-mod if missing
-  echo " $modules " | grep -q " zfcp " || modules="zfcp $modules"
-fi
-
-if [ "$do_dasd" = 1 ] ; then
-  # add dasd-mod if missing
-  echo " $modules " | grep -q " dasd " || modules="dasd $modules"
-fi
-
 # check if an initrd is needed at all.
 #
 # on s390 the initrd is always needed as long as we don't set the
@@ -449,7 +446,7 @@ fi
 }
 
 ###################################################################
-# set flags for modules
+# synchronize $do_* and $has_* flags with $modules
 do_raid=
 do_raid5=
 has_xor=
@@ -460,10 +457,13 @@ for i in $modules ; do
   case $i in
     raid[01]|linear) do_raid=1 ;;
     raid5) do_raid=1 do_raid5=1 ;;
-    zfcp) do_zfcp=1 ;;
-    dasd) do_dasd=1 ;;
+    zfcp) do_zfcp=1 ; has_zfcp=1;;
+    dasd) do_dasd=1 ; has_dasd=1;;
     xor) has_xor=1 ;;
     jfs) has_jfs=1 ;;
+    dasd_fba_mod) has_dasd_fba=1 ;;
+    dasd_eckd_mod) has_dasd_eckd=1 ;;
+    dasd_diag_mod) has_dasd_diag=1 ;;
     nls_iso8859-1) has_nls=1 ;;
     qdio) has_qdio=1 ;;
   esac
@@ -481,6 +481,26 @@ done
 # zfcp needs qdio
 [ "$do_zfcp" -a ! "$has_qdio" ] && modules="qdio $modules"
 
+# dasd needs either fba or eckd
+test "$do_dasd" && {
+    test "$has_dasd_eckd" -o "$has_dasd_fba" || {
+	error 1 "unload dasd_mod or load dasd_fba_mod or dasd_eckd_mod"
+    }
+}
+
+# add dasd modules
+test "$do_dasd" && {
+    test "$has_dasd" || modules="dasd $modules"
+    test "$has_dasd_eckd" || modules="$modules dasd_eckd_mod"
+    test "$has_dasd_fba"  || modules="$modules dasd_fba_mod"
+    test "$has_dasd_diag" || modules="$modules dasd_diag_mod"
+}
+
+# add zfcp modules
+test "$do_zfcp" && {
+    test "$has_zfcp" || modules="zfcp $modules"
+}
+
 ###################################################################
 # more sanity checks after all variables and $modules are synchronized:
 
@@ -497,6 +517,7 @@ root_dir/etc/zipl.conf and root_dir/etc/modules.conf"
 warning: there are some parameter definitions without dasd parameter
 in root_dir/etc/zipl.conf:"
 
+	# show all sections with paramenters
 	grep -n -e '^[[:space:]]*\[' -e '^[[:space:]]*parameters=' $root_dir/etc/zipl.conf |
 	grep --before-context=1  '^[[:digit:]]*:[[:space:]]*parameters='
 	test "$dasd_modules_conf" && {
