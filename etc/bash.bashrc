@@ -7,7 +7,8 @@
 # Check which shell is reading this file
 #
 if test -z "$is" ; then
-  case "`ls -l /proc/$$/exe`" in
+ if test -f /proc/mounts ; then
+  case "`/bin/ls -l /proc/$$/exe`" in
     */bash)	is=bash ;;
     */rbash)	is=bash ;;
     */ash)	is=ash  ;;
@@ -15,6 +16,9 @@ if test -z "$is" ; then
     */zsh)	is=zsh  ;;
     */*)	is=sh   ;;
   esac
+ else
+  is=sh
+ fi
 fi
 
 #
