@@ -1,0 +1,106 @@
+#!/bin/bash
+# quick_halt, quick_reboot, quick_poweroff (symlinks)
+# Fast system shutdown, that does not carefully stop every single service
+# in the specified order, but just sends a TERM and KILL to everyone
+# and makes sure the filesystems get shut down properly prior to
+# reboot/halt/poweroff
+# Slightly better than SysRq - E S I U B/O ...
+# 
+# (w) Kurt Garloff <garloff@suse.de>, 8/2001, GNU GPL
+# USE AT YOUR OWN RISK!
+
+# Test root
+if test "$UID" != "0"; then
+  echo "You need to be root to execute $0"
+  exit 1
+fi
+
+# Warn users and syslog the event
+echo "$0: System is going down now ..." | wall
+echo "$0: System is going down now ..." | logger
+
+sync
+# Reexexute init (shared libs) and free consoles
+telinit u
+
+# We could play tricks here to redirect messages to some console.
+# For now, we ignore this ... as it's not straightforward
+# (we'd need to kill init and fun like this)
+
+# We might want to get rid of e-mail waiting in the sendmail queue
+#/usr/sbin/sendmail -s & sleep 1
+
+# Avoid being interrupted
+trap "echo" SIGINT SIGSEGV SIGQUIT SIGTERM
+set +e
+
+# Local stuff ...
+test -e /etc/init.d/halt.local && {
+    echo Running /etc/init.d/halt.local
+    /bin/sh /etc/init.d/halt.local
+}
+
+# Determine halt/reboot/poweroff
+cmnd=${0##*/}
+cmnd=${cmnd#quick_}
+$cmnd -w
+
+# Flush buffers first (so disk is ready to process the stuff processes write
+# upon SIGTERM) and send signals
+sync
+echo "Sending SIGTERM to everyone ..."
+killall5 -15
+sleep 5
+
+# For the shells, pppd, ...
+killall5 -1
+sync
+sleep 1
+# Umount network filesystems and stop network
+umount -avft coda &
+umount -avft smbfs & 
+umount -avft ncpfs &
+umount -avft nfs &
+sleep 1
+rcnetwork stop
+
+echo "Sending SIGKILL to remaining processes ..."
+killall5 -9
+
+# Determine console that syslog is sent to and switch to it
+while read act dev ; do
+    case "$dev" in
+	/dev/tty*) SYSLOGCONS=${dev#*tty}; break ;;
+    esac
+done < /etc/syslog.conf
+test -z "$SYSLOGCONS" && SYSLOGCONS=10
+
+# Now shut down filesystems ... properly 
+umount -av
+# The swapoff is only needed if we have swap files or swap on top
+# of raid or LVM; otherwise you may comment it out.
+swapoff -a; umount -av
+
+chvt $SYSLOGCONS &
+# Stop raid and LVM
+if test -f /etc/mdtab -a -x /sbin/mdstop ; then
+    echo -n "Disable Multiple Devices"
+    /sbin/mdstop -a
+    # raidstop --all
+fi
+	    
+if test -d /etc/lvmtab.d -a -x /sbin/vgchange ; then
+    /sbin/vgchange -a n
+fi
+mount -o remount,ro / 
+sync
+
+echo -en "\033[10;300]\a"
+usleep 125000
+echo "$cmnd ... "
+# Now, we should give the disks some chance to flush their internal buffers
+if [ "$cmnd" != "halt" ]; then sleep 1; fi
+echo -en "\033[10;200]\a"
+
+# Done
+exec /sbin/$cmnd -d -f
