@@ -24,11 +24,9 @@ LC_MONETARY"
 
 for var in $locale_vars
 do
-    if eval test "\$RC_$var"; then
-        eval $var="\$RC_$var"  
+    if eval test -z "\$$var"; then
+        eval $var="\$RC_$var"
         export $var
-    else
-        unset $var
     fi
 done
 
