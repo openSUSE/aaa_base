@@ -688,7 +688,7 @@ test "$CHECK_INITTAB" = yes && {
     fi
 
     case "$DISPLAYMANAGER" in
-        kdm|KDM|xdm|XDM) INITRL=3;;
+        kdm|KDM|xdm|XDM|gdm|GDM) INITRL=3;;
         *)               INITRL=2;;
     esac
 
