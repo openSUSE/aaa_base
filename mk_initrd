@@ -30,6 +30,9 @@
 #
 # ChangeLog:
 #
+# 13/2/2002:    v1.23
+#  - use default kernel names on alpha. 
+#
 # 14/1/2002:	v1.22
 #  - INITRD_MODULES has been moved to /etc/sysconfig/kernel
 #
@@ -130,7 +133,6 @@ kernels_default="vmlinuz vmlinuz.suse"
 arch=`uname -m`
 arch=${arch/ppc64/ppc}
 [ "$arch" = ppc ] && kernels_default="vmlinux"
-[ "$arch" = alpha ] && kernels_default="vmlinux.gz vmlinux.suse.gz"
 test -d /proc/iSeries && kernels_default="vmlinux64"
 
 # initial ram disks (corresponding to $kernels); dto. in $boot_dir
