@@ -31,9 +31,9 @@ if [ -L /usr/lib/java ] ; then
 fi  
 
 JAVALINKTO=
-if   [ -d /usr/lib/IBMJava2/jre/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2
-elif [ -d /usr/lib/SunJava2/bin ] ; then JAVALINKTO=/usr/lib/SunJava2
-elif [ -d /usr/lib/SunJava1/bin ] ; then JAVALINKTO=/usr/lib/SunJava1
+if   [ -d /usr/lib/SunJava1/bin ] ; then JAVALINKTO=/usr/lib/SunJava1
+elif [ -d /usr/lib/SunJava2/jre/bin ] ; then JAVALINKTO=/usr/lib/SunJava2
+elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2
 fi
 
 if [ -n "$JAVALINKTO" ] ; then

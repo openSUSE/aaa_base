@@ -67,9 +67,9 @@ case "$JAVA_VER" in
 	  ;;
 	"SunJava2")  
 	  if [ "$DEVEL" = "yes" ] ; then
-	    if [ -e /usr/lib/SunJava2/bin/javac ] ; then JAVALINKTO=/usr/lib/SunJava2; fi
-	  else    
 	    if [ -d /usr/lib/SunJava2/bin ] ; then JAVALINKTO=/usr/lib/SunJava2; fi
+	  else    
+	    if [ -d /usr/lib/SunJava2/jre/bin ] ; then JAVALINKTO=/usr/lib/SunJava2; fi
 	  fi
 	  ;;
         "IBMJava2")
@@ -81,11 +81,11 @@ case "$JAVA_VER" in
 	  ;;
         "Java2")
 	  if [ "$DEVEL" = "yes" ] ; then
-	    if   [ -e /usr/lib/SunJava2/bin/javac ] ; then JAVALINKTO=/usr/lib/SunJava2
+	    if   [ -d /usr/lib/SunJava2/bin ] ; then JAVALINKTO=/usr/lib/SunJava2
 	    elif [ -d /usr/lib/IBMJava2/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2 
 	    fi
 	  else
-	    if   [ -d /usr/lib/SunJava2/bin ] ; then JAVALINKTO=/usr/lib/SunJava2
+	    if   [ -d /usr/lib/SunJava2/jre/bin ] ; then JAVALINKTO=/usr/lib/SunJava2
 	    elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2
             fi
 	  fi
@@ -93,12 +93,12 @@ case "$JAVA_VER" in
         "default")
 	  if [ "$DEVEL" = "yes" ] ; then
 	    if   [ -e /usr/lib/SunJava1/bin/javac ] ; then JAVALINKTO=/usr/lib/SunJava1
-	    elif [ -e /usr/lib/SunJava2/bin/javac ] ; then JAVALINKTO=/usr/lib/SunJava2
+	    elif [ -d /usr/lib/SunJava2/bin ] ; then JAVALINKTO=/usr/lib/SunJava2
 	    elif [ -d /usr/lib/IBMJava2/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2
             fi
 	  else
 	    if   [ -d /usr/lib/SunJava1/bin ] ; then JAVALINKTO=/usr/lib/SunJava1
-	    elif [ -d /usr/lib/SunJava2/bin ] ; then JAVALINKTO=/usr/lib/SunJava2
+	    elif [ -d /usr/lib/SunJava2/jre/bin ] ; then JAVALINKTO=/usr/lib/SunJava2
 	    elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2
             fi
 	  fi

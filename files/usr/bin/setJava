@@ -78,6 +78,7 @@ if [ "$EXIT_setJava" = "no" ] ; then
         "/usr/lib/java/jre/bin" | \
         "/usr/lib/SunJava1/bin" | \
         "/usr/lib/SunJava2/bin" | \
+        "/usr/lib/SunJava2/jre/bin" | \
         "/usr/lib/IBMJava2/bin" | \
         "/usr/lib/IBMJava2/jre/bin")
           JAVA_OLD_PATH_setJava=$i
@@ -105,10 +106,10 @@ if [ "$EXIT_setJava" = "no" ] ; then
       ;;	  
     "SunJava2")
       if [ "$DEVEL_setJava" = "yes" ] ; then
-        if [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK" ; fi
+        if [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK" ; fi
       else
-        if   [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
-        elif [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
+        if   [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -d /usr/lib/SunJava2/jre/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
         fi
       fi
       ;;
@@ -123,12 +124,12 @@ if [ "$EXIT_setJava" = "no" ] ; then
       ;;
     "Java2")
       if [ "$DEVEL_setJava" = "yes" ] ; then
-        if   [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        if   [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
         elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
         fi
       else
-        if   [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
-        elif [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
+        if   [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -d /usr/lib/SunJava2/jre/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
         elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
         elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-JRE"
         fi
@@ -137,14 +138,14 @@ if [ "$EXIT_setJava" = "no" ] ; then
     "default")
       if [ "$DEVEL_setJava" = "yes" ] ; then
         if   [ -e /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK"
-        elif [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
         elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
         fi
       else
         if   [ -e /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK"
         elif [ -d /usr/lib/SunJava1/bin ] ; then SELECTED_JAVA_setJava="SunJava1-JRE"
-        elif [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
-        elif [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
+        elif [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -d /usr/lib/SunJava2/jre/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
         elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
         elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-JRE"
         fi
@@ -191,15 +192,15 @@ if [ "$EXIT_setJava" = "no" ] ; then
       JAVA_NEW_PATH_setJava=/usr/lib/SunJava2/bin
       JAVA_BINDIR=/usr/lib/SunJava2/bin
       JAVA_HOME=/usr/lib/SunJava2
-      JRE_HOME=/usr/lib/SunJava2
-      unset JDK_HOME
+      JRE_HOME=/usr/lib/SunJava2/jre
+      JDK_HOME=/usr/lib/SunJava2
       SDK_HOME=/usr/lib/SunJava2
       ;;
     "SunJava2-JRE")
-      JAVA_NEW_PATH_setJava=/usr/lib/SunJava2/bin
-      JAVA_BINDIR=/usr/lib/SunJava2/bin
-      JAVA_HOME=/usr/lib/SunJava2
-      JRE_HOME=/usr/lib/SunJava2
+      JAVA_NEW_PATH_setJava=/usr/lib/SunJava2/jre/bin
+      JAVA_BINDIR=/usr/lib/SunJava2/jre/bin
+      JAVA_HOME=/usr/lib/SunJava2/jre
+      JRE_HOME=/usr/lib/SunJava2/jre
       unset JDK_HOME
       unset SDK_HOME
       ;;
@@ -208,13 +209,13 @@ if [ "$EXIT_setJava" = "no" ] ; then
       JAVA_BINDIR=/usr/lib/IBMJava2/bin
       JAVA_HOME=/usr/lib/IBMJava2
       JRE_HOME=/usr/lib/IBMJava2/jre
-      unset JDK_HOME
+      JDK_HOME=/usr/lib/IBMJava2
       SDK_HOME=/usr/lib/IBMJava2
       ;;
     "IBMJava2-JRE")
       JAVA_NEW_PATH_setJava=/usr/lib/IBMJava2/jre/bin
       JAVA_BINDIR=/usr/lib/IBMJava2/jre/bin
-      JAVA_HOME=/usr/lib/IBMJava2
+      JAVA_HOME=/usr/lib/IBMJava2/jre
       JRE_HOME=/usr/lib/IBMJava2/jre
       unset JDK_HOME
       unset SDK_HOME
