@@ -5,7 +5,7 @@
 #         Bernhard Kaindl <bk@suse.de>, 1999
 #         Rüdiger Oertel <ro@suse.de>, 2000-01
 #
-# This module generates /etc/HOSTNAME and /etc/hosts
+# This module generates entries for /etc/hosts
 
 # check if we are started as root
 # only one of UID and USER must be set correctly
@@ -73,8 +73,6 @@ if test -n "$XHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
 
     echo $XHOSTNAME >> $OLDHOSTENTRY
     NICKNAME=${XHOSTNAME%%.*}
-    echo > $r/etc/HOSTNAME.SuSEconfig
-    check_md5_and_move $r/etc/HOSTNAME
 
     NET_DEVICE_FOUND=false
 

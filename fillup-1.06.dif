@@ -1,5 +1,5 @@
 --- SRC/parser.c
-+++ SRC/parser.c	2000/04/19 09:37:37
++++ SRC/parser.c	2002/01/28 12:37:57
 @@ -388,8 +388,10 @@
      {
          Counter = 1;
@@ -13,3 +13,92 @@
                 ( *buffer != delimiterStart ) )
          {
              Counter++;
+@@ -1348,6 +1350,37 @@
+     }       
+ }
+ 
++/*-------------- writeBaseFileHeader ---------------*/
++
++static
++void
++writeBaseFileHeader
++(
++    FILE                      * filePointer
++)
++{
++    char                      * baseFileHeader;
++    long                        length;
++    long                        loop;
++
++    getVBeginOfBlock( baseFileBlock, &baseFileHeader );
++    length = getVLength( baseFileBlock );
++
++    loop = 0;
++    while( loop < length )
++    {
++       if( '\n' == baseFileHeader[ loop ] )
++       {
++           if( '\n' == baseFileHeader[ loop+1 ] )
++           {
++               writeVariableBlock( baseFileHeader, loop+1, filePointer );
++               break;
++           }
++       }
++       loop++;
++    }
++}
++
+ /*------------------ writeOutput -------------------*/
+ 
+ static
+@@ -1375,7 +1408,23 @@
+         &&  ( FileOpened == openFileForWriting( newBaseFileName, &filePointer ) ) )
+         {
+             listPointer = baseFileBlock;
+-            for( index = 0; index < numberOfUsedBaseBlocks; index++ )
++            evaluationClass = getVEvaluationClass( listPointer );
++            switch( evaluationClass )
++            {
++                case Output:
++                case Ignored:
++                    displayVerbose( "base", listPointer );
++                    getVBeginOfBlock( listPointer, &variableBlock );
++                    writeVariableBlock( variableBlock, getVLength( listPointer ), filePointer );
++                    break;
++
++                default: 
++                    writeBaseFileHeader( filePointer );
++                    break;
++            }
++
++            listPointer++;
++            for( index = 1; index < numberOfUsedBaseBlocks; index++ )
+             {
+                 evaluationClass = getVEvaluationClass( listPointer );
+                 switch( evaluationClass )
+@@ -1400,7 +1449,24 @@
+     if( FileOpened == openFileForWriting( outputFileName, &filePointer ) )
+     {
+         listPointer = baseFileBlock;
+-        for( index = 0; index < numberOfUsedBaseBlocks; index++ )
++        evaluationClass = getVEvaluationClass( listPointer );
++        switch( evaluationClass )
++        {
++            case Output:
++            case OutputButRemoved:
++                displayVerbose( "base", listPointer );
++                getVBeginOfBlock( listPointer, &variableBlock );
++                writeVariableBlock( variableBlock, getVLength( listPointer ), 
++                    filePointer );
++                break;
++
++            default:
++                writeBaseFileHeader( filePointer );
++                break;
++        }
++
++        listPointer++;
++        for( index = 1; index < numberOfUsedBaseBlocks; index++ )
+         {
+             evaluationClass = getVEvaluationClass( listPointer );
+             switch( evaluationClass )

@@ -77,9 +77,6 @@ fi
 %{fillup_and_insserv -py nscd halt nfs random reboot single xdm boot.clock boot.ibmsis boot.ipconfig boot.klog boot.ldconfig boot.localfs boot.localnet boot.proc boot.quota boot.swap boot.idedma}
 ## powerfail probably needs empty header ...
 
-# hack: DEFAULT_LANGUAGE was the first variable in rc.config
-# and we want to move it out
-awk 'BEGIN { i=0; } /^$/ { if (i==0) { print "DUMMY_SEPARATOR=dummy\n" ; i++ ; next } } { print } ' etc/rc.config > etc/rc.config.new 2>/dev/null && mv etc/rc.config.new etc/rc.config
 #
 # remove old stuff from rc.config (oldstuff only has removed variables)
 if [ -x bin/fillup ] ; then
@@ -98,9 +95,6 @@ for i in language backup displaymanager locate mouse kernel \
 	hardware cron_daily ; do
 %{fillup_only -n $i}
 done
-# hack: remove the separator line again
-grep -v "^DUMMY_SEPARATOR" etc/rc.config > etc/rc.config.new
-mv etc/rc.config.new etc/rc.config
 
 #
 # handle password files

@@ -36,15 +36,32 @@ _file_ ()
     # bash `complete' is broken because you can not combine
     # -d, -f, and -X pattern without missing directories.
     local c=${COMP_WORDS[COMP_CWORD]}
+    local a="${COMP_WORDS[@]}"
     local o="$IFS"
     local e
 
     case "$1" in
     compress)		e='*.Z'					;;
-    bzip2)		e='*.bz2'				;;
+    bzip2)
+	case "$c" in
+	-)		COMPREPLY=(d c); return			;;
+ 	-?|-??)		COMPREPLY=($c) ; return			;;
+	esac
+	case "$a" in
+	*-?(c)d*)	e='!*.bz2'				;;
+	*)		e='*.bz2'				;;
+	esac							;;
     bunzip2)		e='!*.bz2'				;;
-    gzip)		e='*.+(gz|z|Z)'				;;
-    gunzip)		e='!*.+(gz|z|Z)'			;;
+    gzip)
+	case "$c" in
+	-)		COMPREPLY=(d c); return			;;
+ 	-?|-??)		COMPREPLY=($c) ; return			;;
+	esac
+	case "$a" in
+	*-?(c)d*)	e='!*.+(gz|tgz|z|Z)'			;;
+	*)		e='*.+(gz|tgz|z|Z)'			;;
+	esac							;;
+    gunzip)		e='!*.+(gz|tgz|z|Z)'			;;
     uncompress)		e='!*.Z'				;;
     unzip)		e='!*.+(zip|ZIP|jar|exe|EXE)'		;;
     gs|ghostview)	e='!*.+(eps|EPS|ps|PS|pdf|PDF)'		;;
