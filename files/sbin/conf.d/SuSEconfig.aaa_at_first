@@ -17,23 +17,10 @@ fi
 
 test -n "$ROOT" && exit 0
 
-test -f /lib/YaST/SuSEconfig.functions || {
-    echo "ERROR - can not find /lib/YaST/SuSEconfig.functions!!"
-    echo "This should not happen.  Exit..."
-    exit 1
-}
-. /lib/YaST/SuSEconfig.functions
-
-test -f /etc/sysconfig/mouse && . /etc/sysconfig/mouse
 test -f /etc/sysconfig/clock && . /etc/sysconfig/clock
 
 if test -n "$TIMEZONE" -a -x /usr/sbin/zic ; then
     /usr/sbin/zic -l $TIMEZONE
-fi
-
-if test -n "$MOUSE" ; then
-    rm -f /dev/mouse
-    ln -sf $MOUSE /dev/mouse
 fi
 
 test -x /sbin/ldconfig -a "$CHECK_NEWPACKAGE" != false && \

@@ -16,6 +16,7 @@
 
 EXIT_setJava=no
 PRINT_HELP_setJava=no
+WANT_HELP_setJava=no
 NEW_JAVA_setJava=no
 DEVEL_setJava=no
 
@@ -23,6 +24,7 @@ case "$#" in
   "1")
     if [ "$1" = "--help" ] ; then
       PRINT_HELP_setJava=yes
+      WANT_HELP_setJava=yes
     else
       JAVA_VER_setJava=$1
     fi
@@ -98,57 +100,57 @@ if [ "$EXIT_setJava" = "no" ] ; then
   case "$JAVA_VER_setJava" in
     "SunJava1")
       if [ "$DEVEL_setJava" = "yes" ] ; then
-        if [ -e /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK" ; fi
+        if [ -x /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK" ; fi
       else
-        if   [ -e /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK"
-        elif [ -d /usr/lib/SunJava1/bin ] ; then SELECTED_JAVA_setJava="SunJava1-JRE"
+        if   [ -x /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK"
+        elif [ -x /usr/lib/SunJava1/bin/jre ] ; then SELECTED_JAVA_setJava="SunJava1-JRE"
         fi
       fi
       ;;	  
     "SunJava2")
       if [ "$DEVEL_setJava" = "yes" ] ; then
-        if [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK" ; fi
+        if [ -x /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK" ; fi
       else
-        if   [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
-        elif [ -d /usr/lib/SunJava2/jre/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
+        if   [ -x /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -x /usr/lib/SunJava2/jre/bin/java ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
         fi
       fi
       ;;
     "IBMJava2")
       if [ "$DEVEL_setJava" = "yes" ] ; then
-        if [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK" ; fi
+        if [ -x /usr/lib/IBMJava2/bin/javac ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK" ; fi
       else
-        if   [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
-        elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-JRE"
+        if   [ -x /usr/lib/IBMJava2/bin/javac ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
+        elif [ -x /usr/lib/IBMJava2/jre/bin/java ] ; then SELECTED_JAVA_setJava="IBMJava2-JRE"
         fi
       fi
       ;;
     "Java2")
       if [ "$DEVEL_setJava" = "yes" ] ; then
-        if   [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
-        elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
+        if   [ -x /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -x /usr/lib/IBMJava2/bin/javac ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
         fi
       else
-        if   [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
-        elif [ -d /usr/lib/SunJava2/jre/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
-        elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
-        elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-JRE"
+        if   [ -x /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -x /usr/lib/SunJava2/jre/bin/java ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
+        elif [ -x /usr/lib/IBMJava2/bin/javac ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
+        elif [ -x /usr/lib/IBMJava2/jre/bin/java ] ; then SELECTED_JAVA_setJava="IBMJava2-JRE"
         fi
       fi
       ;;
     "default")
       if [ "$DEVEL_setJava" = "yes" ] ; then
-        if   [ -e /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK"
-        elif [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
-        elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
+        if   [ -x /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK"
+        elif [ -x /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -x /usr/lib/IBMJava2/bin/javac ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
         fi
       else
-        if   [ -e /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK"
-        elif [ -d /usr/lib/SunJava1/bin ] ; then SELECTED_JAVA_setJava="SunJava1-JRE"
-        elif [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
-        elif [ -d /usr/lib/SunJava2/jre/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
-        elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
-        elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-JRE"
+        if   [ -x /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK"
+        elif [ -x /usr/lib/SunJava1/bin/jre ] ; then SELECTED_JAVA_setJava="SunJava1-JRE"
+        elif [ -x /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -x /usr/lib/SunJava2/jre/bin/java ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
+        elif [ -x /usr/lib/IBMJava2/bin/javac ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
+        elif [ -x /usr/lib/IBMJava2/jre/bin/java ] ; then SELECTED_JAVA_setJava="IBMJava2-JRE"
         fi
       fi
       ;;	  
@@ -245,4 +247,4 @@ unset EXIT_setJava
 export PATH JAVA_BINDIR JAVA_HOME JRE_HOME JDK_HOME SDK_HOME
 
 
-test "$NEW_JAVA_setJava" = "yes"
+test "$NEW_JAVA_setJava" = "yes" -o "$WANT_HELP_setJava" = "yes"

@@ -32,9 +32,9 @@ done
 test "$CREATE_JAVALINK" = "yes" || exit 0
 
 if [ -L /usr/lib/java ] ; then
-  if [ -e /usr/lib/java/bin/java ] || 
-     [ -e /usr/lib/java/bin/jre ] ||
-     [ -e /usr/lib/java/jre/bin/java ] ; then
+  if [ -x /usr/lib/java/bin/java ] || 
+     [ -x /usr/lib/java/bin/jre ] ||
+     [ -x /usr/lib/java/jre/bin/java ] ; then
     # link /usr/lib/java points to valid directory
     exit 0
   fi
@@ -47,9 +47,9 @@ if [ -L /usr/lib/java ] ; then
 fi  
 
 JAVALINKTO=
-if   [ -d /usr/lib/SunJava1/bin ] ; then JAVALINKTO=/usr/lib/SunJava1
-elif [ -d /usr/lib/SunJava2/jre/bin ] ; then JAVALINKTO=/usr/lib/SunJava2
-elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2
+if   [ -x /usr/lib/SunJava1/bin/jre ] ; then JAVALINKTO=/usr/lib/SunJava1
+elif [ -x /usr/lib/SunJava2/jre/bin/java ] ; then JAVALINKTO=/usr/lib/SunJava2
+elif [ -x /usr/lib/IBMJava2/jre/bin/java ] ; then JAVALINKTO=/usr/lib/IBMJava2
 fi
 
 if [ -n "$JAVALINKTO" ] ; then
