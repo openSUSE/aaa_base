@@ -534,7 +534,7 @@ if ($mode eq 'c') {
   $s = $services[0];
   my $want;
   if (@services == 1) {
-    $want = `runlevel`;
+    $want = `/sbin/runlevel`;
     chomp($want);
     die("Can't determine current runlevel\n") unless $want =~ s/^. (.)$/$1/;
   } else {
