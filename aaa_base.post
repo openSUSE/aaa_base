@@ -124,7 +124,7 @@ if [ -f etc/sysconfig/hardware ] ; then
 fi
 %{remove_and_set -n ide DEVICES_FORCE_IDE_DMA_ON DEVICES_FORCE_IDE_DMA_OFF}
 for i in language backup boot displaymanager kernel \
-	suseconfig clock proxy windowmanager sysctl java mail \
+	suseconfig clock proxy windowmanager sysctl mail \
 	ide cron news ; do
 %{fillup_only -n $i}
 done

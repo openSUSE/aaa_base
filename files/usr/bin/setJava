@@ -2,42 +2,13 @@
 # Copyright (c) 2000-2002 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
-# Author: Petr Mladek <pmladek@suse.cz>
+# Author: Sonja Krause-Harder <skh@suse.de> 
 
-# will the output be the help?
-SET_JAVA_PL_HELP="no"
-for arg in "$@" ; do
-  if [ "$arg" == "--help" ] ; then
-    SET_JAVA_PL_HELP="yes"
-  fi
-done
+echo -e \
+'################################################################\n'\
+'# setJava is no longer supported. Please install the package   #\n'\
+'# jpackage-utils and read the documentation in                 #\n'\
+'# /usr/share/doc/packages/jpackage-utils for information about #\n'\
+'# the new java packages on SUSE Linux.                         #\n'\
+'################################################################'
 
-# call universal setJava.ps script
-SET_JAVA_PL_OUTPUT=`setJava.pl --encaps "source setJava" setenv "$@"`
-SET_JAVA_PL_RESULT=$?
-
-# print help or error messages or process commands from setJava.pl script
-if [ "$SET_JAVA_PL_RESULT" = "0" ] ; then
-  if [ "$SET_JAVA_PL_HELP" = "yes" ] ; then
-    echo "This script sets java for the current shell (for applications"
-    echo "to be run from this shell)"
-    echo
-    echo "$SET_JAVA_PL_OUTPUT"
-    echo 
-    echo "Important: Do not forget to run this script with \"source\" shell command"
-    echo "           because the result of the script must be sourced to change"
-    echo "           the settings in the current shell."
-  else
-    eval "$SET_JAVA_PL_OUTPUT"
-  fi    
-else
-  # an error occured, all messages should have written to stderr
-  # $SET_JAVA_PL_OUTPUT should be "" in this case
-  if [ -n "$SET_JAVA_PL_OUTPUT" ] ; then
-    echo "$SET_JAVA_PL_OUTPUT"
-  fi    
-fi  
-
-unset SET_JAVA_PL_OUTPUT
-unset SET_JAVA_PL_HELP
-test "$SET_JAVA_PL_RESULT" = "0"    
