@@ -34,7 +34,11 @@ setenv MORE -sl
 setenv PAGER '/usr/bin/less'
 setenv GZIP -9
 setenv CSHEDIT emacs
-setenv INFODIR /usr/info:/usr/share/info:/usr/local/info
+if ( -d /usr/info ) then
+   setenv INFODIR /usr/info:/usr/share/info:/usr/local/info
+else
+   setenv INFODIR /usr/share/info:/usr/local/info
+endif
 setenv INFOPATH $INFODIR
 if ( -s /etc/nntpserver ) then
    setenv NNTPSERVER `cat /etc/nntpserver`

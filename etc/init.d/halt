@@ -98,7 +98,7 @@ if test "$HOSTTYPE" = "s390" ; then
 fi
 if test "$HWCLOCK_ACCESS" != "no" ; then
     echo -n "Set Hardware Clock to the current System Time:"
-    if test "$GMT" != "YAST_ASK" ; then
+    if test "$GMT" != "YAST_ASK" -a "$START_XNTPD" = "yes" -a -n "$XNTPD_INITIAL_NTPDATE" ; then
         # write back to hardware clock and calculate adjtime
 	/sbin/hwclock_wrapper --systohc $GMT
 	rc_status

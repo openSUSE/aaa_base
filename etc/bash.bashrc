@@ -243,8 +243,8 @@ case "$-" in
 	    complete -A user			talk su login sux
 	    complete -A builtin			builtin
 	    complete -A export			printenv
-	    complete -A command			command which nohup exec nice \
-						eval ltrace strace gdb
+	    complete -A command			command which nohup exec nice eval 
+	    complete -A command	-A file		ltrace strace gdb
 	    HOSTFILE=""
 	    test -s $HOME/.hosts && HOSTFILE=$HOME/.hosts
 	    complete -A hostname		ping telnet rsh ssh slogin \

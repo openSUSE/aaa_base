@@ -184,7 +184,7 @@ kernels=""
 initrds=""
 modules=""
 boot_dir=""
-splash=""
+splash="auto"
 oem=""
 
 while getopts :hk:i:m:b:d:o:s: a ; do
@@ -229,6 +229,23 @@ while getopts :hk:i:m:b:d:o:s: a ; do
 	esac
 done
 shift `expr $OPTIND - 1`
+
+[ "x$splash" = xoff ] && splash=
+if [ "x$splash" = xauto ] ; then
+    splash=
+    for vga in `sed -ne 's/[ 	]*vga[ 	]*='//p </etc/lilo.conf 2>/dev/null`; do
+	splashsize=
+	case $vga in
+	    785|786|0x311|0x312) splashsize=640x480   ;;
+	    788|789|0x314|0x315) splashsize=800x600   ;;
+	    791|792|0x317|0x318) splashsize=1024x768  ;;
+	    794|0x31a|0x31A)     splashsize=1280x1024 ;;
+	    795|0x31b|0x31B)     splashsize=1280x1024 ;;
+	esac
+	test -n "$splashsize" && test "x${splash/$splashsize/}" = "x$splash" && splash="$splash,$splashsize"
+    done
+    splash=${splash#,}
+fi
 
 if [ -n "$kernels" ] ; then
    if [ -z "$initrds" ] ; then
@@ -314,9 +331,11 @@ x2=`echo \`echo "$x1" | wc -l\``
 x3=`echo "$x1" | cut -f 1 -d " "`
 
 root_lvm=0
-if [ -z "$rootdev" ] 
-then
+if [ -z "$rootdev" ] ; then
     [ "$x2" = 1 -a -b "$x3" ] && rootdev="$x3"
+fi
+
+if [ -b "$rootdev" ] ; then
     major=`ls -l "$rootdev" | sed -e "s/.* \\([0-9]\+\\), *[0-9]\+.*/\\1/"`
     [ "$major" -ne 58 ] || root_lvm=1
 fi
@@ -398,7 +417,7 @@ for k in $kernels ; do
 
     mkdir $tmp_mnt
     dd if=/dev/zero of=$tmp_initrd bs=1k count=$image_blocks 2>/dev/null
-    mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd 2>/dev/null
+    mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd 2>/dev/null 1>&2
     tune2fs -i 0 $tmp_initrd >/dev/null 2>&1
 
     mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || { 
@@ -519,7 +538,7 @@ for k in $kernels ; do
     mkdir $tmp_mnt_small
     
     dd if=/dev/zero of=$tmp_initrd_small bs=1k count=$img_size 2>/dev/null
-    mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd_small 2>/dev/null
+    mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd_small 2>/dev/null 1>&2
     tune2fs -i 0 $tmp_initrd_small >/dev/null 2>&1
     
     mount -oloop $tmp_initrd_small $tmp_mnt_small || { 
