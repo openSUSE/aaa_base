@@ -1,16 +1,3 @@
-## Description:	ACPI DSDT (Differentiated System Description Table)
-## Type:	string
-## Default:     /etc/acpi/dsdt
-#
-# The file name of a binary ACPI Differentiated System Description Table
-# (DSDT). This table is appended to the initial ram disk (initrd) that
-# the mkinitrd script creates. If the kernel finds that its initrd
-# contains a DSDT, this table replaces the DSDT of the bios. If the file
-# specified in ACPI_DSDT is not found or ACPI_DSDT is empty/not specified,
-# no DSDT will be appended to the initrd.
-#
-ACPI_DSDT=""
-
 ## Path:	System/Kernel
 ## Description:	Modules to load from initrd
 ## Type:	string
@@ -30,6 +17,20 @@ INITRD_MODULES=""
 # once the main filesystem is active
 #
 MODULES_LOADED_ON_BOOT=""
+
+## Description: ACPI DSDT (Differentiated System Description Table)
+## Type:        string
+## Default:     ""
+#
+# The file name of a binary ACPI Differentiated System Description Table
+# (DSDT). This table is appended to the initial ram disk (initrd) that
+# the mkinitrd script creates. If the kernel finds that its initrd
+# contains a DSDT, this table replaces the DSDT of the bios. If the file
+# specified in ACPI_DSDT is not found or ACPI_DSDT is empty/not specified,
+# no DSDT will be appended to the initrd.
+# Example path /etc/acpi/dsdt
+#
+ACPI_DSDT=""
 
 ## Description:	tmpfs/shmfs memory limit
 ## Type:	integer

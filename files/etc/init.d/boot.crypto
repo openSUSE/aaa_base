@@ -126,15 +126,27 @@ case "$1" in
 		sync
 	    fi
 	    #
-	    # Mounting loop device to mount point
+	    # Mounting loop device to mount point WITHOUT entry in /etc/mtab
 	    #
 	    case "$mopt" in
-		default|"") mopt=""	    ;;
-		*)	    mopt="-o $mopt" ;;
+		default|"") mopt=""	;;
 	    esac
-	    mount -t $filesys $mopt $loopdev $access
+	    mount -t $filesys -n ${mopt:+"-o $mopt"} $loopdev $access
 	    rc_status
-	    test $? -gt 0 && losetup -d $loopdev &> /dev/null
+	    if test $? -gt 0 ; then
+		losetup -d $loopdev &> /dev/null
+	    else
+		#
+		# Generate entry in /etc/mtab (to enable umount to run losetup -d)
+		#
+		loopopt="loop=${loopdev},encryption=${$crypto}"
+		case "$mopt" in
+		    default|"") mopt="${loopopt}"		;;
+		    *)		mopt="${loopopt},${mopt}"	;;
+		esac
+		mount -t $filesys -f -o $mopt $physdev $access
+		rc_status
+	    fi
 	done < $CRYPTOTAB
 	test $main_status -gt 0 && rc_failed 1 || true
 	rc_status -v1
@@ -157,10 +169,13 @@ case "$1" in
 	    umount $access
 	    rc_status
 	    #
-	    # Remove loop device
+	    # If /etc/mtab is linked to /proc/mounts
+	    # we've to run losetup to detach loop device
 	    #
-	    losetup -d $loopdev
-	    rc_status
+	    if test -L /etc/mtab ; then
+		losetup -d $loopdev
+		rc_status
+	    fi
 	done < $CRYPTOTAB
 	test $main_status -gt 0 && rc_failed 1 || true
 	rc_status -v1
