@@ -293,7 +293,7 @@ fi
 if test -n "$CUPS_SERVER" ; then
     echo "CUPS_SERVER='$CUPS_SERVER'" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export CUPS_SERVER" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv CUPS_SERVER '$CUPS_SERVER'" >> $r/etc/SuSEconfig/csh.cshrc.Su
+    echo "setenv CUPS_SERVER '$CUPS_SERVER'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test -n "$DEFAULT_PRINTER" ; then
     echo "PRINTER='$DEFAULT_PRINTER'" >> $r/etc/SuSEconfig/profile.SuSEconfig
