@@ -39,8 +39,10 @@ do
     fi
 done
 
+PIDFILE=""
 case "$DISPLAYMANAGER" in
     kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde/bin/kdm
+			 PIDFILE="-p /var/run/xdm.pid"
 			 test -x /opt/kde2/bin/kdm && \
 			 DISPLAYMANAGER=/opt/kde2/bin/kdm  ;;
     gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/bin/gdm ;;
@@ -55,7 +57,7 @@ rc_reset
 case "$1" in
     start)
 	echo -n "Starting service $DM"
-	startproc $DISPLAYMANAGER || rc_failed
+	startproc $PIDFILE $DISPLAYMANAGER || rc_failed
 	# After a crash or a kill signal we may have
 	# a wrong owner ship of /dev/xconsole
 	if rc_status ; then
@@ -74,7 +76,7 @@ case "$1" in
 	# killproc(8) sleep upto five seconds and sends
 	# SIGKILL if xdm does not terminate within
 	#
-	killproc -TERM $DISPLAYMANAGER
+	killproc $PIDFILE -TERM $DISPLAYMANAGER
 	rc_status -v
 	;;
     restart)
@@ -84,12 +86,12 @@ case "$1" in
 	;;
     reload|force-reload)
 	echo -n "Reload service $DM"
-	killproc -HUP  $DISPLAYMANAGER
+	killproc $PIDFILE -HUP  $DISPLAYMANAGER
 	rc_status -v
 	;;
     status|check)
 	echo -n "Checking for service ${DM}: "
-	checkproc $DISPLAYMANAGER
+	checkproc $PIDFILE $DISPLAYMANAGER
 	rc_status -v
 	;;
     probe)
