@@ -3,7 +3,7 @@
 # to "yes" the system will ask whether to confirm every
 # step of the boot process.
 #
-PROMPT_FOR_CONFIRM="yes"
+PROMPT_FOR_CONFIRM="no"
 
 #
 # For interactive debugging of the startup process. How long
