@@ -714,6 +714,17 @@ test "$CHECK_INITTAB" = yes && {
           CA_LINE=""
         ;;
     esac
+    if test -n "$SERIAL_CONSOLE" ; then
+      SERIAL_CON_LINE=${SERIAL_CONSOLE%%,*}
+      SERIAL_CON_SPEED=${SERIAL_CONSOLE##*,}
+      SERIAL_CON_SHORT=${SERIAL_CON_LINE##tty}
+      SERIAL_CON_STRING="$SERIAL_CON_SHORT:123:respawn:/sbin/agetty -L $SERIAL_CON_SPEED $SERIAL_CON_LINE"
+    else
+      SERIAL_CON_LINE=""
+      SERIAL_CON_SPEED=""
+      SERIAL_CON_SHORT=""
+      SERIAL_CON_STRING="#S0:123:respawn:/sbin/agetty -L 9600 ttyS0"
+    fi
 
     cp -p $r/etc/inittab $r/etc/inittab.SuSEconfig || {
         echo "Unexpected Error - emergency exit..."
@@ -722,8 +733,9 @@ test "$CHECK_INITTAB" = yes && {
     }
 
     cat $r/etc/inittab | \
-        sed -e "s%^id:[0-9sSa-cA-C]*:initdefault:%id:$INITRL:initdefault:%" -e \
-               "s%$CA_SEARCH%$CA_LINE%" \
+        sed -e "s%^id:[0-9sSa-cA-C]*:initdefault:%id:$INITRL:initdefault:%" \
+            -e "s%$CA_SEARCH%$CA_LINE%" \
+            -e "s%.*/sbin/agetty -L.*%$SERIAL_CON_STRING%" \
         > $r/etc/inittab.SuSEconfig
 
     test -s $r/etc/inittab.SuSEconfig || {
@@ -737,7 +749,20 @@ test "$CHECK_INITTAB" = yes && {
         echo "Installing new $r/etc/inittab"
     }
     rm -f $r/etc/inittab.SuSEconfig
+
+    if test -n "$SERIAL_CON_LINE" ; then
+     grep "$SERIAL_CON_LINE" $r/etc/securetty >/dev/null 2>/dev/null || \
+       { 
+         echo $SERIAL_CON_LINE >> $r/etc/securetty
+         echo "Added $SERIAL_CON_LINE to /etc/securetty"
+       }
+     rm -f $r/etc/securetty.SuSEconfig
+    fi
     unset INITRL
+    unset SERIAL_CON_LINE
+    unset SERIAL_CON_SPEED
+    unset SERIAL_CON_SHORT
+    unset SERIAL_CON_STRING
 }
 
 #

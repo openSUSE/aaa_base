@@ -666,6 +666,12 @@ DEFAULT_WM=kde
 CONSOLE_SHUTDOWN=reboot
 
 #
+# SERIAL_CONSOLE is used to add a serial terminal to inittab and securetty
+# The format is "ttyS0,9600" as used in the kernel commandline.
+#
+SERIAL_CONSOLE=""
+
+#
 # run the Name Service Caching Daemon at boot time? (yes/no)
 #
 START_NSCD=yes
