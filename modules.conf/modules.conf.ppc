@@ -3,6 +3,22 @@
 alias char-major-4        off
 alias char-major-5        off
 
+alias char-major-9        off
+# alias char-major-9      st
+
+# 206 char        OnStream SC-x0 tape devices
+alias char-major-206      off
+
+#  11 block       SCSI CD-ROM devices
+alias block-major-11      off
+# alias block-major-11    sr_mod
+
+#  86 char        SCSI media changer
+alias char-major-86       off
+
+# the "powerpc32 bash" triggers that one
+alias personality-8       off
+
 alias parport_lowlevel    parport_pc
 # options parport_pc io=0x3bc irq=none,none
 # If you have multiple parallel ports, specify them this way:
