@@ -61,4 +61,4 @@ if test "$CHECK_NEWPACKAGE" != false -a -x /usr/X11R6/bin/mkfontdir ; then
 fi
 
 echo "create XftCache files ..."
-xftcache
+/usr/X11R6/bin/xftcache
