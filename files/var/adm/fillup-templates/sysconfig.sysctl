@@ -1,11 +1,13 @@
 ## Path:	Network/General
-## Description:	
+## Description:	activate dynamic-IP-patch at bootup
 ## Type:	yesno
 ## Default:	no
 # Do you want the "dynamic IP patch" to be enabled at bootup? (yes/no)
 #
 IP_DYNIP="no"
 
+## Path:	Network/General
+## Description:	activate syn-flood protection at bootup
 ## Type:	yesno
 ## Default:	yes
 #
@@ -14,6 +16,8 @@ IP_DYNIP="no"
 #
 IP_TCP_SYNCOOKIES="yes"
 
+## Path:	Network/General
+## Description:	forward/route IP(v4) packets
 ## Type:	yesno
 ## Default:	no
 #
@@ -22,6 +26,17 @@ IP_TCP_SYNCOOKIES="yes"
 #
 IP_FORWARD="no"
 
+## Path:	Network/General
+## Description:	forward/route IPv6 packets
+## Type:	yesno
+## Default:	no
+#
+# Runtime-configurable parameter: forward IPv6 packets.
+#
+IPV6_FORWARD="no"
+
+## Path:	Network/General
+## Description:	activate ECN network configuration at bootup
 ## Type:	yesno
 ## Default:	yes
 #
@@ -35,7 +50,7 @@ IP_FORWARD="no"
 DISABLE_ECN="yes"
 
 ## Path:	System/Kernel
-## Description:	
+## Description:	enable/allow sysrq hotkeys
 ## Type:	yesno
 ## Default:	no
 #

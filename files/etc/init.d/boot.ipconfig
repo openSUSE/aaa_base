@@ -66,6 +66,22 @@ case "$1" in
     esac
     rc_status -v -r
    fi
+   #
+   # Enable IPv6 forwarding ?
+   #
+   if test -e /proc/sys/net/ipv6/conf/all/forwarding -a -n "$IPV6_FORWARD" ; then
+    case $IPV6_FORWARD in
+      yes)
+	echo -n "Enabling IPv6 forwarding"
+	echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
+	;;
+      *)
+	echo -n "Disabling IPv6 forwarding"
+	echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
+	;;
+    esac
+    rc_status -v -r
+   fi
    ;;
   stop)
     rc_failed 3
