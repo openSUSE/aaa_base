@@ -10,7 +10,7 @@
 # on errors:
 #   exit code > 0
 #
-# Version 1.02
+# Version 1.03
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
@@ -41,12 +41,13 @@ image_inodes=100
 
 tmp_mnt=/tmp/mnt$$
 tmp_msg=/tmp/msg$$
+tmp_magic=/tmp/magic$$
 lx_rc=$tmp_mnt/linuxrc
 is_mounted=
 
 clean_up () {
   [ "$is_mounted" ] && umount $tmp_mnt
-  rm -f $tmp_initrd $tmp_initrd.gz $tmp_msg
+  rm -f $tmp_initrd $tmp_initrd.gz $tmp_msg $tmp_magic
   [ -d $tmp_mnt ] && rmdir $tmp_mnt
 }
 
@@ -61,10 +62,14 @@ error () {
 root_dir="$1"
 [ "$root_dir" ] || root_dir=/
 
-LD_LIBRARY_PATH=$root_dir/lib:$root_dir/usr/lib
 tmp_initrd=$root_dir/tmp/initrd$$
 
-cp -f /proc/mounts /etc/mtab
+if [ "$root_dir" != / ] ; then
+  LD_LIBRARY_PATH=$root_dir/usr/lib
+  PATH=$root_dir/usr/bin:$PATH
+  [ -x "$root_dir$static_shell" ] && static_shell="$root_dir$static_shell"
+  [ -x "$root_dir$static_insmod" ] && static_insmod="$root_dir$static_insmod"
+fi
 
 x1=`mount 2>/dev/null | grep "on $root_dir "`
 x2=`echo \`echo "$x1" | wc -l\``
@@ -84,7 +89,33 @@ modules="$INITRD_MODULES"
 ( cd $root_dir$boot_dir ; rm -f $initrds )
 [ "$modules" ] || error 0 "no initrd required"
 
+# write an updated magic file
+cat <<-blub >$tmp_magic
+	0x202	string		HdrS		Linux/i386 Kernel
+	>0x206	short		0x0105		setupV1 zImage
+	>0x206	short		0x0200		setupV2
+	>>0x211	byte		0		zImage
+	>>0x211	byte		1		bzImage
+	>(0x20e.s+0x205)	byte	32
+	>>(0x20e.s+0x200)	string	>\0	"%5.5s"
+	>(0x20e.s+0x206)	byte	32
+	>>(0x20e.s+0x200)	string	>\0	"%6.6s"
+	>(0x20e.s+0x207)	byte	32
+	>>(0x20e.s+0x200)	string	>\0	"%7.7s"
+	>(0x20e.s+0x208)	byte	32
+	>>(0x20e.s+0x200)	string	>\0	"%8.8s"
+	>(0x20e.s+0x209)	byte	32
+	>>(0x20e.s+0x200)	string	>\0	"%9.9s"
+	>(0x20e.s+0x20a)	byte	32
+	>>(0x20e.s+0x200)	string	>\0	"%10.10s"
+blub
+
 initrd_a=($initrds)
+
+
+file=file
+[ -x /usr/bin/file ] && file=/usr/bin/file
+[ -x $root_dir/usr/bin/file ] && file=$root_dir/usr/bin/file
 
 kernel_idx=0
 for k in $kernels ; do
@@ -92,7 +123,7 @@ for k in $kernels ; do
   kk="$root_dir$boot_dir/$k"
   [ -f "$kk" ] || error 2 "no such kernel image: \"$kk\""
 
-  vv=`head -c 10000 $kk | $root_dir/usr/bin/strings | egrep '^[0-9]\.[0-9]\.[0-9]+' | cut -d " " -f 1`
+  vv=`$file -m $tmp_magic $kk | cut -d \" -f 2`
 
   ii="$root_dir$boot_dir/${initrd_a[$kernel_idx]}"
 
@@ -104,13 +135,20 @@ for k in $kernels ; do
 
   dd if=/dev/zero of=$tmp_initrd bs=1k count=$image_blocks 2>/dev/null
   mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd 2>/dev/null
-  insmod /lib/loop.o
 
   mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || { 
-    error 4 "failed to mount image"
+    if [ -f /lib/loop.o ] ; then
+      insmod /lib/loop.o
+      mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || {
+        error 4 "failed to mount image"
+      }
+    else
+      error 4 "failed to mount image"
+    fi
   }
   is_mounted=1
 
+  rmdir $tmp_mnt/lost+found
   mkdir $tmp_mnt/{bin,dev}
   cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console} $tmp_mnt/dev
   cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 5 "no static shell"
@@ -124,10 +162,10 @@ for k in $kernels ; do
   chmod 755 $lx_rc
 
   for i in $modules; do
-    x=`find $root_dir/lib/modules/$vv -name $i.o`
+    x=`cd $root_dir ; find lib/modules/$vv/ -name $i.o`
     if [ "$x" ] ; then
-      echo "adding module \"$x\""
-      tar -cf - $x 2>/dev/null | tar -C $tmp_mnt -xpf - 2>/dev/null
+      echo "adding module \"/$x\""
+      tar -C $root_dir -cf - $x 2>/dev/null | tar -C $tmp_mnt -xpf - 2>/dev/null
       if [ $? != 0 ] ; then
         error 7 "initrd too small"
       fi
