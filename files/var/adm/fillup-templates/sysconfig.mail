@@ -1,0 +1,11 @@
+## Path:		Network/Mail/General
+## Description:
+## Type:		string
+## Default:		""
+## Config:		sendmail,postfix
+## ServiceReload:	sendmail,postfix
+#
+# From:-Line in email and News postings
+# (otherwise the FQDN is used)
+#
+FROM_HEADER=""
