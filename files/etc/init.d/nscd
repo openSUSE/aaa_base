@@ -142,8 +142,12 @@ case "$1" in
 
 	test /etc/nscd.conf -nt /var/run/nscd.pid && echo reload
 	;;
+    try-restart)
+	$0 status >/dev/null &&  $0 restart
+	rc_status
+	;;
     *)
-	echo "Usage: $0 {start|stop|status|restart|force-reload|reload|probe}"
+	echo "Usage: $0 {start|stop|status|restart|force-reload|reload|probe|try-restart}"
 	exit 1
 	;;
 esac
