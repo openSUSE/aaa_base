@@ -6,7 +6,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.klog
-# Required-Start:
+# Required-Start:    boot.localfs
 # X-UnitedLinux-Should-Start: setserial boot.setup boot.isapnp
 # Required-Stop:
 # Default-Start:     B

@@ -25,7 +25,7 @@ rc_status -v -r
 echo -n "Mounting /dev/pts"
 optpts="-o mode=0620,gid=5"
 mount -n -t devpts $optpts devpts /dev/pts
-rc_status -v1 -r
+rc_status -v -r
 
 #
 # Save old terminal settings and set -nl to avoid staircase
