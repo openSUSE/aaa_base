@@ -84,10 +84,9 @@ if test "$is" != "ash" ; then
     #ulimit -m 30000		# max resident set size is 30 MB
 
     ulimit -Sc 0		# don't create core files
-    ulimit -Sd unlimited
-    # ksh does not support this command.
-    test "$is" != "ksh" && ulimit -Ss unlimited
-    ulimit -Sm unlimited
+    ulimit -Sd $(ulimit -Hd)
+    ulimit -Ss $(ulimit -Hs)
+    ulimit -Sm $(ulimit -Hm)
 fi
 
 #
