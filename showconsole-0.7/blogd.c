@@ -155,6 +155,9 @@ int main(int argc, char *argv[])
     saved_sigint  = signal(SIGINT,  sighandle);
     saved_sigquit = signal(SIGQUIT, sighandle);
     saved_sigterm = signal(SIGTERM, sighandle);
+    (void)siginterrupt(SIGINT,  0);
+    (void)siginterrupt(SIGQUIT, 0);
+    (void)siginterrupt(SIGTERM, 0);
 
     if (argc > 2)
 	error("usage: %s [/dev/tty<X>]\n", myname);
@@ -228,7 +231,7 @@ int main(int argc, char *argv[])
     do {
 	safeIO(0, 1);
     } while (!signaled);
-    closeIO();
+    closeIO(0, 1);
 
     close(pts);
     rmfpid();

@@ -457,9 +457,38 @@ out:
 /*
  *
  */
-void closeIO()
+void closeIO(const int fdread, const int fdwrite)
 {
+    fd_set watch;
+    struct timeval timeout;
     ssize_t todo;
+
+    FD_ZERO (&watch);
+    FD_SET (fdread, &watch);
+
+    timeout.tv_sec  = 2;
+    timeout.tv_usec = 0;
+
+    if (select(fdread + 1, &watch, (fd_set*)0, (fd_set*)0, &timeout) == 1) {
+	ssize_t cnt;
+	if ((cnt = read(fdread, in, end - in)) >= 0) {
+	    char * tmp = in;
+
+	    safeout(fdwrite, in, cnt);	/* Write copy of input to real tty */
+	    in += cnt;
+
+	    if (tmp < out && in > out)
+		out = in;
+	    if (in  >= end)
+		in  = ring;
+	    if (out >= end)
+		out = ring;
+	} else {
+	    if (errno != EINTR && errno != EAGAIN)
+		error("Can not write to fd %d: %s\n", fdread, strerror(errno));
+	}
+    }
+    (void)fdatasync(fdwrite);
 
     if (!flog)
 	goto out;

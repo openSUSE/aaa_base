@@ -12,7 +12,7 @@ BOOT_LOGFILE	= /var/log/boot.msg
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.6
+VERSION	 =	0.7
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #
