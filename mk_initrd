@@ -32,6 +32,11 @@
 #
 # ChangeLog:
 #
+# 03/9/2002:    v1.32
+# - use lib64 on 64-bit systems
+# - use /var/tmp instead of /tmp (/tmp may be tmpfs)
+# - use new ash builtin 'createpartitiondevs' to create missing devs
+# - made root-on-lvm work by telling the kernel the right device
 # 27/8/2002:    v1.31
 # - use hwinfo to get unknown vga mode sizes
 # - create missing devices in pivot_root case
@@ -323,7 +328,7 @@ if [ "$arch" = ppc -a "$kernels_default" = vmlinux ] ; then
 fi
 
 # *full* paths
-[ -z "$tmp_dir" ] && tmp_dir=/tmp
+[ -z "$tmp_dir" ] && tmp_dir=/var/tmp
 
 
 static_shell=/bin/ash.static
@@ -603,6 +608,13 @@ if [ "$need_libc" ] ; then
   image_inodes=7000
 fi
 
+lib=lib
+case `uname -m` in
+  ppc64)  lib=lib64 ;;
+  s390x)  lib=lib64 ;;
+  x86_64) lib=lib64 ;;
+esac
+
 # put the initrds in an array
 initrd_a=($initrds)
 
@@ -665,13 +677,14 @@ for k in $kernels ; do
 
     if [ "$need_libc" ] ; then
       mkdir -p $tmp_mnt/{lib,etc,proc,mnt}
+      [ "$lib" != lib ] && mkdir -p $tmp_mnt/$lib
       echo 'none /proc proc defaults 0 0' > $tmp_mnt/etc/fstab
       cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
       cp -a $root_dir/dev/dasd* $tmp_mnt/dev 2>/dev/null
       cp -a $root_dir/dev/{i2o,ida,cciss,rd} $tmp_mnt/dev
-      cp -a $root_dir/lib/ld-*so* $tmp_mnt/lib
-      cp -a $root_dir/lib/libc.so.6 $tmp_mnt/lib
-      cp -a $root_dir/lib/libz.so.1* $tmp_mnt/lib
+      cp -a $root_dir/$lib/ld* $tmp_mnt/$lib
+      cp -a $root_dir/$lib/libc.so.6 $tmp_mnt/$lib
+      cp -a $root_dir/$lib/libz.so.1* $tmp_mnt/$lib
       cp -a $root_dir/bin/{mount,umount} $tmp_mnt/bin
       if [ -z "$use_pivot_root" -a -b "$root_dir/$rootdev" ] ; then
 	mkdir -p $tmp_mnt/${rootdev%/*}
@@ -682,8 +695,9 @@ for k in $kernels ; do
     if [ $root_lvm -eq 1 ] ; then
       echo " - LVM support"
       cp -a $root_dir/dev/lvm  $tmp_mnt/dev
-      cp -a $root_dir/lib/liblvm*.so* $tmp_mnt/lib
+      cp -a $root_dir/$lib/liblvm*.so* $tmp_mnt/$lib
       cp -a $root_dir/sbin/{vgscan,vgchange} $tmp_mnt/bin
+      cp -a $root_dir/bin/cat $tmp_mnt/bin
     fi
 
     if [ -n "$oem" ] ; then
@@ -696,7 +710,7 @@ for k in $kernels ; do
     if [ "$use_pivot_root" ] ; then
       echo " - pivot root support"
       cp -a $root_dir/sbin/pivot_root $tmp_mnt/bin
-      cp -a $root_dir/bin/{cat,mknod,mkdir,rmdir} $tmp_mnt/bin
+      cp -a $root_dir/bin/cat $tmp_mnt/bin
       mkdir -p $tmp_mnt/mnt
     fi
 
@@ -704,9 +718,9 @@ for k in $kernels ; do
       echo " - JFS recovery support"
       cp -a $root_dir/sbin/fsck $tmp_mnt/bin
       cp -a $root_dir/sbin/fsck.jfs $tmp_mnt/bin
-      cp -a $root_dir/lib/libuuid.so.* $tmp_mnt/lib
-      cp -a $root_dir/lib/libext2fs.so.* $tmp_mnt/lib
-      cp -a $root_dir/lib/libcom_err.so.* $tmp_mnt/lib
+      cp -a $root_dir/$lib/libuuid.so.* $tmp_mnt/$lib
+      cp -a $root_dir/$lib/libext2fs.so.* $tmp_mnt/$lib
+      cp -a $root_dir/$lib/libcom_err.so.* $tmp_mnt/$lib
     fi
 
     if [ "$do_zfcp" ] ; then
@@ -774,6 +788,22 @@ for k in $kernels ; do
 mount -n -tproc none /proc
 vgscan
 vgchange -a y
+# set the right root device if user specified a lvm root
+root=
+for o in \`cat /proc/cmdline\` ; do
+  case \$o in
+    root=*) root="\$o" ;;
+  esac
+done
+if test -n "\$root"; then
+  echo "\$root" > /.root
+  oifs="\$IFS"
+  IFS="="
+  read dummy rootdev < /.root
+  IFS="\$oifs"
+  rootdevn=\`devnumber \$rootdev 2>/dev/null\`
+  test -n "\$rootdevn" -a "\$rootdevn" -ge 14848 -a "\$rootdevn" -lt 15104 && echo "\$rootdevn" > /proc/sys/kernel/real-root-dev
+fi
 umount -n /proc
 
 EOF
@@ -783,26 +813,9 @@ EOF
 
     if [ "$use_pivot_root" ] ; then
 	cat >>$lx_rc <<EOF
-# create all missing devices
+# create missing devices
 mount -n -tproc none /proc
-cat /proc/partitions > /.partitions
-(
-  umask 77
-  while read major minor blocks name rest; do
-    case \$name in
-      */*[0-9]) 
-	if ! test -b /dev/\$name ; then
-	  mkdir -p /dev/\$name 2>/dev/null
-	  rmdir /dev/\$name 2>/dev/null
-          mknod /dev/\$name b \$major \$minor
-	fi
-	;;
-      *[0-9]) 
-        test -b /dev/\$name || mknod /dev/\$name b \$major \$minor
-        ;;
-    esac    
-  done < /.partitions
-)
+createpartitiondevs
 umount -n /proc
 
 EOF
@@ -826,7 +839,7 @@ rootdev="$rootdev"
 root=
 nopivot=
 mount -n -tproc none /proc
-# bug in ash, need cat
+# bug in some kernels, need cat
 for o in \`cat /proc/cmdline\` ; do
   test "\$o" = rw && opt=
   case \$o in
