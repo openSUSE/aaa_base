@@ -30,6 +30,7 @@ test "$PREVLEVEL" = "1" -a "$RUNLEVEL" = "S" && exit 0
 # Up from runlevel N we may want to run in confirm mode
 #
 if test "$PREVLEVEL" = "N" ; then
+    test -e /proc/cmdline || mount -n -t proc proc /proc
     read -t 2 check < /proc/cmdline 2> /dev/null
     case "$check" in
 	*confirm*) DO_CONFIRM=yes ;;
