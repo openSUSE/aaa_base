@@ -130,7 +130,7 @@ for i in passwd group shadow gshadow ; do
   fi
 done
 # check/fix owner and permission of shadow files
-for i in etc/shadow etc/group ; do
+for i in etc/shadow etc/gshadow ; do
     chmod 640 $i
     chgrp shadow $i
 done
