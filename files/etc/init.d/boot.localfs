@@ -8,7 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.localfs
 # Required-Start:    boot.proc
-# X-UnitedLinux-Should-Start: boot.ibmsis boot.md boot.lvm boot.lkcd
+# X-UnitedLinux-Should-Start: boot.ibmsis boot.md boot.lvm
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
@@ -20,6 +20,10 @@
 # to get max number of parallel fsck processes
 . /etc/sysconfig/boot
 
+if [ -f /etc/sysconfig/dump ]; then
+	. /etc/sysconfig/dump
+fi
+
 export FSCK_MAX_INST
 
 rc_reset
@@ -29,10 +33,16 @@ case "$1" in
 	#
 	# fsck may need a huge amount of memory, so make sure, it is there.
 	#
-	echo "Activating swap-devices in /etc/fstab..."
-	swapon -a &> /dev/null
-	rc_status -v1 -r
-
+	# However, in the case of an active LKCD configuration, we need to
+	# recover the crash dump from the swap partition first, so we cannot
+	# yet activate them.
+	#
+	if [ "$DUMP_ACTIVE" != "1" ]; then
+		echo "Activating swap-devices in /etc/fstab..."
+		swapon -a &> /dev/null
+		rc_status -v1 -r
+	fi
+	
 	case `uname -r` in
 	    0.*|1.*|2.[01].*|2.2.?|2.2.10)
 	        echo -n "Running update (bdflush) daemon"
