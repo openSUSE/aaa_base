@@ -35,6 +35,8 @@ endif
 	  RMDIR = rm -rf
    INSTBINFLAGS = -s -m 0700
 	INSTBIN = install $(INSTBINFLAGS)
+   INSTSRPFLAGS = -m 0700
+	INSTSRP = install $(INSTSRPFLAGS)
    INSTDOCFLAGS = -c -m 0444
 	INSTDOC = install $(INSTDOCFLAGS)
    INSTCONFLAGS = -c -m 0644
@@ -68,14 +70,15 @@ install:	$(TODO)
 	$(MKDIR)   $(SDOCDIR)
 	$(MKDIR)   $(CONFDIR)
 	$(MKDIR)   $(LSBDIR)
+	$(MKDIR)   $(DESTDIR)/usr/lib
 	$(INSTBIN) insserv        $(SBINDIR)/
 	$(INSTDOC) insserv.8      $(SDOCDIR)/
 	$(INSTCON) insserv.conf   $(CONFDIR)/
 	$(INSTCON) init-functions $(LSBDIR)/
-	$(INSTBIN) install_initd  $(LSBDIR)/
-	$(INSTBIN) remove_initd   $(LSBDIR)/
+	$(INSTSRP) install_initd  $(LSBDIR)/
+	$(INSTSRP) remove_initd   $(LSBDIR)/
 	$(RMDIR)   $(OLDLSBDIR)/
-	$(LINK)    ../../lib      $(OLDLSBDIR)
+	$(LINK)    ../../lib/lsb  $(OLDLSBDIR)
 
 #
 # Make distribution
