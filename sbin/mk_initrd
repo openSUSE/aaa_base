@@ -7,10 +7,13 @@
 #
 #   root_dir: the directory the root partition is mounted to (defaults to "/")
 #
+#   As an alternative, you can specify the root device via the environment
+#   variable rootdev (e.g. "rootdev=/dev/hda mk_initrd").
+#
 # on errors:
 #   exit code > 0
 #
-# Version 1.03
+# Version 1.05
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
@@ -57,39 +60,8 @@ error () {
   exit $1
 }
 
-[ "$1" = -r ] && shift
-
-root_dir="$1"
-[ "$root_dir" ] || root_dir=/
-
-tmp_initrd=$root_dir/tmp/initrd$$
-
-if [ "$root_dir" != / ] ; then
-  LD_LIBRARY_PATH=$root_dir/usr/lib
-  PATH=$root_dir/usr/bin:$PATH
-  [ -x "$root_dir$static_shell" ] && static_shell="$root_dir$static_shell"
-  [ -x "$root_dir$static_insmod" ] && static_insmod="$root_dir$static_insmod"
-fi
-
-x1=`mount 2>/dev/null | grep "on $root_dir "`
-x2=`echo \`echo "$x1" | wc -l\``
-x3=`echo "$x1" | cut -f 1 -d " "`
-
-root_dev=
-[ "$x2" = 1 -a -b "$x3" ] && root_dev="$x3"
-
-[ "$root_dev" ] || error 1 "usage: mk_initrd [root_dir]"
-
-echo "using \"$root_dev\" as root device (mounted on \"$root_dir\")"
-
-[ -f "$root_dir/etc/rc.config" ] && . $root_dir/etc/rc.config
-
-modules="$INITRD_MODULES"
-
-( cd $root_dir$boot_dir ; rm -f $initrds )
-[ "$modules" ] || error 0 "no initrd required"
-
 # write an updated magic file
+write_magic () {
 cat <<-blub >$tmp_magic
 	0x202	string		HdrS		Linux/i386 Kernel
 	>0x206	short		0x0105		setupV1 zImage
@@ -109,9 +81,42 @@ cat <<-blub >$tmp_magic
 	>(0x20e.s+0x20a)	byte	32
 	>>(0x20e.s+0x200)	string	>\0	"%10.10s"
 blub
+}
+
+[ "$1" = -r ] && shift
+
+root_dir="$1"
+[ "$root_dir" ] || root_dir=/
+
+tmp_initrd=$root_dir/tmp/initrd$$
+
+if [ "$root_dir" != / ] ; then
+  LD_LIBRARY_PATH=$root_dir/usr/lib
+  PATH=$root_dir/usr/bin:$PATH
+  [ -x "$root_dir$static_shell" ] && static_shell="$root_dir$static_shell"
+  [ -x "$root_dir$static_insmod" ] && static_insmod="$root_dir$static_insmod"
+fi
+
+x1=`mount 2>/dev/null | grep "on $root_dir "`
+x2=`echo \`echo "$x1" | wc -l\``
+x3=`echo "$x1" | cut -f 1 -d " "`
+
+if [ -z "$rootdev" ] ; then
+    [ "$x2" = 1 -a -b "$x3" ] && rootdev="$x3"
+fi
+
+[ "$rootdev" ] || error 1 "usage: mk_initrd [root_dir]"
+
+echo "using \"$rootdev\" as root device (mounted on \"$root_dir\")"
+
+[ -f "$root_dir/etc/rc.config" ] && . $root_dir/etc/rc.config
+
+modules="$INITRD_MODULES"
+
+( cd $root_dir$boot_dir ; rm -f $initrds )
+[ "$modules" ] || error 0 "no initrd required"
 
 initrd_a=($initrds)
-
 
 file=file
 [ -x /usr/bin/file ] && file=/usr/bin/file
@@ -122,6 +127,8 @@ for k in $kernels ; do
 
   kk="$root_dir$boot_dir/$k"
   [ -f "$kk" ] || error 2 "no such kernel image: \"$kk\""
+
+  write_magic
 
   vv=`$file -m $tmp_magic $kk | cut -d \" -f 2`
 
