@@ -191,6 +191,11 @@ START_LOOPBACK="yes"
 NETCONFIG="YAST_ASK"
 
 #
+# contains all indices of active PCMCIA network devices
+#
+NETCONFIG_PCMCIA=""
+
+#
 # IP Adresses
 #
 IPADDR_0=""
