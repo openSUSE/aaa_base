@@ -95,7 +95,7 @@ ROOT_LOGIN_REMOTE="no"
 CHECK_INITTAB=yes
 
 #
-# Here you can set the default Display manager (kdm/xdm/console).
+# Here you can set the default Display manager (kdm/xdm/gdm/console).
 # Attention: CHECK_INITTAB has to be set to yes, to activate this feature.
 # If DISPLAYMANAGER is set to console, SuSEconfig will not bother you
 # with a missing XF86Config.
