@@ -129,7 +129,6 @@ call ()
     rc_splash "$script start"
     blogger   "$script start"
 
-    rc_init
     if test -x "$1" ; then
 	# Active boot scripts, should have their own messages
 	$1 start <> $CONSOLE 2>&0 1>&0
@@ -175,8 +174,8 @@ if test -d ${bootrc}/ ; then
 	test -n "$cur" || callord="${callord:+"$callord "}$B"
 
 	# Remember scripts
-	start="${bootrc}/$B$script"
-	eval $B="\${cur:+call $start\|}\${cur:-call $start}"
+	start="call ${bootrc}/$B$script"
+	eval $B="\${cur:+$start\|}\${cur:-$start}"
     done
 fi
 

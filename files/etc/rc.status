@@ -31,11 +31,6 @@
 #    \015          carriage return (without newline)
 #
 
-# check whether splash screen animations are installed.
-_rc_splash=0
-test -f /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
-test -x /sbin/splash && _rc_splash=1
-
 if test -z "$LINES" -o -z "$COLUMNS" ; then
     eval `stty size 2>/dev/null | (read L C; \
 	  echo LINES=${L:-24} COLUMNS=${C:-80})`
@@ -63,12 +58,11 @@ if test -t 1 -a "$TERM" != "raw" -a "$TERM" != "dumb" && stty size > /dev/null 2
   rc_unknown="${stat}${attn}unknown${norm}"
   rc_done_up="${esc}[1A${rc_done}"
 rc_failed_up="${esc}[1A${rc_failed}"
-    rc_reset="${norm}"
-     rc_save="${esc}7"
-  rc_restore="${esc}8"
-    function rc_init () { return; }
-    function rc_goto () { return; }
-    function rc_cuu () { echo -en "\033[${1}A"; }
+    rc_reset="${norm}${esc}[?25h"
+     rc_save="${esc}7${esc}[?25l"
+  rc_restore="${esc}8${esc}[?25h"
+    function rc_cuu () { test $1 -eq 0 && return; echo -en "\033[${1}A"; }
+    function rc_cud () { test $1 -eq 0 && return; echo -en "\033[${1}B"; }
     function rc_timer_on () {
 	# Draw seconds of running timout to column.
 	# Two arguments: timeout in seconds and offset
@@ -112,13 +106,13 @@ rc_failed_up="${rc_failed}"
     rc_reset=""
      rc_save=""
   rc_restore=""
-    function rc_init () { return; }
-    function rc_goto () { return; }
     function rc_cuu () { return; }
+    function rc_cud () { return; }
     function rc_timer_on  () { return; }
     function rc_timer_off () { return; }
 fi
 
+_rc_service=${0##*/[SK][0-9][0-9]}
 _rc_status=0
 _rc_status_all=0
 _rc_todo=$1
@@ -145,18 +139,20 @@ function rc_status ()
     for i ; do
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])
-	    echo -en "$rc_save"
-	    rc_goto
-	    test -n "${i#-v}" && rc_cuu ${i#-v}
+	    local vrt=""
+	    local out=1
+	    local opt="en"
+
+	    test -n "${i#-v}" && vrt="$vrt${esc}[${i#-v}A" || opt="e"
 	    case "$_rc_status" in
-	    0)	echo -en "$rc_running"	 ;; # service running
-	    1)	echo -en "$rc_dead" 1>&2 ;; # service dead (but has pid file)
-	    2)	echo -en "$rc_dead" 1>&2 ;; # service dead (but has lock file)
-	    3)	echo -en "$rc_unused"	 ;; # service not running
-	    4)	echo -en "$rc_unknown"	 ;; # status is unknown
+	    0)	vrt="$vrt$rc_running";		;; # service running
+	    1)	vrt="$vrt$rc_dead"   ; out=2	;; # service dead (but has pid file)
+	    2)	vrt="$vrt$rc_dead"   ; out=2	;; # service dead (but has lock file)
+	    3)	vrt="$vrt$rc_unused" ;		;; # service not running
+	    4)	vrt="$vrt$rc_unknown";		;; # status is unknown
 	    esac
-	    echo -en "$rc_restore"
-	    test -z "${i#-v}" && echo
+	    echo -$opt "$rc_save$vrt$rc_restore" 1>&$out
+
 	    # reset _rc_status to 0 after verbose case
 	    _rc_status=0 ;;
 	-r) rc_reset ;;
@@ -182,22 +178,24 @@ function rc_status ()
     for i ; do
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])
-	    echo -en "$rc_save"
-	    rc_goto
-	    test -n "${i#-v}" && rc_cuu ${i#-v}
+	    local vrt=""
+	    local out=1
+	    local opt="en"
+
+	    test -n "${i#-v}" && vrt="$vrt${esc}[${i#-v}A" || opt="e"
 	    case "$_rc_status" in
-	    0)	echo -en "$rc_done"	    ;; # success
-	    1)	echo -en "$rc_failed"  1>&2 ;; # generic or unspecified error
-	    2)	echo -en "$rc_failed"  1>&2 ;; # invalid or excess args
-	    3)	echo -en "$rc_missed"  1>&2 ;; # unimplemented feature
-	    4)	echo -en "$rc_failed"  1>&2 ;; # insufficient privilege
-	    5)	echo -en "$rc_skipped" 1>&2 ;; # program is not installed
-	    6)	echo -en "$rc_unused"  1>&2 ;; # program is not configured
-	    7)	echo -en "$rc_failed"  1>&2 ;; # program is not running
-	    *)	echo -en "$rc_failed"  1>&2 ;; # unknown (maybe used in future)
+	    0)	vrt="$vrt$rc_done"   ;		;; # success
+	    1)	vrt="$vrt$rc_failed" ; out=2	;; # generic or unspecified error
+	    2)	vrt="$vrt$rc_failed" ; out=2	;; # invalid or excess args
+	    3)	vrt="$vrt$rc_missed" ; out=2	;; # unimplemented feature
+	    4)	vrt="$vrt$rc_failed" ; out=2	;; # insufficient privilege
+	    5)	vrt="$vrt$rc_skipped"; out=2	;; # program is not installed
+	    6)	vrt="$vrt$rc_unused" ; out=2	;; # program is not configured
+	    7)	vrt="$vrt$rc_failed" ; out=2	;; # program is not running
+	    *)	vrt="$vrt$rc_failed" ; out=2	;; # unknown (maybe used in future)
 	    esac
-	    echo -en "$rc_restore"
-	    test -z "${i#-v}" && echo
+	    echo -$opt "$rc_save$vrt$rc_restore" 1>&$out
+
 	    # reset _rc_status to 0 after verbose case
 	    _rc_status=0 ;;
 	-r) rc_reset ;;
@@ -216,12 +214,17 @@ function rc_status ()
     for i ; do
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])
-	    echo -en "$rc_save"
-	    rc_goto
-	    test -n "${i#-v}" && rc_cuu ${i#-v}
-	    test $_rc_status -gt 0 && echo -en "$rc_failed" || echo -en "$rc_done"
-	    echo -en "$rc_restore"
-	    test -z "${i#-v}" && echo
+	    local vrt=""
+	    local out=1
+	    local opt="en"
+
+	    test -n "${i#-v}" && vrt="$vrt${esc}[${i#-v}A" || opt="e"
+	    case "$_rc_status" in
+	    0)	vrt="$vrt$rc_done"  ;		;; # success
+	    *)	vrt="$vrt$rc_failed"; out=2	;; # failed
+	    esac
+	    echo -$opt "$rc_save$vrt$rc_restore" 1>&$out
+
 	    # reset _rc_status to 0 after verbose case
 	    _rc_status=0 ;;
 	-r) rc_reset ;;
@@ -257,7 +260,7 @@ function rc_confirm()
     local ret=0
 
     case "$1" in
-    -t) shift; timeout=$1; shift ;;
+    -t) timeout=$2; shift 2 ;;
     esac
     local message="$@, (Y)es/(N)o/(C)ontinue? [y] "
     : ${REDIRECT:=/dev/tty}
@@ -275,18 +278,29 @@ function rc_confirm()
     return $ret
 }
 
-function rc_splash()
-{
-    test "$SPLASH" != "no" && test "$_rc_splash" -eq 1 && /sbin/splash "$1"
-    progress=$(( $progress + 1 ))
-}
-
 function rc_active ()
 {
+    local x
     for x in /etc/init.d/*.d/S[0-9][0-9]${1} ; do
 	test -e $x || break
 	return 0
     done
     return 1
 }
+
+# Check whether splash screen animations are installed.
+test -f /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
+
+if test -x /sbin/splash -a "$SPLASH" != "no" ; then
+    function rc_splash()
+    {
+	/sbin/splash "$1"
+	: $((progress++))
+    }
+else
+    function rc_splash()
+    {
+	: $((progress++))
+    }
+fi
 

@@ -210,7 +210,6 @@ call ()
     rc_splash "$serv $2"
     blogger   "$serv $2"
 
-    rc_init
     $@ <> $CONSOLE 2>&0 1>&0
     status=$?
     echo -en "$rc_reset" > $CONSOLE
@@ -242,8 +241,8 @@ for i in $prerc/K${rex}*; do
     test -n "$cur" || callord="${callord:+"$callord "}$K"
 
     # Remember services
-    stop="$prerc/$K$service stop"
-    eval $K="\${cur:+call $stop\|}\${cur:-call $stop}"
+    stop="call $prerc/$K$service stop"
+    eval $K="\${cur:+$stop\|}\${cur:-$stop}"
 done
 
 for i in $runrc/S${rex}*; do
@@ -276,8 +275,8 @@ for i in $runrc/S${rex}*; do
     test -n "$cur" || callord="${callord:+"$callord "}$S"
 
     # Remember services
-    start="$runrc/$S$service start"
-    eval $S="\${cur:+call $start\|}\${cur:-call $start}"
+    start="call $runrc/$S$service start"
+    eval $S="\${cur:+$start\|}\${cur:-$start}"
 done
 
 #
