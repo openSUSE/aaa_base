@@ -258,7 +258,7 @@ alias char-major-185 intermezzo
 
 alias char-major-188      usbserial
 
-alias char-major-195      NVdriver
+alias char-major-195*     nvidia
 alias char-major-206      osst
 alias char-major-212      /bin/true
 
