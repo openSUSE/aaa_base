@@ -76,8 +76,8 @@ export HOST CPU HOSTNAME HOSTTYPE OSTYPE MACHTYPE
 #
 # Adjust some size limits (see bash(1) -> ulimit)
 # Note: You may use /etc/initscript instead to set up ulimits and your PATH.
-#
-if test "$is" != "ash" ; then
+# Setting of ulimits are skipped if /etc/initscript (ulimit package) exists.
+if test "$is" != "ash" -a ! -r /etc/initscript; then
     #ulimit -c 20000		# only core-files less than 20 MB are written
     #ulimit -d 15000		# max data size of a program is 15 MB
     #ulimit -s 15000		# max stack size of a program is 15 MB

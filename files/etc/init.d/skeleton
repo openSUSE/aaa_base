@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1995-2003 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 1995-2004 SUSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
 # Author: Kurt Garloff
@@ -22,9 +22,9 @@
 ### BEGIN INIT INFO
 # Provides:          FOO
 # Required-Start:    $syslog $remote_fs
-# X-UnitedLinux-Should-Start: $time ypbind sendmail
+# Should-Start: $time ypbind sendmail
 # Required-Stop:     $syslog $remote_fs
-# X-UnitedLinux-Should-Stop: $time ypbind sendmail
+# Should-Stop: $time ypbind sendmail
 # Default-Start:     3 5
 # Default-Stop:      0 1 2 6
 # Short-Description: FOO XYZ daemon providing ZYX
@@ -37,11 +37,11 @@
 ### END INIT INFO
 # 
 # Any extensions to the keywords given above should be preceeded by 
-# X-VendorTag- (X-UnitedLinux- for us) according to LSB.
+# X-VendorTag- (X-UnitedLinux- X-SuSE- for us) according to LSB.
 # 
-# Notes on Required-Start/X-UnitedLinux-Should-Start:
+# Notes on Required-Start/Should-Start:
 # * There are two different issues that are solved by Required-Start
-#    and X-UnitedLinux-Should-Start
+#    and Should-Start
 # (a) Hard dependencies: This is used by the runlevel editor to determine
 #     which services absolutely need to be started to make the start of
 #     this service make sense. Example: nfsserver should have
@@ -53,7 +53,7 @@
 # (b) Specifying the init script ordering, not real (hard) dependencies.
 #     This is needed by insserv to determine which service should be
 #     started first (and at a later stage what services can be started
-#     in parallel). The tag X-UnitedLinux-Should-Start: is used for this.
+#     in parallel). The tag Should-Start: is used for this.
 #     It tells, that if a service is available, it should be started
 #     before. If not, never mind.
 # * When specifying hard dependencies or ordering requirements, you can 
@@ -78,13 +78,13 @@
 #	$ALL			indicates that a script should be inserted
 #				at the end
 # * The services specified in the stop tags 
-#   (Required-Stop/X-UnitedLinux-Should-Stop)
+#   (Required-Stop/Should-Stop)
 #   specify which services need to be still running when this service
 #   is shut down. Often the entries there are just copies or a subset 
 #   from the respective start tag.
-# * X-UnitedLinux-Should-Start/Stop are not part of LSB (as of 1.3)
-#   but official Should-Start/Stop tags are in discussion (1.9).
-#   insserv does support these as well.
+# * Should-Start/Stop are now part of LSB as of 2.0,
+#   formerly SUSE/Unitedlinux used X-UnitedLinux-Should-Start/-Stop.
+#   insserv does support both variants.
 # * X-UnitedLinux-Default-Enabled: yes/no is used at installation time
 #   (%fillup_and_insserv macro in %post of many RPMs) to specify whether
 #   a startup script should default to be enabled after installation.
