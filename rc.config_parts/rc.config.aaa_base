@@ -270,22 +270,6 @@ CHECK_PERMISSIONS=set
 #
 PERMISSION_SECURITY="easy local"
 
-
-#
-# How long to store old log files. If set to 0, log files will remain
-# untouched. The log files below will be checked by cron.daily.
-# The number after the name is the minimum size (in kb) the file has to
-# have, before it will be backed up (root gets a mail when it happens).
-#
-# /tmp/log_mg.* (1024), /var/log/wtmp (400), /var/log/isdn (4096),
-# /var/lib/xdm/xdm-errors (200), /var/spool/uucp/Log (2048),
-# /var/spool/uucp/Stats (1024), /var/log/debug (1024), /var/log/warn (1024),
-# /var/log/messages (4096), /var/log/xferlog (4096), 
-# /local/www/logs/access_log (4096), /local/www/logs/error_log (1024)
-# /var/adm/isdn.log (1024), /var/log/isdncalls (1024)
-#
-MAX_DAYS_FOR_LOG_FILES=365
-
 #
 # cron.daily can check for old files in tmp-dirs. It will delete all files
 # not accessed for more than MAX_DAYS_IN_TMP. If MAX_DAYS_IN_TMP is not set
