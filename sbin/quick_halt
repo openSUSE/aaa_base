@@ -60,12 +60,13 @@ sleep 5
 # For the shells, pppd, ...
 killall5 -1
 sync
+# Umount network filesystems, unexport NFS and stop network
+test -x /usr/sbin/exportfs && exportfs -au
 sleep 1
-# Umount network filesystems and stop network
+umount -avft nfs &
 umount -avft coda &
 umount -avft smbfs & 
 umount -avft ncpfs &
-umount -avft nfs &
 sleep 1
 rcnetwork stop
 
