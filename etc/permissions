@@ -268,7 +268,6 @@
 /sbin/init.d/autofs                    root.root         744
 /sbin/init.d/axnet                     root.root         744
 /sbin/init.d/boot                      root.root         744
-/sbin/init.d/boot.d                    root.root         744
 /sbin/init.d/boot.setup                root.root         744
 /sbin/init.d/cdb                       root.root         744
 /sbin/init.d/cipe                      root.root         744
