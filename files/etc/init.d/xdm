@@ -128,8 +128,17 @@ case "$1" in
 	    echo reload
 	fi
 	;;
+    try-restart|condrestart)
+	$0 status
+	if test $? = 0; then
+	    $0 restart
+	else
+	    rc_reset
+	fi
+	rc_status
+	;;
     *)
-	echo "Usage: $0 {start|stop|status|restart|reload|force-reload|probe}"
+	echo "Usage: $0 {start|stop|status|restart|reload|force-reload|probe|try-restart}"
 	exit 1
 esac
 rc_exit

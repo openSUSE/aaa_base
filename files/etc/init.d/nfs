@@ -102,8 +102,17 @@ case "$1" in
 	fi
         rc_status -v
 	;;
+    try-restart|condrestart)
+	$0 status
+	if test $? = 0; then
+	    $0 restart
+	else
+	    rc_reset
+	fi
+	rc_status
+	;;
     *)
-	echo "Usage: $0 {start|stop|status|reload|force-reload|restart}"
+	echo "Usage: $0 {start|stop|status|reload|force-reload|restart|try-restart}"
 	exit 1
 esac
 rc_exit

@@ -38,6 +38,8 @@ setJava.pl link --noreplace --linkname SunJava2 --version 1.2 --vendor Sun >/dev
 setJava.pl link --noreplace --linkname IBMJava2 --version 1.2 --vendor IBM >/dev/null 2>/dev/null
 # /usr/lib/BlackdownJava2
 setJava.pl link --noreplace --linkname BlackdownJava2 --version 1.2 --vendor Blackdown >/dev/null 2>/dev/null
+# /usr/lib/BEAJava2
+setJava.pl link --noreplace --linkname BEAJava2 --version 1.2 --vendor BEA >/dev/null 2>/dev/null
 
 # create compat links if only Blackdown's JRE is installed
 test -x /usr/lib/BlackdownJava2/manPagesCompatLinks && /usr/lib/BlackdownJava2/manPagesCompatLinks
