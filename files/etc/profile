@@ -236,11 +236,6 @@ fi
 
 if test "$is" != "ash" ; then
     #
-    # Source some aliases which provide help for DOS users
-    #
-    #test -e /etc/profile.dos && . /etc/profile.dos
-
-    #
     # And now let's see if there is a local profile
     # (for options defined by your sysadmin, not SuSE Linux)
     #
