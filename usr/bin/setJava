@@ -1,0 +1,95 @@
+#! /bin/bash
+# Copyright (c) 2000 SuSE Gmbh Nuernberg, Germany.  All rights reserved.
+#
+# Author: Petr Mladek <pmladek@suse.cz>
+
+SETJAVA_EXIT=no
+NEW_JAVA=no
+
+if [ "$#" != "1" ] || [ "$1" = "--help" ] ; then
+  echo "This script set java for current shell (for next applications)"
+  echo
+  echo "Usage: . setJava [--help] java_type"
+  echo
+  echo "	--help    - print this help"
+  echo "	java_type - is one from: - SunJava1, SunJava2, IBMJava2"
+  echo "                                   Java2, default"
+  echo
+  SETJAVA_EXIT=yes
+fi
+
+if [ "$SETJAVA_EXIT" = "no" ] ; then 
+  # find current java in $PATH
+  JAVA_OLD_PATH=
+  JAVA_FIRST_IN_PATH=no
+  OLD_IFS=$IFS
+  IFS=":,$IFS"
+  for i in $PATH ; do
+    # we find first occurence
+    if [ "$JAVA_FIRST_IN_PATH" = "no" ] ; then
+      case "$i" in
+        "/usr/lib/java/bin" | \
+        "/usr/lib/SunJava1/bin" | \
+        "/usr/lib/SunJava2/bin" | \
+        "/usr/lib/IBMJava2/bin")
+          JAVA_OLD_PATH=$i
+	  JAVA_FIRST_IN_PATH=yes
+          ;;
+      esac
+    fi  
+  done
+  IFS=$OLD_IFS
+  export IFS
+fi
+
+
+if [ "$SETJAVA_EXIT" = "no" ] ; then 
+  # find requested java for new PATH
+  JAVA_NEW_PATH=
+  case "$1" in
+    "SunJava1")
+      if [ -d /usr/lib/SunJava1/bin ] ; then JAVA_NEW_PATH=/usr/lib/SunJava1/bin; fi
+      ;;
+    "SunJava2")
+      if [ -d /usr/lib/SunJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/SunJava2/bin; fi
+      ;;
+    "IBMJava2")
+      if [ -d /usr/lib/IBMJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/IBMJava2/bin; fi
+      ;;
+    "Java2")
+      if [ -d /usr/lib/IBMJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/IBMJava2/bin; fi
+      if [ -d /usr/lib/SunJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/SunJava2/bin; fi
+      ;;
+    "default")
+      if [ -d /usr/lib/IBMJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/IBMJava2/bin; fi
+      if [ -d /usr/lib/SunJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/SunJava2/bin; fi
+      if [ -d /usr/lib/SunJava1/bin ] ; then JAVA_NEW_PATH=/usr/lib/SunJava1/bin; fi
+      ;;
+    *)          
+      echo "Error: I do not know this java_type ($1)"
+      echo "       Please, use setJava --help"
+      SETJAVA_EXIT=yes
+      ;;
+  esac
+fi
+
+if [ "$SETJAVA_EXIT" = "no" ] && [ -z "$JAVA_NEW_PATH" ] ; then
+  echo "Error: Requested java ($1) is not installed"
+  SETJAVA_EXIT=yes
+fi
+
+if [ "$SETJAVA_EXIT" = "no" ] ; then
+  # set new java in $PATH
+  if [ -n "$JAVA_OLD_PATH" ] ; then
+    PATH=`echo $PATH | sed -e "s|$JAVA_OLD_PATH|$JAVA_NEW_PATH|"`
+  else
+    PATH="$PATH:$JAVA_NEW_PATH"
+  fi  
+  NEW_JAVA=yes
+fi
+
+unset SETJAVA_EXIT
+
+export PATH
+
+test "$NEW_JAVA" = "yes"

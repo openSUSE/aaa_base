@@ -1,0 +1,81 @@
+--- etc/init.d/rc.old	Tue Aug 21 17:09:39 2001
++++ etc/init.d/rc	Thu Aug 23 15:18:57 2001
+@@ -111,6 +111,9 @@
+     test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
+     test -x "$1"  && continue
+ 
++    # send information to splash icon viewer.
++    rc_splash  "$i stop"
++
+     # Log to /var/log/boot.msg
+     blogger "$i stop"
+ 
+@@ -139,6 +142,9 @@
+     set -- $prerc/K$rex$service
+     test $# -gt 1 && echo -e "$attn$prerc/: more than one link for service $service$norm"
+     test -x "$1"  && continue
++
++    # send information to splash icon viewer.
++    rc_splash  "$i start"
+ 
+     # Log to /var/log/boot.msg
+     blogger "$i start"
+--- etc/init.d/boot.old	Tue Aug 21 17:09:45 2001
++++ etc/init.d/boot	Fri Aug 24 11:42:33 2001
+@@ -108,6 +108,8 @@
+     fi
+ fi
+ 
++rc_splash "early stop"
++
+ #
+ # s390 is 'like' serial console(better: no console ttys at all)
+ # and we don't have access to the HW Clock
+@@ -126,6 +128,8 @@
+    FSCK_PROGRESSBAR=""
+ fi
+ 
++rc_splash "fsck start"
++
+ #
+ # Find and activate volume groups (HM 1/1/1999)
+ #
+@@ -337,6 +341,7 @@
+ echo "Activating remaining swap-devices in /etc/fstab..."
+ swapon -a &> /dev/null
+ rc_status -v1 -r
++rc_splash "fsck stop"
+ 
+ # set and adjust the CMOS clock
+ if test "$HWCLOCK_ACCESS" != "no" ; then
+@@ -414,6 +419,8 @@
+     /usr/sbin/zic -l $TIMEZONE
+     rc_status -v -r
+ fi
++
++rc_splash "bootnetwork start"
+ 
+ #
+ # initialize loopback device
+--- etc/rc.status.old	Thu Aug 23 14:03:02 2001
++++ etc/rc.status	Fri Aug 24 12:40:39 2001
+@@ -26,6 +26,10 @@
+ #    \015          carriage return (without newline)
+ #
+ 
++# check whether splash screen animations are installed.
++_rc_splash=0
++test -x /bin/splash && _rc_splash=1
++
+ if test -z "$LINES" -o -z "$COLUMNS" ; then
+     eval `stty size 2>/dev/null | (read L C; \
+ 	  echo LINES=${L:-24} COLUMNS=${C:-80})`
+@@ -189,4 +193,8 @@
+ function rc_exit ()
+ {
+     exit $_rc_status_all
++}
++function rc_splash()
++{
++    test "$_rc_splash" -eq 1 && /bin/splash "$1"
+ }

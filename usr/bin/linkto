@@ -1,0 +1,10 @@
+#! /usr/bin/env perl
+# Copyright (c) 2000 SuSE Gmbh Nuernberg, Germany.  All rights reserved.
+#
+# Author: Vladimir Linek <vinil@suse.cz>
+
+# this script prints destination of the symbolic link
+
+# Usage:      linkto symlink
+
+print readlink($ARGV[0]) . "\n";

@@ -132,12 +132,15 @@ export TEXINPUTS
 #
 # Configure the default pager on SuSE Linux
 #
-LESS="-M"
-LESSKEY=/etc/lesskey.bin
-LESSOPEN="lessopen.sh %s"
-LESSCLOSE="lessclose.sh %s %s"
-PAGER=less
-export LESSOPEN LESSCLOSE LESS LESSKEY PAGER
+if test -z "$LESS" ; then
+  LESS="-M"
+  LESSKEY=/etc/lesskey.bin
+  LESSOPEN="lessopen.sh %s"
+  LESSCLOSE="lessclose.sh %s %s"
+  LESS_ADVANCED_PREPROCESSOR="no"
+  PAGER=less
+  export LESSOPEN LESSCLOSE LESS LESSKEY PAGER
+fi
 
 #
 # Minicom 

@@ -1,0 +1,61 @@
+#! /bin/bash
+# Copyright (c) 2000 SuSE Gmbh Nuernberg, Germany.  All rights reserved.
+#
+# Author: Petr Mladek <pmladek@suse.cz>
+
+if [ "$#" != "1" ] || [ "$1" = "--help" ] ; then
+  echo "This script sets default java for your computer"
+  echo
+  echo "Usage: setDefaultJava [--help] java_type"
+  echo
+  echo "	--help    - print this help"
+  echo "	java_type - is one from: - SunJava1, SunJava2, IBMJava2"
+  echo "                                   Java2, default)"
+  echo
+  exit 0
+fi
+
+# check if we are started as root
+# only one of UID and USER must be set correctly
+if test "$UID" != 0 -a "$USER" != root; then
+    echo "You must be root to start $0."
+    exit 1
+fi
+
+# test if there is desired java
+JAVALINKTO=
+
+case "$1" in
+	"SunJava1")
+	  if [ -d /usr/lib/SunJava1/bin ] ; then JAVALINKTO=/usr/lib/SunJava1; fi
+	  ;;
+	"SunJava2")  
+	  if [ -d /usr/lib/SunJava2/bin ] ; then JAVALINKTO=/usr/lib/SunJava2; fi
+	  ;;
+        "IBMJava2")
+	  if [ -d /usr/lib/IBMJava2/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2; fi
+	  ;;
+        "Java2")
+	  if [ -d /usr/lib/IBMJava2/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2; fi
+	  if [ -d /usr/lib/SunJava2/bin ] ; then JAVALINKTO=/usr/lib/SunJava2; fi
+          ;;
+        "default")
+	  if [ -d /usr/lib/IBMJava2/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2; fi
+	  if [ -d /usr/lib/SunJava2/bin ] ; then JAVALINKTO=/usr/lib/SunJava2; fi
+	  if [ -d /usr/lib/SunJava1/bin ] ; then JAVALINKTO=/usr/lib/SunJava1; fi
+          ;;
+        *)	
+	  echo "Error: I do not know this java_type ($1)"
+	  echo "       Please, use setDefaultJava --help"
+	  exit 1
+esac
+
+if [ -z "$JAVALINKTO" ] ; then
+  echo "Error: Requested java ($1) is not installed"
+  exit 1
+fi
+
+# create requested link
+if [ -L /usr/lib/java ] ; then rm /usr/lib/java; fi
+ln -sf `linkto $JAVALINKTO` /usr/lib/java
+exit 0
