@@ -79,7 +79,7 @@ case "$-" in
     #
     # Some useful functions
     #
-    startx  () { /usr/X11R6/bin/startx ${1+"$@"} 2>&1 | tee $HOME/.X.err ; }
+    startx  () { exec /usr/X11R6/bin/startx ${1+"$@"} 2>&1 | tee $HOME/.X.err ; }
     remount () { /bin/mount -o remount,${1+"$@"} ; }
 
     #
@@ -87,33 +87,45 @@ case "$-" in
     #
     case "$is" in
     bash)
-#	set -P
-	set -p
-	if test "$UID" = 0 ; then
-	    PS1="\h:\w # "
-	else
-	    PS1="\u@\h:\w> "
-	fi
-#	# Returns short path (last two directoeries)
+	# Returns short path (last two directoeries)
 	spwd () {
 	  ( IFS=/
 	    set $PWD
 	    if test $# -le 3 ; then
 		echo "$PWD"
 	    else
-		eval echo \"..\${$(($# - 1))}/\${$#}\"
+		eval echo \"..\${$(($#-1))}/\${$#}\"
 	    fi ) ; }
-#	if test "$UID" = 0 ; then
-#	    PS1="\h:\$(spwd) # "
-#	else
-#	    PS1="\u@\h:\$(spwd)> "
-#	fi
+	# Returns short path (last 18 characters)
+	ppwd () {
+	    local _w="$(dirs +0)"
+	    if test ${#_w} -le 18 ; then
+		echo "$_w"
+	    else
+		echo "...${_w:$((${#_w}-18))}"
+	    fi ; }
+	# If set: do not follow sym links
+	# set -P
+	#
+	# Other prompting for root
+	_t=""
+	if test "$UID" = 0 ; then
+	    _u="\h"
+	    _p=" #"
+	else
+	    _u="\u@\h"
+	    _p=">"
+	    if test \( "$TERM" = "xterm" -o "${TERM#screen}" != "$TERM" \) -a -z "$EMACS" ; then
+		_t="\[\e]2;\u@\h:\$(ppwd)\007\e]1;\h\007\]"
+	    fi
+	fi
+	# With full path on prompt
+	PS1="${_t}${_u}:\w${_p} "
+#	# With short path on prompt
+#	PS1="${_t}${_u}:\$(spwd)${_p} "
 #	# With physical path even if reached over sym link
-#	if test "$UID" = 0 ; then
-#	    PS1="\h:\$(pwd -P) # "
-#	else
-#	    PS1="\u@\h:\$(pwd -P)> "
-#	fi
+#	PS1="${_t}${_u}:\$(pwd -P)${_p} "
+	unset _u _p _t
 	;;
     ash)
 	cd () {
@@ -210,8 +222,8 @@ case "$-" in
 	esac
     fi
 
-    # Do not save dupes and lines starting by space in the bash history file
-    HISTCONTROL=ignoreboth
+    # Do not save dupes in the bash history file
+    HISTCONTROL=ignoredups
     if test "$is" = "ksh" ; then
 	# Use a ksh specific history file and enable
     	# emacs line editor
