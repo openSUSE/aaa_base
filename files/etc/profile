@@ -127,6 +127,7 @@ fi
 # Most bourn shell clones knows about this
 #
 HISTSIZE=1000
+export HISTSIZE
 
 #
 # Set some environment variables for TeX/LaTeX
