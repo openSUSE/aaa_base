@@ -8,8 +8,6 @@
 
 RESOLVCONF=/etc/resolv.conf
 PROGNAME=`basename $0`
-TMPFILE=`mktemp /tmp/mdfrc.XXXXXX`
-TMPRC=`mktemp /tmp/resolv.conf.XXXXXX`
 RETVAL=0
 
 usage () {
@@ -424,7 +422,7 @@ debug "(4) INVALID_BACKUPS: $INVALID_BACKUPS"
 ###########################################################
 
 # If there is a resolv.conf and --save_now was set then lets do it:
-test -n "$SAVENOW" -a -e "$RESOLVCONF" && cp --backup=t $RESOLVCONF $SAVENOW
+test -n "$SAVENOW" -a -e "$RESOLVCONF" && cp -p --backup=t $RESOLVCONF $SAVENOW
 
 debug "BACKUP=$BACKUP"
 case $ACTION in
@@ -438,7 +436,7 @@ case $ACTION in
     done
     # ... there isn't any
     if [ -e $RESOLVCONF -a "$SAVE" != "no" ] ; then
-       cp $RESOLVCONF $BACKUP
+       cp -p $RESOLVCONF $BACKUP
        debug "$RESOLVCONF saved to $BACKUP"
     fi
     # Only one of $DOMAIN and $SEARCH does contain something
@@ -465,7 +463,7 @@ case $ACTION in
     # If __save_later was set when modifying then we save the temporary
     # resolv.conf
     test -n "$RC_SAVELATER" -a -e "$RESOLVCONF" &&
-      cp --backup=t $RESOLVCONF $RC_SAVELATER
+      cp -p --backup=t $RESOLVCONF $RC_SAVELATER
     # We only restore if a backup with the correct name (already in $BACKUP) 
     # exists. If this backup is valid we have to save the integrity of a 
     # possibly existing backup stack. If this backup is invalid (= not part
@@ -502,7 +500,8 @@ case $ACTION in
         # 2) The Backup has itself a backup (S!="") then we have to replace the
         #    info block in the predecessor (P) with that from the Backup (C),
         #    but keep everything else from P. And remove C. 
-        cp $P $TMPFILE 
+        TMPFILE=`mktemp /tmp/mdfrc.XXXXXX`
+        cp -p $P $TMPFILE 
         if [ "$S" = "" ] ; then
           sed "/### BEGIN INFO/,/### END INFO/d" $TMPFILE > $P
           log "kept $P and removed info block"
@@ -545,7 +544,7 @@ case $ACTION in
       # If --save_later was set when modifying then we save the temporary
       # resolv.conf
       test -n "$RC_SAVELATER" -a -e "$RESOLVCONF" &&
-        cp --backup=t $RESOLVCONF $RC_SAVELATER
+        cp -p --backup=t $RESOLVCONF $RC_SAVELATER
       # Search the most reasonable backup. That is (if existing) the LAST_BACKUP
       # then the DIRECT_BACKUP and last the first one of INVALID_BACKUPS
       BACKUP=`echo "$LAST_BACKUP $DIRECT_BACKUP $INVALID_BACKUPS" \
@@ -562,7 +561,8 @@ case $ACTION in
     # After cleaning up resolc.conf should not contain an INFO block that
     # marks it as modified. If it somehow happens that it has it, we remove it.
     if grep "### BEGIN INFO" $RESOLVCONF 2>/dev/null; then
-      cp $RESOLVCONF $TMPFILE
+      TMPFILE=`mktemp /tmp/mdfrc.XXXXXX`
+      cp -p $RESOLVCONF $TMPFILE
       sed "/### BEGIN INFO/,/### END INFO/d" $TMPFILE >  $RESOLVCONF
       rm $TMPFILE
       chmod 644 $RESOLVCONF

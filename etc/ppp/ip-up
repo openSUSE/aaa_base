@@ -46,8 +46,8 @@ ippp*)
 	# Get the nameservers (works with ipppd option ms-get-dns):
 
 	if [ -n "$MS_DNS1" -a "$START_NAMED" != "yes" ]; then
-                /sbin/modify_resolvconf modify -s ipppd -p ipppd \
-                  -f /etc/ppp/ip-up -n "$MS_DNS1 $MS_DNS2" -t - << EOT
+                /sbin/modify_resolvconf modify -s ipppd -e "$INTERFACE" \
+                  -p ipppd -f /etc/ppp/ip-up -n "$MS_DNS1 $MS_DNS2" -t - << EOT
                   This is a temporary resolv.conf created by ipppd. The previous
                   file has been saved as <see "Backup: field above>. It will be
                   restored when ippp disconnects.
@@ -100,7 +100,7 @@ EOT
 	# Restore the nameservers (got with ipppd option ms-get-dns):
 
 	if [ -n "$MS_DNS1" -a "$START_NAMED" != "yes" ]; then
-                /sbin/modify_resolvconf restore -s ipppd
+                /sbin/modify_resolvconf restore -s ipppd -e "$INTERFACE"
 	fi
 
 	# restart interface
@@ -135,7 +135,7 @@ ppp*)
 	# by pppd when the link goes down.
 	#
 	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf -a "$START_NAMED" != "yes" ]; then
-		/sbin/modify_resolvconf modify -s pppd -p pppd \
+		/sbin/modify_resolvconf modify -s pppd -p pppd -e "$INTERFACE" \
                   -f /etc/ppp/ip-up -n "$DNS1 $DNS2" -t - << EOT
                   This is a temporary resolv.conf created by pppd. The previous
                   file has been saved as <see Backup: field above>. It will be
@@ -171,7 +171,7 @@ EOT
 	# resolv.conf was modified for the supplied dns server adresses.
 	#
 	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf -a "$START_NAMED" != "yes" ]; then
-                /sbin/modify_resolvconf restore -s pppd
+                /sbin/modify_resolvconf restore -s pppd -e "$INTERFACE"
 	fi
 
 	#

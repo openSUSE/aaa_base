@@ -370,7 +370,7 @@ if [ -n "$OLDMODCONF" ] ; then
     echo -n "Checking old modules.conf..."
     rm -f etc/modules.conf.aa.sed
     rm -f etc/modules.conf.aa.add
-    KEEPOPTIONS="tuner"
+    KEEPOPTIONS="tuner|bttv"
     while read field orig target ; do
       case $field in
 	alias)
