@@ -221,6 +221,9 @@ if ( ${?LANG} ) then
     case ko*:
 	set dspmbyte=euc
         breaksw
+    case zh_TW*:
+	set dspmbyte=big5
+        breaksw
     default:
         breaksw
     endsw

@@ -33,7 +33,7 @@ test -f /etc/rc.config || {
 # safety-check: look for duplicated variables in /etc/rc.config
 #
 MYTMP=`mktemp -d /tmp/rcconfigchk.XXXXXX`
-grep -vh "^#" /etc/rc.config /etc/rc.config.d/*.rc.config | grep -v "^$" | cut -d= -f1 | sort | uniq -d \
+grep -vh "^#" /etc/rc.config /etc/rc.config.d/*.rc.config | grep "=" | cut -d= -f1 | sort | uniq -d \
   > $MYTMP/toomuch
 if [ -s $MYTMP/toomuch ] ; then
   echo "This is a warning message." > $MYTMP/rc.config_check
