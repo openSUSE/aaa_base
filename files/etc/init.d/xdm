@@ -49,7 +49,7 @@ case "$DISPLAYMANAGER" in
     kdm|kde|KDM|KDE)	 PIDFILE="-p /var/run/xdm.pid"
 			 DISPLAYMANAGER=/opt/kde3/bin/kdm ;;
     xdm) DISPLAYMANAGER=/usr/X11R6/bin/xdm ;;
-    gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/usr/bin/gdm ;;
+    gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/bin/gdm ;;
     wdm|WDM)		 DISPLAYMANAGER=/usr/X11R6/bin/wdm ;;
     console) exit 0 ;;
     *)			 DISPLAYMANAGER=/usr/X11R6/bin/xdm 

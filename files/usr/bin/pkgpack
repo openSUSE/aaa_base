@@ -290,7 +290,7 @@ if ( $user )
     {
     foreach $name ( split(' ',$user) )
 	{
-	system "find . -user $name -exec chown root.root {} \\; 2>/dev/null";
+	system "find . -user $name -exec chown root:root {} \\; 2>/dev/null";
 	}
     }
 
