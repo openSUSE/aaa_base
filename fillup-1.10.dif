@@ -1,5 +1,26 @@
+--- ChangeLog
++++ ChangeLog	2002/02/18 17:15:30
+@@ -0,0 +1,18 @@
++++++ fillup
++
++  - added new functionality due to the first variable block of
++    basefile:
++
++    The first variable block of basefile can hold header information
++    for the basefile that should always be part of the resulting
++    outputfile.
++    The former version handles all variable blocks transparently.
++    Now if former version ignores the first variable block of
++    basefile a header of comment lines and white spaces is taken
++    nevertheless.
++
++    man page and info file revised.
++
++    Test sequence included.
++
++
 --- SRC/parser.c
-+++ SRC/parser.c	2002/02/04 14:53:05
++++ SRC/parser.c	2002/02/18 17:14:50
 @@ -388,9 +388,11 @@
      {
          Counter = 1;
@@ -15,3 +36,146 @@
          {
              Counter++;
              buffer++;
+@@ -1358,26 +1360,81 @@
+ )
+ {
+     char                      * baseFileHeader;
++    char                      * commentMarkerString;
++    char                      * delimiterString;
++    long                        commentMarkerStringLength;
++    long                        endOfHeader;
++    BlockClass_t                classifier;
+     long                        length;
+     long                        loop;
+ 
+     getVBeginOfBlock( baseFileBlock, &baseFileHeader );
+     length = getVLength( baseFileBlock );
+ 
++    queryStringParameter( CommentMarker, &commentMarkerString );
++    queryStringParameter( Delimiter, &delimiterString );
++    commentMarkerStringLength = stringLength( commentMarkerString );
++
+     loop = 0;
++    endOfHeader = 0;
+     while( loop < length )
+     {
+-       if( '\n' == baseFileHeader[ loop ] )
++       loop += consumeSpaces( &baseFileHeader[ loop ], length );
++       if( ( loop + commentMarkerStringLength ) < length )
+        {
+-           if( 0 == loop ) break;   /* empty header */
+-
+-           if( '\n' == baseFileHeader[ loop+1 ] )
++           if( Equal ==
++               compareStringsExactly( commentMarkerString, 
++                                      &baseFileHeader[ loop ] ) )
++           {
++               /* here the comment marker is detected */
++               /* and line is read upto newline       */
++               loop += commentMarkerStringLength;
++               while( loop < length )
++               {
++                   if( '\n' != baseFileHeader[ loop ] ) loop++;
++                   else
++                   {
++                       endOfHeader = loop;
++                       if( length < endOfHeader ) endOfHeader = 0; /*error*/ 
++                       break;
++                   }
++               }
++           }
++           else
+            {
+-               writeVariableBlock( baseFileHeader, loop+1, filePointer );
++               /* no comment */
+                break;
+            }
+        }
++       else
++       {
++           /* no comment */
++           break;
++       }
++
+        loop++;
++    }
++
++    classifier = getVClassifier( baseFileBlock );
++    switch( classifier )
++    {
++        case CompleteVariableBlock:
++        case CommentedVariableBlock:
++             {
++                 displayVerboseString( "\nHeader is written\n" );
++                 writeVariableBlock( baseFileHeader, endOfHeader, filePointer );
++             } break;
++
++        case TrailingCommentBlock:
++             {
++                 if( 1 == numberOfUsedBaseBlocks )
++                 {
++                     displayVerboseString( "\nSingle trailing comment as header is written\n" );
++                     writeVariableBlock( baseFileHeader, endOfHeader, filePointer );
++                 } 
++             } break;
++             
++        default: break;   /* do nothing */
+     }
+ }
+ 
+--- TEST/PARAMETERS/OUT/Test207.txt
++++ TEST/PARAMETERS/OUT/Test207.txt	2002/02/18 17:14:50
+@@ -1,2 +1,2 @@
+-This is fillup, version 1.10, compiled on Feb  4 2002
++This is fillup, version 1.10, compiled on Feb 18 2002
+ 
+--- TEST/PARAMETERS/OUT/Test237.txt
++++ TEST/PARAMETERS/OUT/Test237.txt	2002/02/18 17:14:50
+@@ -1,2 +1,2 @@
+-This is fillup, version 1.10, compiled on Feb  4 2002
++This is fillup, version 1.10, compiled on Feb 18 2002
+ 
+--- TEST/REPLACEMENT/REFERENCE/Test400.newtxt
++++ TEST/REPLACEMENT/REFERENCE/Test400.newtxt	2002/02/18 17:14:50
+@@ -1,4 +1,7 @@
+ 
++#
++# [1] Allende, Isabel (1943 - ?)
++#
+ 
+ #
+ # [4] Balzac, Honore de (1799 - 1850)
+--- TEST/REPLACEMENT/REFERENCE/Test401.newtxt
++++ TEST/REPLACEMENT/REFERENCE/Test401.newtxt	2002/02/18 17:14:50
+@@ -4,6 +4,9 @@
+ #                                                         #
+ ###########################################################
+ 
++#
++# [1] Allende, Isabel (1943 - ?)
++#
+ 
+ #
+ # [4] Balzac, Honore de (1799 - 1850)
+--- TEST/REPLACEMENT/REFERENCE/Test500.newtxt
++++ TEST/REPLACEMENT/REFERENCE/Test500.newtxt	2002/02/18 17:14:50
+@@ -1,4 +1,7 @@
+ 
++#
++# [1] Allende, Isabel (1943 - ?)
++#
+ 
+ #
+ # [4] Balzac, Honore de (1799 - 1850)
+--- TEST/REPLACEMENT/REFERENCE/Test501.newtxt
++++ TEST/REPLACEMENT/REFERENCE/Test501.newtxt	2002/02/18 17:14:50
+@@ -4,6 +4,9 @@
+ #                                                         #
+ ###########################################################
+ 
++#
++# [1] Allende, Isabel (1943 - ?)
++#
+ 
+ #
+ # [4] Balzac, Honore de (1799 - 1850)
