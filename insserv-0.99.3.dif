@@ -1,6 +1,6 @@
 --- insserv.conf
-+++ insserv.conf	2002/07/16 12:21:03
-@@ -6,12 +6,12 @@
++++ insserv.conf	2002/08/12 09:51:35
+@@ -6,19 +6,19 @@
  #
  # Low level networking (ethernet card)
  #
@@ -15,6 +15,14 @@
  
  #
  # All remote filesystems are mounted (note in some cases /usr may
+ # be remote. Most applications that care will probably require
+ # both $local_fs and $remote_fs)
+ #
+-$remote_fs	$local_fs nfs
++$remote_fs	$local_fs +nfs
+ 
+ #
+ # System logger is operational
 @@ -38,5 +38,5 @@
  #
  # The system time has been set correctly
