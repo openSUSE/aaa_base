@@ -16,17 +16,12 @@ if test "$UID" != 0 -a "$USER" != root; then
 fi
 
 if [ -L /usr/lib/java ] ; then
-  case `linkto /usr/lib/java` in
-    `linkto /usr/lib/SunJava1` | \
-    `linkto /usr/lib/SunJava2` | \
-    `linkto /usr/lib/IBMJava2`)
-      # link /usr/lib/java points to valid directory
-      # this compicated test is needed through IBMJava2-SDK and IBMJava2-JDK
-      # because IBMJava2-SDK includes IBMJava2-JRE and we must detect
-      # that anybody install SDK instead JRE ot to the contrary
-      exit 0
-      ;;
-  esac      
+  if [ -e /usr/lib/java/bin/java ] || 
+     [ -e /usr/lib/java/bin/jre ] ||
+     [ -e /usr/lib/java/jre/bin/java ] ; then
+    # link /usr/lib/java points to valid directory
+    exit 0
+  fi
 fi
 
 # we must set link /usr/lib/java to valid jdk(sdk,jre)
@@ -36,9 +31,10 @@ if [ -L /usr/lib/java ] ; then
 fi  
 
 JAVALINKTO=
-if [ -d /usr/lib/IBMJava2/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2; fi
-if [ -d /usr/lib/SunJava2/bin ] ; then JAVALINKTO=/usr/lib/SunJava2; fi
-if [ -d /usr/lib/SunJava1/bin ] ; then JAVALINKTO=/usr/lib/SunJava1; fi
+if   [ -d /usr/lib/IBMJava2/jre/bin ] ; then JAVALINKTO=/usr/lib/IBMJava2
+elif [ -d /usr/lib/SunJava2/bin ] ; then JAVALINKTO=/usr/lib/SunJava2
+elif [ -d /usr/lib/SunJava1/bin ] ; then JAVALINKTO=/usr/lib/SunJava1
+fi
 
 if [ -n "$JAVALINKTO" ] ; then
   ln -sf `linkto $JAVALINKTO` /usr/lib/java

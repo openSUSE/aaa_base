@@ -20,8 +20,7 @@ if ( -f /var/spool/mail/$USER ) then
 endif
 
 set _xpath
-set _tpath=( /opt/bin /usr/andrew/bin \
-	     /usr/lib/java/bin /usr/games )
+set _tpath=( /opt/bin /usr/andrew/bin /usr/games )
 
 if ( ${?OPENWINHOME} && -d $OPENWINHOME/bin ) then
     set _xpath=( $OPENWINHOME/bin )

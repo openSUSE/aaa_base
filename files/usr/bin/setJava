@@ -3,37 +3,85 @@
 #
 # Author: Petr Mladek <pmladek@suse.cz>
 
-SETJAVA_EXIT=no
-NEW_JAVA=no
+# Decription:
+# This script sets java for current shell (for next applications)
+#
+# It sets environment variables: PATH, JAVA_BINDIR, JAVA_HOME, 
+#                                JRE_HOME, JDK_HOME, SDK_HOME
+#
+# When exist more possibilities it prefers:
+#	- SunJava1 before SunJava2 
+#	- SunJava2 before IBMJava2
 
-if [ "$#" != "1" ] || [ "$1" = "--help" ] ; then
-  echo "This script set java for current shell (for next applications)"
+EXIT_setJava=no
+PRINT_HELP_setJava=no
+NEW_JAVA_setJava=no
+DEVEL_setJava=no
+
+case "$#" in
+  "1")
+    if [ "$1" = "--help" ] ; then
+      PRINT_HELP_setJava=yes
+    else
+      JAVA_VER_setJava=$1
+    fi
+    ;;
+  "2")
+    if [ "$1" != "--devel" ] ; then
+      PRINT_HELP_setJava=yes
+    else
+      DEVEL_setJava=yes
+      JAVA_VER_setJava=$2
+    fi
+    ;;
+  *)
+    PRINT_HELP_setJava=yes
+    ;;
+esac              
+    
+if [ "$PRINT_HELP_setJava" = "yes" ] ; then
+  echo "This script sets java for current shell (for next applications)"
   echo
-  echo "Usage: . setJava [--help] java_type"
+  echo "It sets environment variables: PATH, JAVA_BINDIR, JAVA_HOME," 
+  echo "                               JRE_HOME, JDK_HOME, SDK_HOME" 
   echo
-  echo "	--help    - print this help"
-  echo "	java_type - is one from: - SunJava1, SunJava2, IBMJava2"
-  echo "                                   Java2, default"
+  echo "Usage: setJava --help"
+  echo "       source setJava [--devel] java_ver"
   echo
-  SETJAVA_EXIT=yes
+  echo "Command line options:"
+  echo "	--help   - print this help"
+  echo "	--devel  - use this options if you request the development kit"
+  echo "	java_ver - is one from: SunJava1, SunJava2, IBMJava2"
+  echo "                                Java2, default"
+  echo "	         - SunJava1 - java ver. 1.1.x, from Sun Microsystems"
+  echo "		 - SunJava2 - java ver. 1.2.x or 1.3.x, from Sun Microsystems"
+  echo "		 - IBMJava2 - java ver. 1.2.x or 1.3.x, from IBM"
+  echo "		 - Java2    - java ver. 1.2.x or 1.3.x, any vendor"
+  echo "		 - default  - any version, any vendor"
+  echo 
+  echo "Note: Do not forget to run this script with \"source\" shell command !!!"
+  echo
+  EXIT_setJava=yes
 fi
 
-if [ "$SETJAVA_EXIT" = "no" ] ; then 
+if [ "$EXIT_setJava" = "no" ] ; then 
   # find current java in $PATH
-  JAVA_OLD_PATH=
-  JAVA_FIRST_IN_PATH=no
+  JAVA_OLD_PATH_setJava=
+  JAVA_FIRST_IN_PATH_setJava=no
   OLD_IFS=$IFS
   IFS=":,$IFS"
   for i in $PATH ; do
     # we find first occurence
-    if [ "$JAVA_FIRST_IN_PATH" = "no" ] ; then
+    if [ "$JAVA_FIRST_IN_PATH_setJava" = "no" ] ; then
       case "$i" in
         "/usr/lib/java/bin" | \
+        "/usr/lib/java/jre/bin" | \
         "/usr/lib/SunJava1/bin" | \
         "/usr/lib/SunJava2/bin" | \
-        "/usr/lib/IBMJava2/bin")
-          JAVA_OLD_PATH=$i
-	  JAVA_FIRST_IN_PATH=yes
+        "/usr/lib/IBMJava2/bin" | \
+        "/usr/lib/IBMJava2/jre/bin")
+          JAVA_OLD_PATH_setJava=$i
+	  JAVA_FIRST_IN_PATH_setJava=yes
           ;;
       esac
     fi  
@@ -42,54 +90,157 @@ if [ "$SETJAVA_EXIT" = "no" ] ; then
   export IFS
 fi
 
-
-if [ "$SETJAVA_EXIT" = "no" ] ; then 
-  # find requested java for new PATH
-  JAVA_NEW_PATH=
-  case "$1" in
+if [ "$EXIT_setJava" = "no" ] ; then 
+  # select existing java for given request
+  SELECTED_JAVA_setJava=
+  case "$JAVA_VER_setJava" in
     "SunJava1")
-      if [ -d /usr/lib/SunJava1/bin ] ; then JAVA_NEW_PATH=/usr/lib/SunJava1/bin; fi
-      ;;
+      if [ "$DEVEL_setJava" = "yes" ] ; then
+        if [ -e /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK" ; fi
+      else
+        if   [ -e /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK"
+        elif [ -d /usr/lib/SunJava1/bin ] ; then SELECTED_JAVA_setJava="SunJava1-JRE"
+        fi
+      fi
+      ;;	  
     "SunJava2")
-      if [ -d /usr/lib/SunJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/SunJava2/bin; fi
+      if [ "$DEVEL_setJava" = "yes" ] ; then
+        if [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK" ; fi
+      else
+        if   [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
+        fi
+      fi
       ;;
     "IBMJava2")
-      if [ -d /usr/lib/IBMJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/IBMJava2/bin; fi
+      if [ "$DEVEL_setJava" = "yes" ] ; then
+        if [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK" ; fi
+      else
+        if   [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
+        elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-JRE"
+        fi
+      fi
       ;;
     "Java2")
-      if [ -d /usr/lib/IBMJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/IBMJava2/bin; fi
-      if [ -d /usr/lib/SunJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/SunJava2/bin; fi
+      if [ "$DEVEL_setJava" = "yes" ] ; then
+        if   [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
+        fi
+      else
+        if   [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
+        elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
+        elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-JRE"
+        fi
+      fi
       ;;
     "default")
-      if [ -d /usr/lib/IBMJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/IBMJava2/bin; fi
-      if [ -d /usr/lib/SunJava2/bin ] ; then JAVA_NEW_PATH=/usr/lib/SunJava2/bin; fi
-      if [ -d /usr/lib/SunJava1/bin ] ; then JAVA_NEW_PATH=/usr/lib/SunJava1/bin; fi
-      ;;
+      if [ "$DEVEL_setJava" = "yes" ] ; then
+        if   [ -e /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK"
+        elif [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
+        fi
+      else
+        if   [ -e /usr/lib/SunJava1/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava1-JDK"
+        elif [ -d /usr/lib/SunJava1/bin ] ; then SELECTED_JAVA_setJava="SunJava1-JRE"
+        elif [ -e /usr/lib/SunJava2/bin/javac ] ; then SELECTED_JAVA_setJava="SunJava2-SDK"
+        elif [ -d /usr/lib/SunJava2/bin ] ; then SELECTED_JAVA_setJava="SunJava2-JRE"
+        elif [ -d /usr/lib/IBMJava2/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-SDK"
+        elif [ -d /usr/lib/IBMJava2/jre/bin ] ; then SELECTED_JAVA_setJava="IBMJava2-JRE"
+        fi
+      fi
+      ;;	  
     *)          
-      echo "Error: I do not know this java_type ($1)"
+      echo "Error: I do not know $JAVA_VER_setJava"
       echo "       Please, use setJava --help"
-      SETJAVA_EXIT=yes
+      EXIT_setJava=yes
       ;;
   esac
 fi
 
-if [ "$SETJAVA_EXIT" = "no" ] && [ -z "$JAVA_NEW_PATH" ] ; then
-  echo "Error: Requested java ($1) is not installed"
-  SETJAVA_EXIT=yes
-fi
-
-if [ "$SETJAVA_EXIT" = "no" ] ; then
-  # set new java in $PATH
-  if [ -n "$JAVA_OLD_PATH" ] ; then
-    PATH=`echo $PATH | sed -e "s|$JAVA_OLD_PATH|$JAVA_NEW_PATH|"`
+if [ "$EXIT_setJava" = "no" ] && [ -z "$SELECTED_JAVA_setJava" ] ; then
+  if [ "$DEVEL_setJava" = "yes" ] ; then
+    echo "Error: The development version of $JAVA_VER_setJava is not installed"
   else
-    PATH="$PATH:$JAVA_NEW_PATH"
-  fi  
-  NEW_JAVA=yes
+    echo "Error: The requested $JAVA_VER_setJava is not installed"
+  fi    
+  EXIT_setJava=yes
 fi
 
-unset SETJAVA_EXIT
+if [ "$EXIT_setJava" = "no" ] ; then 
+  # set new values for environment variables
+  JAVA_NEW_PATH_setJava=
+  case "$SELECTED_JAVA_setJava" in
+    "SunJava1-JDK")
+      JAVA_NEW_PATH_setJava=/usr/lib/SunJava1/bin
+      JAVA_BINDIR=/usr/lib/SunJava1/bin
+      JAVA_HOME=/usr/lib/SunJava1
+      JRE_HOME=/usr/lib/SunJava1
+      JDK_HOME=/usr/lib/SunJava1
+      unset SDK_HOME  
+      ;;
+    "SunJava1-JRE")
+      JAVA_NEW_PATH_setJava=/usr/lib/SunJava1/bin
+      JAVA_BINDIR=/usr/lib/SunJava1/bin
+      JAVA_HOME=/usr/lib/SunJava1
+      JRE_HOME=/usr/lib/SunJava1
+      unset JDK_HOME
+      unset SDK_HOME
+      ;;
+    "SunJava2-SDK")
+      JAVA_NEW_PATH_setJava=/usr/lib/SunJava2/bin
+      JAVA_BINDIR=/usr/lib/SunJava2/bin
+      JAVA_HOME=/usr/lib/SunJava2
+      JRE_HOME=/usr/lib/SunJava2
+      unset JDK_HOME
+      SDK_HOME=/usr/lib/SunJava2
+      ;;
+    "SunJava2-JRE")
+      JAVA_NEW_PATH_setJava=/usr/lib/SunJava2/bin
+      JAVA_BINDIR=/usr/lib/SunJava2/bin
+      JAVA_HOME=/usr/lib/SunJava2
+      JRE_HOME=/usr/lib/SunJava2
+      unset JDK_HOME
+      unset SDK_HOME
+      ;;
+    "IBMJava2-SDK")
+      JAVA_NEW_PATH_setJava=/usr/lib/IBMJava2/bin
+      JAVA_BINDIR=/usr/lib/IBMJava2/bin
+      JAVA_HOME=/usr/lib/IBMJava2
+      JRE_HOME=/usr/lib/IBMJava2/jre
+      unset JDK_HOME
+      SDK_HOME=/usr/lib/IBMJava2
+      ;;
+    "IBMJava2-JRE")
+      JAVA_NEW_PATH_setJava=/usr/lib/IBMJava2/jre/bin
+      JAVA_BINDIR=/usr/lib/IBMJava2/jre/bin
+      JAVA_HOME=/usr/lib/IBMJava2
+      JRE_HOME=/usr/lib/IBMJava2/jre
+      unset JDK_HOME
+      unset SDK_HOME
+      ;;
+  esac
+fi
 
-export PATH
+if [ "$EXIT_setJava" = "no" ] ; then
+  # set new java in $PATH
+  if [ -n "$JAVA_OLD_PATH_setJava" ] ; then
+    PATH=`echo $PATH | sed -e "s|$JAVA_OLD_PATH_setJava|$JAVA_NEW_PATH_setJava|"`
+  else
+    PATH="$PATH:$JAVA_NEW_PATH_setJava"
+  fi  
+  NEW_JAVA_setJava=yes
+fi
 
-test "$NEW_JAVA" = "yes"
+unset JAVA_FIRST_IN_PATH_setJava
+unset JAVA_OLD_PATH_setJava
+unset JAVA_NEW_PATH_setJava
+unset DEVEL_setJava
+unset PRINT_HELP_setJava
+unset SELECTED_JAVA_setJava
+unset EXIT_setJava
+
+export PATH JAVA_BINDIR JAVA_HOME JRE_HOME JDK_HOME SDK_HOME
+
+
+test "$NEW_JAVA_setJava" = "yes"

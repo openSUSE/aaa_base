@@ -92,8 +92,7 @@ if test -z "$PROFILEREAD" ; then
 	test -d $dir && PATH=$dir:$PATH
     done
     test "$UID" = 0 && PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
-    for dir in  /usr/lib/java/bin \
-		/var/lib/dosemu \
+    for dir in  /var/lib/dosemu \
 		/usr/games/bin \
 		/usr/games \
 		/opt/bin \
