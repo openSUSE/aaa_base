@@ -5,7 +5,7 @@
 #         Werner Fink <werner@suse.de>, 1996-2000
 #      
 #
-# /sbin/init.d/route		Version 0.4
+# /sbin/init.d/route		Version 0.5
 #
 
 . /etc/rc.config
@@ -136,7 +136,9 @@ case "$todo" in
 			 "${des}" = "default"		&& continue 2
 		done
 		card=""
-		test -n "$iface" && card="dev $iface"
+		if test -n "$iface" ; then
+		    test "$iface" = "reject" && card="reject" || card="dev $iface"
+		fi
 		case "$what" in
 		"")
 		    wrong_entry "$des $what $mask $iface"
@@ -145,7 +147,7 @@ case "$todo" in
 		    if test -z "$mask" -o -z "$iface" ; then
 			wrong_entry "$des $what $mask $iface"
 		    fi
-		    for dev in $given ; do
+		    for dev in reject $given ; do
 			case "$iface" in
 			$dev)
 			    if test "${mask}" = 255.255.255.255 ; then
@@ -265,7 +267,9 @@ case "$todo" in
 		;;
 	    *)
 		card=""
-		test -n "$iface" && card="dev $iface"
+		if test -n "$iface" ; then
+		    test "$iface" = "reject" && card="reject" || && card="dev $iface"
+		fi
 		case "$what" in
 		"")
 		    wrong_entry "$des $what $mask $iface"
@@ -274,7 +278,7 @@ case "$todo" in
 		    if test -z "$mask" -o -z "$iface" ; then
 			wrong_entry "$des $what $mask $iface"
 		    fi
-		    for dev in $given ; do
+		    for dev in reject $given ; do
 			case "$iface" in
 			$dev)
 			    if test "${mask}" = 255.255.255.255 ; then
