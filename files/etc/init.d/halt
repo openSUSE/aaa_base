@@ -152,6 +152,7 @@ while read des fs type rest; do
 	devpts)    umount -t devpts   $fs ;;
 	devfs)     umount -t devfs    $fs ;;
 	shm)       umount -t shm      $fs ;;
+	usbfs)     umount -t usbfs    $fs ;;
 	usbdevfs)  umount -t usbdevfs $fs ;;
     esac
 done
