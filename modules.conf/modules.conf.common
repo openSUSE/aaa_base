@@ -7,257 +7,68 @@
 # Configuration file for loadable modules; used by modprobe
 #
 
+########################################################################
 # Aliases - specify your hardware
+########################################################################
+
 alias eth0             off
 alias eth1             off
 alias tr0              off
 alias scsi_hostadapter off
 alias fb0              off
 
+########################################################################
 # only used for Mylex or Compaq Raid as module
+########################################################################
+
 alias block-major-48   off
 alias block-major-49   off
 alias block-major-72   off
 alias block-major-73   off
 
+########################################################################
 # only needed for fifth and sixth IDE adaptor
+########################################################################
+
 alias block-major-56   off
 alias block-major-57   off
 
+########################################################################
 # mouse (for older busmice)
+########################################################################
+
 alias char-major-10    off
 
+########################################################################
 # If you want to use the new autofs4
+########################################################################
+
 # alias autofs           autofs4
 
-# For parallel port devices, uncomment the following two lines and change
-# "frpw" to the protocol type you use
+########################################################################
+# For parallel port devices, uncomment the following two lines and
+# change "frpw" to the protocol type you use
+########################################################################
 
 # post-install paride insmod frpw
 # pre-remove paride rmmod frpw
 
-#*****************************************************************************
-# If you want to use the kernel sound drivers instead of ALSA (SuSE's default
-# sound solution) please put comment signs in front of the following 
-# entries and remove any previous ALSA configuration from YaST2 or alsaconf
-# from the end of this file. Then choose one of the sample configurations
-# below. Uncomment all lines starting with 'alias', 'options', pre- or post-
-# install' within one configuration and modify the parameters according to
-# your needs (e.g. the resources chosen for this device in /etc/isapnp.conf).
-#*****************************************************************************
+########################################################################
+#
+# Aliases for OSS
+#
+# These aliases will be changed by YaST2 sound configurator.
+# If you would like to configure OSS drivers by yourself, please
+# take a look at the files on /usr/src/linux/Documentation/sound.
+#
+########################################################################
 
 alias char-major-14 off
 alias sound off
 alias midi off                     
 
-#*****************************************************************************
-#    module : ad1816.o           AD1816 chip
-#
-#                                Supported cards :
-#
-#                                Terratec Base 1/64
-#                                HP Kayak
-#                                Acer FX-3D
-#                                SY-1816
-#                                Highscreen Sound-Boostar 32 Wave 3D
-#                                Highscreen Sound-Boostar 16
-#    
-#    Documentation available in /usr/src/linux/Documentation/sound/AD1816
-#    and in /usr/src/linux/drivers/sound/ad1816.c .
-#
-#    Possible configuration :
-#
-# alias char-major-14 ad1816
-# post-install ad1816 modprobe "-k" opl3
-# post-install ad1816 modprobe "-k" mpu401
-# options ad1816 io=0x530 irq=5 dma=1 dma2=3 ad1816_clockfreq=33000
-# options opl3 io=0x0388
-# options mpu401 io=0x0330 irq=9      
-#
-#*****************************************************************************
-#    module : ad1848.o           AD1848/CS4231/CS4248 Chip
-#                                --> Windows Sound System (MSS/WSS)
-#
-#                                A variety of common ISA soundcards are
-#                                compatible with this family of chips.
-#
-#    Documentation available in /usr/src/linux/drivers/sound/ad1848.c (search
-#    for MODULE_PARM) and in /usr/src/linux/Documentation/sound/README.OSS .
-#    Usually this module is used in conjunction with other higher level sound
-#    modules.
-#
-#    Possible configuration for stand-alone usage :
-#
-# alias char-major-14 ad1848
-# options ad1848 io=0x530 irq=7 dma=0 dma2=3
-#
-#*****************************************************************************
-#    module : cs4232.o           Crystal 423x chipsets
-#
-#    Documentation available in /usr/src/linux/drivers/sound/cs4232.c (search
-#    for MODULE_PARM) and in /usr/src/linux/Documentation/sound/CS4232 . This
-#    chip is often used together with other sound hardware.
-#
-#    Possible configuration for stand-alone usage :
-#
-# alias char-major-14 cs4232
-# post-install cs4232 modprobe "-k" opl3 
-# options cs4232 io=0x534 irq=5 dma=1 dma2=0 mpuio=0x330 mpuirq=9
-# options opl3 io=0x388
-#
-#*****************************************************************************
-#    module : es1370.o           Ensoniq 1370 Chipset (--> PCI64/128)
-#                                
-#                                Supported cards :
-#                                
-#                                Creative Labs PCI64/128
-# 
-#    Documentation available at /usr/src/linux/Documentation/sound/es1370 and
-#    /usr/src/linux/drivers/sound/es1370.c .
-#
-# alias char-major-14  es1370
-# options es1370 joystick=1
-#
-#*****************************************************************************
-#    module : es1371.o           Creative Ensoniq 1371 Chipset (--> PCI64/128)
-#
-#                                Supported cards :
-#                                
-#                                Creative Labs PCI64/128
-#
-#    Documentation available at /usr/src/linux/Documentation/sound/es1371 and
-#    /usr/src/linux/drivers/sound/es1371.c . 
-#
-# alias char-major-14  es1371
-# options es1371 joystick=0x200
-#
-#*****************************************************************************
-#    module : mad16.o            MAD16
-#
-#    Possible configuration :
-#
-# alias char-major-14 mad16
-# options sb mad16=1
-# options mad16 io=0x530 irq=7 dma=0 dma16=1
-#
-#*****************************************************************************
-#    module : sb.o               Soundblaster 16, SB Pro + Clones
-#                                Also needed for AWE32/64 
-#
-#    Documentation available in /usr/src/linux/Documentation/sound/Soundblaster
-#    and in /usr/src/linux/drivers/sound/sb.c .
-#
-#    Possible configuration :
-#
-# alias char-major-14 sb
-# post-install sb /sbin/modprobe "-k" "adlib_card"
-# options sb io=0x220 irq=7 dma=1 dma16=5 mpu_io=0x330
-# options adlib_card io=0x388
-#
-#*****************************************************************************
-#    module : trix.o             MediaTrix AudioTrix Pro
-#
-# alias char-major-14 trix
-# pre-install trix modprobe "-k" 
-#
-#*****************************************************************************
-#    module : wavefront.o        Turtle Beach Maui, Tropez, Tropez Plus
-#
-#    Comment from /usr/src/linux/Documentation/sound/Wavefront :
-#    (please read that file !)
-#    "the wavefront options "io" and "irq" ***MUST*** match the "synthio"
-#     and "synthirq" cs4232 options."
-#
-#    Possible configuration :
-#
-# alias char-major-14 wavefront
-# alias synth0 wavefront
-# alias mixer0 cs4232
-# alias audio0 cs4232
-# pre-install wavefront modprobe "-k" "cs4232"
-# post-install wavefront modprobe "-k" "opl3"
-# options wavefront io=0x200 irq=9
-# options cs4232 synthirq=9 synthio=0x200 io=0x530 irq=5 dma=1 dma2=0
-# options opl3 io=0x388 
-#
-#*****************************************************************************
-
-#*****************************************************************************
-# Example configs for ALSA
-# You don't need to run isapnp with ALSA, it has full PnP support.
-# See /usr/share/doc/packages/alsa/README.SuSE
-#*****************************************************************************
-# 
-# ALSA native device support and OSS emulation support. Uncomment these
-# lines to enable ALSA:
-#
-# alias char-major-14      soundcore
-# alias char-major-116     snd
-# alias sound-slot-0       snd-card-0
-# alias sound-service-0-0  snd-mixer-oss
-# alias sound-service-0-1  snd-seq-oss
-# alias sound-service-0-3  snd-pcm-oss
-# alias sound-service-0-8  snd-seq-oss
-# alias sound-service-0-12 snd-pcm-oss
-#
-# Uncomment this line too, you can setup your ALSA device permissions here:
-#
-# options snd snd_major=116 snd_cards_limit=1 snd_device_mode=0666 snd_device_gid=17 snd_device_uid=0
-#
-# ALSA Card examples:
-#
-#     Creative SB16 PnP (ALSA will do isapnp itself per default):
-#
-# alias snd-card-0 snd-sb16
-# options snd-sb16 snd_index=0
-#
-#     Creative SB Live! (ALSA will find it with the kernel's PCI support):
-#
-# alias snd-card-0 snd-emu10k1
-# options snd-emu10k1 snd_index=0
-#
-# Another Example: IBM ThinkPad 600E with a CS423x hosted by a CS4610/11
-# In this case, the native PCI Sound is expected to not work, but is
-# connected to CS4236 ISA non-PNP chip.
-#
-# alias snd-card-0         snd-cs4236
-# options snd-cs4236 snd_index=0 snd_port=0x530 snd_cport=0x538 snd_irq=5 snd_dma1=1 snd_dma2=0 snd_isapnp=0
-#
-# You MUST supply all required snd_port, snd_irq and snd_dma parameter AND
-# the snd_isapnp=0 option to the snd-card if the card is not shown by pnpdump,
-# Otherwise the ALSA driver will try to do PnP and will not find your card.
-# 
-# This is an example of a post-install you may want to use:
-#
-# post-install snd amixer set Master 100% unmute;amixer set PCM 100% unmute
-#
-# For more info about the powerful amixer look into "man amixer".
-#
-# This will open your mixer channels in case you did not store a mixer setup
-# for your card in /etc/asound.conf and you will have a default configuration.
-# To test your new setup, do:
-#
-# depmod -a
-# rcalsasound restart
-#
-# If the modules were loaded, you can check them with lsmod.
-#
-# Open and unmute the mixer channels, e.g. with alsamixer, gamix or your
-# OSS mixer (alsamixer: unmute the Master and PCM channels with ",." and
-# raise them with the up/down-arrow keys, man alsamixer explains all the keys)
-#
-# To play a sound sample run:
-#
-# aplay /usr/share/sounds/alsa/test.wav
-# 
-# For a list of supported soundcards look into
-# /usr/share/doc/packages/alsa/cards.txt
-# and browse the other files there and www.alsa-project.org
-# for more information.
-#*****************************************************************************
-
 ########################################################################
-# Options; these are examples; uncommented and modify the lines you need
+# Options; these are examples; uncomment and modify the lines you need
 ########################################################################
 
 # options cdu31a         cdu31a_port=0x340 cdu31a_irq=0
@@ -315,13 +126,19 @@ alias midi off
 options dummy0 -o dummy0
 options dummy1 -o dummy1
 
+########################################################################
 # cipe section
+########################################################################
+
 alias cipcb0 cipcb
 alias cipcb1 cipcb
 
 options cipcb    cipe_maxdev=2 cipe_debug=0
 
+########################################################################
 # block dev aliases
+########################################################################
+
 alias block-major-1       rd
 alias block-major-2       floppy
 alias block-major-3       off
@@ -350,6 +167,10 @@ alias block-major-43      off
 alias block-major-45      pd
 alias block-major-46      pcd
 alias block-major-47      pf
+
+########################################################################
+# char dev aliases
+########################################################################
 
 alias char-major-6        lp
 alias char-major-9        st
@@ -391,9 +212,12 @@ alias char-major-109      lvm-mod
 # remove this if sound is configured
 alias char-major-116      off
 
+########################################################################
 # ppp over ethernet
 # the kernel 2.2 uses pppox
 # the kernel 2.4 uses pppoe
+########################################################################
+
 if `kernelversion` == "2.2"
 alias char-major-144      pppox
 post-install pppox insmod mssclampfw
@@ -404,19 +228,28 @@ alias char-major-144      pppoe
 alias net-pf-24           pppoe
 endif
 
+########################################################################
 # IrDA
+########################################################################
+
 alias char-major-161	  ircomm-tty
 
+########################################################################
 # USB
+########################################################################
+
 alias char-major-166	  acm
 
+########################################################################
 # Moxa Multiport Serial Boards
-alias char-major-172    moxa
-alias char-major-173    moxa
+########################################################################
+
+alias char-major-172      moxa
+alias char-major-173      moxa
 
 # options moxa type=2,,, baseaddr=0xdc000,,, numports=8,,,
-alias char-major-174    mxser
-alias char-major-175    mxser
+alias char-major-174      mxser
+alias char-major-175      mxser
 # options mxser ioaddr=0x180
 
 #alias char-major-180	  usbcore
@@ -454,8 +287,11 @@ alias sl0                 slip
 alias slip1               slip
 alias sl1                 slip
 
+########################################################################
 # the kernel 2.2 uses ppp.o as ppp driver,
 # the kernel 2.4 uses ppp_generic.o
+########################################################################
+
 if `kernelversion` == "2.2"
 alias ppp0                ppp
 alias ppp1                ppp
