@@ -170,6 +170,10 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
           german)
             echo "Geben Sie jetzt \"root\" ein um sich als Benutzer root einzuloggen..."
           ;;
+          french)
+            echo "Tapez maintenant \"root\" pour vous connecter"
+            echo "en tant qu'utilisateur root..."
+          ;;
           *)
             echo "Please enter \"root\" to login as user root..."
           ;;
