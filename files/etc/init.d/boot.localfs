@@ -87,11 +87,9 @@ case "$1" in
 			/etc/init.d/kbd start
 		    fi
 	            echo
-	            echo "fsck failed.  Please repair manually and reboot. The root"
-	            echo "file system is currently mounted read-only. To remount it"
-	            echo "read-write do:"
-	            echo
-	            echo "   bash# mount -n -o remount,rw /"
+	            echo "fsck failed for at least one filesystem (not /)."
+		    echo "Please repair manually and reboot."
+		    echo "The root file system is is already mounted read-write."
 	            echo
 	            echo "Attention: Only CONTROL-D will reboot the system in this"
 	            echo "maintanance mode. shutdown or reboot will not work."
