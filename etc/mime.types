@@ -48,6 +48,7 @@ application/x-maker		frm maker frame fm fb book fbdoc
 application/x-mif		mif
 application/x-msdos-program	com exe bat
 application/x-netcdf		nc cdf
+application/x-ns-proxy-autoconfig	pac
 application/x-perl		pl pm
 application/x-sh		sh
 application/x-shar		shar
