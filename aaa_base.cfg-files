@@ -10,7 +10,6 @@ etc/insserv.conf
 etc/ld.so.conf
 etc/mailcap
 etc/mime.types
-etc/motd
 etc/permissions
 etc/permissions.easy
 etc/permissions.local

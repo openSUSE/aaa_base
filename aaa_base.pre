@@ -43,38 +43,43 @@ uucp:x:10:14:Unix-to-Unix CoPy system:/etc/uucp:/bin/bash
 games:x:12:100:Games account:/var/games:/bin/bash
 man:x:13:62:Manual pages viewer:/var/cache/man:/bin/bash
 wwwrun:x:30:65534:WWW daemon apache:/var/lib/wwwrun:/bin/bash
-ftp:x:40:2:FTP account:/usr/local/ftp:/bin/bash
+ftp:x:40:50:FTP account:/usr/local/ftp:/bin/bash
 named:x:44:44:Nameserver daemon:/var/named:/bin/bash
 nobody:x:65534:65533:nobody:/var/lib/nobody:/bin/bash" \
  > var/adm/fillup-templates/passwd.aaa_base
 
-echo "root:x:0:root
-bin:x:1:root,bin,daemon
+echo "root:x:0:
+bin:x:1:daemon
 daemon:x:2:
 sys:x:3:
 tty:x:5:
 disk:x:6:
 lp:x:7:
-wwwadmin:x:8:
+www:x:8:
 kmem:x:9:
 wheel:x:10:
 mail:x:12:
-news:x:13:news
-uucp:x:14:root
-shadow:x:15:root
-dialout:x:16:root
-audio:x:17:root
+news:x:13:
+uucp:x:14:
+shadow:x:15:
+dialout:x:16:
+audio:x:17:
+floppy:x:19:
+cdrom:x:20:
+console:x:21:
+utmp:x:22:
 public:x:32:
 video:x:33:
-game:x:40:
+games:x:40:
 xok:x:41:
 trusted:x:42:
 modem:x:43:
 named:x:44:
+ftp:x:50:
 man:x:62:
 users:x:100:
-nobody:x:65533:nobody,root
-nogroup:x:65534:nobody,root" > var/adm/fillup-templates/group.aaa_base
+nobody:x:65533:nobody
+nogroup:x:65534:nobody" > var/adm/fillup-templates/group.aaa_base
 
 rm -f var/adm/fillup-templates/shadow.aaa_base
 while read LINE ; do
@@ -100,6 +105,13 @@ if test -e etc/passwd ; then
   grep -v "^news:\|^uucp:\|^man:" etc/passwd > etc/passwd.t
   cat etc/passwd.t > etc/passwd
   rm -f etc/passwd.t
+fi
+
+# Rename game -> games, wwwadmin -> www
+if test -e etc/group ; then
+  sed -e "s|^game:|games:|" -e "s|^wwwadmin:|www:|" etc/group > etc/group.t
+  cat etc/group.t > etc/group
+  rm -f etc/group.t
 fi
 
 for file in passwd group ; do
@@ -257,4 +269,3 @@ if test ! -f etc/defaultdomain -a -f /etc/rc.config ; then
   echo -n $YP_DOMAINNAME > etc/defaultdomain
   chmod 644 etc/defaultdomain
 fi
-
