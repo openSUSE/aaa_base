@@ -56,12 +56,9 @@ firewall:x:41:31:Firewall account:/var/lib/firewall:/bin/false
 named:x:44:44:Nameserver daemon:/var/named:/bin/bash
 fnet:x:49:14:FidoNet account:/var/spool/fnet:/bin/bash
 gdm:x:50:15:Gnome Display Manager daemon:/var/lib/gdm:/bin/bash
-postfix:x:51:51:Postfix daemon:/var/spool/postfix:/bin/false
-cyrus:x:96:12:IMAP daemon:/usr/lib/cyrus:/bin/bash
 oracle:x:59:54:Oracle database admin:/opt/oracle:/bin/bash
 mysql:x:60:2:MySQL database admin:/var/lib/mysql:/bin/false
 dpbox:x:61:56:DpBox account:/var/spool/dpbox:/bin/false
-ingres:x:62:3:Ingres database admin:/opt/tngfw/ingres:/bin/bash
 zope:x:64:2:Zope daemon:/var/lib/zope:/bin/false
 vscan:x:65:65534:Vscan account:/var/spool/vscan:/bin/false
 wnn:x:66:100:Wnn system account:/var/lib/wnn:/bin/false
@@ -82,13 +79,12 @@ lp:x:7:
 wwwadmin:x:8:
 kmem:x:9:
 wheel:x:10:
-mail:x:12:cyrus
+mail:x:12:
 news:x:13:news
 uucp:x:14:uucp,fax,root,fnet
 shadow:x:15:root,gdm
 dialout:x:16:root
 audio:x:17:root
-at:x:25:at
 mdom:x:28:
 dosemu:x:30:
 firewall:x:31:
@@ -99,12 +95,10 @@ xok:x:41:
 trusted:x:42:
 modem:x:43:
 named:x:44:named
-postfix:x:51:postfix
 oinstall:x:54:
 dba:x:55:oracle
 localham:x:56:dpbox
 logmastr:x:57:
-maildrop:x:59:
 perforce:x:60:perforce
 sapdb:x:61:sapdb
 man:x:62:
