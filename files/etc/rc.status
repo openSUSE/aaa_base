@@ -33,7 +33,8 @@
 
 # check whether splash screen animations are installed.
 _rc_splash=0
-test -x /bin/splash && _rc_splash=1
+test -f /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
+test -x /sbin/splash && _rc_splash=1
 
 if test -z "$LINES" -o -z "$COLUMNS" ; then
     eval `stty size 2>/dev/null | (read L C; \
@@ -269,7 +270,7 @@ function rc_confirm()
 
 function rc_splash()
 {
-    test "$BOOT_SPLASH" != "no" && test "$_rc_splash" -eq 1 && /sbin/splash "$1"
+    test "$SPLASH" != "no" && test "$_rc_splash" -eq 1 && /sbin/splash "$1"
     progress=$(( $progress + 1 ))
 }
 

@@ -67,6 +67,9 @@ case "$1" in
 		test $FSCK_RETURN -lt 2
 		rc_status -v1 -r
 	        if test $FSCK_RETURN -gt 1; then
+		    # if appropriate, switch bootsplash to verbose 
+		    # mode to make text messages visible.
+		    test -f /proc/splash && echo "verbose" > /proc/splash
 		    # Stop blogd since we reboot after sulogin
 		    test -x /sbin/blogd && killproc -QUIT /sbin/blogd
 		    if test -x /etc/init.d/kbd ; then
