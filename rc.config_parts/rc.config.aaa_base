@@ -295,14 +295,6 @@ START_BWNFSD=no
 PCNFSD_LPSPOOL=/var/spool/lpd
 
 #
-# start routed (for dynamic routing - see man routed) (yes/no)
-# ATTENTION:  starting routed causes net traffic every 30 seconds.
-# If your host is connected to internet via dial-up it makes absolutely
-# no sense to activate it.
-#
-START_ROUTED=no
-
-#
 # start the named (package bind)? You have to configure the named first,
 # before you can start it (man named).
 #
