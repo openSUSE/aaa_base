@@ -35,11 +35,11 @@ FIND_CMD="find $RCCONFIG /etc/sysconfig -type f -maxdepth 1 \
  ! -name \"*.old\" ! -name \"*.tmp\" ! -name \"*.orig\" \
  ! -name \"*.sav\" ! -name \"*.org\" "
 
-$FIND_CMD | xargs grep -vh "^#" | grep "=" | cut -d= -f1 | sort | uniq -d \
+eval $FIND_CMD | xargs grep -vh "^#" | grep "=" | cut -d= -f1 | sort | uniq -d \
   > $MYTMP/toomuch
 if [ -s $MYTMP/toomuch ] ; then
   while read DOUBLE ; do
-    $FIND_CMD | xargs grep -H "^$DOUBLE=" >> $MYTMP/toomuch.out
+    eval $FIND_CMD | xargs grep -H "^$DOUBLE=" >> $MYTMP/toomuch.out
   done < $MYTMP/toomuch
   echo "This is a warning message." > $MYTMP/sysconfig_check
   echo "The following variables seem to be doubled in /etc/rc.config" >> $MYTMP/sysconfig_check
