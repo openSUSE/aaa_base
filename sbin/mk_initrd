@@ -1,0 +1,148 @@
+#! /bin/bash
+
+# Script to create an initial ram disk.
+#
+# usage:
+# mk_initrd [root_dir]
+#
+#   root_dir: the directory the root partition is mounted to (defaults to "/")
+#
+# on errors:
+#   exit code > 0
+#
+# Version 1.01
+#
+# Author: Steffen Winterfeldt <wfeldt@suse.de>
+# (c) 1999 SuSE GmbH
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# general configurable parameters
+
+# the kernel images to use; must be in $boot_dir
+kernels="vmlinuz vmlinuz.suse"
+
+# initial ram disks (corresponding to $kernels); dto. in $boot_dir
+initrds="initrd initrd.suse"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# adapt these only if needed
+
+# *full* paths
+boot_dir=/boot
+static_shell=/bin/ash.static
+static_insmod=/sbin/insmod.static
+
+# initrd size
+image_blocks=1500
+image_inodes=100
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# should be nothing to change below...
+
+tmp_initrd=/tmp/initrd$$
+tmp_mnt=/tmp/mnt$$
+tmp_msg=/tmp/msg$$
+lx_rc=$tmp_mnt/linuxrc
+is_mounted=
+
+clean_up () {
+  [ "$is_mounted" ] && umount $tmp_mnt
+  rm -f $tmp_initrd $tmp_initrd.gz $tmp_msg
+  [ -d $tmp_mnt ] && rmdir $tmp_mnt
+}
+
+error () {
+  echo "$2"
+  clean_up
+  exit $1
+}
+
+[ "$1" = -r ] && shift
+
+root_dir="$1"
+[ "$root_dir" ] || root_dir=/
+
+x1=`mount 2>/dev/null | grep "on $root_dir "`
+x2=`echo \`echo "$x1" | wc -l\``
+x3=`echo "$x1" | cut -f 1 -d " "`
+
+root_dev=
+[ "$x2" = 1 -a -b "$x3" ] && root_dev="$x3"
+
+[ "$root_dev" ] || error 1 "usage: mk_initrd [root_dir]"
+
+echo "using \"$root_dev\" as root device (mounted on \"$root_dir\")"
+
+. $root_dir/etc/rc.config
+
+modules="$INITRD_MODULES"
+
+[ "$modules" ] || error 0 "no initrd required"
+
+initrd_a=($initrds)
+
+kernel_idx=0
+for k in $kernels ; do
+
+  kk="$root_dir$boot_dir/$k"
+  [ -f "$kk" ] || error 2 "no such kernel image: \"$kk\""
+
+  vv=`head -c 10000 $kk | strings | egrep '^[0-9]\.[0-9]\.[0-9]+' | cut -d " " -f 1`
+
+  ii="$root_dir$boot_dir/${initrd_a[$kernel_idx]}"
+
+  echo "creating initrd \"$ii\" for kernel \"$kk\" ($vv)"
+
+  [ -d "$root_dir/lib/modules/$vv/misc" ] || error 3 "no version \"$vv\" modules found"
+
+  mkdir $tmp_mnt
+
+  dd if=/dev/zero of=$tmp_initrd bs=1k count=$image_blocks 2>/dev/null
+  mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd 2>/dev/null
+
+  mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || { 
+    error 4 "failed to mount image"
+  }
+  is_mounted=1
+
+  mkdir $tmp_mnt/{bin,dev}
+  cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console} $tmp_mnt/dev
+  cp $root_dir/$static_shell $tmp_mnt/bin/sh 2>/dev/null || error 5 "no static shell"
+  cp $root_dir/$static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 6 "no static insmod"
+
+  echo '#! /bin/sh' >$lx_rc
+  echo >>$lx_rc
+  echo "export PATH=/bin" >>$lx_rc
+  echo >>$lx_rc
+
+  chmod 755 $lx_rc
+
+  for i in $modules; do
+    x=`find $root_dir/lib/modules/$vv -name $i.o`
+    if [ "$x" ] ; then
+      echo "adding module \"$x\""
+      tar -cf - $x 2>/dev/null | tar -C $tmp_mnt -xpf - 2>/dev/null
+      if [ $? != 0 ] ; then
+        error 7 "initrd too small"
+      fi
+      echo "echo \"Loading module $i ...\"" >>$lx_rc
+      echo "insmod $i" >>$lx_rc
+      echo >>$lx_rc
+    else
+      error 8 "no such module: $i"
+    fi
+  done
+
+  umount $tmp_mnt
+  is_mounted=
+
+  gzip -9 $tmp_initrd
+
+  cp $tmp_initrd.gz $ii || error 9 "failed to install initrd"
+
+  kernel_idx=$((kernel_idx+1))
+
+  clean_up
+
+done
+
