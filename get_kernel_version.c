@@ -56,7 +56,7 @@ main (int argc, char *argv[])
 
     if (buf [0] == 037 && (buf [1] == 0213 || buf [1] == 0236))
       {
-	snprintf (command, sizeof (command), "/bin/gzip -dc %s", argv[1]);
+	snprintf (command, sizeof (command), "/bin/gzip -dc %s 2>/dev/null", argv[1]);
 	fp = popen (command, "r");
 	if (fp == NULL)
 	  {
