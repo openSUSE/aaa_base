@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.27
+# Version 1.28
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999-2002 SuSE Linux AG
@@ -29,6 +29,11 @@
 # (c) 2000 Karsten Keil   option and kernel 2.4 support
 #
 # ChangeLog:
+#
+#
+# 15/7/2002:	v1.28
+#  - explicit -t ext2 for mounting initrd
+#  - add all md devices, not just md0 (reported by tobias@wolf.gl)
 #
 # 12/7/2002:	v1.27
 #  - ignore comments in lilo.conf
@@ -423,10 +428,10 @@ for k in $kernels ; do
     mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd 2>/dev/null 1>&2
     tune2fs -i 0 $tmp_initrd >/dev/null 2>&1
 
-    mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || { 
+    mount -t ext2 -oloop $tmp_initrd $tmp_mnt 2>/dev/null || { 
       if [ -f /lib/loop.o ] ; then
         insmod /lib/loop.o
-        mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || {
+        mount -t ext2 -oloop $tmp_initrd $tmp_mnt 2>/dev/null || {
           error 3 "failed to mount image"
         }
       else
@@ -437,7 +442,7 @@ for k in $kernels ; do
 
     rmdir $tmp_mnt/lost+found
     mkdir $tmp_mnt/{bin,dev}
-    cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console,md0} $tmp_mnt/dev
+    cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console,md*} $tmp_mnt/dev
     cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 4 "no static shell"
     cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 5 "no static insmod"
     
@@ -555,7 +560,7 @@ xxx
     mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd_small 2>/dev/null 1>&2
     tune2fs -i 0 $tmp_initrd_small >/dev/null 2>&1
     
-    mount -oloop $tmp_initrd_small $tmp_mnt_small || { 
+    mount -t ext2 -oloop $tmp_initrd_small $tmp_mnt_small || { 
       error 3 "failed to mount image"
     }
     is_mounted_small=1
