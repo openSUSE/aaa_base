@@ -52,4 +52,5 @@ if ( $? == 0 ) then
 	endif
     end
     unset ret lc val
+    setenv LANG $LANG
 endif
