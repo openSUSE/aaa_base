@@ -170,8 +170,9 @@ else
 fi
 
 #
-# May change to first terminal
+# May change to first terminal, but first we kill all vlock sessions
 #
+killall -q /usr/bin/vlock &> /dev/null || true
 chvt
 
 #

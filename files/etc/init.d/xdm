@@ -25,6 +25,8 @@
 . /etc/sysconfig/displaymanager
 . /etc/sysconfig/language
 . /etc/SuSEconfig/profile
+test -r /etc/profile.d/desktop-data.sh && \
+  . /etc/profile.d/desktop-data.sh
 
 locale_vars="\
 LANG         \
