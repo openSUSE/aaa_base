@@ -13,8 +13,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          xdm
-# Required-Start:    $remote_fs kbd
-# Should-Start: ypbind $syslog gpm firstboot
+# Required-Start:    $remote_fs
+# Should-Start: ypbind $syslog gpm firstboot kbd resmgr
 # Required-Stop:
 # Default-Start:     5
 # Default-Stop:
