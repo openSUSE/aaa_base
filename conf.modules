@@ -294,6 +294,12 @@ alias iso9660             isofs
 alias tty-ldisc-1         slip
 alias tty-ldisc-3         ppp
 alias tty-ldisc-5         mkiss
+# alias tty-ldisc-7       6pack
+alias tty-ldisc-7         off
+# alias ax0               mkiss
+alias ax0                 off
+# alias sp0               6pack
+alias sp0                 off
 alias slip0               slip
 alias slip1               slip
 alias ppp0                ppp
