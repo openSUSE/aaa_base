@@ -4,3 +4,4 @@ etc/DIR_COLORS
 etc/netgroup
 etc/host.conf
 etc/inittab
+etc/nsswitch.conf
