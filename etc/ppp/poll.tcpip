@@ -11,7 +11,16 @@
 #
 # Check our lock file
 #
-test -e /var/run/poll.lock && exit 0
+if test -e /var/run/poll.lock ; then
+    running=false
+    read lpid < /var/run/poll.lock
+    for l in /proc/$lpid/fd/* ; do
+	test -L $l || continue
+	test $0 -ef $l && running=true
+    done
+    test "$running" = "true" && exit 0
+    unset l lpid running
+fi
 trap 'echo' SIGHUP SIGINT SIGQUIT
 trap 'rm -f /var/run/poll.lock; exit 1' SIGTRAP SIGBUS SIGKILL SIGPIPE SIGTERM
 trap 'rm -f /var/run/poll.lock; exit 0' EXIT

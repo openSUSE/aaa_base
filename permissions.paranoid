@@ -88,6 +88,8 @@
 /etc/ppp/chap-secrets                  root.root         600
 /etc/ppp/pap-secrets                   root.root         600
 /etc/pppoed.conf                       root.root         600
+/etc/smpppd.conf                       root.root         600
+/etc/smpppd-c.conf                     root.dialout      640
 /etc/services                          root.root         644
 # changing the global ssh client configuration makes it unreadable
 # and therefore useless. Keep in mind that users can bring their own client!
