@@ -30,13 +30,13 @@ if [ -x /usr/lib/jvm/java/bin/java ] || [ -x /usr/lib/jvm/java/bin/jre ] ; then
     fi
   fi
 else
-  if [ -x /usr/lib/jvm/java/jre/bin/java ] ; then
+  if [ -x /usr/lib/jvm/jre/bin/java ] ; then
     # it is IBMJava2-JRE or SunJava2-JRE
-    export PATH=$PATH:/usr/lib/jvm/java/jre/bin
-    export JAVA_BINDIR=/usr/lib/jvm/java/jre/bin
-    export JAVA_ROOT=/usr/lib/jvm/java
-    export JAVA_HOME=/usr/lib/jvm/java/jre
-    export JRE_HOME=/usr/lib/jvm/java/jre
+    export PATH=$PATH:/usr/lib/jvm/jre/bin
+    export JAVA_BINDIR=/usr/lib/jvm/jre/bin
+    export JAVA_ROOT=/usr/lib/jvm/jre
+    export JAVA_HOME=/usr/lib/jvm/jre
+    export JRE_HOME=/usr/lib/jvm/jre
     unset JDK_HOME
     unset SDK_HOME
   fi

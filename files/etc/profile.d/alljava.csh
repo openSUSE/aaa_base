@@ -30,12 +30,12 @@ if ( -x /usr/lib/jvm/java/bin/java || -x /usr/lib/jvm/java/bin/jre ) then
     endif
   endif
 else
-  if ( -x /usr/lib/jvm/java/jre/bin/java ) then
+  if ( -x /usr/lib/jvm/jre/bin/java ) then
     # it is IBMJava2-JRE or SunJava2-JRE
-    setenv JAVA_BINDIR /usr/lib/jvm/java/jre/bin
-    setenv JAVA_ROOT /usr/lib/jvm/java
-    setenv JAVA_HOME /usr/lib/jvm/java/jre
-    setenv JRE_HOME /usr/lib/jvm/java/jre
+    setenv JAVA_BINDIR /usr/lib/jvm/jre/bin
+    setenv JAVA_ROOT /usr/lib/jvm/jre
+    setenv JAVA_HOME /usr/lib/jvm/jre
+    setenv JRE_HOME /usr/lib/jvm/jre
     unsetenv JDK_HOME
     unsetenv SDK_HOME
   endif
