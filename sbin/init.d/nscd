@@ -21,7 +21,7 @@ test -x /usr/sbin/nscd || exit 0
 
 case `/bin/uname -r` in
     0.*|1.*|2.0.*|2.1.*)
-        echo No Name Service Cache Daemon started - needs at least kernel version 2.0.
+        echo No Name Service Cache Daemon started - needs at least kernel version 2.2.
         exit 0
     ;;
 esac
