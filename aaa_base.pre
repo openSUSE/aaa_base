@@ -122,8 +122,8 @@ for file in passwd group ; do
  if test -f etc/$file ; then
   # like fillup, but : is the only separator
   rm -f etc/$file.add
-  sort +0 -1 -t: -u etc/$file var/adm/fillup-templates/$file.aaa_base \
-  | sort +0 -1 -t: etc/$file - | uniq -u > etc/$file.add
+  sort -k 1,1 -t: -u etc/$file var/adm/fillup-templates/$file.aaa_base \
+  | sort -k 1,1 -t: etc/$file - | uniq -u > etc/$file.add
   cat etc/$file.add >> etc/$file
   rm -f etc/$file.add
   # fix permissions if this script is called with strange umask

@@ -79,7 +79,7 @@ fi
 
 # hack: DEFAULT_LANGUAGE was the first variable in rc.config
 # and we want to move it out
-awk 'BEGIN { i=0; } /^$/ { if (i==0) { print "DUMMY_SEPARATOR=dummy\n" ; i++ ; next } else { print } } { print } ' etc/rc.config > etc/rc.config.new 2>/dev/null && mv etc/rc.config.new etc/rc.config
+awk 'BEGIN { i=0; } /^$/ { if (i==0) { print "DUMMY_SEPARATOR=dummy\n" ; i++ ; next } } { print } ' etc/rc.config > etc/rc.config.new 2>/dev/null && mv etc/rc.config.new etc/rc.config
 #
 # remove old stuff from rc.config (oldstuff only has removed variables)
 if [ -x bin/fillup ] ; then
@@ -111,8 +111,8 @@ for i in passwd group shadow gshadow ; do
   if test -f etc/$i ; then  
     cp etc/$i etc/$i.tmp
     rm -f etc/$i.add
-    sort +0 -1 -t: -u etc/$i var/adm/fillup-templates/$i.aaa_base \
-    | sort +0 -1 -t: etc/$i - | uniq -u > etc/$i.add
+    sort -k 1,1 -t: -u etc/$i var/adm/fillup-templates/$i.aaa_base \
+    | sort -k 1,1 -t: etc/$i - | uniq -u > etc/$i.add
     cat etc/$i.add >> etc/$i
     rm -f etc/$i.add
     if cmp -s etc/$i etc/$i.tmp ; then
