@@ -9,6 +9,7 @@
 # /sbin/init.d/xdm
 #
 
+. /etc/rc.status
 . /etc/rc.config
 . /etc/SuSEconfig/profile
 
@@ -47,8 +48,12 @@ case "$1" in
 	# After a crash or a kill signal we may have
 	# a wrong owner ship of /dev/xconsole
 	if rc_status ; then
-	    chown root:tty /dev/xconsole /dev/tty0
-	    chmod 622      /dev/xconsole /dev/tty0
+	    if test -x /etc/X11/xdm/TakeDevices ; then
+		/etc/X11/xdm/TakeDevices
+	    else
+		chown root:tty /dev/xconsole /dev/tty0
+		chmod 622      /dev/xconsole /dev/tty0
+	    fi
 	fi
 	rc_status -v
 	;;
