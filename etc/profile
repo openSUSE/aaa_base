@@ -11,7 +11,7 @@ umask 022
 #ulimit -s 15000		# max stack size of a program is 15 MB
 #ulimit -m 30000		# max resident set size is 30 MB
 
-ulimit -Sc 0                     # don't create core files
+ulimit -Sc 0			# don't create core files
 ulimit -d unlimited
 if [ -z "$KSH_VERSION" ]; then
     # ksh does not support this command.
@@ -200,13 +200,6 @@ export COLORTERM
 PAGER=less
 export PAGER
 
-if test -z "$EMACS" ; then
-    if   [ -n "$ZSH_VERSION" ]; then
-        setopt chaselinks
-        PS1='%n@%m:%/'
-    fi
-fi
-
 # I had problems using 'eval tset' instead of 'TERM=', but you might want to 
 # try it anyway. I think with the right /etc/termcap it would work great.
 # eval `SHELL=/bin/sh; tset -sQ "$TERM"`
@@ -233,7 +226,12 @@ fi
 if [ "$SHELL" = "/usr/bin/pdksh" -o "$SHELL" = "/usr/bin/ksh" -o "$SHELL" = "/bin/ksh" ]; then
     PS1="! $ "
 elif [ -n "$ZSH_VERSION" ]; then
-    PS1="%m:%~%# "
+    # setopt chaselinks
+    if test "$UID" = 0; then
+        PS1='%n@%m:%~ # '
+    else
+        PS1='%n@%m:%~ > '
+    fi
 elif [ "$SHELL" = "/usr/bin/ash" -o "$SHELL" = "/bin/ash" ]; then
     PS1="$ "
 elif [ -n "$BASH_VERSION" ] ; then
@@ -279,7 +277,7 @@ test -d /etc/profile.d && \
     for s in /etc/profile.d/*.sh ; do
       test -r $s && . $s
     done
-  }	
+  }
 
 #
 # and now let's look if there is a local profile (for stuff not done in

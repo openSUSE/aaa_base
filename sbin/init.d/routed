@@ -28,7 +28,7 @@ case "$1" in
 	echo -e "$return"
 	;;
     restart|reload)
-	$0 start && $0 stop || return=$rc_failed
+	$0 stop && $0 start || return=$rc_failed
 	;;
     status)
         route -n
