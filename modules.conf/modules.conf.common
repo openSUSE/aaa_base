@@ -437,7 +437,6 @@ alias binfmt-0008         binfmt_aout
 
 alias iso9660             isofs
 alias tty-ldisc-1         slip
-alias tty-ldisc-3         ppp
 alias tty-ldisc-5         mkiss
 
 # alias tty-ldisc-7       6pack
@@ -460,9 +459,11 @@ alias sl1                 slip
 if `kernelversion` == "2.2"
 alias ppp0                ppp
 alias ppp1                ppp
+alias tty-ldisc-3         ppp
 else
 alias ppp0                ppp_generic
 alias ppp1                ppp_generic
+alias tty-ldisc-3         ppp_async
 endif
 
 alias plip0               plip

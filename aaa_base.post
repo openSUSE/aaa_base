@@ -198,9 +198,7 @@ if test ! -e etc/permissions.local ; then
 #
 # /etc/permissions.local
 #
-# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
-#
-# Author: Roman Drahtmueller <draht@suse.de>, 2001
+# Description: Roman Drahtmueller <draht@suse.de>, 2001
 #
 # This file is used by SuSEconfig and chkstat to check or set the modes
 # and ownerships of files and directories in the installation.
