@@ -30,7 +30,7 @@
 #
 /usr/X11R6/bin/cardinfo                root.root        4755
 /usr/X11R6/bin/v4l-conf                root.video       4755
-/usr/X11R6/bin/rxvt                    root.tty         4755
+/usr/X11R6/bin/rxvt                    root.tty         2755
 /usr/X11R6/bin/xtvscreen.SuSE-dynamic  root.video       4755
 /usr/X11R6/bin/xtvscreen.SuSE-static   root.video       4755
 /usr/bin/bttvgrab                      root.video       4750
