@@ -296,29 +296,26 @@ dollar:
 }
 
 /*
- * Check required services
+ * Check required services for name
  */
 static boolean chkrequired(const char * name)
 {
     serv_t * serv = findserv(name);
     list_t * req_start, * ptr;
-    boolean ret = false;
+    boolean ret = true;
 
-    ret = false;
     if (serv && serv->req.serv)
 	req_start = &(serv->req.list);
     else
 	goto out;
 
     /*
-     * If only _one_  required service is misssed we run on an error.
+     * If the first required service is misssed we run on an error.
      */
-    if (!findserv(serv->req.serv))
+    if (!findserv(serv->req.serv)) {
 	warn("Service %s has to be enabled for service %s\n", serv->req.serv, name);
-
-    ret = true;
-    if (req_start == req_start->next)
-	goto out;
+	ret = false;
+    }
 
     for (ptr = req_start->next; ptr != req_start; ptr = ptr->next)
 	if (!findserv(getreq(ptr)->serv)) {
@@ -326,6 +323,38 @@ static boolean chkrequired(const char * name)
 	    ret = false;
 	}
 out:
+    return ret;
+}
+
+/*
+ * Check dependencies for name as a service
+ */
+static boolean chkdependencies(const char * name)
+{
+    list_t * srv;
+    boolean ret = true;
+
+    for (srv = serv_start->next; srv != serv_start; srv = srv->next) {
+	serv_t * cur = getserv(srv);
+	list_t * req_start, * req;
+
+	if (cur && cur->req.serv)
+	    req_start = &(cur->req.list);
+	else
+	    continue;
+
+	if (!strcmp(cur->req.serv, name)) {
+	    warn("Service %s has to be enabled for service %s\n", name, cur->name);
+	    ret = false;
+	}
+
+	for (req = req_start->next; req != req_start; req = req->next) {
+	    if (!strcmp(getreq(req)->serv, name)) {
+		warn("Service %s has to be enabled for service %s\n", name, cur->name);
+		ret = false;
+	    }
+	}
+    }
     return ret;
 }
 
@@ -642,7 +671,7 @@ static void scan_script_defaults(const char *path)
 }
 
 /*
- *
+ * Scan current service structure
  */
 static void scan_script_locations(const char * path)
 {
@@ -1158,9 +1187,15 @@ int main (int argc, char *argv[])
 		     * Use information from symbolic link structure to
 		     * check if all services are around for this script.
 		     */
-		    if (chkfor(d->d_name, argv, argc) && !ignore)
-			if (!chkrequired(d->d_name))
+		    if (chkfor(d->d_name, argv, argc) && !ignore) {
+			boolean ok = true;
+			if (del)
+			    ok = chkdependencies(d->d_name);
+			else
+			    ok = chkrequired(d->d_name);
+			if (!ok)
 			    error("exiting now!\n");
+		    }
 
 		    if (script_inf.default_start && script_inf.default_start != empty) {
 		 	unsigned int deflvls = str2lvl(script_inf.default_start);

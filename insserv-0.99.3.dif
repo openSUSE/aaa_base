@@ -1,0 +1,24 @@
+--- insserv.conf
++++ insserv.conf	2002/07/16 12:21:03
+@@ -6,12 +6,12 @@
+ #
+ # Low level networking (ethernet card)
+ #
+-$network	network pcmcia hotplug
++$network	network +pcmcia +hotplug
+ 
+ #
+ # Named is operational
+ #
+-$named		named $network
++$named		+named $network
+ 
+ #
+ # All remote filesystems are mounted (note in some cases /usr may
+@@ -38,5 +38,5 @@
+ #
+ # The system time has been set correctly
+ #
+-$time		boot.clock xntpd
++$time		boot.clock +xntpd
+ 
