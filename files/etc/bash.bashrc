@@ -175,7 +175,7 @@ case "$-" in
 	if test "$is" = "zsh" ; then
 	    alias ls='eval /bin/ls $LS_OPTIONS'
 	else
-	    alias ls='ls $LS_OPTIONS'
+	    alias ls='/bin/ls $LS_OPTIONS'
 	fi
 	alias dir='ls -l'
 	alias ll='ls -l'
