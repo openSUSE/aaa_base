@@ -31,6 +31,7 @@ TERM con80x60
 TERM screen
 TERM xterm
 TERM vt100
+TERM gnome
 
 # EIGHTBIT, followed by '1' for on, '0' for off. (8-bit output)
 EIGHTBIT 1
