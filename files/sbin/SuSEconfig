@@ -228,7 +228,19 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
     fi
 
     if test "$FASTRUN" != "true" ; then
-        MODULES_DIR=/lib/modules/`uname -r`
+	case `uname -m` in
+		ppc)  KERNEL_FILENAME="vmlinux" ;;
+		s390) KERNEL_FILENAME="kernel/image" ;;
+		*)    KERNEL_FILENAME="vmlinuz" ;;
+	esac
+	KERNEL_VERSION=`/sbin/get_kernel_version /boot/$KERNEL_FILENAME 2>/dev/null`
+	if test -n "$KERNEL_VERSION" -a -d /lib/modules/$KERNEL_VERSION -a -f /boot/System.map-$KERNEL_VERSION ; then
+		MODULES_DIR=/lib/modules/$KERNEL_VERSION
+		DEPMOD_PARAMS="-a -F /boot/System.map-$KERNEL_VERSION $KERNEL_VERSION"
+	else
+		MODULES_DIR=/lib/modules/`uname -r`
+		DEPMOD_PARAMS="-a"
+	fi
         if test -x /sbin/depmod -a -d $MODULES_DIR ; then
             for i in $MODULES_DIR/* $MODULES_DIR/*/* /etc/modules.conf ; do
                 test -e $i || continue
@@ -241,7 +253,7 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
 		rm -f $MODULES_DIR/modules.dep
 	    fi
             if test ! -e $MODULES_DIR/modules.dep ; then
-                /sbin/depmod -a > /dev/null 2>&1
+                /sbin/depmod $DEPMOD_PARAMS > /dev/null 2>&1
             fi
         fi
     fi
