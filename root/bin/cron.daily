@@ -5,7 +5,7 @@
 # early morning-hours. Please add your local changes to cron.daily.local
 # since this file will be overwritten, when updating your system.
 #
-# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.   
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.   
 #
 # please send bugfixes or comments to feedback@suse.de.
 #
@@ -160,6 +160,12 @@ if [ "$MAX_DAYS_IN_TMP" -gt 0 ] ; then
                 rmdir $DEL_DIR 2> /dev/null
             fi
         done
+    done
+    for DEL_DIR in `find $TMP_DIR $OMIT \( -type d \) \
+                    -ctime +$MAX_DAYS_IN_TMP | sort -r` ; do
+        if [ "$DEL_DIR" != "$TMP_DIR" ] ; then
+            rmdir $DEL_DIR 2> /dev/null
+        fi
     done
 fi
 

@@ -150,10 +150,6 @@ if [ -f /usr/lib/teTeX/texmf.cnf ] ; then
 fi
 
 
-# See metamail(1). Run metamail also as root.
-MM_RUNASROOT=true
-export MM_RUNASROOT
-
 # Further options for the 'ls' command are in /etc/DIR_COLORS.
 unalias ls 2>/dev/null
 if test "$UID" = 0 ; then
@@ -216,14 +212,6 @@ if test -z "$EMACS" ; then
 		PS1="%n@%m:`pwd -r` > "
 	    fi
 	}
-    elif [ -n "$BASH_VERSION" ] ; then
-        if test "$UID" = 0 ; then
-            # set -P
-            set -p
-            PS1="\h:\w # "
-        else
-            PS1="\u@\h:\w > "
-        fi
     fi
 fi
 
@@ -246,17 +234,28 @@ fi
 # unset TERMCAP
 
 
+#
+# set prompt
+#
 #PS1='`hostname`:`pwd`# '
 if [ "$SHELL" = "/usr/bin/pdksh" -o "$SHELL" = "/usr/bin/ksh" -o "$SHELL" = "/bin/ksh" ]; then
- PS1="! $ "
+    PS1="! $ "
 elif [ -n "$ZSH_VERSION" ]; then
- PS1="%m:%~%# "
+    PS1="%m:%~%# "
 elif [ "$SHELL" = "/usr/bin/ash" -o "$SHELL" = "/bin/ash" ]; then
- PS1="$ "
+    PS1="$ "
+elif [ -n "$BASH_VERSION" ] ; then
+    # set -P
+    set -p
+    if test "$UID" = 0 ; then
+        PS1="\h:\w # "
+    else
+        PS1="\u@\h:\w > "
+    fi
 else
- PS1='\h:\w \$ '
-#PS1='\u \w \$ '
-  fi
+    PS1='\h:\w \$ '
+    #PS1='\u \w \$ '
+fi
 PS2='> '
 ignoreeof=0
 export PS1 PS2 ignoreeof
@@ -286,7 +285,7 @@ test -d /etc/profile.d && \
 
 #
 # and now let's look if there is a local profile (for stuff not done in
-# S.u.S.E. Linux).
+# SuSE Linux).
 #
 test -e /etc/profile.local && . /etc/profile.local
 

@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
 #	  Werner Fink <werner@suse.de>, 1996
@@ -27,9 +27,13 @@ case "$1" in
 	echo -n "Starting RPC portmap daemon"
 	startproc $PORTMAP || return=$rc_failed
 	/bin/sleep 1
+        if test "$NFS_SERVER_UGID" = yes; then
+            startproc /usr/sbin/rpc.ugidd       || return=$rc_failed
+        fi
 	echo -e "$return"
 	;;
     stop)
+        killproc -TERM /usr/sbin/rpc.ugidd      || return=$rc_failed
 	echo -n "Shutting down RPC services"
 	killproc -TERM $PORTMAP || return=$rc_failed
 	echo -e "$return"
@@ -38,7 +42,11 @@ case "$1" in
 	$0 stop && $0 start || return=$rc_failed
 	;;
     status)
-	checkproc $PORTMAP && echo "OK" || echo "No process"
+        status="OK"
+        if test "$NFS_SERVER_UGID" = yes; then
+            checkproc /usr/sbin/rpc.ugidd  || status="rpc.ugidd down"
+        fi
+	checkproc $PORTMAP && echo "OK" || echo "portmapper down"
 	;;
     *)
 	echo "Usage: $0 {start|stop}"

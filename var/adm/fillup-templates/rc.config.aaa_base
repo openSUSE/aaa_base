@@ -216,7 +216,7 @@ IRCSERVER=""
 #
 # start the inet daemon in multi-user? ("yes" or "no")
 # this is needed, if you have to telnet/rlogin to your own machine.
-# It is also needed for the man page formatter in S.u.S.E. Help system
+# It is also needed for the man page formatter in SuSE Help system
 # and for starting the plp lp daemon.
 #
 START_INETD="YAST_ASK"
@@ -444,7 +444,7 @@ CREATE_INFO_DIR="yes"
 CHECK_PERMISSIONS=set
 
 #
-# S.u.S.E. Linux contains two different configurations for
+# SuSE Linux contains two different configurations for
 # chkstat. The differences can be found in /etc/permissions.secure
 # and /etc/permissions.easy. If you create your own configuration
 # (e.g. permissions.foo), you can enter the extension here as well.
@@ -516,7 +516,7 @@ ROOT_LOGIN_REMOTE="no"
 
 
 #
-# Some packages by S.u.S.E. include dynamically linked motif progs as well
+# Some packages by SuSE include dynamically linked motif progs as well
 # as statically linked (<p>.SuSE-dynamic resp. <p>.SuSE-static). SuSEconfig 
 # can analyze your system and link the matching program to <p>.  If you
 # set this to "clean", the other binary will be deleted. (no/link/clean)
@@ -553,13 +553,6 @@ CONSOLE_SHUTDOWN=reboot
 # Should isapnp be used to initialize your PNP at bootup?  (yes/no)
 #
 START_ISAPNP=yes
-
-#
-# possibly a script in /sbin/init.d or cron.daily sends mails. 
-# So please let MM_RUNASROOT be set to "true".
-#
-MM_RUNASROOT=true
-export MM_RUNASROOT
 
 umask 022
 

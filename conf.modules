@@ -1,5 +1,5 @@
 #
-# Copyright (c) 1996-1998 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
+# Copyright (c) 1996-1998 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Hubert Mantel <mantel@suse.de>, 1996,1997
 #
@@ -104,7 +104,6 @@ alias char-major-5        serial
 alias char-major-6        lp
 alias char-major-9        st
 alias char-major-10-135   off
-alias char-major-14       off
 alias char-major-14       sound
 alias char-major-19       cyclades
 alias char-major-20       cyclades
@@ -146,4 +145,6 @@ alias net-pf-3            off
 alias net-pf-4            off
 # alias net-pf-5            appletalk
 alias net-pf-5            off
+
+alias net-pf-17           af_package
 

@@ -1,7 +1,5 @@
-root/.exrc
 root/bin/cron.daily
 root/bin/cron.daily.local
-etc/DIR_COLORS
 etc/conf.modules
 etc/csh.cshrc
 etc/csh.login
@@ -14,7 +12,6 @@ etc/logfiles
 etc/mailcap
 etc/mime.types
 etc/motd
-etc/netgroup
 etc/nsswitch.conf
 etc/permissions
 etc/permissions.easy

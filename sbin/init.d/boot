@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
 #         Werner Fink <werner@suse.de>, 1996
@@ -251,6 +251,12 @@ chmod 664 /var/run/utmp
 chown root.tty /var/run/utmp
 
 #
+# there could be a new kernel version.  reinit /etc/psdevtab, to be sure.
+#
+rm -f /etc/psdevtab
+test -x /bin/ps && /bin/ps > /dev/null 2> /dev/null
+
+#
 # start bootup client scripts.
 #
 if test -d /sbin/init.d/boot.d; then
@@ -353,5 +359,6 @@ if test -e /var/adm/setup/setup.newinst -o -e /usr/lib/YaST/.configured2 ; then
         killproc -TERM /usr/bin/gpm > /dev/null 2> /dev/null
     fi
 fi
+
 
 exit 0

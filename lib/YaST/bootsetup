@@ -29,25 +29,25 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
           german)
             echo "------------------------------------------------------------------------------"
             echo " "
-            echo "                        Willkommen zu S.u.S.E. Linux"
+            echo "                        Willkommen zu SuSE Linux"
             echo " "
           ;;
           french)
             echo "------------------------------------------------------------------------------"
             echo " "
-            echo "                  S.u.S.E. Linux vous souhaite la bienvenue"
+            echo "                  SuSE Linux vous souhaite la bienvenue"
             echo " "
           ;;
           italian)
             echo "------------------------------------------------------------------------------"
             echo " "
-            echo "                        Benvenuti da S.u.S.E. Linux"
+            echo "                        Benvenuti da SuSE Linux"
             echo " "
           ;;
           *)
             echo "------------------------------------------------------------------------------"
             echo " "
-            echo "                        Welcome to S.u.S.E. Linux"
+            echo "                        Welcome to SuSE Linux"
             echo " "
           ;;
         esac
@@ -271,7 +271,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     echo "            Have a lot of fun!"
     echo " "
     echo " "
-    echo "                              Your S.u.S.E. Team"
+    echo "                              Your SuSE Team"
     echo " "
     echo " "
     echo " "

@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
 #         Werner Fink <werner@suse.de>, 1996,98
@@ -55,9 +55,6 @@ case "$1" in
 	echo -n "Starting NFS server"
 	startproc /usr/sbin/rpc.mountd $PARAMS  || return=$rc_failed
 	startproc /usr/sbin/rpc.nfsd   $PARAMS  || return=$rc_failed
-	if test "$NFS_SERVER_UGID" = yes; then
-	    startproc /usr/sbin/rpc.ugidd       || return=$rc_failed
-	fi
       fi
       echo -e "$return"
       ;;
@@ -73,7 +70,6 @@ case "$1" in
         echo -n "Shutting down NFS server"
         killproc -TERM /usr/sbin/rpc.mountd     || return=$rc_failed
         killproc -TERM /usr/sbin/rpc.nfsd       || return=$rc_failed
-        killproc -TERM /usr/sbin/rpc.ugidd      || return=$rc_failed
       fi
       echo -e "$return"
       ;;
@@ -101,9 +97,6 @@ case "$1" in
       else
         checkproc    /usr/sbin/rpc.mountd  || status="NFS server down"
         checkproc    /usr/sbin/rpc.nfsd    || status="NFS server down"
-	if test "$NFS_SERVER_UGID" = yes; then
-            checkproc /usr/sbin/rpc.ugidd  || status="NFS server down"
-	fi
       fi
       echo "$status"
       ;;

@@ -9,7 +9,7 @@ write_header (){
               echo "#" >> $INSTALL
               echo "# install/doinst.sh - to be done after extraction" >> $INSTALL
               echo "#" >> $INSTALL
-              echo "# Copyright (c) 1996,97 S.u.S.E. GmbH Fuerth, Germany.   " >> $INSTALL
+              echo "# Copyright (c) 1996,97 SuSE GmbH Nuernberg, Germany.   " >> $INSTALL
               echo "#" >> $INSTALL
               echo "#" >> $INSTALL
     fi

@@ -2,7 +2,7 @@
 #
 # /sbin/rctab
 #
-# Copyright (c) 1997 S.u.S.E. GmbH Fuerth, Germany.   
+# Copyright (c) 1997 SuSE GmbH Nuernberg, Germany.   
 # please send bugfixes or comments to feedback@suse.de.
 #
 # Author:  Werner Fink        <werner@suse.de>
@@ -510,7 +510,7 @@ function makerl () {
 
 #
 # This routine ``simply'' inserts a start and stop link
-# for the given S.u.S.E. service script
+# for the given SuSE service script
 #  ...
 #
 function insertscript () { 
