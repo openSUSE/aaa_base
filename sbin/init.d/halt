@@ -109,7 +109,7 @@ done
 
 UMOUNT_FAILED=false
 echo "Unmounting file systems"
-umount -avt noproc,nonfs || {
+umount -avt noproc,nonfs,nosmbf || {
     rc_status
     UMOUNT_FAILED=true
 }

@@ -28,8 +28,8 @@ rc_status -v -r
 if test "$START_KERNELD" = yes -a \
         -x /sbin/kerneld -a ! -e /proc/sys/kernel/modprobe ; then
     echo -n "Starting kerneld:"
-    /sbin/kerneld
-    rc_status -v1 -r
+    /sbin/kerneld > /dev/null 2>&1
+    rc_status -v -r
 fi
 
 #
@@ -350,7 +350,7 @@ if test "$START_LOOPBACK" = yes; then
 	rc_status
         ;;
     esac
-    rc_status -v1 -r
+    rc_status -v -r
 fi
 
 #
@@ -467,7 +467,7 @@ if test -d /proc/sys/fs/binfmt_misc -a -x /usr/bin/dosexec; then
   echo -n "Registering DEXE for binfmt"
   echo :DEXE:M::\\x0eDEXE::/usr/bin/dosexec: > \
     /proc/sys/fs/binfmt_misc/register
-  rc_status -v1 -r
+  rc_status -v -r
 fi
 
 #
