@@ -12,6 +12,13 @@ alias parport_lowlevel    parport_pc
 alias char-major-10-219 mwave
 # options mwave dspirq=10 dspio=0x130 uartirq=3 uartio=0x2f8
 
+# nVidia nforce chipset (network + audio)
+#alias eth0 nvnet
+#alias sound-slot-1 nvaudio
+#alias usb-interface usb-ohci
+
+alias char-major-254 pvrcore
+
 # IBM thinkpad tpctl
 # see /usr/share/doc/packages/tpctl/
 alias char-major-10-170 thinkpad
