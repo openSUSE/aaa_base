@@ -7,7 +7,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.loadmodules
-# Required-Start:    boot.localfs
+# Required-Start:    boot.localfs boot.udev
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
