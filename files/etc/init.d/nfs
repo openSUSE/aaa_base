@@ -25,10 +25,13 @@ nfs=no
 while read  where what type options rest  ; do
     case "$where" in
 	\#*|"") ;;
-	*) if test "$type" = "nfs" ; then
-		nfs=yes
-		break
-	   fi ;;
+	*) case "$options" in
+	    *noauto*) ;;
+	    *) if test "$type" = "nfs" ; then
+		    nfs=yes
+		    break
+		fi ;;
+	    esac
     esac
 done < /etc/fstab
 
