@@ -64,7 +64,7 @@ CHR    40;33;01 # character device driver
 ORPHAN 40;31    # symlink to nonexistent file
 
 # This is for files with execute permission:
-EXEC 01;32
+EXEC 00;32
 
 # List any file extensions like '.gz' or '.tar' that you would like ls
 # to colorize below. Put the extension, a space, and the color init string.
