@@ -268,17 +268,9 @@ if test -n "$CREATE_HOSTCONF" -a "$CREATE_HOSTCONF" = "yes" ; then
         > $r/etc/host.conf.SuSEconfig
 
     if test -n "$NAMESERVER" ; then
-        if test "$USE_NIS_FOR_RESOLVING" = yes ; then
-            echo "order hosts nis bind" >> $r/etc/host.conf.SuSEconfig
-        else
-            echo "order hosts bind" >> $r/etc/host.conf.SuSEconfig
-        fi
+        echo "order hosts bind" >> $r/etc/host.conf.SuSEconfig
     else
-        if test "$USE_NIS_FOR_RESOLVING" = yes ; then
-            echo "order hosts nis" >> $r/etc/host.conf.SuSEconfig
-        else
-            echo "order hosts" >> $r/etc/host.conf.SuSEconfig
-        fi
+        echo "order hosts" >> $r/etc/host.conf.SuSEconfig
     fi
     echo "multi on" >> $r/etc/host.conf.SuSEconfig
     check_md5_and_move $r/etc/host.conf
@@ -373,13 +365,13 @@ echo '# start of i18n support'       >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo '# start of i18n support'       >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 
 if test -z "$RC_LANG" ; then
-	case "$LANGUAGE" in
-		italian)	RC_LANG=it_IT.ISO-8859-1 ;;
-		russian)	RC_LANG=ru_RU.KOI8-R     ;;
-		brazilian)	RC_LANG=pt_BR.ISO-8859-1 ;;
-		english)	RC_LANG=POSIX            ;;
-		*)		RC_LANG="$LANGUAGE"      ;;
-	esac
+        case "$LANGUAGE" in
+                italian)        RC_LANG=it_IT.ISO-8859-1 ;;
+                russian)        RC_LANG=ru_RU.KOI8-R     ;;
+                brazilian)      RC_LANG=pt_BR.ISO-8859-1 ;;
+                english)        RC_LANG=POSIX            ;;
+                *)              RC_LANG="$LANGUAGE"      ;;
+        esac
 fi
 
 locale_vars="\
@@ -606,11 +598,11 @@ echo "export WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo "if ( ! \${?WINDOWMANAGER} ) setenv WINDOWMANAGER $WINDOWMANAGER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 
 test -n "$CONSOLE_MAGIC" && {
-    	echo "# The following sequence is needed for most non-west-european languages" >> $r/etc/SuSEconfig/profile.SuSEconfig
-	echo "test \"\$TERM\" = \"linux\" && echo -en \"\\033"$CONSOLE_MAGIC\"\
+        echo "# The following sequence is needed for most non-west-european languages" >> $r/etc/SuSEconfig/profile.SuSEconfig
+        echo "test \"\$TERM\" = \"linux\" && echo -en \"\\033"$CONSOLE_MAGIC\"\
  >> $r/etc/SuSEconfig/profile.SuSEconfig
-    	echo "# The following sequence is needed for most non-west-european languages" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
-    echo "test \"\$TERM\" = \"linux\" && echo -n \"\\033"$CONSOLE_MAGIC\" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
+        echo "# The following sequence is needed for most non-west-european languages" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
+        echo "test \"\$TERM\" = \"linux\" && echo -n \"\\033"$CONSOLE_MAGIC\" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
 }
 
 check_md5_and_move $r/etc/SuSEconfig/profile
@@ -640,18 +632,18 @@ fi
 #
 if test -n "$ROOT_LOGIN_REMOTE" ; then
     if test "$ROOT_LOGIN_REMOTE" = "yes" ; then
-	cat $r/etc/pam.d/login | \
-	    sed 's@^[[:space:]]*auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)@#&@' \
+        cat $r/etc/pam.d/login | \
+            sed 's@^[[:space:]]*auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)@#&@' \
             > $r/etc/pam.d/login.SuSEconfig
-	cat $r/etc/pam.d/rlogin | \
-	    sed 's@^[[:space:]]*auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)@#&@' \
+        cat $r/etc/pam.d/rlogin | \
+            sed 's@^[[:space:]]*auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)@#&@' \
             > $r/etc/pam.d/rlogin.SuSEconfig
     else
         cat $r/etc/pam.d/login | \
-	    sed 's@^[[:space:]]*#[[:space:]]*\(auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)\)@\1@' \
+            sed 's@^[[:space:]]*#[[:space:]]*\(auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)\)@\1@' \
             > $r/etc/pam.d/login.SuSEconfig
         cat $r/etc/pam.d/rlogin | \
-	    sed 's@^[[:space:]]*#[[:space:]]*\(auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)\)@\1@' \
+            sed 's@^[[:space:]]*#[[:space:]]*\(auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)\)@\1@' \
             > $r/etc/pam.d/rlogin.SuSEconfig
     fi
     check_md5_and_move $r/etc/pam.d/login

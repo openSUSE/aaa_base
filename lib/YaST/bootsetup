@@ -165,6 +165,17 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     }
 
 
+    echo_login_as_root () {
+        case "$LANGUAGE" in
+          german)
+            echo "Geben Sie jetzt \"root\" ein um sich als Benutzer root einzuloggen..."
+          ;;
+          *)
+            echo "Please enter \"root\" to login as user root..."
+          ;;
+        esac
+    }
+
     press_enter () {
         case "$LANGUAGE" in
           german)
@@ -276,6 +287,52 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     echo " "
     echo " "
     echo " "
+
+
+    #
+    # Ring the bell
+    #
+    tput bel
+
+    #
+    # Almost white border line on grey background
+    #
+    tput smacs
+    tput bold; tput setab 7; tput setaf 7
+    echo -n Ú
+    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    tput sgr0; tput setab 7; tput setaf 0
+    echo -n  ¿
+    tput rmacs
+
+    #
+    # Red text on grey background and borders on both sides
+    #
+    echo_login_as_root | while read line ; do
+        tput bold; tput setab 7; tput setaf 7
+        tput smacs; echo -n '³'; tput rmacs; echo -n "  "
+        tput sgr0; tput setab 7; tput setaf 1
+
+        echo -n "$line" ; tput el; tput hpa 79
+
+        tput sgr0; tput setab 7; tput setaf 0
+        tput smacs; echo -n '³'; tput rmacs; tput cud1
+    done
+
+    #
+    # Almost black border line on grey background
+    #
+    tput smacs
+    tput bold; tput setab 7; tput setaf 7
+    echo -n À
+    tput sgr0; tput setab 7; tput setaf 0
+    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    echo -n Ù
+    tput rmacs
+
+    tput setab 0; tput setaf 7; tput sgr0; tput cud1
 
     exit 0
 fi

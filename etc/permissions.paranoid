@@ -283,7 +283,7 @@
 /usr/lib/YARD/bin/yardinit             root.yard        4750
 /usr/lib/YARD/bin/yardlog              root.yard        4750
 /usr/lib/YARD/bin/yardsrv              root.yard        6755
-/usr/lib/YARD/bin/yardstat             root.yard        6555
+/usr/lib/YARD/bin/yardstat             root.yard        6755
 /usr/lib/YARD/bin/yarduser             root.yard        4555
 /usr/lib/news/bin/input/newsspool      news.news        6555
 # Only useful for UUCP anyway.

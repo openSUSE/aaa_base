@@ -200,14 +200,8 @@ export PAGER
 
 if test -z "$EMACS" ; then
     if   [ -n "$ZSH_VERSION" ]; then
-	precmd ()
-	{
-	    if test "$UID" = 0; then
-		PS1="%m:`pwd -r` # "
-	    else
-		PS1="%n@%m:`pwd -r` > "
-	    fi
-	}
+        setopt chaselinks
+        PS1='%n@%m:%/'
     fi
 fi
 

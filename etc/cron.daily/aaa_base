@@ -67,6 +67,11 @@ check_log_file () {
         -exec chmod $3 "$1" "$1.o" \; \
         -exec chown $4 "$1" "$1.o" \; 
 
+    test -f "$1" && {
+        chmod $3 "$1"
+        chown $4 "$1"
+    }
+
     if test -f "$1".o; then
 
         echo -n "Saving file "

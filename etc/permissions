@@ -123,7 +123,7 @@
 /usr/lib/YARD/bin/yardinit             root.yard        4750
 /usr/lib/YARD/bin/yardlog              root.yard        4750
 /usr/lib/YARD/bin/yardsrv              root.yard        6755
-/usr/lib/YARD/bin/yardstat             root.yard        6555
+/usr/lib/YARD/bin/yardstat             root.yard        6755
 /usr/lib/YARD/bin/yarduser             root.yard        4555
 /usr/lib/news/bin/input/newsspool      news.news        6555
 /usr/lib/uucp/uucico                   uucp.uucp        6555
@@ -170,10 +170,6 @@
 /var/lib/xdm/xdm-keys                  root.root         600
 /var/log/faillog                       root.root         600
 /var/log/lastlog                       root.tty          664
-/var/log/messages                      root.root         640
-/var/log/warn                          root.root         640
-/var/log/wtmp                          root.tty          664
-/var/log/xdm.errors                    root.root         640
 /var/run/utmp                          root.tty          664
 /var/lib/gdm                           gdm.shadow        750
 /var/spool/atjobs/.SEQ                 at.at             600

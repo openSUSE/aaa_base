@@ -276,11 +276,6 @@ CREATE_HOSTCONF="yes"
 CREATE_RESOLVCONF=yes
 
 #
-# Should NIS be used for name resolving (yes/no)
-#
-USE_NIS_FOR_RESOLVING=no
-
-#
 # domain searchlist that should be used in /etc/resolv.conf
 # (e.g. "suse.de linux.de uni-stuttgart.de")
 # Attention! this has to be filled out, if you want to access a name server

@@ -33,6 +33,7 @@
 /var/log/setup_autobuild       +4096k   644      root.root
 /var/log/warn                  +1024k   640      root.root
 /var/log/wtmp                   +400k   664      root.tty
+/var/log/xdm.errors            +4096k   640      root.root
 /var/log/xferlog               +4096k   640      root.root
 /var/spool/smail/log/logfile    +512k   644      root.root
 /var/spool/smail/log/paniclog   +128k   644      root.root

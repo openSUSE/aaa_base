@@ -14,7 +14,7 @@
 case "$1" in
     start)
         if test -x /usr/sbin/klogconsole ; then
-                /usr/sbin/klogconsole -r 8
+                ( test -c /dev/tty8 && > /dev/tty8 ) > /dev/null 2>&1 && /usr/sbin/klogconsole -r 8
         fi
         if test -d /usr/lib/kbd/consolefonts -a \
            -n "$CONSOLE_FONT" -a "$CONSOLE_FONT" != "YAST_ASK" ; then
@@ -73,7 +73,7 @@ case "$1" in
                         KBD_TTY="tty[1-9]*"
                 fi
                 for tty in $KBD_TTY; do
-                        /usr/bin/setleds -D $LEDOPT < $tty
+                        ( test -c $tty && > $tty ) > /dev/null 2>&1 && /usr/bin/setleds -D $LEDOPT < $tty
                 done
         fi
 
