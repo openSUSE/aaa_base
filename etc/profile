@@ -96,7 +96,8 @@ if test -z "$PROFILEREAD" ; then
 		/opt/gnome/bin \
 		/opt/kde2/bin \
 		/opt/kde/bin \
-		/usr/openwin/bin
+		/usr/openwin/bin \
+		/opt/cross/bin
     do
 	test -d $dir && PATH=$PATH:$dir
     done

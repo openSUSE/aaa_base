@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+
+CLOCKCMD=/sbin/hwclock
+CLOCKARGS=""
+while read line; do
+	case "$line" in
+		*MTX*) CLOCKARGS="--mtxplus --directisa" ;;
+		*Series\ E*) CLOCKARGS="--mtxplus --directisa" ;;
+	esac
+done < /proc/cpuinfo
+
+$CLOCKCMD $CLOCKARGS $*
+

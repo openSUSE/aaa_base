@@ -341,19 +341,11 @@ rc_status -v1 -r
 # set and adjust the CMOS clock
 if test "$HWCLOCK_ACCESS" != "no" ; then
     echo -n Setting up the CMOS clock
-    CLOCKCMD=hwclock
-    while read line; do
-	case "$line" in
-		*MTX\ Plus*) CLOCKCMD="hwclock --mtxplus --directisa" ;;
-		*PReP\ Dual\ MTX*) CLOCKCMD="hwclock --mtxplus --directisa" ;;
-	esac
-    done < /proc/cpuinfo
-
     test -f /etc/adjtime || echo "0.0 0 0.0" > /etc/adjtime
     if test "$GMT" != "YAST_ASK" ; then
-	$CLOCKCMD --adjust $GMT
+	/sbin/hwclock_wrapper --adjust $GMT
 	rc_status
-	$CLOCKCMD --hctosys $GMT
+	/sbin/hwclock_wrapper --hctosys $GMT
 	rc_status
     fi
     rc_status -v -r
