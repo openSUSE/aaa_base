@@ -24,6 +24,8 @@
 # Version 1.28
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
+#         Susanne Oberhauser  <froh@suse.de>
+#
 # (c) 1999-2002 SuSE Linux AG
 # (c) 1999 Heiko Eiﬂfeldt bugfix, add module parameter passing
 # (c) 2000 Karsten Keil   option and kernel 2.4 support
@@ -55,7 +57,7 @@
 #    just the first one we find, assuming they are identical anyway
 #
 # 13/2/2002:    v1.23
-#  - use default kernel names on alpha. 
+#  - use default kernel names on alpha.
 #
 # 14/1/2002:	v1.22
 #  - INITRD_MODULES has been moved to /etc/sysconfig/kernel
@@ -66,7 +68,7 @@
 #
 # 10/9/2001:	v1.20
 #  - new header format for splash picture
-#  
+#
 # 07/9/2001:    v1.19
 #  - add "splashanim" feature.
 #
@@ -117,7 +119,7 @@
 #
 usage() {
 	cat<<EOM
-      	mk_initrd creates initial ramdisk images for booting linux
+	mk_initrd creates initial ramdisk images for booting linux
                   with enviroments which need loading modules before
                   mounting the root device (e.g SCSI controller)
 
@@ -247,7 +249,7 @@ shift `expr $OPTIND - 1`
 [ "x$splash" = xoff ] && splash=
 if [ "x$splash" = xauto ] ; then
     splash=
-    for vga in `test -f $root_dir/etc/lilo.conf && sed -n -e '/^[ 	]*#/d' -e 's/[ 	]*vga[ 	]*='//p <$root_dir/etc/lilo.conf`; do
+    for vga in `test -f $root_dir/etc/lilo.conf && sed -n -e '/^[	]*#/d' -e 's/[	]*vga[	]*='//p <$root_dir/etc/lilo.conf`; do
 	splashsize=
 	case $vga in
 	    785|786|0x311|0x312) splashsize=640x480   ;;
@@ -348,13 +350,62 @@ oops () {
 tmp_initrd=$root_dir/$tmp_dir/initrd$$
 tmp_initrd_small=${tmp_initrd}_small
 
-# get root device from the $root_dir, if it is not given explicitely
+###################################################################
+
+# mkinitrd assumes, the root device is mentioned in root_dir/etc/fstab
+# and is currently
+#
+# the former is necessary for LABEL= and UUID= support, the latter is
+# for LVM detection.
+
+# find the root device in /etc/fstab
+while read fstab_device fstab_mountpoint fstab_type fstab_options dummy
+  do
+  test "$fstab_mountpoint" = "/" && break
+done < <(sed '
+    s,#.*,,
+    /^[[:space:]]*$/d' < $root_dir/etc/fstab ) ||
+error 1 "no '/' mountpoint specified in root_dir/etc/fstab."
+
+case $fstab_device in
+    LABEL=*)
+	eval $fstab_device
+	mount_device="-L $LABEL"
+	use_pivot_root=1
+	;;
+    UUID=*)
+	eval $fstab_device
+	mount_device="-U $UUID"
+	use_pivot_root=1
+	;;
+    *)
+	mount_device=$fstab_device
+	;;
+esac
+
+echo "root_dir: $root_dir"
+# determine the root device from the $root_dir, if it is not given
+# explicitely
 if [ -z "$rootdev" ] ; then
-    x1=`mount 2>/dev/null | grep "on $root_dir " | tail -1`
-    x2=`echo \`echo "$x1" | wc -l\``
-    x3=`echo "$x1" | cut -f 1 -d " "`
-    [ "$x2" = 1 -a -b "$x3" ] && rootdev="$x3"
+    while read \
+	proc_mounts_device \
+	proc_mounts_mountpoint \
+	proc_mounts_type \
+	proc_pounts_options \
+	dummy
+      do
+      test "$proc_mounts_mountpoint" = "$root_dir" && break
+    done < /proc/mounts ||
+    error 1 "no root device given and nothing mounted below root_dir."
+
+    rootdev=$proc_mounts_device
 fi
+
+test "$rootdev" = "$proc_mounts_device" || {
+    echo "\
+warning: given root device <$rootdev> and probed root device
+from /proc/mounts <$proc_mounts_device> mismatch"
+}
 
 # no mk_initrd without a root device
 [ "$rootdev" ] || error 1 "usage: mk_initrd [root_dir]"
@@ -366,7 +417,8 @@ if [ -b "$rootdev" ] ; then
     [ "$major" -ne 58 ] || root_lvm=1
 fi
 
-# take the static utilities from root_dir, if they are present there. why so???
+# take the static utilities from root_dir, if they are present
+# there. why so???
 if [ "$root_dir" != / ] ; then
   LD_LIBRARY_PATH=$root_dir/usr/lib
   PATH=$root_dir/usr/bin:$PATH
@@ -416,13 +468,18 @@ grep -q '^[[:space:]]*options[[:space:]]\+dasd' $root_dir/etc/modules.conf && da
 #test "$zipl_conf_with_dasd" -o "$dasd_modules_conf" && do_dasd=1
 
 ###################################################################
-# determine the filesystem type of root
+# determine the filesystem type of the mounted root
 x1=`cat /etc/fstab /proc/mounts 2>/dev/null | grep -E "$rootdev[[:space:]]" | tail -1`
 rootfstype=`echo $x1 | cut -f 3 -d " "`
 
-# [ "$rootfstype" = ext3 ] && use_pivot_root=1
+test "$rootfstype" = "$fstab_type" || error 1 "filesystem types for mounted root and fstab root mismatch"
 
-echo "using \"$rootdev\" as root device (mounted on \"$root_dir\" as \"$rootfstype\")"
+# [ "$fstab_type" = ext3 ] && use_pivot_root=1
+case "$fstab_type" in
+    jfs) use_pivot_root=1;;
+esac
+
+echo "using \"$rootdev\" as root device (mounted on \"$root_dir\" as \"$fstab_type\")"
 
 # get INITRD_MODULES as set by YaST
 [ -f "$root_dir/etc/sysconfig/kernel" ] && . $root_dir/etc/sysconfig/kernel
@@ -584,7 +641,7 @@ for k in $kernels ; do
     tune2fs -i 0 $tmp_initrd >/dev/null 2>&1
 
     # mount it
-    mount -t ext2 -oloop $tmp_initrd $tmp_mnt 2>/dev/null || { 
+    mount -t ext2 -oloop $tmp_initrd $tmp_mnt 2>/dev/null || {
       if [ -f /lib/loop.o ] ; then
         insmod /lib/loop.o
         mount -t ext2 -oloop $tmp_initrd $tmp_mnt 2>/dev/null || {
@@ -672,7 +729,7 @@ for k in $kernels ; do
           oops 6 "initrd too small"
           continue 2
         fi
-        modparms=`grep "^[ 	]*options $i" "$root_dir"/etc/modules.conf`
+        modparms=`grep "^[	]*options $i" "$root_dir"/etc/modules.conf`
         modparms="${modparms#* * }"
 	test -n "$modparms" && modparms=" $modparms"
         echo "echo \"Loading module $i$modparms ...\"" >>$lx_rc
@@ -686,6 +743,7 @@ for k in $kernels ; do
 #        continue 2
       fi
     done
+
     if [ "$do_zfcp" ] ; then
       echo " - zfcp support"
       echo "echo \"zfcp ...\" " >>$lx_rc
@@ -711,39 +769,74 @@ for k in $kernels ; do
     [ -n "$oem" ] && cat $oem >> $lx_rc
 
     if [ "$has_jfs" ] ; then
-      echo "fsck.jfs $rootdev" >>$lx_rc
+	# this test can go away when the lookup via LABEL/UUID is
+	# implemented for jfs:
+	test "$rootdev" = "$fstab_device" || {
+	    oops 9 "mount per LABEL= or UUID= is not supported on jfs."
+	    continue
+	}
+	echo "fsck.jfs $rootdev" >>$lx_rc
     fi
 
     if [ "$use_pivot_root" ] ; then
-      cat >>$lx_rc <<xxx
+	echo " - pivot root to mount device $mount_device"
+	cat >>$lx_rc <<EOF
+# mount proc for /proc/sys/kernel/real-root-dev and /proc/partitions
+# (mount(8))
+mount -tproc none /proc
+# tell the kernel the major *256 + minor of the root device to prevent
+# a panic later (magic)
+#echo 512 > /proc/sys/kernel/real-root-dev
+
+
+# mount the actual root device below /mnt
 mkdir -p /mnt
-mount -n -oro -t $rootfstype $rootdev /mnt
-cd /mnt
-pivot_root . tmp
-exec sh -c 'umount -n /tmp' </dev/console >/dev/console 2>&1
-xxx
+mount -n -oro -t $fstab_type $mount_device /mnt
+
+umount /proc
+
+# pivot initrd and actual root.  This is a function, so the shell has
+# parsed it completely before doing the pivot_root(2).
+pivot_root_and_initrd ()
+{
+    cd /mnt
+    if test -d initrd
+    then
+       PIVOT_DIR=initrd
+       AFTER_MOUNT="exit"
+    else
+       PIVOT_DIR=tmp
+       AFTER_MOUNT="umount /tmp; exit"
+    fi
+    pivot_root . \$PIVOT_DIR
+    exec sh -c "\$AFTER_MOUNT" <dev/console >dev/console 2>&1
+}
+
+pivot_root_and_initrd
+# NOT REACHED
+EOF
     fi
 
     # now create a second initrd with minimal size
-    
+
     img_size=`expr \`df -k $tmp_mnt | sed '1d' | awk '{print $3}'\` + 2000`
     mkdir $tmp_mnt_small
-    
+
     dd if=/dev/zero of=$tmp_initrd_small bs=1k count=$img_size 2>/dev/null
     mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd_small 2>/dev/null 1>&2
     tune2fs -i 0 $tmp_initrd_small >/dev/null 2>&1
-    
-    mount -t ext2 -oloop $tmp_initrd_small $tmp_mnt_small || { 
+
+    mount -t ext2 -oloop $tmp_initrd_small $tmp_mnt_small || {
       error 3 "failed to mount image"
     }
     is_mounted_small=1
-    
+
     rmdir $tmp_mnt_small/lost+found
     cp -a $tmp_mnt/* $tmp_mnt_small || error 6 "copy big image to small image failed"
-    
+
     umount $tmp_mnt_small
     is_mounted_small=
-    
+
     umount $tmp_mnt
     is_mounted=
 
@@ -768,7 +861,7 @@ xxx
 	fi
       done
     fi
-    
+
     clean_up
 
   else
