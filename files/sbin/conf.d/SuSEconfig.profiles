@@ -269,9 +269,9 @@ else
   fi
 fi
 if test -d $r/opt/kde3 -o -d $r/opt/kde2 ; then
-    echo "KDEDIRS=/etc/X11/kde3/:/opt/kde3/:/opt/kde2/" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "KDEDIRS=/etc/X11/kde3/:/opt/kde3/" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export KDEDIRS" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv KDEDIRS /etc/X11/kde3/:/opt/kde3/:/opt/kde2/" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    echo "setenv KDEDIRS /etc/X11/kde3/:/opt/kde3/" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test -d $r/usr/X11R6/lib/xad ; then
     echo "XADIDIR=/usr/X11R6/lib/xad" >> $r/etc/SuSEconfig/profile.SuSEconfig

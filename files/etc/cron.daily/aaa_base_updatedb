@@ -27,8 +27,8 @@ export PATH
 #
 # get information from /etc/rc.config
 #
-if [ -f /etc/rc.config ] ; then
-    . /etc/rc.config
+if [ -f /etc/sysconfig/locate ] ; then
+    . /etc/sysconfig/locate
 fi
 
 #
