@@ -167,6 +167,7 @@ alias block-major-43      off
 alias block-major-45      pd
 alias block-major-46      pcd
 alias block-major-47      pf
+alias block-major-117     evms
 
 ########################################################################
 # char dev aliases
