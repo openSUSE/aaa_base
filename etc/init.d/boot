@@ -306,6 +306,13 @@ mount -av -t nonfs,noproc,nodevpts
 rc_status -v1 -r
 
 #
+# Run boot.crypto before fideling with files and file systems
+#
+if test -x /etc/init.d/boot.crypto ; then
+    /etc/init.d/boot.crypto start
+fi
+
+#
 # After mounting we may activate swap files in /etc/fstab
 # .. this should work know with the new swapon behavio(u)r
 #

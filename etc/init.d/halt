@@ -110,7 +110,12 @@ mounts=/etc/fstab
 test -r /proc/mounts && mounts=/proc/mounts
 reverse < $mounts | \
 while read des fs type rest; do
-    case "$des" in ""|\#*) continue ;; esac
+    case "$des"  in
+	""|\#*)	   continue ;;
+	/dev/loop*)
+		   umount $fs
+		   losetup -d $des ;;
+    esac
     case "$fs"   in
 	/proc)     continue ;;
 	/dev/pts)  continue ;;
@@ -179,16 +184,23 @@ sync
 # to really flush their buffers before power goes down.
 if test -n "$REDIRECT" ; then
     sleep 1
-    if test "$DO_QUINT" = "yes" ; then
+    case "$HALT_SOUND" in
+    "yes"|"quint")
+	echo -en "\033[10;393]\a\033[10;262]"
+	sleep 1
+	;;
+    "octave")
 	for tone in 524 491 440 393 349 328 295 ; do
 	    echo -en "\033[10;${tone}]\a"
 	    usleep 125000
 	done
 	echo -en "\033[10;262]"
-    else
-	echo -en "\033[10;440]\a"
+	;;
+    *)
+    	echo -en "\033[10;440]\a"
 	usleep 250000
-    fi
+	;;
+    esac
 else
     echo -en "\a"
     sleep 2

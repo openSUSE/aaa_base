@@ -10,7 +10,7 @@
 # Provides:          boot.crypto
 # Required-Start:    
 # Required-Stop:
-# Default-Start:     B
+# Default-Start:
 # Default-Stop:
 # Description:       Enable crypto file systems before leaving boot phase
 ### END INIT INFO

@@ -484,6 +484,7 @@ MODIFY_RESOLV_CONF_DYNAMICALLY="yes"
 INITRD_MODULES=""
 
 #
-# Set to "yes" to play a quint tone sequence at system halt or reboot
+# Set to "yes" or "quin" to play a quint tone sequence at system halt or reboot
+# or set to "octave" to play octave sound at that occasion.
 #
-DO_QUINT="no"
+HALT_SOUND="no"
