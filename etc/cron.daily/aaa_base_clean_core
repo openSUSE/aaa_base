@@ -65,7 +65,7 @@ else
   cat /proc/mounts | \
   while read device where fstype rest ; do
     case $fstype in
-      nfs|NFS|autofs|proc|devpts|smbfs)
+      nfs|NFS|autofs|proc|devpts|smbfs|ncpfs)
         ;;
       *)
         find $where -mount -type f ! \( -fstype nfs -o -fstype NFS \) \
