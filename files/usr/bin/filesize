@@ -2,6 +2,4 @@
 #
 # Print the size of a file, in bytes.
 #
-SIZE=`ls -ld "$1" | awk '{print $5}'`
-echo -n $SIZE
-
+stat -c %s "$1"
