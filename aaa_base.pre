@@ -108,11 +108,13 @@ if test -e etc/passwd ; then
 fi
 
 # Rename game -> games, wwwadmin -> www
-if test -e etc/group ; then
-  sed -e "s|^game:|games:|" -e "s|^wwwadmin:|www:|" etc/group > etc/group.t
-  cat etc/group.t > etc/group
-  rm -f etc/group.t
-fi
+for i in etc/group etc/gshadow ; do
+  if test -e $i ; then
+    sed -e "s|^game:|games:|" -e "s|^wwwadmin:|www:|" $i > $i.t
+    cat $i.t > $i
+    rm -f $i.t
+  fi
+done
 
 for file in passwd group ; do
  if test -f etc/$file ; then

@@ -1,8 +1,8 @@
 #
-# Set to "-u" if your system clock is set to GMT, and to "--localtime"
+# Set to "-u" if your system clock is set to UTC, and to "--localtime"
 # if your clock runs that way.
 #
-GMT=""
+UTC=""
 
 #
 # Timezone (e.g. CET)

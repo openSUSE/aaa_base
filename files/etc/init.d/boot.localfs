@@ -159,6 +159,7 @@ case "$1" in
 	echo "Mounting local file systems..."
 	mount -fv -t proc proc /proc
 	rc_status
+	optpts="-o mode=0620,gid=5"
 	mount -fv -t devpts $optpts devpts /dev/pts
 	rc_status
 	mount -av -t nonfs,noproc,nodevpts,nosmbfs

@@ -42,7 +42,7 @@ case "$1" in
     # minimal shift due to the delay between gettimeofday and
     # settimeofday, and it only works as long as $0 is executed
     # exactly once, at boot.
-    if test "$GMT" = ""; then
+    if test "$UTC" = ""; then
         date $(date -u +'%m%d%H%M%Y')
        rc_status
     fi
@@ -50,9 +50,9 @@ case "$1" in
    else
     echo -n Setting up the CMOS clock
     test -f /etc/adjtime || echo "0.0 0 0.0" > /etc/adjtime
-    /sbin/hwclock_wrapper --adjust $GMT
+    /sbin/hwclock_wrapper --adjust $UTC
     rc_status
-    /sbin/hwclock_wrapper --hctosys $GMT
+    /sbin/hwclock_wrapper --hctosys $UTC
     rc_status
     rc_status -v -r
    fi
