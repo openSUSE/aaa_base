@@ -105,7 +105,7 @@ case "$1" in
 	    #
 	    case "$crypto" in
 		twofish)	modprobe loop_fish2 ;;
-		twofishSL92)	modprobe loop_fish2 ; crypto="twofish256" ;;
+		twofishSL92)	modprobe loop_fish2 ;;
 		twofish[0-9]*)	modprobe cryptoloop && modprobe twofish ;;
 	    esac
 	    rc_status
