@@ -17,6 +17,7 @@ do_gzip() {
 		if test -L $input; then
 			link=`ls -l $input | awk '{ print $11 }'`
 			test -d $link && continue
+			test -d $RPM_BUILD_ROOT/$link && continue
 			rm -f $input
 			ln -sf $link.gz $input.gz
 		else
