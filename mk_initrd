@@ -788,7 +788,6 @@ for k in $kernels ; do
       echo " - LVM support"
       cp -a $root_dir/dev/lvm  $tmp_mnt/dev
       cp -a $root_dir/$lib/liblvm*.so* $tmp_mnt/$lib
-      cp -a $root_dir/$lib/libattr.so* $tmp_mnt/$lib
       cp -a $root_dir/sbin/{vgscan,vgchange} $tmp_mnt/bin
       cp -a $root_dir/bin/cat $tmp_mnt/bin
     fi
@@ -803,7 +802,6 @@ for k in $kernels ; do
     if [ "$use_pivot_root" ] ; then
       echo " - pivot root support"
       cp -a $root_dir/sbin/pivot_root $tmp_mnt/bin
-      cp -a $root_dir/$lib/libattr.so* $tmp_mnt/$lib
       cp -a $root_dir/bin/cat $tmp_mnt/bin
       mkdir -p $tmp_mnt/mnt
     fi
@@ -889,7 +887,6 @@ $zfcp_conf_contents\""
 
     if [ "$do_zfcp" ] ; then
       echo " - zfcp support"
-      cp -a --parents $root_dir/$lib/libattr.so* $tmp_mnt/
       cp -a --parents $root_dir/bin/cat       $tmp_mnt/
       cp -a --parents $root_dir/etc/zfcp.conf $tmp_mnt/
       cat >>$lx_rc <<EOF
