@@ -48,11 +48,17 @@ test -z "$LOGNAME"  && LOGNAME=$USER
 
 #
 # ls color option depends on the terminal
+# If LS_COLROS is set but empty, the terminal has no colors.
 #
-if test "$UID" = 0 ; then
-    LS_OPTIONS='-a -N --color=tty -T 0';
+if test "${LS_COLORS+empty}" = "${LS_COLORS:+empty}" ; then
+    LS_OPTIONS=--color=tty
 else
-    LS_OPTIONS='-N --color=tty -T 0';
+    LS_OPTIONS=--color=none
+fi
+if test "$UID" = 0 ; then
+    LS_OPTIONS="-a -N $LS_OPTIONS -T 0"
+else
+    LS_OPTIONS="-N $LS_OPTIONS -T 0"
 fi
 
 #

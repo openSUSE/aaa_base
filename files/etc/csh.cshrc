@@ -155,11 +155,15 @@ if ( -x /usr/bin/dircolors ) then
 	eval `dircolors -c /etc/DIR_COLORS`
     endif
 endif
+setenv LS_OPTIONS '--color=tty'
+if ( ${?LS_COLORS} ) then
+    if ( "${LS_COLORS}" == "" ) setenv LS_OPTIONS '--color=none'
+endif
 unalias ls
 if ( "$uid" == "0" ) then
-    setenv LS_OPTIONS '-a -N --color=tty -T 0';
+    setenv LS_OPTIONS "-a -N $LS_OPTIONS -T 0"
 else
-    setenv LS_OPTIONS '-N --color=tty -T 0';
+    setenv LS_OPTIONS "-N $LS_OPTIONS -T 0"
 endif
 alias ls 'ls $LS_OPTIONS'
 alias la 'ls -AF --color=none'
