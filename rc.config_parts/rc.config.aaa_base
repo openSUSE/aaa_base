@@ -209,12 +209,6 @@ SORT_PASSWD_BY_UID=no
 FQHOSTNAME=""
 
 #
-# SuSEconfig can create and check the /etc/host.conf for you. Should this
-# be done ("yes" or "no").
-#
-CREATE_HOSTCONF="yes"
-
-#
 # Shall SuSEconfig maintain /etc/resolv.conf (needed for DNS) ? 
 # If set to yes and one of SEARCHLIST and NAMESERVER is empty,
 # it is assumed, that no DNS is wanted and /etc/resolv.conf will

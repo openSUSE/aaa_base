@@ -267,20 +267,6 @@ if test -n "$CREATE_RESOLVCONF" -a "$CREATE_RESOLVCONF" = "yes" -a \
 fi
 
 
-if test -n "$CREATE_HOSTCONF" -a "$CREATE_HOSTCONF" = "yes" ; then
-    echo_warning /etc/host.conf.SuSEconfig \
-        "# Change variables (NAMESERVER + YP_SERVER) in /etc/rc.config instead." \
-        > $r/etc/host.conf.SuSEconfig
-
-    if test -n "$NAMESERVER" ; then
-        echo "order hosts bind" >> $r/etc/host.conf.SuSEconfig
-    else
-        echo "order hosts" >> $r/etc/host.conf.SuSEconfig
-    fi
-    echo "multi on" >> $r/etc/host.conf.SuSEconfig
-    check_md5_and_move $r/etc/host.conf
-fi
-
 test -n "$ORGANIZATION" && {
     echo "$ORGANIZATION" > $r/etc/organization.SuSEconfig
     check_md5_and_move $r/etc/organization
