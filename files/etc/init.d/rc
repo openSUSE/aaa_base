@@ -138,29 +138,41 @@ export LINES COLUMNS CONSOLE
 exec 0<> $CONSOLE 1>&0 2>&0
 
 #
+# Dummy shell function
+#
+chvt () { true; }
+
+#
 # This redirects all rc messages during reboot and halt
 # to tty1 if the system console is bound on VGA (tty0).
 #
 REDIRECT="`showconsole 2>/dev/null`"
 export REDIRECT
-if test $COLUMNS -gt 0 ; then
+if test -x /sbin/isserial && /sbin/isserial ; then
+    # Serial: columns and lines are not defined
+    : ${LINES:=24}
+    : ${COLUMNS:=80}
+    test "$TERM" = "linux" -o -z "$TERM" && TERM=vt102
+else
     # VGA
     if test "$RUNLEVEL" = "0" -o "$RUNLEVEL" = "6" ; then
 	case "$REDIRECT" in /dev/tty[1-9]*)
 	    REDIRECT=/dev/tty1
 	    setconsole $REDIRECT < $CONSOLE
+	    # Overwrite chvt shell function
+	    chvt () { test -x /usr/bin/chvt && /usr/bin/chvt 1 ; }
 	    set -- $(stty size < $REDIRECT)
 	    LINES=$1
 	    COLUMNS=$2
 	    export LINES COLUMNS
 	esac
     fi
-else
-    # Serial: columns and lines are not defined
-      LINES=24
-    COLUMNS=80
-    test "$TERM" = "linux" -o -z "$TERM" && TERM=vt102
 fi
+
+#
+# May change to first terminal
+#
+chvt
 
 #
 # Configuration and coloring of the boot messages
@@ -318,6 +330,8 @@ if test -n "$startpar" ; then
 	else
 	    status=($($startpar -t 20 -T 3 -a $todo ${p[@]}))
 	fi
+	# May change to first terminal
+	chvt
 	echo -en "$rc_reset"
 	blogger "exit status of (${p[@]##*[SK]$rex}) is (${status[@]})"
 
