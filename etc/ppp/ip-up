@@ -80,7 +80,7 @@ ippp*)
 	# You may choose to use a default firewall script, configured for
 	# the standard dialup user(install package ipchains):
 	#
-	#test -x /etc/ppp/inet_chains.local && /etc/ppp/inet_chains.local $*
+	#test -x /etc/ppp/inet_chains.local && /etc/ppp/inet_chains.local "$@"
 
 	# maybe you want to start mail services:
         # set follow variables in /etc/rc.config 
@@ -102,7 +102,7 @@ ippp*)
 	# /etc/ppp/poll.tcpip
 
 	# call ip-up.local if it exists and is executable:
-	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local $*
+	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local "$@"
         ;;
     ip-down)
 
@@ -137,7 +137,7 @@ ippp*)
         test "$START_FW" = yes && /sbin/SuSEfirewall
 
 	# call ip-down.local if it exists and is executable:
-	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local $*
+	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local "$@"
         ;;
     *)
         ;;
@@ -181,10 +181,10 @@ ppp*)
 	# You may choose to use a default firewall script, configured for
 	# the standard dialup user(install package ipchains):
 	#
-	#test -x /etc/ppp/inet_chains.local && /etc/ppp/inet_chains.local $*
+	#test -x /etc/ppp/inet_chains.local && /etc/ppp/inet_chains.local "$@"
 
 	# call ip-up.local if it exists and is executable:
-	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local $*
+	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local "$@"
         ;;
     ip-down)
 	#
@@ -210,7 +210,7 @@ ppp*)
         test "$START_FW" = yes && /sbin/SuSEfirewall
 
 	# call ip-down.local if it exists and is executable:
-	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local $*
+	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local "$@"
         ;;
     *)
         ;;
