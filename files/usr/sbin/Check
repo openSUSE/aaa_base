@@ -62,7 +62,7 @@ for DIR in $DIRS ; do
     test -d $DIR && find $DIR \! -name "*.gz" \! -name "*.Z" \
         \! -name dir \! -name dir.old \! -name localdir \
         \! -name whatis \! -name fonts.alias \! -name fonts.dir \
-        \! -name "fonts.scale*" \! -name "fonts.cache*" \
+        \! -name "fonts.*" \! -name ".fonts-*" \
 	\! -name "*.spd" \! -name "*.pfa" \
         \! -name "*.pfb" \! -name "*.phont" \! -name ".*.gz" \
         \! -name ".*.Z" \! -name ".*.spd" \! -name ".*.pfa" \
