@@ -24,6 +24,7 @@ case "$1" in
     echo Loading required kernel modules
     . /etc/sysconfig/kernel
     for I in $MODULES_LOADED_ON_BOOT ; do
+	if ! modprobe -n $I > /dev/null 2>&1 ; then continue ; fi
 	modprobe $I;
     done
     rc_status -v1 -r
