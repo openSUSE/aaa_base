@@ -20,7 +20,7 @@
 . /etc/rc.config
 
 NEED_NFS=no
-test "$START_AUTOFS" = yes && NEED_NFS=yes
+rc_active autofs && NEED_NFS=yes
 nfs=no
 while read  where what type options rest  ; do
     case "$where" in

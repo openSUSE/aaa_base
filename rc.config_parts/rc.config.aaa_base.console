@@ -28,61 +28,9 @@ MOUSE="YAST_ASK"
 MODEM="YAST_ASK"
 
 #
-# Keytable and console font
-# (e.g. "de-latin1-nodeadkeys" for KEYTABLE, empty for US settings)
-#
-KEYTABLE="de-latin1-nodeadkeys"
-
-#
-# Load this console font on bootup:
-#
-CONSOLE_FONT=""
-
-#
-# Does your console font need a screenmap? Insert it into CONSOLE_SCREENMAP.
-#
-CONSOLE_SCREENMAP=""
-
-#
-# Some fonts/keymap need a unicode map (TRANSLATION in former releases).
-# If so, specify the map here:
-#
-CONSOLE_UNICODEMAP=""
-
-#
-# for some fonts the console has to be initialized with CONSOLE_MAGIC.
-# CONSOLE_MAGIC can be empty or have the values "(B", ")B", "(K" or ")K".
-#
-CONSOLE_MAGIC=""
-
-
-#
-# Keyboard repeat rate (2.0 - 30.0)
-# Keyboard delay time in ms (250, 500, 750, 1000)
-# (If you want "kbdrate" to be executed, you have to set both of them.)
-#
-KBD_RATE=""
-KBD_DELAY=""
-
-#
-# NumLock on? ("yes" or "no")
-KBD_NUMLOCK="no"
-
-#
-# CapsLock on? ("yes" or "no")
-KBD_CAPSLOCK="no"
-
-#
-# tty's for NumLock and CapsLock 
-# Example: "tty1 tty2"
-# "" for all tty's
-#
-KBD_TTY="tty1 tty2 tty3 tty4 tty5 tty6"
-
-#
 # If you want to allow root logins from other machines, set ROOT_LOGIN_REMOTE
 # to "yes". (Logging in via ssh is not affected by this variable since SSH
-# is seen as a safe login method).
+# is widely accepted as a safe login method).
 #
 ROOT_LOGIN_REMOTE="no"
 

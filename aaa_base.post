@@ -74,7 +74,7 @@ fi
 #
 %{fillup_and_insserv -ps dummy SETUPDUMMYDEV }
 %{fillup_and_insserv -psy boot.crypto START_CRYPTO_FILESYSTEMS boot.loopback START_LOOPBACK }
-%{fillup_and_insserv -py nscd halt network nfs random reboot route single xdm boot.clock boot.ibmsis boot.ipconfig boot.isapnp boot.klog boot.ldconfig boot.localfs boot.localnet boot.lvm boot.md boot.proc boot.quota boot.setup boot.swap }
+%{fillup_and_insserv -py nscd halt network nfs random reboot route single xdm boot.clock boot.ibmsis boot.ipconfig boot.klog boot.ldconfig boot.localfs boot.localnet boot.lvm boot.md boot.proc boot.quota boot.swap }
 ## powerfail probably needs empty header ...
 if [ -x bin/fillup ] ; then
   bin/fillup -q -t -r -i -d "=" etc/rc.config var/adm/fillup-templates/rc.config.aaa_base.oldstat /dev/null

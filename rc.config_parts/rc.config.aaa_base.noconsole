@@ -8,7 +8,7 @@ ROOT_LOGIN_REMOTE="yes"
 
 #
 # SuSEconfig can do some modifications to /etc/inittab.  If you don't want
-# this, set CHECK_INITTAB to no.  (yes/no)
+# this, set CHECK_INITTAB to "no".  (yes/no)
 #
 CHECK_INITTAB=no
 

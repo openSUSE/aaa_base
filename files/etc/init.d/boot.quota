@@ -20,13 +20,15 @@
 # reinit quota, if fsck has returned value != 0
 #
 
-if test -e /fsck_corrected_errors -a -n "$START_QUOTA" -a "$START_QUOTA"="yes" ; then
+if test -e /fsck_corrected_errors ; then
+  if rc_active quota ; then
     # Check quota and then turn quota on.
     if test -x /sbin/quotacheck ; then
         echo "Checking quotas. This may take some time."
         /sbin/quotacheck -avug
 	rc_status -v1 -r
     fi
+  fi
 fi
 
 

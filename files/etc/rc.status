@@ -197,11 +197,23 @@ function rc_failed ()
     rc_check
     return $_rc_status
 }
+
 function rc_exit ()
 {
     exit $_rc_status_all
 }
+
 function rc_splash()
 {
     test "$BOOT_SPLASH" != "no" && test "$_rc_splash" -eq 1 && /bin/splash "$1"
 }
+
+function rc_active ()
+{
+    for x in /etc/init.d/*.d/S[0-9][0-9]${1} ; do
+	test -e $x || break
+	return 0
+    done
+    return 1
+}
+
