@@ -91,7 +91,9 @@ if [ -x /usr/X11R6/bin/xset ]; then
 fi
 
 XFS_BIN=/usr/X11R6/bin/xfs
-if checkproc $XFS_BIN ; then
-   echo "Reloading config file of X Font Server"
-   killproc $XFS_BIN -USR1  # re-read config file
+if [ -x $XFS_BIN ]; then
+  if checkproc $XFS_BIN ; then
+    echo "Reloading config file of X Font Server"
+    killproc $XFS_BIN -USR1  # re-read config file
+  fi
 fi
