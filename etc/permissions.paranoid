@@ -201,7 +201,6 @@
 /usr/X11R6/bin/XSuSE_Tseng             root.root         755
 /usr/X11R6/bin/Xwrapper                root.root        4755
 /usr/X11R6/bin/dga                     root.root        4755
-/usr/X11R6/bin/xload                   root.root        4755
 /usr/X11R6/bin/xlock                   root.shadow      2755
 /usr/X11R6/bin/xosview.bin             root.root        4755
 /usr/X11R6/bin/xterm                   root.root        4755
@@ -403,6 +402,7 @@
 # 'normal stuff' (e.g. former suid stuff)
 #
 /usr/X11R6/bin/SuperProbe              root.root         755
+/usr/X11R6/bin/xload                   root.root         755
 /usr/bin/elm                           root.root         755
 /usr/bin/filter                        root.root         755
 /usr/bin/deliver                       root.root         755
