@@ -37,7 +37,7 @@ case "$1" in
     fi
     if test -x /usr/sbin/klogconsole ; then
 	if test -x /sbin/showconsole ; then
-		if test `/sbin/showconsole` = "/dev/tty1" ; then
+		if test "`/sbin/showconsole`" = /dev/tty1 ; then
 		    ( test -c /dev/tty10 && > /dev/tty10 ) > /dev/null 2>&1 \
 			&& /usr/sbin/klogconsole -r10 
 		else

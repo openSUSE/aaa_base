@@ -32,7 +32,6 @@
 %config /etc/init.d/halt
 %config /etc/init.d/network
 %config /etc/init.d/nfs
-%config /etc/init.d/nscd
 %config /etc/init.d/powerfail
 %config /etc/init.d/random
 %config /etc/init.d/route
