@@ -405,11 +405,12 @@
 # devpts obsoletes this: no suid bits any more
 /opt/kde3/bin/konsole_grantpty          root.root       0755
 /opt/kde2/bin/konsole_grantpty          root.root       0755
-/opt/kde3/bin/kreatecd_rootwrapper      root.root       4755
+/opt/kde2/bin/kreatecd_rootwrapper      root.root       4755
 /opt/kde2/bin/kpac_dhcp_helper          root.root       4755
 /opt/kde3/bin/kpac_dhcp_helper          root.root       4755
-/opt/kde2/bin/kradio                    root.video      2755
-/opt/kde2/bin/kwintv                    root.video      2755
+# no kde-linked suid/sgid apps
+/opt/kde2/bin/kradio                    root.video      0755
+/opt/kde2/bin/kwintv                    root.video      0755
 
 
 
