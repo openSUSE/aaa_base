@@ -54,8 +54,13 @@ case "$1" in
 		fi	
 		echo $SCHED_MINTIMESLICE > /proc/sys/kernel/min-timeslice
 		rc_status
-		echo $SCHED_MAXTIMESLICE > /proc/sys/kernel/max-timeslice
-		rc_status
+		if test -e /proc/sys/kernel/def-timeslice; then
+			echo $((($SCHED_MAXTIMESLICE+$MINSLICE)/2)) > /proc/sys/kernel/def-timeslice
+			rc_status
+		else	
+			echo $SCHED_MAXTIMESLICE > /proc/sys/kernel/max-timeslice
+			rc_status
+		fi
 	fi
 	true
 	rc_status -v
