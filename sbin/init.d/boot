@@ -15,7 +15,7 @@
 echo "Running $0."
 
 echo "Mounting /proc device..."
-mount -nv /proc
+mount -nv -t proc proc /proc
 
 #
 # possibly there are file systems on devices, which need a kernel 
@@ -58,7 +58,7 @@ echo "Running update (bdflush) daemon."
 # do fsck and start sulogin, if it fails.
 #
 FSCK_RETURN=0
-if test ! -f /fastboot; then
+if test ! -f /fastboot -a -z "$fastboot" ; then
     # on an umsdos root fs this mount will fail, so direct error messages 
     # to /dev/null.
     # this seems to be ugly, but should not really be a problem.
@@ -138,9 +138,8 @@ fi
 # for / and /proc).
 #
 echo "Mounting local file systems..."
-mount -f /proc
+mount -fv -t proc proc /proc
 mount -av -t nonfs,noproc
-mount -a -t proc
 
 #
 # reinit quota, if fsck has returned value != 0

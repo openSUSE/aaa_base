@@ -1,12 +1,21 @@
 #! /bin/sh
-# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
+# Copyright (c) 1995-1998 S.u.S.E. GmbH Fuerth, Germany.
 #
 # Author: 
 #
-# /sbin/init.d/skeleton
+# /sbin/init.d/<skeleton>
+#
+#   and symbolic its link
+#
+# /sbin/rc<skeleton>
 #
 
 . /etc/rc.config
+
+base=${0##*/}
+test -n "${base##rc}" -a ${base} = rc${base#rc} && START_FOO=yes
+
+test "$START_FOO" = yes || exit 0
 
 case "$1" in
     start)
@@ -18,9 +27,19 @@ case "$1" in
 	#killproc -TERM /usr/sbin/foo
 	echo
 	;;
+    restart|reload)
+	$0 stop
+	$0 start
+	;;
+    check|status)
+	echo -n "Checking for foo, pid is:"
+	#pidof /usr/sbin/foo
+	echo
+	;;
     *)
-	echo "Usage: $0 {start|stop}"
+	echo "Usage: $0 {start|stop|restart|check}"
 	exit 1
+	;;
 esac
 
 exit 0

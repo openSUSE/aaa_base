@@ -3,13 +3,28 @@
 # .xsession/.xinitrc
 #
 
-export TERM=xterm
+#
+# What we do if we fail at least ... emergency fall back.
+#
+failsafe="xterm -ls -T Failsave -geometry 80x24-0-0"
+trap "exec $failsafe" EXIT SIGHUP SIGINT SIGPIPE SIGTERM SIGIO
 
+#
+# Some bash (1 and 2) settings to avoid trouble on a
+# failed program call.
+#
+test -n "$BASH" && set +o posix
+no_exit_on_failed_exec=1
+type shopt > /dev/null 2>&1 && shopt -s execfail
+
+#
+# This should be the default
+#
+export TERM=xterm
 
 #
 # choose a window manager
 #
-
 if test -z "$WINDOWMANAGER" ; then
     WINDOWMANAGER=/usr/X11R6/bin/startkde
 fi
@@ -17,7 +32,6 @@ fi
 #
 # load resources
 #
-
 if [ -f /usr/X11R6/lib/X11/Xmodmap ]; then
     xmodmap /usr/X11R6/lib/X11/Xmodmap
 fi
@@ -27,11 +41,11 @@ if [ -f ~/.Xmodmap ]; then
 fi
 
 if [ -f ~/.Xdefaults ]; then
-    xrdb -merge ~/.Xdefaults
+    xrdb -I$HOME -merge ~/.Xdefaults
 fi
 
 if [ -f ~/.Xresources ]; then
-    xrdb -merge ~/.Xresources
+    xrdb -I$HOME -merge ~/.Xresources
 fi
 
 
@@ -47,8 +61,7 @@ fi
 # 
 # finaly start the window manager
 #
-
 exec $WINDOWMANAGER 
 
-
-
+# call failsafe
+exit 0

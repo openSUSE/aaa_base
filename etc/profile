@@ -14,7 +14,10 @@ umask 022
 
 ulimit -c 0                     # don't create core files
 ulimit -d unlimited
-ulimit -s unlimited
+if [ -z "$KSH_VERSION" ]; then
+    # ksh does not support this command.
+    ulimit -s unlimited
+fi
 ulimit -m unlimited
 
 
@@ -160,7 +163,9 @@ alias o='less'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias +='pushd .'
-alias -- -='popd'
+if [ -z "$KSH_VERSION" ]; then
+    alias -- -='popd'
+fi
 alias rd=rmdir
 alias md='mkdir -p'
 alias unix2dos='recode lat1:ibmpc'
@@ -209,7 +214,7 @@ fi
 
 
 #PS1='`hostname`:`pwd`# '
-if [ "$SHELL" = "/usr/bin/pdksh" -o "$SHELL" = "/usr/bin/ksh" ]; then
+if [ "$SHELL" = "/usr/bin/pdksh" -o "$SHELL" = "/usr/bin/ksh" -o "$SHELL" = "/bin/ksh" ]; then
  PS1="! $ "
 elif [ "$SHELL" = "/usr/bin/zsh" ]; then
  PS1="%m:%~%# "

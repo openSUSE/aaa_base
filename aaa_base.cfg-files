@@ -10,6 +10,7 @@ etc/inputrc
 etc/issue
 etc/issue.net
 etc/ld.so.conf
+etc/logfiles
 etc/mailcap
 etc/mime.types
 etc/motd

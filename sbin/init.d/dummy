@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
+# Copyright (c) 1996-98 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Burchard Steinbild <bs@suse.de>, 1996
 #
@@ -7,20 +7,55 @@
 #
 
 . /etc/rc.config
+    
+if test "$NETCONFIG" != "YAST_ASK" ; then
+    if grep -q dummy: /proc/net/dev ; then
+        dummy=dummy
+    else
+        dummy=dummy0
+    fi
+    ethdev=""
+    defdev=""
+    ipdef=""
+    ipaddr=""
+    for dev in $NETCONFIG; do
+        eval ndev=\$NETDEV$dev
+        if [ -z "$defdev" ]; then
+            eval defdev=\$IPADDR$dev
+            ipdef=$defdev
+        fi
+        case "$ndev" in
+            eth*|tr*)
+                if [ -z "$ethdev" ]; then
+                    eval ethdev=\$IFCONFIG$dev
+                    eval ipeth=\$IPADDR$dev
+                fi
+                ;;
+        esac
+    done
+    if [ -n "$ethdev" ]; then
+        dev=$ethdev
+        ipaddr=$ipeth
+    else
+        dev=$defdev
+        ipaddr=$ipdef
+    fi
+fi
 
 case "$1" in
     start)
     if test "$NETCONFIG" != "YAST_ASK" ; then
-        if test -n "$SETUPDUMMYDEV" -a "$SETUPDUMMYDEV" = "yes" ; then
-            test -n "$IPADDR_0" && ifconfig dummy0 $IPADDR_0 && \
-                route add $IPADDR_0 dev dummy0
+        if test -n "$SETUPDUMMYDEV" -a "$SETUPDUMMYDEV" == "yes" ; then
+            if [ -n "$dev" ]; then
+                test -n "$dev" && ifconfig $dummy $dev && route add $ipaddr dev $dummy
+            fi
         fi
     fi
     ;;
     stop)
     if test "$NETCONFIG" != "YAST_ASK" ; then
         if test -n "$SETUPDUMMYDEV" -a "$SETUPDUMMYDEV" = "yes" ; then
-            test -n "$IPADDR_0" && ifconfig dummy0 down
+            test -n "$dev" && ifconfig $dummy down
         fi
     fi
     ;;

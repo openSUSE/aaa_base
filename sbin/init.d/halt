@@ -51,12 +51,10 @@ sync ; sync
 swapoff -a
 
 echo "Unmounting file systems"
-umount -avt proc
-umount -av
+umount -avt noproc
 
 if [ "$?" != "0" ]; then
     echo "Oops: umount failed :-(  --  trying to remount readonly..."
-    mount -nt proc none /proc 2> /dev/null
     mounts=/etc/fstab
     test -r /proc/mounts && mounts=/proc/mounts
     while read des fs rest; do
@@ -67,6 +65,8 @@ if [ "$?" != "0" ]; then
     sync; sync
     echo "... hope now it's ok to reboot."
 fi
+
+umount -avt proc
 
 
 # maybe we use Multiple devices

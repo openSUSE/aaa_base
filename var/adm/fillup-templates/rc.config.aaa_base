@@ -227,7 +227,7 @@ SMTP="no"
 FROM_HEADER="YAST_ASK"
 
 #
-# some programms (e.g. lynx, arena and wget) support proxies, if set in
+# some programs (e.g. lynx, arena and wget) support proxies, if set in
 # environment.  SuSEconfig can add this environment variables to
 # /etc/SuSEconfig/* (sourced by /etc/profile etc.) - See
 # http://www.suse.de/Support/sdb_e/lynx_proxy.html for more details.

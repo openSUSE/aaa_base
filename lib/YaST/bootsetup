@@ -23,124 +23,178 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
 
     test -e /etc/rc.config && . /etc/rc.config
 
-    echo_welcome_g () {
+    echo_welcome () {
+
+        case "$LANGUAGE" in
+          german)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "                        Willkommen zu S.u.S.E. Linux"
+            echo " "
+          ;;
+          french)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "                  S.u.S.E. Linux vous souhaite la bienvenue"
+            echo " "
+          ;;
+          italian)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "                        Benvenuti da S.u.S.E. Linux"
+            echo " "
+          ;;
+          *)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "                        Welcome to S.u.S.E. Linux"
+            echo " "
+          ;;
+        esac
+    }
+
+    echo_passwd () {
+        case "$LANGUAGE" in
+          german)
+            echo "    Als erstes sollten Sie ein Passwort für den Benutzer root vergeben. "
+            echo "    Wenn Sie kein Passwort möchten, geben Sie einfach RETURN ein."
+            echo " "
+          ;;
+          french)
+            echo "    Tout d'abord, vous devriez assigner un mot de passe à l'utilisateur"
+            echo "    root.  Si vous ne voulez pas de mot de passe, appuyez simplement sur"
+            echo "    ENTRÉE."
+            echo " "
+          ;;
+          italian)
+            echo "    Per prima cosa dovreste assegnare una password all'utente root. "
+            echo "    Se non desiderate alcuna password, premete simplicemente ENTER."
+            echo " "
+          ;;
+          *)
+            echo "    You should set a password for root first. If you don't want a"
+            echo "    password for root, simply hit enter. "
+            echo " "
+          ;;
+        esac
+    }
+
+    echo_todo () {
+        case "$LANGUAGE" in
+          german)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "    Vermutlich muß YaST noch einige Dinge konfigurieren, wir starten"
+            echo "    einfach mal ;-)"
+            echo " "
+          ;;
+          french)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "    YaST a probalement encore certaines choses à configurer, démarrons"
+            echo "    tout simplement ;-)"
+            echo " "
+          ;;
+          italian)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "    YaST deve probabilmente configurare ancora alcune cose, iniziamo "
+            echo "    pure ;-)"
+            echo " "
+          ;;
+          *)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo "    Probably YaST has to configure some things, so we simply start it ;-) "
+            echo " "
+          ;;
+        esac
+    }
+
+    echo_please_wait () {
+        case "$LANGUAGE" in
+          german)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo " Nun müssen noch einige Skripte laufen. Diese werden in etwa einer"
+            echo " Minute automatisch gestartet.  Eine Logdatei finden Sie dann unter"
+            echo " /var/log/Config.bootup.  Außerdem können Sie die Ausgaben auf"
+            echo " Console 9 beobachten."
+            echo " Sie können das System jetzt bereits normal benutzen. Wenn Sie "
+            echo " das System herunterfahren, bevor die Skripte beendet sind, werden "
+            echo " sie beim nächsten Hochlauf nochmal gestartet."
+            echo " "
+          ;;
+          french)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo " Quelques scripts doivent encore être exécutés. Ils seront lancés "
+            echo " automatiquement dans une minute environ."
+            echo " Vous trouverez alors un fichier de trace sous /var/log/Config.bootup."
+            echo " Vous pouvez en outre voir les affichages sur la console 9."
+            echo " Vous pouvez déjà maintenant utiliser le système normalement. Si vous"
+            echo " arrêtez le système avant que les scripts ne soient terminés, ils seront"
+            echo " de nouveau lancés lors du prochain démarrage."
+            echo " "
+          ;;
+          italian)
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo " Alcuni script devono ancora essere esecutati. Verranno automaticamente"
+            echo " avviati entro un minuto circa.  Troverete allora un logfile sotto"
+            echo " /var/log/Config.bootup. Inoltre potete visualizzare il display sulla"
+            echo " console 9."
+            echo " Potete già utilizzare il sistema normalmente. Se portate giù il sistema"
+            echo " prima che gli script vengano terminati, verranno di nuovo avviati la"
+            echo " prossima volta che porterete su il sistema."
+            echo " "
+          ;;
+          *)
+            echo " "
+            echo "------------------------------------------------------------------------------"
+            echo " "
+            echo " Now scripts have to be started.  They will be started in one"
+            echo " minute.  You can find a log file under /var/log/Config.bootup."
+            echo " It will also be printed on console 9."
+            echo " You can now already use your system. If you shut down the system "
+            echo " before the scripts are finished, they are executed again at the "
+            echo " next system startup."
+            echo " "
+          ;;
+        esac
+    }
+
+
+    press_enter () {
+        case "$LANGUAGE" in
+          german)
+            echo -n " Bitte <RETURN> drücken..."
+          ;;
+          *)
+            echo -n " Press <RETURN> to continue..."
+          ;;
+        esac
+        read < /dev/tty
+    }
+
+    echo " "
+    echo " "
+
+    echo_welcome
+
     echo "------------------------------------------------------------------------------"
     echo " "
-    echo "                        Willkommen zu S.u.S.E. Linux"
-    echo " "
-    }
 
-    echo_welcome_e () {
-    echo "------------------------------------------------------------------------------"
-    echo " "
-    echo "                        Welcome to S.u.S.E. Linux"
-    echo " "
-    }
-
-    echo_passwd_g () {
-    echo "    Als erstes sollten Sie ein Passwort für den Benutzer root vergeben. "
-    echo "    Wenn Sie kein Passwort möchten, geben Sie einfach RETURN ein."
-    echo " "
-    }
-
-    echo_passwd_e () {
-    echo "    You should set a password for root first. If you don't want a password "
-    echo "    for root, simply hit enter. "
-    echo " "
-    }
-
-    echo_todo_g () {
-    echo "------------------------------------------------------------------------------"
-    echo " "
-    echo "    Vermutlich muß YaST noch einige Dinge konfigurieren, wir starten"
-    echo "    einfach mal ;-)"
-    echo " "
-    }
-
-    echo_todo_e () {
-    echo "------------------------------------------------------------------------------"
-    echo " "
-    echo "    Probably YaST has to configure some things, so we simply start it ;-) "
-    echo " "
-    }
-
-    echo_please_wait_g () {
-    echo "------------------------------------------------------------------------------"
-    echo " "
-    echo " Nun müssen noch einige Skripte laufen. Diese werden in etwa einer"
-    echo " Minute automatisch gestartet.  Eine Logdatei finden Sie dann unter"
-    echo " /var/log/Config.bootup.  Außerdem können Sie die Ausgaben auf"
-    echo " Console 9 beobachten."
-    echo " Sie können das System jetzt bereits normal benutzen. Wenn Sie "
-    echo " das System herunterfahren, bevor die Skripte beendet sind, werden "
-    echo " sie beim nächsten Hochlauf nochmal gestartet."
-    echo " "
-    }
-
-    echo_please_wait_e () {
-    echo " "
-    echo "------------------------------------------------------------------------------"
-    echo " "
-    echo " Now scripts have to be started.  They will be started in one"
-    echo " minute.  You can find a log file under /var/log/Config.bootup."
-    echo " It will also be printed on console 9."
-    echo " You can now already use your system. If you shut down the system "
-    echo " before the scripts are finished, they are executed again at the "    
-    echo " next system startup."
-    echo " "
-    }
-
-    press_enter ()
-    {
-    if test "$LANGUAGE" = "german" ; then
-        echo -n " Bitte <RETURN> drücken..."
-    elif test "$LANGUAGE" = "english" ; then
-        echo -n " Press <RETURN> to continue..."
-    else
-        echo " Press <RETURN> to continue..."
-        echo -n " Bitte <RETURN> drücken..."
-    fi
-    read < /dev/tty
-    }
-
-
-    echo " "
-    echo " "
-
-    if test "$LANGUAGE" = "german" ; then
-        echo_welcome_g
-    elif test "$LANGUAGE" = "english" ; then
-        echo_welcome_e
-    else
-        echo_welcome_e
-    fi
-
-    echo "------------------------------------------------------------------------------"
-    echo " "
-    
     PASSWD=`grep ^root: /etc/shadow | cut -d ":" -f 2`
     if test -z "$PASSWD" ; then
-        if test "$LANGUAGE" = "german" ; then
-            echo_passwd_g
-        elif test "$LANGUAGE" = "english" ; then
-            echo_passwd_e
-        else
-            echo_passwd_e
-        fi
-
+        echo_passwd
         passwd
     fi
 
     echo " "
     echo " "
 
-    if test "$LANGUAGE" = "german" ; then
-        echo_todo_g
-    elif test "$LANGUAGE" = "english" ; then
-        echo_todo_e
-    else
-        echo_todo_e
-    fi
+    echo_todo
 
     echo "------------------------------------------------------------------------------"
     echo " "
@@ -166,7 +220,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     # Otherwise system might hang when cardmanager is started on regular
     # bootup.
     #               hm, 11.06.1997
-    
+
     test -x /sbin/init.d/pcmcia && /sbin/init.d/pcmcia start
 
     sleep 1
@@ -182,13 +236,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
 
     /sbin/SuSEconfig -quick
 
-    if test "$LANGUAGE" = "german" ; then
-        echo_please_wait_g
-    elif test "$LANGUAGE" = "english" ; then
-        echo_please_wait_e
-    else
-        echo_please_wait_e
-    fi
+    echo_please_wait
 
     sleep 3
 
@@ -199,7 +247,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
         exit 0
     ) &
 
-    export -f press_enter 
+    export -f press_enter
     export LANGUAGE
 
     ( press_enter; touch /tmp/return.$$ ) &
