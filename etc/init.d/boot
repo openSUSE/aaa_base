@@ -121,7 +121,8 @@ if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
     FSCK_RETURN=0
     # on first startup of a system with a lvm root device lvm /dev entries 
     # may not exist at this time, so skip fsck in this case
-    if [ -f $des ]  
+    # skip fsck also for reiserfs case
+    if [ -f $des -a "$type" != "reiserfs" ]  
     then
 	fsck $FSCK_PROGRESSBAR -a -t $type /
 	FSCK_RETURN=$?
@@ -383,7 +384,7 @@ if test "$START_LOOPBACK" = yes; then
     ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
     rc_status
     case `uname -r` in
-    0.*|1.*|2.[01].*|2.2.?|2.2.??)
+    0.*|1.*|2.[012].*)
 	route add -net 127.0.0.0 netmask 255.0.0.0 dev lo
 	rc_status
         ;;

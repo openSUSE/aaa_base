@@ -83,7 +83,7 @@ case "$1" in
 		    echo "Trying to kill UPS inverter"
 		    $KILL_UPS_CMD
 		    ;;
-	    easc
+	    esac
 	else
 	    echo "Not implemented"
 	fi

@@ -327,6 +327,7 @@ fi
 
 SAVEPATH=$PATH
 PATH=$PATH:$r/usr/X11R6/bin:$r/opt/kde2/bin:$r/opt/kde/bin:$r/opt/gnome/bin:$r/usr/openwin/bin
+DEFAULT_WM=`basename $DEFAULT_WM`
 WINDOWMANAGER=`type -p $DEFAULT_WM`
 PATH=$SAVEPATH
 unset SAVEPATH
