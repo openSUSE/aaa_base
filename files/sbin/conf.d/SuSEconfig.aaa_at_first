@@ -23,11 +23,7 @@ test -f /lib/YaST/SuSEconfig.functions || {
 }
 . /lib/YaST/SuSEconfig.functions
 
-test -f /etc/rc.config || {
-    echo "No /etc/rc.config found."
-    exit 1
-}
-. /etc/rc.config
+test -f /etc/rc.config && . /etc/rc.config
 test -f /etc/sysconfig/mouse && . /etc/sysconfig/mouse
 test -f /etc/sysconfig/clock && . /etc/sysconfig/clock
 
@@ -43,10 +39,6 @@ fi
 if test -n "$MOUSE" -a "$MOUSE" != "YAST_ASK" ; then
     rm -f /dev/mouse
     ln -sf $MOUSE /dev/mouse
-fi
-if test -n "$MODEM" -a "$MODEM" != "YAST_ASK" ; then
-    rm -f /dev/modem
-    ln -sf $MODEM /dev/modem
 fi
 
 test -x /sbin/ldconfig -a "$CHECK_NEWPACKAGE" != false && \

@@ -1,9 +1,4 @@
 #
-# Which device is the modem ? (e.g. "/dev/ttyS1")
-#
-MODEM="YAST_ASK"
-
-#
 # SuSEconfig can do some modifications to /etc/inittab.  If you don't want
 # this, set CHECK_INITTAB to "no".  (yes/no)
 #
