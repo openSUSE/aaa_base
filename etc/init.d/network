@@ -11,7 +11,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:       network
-# Required-Start: $local_fs dummy dhclient firewall_init
+# Required-Start: $local_fs dummy usbmgr dhclient firewall_init
 # Required-Stop:
 # Default-Start:  2 3 5
 # Default-Stop:

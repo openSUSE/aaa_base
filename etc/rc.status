@@ -54,7 +54,7 @@ if test "$TERM" != "raw" ; then
   rc_done_up="${esc}[1A${rc_done}"
 rc_failed_up="${esc}[1A${rc_failed}"
     rc_reset="${norm}"
-     rc_save=`echo -en "\015${esc}7"`
+     rc_save="${esc}7"
   rc_restore="${esc}8"
     function rc_cuu () { echo -en "\033[${1}A"; }
 else
@@ -109,6 +109,8 @@ function rc_status ()
 	    esac
 	    echo -en "$rc_restore" ;;
 	-r) rc_reset ;;
+	-s) echo -e "$rc_skipped" ; rc_failed 3 ;;
+	-u) echo -e "$rc_unused"  ; rc_failed 3 ;;
 	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
 	esac
     done
@@ -138,7 +140,9 @@ function rc_status ()
 	    esac
 	    echo -en "$rc_restore" ;;
 	-r) rc_reset ;;
-	*)  echo "rc_status: Usage: [-v[<num>]] [-r]" 1>&2 ; return 0 ;;
+	-s) echo -e "$rc_skipped" 1>&2 ; rc_failed 5 ;;
+	-u) echo -e "$rc_unused"  1>&2 ; rc_failed 6 ;;
+	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
 	esac
     done
     return $_rc_status
@@ -156,7 +160,9 @@ function rc_status ()
 	    test $_rc_status -gt 0 && echo -e "$rc_failed" || echo -e "$rc_done"
 	    echo -en "$rc_restore" ;;
 	-r) rc_reset ;;
-	*)  echo "rc_status: Usage: [-v[<num>]] [-r]" 1>&2 ; return 0 ;;
+	-s) echo -e "$rc_skipped"  ; return 0 ;;
+	-u) echo -e "$rc_unused"   ; return 0 ;;
+	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
 	esac
     done
     return $_rc_status
