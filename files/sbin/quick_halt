@@ -63,6 +63,7 @@ sync
 # Umount network filesystems, unexport NFS and stop network
 test -x /usr/sbin/exportfs && exportfs -au
 sleep 1
+test -x /usr/sbin/umountizo && /usr/sbin/umountizo
 umount -avft nfs &
 umount -avft coda &
 umount -avft smbfs & 
