@@ -159,7 +159,7 @@ IFCONFIG_3=""
 # setup dummy network device for IPADDR_0? this is useful for non permanent
 # network connections (e.g. SLIP, PPP). Some software needs a connection
 # to FQHOSTNAME (e.g. plp). (yes, no)
-SETUPDUMMYDEV=yes
+SETUPDUMMYDEV=no
 
 #
 # Do you want the "dynamic IP patch" to be enabled at bootup? (yes/no)
