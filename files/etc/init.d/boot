@@ -148,45 +148,7 @@ callord=""
 #
 # Initialize boosplash progressbar variables
 #
-SPLASHCFG=
-SPLASH=yes
-THEME=
-export SPLASHCFG SPLASH
-test -f /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
-test -x /sbin/splash -a -w /proc/splash || SPLASH=no
-test -n "$THEME" -a -d "/etc/bootsplash/themes/$THEME" || SPLASH=no
-if test "$SPLASH" = yes ; then
-  splashstatus="`cat /proc/splash 2>/dev/null`"
-  test "$splashstatus" = "${splashstatus/on}" && SPLASH=no
-fi
-if test "$SPLASH" = yes ; then
-  SPLASHCFG="/etc/bootsplash/themes/$THEME/config/bootsplash-`fbresolution`.cfg"
-  test -f "$SPLASHCFG" || SPLASH=no
-fi
-SPLASHNUM=0
-if test "$SPLASH" = yes ; then
-    SPLASHSTART=100
-    SPLASHEND=20000
-    for i in $bootrc/S${rex}*; do
-        test -x "$i" || continue
-        SPLASHNUM=$(( $SPLASHNUM + 1 ))
-    done
-fi
-
-function splashtrigger () {
-    test "$SPLASH" = yes || return
-    /sbin/splash -p $SPLASHSTART -t "$1" "$SPLASHCFG"
-}
-
-function splashprogress() {
-    test "$SPLASH" = yes || return
-    test "$SPLASHNUM" -ge 1 || SPLASHNUM=1
-    SPLASHDIFF=$(( ( $SPLASHEND - $SPLASHSTART ) / $SPLASHNUM ))
-    /sbin/splash -p "$SPLASHSTART:$SPLASHDIFF" -t "$1" "$SPLASHCFG"
-    SPLASHSTART=$(( $SPLASHSTART + $SPLASHDIFF ))
-    SPLASHNUM=$(( $SPLASHNUM - 1 ))
-}
-
+. /etc/rc.splash B
 splashtrigger "rlchange B"
 
 #
@@ -210,14 +172,7 @@ test "$DO_CONFIRM"   = "yes" && startpar=""
 #
 if test "$USE_MAKE" = "yes" -a -n "$startpar" ; then
 
-    startopt="-p4 -t 20 -T 3"
-    if test "$SPLASH" = yes ; then
-	SPLASHDIFF=$(( $SPLASHEND - $SPLASHSTART ))
-	startopt="$startopt -S $SPLASHSTART:$SPLASHDIFF"
-	SPLASHSTART=$SPLASHEND
-	SPLASHNUM=0
-    fi
-
+    startopt="-p4 -t 30 -T 3 $(splashmake)"
     eval $($startpar $startopt -M boot)
     failed="${failed:+$failed }$failed_service"
     skipped="${skipped:+$skipped }$skipped_service"
@@ -294,19 +249,8 @@ if test -n "$startpar" ; then
 	    service=${service#*[SK]$rex}
 	    splashprogress "$service start"
 	else
-	    if test "$SPLASH" = yes ; then
-		SPLASHOLDSTART=$SPLASHSTART
-		for i in ${p[@]} ; do
-		    test "$SPLASHNUM" -ge 1 || SPLASHNUM=1
-		    SPLASHDIFF=$(( ( $SPLASHEND - $SPLASHSTART ) / $SPLASHNUM ))
-		    SPLASHSTART=$(( $SPLASHSTART + $SPLASHDIFF ))
-		    SPLASHNUM=$(( $SPLASHNUM - 1 ))
-		done
-		SPLASHDIFF=$(( $SPLASHSTART - $SPLASHOLDSTART ))
-		status=($($startpar -S "$SPLASHOLDSTART:$SPLASHDIFF" -t 30 -T 3 -a start ${p[@]}))
-	    else
-		status=($($startpar -t 30 -T 3 -a start ${p[@]}))
-	    fi
+	    startopt="-p4 -t 30 -T 3 $(splashparallel)"
+	    status=($($startpar $startop -a start ${p[@]}))
 	fi
 	echo -en "$rc_reset"
 	blogger "exit status of (${p[@]##*S$rex}) is (${status[@]})"
@@ -323,7 +267,6 @@ if test -n "$startpar" ; then
     done
 fi
 
-SPLASHSTART=$SPLASHEND
 splashtrigger "rlreached B"
 
 #

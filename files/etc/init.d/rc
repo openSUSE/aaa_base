@@ -55,69 +55,7 @@ prerc=/etc/init.d/rc${PREVLEVEL}.d
 #
 # Initialize boosplash progressbar variables
 #
-SPLASHCFG=
-SPLASH=yes
-THEME=
-export SPLASHCFG SPLASH
-test -f /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
-test -x /sbin/splash -a -w /proc/splash || SPLASH=no
-test -n "$THEME" -a -d "/etc/bootsplash/themes/$THEME" || SPLASH=no
-case "$PREVLEVEL-$RUNLEVEL" in
-  [2-5]-[2-5]) SPLASH=no ;;
-esac
-if test "$SPLASH" = yes ; then
-  splashstatus="`cat /proc/splash 2>/dev/null`"
-  test "$splashstatus" = "${splashstatus/on}" && SPLASH=no
-fi
-if test "$SPLASH" = yes ; then
-  SPLASHCFG="/etc/bootsplash/themes/$THEME/config/bootsplash-`fbresolution`.cfg"
-  test -f "$SPLASHCFG" || SPLASH=no
-fi
-SPLASHNUM=0
-if test "$SPLASH" = yes ; then
-    SPLASHSTART=0
-    SPLASHEND=65535
-    case "$PREVLEVEL-$RUNLEVEL" in
-        N-[3-5]) SPLASHSTART=20000 ;;
-    esac
-    rex="[0-9][0-9]"
-    for i in $prerc/K${rex}*; do
-        test -x "$i" || continue
-        service=${i##*/}
-        service=${service#*K$rex}
-        set -- $runrc/S$rex$service
-        test -x "$1"  && continue
-        SPLASHNUM=$(( $SPLASHNUM + 1 ))
-    done
-    for i in $runrc/S${rex}*; do
-        test -x "$i" || continue
-        service=${i##*/}
-        service=${service#*S$rex}
-        set -- $prerc/K$rex$service
-        test -x "$1"  && continue
-        SPLASHNUM=$(( $SPLASHNUM + 1 ))
-    done
-fi
-
-function splashtrigger () {
-    test "$SPLASH" = yes -a -w /proc/splash || return
-    # use nosetsid option if going down otherwise killall5 will kill us
-    if test "$RUNLEVEL" = 0 -o "$RUNLEVEL" = 6 ; then
-	/sbin/splash -S -p $SPLASHSTART -t "$1" "$SPLASHCFG"
-    else
-	/sbin/splash -p $SPLASHSTART -t "$1" "$SPLASHCFG"
-    fi
-}
-
-function splashprogress() {
-    test "$SPLASH" = yes -a -w /proc/splash || return
-    test "$SPLASHNUM" -ge 1 || SPLASHNUM=1
-    SPLASHDIFF=$(( ( $SPLASHEND - $SPLASHSTART ) / $SPLASHNUM ))
-    /sbin/splash -p "$SPLASHSTART:$SPLASHDIFF" -t "$1" "$SPLASHCFG"
-    SPLASHSTART=$(( $SPLASHSTART + $SPLASHDIFF ))
-    SPLASHNUM=$(( $SPLASHNUM - 1 ))
-}
-
+. /etc/rc.splash $RUNLEVEL
 
 #
 # Up from runlevel S we have to check if the system was
@@ -285,14 +223,7 @@ test "$DO_CONFIRM"   = "yes" && startpar=""
 #
 if test "$USE_MAKE" = "yes" -a -n "$startpar" ; then
 
-    startopt="-p4 -t 20 -T 3"
-    if test "$SPLASH" = yes ; then
-	SPLASHDIFF=$(( $SPLASHEND - $SPLASHSTART ))
-	startopt="$startopt -S $SPLASHSTART:$SPLASHDIFF"
-	SPLASHSTART=$SPLASHEND
-	SPLASHNUM=0
-    fi
-
+    startopt="-p4 -t 30 -T 3 $(splashmake)"
     eval $($startpar $startopt -M stop  -P $PREVLEVEL -R $RUNLEVEL)
     failed="${failed:+$failed }$failed_service"
     skipped="${skipped:+$skipped }$skipped_service"
@@ -417,19 +348,8 @@ if test -n "$startpar" ; then
 	    service=${service#*[SK]$rex}
 	    splashprogress "$service $todo"
 	else
-	    if test "$SPLASH" = yes ; then
-		SPLASHOLDSTART=$SPLASHSTART
-		for i in ${p[@]} ; do
-		    test "$SPLASHNUM" -ge 1 || SPLASHNUM=1
-		    SPLASHDIFF=$(( ( $SPLASHEND - $SPLASHSTART ) / $SPLASHNUM ))
-		    SPLASHSTART=$(( $SPLASHSTART + $SPLASHDIFF ))
-		    SPLASHNUM=$(( $SPLASHNUM - 1 ))
-		done
-		SPLASHDIFF=$(( $SPLASHSTART - $SPLASHOLDSTART ))
-		status=($($startpar -S "$SPLASHOLDSTART:$SPLASHDIFF" -t 20 -T 3 -a $todo ${p[@]}))
-	    else
-		status=($($startpar -t 20 -T 3 -a $todo ${p[@]}))
-	    fi
+	    startopt="-p4 -t 30 -T 3 $(splashparallel)"
+	    status=($($startpar $startopt -a $todo ${p[@]}))
 	fi
 	# May change to first terminal
 	chvt
@@ -471,7 +391,6 @@ fi
 #    OK   : 7 - program is not running (doing "stop")
 #
 
-SPLASHSTART=$SPLASHEND
 splashtrigger "rlreached $RUNLEVEL"
 
 #
