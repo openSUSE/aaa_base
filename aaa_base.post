@@ -461,6 +461,11 @@ if [ -n "$OLDMODCONF" ] ; then
       rm -f etc/modules.conf.aa.add
     fi
     echo "done"
+    # move the include local statement to end of file
+    rm -f etc/modules.conf.aa
+    grep -v "modules.conf.local" etc/modules.conf > etc/modules.conf.aa
+    grep "modules.conf.local" etc/modules.conf >> etc/modules.conf.aa
+    test -f etc/modules.conf.aa && mv etc/modules.conf.aa etc/modules.conf
     mv $OLDMODCONF $OLDMODCONF.old
 fi
 ### import suse package build key to gpg keyring
