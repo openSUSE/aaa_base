@@ -47,15 +47,13 @@ export KDEROOTHOME
 
 case "$DISPLAYMANAGER" in
     kdm|kde|KDM|KDE)	 PIDFILE="-p /var/run/xdm.pid"
-			 DISPLAYMANAGER=/opt/kde/bin/kdm
-			 test -x /opt/kde2/bin/kdm && \
-			 DISPLAYMANAGER=/opt/kde2/bin/kdm 
-			 test -x /opt/kde3/bin/kdm && \
 			 DISPLAYMANAGER=/opt/kde3/bin/kdm ;;
     gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome2/bin/gdm ;;
     wdm|WDM)		 DISPLAYMANAGER=/usr/X11R6/bin/wdm ;;
     console) exit 0 ;;
-    *)			 DISPLAYMANAGER=/usr/X11R6/bin/xdm ;;
+    *)			 DISPLAYMANAGER=/usr/X11R6/bin/xdm 
+			 test -x /opt/kde3/bin/kdm && \
+			 DISPLAYMANAGER=/opt/kde3/bin/kdm ;;
 esac
 test ! -x "$DISPLAYMANAGER" && DISPLAYMANAGER=/usr/X11R6/bin/xdm
 
