@@ -229,6 +229,7 @@
 /usr/X11R6/bin/v4l-conf                 root.video      0755
 # vmware
 /usr/bin/vmware                         root.trusted    4750
+/usr/bin/vmware-ping                    root.root       4750
 # iBCS2 binary emulator
 /shlib/protlib_s.emu                    root.root        755
 /shlib/protlib_s.debug                  root.root        755
