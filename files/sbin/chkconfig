@@ -5,6 +5,8 @@ use Getopt::Long;
 use File::Temp 'tempfile';
 
 my $initdir = '/etc/init.d';
+my $inetddir = '/etc/inetd.d';
+my $xinetddir = '/etc/xinetd.d';
 
 my %to_d = (
   '0' => 'rc0.d', '1' => 'rc1.d', '2' => 'rc2.d', '3' => 'rc3.d',
@@ -12,12 +14,13 @@ my %to_d = (
 );
 
 # which files to skip in $initdir
-my %skips = map {$_ => 1} qw {rc rx skeleton powerfail boot halt reboot single boot.local halt.local};
+my %skips_rc = map {$_ => 1} qw {rc rx skeleton powerfail boot halt reboot single boot.local halt.local};
 
-# which services are currently on?
-# initialized by initlinks(), used in getreal()
-my %links = ();
-my %links_unknown = ();
+# which services are known
+my %known_rc = ();
+my %known_inetd = ();
+my %known_xinetd = ();
+my %known_all = ();
 
 #
 # get the contents of a directory
@@ -33,15 +36,41 @@ sub ls {
 }
 
 #
+# unify an array
+#
+sub unify {
+  my %h = map {$_ => 1} @_;
+  return grep {delete $h{$_}} @_;
+}
+
+
+##################################################################
+#                         runlevel part
+##################################################################
+
+# which services are currently on? this is a cache to speed things up
+# initialized by initlinks_rc(), used in getreal_rc()
+my %links = ();
+my %links_unknown = ();
+
+#
+#
 # calculate the default runlevels of a service by reading the
 # insserv header. regexes taken from insserv.c
 #
-sub getdef {
+my %getdef_rc_cache = ();
+
+sub getdef_rc {
   my $s = shift;
 
+  return $getdef_rc_cache{$s} if exists $getdef_rc_cache{$s};
   my $file = "$initdir/$s";
   local *F;
-  open(F, "<$file") || return undef;
+  if (!open(F, "<$file")) {
+    print STDERR "$file: $!\n";
+    $getdef_rc_cache{$s} = undef;
+    return undef;
+  }
   while (<F>) {
     chomp;
     if (/^#[[:blank:]]*default[-_]?start:[[:blank:]]*([[:print:][:blank:]]*)/i) {
@@ -54,17 +83,19 @@ sub getdef {
 	$_ = uc($_);
 	$ret .= $_ if /[0123456SB]/;
       }
+      $getdef_rc_cache{$s} = $ret;
       return $ret;
     }
   }
-  return "35";
+  $getdef_rc_cache{$s} = '35';
+  return '35';
 }
 
 #
 # calculate the required services by reading the insserv header.
 # regexes taken from insserv.c
 #
-sub getdeps {
+sub getdeps_rc {
   my $s = shift;
 
   my $file = "$initdir/$s";
@@ -86,39 +117,14 @@ sub getdeps {
 # calculate the active runlevels of a service. Uses global %links
 # hash.
 #
-sub getreal {
+sub getreal_rc {
   my $s = shift;
 
   my $start = '';
   my $l;
-  initlinks() if $links_unknown{$s};
+  initlinks_rc() if $links_unknown{$s};
   for $l (sort keys %links) {
     $start .= $l if $links{$l}->{$s};
-  }
-  return $start;
-}
-
-#
-# calculate current status, use on/off when appropriate
-#
-sub getcurrent {
-  my $s = shift;
-
-  if (! -f "$initdir/$s") {
-    print STDERR "$s: unknown service\n";
-    return undef;
-  }
-  my ($defstart, $start);
-  $defstart = getdef($s);
-  if (!defined($defstart)) {
-    print STDERR "$initdir/$s: $!\n";
-    return undef;
-  }
-  $start = getreal($s);
-  if ($start eq '') {
-    $start = 'off';
-  } elsif ($start eq $defstart) {
-    $start = 'on';
   }
   return $start;
 }
@@ -127,7 +133,7 @@ sub getcurrent {
 # initializes global %links hash by scanning the link directories
 # for each runlevel.
 #
-sub initlinks {
+sub initlinks_rc {
   my $l;
   for $l (keys %to_d) {
     my @links = grep {s/^S\d\d//} ls("$initdir/$to_d{$l}");
@@ -137,21 +143,26 @@ sub initlinks {
 }
 
 #
-# return all services we know about by scanning $initdir for init
-# scripts.
+# set the state of a service. 'on' is interpreted as default
 #
-sub allservices {
-  my @services = ();
-  for (ls($initdir)) {
-    next unless -f "$initdir/$_";
-    next if /^README/ || /^core/;
-    next if $skips{$_};
-    next if /~$/ || /^[\d\$\.#_\-\\\*]/ || /\.(rpm|ba|old|new|save|swp|core)/;
-    push @services, $_;
-  }
-  return sort @services;
-}
+sub set_rc {
+  my $s = shift;
+  my $want = shift;
 
+  if (!$known_rc{$s}) {
+    print STDERR "$s: not a runlevel service\n";
+    return;
+  }
+  if ($want eq '') {
+    insserv('-r', '-d', "$initdir/$s");
+  } elsif ($want eq getdef_rc($s)) {
+    insserv('-d', "$initdir/$s");
+  } else {
+    insserv('-r', '-d', "$initdir/$s");
+    insserv("$initdir/$s,start=".join(',', split('', $want)));
+  }
+  $links_unknown{$s} = 1;	# check again for this service
+}
 
 my $force;
 
@@ -169,9 +180,292 @@ sub insserv {
   }
 }
 
+
+##################################################################
+#                         xinetd part
+##################################################################
+
 #
-# main programm starts here
+# get the state of a xinetd service
 #
+sub getreal_xinetd {
+  my $s = shift;
+
+  my $file = "$xinetddir/$s";
+  local *F;
+  open(F, "<$file") || return undef;
+  my $dis = 1;
+  while (<F>) {
+    if (/^\s*service\s*\S/) {
+      if (!$dis) {
+	close F;
+	return 'X';
+      }
+      $dis = 0;
+    }
+    if (/^\s*disable\s*=\s*yes/) {
+      $dis = 1;
+      next;
+    }
+  }
+  close F;
+  return $dis ? '' : 'X';
+}
+
+#
+# change the state of a xinetd service
+#
+sub set_xinetd {
+  my $s = shift;
+  my $state = shift;
+
+  if (!$known_xinetd{$s}) {
+    print STDERR "$s: not a xinetd service\n";
+    return;
+  }
+  local *F;
+  local *N;
+  my $file = "$xinetddir/$s";
+  if (!open(F, "<$file")) {
+    print STDERR "$file: $!\n";
+    return;
+  }
+  if (!open(N, ">$file.chkconfig~")) {
+    print STDERR "$file.chkconfig~: $!\n";
+    return;
+  }
+  while (<F>) {
+    if (/^\s*service\s*\S/) {
+      if (!/{/) {	#}
+        print N $_;
+	$_ = <F>;
+      }
+      print N $_;
+      print N "\tdisable     = yes\n" unless $state;
+      next;
+    }
+    print N $_ unless /^\s*disable\s*=\s*yes/;
+  }
+  close F;
+  if (!close N) {
+    print STDERR "$file.chkconfig~: $!\n";
+    unlink("$file.chkconfig~");
+    return;
+  }
+  if (!rename("$file.chkconfig~", "$file")) {
+    print STDERR "rename $file.chkconfig~ $file: $!\n";
+    unlink("$file.chkconfig~");
+    return;
+  }
+  return 1;
+}
+
+
+##################################################################
+#                         inetd part
+##################################################################
+
+#
+# get the state of a inetd service
+#
+sub getreal_inetd {
+  my $s = shift;
+
+  my $file = "$inetddir/$s";
+  local *F;
+  open(F, "<$file") || return undef;
+  while (<F>) {
+    chomp;
+    next if /^\s*#/;
+    next if /^\s*$/;
+    close F;
+    return 'T';
+  }
+  close F;
+  return '';
+}
+
+#
+# does the line look like a inetd service?
+#
+sub looks_ok_inetd {
+  return 1 if $_[0] =~ /^![\|<]/;
+  my @x = split(' ', $_[0]);
+  my %oktype = map {$_ => 1} qw{stream dgram raw rdm seqpacket};
+  return 0 unless $oktype{$x[1]};
+  return 0 unless $x[3] =~ /^(no)?wait/;
+  return 1;
+}
+
+#
+# change the state of a inetd service
+#
+sub set_inetd {
+  my $s = shift;
+  my $state = shift;
+
+  if (!$known_inetd{$s}) {
+    print STDERR "$s: not an inetd service\n";
+    return;
+  }
+  local *F;
+  local *N;
+  my $file = "$inetddir/$s";
+  if (!open(F, "<$file")) {
+    print STDERR "$file: $!\n";
+    return;
+  }
+  if (!open(N, ">$file.chkconfig~")) {
+    print STDERR "$file.chkconfig~: $!\n";
+    return;
+  }
+  while (<F>) {
+    chomp;
+    if (/^#\s*(.*)/) {
+      my $l = $1;
+      if (looks_ok_inetd($l)) {
+        print N $state ? "$l\n" : "## $l\n";
+        next;
+      }
+    }
+    if (!$state && looks_ok_inetd($_)) {
+      print N "# $_\n";
+      next;
+    }
+    print N "$_\n";
+  }
+  if (!close N) {
+    print STDERR "$file.chkconfig~: $!\n";
+    unlink("$file.chkconfig~");
+    return;
+  }
+  if (!rename("$file.chkconfig~", "$file")) {
+    print STDERR "rename $file.chkconfig~ $file: $!\n";
+    unlink("$file.chkconfig~");
+    return;
+  }
+  return 1;
+}
+
+
+##################################################################
+#                     common functions
+##################################################################
+
+#
+# calculate current status
+#
+sub getcurrent {
+  my $s = shift;
+
+  if (!$known_all{$s}) {
+    print STDERR "$s: unknown service\n";
+    return undef;
+  }
+  my $start = '';
+  $start .= getreal_rc($s) if $known_rc{$s};
+  $start .= getreal_inetd($s) if $known_inetd{$s};
+  $start .= getreal_xinetd($s) if $known_xinetd{$s};
+  return $start;
+}
+
+
+#
+# return all services we know about by scanning $initdir for init
+# scripts.
+#
+sub findknown {
+  for (ls($initdir)) {
+    next unless -f "$initdir/$_";
+    next if /^README/ || /^core/;
+    next if /~$/ || /^[\d\$\.#_\-\\\*]/ || /\.(rpm|ba|old|new|save|swp|core)/;
+    $known_rc{$_} = 1;
+    $known_all{$_} = 1;
+  }
+  for (ls($xinetddir)) {
+    next unless -f "$xinetddir/$_";
+    next if /~$/ || /\./;
+    $known_xinetd{$_} = 1;
+    $known_all{$_} = 1;
+  }
+  return unless -d $inetddir;
+  local *F;
+  my $gotinetd = 0;
+  if (!open(F, "</etc/inetd.conf")) {
+    print STDERR "/etc/inetd.conf: $!\n";
+    return;
+  }
+  while (<F>) {
+    chomp;
+    if (/^!\|\s*\/usr\/lib\/inetd\/includedir\s+\Q$inetddir\E\s*$/) {
+      $gotinetd = 1;
+      last;
+    }
+  }
+  close F;
+  return unless $gotinetd;
+  for (ls($inetddir)) {
+    next unless -f "$inetddir/$_";
+    next if /~$/ || /\./;
+    $known_inetd{$_} = 1;
+    $known_all{$_} = 1;
+  }
+}
+
+#
+# normalize runlevel
+#
+sub normalize {
+  my $s = shift;
+  my $rl = shift;
+
+  $rl = lc($rl);
+  return '' if $rl eq 'off' || $rl eq '';
+  my $def = '35';
+  $def = 'inetd' if $known_inetd{$s};
+  $def = 'xinetd' if $known_xinetd{$s};
+  $def = getdef_rc($s) if $known_rc{$s};
+  return undef unless defined $def;
+  $rl = ",$rl,";
+  $rl =~ s/,on,/,$def,/g;
+  $rl =~ s/,xinetd,/,X,/g;
+  $rl =~ s/,inetd,/,T,/g;
+  $rl =~ s/s/S/g;
+  $rl =~ s/b/B/g;
+  $rl =~ s/,//g;
+  $rl = join('', sort unify(split('', $rl)));
+  if ($rl =~ /([^0123456SBTX])/) {
+    print STDERR "illegal runlevel specified for $s: $1\n";
+    return undef;
+  }
+  return $rl;
+}
+
+#
+# convert runlevels into a nice human readable form
+#
+sub readable {
+  my $s = shift;
+  my $rl = shift;
+
+  return 'off' if $rl eq '';
+  my $def = '';
+  $def = getdef_rc($s) if $known_rc{$s};
+  return undef unless defined $def;
+  $rl = ",$rl,";
+  $rl =~ s/T/,inetd,/g;
+  $rl =~ s/X/,xinetd,/g;
+  $rl =~ s/,\Q$def\E,/,on,/ if $def ne '';
+  $rl =~ s/,,+/,/g;
+  $rl =~ s/^,//;
+  $rl =~ s/,$//;
+  return $rl;
+}
+
+
+##################################################################
+#                     main program
+##################################################################
 
 my $mode = '';
 my $printdeps;
@@ -220,16 +514,18 @@ if ($mode eq 'h') {
 }
 my (@services, $s);
 
+findknown();
+
 if (@ARGV) {
   @services = @ARGV;
   $mode = @services == 1 ? 't' : 's' if $mode eq '';
 } else {
   die("Please specify a service to check\n") if $mode eq 'c';
-  @services = allservices() if $mode ne 's';
+  @services = sort grep {!$skips_rc{$_}} keys %known_all if $mode ne 's';
 }
 $mode = 't' if $mode eq '';
 
-initlinks() if $mode eq 'e' || $mode eq 't' || $mode eq 's' || $mode eq 'c';
+initlinks_rc() if $mode eq 'e' || $mode eq 't' || $mode eq 's' || $mode eq 'c';
 
 my %current = ();
 
@@ -238,24 +534,25 @@ if ($mode eq 'c') {
   $s = $services[0];
   my $want;
   if (@services == 1) {
-    $want = `/sbin/runlevel`;
+    $want = `runlevel`;
     chomp($want);
     die("Can't determine current runlevel\n") unless $want =~ s/^. (.)$/$1/;
   } else {
     $want = $services[1];
   }
-  $want = lc($want);
-  exit 0 if $want eq 'off';
-  if ($want eq 'on') {
-    $want = getdef($s);
-  } else {
-    $want =~ s/s/S/g;
-    $want =~ s/b/B/g;
-    $want = join('', sort split('', $want));
-    die("illegal runlevel specified for $s: $1\n") if $want =~ /([^0123456SB])/;
-  }
+  $want = normalize($s, $want);
+  exit 1 unless defined $want;
+  exit 0 if $want eq '';
   my $l;
   for $l (split('', $want)) {
+    if ($l eq 'T') {
+      exit 1 unless getreal_inetd($s) ne '';
+      next;
+    }
+    if ($l eq 'X') {
+      exit 1 unless getreal_xinetd($s) ne '';
+      next;
+    }
     exit 1 unless $links{$l}->{$s};
   }
   exit 0;
@@ -274,11 +571,13 @@ if ($mode eq 'e' || $mode eq 't') {
   for $s (@services) {
     $current{$s} = getcurrent($s);
     next unless defined $current{$s};
-    printf $fh "%-*s  %s\n", $maxlen, $s, $current{$s};
+    my $r = readable($s, $current{$s});
+    next unless defined $r;
+    printf $fh "%-*s  %s\n", $maxlen, $s, $r;
   }
-  exit(0) unless $mode eq 'e';
+  exit 0 unless $mode eq 'e';
   close $fh;
-  system("\${VISUAL:-vim} $tmpname");
+  system("\${VISUAL:-vi} $tmpname");
   open(STDIN, "<$tmpname") or die("Could not open temporary file\n");
   $mode = 's';
   @services = ();
@@ -287,7 +586,7 @@ if ($mode eq 'e' || $mode eq 't') {
 if ($mode eq 's') {
   my $usestdin = !@services;
   my $ln = 0;
-  $force = 1 if @services != 2;		# hack
+  $force = 1 if @services != 2;		# stupid hack
   do {
     if ($usestdin) {
       while (<STDIN>) {
@@ -303,47 +602,50 @@ if ($mode eq 's') {
 	@services = @line;
 	last;
       }
-      exit(1) unless @services;
+      exit 1 unless @services;
     }
     if (@services & 1) {
       printf("Usage: chkconfig -s service on|off|runlevels\n");
-      exit(1);
+      exit 1;
     }
-    while(@services) {
+    while (@services) {
       $s = shift @services;
       my $want = shift @services;
-      $want = lc($want);
-      if ($want ne 'on' && $want ne 'off') {
-	$want =~ s/s/S/g;
-	$want =~ s/b/B/g;
-	$want = join('', sort split('', $want));
-	if ($want =~ /([^0123456SB])/) {
-	  print STDERR "illegal runlevel specified for $s: $1\n";
-	  next;
-	}
-      }
+      $want = normalize($s, $want);
+      next unless defined $want;
       $current{$s} = getcurrent($s) unless defined $current{$s};
       next unless defined $current{$s};
-      next if $want eq $current{$s};
-      if ($want eq '' || $want eq 'off') {
-	insserv('-r', '-d', "$initdir/$s");
-      } elsif ($want eq 'on') {
-	insserv('-d', "$initdir/$s");
-      } else {
-	insserv('-r', '-d', "$initdir/$s");
-	insserv("$initdir/$s,start=".join(',',split('', $want)));
-      }
+      my $current = $current{$s};
+      next if $want eq $current;
       delete $current{$s};
-      $links_unknown{$s} = 1;	# check again for this service
+      if (($want =~ /T/) && ($current !~ /T/)) {
+        set_inetd($s, 1);
+      } elsif (($want !~ /T/) && ($current =~ /T/)) {
+        set_inetd($s, 0);
+      }
+      if (($want =~ /X/) && ($current !~ /X/)) {
+        set_xinetd($s, 1);
+      } elsif (($want !~ /X/) && ($current =~ /X/)) {
+        set_xinetd($s, 0);
+      }
+      $want =~ s/[TX]//g;
+      $current =~ s/[TX]//g;
+      set_rc($s, $want) unless $want eq $current;
     }
   } while ($usestdin);
-  exit(0);
+  exit 0;
 }
 
+#
+# compatibility section
+#
 if ($mode eq 'a' || $mode eq 'd') {
   for $s (splice @services) {
-    if (! -f "$initdir/$s") {
+    if (! $known_all{$s}) {
       print STDERR "$s: unknown service\n";
+    }
+    if (! $known_rc{$s}) {
+      print STDERR "$s: not a runlevel service\n";
       next;
     }
     push @services, $s;
@@ -356,9 +658,13 @@ if ($mode eq 'a' || $mode eq 'd') {
   $mode = 'l';
 }
 if ($mode eq 'l') {
-  initlinks();
+  initlinks_rc();
   my $usecolor = -t STDOUT;
   for $s (@services) {
+    if (!$known_rc{$s}) {
+      print STDERR "$s: unknown service\n" unless $known_all{$s};
+      next;
+    }
     printf "%-25s ", $s;
     my $l;
     for $l (0, 1, 2, 3, 4, 5, 6) {
@@ -368,8 +674,32 @@ if ($mode eq 'l') {
 	print $links{$l}->{$s} ? "$l:on    " : "$l:off   ";
       }
     }
-    print getdeps($s) if $printdeps;
+    print getdeps_rc($s) if $printdeps;
     print "\n";
+  }
+  my @inetd_services = grep {$known_inetd{$_}} @services;
+  if (@inetd_services) {
+    print "inetd based services:\n";
+    for $s (@inetd_services) {
+      printf "        %-19s ", "$s:";
+      if (getreal_inetd($s) ne '') {
+	print $usecolor ? "\e[0;1;32mon\e[m\n" : "on\n";
+      } else {
+	print "off\n";
+      }
+    }
+  }
+  my @xinetd_services = grep {$known_xinetd{$_}} @services;
+  if (@xinetd_services) {
+    print "xinetd based services:\n";
+    for $s (@xinetd_services) {
+      printf "        %-19s ", "$s:";
+      if (getreal_xinetd($s) ne '') {
+	print $usecolor ? "\e[0;1;32mon\e[m\n" : "on\n";
+      } else {
+	print "off\n";
+      }
+    }
   }
   exit(0);
 }

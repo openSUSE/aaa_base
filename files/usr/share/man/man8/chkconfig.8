@@ -1,11 +1,11 @@
 .\"
 .\" SuSE man page for chkconfig
-.\" Copyright (c) 2002 SuSE Linux AG, Nuernberg, Germany.
+.\" Copyright (c) 2003 SuSE Linux AG, Nuernberg, Germany.
 .\" please send bugfixes or comments to feedback@suse.de.
 .\"
 .\" Author: Michael Schroeder <mls@suse.de>
 .\"
-.TH CHKCONFIG 8 "Feb 2002"
+.TH CHKCONFIG 8 "Jan 2003"
 .SH NAME
 chkconfig \- enable or disable system services
 
@@ -60,7 +60,15 @@ no runlevel,
 is used instead, if it is configured in the runlevels defined
 as a default by the start script,
 .B on
-is used.
+is used. If the service is an enabled inetd or xinetd service,
+.B inetd
+and
+.B xinetd
+are used. Inetd/xinetd services are configured in
+.I /etc/inetd.d
+and
+.IR /etc/xinetd.d ,
+respectively.
 .PP
 If chkconfig is called without arguments, all services are listed
 in terse mode.
@@ -71,8 +79,12 @@ service name and new state. You can use
 .B on
 and
 .B off
-as special state to specify the default set of runlevels or to disable
-a service completely.
+as special states to select the default set of runlevels or to disable
+a service completely. You can use
+.B inetd
+or
+.B xinetd
+to configure a service managed by the inetd/xinetd daemons.
 .PP
 If no services are specified, chkconfig reads lines from standard
 input. Each line must consist of a service/state pair. As this is
@@ -108,7 +120,8 @@ will be printed in bright green if the output is written to a
 terminal. If the
 .B --deps
 option is given, the names of the services that must be started
-before this service is appended to each line.
+before this service is appended to each line. The inetd/xinetd
+services are listed in extra sections.
 .SH ADD MODE
 Calls insserv
 to enable a service and uses list mode to display the new
@@ -148,9 +161,13 @@ chkconfig apache on xntpd off
 .PP
 configure two services
 .IP
+chkconfig finger xinetd
+.PP
+configure a xinetd service
+.IP
 chkconfig >~root/chkconfig.save
 .PP
-Backup the current configuration
+backup the current configuration
 .IP
 chkconfig -s <~root/chkconfig.save
 .PP
@@ -168,14 +185,21 @@ change the runlevel configuration of all services interactively
 .IP /etc/init.d/
 path to the boot script base directory as required by the Linux
 Standard Base Specification (LSB).
+.IP /etc/inetd.d/
+path to the inetd services. See the inetd manpage to find out
+how to enable this feature.
+.IP /etc/xinetd.d/
+path to the xinetd services.
 
 .SH SEE ALSO
 .BR init.d (7),
 .BR init (7),
+.BR inetd (8)
+.BR xinetd (8)
 .BR insserv (8)
 
 .SH COPYRIGHT
-2002 SuSE Linux AG, Nuernberg, Germany.
+2003 SuSE Linux AG, Nuernberg, Germany.
 
 .SH AUTHOR
 Michael Schroeder <mls@suse.de>
