@@ -44,7 +44,7 @@ case "$1" in
         for I in $NETCONFIG; do
             eval NETDEV=\$NETDEV$I
             case $NETDEV in
-              ippp*|ppp*|isdn*) ;;
+              ippp*|ppp*|isdn*|*:*) ;;
               *)
                 echo -n "Shutting down network device $NETDEV"
                 ifconfig $NETDEV down || return=$rc_failed
