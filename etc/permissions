@@ -67,7 +67,6 @@
 /usr/X11R6/bin/xlock                   root.shadow      2755
 /usr/X11R6/bin/xterm                   root.tty         2755
 /usr/bin/at                            root.root        4755
-/usr/bin/chkey                         root.root        4755
 /usr/bin/crontab                       root.root        4755
 /usr/bin/gpasswd                       root.shadow      4755
 /usr/bin/ncpmount                      root.root        4755
