@@ -65,7 +65,8 @@ case "$1" in
 	# clean up
 	#
 	rm -rf /tmp/screens /tmp/uscreens 2>/dev/null
-	rm -f /var/lock/* /var/lock/*/* /tmp/.X*lock \
+	rm -f /var/lock/* /var/lock/*/* \
+	      /tmp/.X*lock /tmp/ssh-*/*agent* \
 	      /var/run/*  /var/run/*/*  /var/spool/uucp/LCK* \
 	      /var/run/utmp /fsck_corrected_errors 2>/dev/null
 	echo -n > /var/run/utmp

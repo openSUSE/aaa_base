@@ -62,6 +62,19 @@ echo -n "Mounting /proc device"
 mount -n -t proc proc /proc
 rc_status -v -r
 
+test -d /sys && {
+    while read a b c  ; do
+	case "$b" in 
+	    sysfs)
+		echo -n "Mounting sysfs on /sys"
+		mount -n -t sysfs sysfs /sys
+		rc_status -v -r
+		break
+		;;
+	esac
+    done < /proc/filesystems
+}
+
 echo -n "Mounting /dev/pts"
 optpts="-o mode=0620,gid=5"
 mount -n -t devpts $optpts devpts /dev/pts
