@@ -200,7 +200,7 @@ if test -z "$r" -o "$FASTRUN" = "true" ; then
     for SKRIPT in $SUB_SCRIPTS ; do
         test -f $SKRIPT || continue
         case "$SKRIPT" in
-          *~|*.swp|*.bak|*.sav|*.save|*.rpmsave|*.rpmorig|*.rpmnew)
+          *~|*.swp|*.bak|*.sav|*.save|*.rpmsave|*.rpmorig|*.rpmnew|*.orig)
             continue
             ;;
           *)
