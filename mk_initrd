@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.18
+# Version 1.21
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
@@ -29,6 +29,11 @@
 # (c) 2000 Karsten Keil   option and kernel 2.4 support
 #
 # ChangeLog:
+#
+# 13/9/2001:	v1.21
+#  - added oem resize support
+#  - added support for splash image sizes
+#
 # 10/9/2001:	v1.20
 #  - new header format for splash picture
 #  
@@ -102,7 +107,8 @@ usage() {
           -d root_device   root device, defaults to the device from which
                            the root_dir is mounted; overwrites the rootdev
                            enviroment variable if set
-	  -s               Add splash animation and bootscreen to initrd.
+	  -s size          Add splash animation and bootscreen to initrd.
+	  -o file          Add OEM resize support.
 			   
         root_dir:          the directory the root partition is mounted to
                            defaults to "/" 
@@ -178,9 +184,10 @@ kernels=""
 initrds=""
 modules=""
 boot_dir=""
-splash=0
+splash=""
+oem=""
 
-while getopts :hsk:i:m:b:d: a ; do
+while getopts :hk:i:m:b:d:o:s: a ; do
 	case $a in
 		\:|\?)	case $OPTARG in
 				k)	echo "-k requires kernel list parameter"
@@ -192,6 +199,10 @@ while getopts :hsk:i:m:b:d: a ; do
 				b)	echo "-b requires boot dir parameter"
 					;;
 				d)	echo "-d requires root device parameter"
+					;;
+				s)	echo "-s requires image size(s)"
+					;;
+				o)	echo "-o requires oem grow script"
 					;;
 				*)  echo "Unknown option: -$OPTARG"
 					echo "Try mk_initrd -h"
@@ -209,9 +220,11 @@ while getopts :hsk:i:m:b:d: a ; do
 			;;
 		d)	rootdev=$OPTARG
 			;;
-		h)	usage
+		o)	oem=$OPTARG
 			;;
-		s)	splash=1
+		s)	splash=$OPTARG
+			;;
+		h)	usage
 			;;
 	esac
 done
@@ -253,7 +266,7 @@ static_insmod=/sbin/insmod.static
 static_fbmngplay=/bin/fbmngplay
 
 bootsplash_anim=/usr/share/splash/device.mng
-bootsplash_picture=/usr/share/splash/bootsplash.jpg
+bootsplash_picture_dir=/usr/share/splash
 # maximum initrd size
 image_blocks=10000
 image_inodes=2000
@@ -335,7 +348,7 @@ if [ "$root_lvm" = 1 ] ; then
   echo " $modules " | grep -q " lvm-mod " || modules="lvm-mod $modules"
 fi
 
-[ "$modules" -o $root_lvm = 1 ] || {
+[ "$modules" -o "$root_lvm" = 1 -o -n "$oem" -o -n "$splash" ] || {
   ( cd $root_dir$boot_dir ; rm -f $initrds )
   error 0 "no initrd required"
 }
@@ -405,7 +418,7 @@ for k in $kernels ; do
     cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console,md0} $tmp_mnt/dev
     cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 4 "no static shell"
     cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 5 "no static insmod"
-    #if [ $splash -eq 1 ]
+    #if [ -n "$splash" ]
     #then
     #	echo -n "Adding bootsplash animation... "
     #	cp $static_fbmngplay $tmp_mnt/bin/fbmngplay 2>/dev/null || \
@@ -432,12 +445,26 @@ for k in $kernels ; do
 	cp -a $root_dir/bin/{rm,mount,umount}  $tmp_mnt/bin
     fi
 
+    if [ -n "$oem" ]
+    then
+	echo "Adding OEM resize support"
+	mkdir -p $tmp_mnt/{lib,etc,proc}
+	touch $tmp_mnt/etc/fstab
+	cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
+	cp -a $root_dir/lib/ld-*so* $tmp_mnt/lib
+	cp -a $root_dir/lib/libc.so.6 $tmp_mnt/lib
+	cp -a $root_dir/lib/libz.so.1* $tmp_mnt/lib
+	cp -a $root_dir/sbin/{sfdisk,resize_reiserfs}  $tmp_mnt/bin
+	cp -a $root_dir/bin/{sleep,mount,umount,cp,cat,sed}  $tmp_mnt/bin
+	cp -a $root_dir/usr/bin/expr  $tmp_mnt/bin
+    fi
+
     echo '#! /bin/sh' >$lx_rc
     echo >>$lx_rc
     echo "export PATH=/bin" >>$lx_rc
     echo >>$lx_rc
 
-    #if [ $splash -eq 1 ]
+    #if [ -n "$splash" ]
     #then
     #	echo "fbmngplay -b -x 878 -y 35 `basename $bootsplash_anim` &" >> $lx_rc
 	#echo "" >>$lx_rc
@@ -484,6 +511,8 @@ for k in $kernels ; do
 	echo "umount /proc" >> $lx_rc
     fi
 
+    [ -n "$oem" ] && cat $oem >> $lx_rc
+
     # now create a second initrd with minimal size
     
     img_size=`expr \`df -k $tmp_mnt | sed '1d' | awk '{print $3}'\` + 1000`
@@ -514,25 +543,28 @@ for k in $kernels ; do
       continue
     }
 
-    if [ $splash -eq 1 ]
+    if [ -n "$splash" ]
     then
-	cfgname=`echo $bootsplash_picture|sed s/\.jpg/\.cfg/g`
-    	echo -n "Concatenating splash picture to initrd... "
-	if [ ! -r $cfgname ]
-	then
-	  echo "No config file present (expected $cfgname)."
-	else
-	  if [ ! -r $bootsplash_picture ]
-	  then
-	    echo "picture not present. (expected $bootsplash_picture)."
-	  else
+	for size in ${splash//,/ }; do
+	    bootsplash_picture="$bootsplash_picture_dir/bootsplash-$size.jpg"
+	    cfgname=`echo $bootsplash_picture|sed s/\.jpg/\.cfg/g`
+	    echo -n "Concatenating splash picture size $size to initrd... "
+	    if [ ! -r $cfgname ]
+	    then
+		echo "No config file present (expected $cfgname)."
+		continue
+	    fi
+	    if [ ! -r $bootsplash_picture ]
+	    then
+		echo "picture not present. (expected $bootsplash_picture)."
+		continue
+	    fi
 	    source $cfgname
 	    size=`wc -c<$bootsplash_picture`
 	    write_header $tx $ty $tw $th $size >> $ii
 	    cat $bootsplash_picture >> $ii
 	    echo "done."
-	  fi
-	fi
+	done
     fi
     
     clean_up
