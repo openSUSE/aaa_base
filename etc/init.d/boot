@@ -560,6 +560,11 @@ if test "$LOAD_MEMSTAT_MODULE" = yes ; then
 fi
 
 #
+# Stop blogd
+#
+killproc -QUIT /sbin/blogd
+
+#
 # look for stuff to do for first bootup.
 #
 if test -e /var/adm/setup/setup.newinst -o -e /usr/lib/YaST/.configured2 ; then
@@ -583,11 +588,6 @@ if test -e /var/adm/setup/setup.newinst -o -e /usr/lib/YaST/.configured2 ; then
     fi
 fi
 
-
-#
-# Stop blogd
-#
-killproc -QUIT /sbin/blogd
 
 #
 # Let YaST2 finish its installation, if you installed with YaST2
