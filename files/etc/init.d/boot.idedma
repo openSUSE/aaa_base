@@ -29,6 +29,7 @@ rc_reset
 
 # enable/disable DMA mode
 function idedma_main() {
+    local MODE DEVICE OPTIONS FIRST
     if [ "$DEVICES_FORCE_IDE_DMA" == "" ] ; then
 	exit 0;
     fi
@@ -37,26 +38,27 @@ function idedma_main() {
 
     OLDIFS=$IFS
     for dev in $DEVICES_FORCE_IDE_DMA ; do
-	IFS=":"
-	# get device and DMA mode
+	# Get device and DMA mode
 
 	MODE=""
 	DEVICE=""
-	LASTPART=""
-	FIRST="yes"
+	OPTIONS=""
+	FIRST=0
 
-	for d in $dev; do
-	    if [ $FIRST == "yes" ] ; then
-		DEVICE=$d
-		FIRST="no"
-	    else
-		DEVICE="$DEVICE$LASTPART"
-		LASTPART=":$d"
-		MODE=$d
-	    fi
+	# The setting e.g. "/dev/hda:69:-c1:-m16:-u1:-W1:-A1" should be
+	# expanded as "hdparm -d 1 -X 69 -c1 -m16 -u1 -W1 -A1 /dev/hda"
+
+	IFS=":"
+	for d in $dev ; do
+	    case $((FIRST++)) in
+	    0) DEVICE=$d ;;
+	    1) MODE=$d   ;;
+	    *) OPTIONS="$OPTIONS$d:"
+	    esac
 	done
+	unset d
 
-	# set DMA mode by hdparm utility
+	# Set DMA mode by hdparm utility
 	if [ -z "$MODE" ] ; then
 	    echo "Missing DMA mode for device $DEVICE"
 	    rc_failed  
@@ -65,11 +67,13 @@ function idedma_main() {
 	elif [ $MODE == "on" ] ; then
 	    $HDPARM -d 1 "$DEVICE" || rc_failed
 	else
-	    $HDPARM -d 1 -X "$MODE" "$DEVICE" || rc_failed
+	    $HDPARM -d 1 -X "$MODE" ${OPTIONS:+$OPTIONS} "$DEVICE" || rc_failed
 	fi
-    done
 
-    IFS=$OLDIFS
+	# Reset Internal Field Separator for the outer loop
+	IFS=$OLDIFS
+    done
+    unset dev
 
     rc_status -v
 }
