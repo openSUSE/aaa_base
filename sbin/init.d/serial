@@ -20,6 +20,14 @@
 # configuration can cause problems as well. I highly recommend using the
 # manual configuration lines to avoid trouble.
 #
+### BEGIN INIT INFO
+# Provides:          serial
+# Required-Start:    
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       Initializes the serial ports
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

@@ -9,6 +9,14 @@
 #
 # /sbin/rc<skeleton>
 #
+### BEGIN INIT INFO
+# Provides:
+# Required-Start:
+# Required-Stop:
+# Default-Start:
+# Default-Stop:
+# Description:
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

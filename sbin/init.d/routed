@@ -5,6 +5,14 @@
 #
 # /sbin/init.d/routed
 #
+### BEGIN INIT INFO
+# Provides:          routed
+# Required-Start:    route syslog
+# Required-Stop:
+# Default-Start:     3 5
+# Default-Stop:
+# Description:       Starts network routing daemon
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

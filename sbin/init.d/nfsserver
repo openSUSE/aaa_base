@@ -7,6 +7,14 @@
 #
 # /sbin/init.d/nfsserver
 #
+### BEGIN INIT INFO
+# Provides:          nfsserver
+# Required-Start:    portmap nfs syslog
+# Required-Stop:
+# Default-Start:     3 5
+# Default-Stop:
+# Description:       NFS server
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

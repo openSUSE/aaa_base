@@ -8,6 +8,15 @@
 #
 # /sbin/init.d/boot.setup
 #
+### BEGIN INIT INFO
+# Provides:          boot.setup
+# Required-Start:    serial
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       Main setup before leaving boot phase
+### END INIT INFO
+
 
 . /etc/rc.status
 . /etc/rc.config

@@ -5,6 +5,14 @@
 #
 # /sbin/init.d/dummy
 #
+### BEGIN INIT INFO
+# Provides:       dummy
+# Required-Start:
+# Required-Stop:
+# Default-Start:  2 3 5
+# Default-Stop:
+# Description:    Configures dummy network interface
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

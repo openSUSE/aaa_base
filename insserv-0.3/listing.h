@@ -1,0 +1,13 @@
+typedef enum _boolean {false, true} boolean;
+extern void follow_all();
+extern void show_all();
+extern void requiresl(const char * this, ...);
+extern void requiresv(const char * this, const char * requires);
+extern void runlevels(const char * this, const char * lvl);
+extern int makeprov(const char * name, const ino_t inode);
+extern void setorder(const char * name, const int order);
+extern void minorder(const char * name, const int order);
+extern int getorder(const char * name);
+extern boolean notincluded(const char * name, const int runlevel);
+extern boolean foreach(char ** name, int * order, const int runlevel);
+extern int maxorder;

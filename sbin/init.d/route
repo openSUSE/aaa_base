@@ -7,6 +7,14 @@
 #
 # /sbin/init.d/route		Version 0.6
 #
+### BEGIN INIT INFO
+# Provides: route
+# Required-Start: network firewall_setup
+# Required-Stop:
+# Default-Start:  2 3 5
+# Default-Stop:
+# Description:    Set up the routing table
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

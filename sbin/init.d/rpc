@@ -6,6 +6,14 @@
 #
 # /sbin/init.d/rpc
 #
+### BEGIN INIT INFO
+# Provides:       portmap ugidd
+# Required-Start: route
+# Required-Stop:
+# Default-Start:  3 5
+# Default-Stop:
+# Description:    DARPA port to RPC program number mapper
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

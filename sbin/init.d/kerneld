@@ -7,6 +7,14 @@
 #
 # /sbin/init.d/kerneld
 #
+### BEGIN INIT INFO
+# Provides:       kerneld
+# Required-Start:
+# Required-Stop:
+# Default-Start:  2 3 5
+# Default-Stop:
+# Description:    Automatically loading of kernel modules.
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

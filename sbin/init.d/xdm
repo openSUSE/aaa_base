@@ -8,6 +8,14 @@
 #
 # /sbin/init.d/xdm
 #
+### BEGIN INIT INFO
+# Provides:          xdm
+# Required-Start:    network ypclient syslog
+# Required-Stop:
+# Default-Start:     5
+# Default-Stop:
+# Description:       X Display Manager
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

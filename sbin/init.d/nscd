@@ -7,6 +7,14 @@
 #   and its symbolic  link
 # /sbin/rcnscd
 #
+### BEGIN INIT INFO
+# Provides:          nscd
+# Required-Start:    xntpd route nfs named syslog
+# Required-Stop:
+# Default-Start:     3 5
+# Default-Stop:
+# Description:       Name service cache
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

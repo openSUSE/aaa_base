@@ -6,6 +6,14 @@
 #
 # /sbin/init.d/inetd
 #
+### BEGIN INIT INFO
+# Provides:          inetd
+# Required-Start:    portmap nfs route syslog
+# Required-Stop:
+# Default-Start:     3 5
+# Default-Stop:
+# Description:       The internet super-server
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

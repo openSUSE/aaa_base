@@ -11,6 +11,14 @@
 # Saves and restores system entropy pool for higher quality
 # random number generation.
 #
+### BEGIN INIT INFO
+# Provides:       random
+# Required-Start:
+# Required-Stop:
+# Default-Start:  2 3 5
+# Default-Stop:
+# Description:    Script to snapshot random state and reload it at boot time.
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config

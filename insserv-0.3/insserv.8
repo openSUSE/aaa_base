@@ -1,0 +1,94 @@
+.\"
+.\" Copyright 1994-2000 Werner Fink, 1996-2000 SuSE GmbH Nuernberg, Germany.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.TH INSSERV 8 "Nov 10, 2000" "Version 1.16" "The SuSE boot concept"
+.UC 8
+.OS SuSE Linux
+.SH NAME
+Insserv \- Enable a installed system init script
+.SH SYNOPSIS
+.\"
+.B insserv
+.RI [[ / ] path/to/init.d/ ]
+.PP
+.B insserv
+.RI [[ / ] path/to/init.d/script ]
+.PP
+.B /usr/lib/lsb/install_initd
+.RI [[ / ] path/to/init.d/script ]
+.SH DESCRIPTION
+.B insserv
+enables a installed system init script (`boot script')
+by reading the comment header of the script, e.g.:
+.sp 1
+.in +1l
+.nf
+ ### BEGIN INIT INFO
+ # Provides:       boot_facility_1 [ boot_facility_2 ...]
+ # Required-Start: boot_facility_1 [ boot_facility_2 ...]
+ # Required-Stop:  boot_facility_1 [ boot_facility_2 ...]
+ # Default-Start:  run_level_1 [ run_level_2 ...]
+ # Default-Stop:   run_level_1 [ run_level_2 ...]
+ # Description:    multiline_description
+ ### END INIT INFO
+.fi
+.in -1l
+.sp 1
+and calculating the dependencies between all scripts.
+Hereby the
+.B Required-Stop
+and
+.B Default-Stop
+is ignored because the SuSE boot script concept
+uses a differential link scheme (see
+.IR init.d (7)).
+With known dependencies and runlevel(s)
+.B insserv
+sets and reorders the corresponding symbolic links
+of the concerned runlevels directories (see
+.IR init.d (7)).
+\."
+.SH ARGUMENTS
+.TP
+.RI [ / ] path/to/init.d/
+Relative or absolute path to the init base directory.
+This defaults to
+.I /sbin/init.d/
+the path of the SuSE boot concept (SystemV conform).
+Note that if a relative path is used
+.B insserv
+has to be called from the root directory.
+.TP
+.RI [ / ] path/to/init.d/script
+Relative or absolute path to a boot script.
+.B insserv
+check the existence of the script.
+\."
+.SH BUGS
+Boot script sometimes misses comments.
+.SH FILES
+.TP
+.I /sbin/init.d/
+path to the SuSE boot concept script base directory.
+.TP
+.I /etc/init.d
+symbolic link to
+.IR /sbin/init.d/ .
+This is required by the Linux Standard Base Specification (LSB).
+.\"
+.SH SEE ALSO
+.BR init.d (7),
+.BR init (7),
+.BR startproc (8),
+.BR checkproc (8),
+.BR killproc (8),
+.SH COPYRIGHT
+2000 Werner Fink,
+2000 SuSE GmbH Nuernberg, Germany.
+.SH AUTHOR
+Werner Fink <werner@suse.de>

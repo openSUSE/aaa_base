@@ -6,6 +6,14 @@
 #
 # /sbin/init.d/pcnfsd
 #
+### BEGIN INIT INFO
+# Provides:          pcnfsd
+# Required-Start:    portmap nfs syslog
+# Required-Stop:
+# Default-Start:     3 5
+# Default-Stop:
+# Description:       PC NFS server
+### END INIT INFO
 
 . /etc/rc.status
 . /etc/rc.config
