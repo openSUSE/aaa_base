@@ -11,7 +11,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          xdm
-# Required-Start:    $remote_fs $syslog ypbind
+# Required-Start:    $remote_fs $syslog
+# X-UnitedLinux-Should-Start: ypbind
 # Required-Stop:
 # Default-Start:     5
 # Default-Stop:

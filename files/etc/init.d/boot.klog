@@ -6,7 +6,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.klog
-# Required-Start:    serial boot.setup boot.isapnp
+# Required-Start:
+# X-UnitedLinux-Should-Start: serial boot.setup boot.isapnp
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:

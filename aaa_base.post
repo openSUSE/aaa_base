@@ -61,10 +61,13 @@ if [ ! -e etc/rc.config ]; then
 # Author: Werner Fink <werner@suse.de>, 1996
 #         Burchard Steinbild <feedback@suse.de>, 1996
 #
-# Configuration database for shell scripts in /etc/init.d, /sbin/SuSEconfig
-# and /etc/cron.daily/aaa_base*
+# The configuration databases for shell scripts in /etc/init.d,
+# /sbin/SuSEconfig and /etc/cron.daily/suse.de-* can now be found
+# in the /etc/sysconfig directory. This file should not be used any
+# longer and will disappear in one of the next releases.
 #
-# Please edit this file and execute /sbin/SuSEconfig to configure everything.
+# Please edit the files in the /etc/sysconfig directory and execute
+# /sbin/SuSEconfig to configure everything.
 #
 
 EOF

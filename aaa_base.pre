@@ -194,8 +194,6 @@ echo "#! /bin/sh
 #
 # script with local commands to be executed from init on system startup
 #
-. /etc/rc.config
-#
 # Here you should add things, that should happen directly after booting
 # before we're going to the first run level.
 #
@@ -218,8 +216,6 @@ echo "#! /bin/sh
 # /etc/init.d/halt.local
 #
 # script with local commands to be executed from init on system shutdown
-#
-. /etc/rc.config
 #
 # Here you should add things, that should happen directly before shuting
 # down.

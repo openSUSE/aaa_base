@@ -7,7 +7,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.localfs
-# Required-Start:    boot.proc boot.ibmsis boot.md boot.lvm
+# Required-Start:    boot.proc
+# X-UnitedLinux-Should-Start: boot.ibmsis boot.md boot.lvm
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:

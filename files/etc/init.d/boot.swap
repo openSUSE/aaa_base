@@ -7,7 +7,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.swap
-# Required-Start:    boot.lvm boot.localfs boot.crypto
+# Required-Start:    boot.localfs
+# X-UnitedLinux-Should-Start: boot.lvm boot.crypto
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
