@@ -165,7 +165,7 @@ stty $otty 0>&1
 # For the first logon on a virtual console.
 #
 test -e /etc/issue-SuSE-first-run && {
-    cat /etc/issue-SuSE-first-run
+    cat /etc/issue-SuSE-first-run > $REDIRECT
     rm -f /etc/issue-SuSE-first-run 2>/dev/null
 }
 
