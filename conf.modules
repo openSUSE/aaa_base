@@ -25,9 +25,12 @@ alias char-major-10    off
 # options sjcd           sjcd_base=0x340
 # options sonycd535      sonycd535=0x340
 # options isp16          isp16_cdrom_base=0x340 isp16_cdrom_irq=0 isp16_cdrom_dma=0 isp16_cdrom_type=Sanyo
-# options bpcd           bp_base=0x378
 
 # options ne             io=0x300 irq=5
+
+# Use this if you have two cards:
+# options ne             io=0x300,0x320 irq=5,7
+
 # options tulip          options=0
 # options 3c59x          options=0
 # options 3c501          io=0x280 irq=5
@@ -56,6 +59,8 @@ alias char-major-10    off
 # options eth16i         io=0x2a0 irq=10
 # options fmv18x         io=0x220 irq=10
 # options ni52           io=0x360 irq=9 memstart=0xd0000 memend=0xd4000
+# options bttv           card=2
+# options tuner          type=7
 
 options dummy0 -o dummy0
 options dummy1 -o dummy1
@@ -91,7 +96,8 @@ alias char-major-5        serial
 alias char-major-6        lp
 alias char-major-9        st
 alias char-major-10-135   off
-alias char-major-14       sound
+alias char-major-14       off
+# alias char-major-14       sound
 alias char-major-19       cyclades
 alias char-major-20       cyclades
 alias char-major-21       sg
@@ -104,7 +110,7 @@ alias char-major-48       riscom8
 alias char-major-49       riscom8
 alias char-major-75       specialix
 alias char-major-76       specialix
-alias char-major-81       off
+alias char-major-81       bttv
 
 alias binfmt-332          iBCS
 alias binfmt-518          iBCS
