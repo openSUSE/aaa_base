@@ -9,7 +9,7 @@
 #
 # /sbin/rcFOO
 #
-# System startup script for the nessus backend nessusd
+# System startup script for some example service or daemon
 #
 ### BEGIN INIT INFO
 # Provides: FOO
