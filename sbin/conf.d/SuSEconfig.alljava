@@ -6,6 +6,10 @@
 # check if we are started as root
 # only one of UID and USER must be set correctly
 
+. /etc/rc.config
+
+test "$CREATE_JAVALINK" = "yes" || exit 0
+
 if test "$UID" != 0 -a "$USER" != root; then
     echo "You must be root to start $0."
     exit 1
@@ -13,8 +17,8 @@ fi
 
 test -n "$ROOT" && exit 0
 
-JAVALINKTO=`rpm -q java java2 ibmjava2  IBMJava2-SDK 2>/dev/null | cut -d- -f 1 | head -n 1`
-JRELINKTO=`rpm -q javarunt ibmjre2 IBMJava2-JRE 2>/dev/null | cut -d- -f 1 | head -n 1`
+JAVALINKTO=`rpm -q java java2 ibmjava2  IBMJava2-SDK 2>/dev/null | sed s,-[^-]*$,,g | head -n 1`
+JRELINKTO=`rpm -q javarunt ibmjre2 IBMJava2-JRE 2>/dev/null | sed s,-[^-]*$,,g | head -n 1`
 if ! test -z "$JAVALINKTO" ; then
    test -L /usr/lib/java && rm /usr/lib/java
    TARGETDIR=`rpm -ql $JAVALINKTO|grep ^/usr/lib/jdk[^/]|head -n 1|cut -d/ -f 4`
