@@ -55,18 +55,10 @@ case "$1" in
 		rc_status -v1 -r
 	fi
 	
-	case `uname -r` in
-	    0.*|1.*|2.[01].*|2.2.?|2.2.10)
-	        echo -n "Running update (bdflush) daemon"
-	        /sbin/update
-	        rc_status -v -r
-		;;
-	esac
-
 	#
 	# If we use a serial console, don't use the fsck progress bar
 	#
-	FSCK_PROGRESSBAR=""
+	FSCK_PROGRESSBAR="-V"
         [ -x /sbin/showconsole ] && [ `/sbin/showconsole` = "/dev/tty1" ] && FSCK_PROGRESSBAR="-C"
 	#
 	# do fsck and start sulogin, if it fails.
@@ -86,9 +78,19 @@ case "$1" in
 	        # were corrected, but that the boot may proceed.
 	        # A return code of 2 or larger indicates failure.
 	        FSCK_RETURN=$?
-		test $FSCK_RETURN -lt 2
+		test $FSCK_RETURN -lt 4
 		rc_status -v1 -r
-	        if test $FSCK_RETURN -gt 1; then
+		if test $FSCK_RETURN -gt 1 -a $FSCK_RETURN -lt 4 ; then
+		    # if appropriate, switch bootsplash to verbose 
+		    # mode to make text messages visible.
+		    test -f /proc/splash && echo "verbose" > /proc/splash
+		    echo
+		    echo "fsck succeed, but reboot is required."
+		    echo
+		    sleep 1
+		    sync
+		    reboot -f
+		elif test $FSCK_RETURN -gt 3; then
 		    # if appropriate, switch bootsplash to verbose 
 		    # mode to make text messages visible.
 		    test -f /proc/splash && echo "verbose" > /proc/splash
