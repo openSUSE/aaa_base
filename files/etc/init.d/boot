@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright (c) 1996-2003 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 1996-2004 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
 # Author: Ruediger Oertel <ro@suse.de>, 1996-2002
@@ -91,9 +91,9 @@ rc_status -v -r
 #
 otty=$(stty -g)
 if test "$FLOW_CONTROL" = "yes" ; then
-    stty -nl  ixon ignbrk -brkint 0>&1
+    stty -nl  ixon ignbrk -brkint
 else
-    stty -nl -ixon ignbrk -brkint 0>&1
+    stty -nl -ixon ignbrk -brkint
 fi
 
 #
@@ -271,7 +271,7 @@ fi
 #
 # Restore old terminal settings
 #
-stty $otty 0>&1
+stty $otty
 
 #
 # Let YaST2 finish its installation, if you installed with YaST2
