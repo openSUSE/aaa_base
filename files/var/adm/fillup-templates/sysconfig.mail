@@ -1,6 +1,9 @@
+## Path:	Network/Mail/General
+## Description:	
+## Type:	string
+## Default:	""
 #
 # From:-Line in email and News postings
 # (otherwise the FQDN is used)
 #
 FROM_HEADER=""
-

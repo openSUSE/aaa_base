@@ -1,12 +1,15 @@
+## Path:	System/Environment/Clock
+## Description:	
+## Type:	string
 #
 # Set to "-u" if your system clock is set to UTC, and to "--localtime"
 # if your clock runs that way.
 #
 HWCLOCK=""
 
+## Type:	string(Europe/Berlin,Europe/London,Europe/Paris)
 #
 # Timezone (e.g. CET)
 # (this will set /usr/lib/zoneinfo/localtime)
 #
 TIMEZONE=""
-

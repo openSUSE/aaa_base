@@ -1,3 +1,7 @@
+## Path:	System/Boot
+## Description:	
+## Type:	yesno
+## Default:	no
 #
 # For interactive debugging of the startup process. If set
 # to "yes" the system will ask whether to confirm every
@@ -5,12 +9,16 @@
 #
 PROMPT_FOR_CONFIRM="no"
 
+## Type:	integer
+## Default:	5
 #
 # For interactive debugging of the startup process. How long
 # wait before the default answer is assumed.
 #
 CONFIRM_PROMPT_TIMEOUT="5"
 
+## Type:	yesno
+## Default:	no
 #
 # If set to "yes" this enables to stop the boot process by
 # pressing Ctrl-S and continue with Ctrl-Q (xon/xoff
@@ -18,6 +26,8 @@ CONFIRM_PROMPT_TIMEOUT="5"
 #
 FLOW_CONTROL="no"
 
+## Type:	integer
+## Default:	10
 #
 # This  variable will limits the maximum number of file system
 # checkers that can be running at one time.  This allows configurations
@@ -25,4 +35,4 @@ FLOW_CONTROL="no"
 # system checkers at once, which might overload CPU and memory resources
 # available on the system.
 #
-FSCK_MAX_INST=10
+FSCK_MAX_INST="10"

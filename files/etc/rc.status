@@ -119,8 +119,9 @@ _rc_status_all=0
 _rc_todo=$1
 function rc_check ()
 {
-    _rc_status=$?
-    test $_rc_status -eq 0 || _rc_status_all=$_rc_status
+    _rc_status_ret=$?
+    test $_rc_status_ret -eq 0 || _rc_status=$_rc_status_ret
+    test $_rc_status     -eq 0 || _rc_status_all=$_rc_status
     return $_rc_check_ret
 }
 function rc_reset ()
@@ -135,6 +136,7 @@ if   test "$_rc_todo" = "status" ; then
 function rc_status ()
 {
     rc_check
+    _rc_status_ret=$_rc_status
     for i ; do
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])
@@ -148,20 +150,23 @@ function rc_status ()
 	    4)	echo -en "$rc_unknown"	 ;; # status is unknown
 	    esac
 	    echo -en "$rc_restore"
-	    test -z "${i#-v}" && echo ;;
+	    test -z "${i#-v}" && echo
+	    # reset _rc_status to 0 after verbose case
+	    _rc_status=0 ;;
 	-r) rc_reset ;;
 	-s) echo -e "$rc_skipped" ; rc_failed 3 ;;
 	-u) echo -e "$rc_unused"  ; rc_failed 3 ;;
 	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
 	esac
     done
-    return $_rc_status
+    return $_rc_status_ret
 }
 elif test -n "$_rc_todo" ; then
 function rc_status ()
 {
     rc_check
     test "$_rc_status" -gt 7 && rc_failed 1
+    _rc_status_ret=$_rc_status
     case "$_rc_todo" in
     stop)
 	# program is not running which
@@ -185,19 +190,22 @@ function rc_status ()
 	    *)	echo -en "$rc_failed"  1>&2 ;; # unknown (maybe used in future)
 	    esac
 	    echo -en "$rc_restore"
-	    test -z "${i#-v}" && echo ;;
+	    test -z "${i#-v}" && echo
+	    # reset _rc_status to 0 after verbose case
+	    _rc_status=0 ;;
 	-r) rc_reset ;;
 	-s) echo -e "$rc_skipped" 1>&2 ; rc_failed 5 ;;
 	-u) echo -e "$rc_unused"  1>&2 ; rc_failed 6 ;;
 	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
 	esac
     done
-    return $_rc_status
+    return $_rc_status_ret
 }
 else
 function rc_status ()
 {
     rc_check
+    _rc_status_ret=$_rc_status
     for i ; do
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])
@@ -205,14 +213,16 @@ function rc_status ()
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    test $_rc_status -gt 0 && echo -en "$rc_failed" || echo -en "$rc_done"
 	    echo -en "$rc_restore"
-	    test -z "${i#-v}" && echo ;;
+	    test -z "${i#-v}" && echo
+	    # reset _rc_status to 0 after verbose case
+	    _rc_status=0 ;;
 	-r) rc_reset ;;
 	-s) echo -e "$rc_skipped"  ; return 0 ;;
 	-u) echo -e "$rc_unused"   ; return 0 ;;
 	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
 	esac
     done
-    return $_rc_status
+    return $_rc_status_ret
 }
 fi
 

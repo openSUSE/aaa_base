@@ -1,3 +1,7 @@
+## Path:	Network/Proxy
+## Description:	
+## Type:	string
+## Default:	""
 #
 # Some programs (e.g. lynx, arena and wget) support proxies, if set in
 # the environment.  SuSEconfig can add these environment variables to
@@ -6,13 +10,16 @@
 # Example: HTTP_PROXY="http://proxy.provider.de:3128/"
 HTTP_PROXY=""
 
+## Type:	string
+## Default:	""
 #
 # Example: FTP_PROXY="http://proxy.provider.de:3128/"
 #
 FTP_PROXY=""
 
+## Type:	string(localhost)
+## Default:	localhost
 #
 # Example: NO_PROXY="www.me.de, do.main, localhost"
 #
 NO_PROXY="localhost"
-

@@ -1,18 +1,28 @@
+## Path:	Desktop/Display manager
+## Description:	
+## Type:	string(kdm,xdm,gdm,wdm,console)
+## Default:	""
 #
 # Here you can set the default Display manager (kdm/xdm/gdm/wdm/console).
 #
 DISPLAYMANAGER=""
 
+## Type:	yesno
+## Default:	no
 #
 # Allow remote access to your display manager (kdm only for now)
 #
 DISPLAYMANAGER_REMOTE_ACCESS="no"
 
+## Type:	string
+## Default:	no
 #
 # Allow remote access of the user root to your display manager
 #
 DISPLAYMANAGER_ROOT_LOGIN_REMOTE="no"
 
+## Type:	yesno
+## Default:	yes
 #
 # let the displaymanager start a local Xserver
 # set to "no" for remote-access only

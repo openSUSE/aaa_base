@@ -1,21 +1,31 @@
+## Path:	System/Cron
+## Description:	
+## Type:	integer
+## Default:	0
 #
 # cron.daily can check for old files in tmp-dirs. It will delete all files
 # not accessed for more than MAX_DAYS_IN_TMP. If MAX_DAYS_IN_TMP is not set
 # or set to 0, this feature will be disabled. 
 #
-MAX_DAYS_IN_TMP=0
+MAX_DAYS_IN_TMP="0"
 
+## Type:	string
+## Default:	"/tmp /var/tmp"
 #
 # This variable contains a list of directories, in which old files are to
 # be searched and deleted.
 #
 TMP_DIRS_TO_CLEAR="/tmp /var/tmp"
 
+## Type:	string
+## Default:	root
 #
 # In OWNER_TO_KEEP_IN_TMP, you can specify, whose files shall not be deleted.
 #
 OWNER_TO_KEEP_IN_TMP="root"
 
+## Type:	yesno
+## Default:	no
 #
 # "Set this to "yes" to entirely remove (rm -rf) all  files and subdirectories
 # from the temporary directories defined in TMP_DIRS_TO_CLEAR on bootup.
@@ -23,4 +33,3 @@ OWNER_TO_KEEP_IN_TMP="root"
 # be removed without exception."
 #
 CLEAR_TMP_DIRS_AT_BOOTUP="no"
-

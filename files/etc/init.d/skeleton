@@ -115,15 +115,15 @@ test -r $FOO_CONFIG || exit 6
 # Shell functions sourced from /etc/rc.status:
 #      rc_check         check and set local and overall rc status
 #      rc_status        check and set local and overall rc status
-#      rc_status -v     ditto but be verbose in local rc status
-#      rc_status -v -r  ditto and clear the local rc status
+#      rc_status -v     be verbose in local rc status and clear it afterwards
+#      rc_status -v -r  ditto and clear both the local and overall rc status
 #      rc_status -s     display "skipped" and exit with status 3
 #      rc_status -u     display "unused" and exit with status 3
 #      rc_failed        set local and overall rc status to failed
 #      rc_failed <num>  set local and overall rc status to <num>
-#      rc_reset         clear local rc status (overall remains)
+#      rc_reset         clear both the local and overall rc status
 #      rc_exit          exit appropriate to overall rc status
-#      rc_active	checks whether a service is activated by symlinks
+#      rc_active        checks whether a service is activated by symlinks
 #      rc_splash arg    sets the boot splash screen to arg (if active)
 . /etc/rc.status
 

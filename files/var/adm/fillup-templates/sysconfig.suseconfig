@@ -1,11 +1,17 @@
+## Path:	System/SuSEconfig
+## Description:	
+## Type:	yesno
+## Default:	yes
 #
 # Some people don't want SuSEconfig to modify the system. With this
 # entry you can disable SuSEconfig completely. 
 # Please don't contact our support if you have trouble configuring your 
 # system after having disabled SuSEconfig.  (yes/no)
 #
-ENABLE_SUSECONFIG=yes
+ENABLE_SUSECONFIG="yes"
 
+## Type:	string(root,"")
+## Default:	root
 #
 # SuSEconfig can mail reports (created by YaST or included in packages)
 # to you.  Here you can set the address.  If you don't want reports to
@@ -13,6 +19,8 @@ ENABLE_SUSECONFIG=yes
 #
 MAIL_REPORTS_TO="root"
 
+## Type:	list(warn,all)
+## Default:	warn
 #
 # There are two levels of mailing. If you set MAIL_LEVEL it to "warn"
 # you will only get the important mails. If you set it to "all", you will
@@ -20,31 +28,41 @@ MAIL_REPORTS_TO="root"
 #
 MAIL_LEVEL="warn"
 
+## Type:	yesno
+## Default:	yes
 #
 # We have a small perl script to generate the usr/info/dir file. Do you
 # want this file to be generated? (yes/no)
 #
 CREATE_INFO_DIR="yes"
 
+## Type:	yesno
+## Default:	yes
 #
 # SuSEconfig can do some checks and modifications in /etc/hosts.
 # If this is not wanted, set the following variable to 'no' (yes/no).
 #
-CHECK_ETC_HOSTS=yes
+CHECK_ETC_HOSTS="yes"
 
+## Type:	yesno
+## Default:	no
 #
 # If CHECK_ETC_HOSTS is set to yes, SuSEconfig sorts your /etc/hosts.
 # But in some cases this may be unwanted. So here is a flag which tells
 # SuSEconfig to "beautify" your /etc/hosts. (yes/no)
 #
-BEAUTIFY_ETC_HOSTS=no
+BEAUTIFY_ETC_HOSTS="no"
 
+## Type:	yesno
+## Default:	no
 #
 # If SORT_PASSWD_BY_UID is set to yes, SuSEconfig sorts your /etc/passwd
 # and /etc/group by uid/gid.
 #
-SORT_PASSWD_BY_UID=no
+SORT_PASSWD_BY_UID="no"
 
+## Type:	yesno
+## Default:	no
 #
 # Do you want to have "." in root path?  This is not recommended, but
 # many people do prefer it (yes/no). The setting affects all system
@@ -52,15 +70,18 @@ SORT_PASSWD_BY_UID=no
 #
 CWD_IN_ROOT_PATH="no"
 
+## Type:	yesno
+## Default:	yes
 #
 # Do you want to have "." in the path for normal users?
 # Defaults to "yes" since this has been the case for years.
 #
 CWD_IN_USER_PATH="yes"
 
+## Type:	list(no,yes,octave)
+## Default:	no
 #
 # Set to "yes" or "quint" to play a quint tone sequence at system halt or reboot
 # or set to "octave" to play octave sound at that occasion.
 #
 HALT_SOUND="no"
-

@@ -1,5 +1,8 @@
+## Path:	System/Printing
+## Description:	
+## Type:	string(lp,lp0,lp1,printer0,printer1)
+## Default:	lp
 #
 # Name of the printer queue used when 'lpr' is invoked with no '-P'
 #
 DEFAULT_PRINTER="lp"
-

@@ -1,10 +1,15 @@
+## Path:	Hardware/IDE
+## Description:	
+## Type:	string
+## Default:	""
 #
 # force dma to "on" for the following ide devices
 #
 DEVICES_FORCE_IDE_DMA_ON=""
 
+## Type:	string
+## Default:	""
 #
 # force dma to "off" for the following ide devices
 #
 DEVICES_FORCE_IDE_DMA_OFF=""
-

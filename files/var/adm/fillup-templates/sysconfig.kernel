@@ -1,3 +1,6 @@
+## Path:	System/Kernel
+## Description:	
+## Type:	string
 #
 # This variable contains the list of modules to be added to the initial
 # ramdisk by calling the script "mk_initrd"
@@ -5,10 +8,10 @@
 #
 INITRD_MODULES=""
 
+## Type:	integer
 #
 # Size parameter for mounting the shmfs filesystem. The kernel defaults
 # to 50% of the available RAM size, but this might not be enough for
 # some special setups.
 #
 SHMFS_SIZE=""
-
