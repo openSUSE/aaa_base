@@ -218,7 +218,7 @@ for i in $runrc/S${rex}*; do
     test -x "$1"  && continue
 
     if test "$DO_CONFIRM" = "yes" ; then
-	rc_confirm -t 30 "Start service $service"
+	rc_confirm -t 5 "Start service $service"
 	case "$?" in
 	0) true     ;;
 	1) continue ;;

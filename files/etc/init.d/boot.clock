@@ -22,7 +22,7 @@ rc_reset
 case "$1" in
   start)
    # set and adjust the CMOS clock
-   if test "$HOSTTYPE" = "s390" ; then
+   if [ "$HOSTTYPE" = "s390" -o "$HOSTTYPE" = "s390x" ] ; then
     echo -n Setting up the system clock
     # On s390 the hwclock is set outside Linux currently.  The kernel
     # always assumes it to be set to UTC.  So if it is set to local

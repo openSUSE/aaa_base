@@ -47,11 +47,11 @@ case "$check" in
     *confirm*) DO_CONFIRM=yes ;;
 esac
 if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
-    echo -en "${extd}Enter (I)nteractive startup mode?${norm}"
-    read -t 30 -n 1 -p " [${extd}I${norm}] " answer
+    echo -en "${extd}Enter Interactive startup mode?${norm}"
+    read -t 15 -n 1 -p " ${extd}y${norm}/[${extd}n${norm}] " answer
     case "$anser" in
-    [iI]) DO_CONFIRM=yes ;;
-    *)    DO_CONFIRM=    ;;
+    [yYiI]) DO_CONFIRM=yes ;;
+    *)      DO_CONFIRM=    ;;
     esac
     unset answer
 fi
@@ -73,7 +73,7 @@ if test -d /etc/init.d/boot.d/ ; then
     for i in /etc/init.d/boot.d/S*; do
 	test -f $i || continue
 	if test "$DO_CONFIRM" = "yes" ; then
-	    rc_confirm -t 30 "Start bootup script ${i##*/S[0-9][0-9]}" < $REDIRECT > $REDIRECT 2>&1
+	    rc_confirm -t 5 "Start bootup script ${i##*/S[0-9][0-9]}" < $REDIRECT > $REDIRECT 2>&1
 	    case "$?" in
 	    0) true     ;;
 	    1) continue ;;
