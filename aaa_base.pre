@@ -68,6 +68,7 @@ wnn:x:66:100:Wnn System Account:/var/lib/wnn:/bin/false
 pop:x:67:100:pop admin:/var/lib/pop:/bin/false
 perforce:x:68:60:perfoce admin:/var/lib/perforce:/bin/false
 sapdb:x:69:61:SAPDB demo user:/var/opt/sapdb:/bin/bash
+db4web:x:2103:100:DB4Web user:/opt/db4web:/bin/false
 nobody:x:65534:65534:nobody:/var/lib/nobody:/bin/bash" > var/adm/fillup-templates/passwd.aaa_base
 echo "root:x:0:root
 bin:x:1:root,bin,daemon
