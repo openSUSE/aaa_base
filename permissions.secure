@@ -258,7 +258,7 @@
 /usr/X11R6/bin/Xwrapper                 root.root       4755
 /usr/X11R6/bin/xemacs                   root.root       0755
 /usr/bin/emacs                          root.root       0755
-/usr/bin/man                           man.root         4755
+/usr/bin/man                            root.root       4755
 # turned off write and wall by disabling sgid tty:
 /usr/bin/wall                          root.tty         0755
 /usr/bin/write                         root.tty         0755

@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.15
+# Version 1.16
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
@@ -29,6 +29,9 @@
 # (c) 2000 Karsten Keil   option and kernel 2.4 support
 #
 # ChangeLog:
+#
+# 14/5/2001:	v1.16
+#  - automagically add lvm-mod.o
 #
 # 10/5/2001:	v1.15
 #  - copy ld-*so* to initrd, not ld-2.2.so
@@ -256,6 +259,11 @@ echo "using \"$rootdev\" as root device (mounted on \"$root_dir\")"
 [ -f "$root_dir/etc/rc.config" ] && . $root_dir/etc/rc.config
 
 [ -z "$modules" ] && modules="$INITRD_MODULES"
+
+if [ "$root_lvm" = 1 ] ; then
+  # add lvm-mod if missing
+  echo " $modules " | grep -q " lvm-mod " || modules="lvm-mod $modules"
+fi
 
 [ "$modules" -o $root_lvm = 1 ] || {
   ( cd $root_dir$boot_dir ; rm -f $initrds )
