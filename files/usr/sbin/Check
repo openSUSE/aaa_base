@@ -10,20 +10,20 @@ test "$UID" = 0 -o ! -z "$RPM_BUILD_ROOT" || {
 
 do_gzip() {
 	while read input; do
-		if test -f $input.gz; then
+		if test -f "$input.gz"; then
 			#echo "Remove old file $input.gz"
-			rm -f $input.gz
+			rm -f "$input.gz"
 		fi
-		if test -L $input; then
+		if test -L "$input"; then
 			link=`perl -e 'print readlink($ARGV[0]);' -- "$input"`
-			test -d $link && continue
-			test -d $RPM_BUILD_ROOT/$link && continue
-			rm -f $input
-			ln -sf $link.gz $input.gz
+			test -d "$link" && continue
+			test -d "$RPM_BUILD_ROOT/$link" && continue
+			rm -f "$input"
+			ln -sf "$link.gz" "$input.gz"
 		else
-			gzip -f9 $input
+			gzip -nf9 "$input"
 		fi
-		ls -l $input.gz
+		ls -l "$input.gz"
 	done
 	return
 }
