@@ -128,8 +128,10 @@ EOM
 # the kernel images to use; must be in $boot_dir
 kernels_default="vmlinuz vmlinuz.suse"
 arch=`uname -m`
+arch=${arch/ppc64/ppc}
 [ "$arch" = ppc ] && kernels_default="vmlinux"
 [ "$arch" = alpha ] && kernels_default="vmlinux.gz vmlinux.suse.gz"
+test -d /proc/iSeries && kernels_default="vmlinux64"
 
 # initial ram disks (corresponding to $kernels); dto. in $boot_dir
 initrds_default="initrd initrd.suse"
