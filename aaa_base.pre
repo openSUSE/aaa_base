@@ -149,7 +149,6 @@ for LOCALFILE in root/bin/cron.daily.local \
 		sbin/init.d/halt.local \
 		usr/sbin/usradd.local \
 		usr/sbin/usrdel.local \
-		usr/sbin/useradd.local \
 		usr/sbin/userdel.local ; do
     test -f $LOCALFILE || continue
     LOCALFILE_CONTAINS_DATA=false

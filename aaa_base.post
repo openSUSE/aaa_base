@@ -207,23 +207,6 @@ chown root.root var/log/lastlog
 touch var/log/wtmp
 chmod 664 var/log/wtmp
 chown root.tty var/log/wtmp
-if test -e usr/sbin/usradd.local -a ! -e usr/sbin/useradd.local ; then
-    cp usr/sbin/usradd.local usr/sbin/useradd.local
-fi
-if test ! -e usr/sbin/useradd.local ; then
-    mkdir -p usr/sbin
-    cat << EOT > usr/sbin/useradd.local
-#!/bin/bash
-#
-# Here you can add your own stuff, that should be done for every new user.
-#
-# When you create a new user with YaST, this script will be called
-# with the new login name as parameter.  The rest of data can be taken
-# from /etc/passwd.
-#
-EOT
-    chmod 744 usr/sbin/useradd.local
-fi
 if test -e usr/sbin/usrdel.local -a ! -e usr/sbin/userdel.local ; then
     cp usr/sbin/usrdel.local usr/sbin/userdel.local
 fi
