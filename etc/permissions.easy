@@ -122,5 +122,11 @@
 /etc/permissions.local                 root.root         644
 /etc/permissions.paranoid              root.root         644
 
-
+#devices
+/dev/fd0                               root.disk         666
+/dev/fd0h1440                          root.disk         666
+/dev/fd0u1440                          root.disk         666
+/dev/fd1                               root.disk         666
+/dev/fd1h1440                          root.disk         666
+/dev/fd1u1440                          root.disk         666
 
