@@ -23,42 +23,47 @@ if test "$CHECK_NEWPACKAGE" != false -a -x /usr/X11R6/bin/mkfontdir ; then
                 /usr/X11R6/lib/X11/fonts/TTF \
                 /usr/X11R6/lib/X11/fonts/Type1 \
                 /usr/X11R6/lib/X11/fonts/Speedo \
-		/usr/X11R6/lib/X11/fonts/CID ; do
-	if test -d $FDIR ; then
+                /usr/X11R6/lib/X11/fonts/CID ; do
+        if test -d $FDIR ; then
             FSHORT=${FDIR##/usr/X11R6/lib/X11/fonts/}
-	    FONTS_SCALE_LIST=$( find $FDIR -follow -name "fonts.scale.*" )
-	    if [ -n "$FONTS_SCALE_LIST" ] ; then
+            FONTS_SCALE_LIST=$( find $FDIR -follow -name "fonts.scale.*" )
+            if [ -n "$FONTS_SCALE_LIST" ] ; then
                 echo "Updating fonts.scale for $FSHORT"
-		echo 0 > $FDIR/fonts.scale
-		for FONTS_SCALE in $FONTS_SCALE_LIST
-		do
-		    case $FONTS_SCALE in 
-			*~|*.swp|*.bak|*.sav|*.save|*.rpmsave|*.rpmorig|*.rpmnew)
-			    continue
-			    ;;
-			*)
-			    grep -v "^[[:space:][:digit:]]*$" $FONTS_SCALE >> $FDIR/fonts.scale
-			    ;;
-		    esac
-		done
-	    fi
-	fi
+                echo 0 > $FDIR/fonts.scale
+                for FONTS_SCALE in $FONTS_SCALE_LIST
+                do
+                    case $FONTS_SCALE in 
+                        *~|*.swp|*.bak|*.sav|*.save|*.rpmsave|*.rpmorig|*.rpmnew)
+                            continue
+                            ;;
+                        *)
+                            grep -v "^[[:space:][:digit:]]*$" $FONTS_SCALE >> $FDIR/fonts.scale
+                            ;;
+                    esac
+                done
+            fi
+        fi
     done
     MKXPARMS=""
     if [ -d /usr/X11R6/lib/X11/fonts/encodings ] ; then
-	MKXPARMS="-e /usr/X11R6/lib/X11/fonts/encodings"
+        MKXPARMS="-e /usr/X11R6/lib/X11/fonts/encodings"
     fi
     if [ -d /usr/X11R6/lib/X11/fonts/encodings/large ] ; then
-	MKXPARMS="$MKXPARMS -e /usr/X11R6/lib/X11/fonts/encodings/large"
+        MKXPARMS="$MKXPARMS -e /usr/X11R6/lib/X11/fonts/encodings/large"
     fi
     for FDIR in `/usr/bin/find /usr/X11R6/lib/X11/fonts/* -type d` ; do
-	if [ ! -f $FDIR/fonts.dir -o $FDIR -nt $FDIR/fonts.dir ] ; then
+        if [ ! -f $FDIR/fonts.dir -o $FDIR -nt $FDIR/fonts.dir ] ; then
             FSHORT=${FDIR##/usr/X11R6/lib/X11/fonts/}
-	    echo "Updating X11 font directory $FSHORT..."
-	    /usr/X11R6/bin/mkfontdir $MKXPARMS $FDIR
-	fi
+            if [ -x /usr/X11R6/bin/mkfontdir ] ; then
+                echo "Updating X11 font directory $FSHORT..."
+                /usr/X11R6/bin/mkfontdir $MKXPARMS $FDIR
+            fi
+        fi
     done
 fi
 
-echo "create XftCache files ..."
-/usr/X11R6/bin/xftcache
+if [ -x /usr/X11R6/bin/xftcache ]; then
+    echo "create XftCache files ..."
+    /usr/X11R6/bin/xftcache
+fi
+
