@@ -12,20 +12,24 @@ shopt -s extglob
 function _cd_ ()
 {
     local c=${COMP_WORDS[COMP_CWORD]}
-    local o="$IFS"
+    local o="$IFS" x
     IFS='
 '
     case "$c" in
     \~*) COMPREPLY=($(compgen -u -- "$c")) ;;
-    *)   COMPREPLY=($(compgen -d -- "$c")) ;;
+    *)	 COMPREPLY=($(compgen -d -- "$c"))
+	 case "$1" in
+	 mkdir)
+	     for x in $(compgen -f -S .d -- "${c%.}") ; do
+		 test -d "${x%.d}" || COMPREPLY=(${COMPREPLY[@]} ${x})
+	     done
+	 esac
     esac
     IFS="$o"
 }
 
-complete -A directory -F _cd_		cd rmdir pushd mkdir chroot chrootx
+complete -A directory -F _cd_		cd rmdir pushd chroot chrootx
 complete -A directory -A file -F _cd_	mkdir
-complete -A directory -A file		chown chgrp chmod chattr ln
-complete -A directory -A file		more cat less strip grep vi ed
 
 _file_ ()
 {
@@ -37,15 +41,18 @@ _file_ ()
 
     case "$1" in
     compress)		e='*.Z'					;;
+    bzip2)		e='*.bz2'				;;
     bunzip2)		e='!*.bz2'				;;
-    gunzip)		e='!*.+(gz|Z)'				;;
+    gzip)		e='*.+(gz|z|Z)'				;;
+    gunzip)		e='!*.+(gz|z|Z)'			;;
     uncompress)		e='!*.Z'				;;
     unzip)		e='!*.+(zip|ZIP|jar|exe|EXE)'		;;
     gs|ghostview)	e='!*.+(eps|EPS|ps|PS|pdf|PDF)'		;;
-    gv)			e='!*.+(eps|EPS|ps|ps.gz|pdf|PDF)'	;;
+    gv)			e='!*.+(eps|EPS|ps|PS|ps.gz|pdf|PDF)'	;;
     acroread|xpdf)	e='!*.+(pdf|PDF)'			;;
     dvips|xdvi)		e='!*.+(dvi|DVI)'			;;
     tex|latex)		e='!*.+(tex|TEX|texi|latex)'		;;
+    *)			e='!*'
     esac
     IFS='
 '
@@ -54,7 +61,9 @@ _file_ ()
 }
 
 complete -d -X '.*' -F _file_		compress \
+					bzip2 \
 					bunzip2 \
+					gzip \
 					gunzip \
 					uncompress \
 					unzip \
@@ -63,13 +72,15 @@ complete -d -X '.*' -F _file_		compress \
 					acroread xpdf \
 					dvips xdvi \
 					tex latex
+complete -A directory -F _file_		chown chgrp chmod chattr ln
+complete -A directory -F _file_		more cat less strip grep vi ed
 
 complete -A function -A alias -A command -A builtin type
 
 complete -A function			function
 complete -A alias			alias unalias
 complete -A variable			unset local readonly
-complete -A variable -A file		export
+complete -A variable -F _file_		export
 complete -A variable -A export		unset
 complete -A shopt			shopt
 complete -A setopt			set
@@ -78,7 +89,7 @@ complete -A user			talk su login sux
 complete -A builtin			builtin
 complete -A export			printenv
 complete -A command			command which nohup exec nice eval 
-complete -A command -A file		ltrace strace gdb
+complete -A command -F _file_		ltrace strace gdb
 HOSTFILE=""
 test -s $HOME/.hosts && HOSTFILE=$HOME/.hosts
 complete -A hostname			ping telnet rsh ssh slogin \

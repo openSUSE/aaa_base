@@ -23,7 +23,7 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 }
 . $r/lib/YaST/SuSEconfig.functions
 
-for i in $r/etc/rc.config $r/etc/sysconfig/suseconfig ; do
+for i in $r/etc/rc.config $r/etc/sysconfig/suseconfig $r/etc/sysconfig/mail ; do
   if test ! -f $i ; then
     echo "No $i found."
     exit 1

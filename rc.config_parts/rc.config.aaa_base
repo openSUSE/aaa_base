@@ -4,25 +4,6 @@
 DEFAULT_PRINTER="lp"
 
 #
-# SuSEconfig can do some checks and modifications in /etc/hosts. 
-# If this is not wanted, set the following variable to 'no' (yes/no).
-#
-CHECK_ETC_HOSTS=yes
-
-#
-# If CHECK_ETC_HOSTS is set to yes, SuSEconfig sorts your /etc/hosts.
-# But in some cases this may be unwanted. So here is a flag which tells
-# SuSEconfig to "beautify" your /etc/hosts. (yes/no)
-#
-BEAUTIFY_ETC_HOSTS=no
-
-#
-# If SORT_PASSWD_BY_UID is set to yes, SuSEconfig sorts your /etc/passwd
-# and /etc/group by uid/gid.
-#
-SORT_PASSWD_BY_UID=no
-
-#
 # Used for News-Postings.
 #
 ORGANIZATION=""
@@ -31,12 +12,6 @@ ORGANIZATION=""
 # News server.
 #
 NNTPSERVER="news"
-
-#
-# From:-Line in email and News postings
-# (otherwise the FQDN is used)
-#
-FROM_HEADER="YAST_ASK"
 
 #
 # When shutting down routing, all net connection can be closed (not useful
@@ -117,19 +92,6 @@ OWNER_TO_KEEP_IN_TMP="root"
 # be removed without exception."
 #
 CLEAR_TMP_DIRS_AT_BOOTUP="no"
-
-#
-# Do you want to have "." in root path?  This is not recommended, but
-# many people do prefer it (yes/no). The setting affects all system
-# users (with uid < 100)
-#
-CWD_IN_ROOT_PATH="no"
-
-#
-# Do you want to have "." in the path for normal users?
-# Defaults to "yes" since this has been the case for years.
-#
-CWD_IN_USER_PATH="yes"
 
 #
 # Attention! This variable PATH is NOT setting the PATH for user or root

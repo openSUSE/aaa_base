@@ -1,0 +1,6 @@
+#
+# From:-Line in email and News postings
+# (otherwise the FQDN is used)
+#
+FROM_HEADER="YAST_ASK"
+
