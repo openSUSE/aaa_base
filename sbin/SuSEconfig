@@ -592,11 +592,11 @@ if test -n "$NO_PROXY" ; then
     echo "setenv no_proxy '$NO_PROXY'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 
+SAVEPATH=$PATH
+PATH=$PATH:/usr/X11R6/bin:/opt/kde/bin:/opt/gnome/bin:/usr/openwin/bin
 WINDOWMANAGER=`type -p $DEFAULT_WM`
-test -z "$WINDOWMANAGER" -a -n "$DEFAULT_WM" && {
-    test -x /usr/X11R6/bin/$DEFAULT_WM && \
-        WINDOWMANAGER=/usr/X11R6/bin/$DEFAULT_WM
-}
+PATH=$SAVEPATH
+unset SAVEPATH
 test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/kde
 echo "test -z \"\$WINDOWMANAGER\" && WINDOWMANAGER=$WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo "export WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
