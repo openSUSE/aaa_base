@@ -257,12 +257,6 @@ CWD_IN_ROOT_PATH="no"
 CWD_IN_USER_PATH="yes"
 
 #
-# If you want that new passwords will be checked through cracklib,
-# set PASSWD_USE_CRACKLIB to "yes".
-#
-PASSWD_USE_CRACKLIB="no"
-
-#
 # Attention! This variable PATH is NOT setting the PATH for user or root
 # shells. It is only used internally for /etc/init.d/*, SuSEconfig and 
 # cron.daily. Please do NOT change PATH here.

@@ -31,6 +31,7 @@ alias binfmt-518          iBCS
 alias binfmt-002c         iBCS
 else
 alias char-major-30       abi-ibcs
+alias binfmt-0004         binfmt_coff
 alias binfmt-332          abi-ibcs
 alias binfmt-518          abi-ibcs
 alias binfmt-002c         abi-ibcs

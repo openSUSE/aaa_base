@@ -23,22 +23,10 @@ DISABLE_ECN="yes"
 MODEM="YAST_ASK"
 
 #
-# If you want to allow root logins from other machines, set ROOT_LOGIN_REMOTE
-# to "yes". (Logging in via ssh is not affected by this variable since SSH
-# is widely accepted as a safe login method).
-#
-ROOT_LOGIN_REMOTE="no"
-
-#
 # SuSEconfig can do some modifications to /etc/inittab.  If you don't want
 # this, set CHECK_INITTAB to "no".  (yes/no)
 #
 CHECK_INITTAB=yes
-
-#
-# Here you can set the default window manager (kde, fvwm, ...)
-#
-DEFAULT_WM=kde
 
 #
 # CONSOLE_SHUTDOWN determines how ctrl-alt-del is handled.
@@ -46,12 +34,6 @@ DEFAULT_WM=kde
 # feature. (ignore/reboot/halt)
 #
 CONSOLE_SHUTDOWN=reboot
-
-#
-# SERIAL_CONSOLE is used to add a serial terminal to inittab and securetty.
-# The format is "ttyS0,9600" as used in the kernel commandline.
-#
-SERIAL_CONSOLE=""
 
 #
 # BOOT_SPLASH can be set to "no" to turn off the splash-screen on console 1

@@ -1,3 +1,21 @@
+#
+# If you want that new passwords will be checked through cracklib,
+# set PASSWD_USE_CRACKLIB to "yes".
+#
+PASSWD_USE_CRACKLIB="no"
+
+#
+# If you want to allow root logins from other machines, set ROOT_LOGIN_REMOTE
+# to "yes". (Logging in via ssh is not affected by this variable since SSH
+# is widely accepted as a safe login method).
+#
+ROOT_LOGIN_REMOTE="no"
+
+#
+# SERIAL_CONSOLE is used to add a serial terminal to inittab and securetty.
+# The format is "ttyS0,9600" as used in the kernel commandline.
+# 
+SERIAL_CONSOLE=""
 
 #
 # NIS-domain, ask the admin of the NIS or NIS+ Server.

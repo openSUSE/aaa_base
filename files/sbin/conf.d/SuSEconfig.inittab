@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 2000-2002 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Burchard Steinbild <bs@suse.de>, 1996-97
 #         Bernhard Kaindl <bk@suse.de>, 1999
@@ -57,17 +57,6 @@ case "$CONSOLE_SHUTDOWN" in
       CA_LINE=""
     ;;
 esac
-if test -n "$SERIAL_CONSOLE" ; then
-  SERIAL_CON_LINE=${SERIAL_CONSOLE%%,*}
-  SERIAL_CON_SPEED=${SERIAL_CONSOLE##*,}
-  SERIAL_CON_SHORT=${SERIAL_CON_LINE##tty}
-  SERIAL_CON_STRING="s%^[# ]*$SERIAL_CON_SHORT:.*/sbin/agetty -L.*%$SERIAL_CON_SHORT:12345:respawn:/sbin/agetty -L $SERIAL_CON_SPEED $SERIAL_CON_LINE%"
-else
-  SERIAL_CON_LINE=""
-  SERIAL_CON_SPEED=""
-  SERIAL_CON_SHORT=""
-  SERIAL_CON_STRING="s%^\(S0:[0-9]*:.*\)%\#\1%"
-fi
 
 cp -p $r/etc/inittab $r/etc/inittab.SuSEconfig || {
     echo "Unexpected Error - emergency exit..."
@@ -76,8 +65,7 @@ cp -p $r/etc/inittab $r/etc/inittab.SuSEconfig || {
 }
 
 cat $r/etc/inittab | \
-    sed -e "s%$CA_SEARCH%$CA_LINE%" -e "$SERIAL_CON_STRING" \
-    > $r/etc/inittab.SuSEconfig
+    sed -e "s%$CA_SEARCH%$CA_LINE%" > $r/etc/inittab.SuSEconfig
 
 test -s $r/etc/inittab.SuSEconfig || {
     echo "Unexpected Error - emergency exit..."
@@ -91,18 +79,6 @@ cmp -s $r/etc/inittab.SuSEconfig $r/etc/inittab || {
 }
 rm -f $r/etc/inittab.SuSEconfig
 
-if test -n "$SERIAL_CON_LINE" ; then
- grep "$SERIAL_CON_LINE" $r/etc/securetty >/dev/null 2>/dev/null || \
-   {
-     echo $SERIAL_CON_LINE >> $r/etc/securetty
-     echo "Added $SERIAL_CON_LINE to /etc/securetty"
-   }
- rm -f $r/etc/securetty.SuSEconfig
-fi
-unset SERIAL_CON_LINE
-unset SERIAL_CON_SPEED
-unset SERIAL_CON_SHORT
-unset SERIAL_CON_STRING
 unset CA_LINE
 unset CA_SEARCH
 
