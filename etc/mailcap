@@ -88,7 +88,7 @@ application/x-tar-gz; gunzip -c %s | tar -tf -; copiousoutput
 #audio/x-pn-realaudio; realplay %s
 video/*; xanim %s
 #video/mpeg; xmpeg %s
-application/pgp; pgp -f < %s | metamail; needsterminal; test=test
-%{encapsulation}=entity
-application/pgp; pgp %s; needsterminal
-
+# PGP decoding in case your MUA is not clever enough by itself.
+# Commented out, as you might use a clever mailer or want to use gpg instead.
+#application/pgp; pgp -f < %s | metamail; needsterminal; test=test %{encapsulation}=entity
+#application/pgp; pgp %s; needsterminal
