@@ -55,8 +55,8 @@ typedef struct dir_struct {
     list_t	      d_list;
     link_t	        link;   /* first link in a directory */
     char	       order;
-    ino_t	       inode;
     char	      * name;
+    char	    * script;
     unsigned int	 lvl;
 } dir_t;
 
@@ -85,8 +85,8 @@ static dir_t * providedir(const char * name)
 	this->name  = strdup(name);
 	if (!this->name)
 	    goto err;
+	this->script = NULL;
 	this->order = 0;
-	this->inode = 0;
 	this->lvl   = 0;
 	ptr = d_start->prev;
 	goto out;
@@ -148,20 +148,26 @@ static void __follow (dir_t * dir, int level)
 	    break;
 	}
 
+	if (!(dir->lvl & tmp->lvl))
+	     continue;		/* Not same boot level */
+
 	/*
 	 * As higher the link deep, as higher the start order.
 	 */
 	if (tmp->order < deep)
 	    tmp->order = deep;
 
-	if (maxorder < tmp->order)
-	    maxorder = tmp->order;
-
 	/*
 	 * If more than one link is included, follow them all
 	 */
 	for (dent = l_start->next; dent != l_start; dent = dent->next) {
 	    dir_t * target = getlink(dent)->target;
+
+	    if (!(dir->lvl & target->lvl))
+		continue;	/* Not same boot level */
+
+	    if (target == dir)
+		break;		/* Loop detected */
 
 	    __follow(target, deep);
 	}
@@ -188,7 +194,7 @@ static void guess_order(dir_t * dir)
     register int min = 99, lvl = 0;
     int deep = 0;
 
-    if (dir->inode)		/* Skip it because we have read it */
+    if (dir->script)		/* Skip it because we have read it */
 	goto out;
 
     if (!target)		/* No target available */
@@ -201,9 +207,6 @@ static void guess_order(dir_t * dir)
 	if (min > target->order)
 	    min = target->order;
 
-	if (maxorder < target->order)
-	    maxorder = target->order;
-
 	lvl |= target->lvl;
 
 	for (dent = l_start->next; dent != l_start; dent = dent->next) {
@@ -212,19 +215,16 @@ static void guess_order(dir_t * dir)
 	    if (++deep > MAX_DEEP)
 		break;
 
+	    if (target == dir)
+		break;		/* Loop detected */
+
 	    if (min > target->order)
 		min = target->order;
-
-	    if (maxorder < target->order)
-		maxorder = target->order;
 
 	    lvl |= target->lvl;
 	}
 	dir->order = min - 1;	/* Set guessed order of this unknown script */
 	dir->lvl |= lvl;	/* Set guessed runlevels of this unknown script */
-
-	if (maxorder < dir->order)
-	    maxorder = dir->order;
     }
 out:
 }
@@ -248,6 +248,10 @@ void follow_all()
      */
     for (tmp = d_start->next; tmp != d_start; tmp = tmp->next)
 	guess_order(getdir(tmp));
+
+    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next)
+	if (maxorder < getdir(tmp)->order)
+	    maxorder = getdir(tmp)->order;
 }
 
 /*
@@ -258,7 +262,7 @@ void show_all()
     list_t *tmp;
     for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
 	dir_t * dir = getdir(tmp);
-	if (dir->inode)
+	if (dir->script)
 	    printf("%.2d %s 0x%.2x\n", dir->order, dir->name, dir->lvl);
 	else
 	    printf("%.2d %s 0x%.2x (guessed)\n", dir->order, dir->name, dir->lvl); 
@@ -266,9 +270,9 @@ void show_all()
 }
 
 /*
- *  Used within loops to get names not included in this runlevel.
+ * Used within loops to get names not included in this runlevel.
  */
-boolean notincluded(const char * name, const int runlevel)
+boolean notincluded(const char * script, const int runlevel)
 {
     list_t *tmp;
     boolean ret = false;
@@ -291,13 +295,13 @@ boolean notincluded(const char * name, const int runlevel)
     for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
 	dir_t * dir = getdir(tmp);
 
-	if (!dir->inode)	/* No such file */
+	if (!dir->script)	/* No such file */
 	    continue;
 
 	if (dir->lvl & lvl)	/* Same runlevel */
 	    continue;
 
-	if (strcmp(name, dir->name))
+	if (strcmp(script, dir->script))
 	    continue;		/* Not this file */
 
 	ret = true;		/* Not included */
@@ -311,15 +315,14 @@ boolean notincluded(const char * name, const int runlevel)
  * Used within loops to get names and order out
  * of the service lists of a given runlevel.
  */
-boolean foreach(char ** name, int * order, const int runlevel)
+boolean foreach(char ** script, int * order, const int runlevel)
 {
     static list_t * tmp;
     dir_t * dir;
     boolean ret;
-    ino_t inode;
     unsigned int lvl = 0;
 
-    if (!*name)
+    if (!*script)
 	tmp  = d_start->next;
 
     switch (runlevel) {
@@ -344,13 +347,12 @@ boolean foreach(char ** name, int * order, const int runlevel)
 	dir = getdir(tmp);
 
 	ret = true;
-	*name  = dir->name;
+	*script  = dir->script;
 	*order = dir->order;
-	inode  = dir->inode;
 
 	tmp = tmp->next;
 
-    } while (!inode || !(dir->lvl & lvl));
+    } while (!*script || !(dir->lvl & lvl));
 
     return ret;
 }
@@ -439,8 +441,13 @@ void setorder(const char * name, const int order)
     list_t * tmp;
     int offset = 0;
 
-    if (dir->order >= order)
+    if (dir->order >= order) /* nothing to do */
 	goto out;
+
+    if (dir->order == 1) {   /* no dependencies, act as minorder */
+	dir->order = order;
+	goto out;
+    }
 
     offset = order - dir->order;
     for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
@@ -455,13 +462,8 @@ void setorder(const char * name, const int order)
 
 	if (cur->order > dir->order)
 	    cur->order += offset;
-
-	if (maxorder < cur->order)
-	    maxorder = cur->order;
     }
     dir->order += offset;
-    if (maxorder < dir->order)
-	maxorder = dir->order;
 
     /*
      * Guess order of not installed scripts in comparision
@@ -469,6 +471,10 @@ void setorder(const char * name, const int order)
      */
     for (tmp = d_start->next; tmp != d_start; tmp = tmp->next)
 	guess_order(getdir(tmp));
+
+    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next)
+	if (maxorder < getdir(tmp)->order)
+	    maxorder = getdir(tmp)->order;
 out:
 }
 
@@ -482,6 +488,9 @@ void minorder(const char * name, const int order)
     dir_t * dir = providedir(name);
     if (dir->order < order)
 	dir->order = order;
+
+    if (maxorder < dir->order)
+	maxorder = dir->order;
 }
 
 /*
@@ -495,20 +504,20 @@ int getorder(const char * name)
 
 /*
  * Provide a service if the corresponding script
- * was read and the inode number was detected.
- * A given inode marks a service as a readed one.
+ * was read and the scripts name was remembered.
+ * A given script name marks a service as a readed one.
  */
-int makeprov(const char * name, const ino_t inode)
+int makeprov(const char * name, const char * script)
 {
     dir_t * dir = providedir(name);
     int ret = 0;
 
-    if (!dir->inode) {
-	dir->inode = inode;
+    if (!dir->script) {
+	dir->script = strdup(script);
 	goto out;
     }
 
-    if (dir->inode != inode)
+    if (strcmp(dir->script, script))
 	ret = -1;
 out:
     return ret;

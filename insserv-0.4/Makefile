@@ -9,7 +9,7 @@ INITDIR  =	/sbin/init.d
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.3
+VERSION	 =	0.4
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #

@@ -1,0 +1,349 @@
+#! /bin/sh
+# Copyright (c) 2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996-97
+#         Bernhard Kaindl <bk@suse.de>, 1999
+#         Rüdiger Oertel <ro@suse.de>, 2000
+#
+# This module generates profile, csh.cshrc and csh.login
+# in /etc/SuSEconfig.
+
+# check if we are started as root
+# only one of UID and USER must be set correctly
+if test "$UID" != 0 -a "$USER" != root; then
+    echo "You must be root to start $0."
+    exit 1
+fi
+
+r=$ROOT
+
+test -f $r/lib/YaST/SuSEconfig.functions || {
+    echo "ERROR - can not find $r/lib/YaST/SuSEconfig.functions!!"
+    echo "This should not happen.  Exit..."
+    exit 1
+}
+. $r/lib/YaST/SuSEconfig.functions
+
+test -f $r/etc/rc.config || {
+    echo "No $r/etc/rc.config found."
+    exit 1
+}
+. $r/etc/rc.config
+
+if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
+    echo "SuSEconfig is disabled in $r/etc/rc.config. Exit..."
+    exit 0
+fi
+
+#
+# Now setup /etc/SuSEconfig stuff
+#
+mkdir -p $r/etc/SuSEconfig
+echo_warning /etc/SuSEconfig/profile \
+        "# Change variables in /etc/rc.config instead." \
+        > $r/etc/SuSEconfig/profile.SuSEconfig
+echo_warning /etc/SuSEconfig/csh.login \
+        "# Change variables in /etc/rc.config instead." \
+        > $r/etc/SuSEconfig/csh.login.SuSEconfig
+echo_warning /etc/SuSEconfig/csh.cshrc \
+        "# Change variables in /etc/rc.config instead." \
+        > $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+
+if test "$CWD_IN_ROOT_PATH" = "yes" ; then
+    echo "test \"\$UID\" = 0 && PATH=\"\$PATH:.\"" \
+        >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "if ( \"\$uid\" == \"0\" ) set path=( \$path . )" \
+        >> $r/etc/SuSEconfig/csh.login.SuSEconfig
+fi
+
+
+
+# start of i18n support
+echo '# start of i18n support'       >> $r/etc/SuSEconfig/profile.SuSEconfig
+echo '# start of i18n support'       >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+
+if test -z "$RC_LANG" ; then
+        case "$DEFAULT_LANGUAGE" in
+                italian)        RC_LANG=it_IT.ISO-8859-1 ;;
+                russian)        RC_LANG=ru_RU.KOI8-R     ;;
+                brazilian)      RC_LANG=pt_BR.ISO-8859-1 ;;
+                english)        RC_LANG=en_US            ;;
+                japanese)       RC_LANG=ja_JP            ;;
+                korean)         RC_LANG=ko_KR            ;;
+                *)              RC_LANG="$DEFAULT_LANGUAGE"      ;;
+        esac
+fi
+
+locale_vars="\
+LANG         \
+LC_ALL       \
+LC_MESSAGES  \
+LC_CTYPE     \
+LC_COLLATE   \
+LC_TIME      \
+LC_NUMERIC   \
+LC_MONETARY"
+
+if test "$ROOT_USES_LANG" = yes ; then
+    message="\
+#
+# /etc/rc.config: ROOT_USES_LANG = yes:
+#
+# All users get all the locale variables from /etc/rc.config:
+#"
+
+    # sh und ksh:
+    echo "$message"                  >> $r/etc/SuSEconfig/profile.SuSEconfig
+    for var in $locale_vars
+    do
+        if eval test "\$RC_$var"; then
+            eval echo "$var=\\\"\$RC_$var\\\""
+            echo "export $var"
+        else
+            echo "unset $var"
+        fi
+    done                             >> $r/etc/SuSEconfig/profile.SuSEconfig
+
+    # csh:
+    echo "$message"                  >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    for var in $locale_vars
+    do
+        if eval test "\$RC_$var"; then
+            eval echo "setenv $var \\\"\$RC_$var\\\""
+        else
+            echo "unsetenv $var"
+        fi
+    done                             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+
+else
+    if test "$ROOT_USES_LANG" = ctype ; then
+    root_message="\
+    #
+    # /etc/rc.config: ROOT_USES_LANG = ctype:
+    #
+    # root uses only the LC_CTYPE, we export all the other locale variables
+    # from /etc/rc.config as-is, and don't assign them to their effective
+    # counterparts. We unset all effective locale variables but LC_CTYPE
+    # and set LANG to POSIX.
+    # This is necessary for non iso-8859-1 roots to be able to type all
+    # the characters in X Windows.
+    # root can later decide to use specific locale variables with simple
+    # assignments and do not need to source rc.config. i.e. LANG=\$RC_LANG
+    #"
+    else
+    root_message="\
+    #
+    # /etc/rc.config: ROOT_USES_LANG != yes|ctype:
+    #
+    # root doesn't use locales, we export the locale variables from
+    # /etc/rc.config as-is, and don't assign them to their effective
+    # counterparts. We unset all effective locale variables and set
+    # LANG to POSIX.
+    # root can later decide to use specific locale variables with simple
+    # assignments and do not need to source rc.config. i.e. LANG=\$RC_LANG
+    #"
+    fi
+
+    user_message="\
+    #
+    # All other users get all the locale variables from /etc/rc.config:
+    #"
+
+    # sh und ksh:
+    echo 'if test "$UID" = 0 ; then' >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "$root_message"             >> $r/etc/SuSEconfig/profile.SuSEconfig
+    for var in $locale_vars
+    do
+        if eval test "\$RC_$var"; then
+            eval echo "'    'RC_$var=\\\"\$RC_$var\\\""
+            echo "    export RC_$var"
+        fi
+	if test "$ROOT_USES_LANG" = ctype -a "$var" = LC_CTYPE ; then
+            if eval test "\$RC_$var"; then
+               eval echo "'    '$var=\\\"\$RC_CTYPE\\\""
+            else
+               eval echo "'    '$var=\\\"\$RC_LANG\\\""
+            fi
+            echo "    export LC_CTYPE"
+        else
+            echo "    unset $var"
+        fi
+    done                             >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo 'else'                      >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "$user_message"             >> $r/etc/SuSEconfig/profile.SuSEconfig
+    for var in $locale_vars
+    do
+        if eval test "\$RC_$var"; then
+            eval echo "'    '$var=\\\"\$RC_$var\\\""
+            echo "    export $var"
+        else
+            echo "    unset $var"
+        fi
+    done                             >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo 'fi'                        >> $r/etc/SuSEconfig/profile.SuSEconfig
+
+    # csh:
+    echo 'if ( "$uid" == "0" ) then' >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    echo "$root_message"             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    for var in $locale_vars
+    do
+        if eval test "\$RC_$var"; then
+            eval echo "'    'setenv RC_$var \\\"\$RC_$var\\\""
+        fi
+	if test "$ROOT_USES_LANG" = ctype -a "$var" = LC_CTYPE ; then
+            if eval test "\$RC_$var"; then
+               eval echo "'    'setenv $var \\\"\$RC_CTYPE\\\""
+            else
+               eval echo "'    'setenv $var \\\"\$RC_LANG\\\""
+            fi
+        else
+            echo "    unsetenv $var"
+        fi
+    done                             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    echo 'else'                      >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    echo "$user_message"             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    for var in $locale_vars
+    do
+        if eval test "\$RC_$var"; then
+            eval echo "'    'setenv $var \\\"\$RC_$var\\\""
+        else
+            echo "    unsetenv $var"
+        fi
+    done                             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    echo 'endif'                     >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+
+echo '# end of i18n support'         >> $r/etc/SuSEconfig/profile.SuSEconfig
+echo '# end of i18n support'         >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+# end of i18n support
+
+
+
+if test -n "$FROM_HEADER" ; then
+    echo "FROM_HEADER=\"$FROM_HEADER\"" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export FROM_HEADER" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv FROM_HEADER \"$FROM_HEADER\"" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -n "$SCANNER_TYPE" ; then
+    echo "SCANNER_TYPE=$SCANNER_TYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export SCANNER_TYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv SCANNER_TYPE $SCANNER_TYPE" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -n "$DOC_HOST" ; then
+    echo "SUSE_DOC_HOST=$DOC_HOST" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export SUSE_DOC_HOST" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv SUSE_DOC_HOST $DOC_HOST" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/opt/kde ; then
+    echo "KDEDIR=/opt/kde" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export KDEDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv KDEDIR /opt/kde" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/X11R6/lib/qt ; then
+    echo "QTDIR=/usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv QTDIR /usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/qt ; then
+    echo "QTDIR=/usr/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv QTDIR /usr/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/opt/gnome ; then
+    echo "GNOMEDIR=/opt/gnome" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export GNOMEDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv GNOMEDIR /opt/gnome" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/X11R6/lib/xad ; then
+    echo "XADIDIR=/usr/X11R6/lib/xad" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export XADIDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv XADIDIR /usr/X11R6/lib/xad" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/dvgt_help ; then
+    echo "DV_IMMED_HELP=/usr/lib/dvgt_help" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export DV_IMMED_HELP" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv DV_IMMED_HELP /usr/lib/dvgt_help" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/maple ; then
+    echo "MAPLE=/usr/lib/maple" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export MAPLE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv MAPLE /usr/lib/maple" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/rasmol ; then
+    echo "RASMOLPATH=/usr/lib/rasmol" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export RASMOLPATH" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv RASMOLPATH /usr/lib/rasmol" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/mars_e ; then
+    echo "DMARSCONF=/usr/lib/mars_e" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export DMARSCONF" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv DMARSCONF /usr/lib/mars_e" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/crisp/macros ; then
+    echo "CRPATH=/usr/lib/crisp/macros" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export CRPATH" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv CRPATH /usr/lib/crisp/macros" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/cint ; then
+    echo "CINTSYSDIR=/usr/lib/cint" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export CINTSYSDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv CINTSYSDIR /usr/lib/cint" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/maxwell ; then
+    echo "MAXHOME=/usr/lib/maxwell" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export MAXHOME" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv MAXHOME /usr/lib/maxwell" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/X11R6/lib/blender ; then
+    echo "BLENDERDIR=/usr/X11R6/lib/blender" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export BLENDERDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv BLENDERDIR /usr/X11R6/lib/blender" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -n "$HTTP_PROXY" ; then
+    echo "http_proxy=$HTTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export http_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv http_proxy $HTTP_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -n "$FTP_PROXY" ; then
+    echo "ftp_proxy=$FTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export ftp_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv ftp_proxy $FTP_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -n "$GOPHER_PROXY" ; then
+    echo "gopher_proxy=$GOPHER_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export gopher_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv gopher_proxy $GOPHER_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -n "$NO_PROXY" ; then
+    echo "no_proxy='$NO_PROXY'" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export no_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv no_proxy '$NO_PROXY'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -n "$DEFAULT_PRINTER" ; then
+    echo "PRINTER='$DEFAULT_PRINTER'" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export PRINTER" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv PRINTER '$DEFAULT_PRINTER'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+
+SAVEPATH=$PATH
+PATH=$PATH:$r/usr/X11R6/bin:$r/opt/kde2/bin:$r/opt/kde/bin:$r/opt/gnome/bin:$r/usr/openwin/bin
+WINDOWMANAGER=`type -p $DEFAULT_WM`
+PATH=$SAVEPATH
+unset SAVEPATH
+test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/kde
+echo "test -z \"\$WINDOWMANAGER\" && WINDOWMANAGER=$WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
+echo "export WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
+echo "if ( ! \${?WINDOWMANAGER} ) setenv WINDOWMANAGER $WINDOWMANAGER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+
+test -n "$CONSOLE_MAGIC" && {
+        echo "# The following sequence is needed for most non-west-european languages" >> $r/etc/SuSEconfig/profile.SuSEconfig
+        echo "test \"\$TERM\" = \"linux\" -a -t && echo -en \"\\033"$CONSOLE_MAGIC\"\
+ >> $r/etc/SuSEconfig/profile.SuSEconfig
+        echo "# The following sequence is needed for most non-west-european languages" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
+        echo "test \"\$TERM\" = \"linux\" -a -t && echo -n \"\\033"$CONSOLE_MAGIC\" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
+}
+
+check_md5_and_move $r/etc/SuSEconfig/profile
+check_md5_and_move $r/etc/SuSEconfig/csh.login
+check_md5_and_move $r/etc/SuSEconfig/csh.cshrc
+

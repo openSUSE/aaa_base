@@ -356,25 +356,26 @@ int main (int argc, char *argv[])
 
 	/* Common script ... */
 	if (!strcmp(d->d_name, "halt")) {
-	    makeprov("halt",   d->d_ino);
+	    makeprov("halt",   d->d_name);
 	    runlevels("halt",   "0");
 	    continue;
 	}
 
 	/* ... and its link */
 	if (!strcmp(d->d_name, "reboot")) {
-	    makeprov("reboot", d->d_ino);
+	    makeprov("reboot", d->d_name);
 	    runlevels("reboot", "6");
 	    continue;
 	}
 
 	/* Common script for single mode */
 	if (!strcmp(d->d_name, "single")) {
-	    makeprov("single", d->d_ino);
+	    makeprov("single", d->d_name);
 #if 0
 	    runlevels("single", "S");
 #else
 	    runlevels("single", "1 S");
+	    requiresv("single", "kbd");
 #endif
 	    continue;
 	}
@@ -382,14 +383,12 @@ int main (int argc, char *argv[])
 	if (!provides) {
 	    /* Oops, no comment found, guess one */
 	    provides = d->d_name;
-	    if (!required_start)
-		required_start = "route nfs syslog autofs";
 	}
 
 	if (provides) {
 	    char * token;
 	    while ((token = strsep(&provides, delimeter))) {
-		if (makeprov(token, d->d_ino) < 0) {
+		if (makeprov(token, d->d_name) < 0) {
 		    warn("%s: script %s: service %s already provided!\n",
 			 myname, d->d_name, token);
 		    continue;
@@ -426,24 +425,25 @@ int main (int argc, char *argv[])
      * force a full re-order of all starting numbers.
      */
 
-    if (getorder("network") <  5) setorder("network",  5);
+    if (getorder("network")    <  5) setorder("network",     5);
     setorder("route", (getorder("network") + 2));
-    if (getorder("inetd")   < 20) setorder("inetd",   20);
+    if (getorder("inetd")      < 20) setorder("inetd",      20);
 
     /*
      * Set order of some singluar scripts
      * (no dependencies or single link).
      */
-    if (getorder("halt")   < 20) minorder("halt",   20);
-    if (getorder("reboot") < 20) minorder("reboot", 20);
-    if (getorder("single") < 20) minorder("single", 20);
-    if (getorder("gpm")    < 20) minorder("gpm",    20);
+    if (getorder("halt")       < 20) minorder("halt",       20);
+    if (getorder("reboot")     < 20) minorder("reboot",     20);
+    if (getorder("single")     < 20) minorder("single",     20);
+    minorder("single", (getorder("kbd") + 2));
 
     /*
      * Do not overwrite good old links.
      */
     if (getorder("serial")     < 10) setorder("serial",     10);
-    if (getorder("boot.setup") < 20) setorder("boot.setup", 20);
+    if (getorder("boot.setup") < 20) minorder("boot.setup", 20);
+    if (getorder("gpm")        < 20) setorder("gpm",        20);
 
     /*
      * Sorry but we support only [KS][0-9][0-9]<name>
@@ -499,8 +499,9 @@ int main (int argc, char *argv[])
 		continue;
 	    ptr += 2;
 
-	    if (!strcmp(ptr, "kbd"))
-		continue;  /* kbd should run on any runlevel change */
+	    if (stat(d->d_name, &st_script) < 0)
+		if (remove(d->d_name) < 0)
+		    warn ("can not remove(%s%s): %s\n", rcd, d->d_name, strerror(errno));
 
 	    if (notincluded(ptr, runlevel))
 		if (remove(d->d_name) < 0)

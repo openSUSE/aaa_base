@@ -4,7 +4,7 @@ extern void show_all();
 extern void requiresl(const char * this, ...);
 extern void requiresv(const char * this, const char * requires);
 extern void runlevels(const char * this, const char * lvl);
-extern int makeprov(const char * name, const ino_t inode);
+extern int makeprov(const char * name, const char * script);
 extern void setorder(const char * name, const int order);
 extern void minorder(const char * name, const int order);
 extern int getorder(const char * name);

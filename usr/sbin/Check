@@ -16,6 +16,7 @@ do_gzip() {
 		fi
 		if test -L $input; then
 			link=`ls -l $input | awk '{ print $11 }'`
+			test -d $link && continue
 			rm -f $input
 			ln -sf $link.gz $input.gz
 		else
@@ -52,14 +53,17 @@ for DIR in $DIRS ; do
 done
 
 for DIR in $DIRS ; do
+    test "$DIR" = "/usr/X11R6/lib/X11/fonts/CID" && continue
     test -d $DIR && find $DIR \! -name "*.gz" \! -name "*.Z" \
         \! -name dir \! -name dir.old \! -name localdir \
         \! -name whatis \! -name fonts.alias \! -name fonts.dir \
-        \! -name fonts.scale \! -name "*.spd" \! -name "*.pfa" \
+        \! -name "fonts.scale*" \! -name "*.spd" \! -name "*.pfa" \
         \! -name "*.pfb" \! -name "*.phont" \! -name ".*.gz" \
         \! -name ".*.Z" \! -name ".*.spd" \! -name ".*.pfa" \
         \! -name ".*.pfb" \! -name ".*.phont" \! -name URW \
         \! -name "*.ttf" \! -name "*.TTF" \! -name "encodings.dir" \
+        \! -name "XftConfig" \! -name "*.TXT" \! -name "*.rpmorig" \
+        \! -name "map-*-*" \! -name "*.afm" \! -name "*.exe" \! -name "*.EXE" \
         \! -type d | do_gzip
 done
 

@@ -1,0 +1,45 @@
+#! /bin/sh
+# Copyright (c) 2000 SuSE Gmbh Nuernberg, Germany.  All rights reserved.
+#
+# Author: Rüdiger Oertel <ro@suse.de>, 2000
+
+# check if we are started as root
+# only one of UID and USER must be set correctly
+
+if test "$UID" != 0 -a "$USER" != root; then
+    echo "You must be root to start $0."
+    exit 1
+fi
+
+test -n "$ROOT" && exit 0
+
+# test if not mounted readonly
+touch /usr/X11R6/lib/X11/fonts 2>/dev/null || exit 0
+
+if test "$CHECK_NEWPACKAGE" != false -a -x /usr/X11R6/bin/mkfontdir ; then
+    for FDIR in /usr/X11R6/lib/X11/fonts/truetype \
+		/usr/X11R6/lib/X11/fonts/CID ; do
+	if test -d $FDIR ; then
+            FSHORT=${FDIR##/usr/X11R6/lib/X11/fonts/}
+	    echo "Updating fonts.scale for $FSHORT"
+	    echo 0 > $FDIR/fonts.scale
+	    find $FDIR -follow -name "fonts.scale.*" | \
+		xargs -r cat >> $FDIR/fonts.scale
+	fi
+    done
+    MKXPARMS=""
+    if [ -d /usr/X11R6/lib/X11/fonts/encodings ] ; then
+	MKXPARMS="-e /usr/X11R6/lib/X11/fonts/encodings"
+    fi
+    if [ -d /usr/X11R6/lib/X11/fonts/encodings/large ] ; then
+	MKXPARMS="$MKXPARMS -e /usr/X11R6/lib/X11/fonts/encodings/large"
+    fi
+    for FDIR in `/usr/bin/find /usr/X11R6/lib/X11/fonts/* -type d` ; do
+	if [ ! -f $FDIR/fonts.dir -o $FDIR -nt $FDIR/fonts.dir ] ; then
+            FSHORT=${FDIR##/usr/X11R6/lib/X11/fonts/}
+	    echo "Updating X11 font directory $FSHORT..."
+	    /usr/X11R6/bin/mkfontdir $MKXPARMS $FDIR
+	fi
+    done
+fi
+
