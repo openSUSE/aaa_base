@@ -293,6 +293,7 @@ alias binfmt-0064         binfmt_aout
 alias iso9660             isofs
 alias tty-ldisc-1         slip
 alias tty-ldisc-3         ppp
+alias tty-ldisc-5         mkiss
 alias slip0               slip
 alias slip1               slip
 alias ppp0                ppp
@@ -303,10 +304,15 @@ alias plip1               plip
 alias ppp-compress-21          bsd_comp
 alias ppp-compress-26          ppp_deflate
 
-alias net-pf-3            off
-# alias net-pf-4            ipx
-alias net-pf-4            off
-# alias net-pf-5            appletalk
-alias net-pf-5            off
+alias net-pf-3            ax25
+# alias net-pf-3            off
+alias net-pf-4            ipx
+# alias net-pf-4            off
+alias net-pf-5            appletalk
+# alias net-pf-5            off
+alias net-pf-6            netrom
+# alias net-pf-6            off
+alias net-pf-11           rose
+# alias net-pf-11           off
 alias net-pf-17           af_packet
 
