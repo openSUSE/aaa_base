@@ -74,7 +74,7 @@ Extract(){
 		if [ -f $input.tar.gz ]; then
 		   tar xzf $input.tar.gz || ErrorExit "Tar failed on $input."
 		else
-		   tar xIf $input.tar.bz2 || ErrorExit "Tar failed on $input."
+		   tar xjf $input.tar.bz2 || ErrorExit "Tar failed on $input."
 		fi
 		cd $input || ErrorExit "cd failed on $1."
 		for RCSFILE in `find -type f -name "*,v"` ; do

@@ -34,10 +34,15 @@ find /etc/rc.config /etc/sysconfig -type f -maxdepth 1 \
  | xargs grep -vh "^#" | grep "=" | cut -d= -f1 | sort | uniq -d \
   > $MYTMP/toomuch
 if [ -s $MYTMP/toomuch ] ; then
+  while read DOUBLE ; do
+    find /etc/rc.config /etc/sysconfig -type f -maxdepth 1 \
+        \! -name "*.rpmsave" \! -name "*.rpmorig" \
+        | xargs grep -H "^$DOUBLE=" >> $MYTMP/toomuch.out
+  done < $MYTMP/toomuch
   echo "This is a warning message." > $MYTMP/rc.config_check
   echo "The following variables seem to be doubled in /etc/rc.config" >> $MYTMP/rc.config_check
   echo "and/or the files in /etc/sysconfig :" >> $MYTMP/rc.config_check
-  cat $MYTMP/toomuch >> $MYTMP/rc.config_check
+  cat $MYTMP/toomuch.out >> $MYTMP/rc.config_check
   echo "Please check which of the instances is correct." >> $MYTMP/rc.config_check
   test -d /var/adm/notify/warnings && \
     mv $MYTMP/rc.config_check /var/adm/notify/warnings

@@ -2,7 +2,7 @@
 # Some programs (e.g. lynx, arena and wget) support proxies, if set in
 # the environment.  SuSEconfig can add these environment variables to
 # /etc/SuSEconfig/* (sourced by /etc/profile etc.) -
-# See http://www.suse.de/Support/sdb_e/lynx_proxy.html for more details.
+# See http://sdb.suse.de/en/sdb/html/lynx_proxy.html for more details.
 # Example: HTTP_PROXY="http://proxy.provider.de:3128/"
 HTTP_PROXY=""
 
