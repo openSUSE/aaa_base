@@ -48,20 +48,6 @@ case "$1" in
 	    export BLKID_FILE=/dev/shm/tmp_blkid.tab
 	fi
 
-	# find out about root fs type
-	mounts=/etc/mtab
-	test -r /proc/mounts && mounts=/proc/mounts
-	rootfstype=""
-	while read des fs type rest; do
-	    case "$fs" in
-		/)
-		    test "$des" = "rootfs" && continue
-		    rootfstype="-t $type"
-		    break
-		    ;;
-	    esac
-        done < $mounts
-
 	#
 	# If we use a serial console, don't use the fsck progress bar
 	#
@@ -73,20 +59,15 @@ case "$1" in
 	FSCK_RETURN=0
 	# on first startup of a system with a lvm root device lvm /dev entries
 	# may not exist at this time, so skip fsck in this case
+	ROOTFS_BLKDEV=`fsck -T -N / 2>/dev/null`
+	ROOTFS_BLKDEV=${ROOTFS_BLKDEV%% }
+        ROOTFS_BLKDEV=${ROOTFS_BLKDEV##* }
 	DES_OK=0
-	case "$des" in
-	    LABEL=*)
-		DES_OK=1
-		;;
-	    UUID=*)
-		DES_OK=1
-		;;
-	    *)
-		test ! -b $des
-		DES_OK=$?
-		;;
-	esac
-	if test ! -f /fastboot -a -z "$fastboot" -a "$rootfstype" != "-t nfs" -a $DES_OK -eq 1 ; then
+	if test -n "$ROOTFS_BLKDEV" -a "$ROOTFS_BLKDEV" != "/" -a -b "$ROOTFS_BLKDEV" ; then
+	    DES_OK=1
+	fi
+
+	if test ! -f /fastboot -a -z "$fastboot" -a $DES_OK -eq 1 ; then
 	    FSCK_FORCE=""
 	    test -f /forcefsck && FSCK_FORCE="-f"
 
@@ -96,7 +77,7 @@ case "$1" in
 	    mount -n -o remount,ro / 2> /dev/null
 	    if test $? = 0; then
 	        echo "Checking root file system..."
-	        fsck $FSCK_PROGRESSBAR -a $FSCK_FORCE $rootfstype /
+	        fsck $FSCK_PROGRESSBAR -a $FSCK_FORCE /
 	        # A return code of 1 indicates that file system errors
 	        # were corrected, but that the boot may proceed.
 	        # A return code of 2 or larger indicates failure.
@@ -151,16 +132,14 @@ case "$1" in
 	        mount -n -o remount,rw /
 		test $FSCK_RETURN -gt 0 && touch /fsck_corrected_errors
 	    else
-		if test "$rootfstype" != "-t umsdos" ; then
-		    echo
-		    echo '*** ERROR!  Cannot fsck because root is not read-only!'
-		    echo
-		fi
+		echo
+		echo '*** ERROR!  Cannot fsck because root is not read-only!'
+		echo
 	    fi
 	    unset BLKID_FILE
 	    rm -f /dev/shm/tmp_blkid.tab
 	else
-	    echo "File systems are NOT being checked."
+	    echo "root file system (/) is NOT being checked."
 	    mount -n -o remount,rw /
 	fi
 	rm -f /etc/mtab*
