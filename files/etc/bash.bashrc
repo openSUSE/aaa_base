@@ -210,8 +210,8 @@ case "$-" in
 	esac
     fi
 
-    # Do not save dupes in the bash history file
-    HISTCONTROL=ignoredups
+    # Do not save dupes and lines starting by space in the bash history file
+    HISTCONTROL=ignoreboth
     if test "$is" = "ksh" ; then
 	# Use a ksh specific history file and enable
     	# emacs line editor
