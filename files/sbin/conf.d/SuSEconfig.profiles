@@ -270,25 +270,27 @@ if test -d $r/usr/lib/maxwell ; then
     echo "export MAXHOME" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv MAXHOME /usr/lib/maxwell" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
-if test -n "$HTTP_PROXY" ; then
-    echo "http_proxy=$HTTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export http_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv http_proxy $HTTP_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -n "$FTP_PROXY" ; then
-    echo "ftp_proxy=$FTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export ftp_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv ftp_proxy $FTP_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -n "$GOPHER_PROXY" ; then
-    echo "gopher_proxy=$GOPHER_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export gopher_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv gopher_proxy $GOPHER_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -n "$NO_PROXY" ; then
-    echo "no_proxy='$NO_PROXY'" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export no_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv no_proxy '$NO_PROXY'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+if test "$PROXY_ENABLED" != "no"; then
+    if test -n "$HTTP_PROXY" ; then
+	echo "http_proxy=$HTTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
+	echo "export http_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+	echo "setenv http_proxy $HTTP_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    fi
+    if test -n "$FTP_PROXY" ; then
+	echo "ftp_proxy=$FTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
+	echo "export ftp_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+	echo "setenv ftp_proxy $FTP_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    fi
+    if test -n "$GOPHER_PROXY" ; then
+	echo "gopher_proxy=$GOPHER_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
+	echo "export gopher_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+	echo "setenv gopher_proxy $GOPHER_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    fi
+    if test -n "$NO_PROXY" ; then
+	echo "no_proxy='$NO_PROXY'" >> $r/etc/SuSEconfig/profile.SuSEconfig
+	echo "export no_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
+	echo "setenv no_proxy '$NO_PROXY'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    fi
 fi
 if test -n "$CUPS_SERVER" ; then
     echo "CUPS_SERVER='$CUPS_SERVER'" >> $r/etc/SuSEconfig/profile.SuSEconfig
