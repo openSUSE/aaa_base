@@ -168,9 +168,14 @@ case "$1" in
 	;;
     try-restart)
 	## Do a restart only if the service was active before.
-	## Note: try-restart is not (yet) part of LSB (as of 1.2)
-	$0 status >/dev/null &&  $0 restart
-
+	## Note: try-restart is now part of LSB (as of 1.9).
+	## RH has a similar command named condrestart.
+	$0 status
+	if test $? = 0; then
+		$0 restart
+	else
+		rc_reset	# Not running is not a failure.
+	fi
 	# Remember status and be quiet
 	rc_status
 	;;
