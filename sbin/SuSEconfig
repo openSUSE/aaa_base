@@ -396,7 +396,11 @@ if test -d $r/opt/kde ; then
     echo "export KDEDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv KDEDIR /opt/kde" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
-if test -d $r/usr/X11R6/lib/qt ; then
+if test -d $r/usr/lib/qt ; then
+    echo "QTDIR=/usr/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv QTDIR /usr/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+elif test -d $r/usr/X11R6/lib/qt ; then
     echo "QTDIR=/usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv QTDIR /usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
