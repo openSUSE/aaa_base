@@ -395,7 +395,7 @@
 # set this to suid root (4755) if you're running shadow via NIS:
 /opt/kde3/bin/kcheckpass                root.shadow     2755
 # getting group id disk means root. See modes of disk device files!
-/opt/kde3/bin/kscd                      root.disk       2755
+/opt/kde3/bin/kscd                      root.disk       0755
 # This has a meaning:  
 /opt/kde3/bin/kdesud                    root.nogroup    2755
 /opt/kde2/bin/kdesud                    root.nogroup    2755
