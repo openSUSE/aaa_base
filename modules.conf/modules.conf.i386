@@ -43,6 +43,8 @@ alias personality-5       abi-ibcs
 alias personality-7       abi-ibcs
 alias personality-13      abi-solaris
 alias personality-14      abi-uw7
+post-install binfmt_misc mount -t binfmt_misc none /proc/sys/fs/binfmt_misc
+pre-remove binfmt_misc umount /proc/sys/fs/binfmt_misc
 endif
 
 # end of i386 part for modules.conf
