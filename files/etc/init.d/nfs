@@ -14,7 +14,7 @@
 # Provides:       nfs
 # Required-Start: $network $portmap
 # Required-Stop:
-# X-UnitedLinux-Should-Start: nfslock
+# X-UnitedLinux-Should-Start:
 # X-UnitedLinux-Should-Stop:
 # Default-Start:  3 5
 # Default-Stop:
