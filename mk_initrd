@@ -30,6 +30,11 @@
 #
 # ChangeLog:
 #
+#
+# 25/2/2002:	v1.24
+#  - there might be more than one module with the same name; we take
+#    just the first one we find, assuming they are identical anyway
+#
 # 13/2/2002:    v1.23
 #  - use default kernel names on alpha. 
 #
@@ -474,7 +479,11 @@ for k in $kernels ; do
     chmod 755 $lx_rc
 
     for i in $modules; do
-      x=`cd $root_dir ; find lib/modules/$vv/ -name $i.o`
+      # Note: we rely on module names being unique here. While this is true
+      # so far there _are_ modules that are just links to others with the
+      # same name in different directories (pcmcia mods, for example). But
+      # in this case it doesn't really matter which one we use.
+      x=`cd $root_dir ; find lib/modules/$vv/ -name $i.o | head -1`
       if [ "$x" ] ; then
         echo "module $i is \"/$x\""
         tar -C $root_dir -cf - $x 2>/dev/null | tar -C $tmp_mnt -xpf - 2>/dev/null

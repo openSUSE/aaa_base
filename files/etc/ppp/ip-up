@@ -11,6 +11,7 @@ DEVICE=$2
 SPEED=$3
 LOCALIP=$4
 REMOTEIP=$5
+IPPARAM=$6
 
 if [ -z "$REMOTEIP" ]; then
     echo "Usage: $0 <INTERFACE> <DEVICE> <SPEED> <LOCALIP> <REMOTEIP>"
@@ -54,6 +55,8 @@ ippp*)
 
     if [ -f /etc/sysconfig/network/ifcfg-$INTERFACE ] ; then
         . /etc/sysconfig/network/ifcfg-$INTERFACE
+	# should be deleted after DYNAMICDNS->USEPEERDNS migration
+	test -z "$USEPEERDNS" -a -n "$DYNAMICDNS" && USEPEERDNS=$DYNAMICDNS
     else
         echo "Device '$INTERFACE' has no sysconfig file";
         exit 1
@@ -64,14 +67,16 @@ ippp*)
 	#
 	# Get the nameservers (works with ipppd option ms-get-dns):
 	#
-	if [ "$DYNAMICDNS" = "yes" -a -n "$MS_DNS1" ]; then
+	if [ "$USEPEERDNS" = "yes" -a -n "$MS_DNS1" ]; then
 		/sbin/modify_resolvconf modify -s ipppd -e "$INTERFACE" \
 		    -p ipppd -f /etc/ppp/ip-up -n "$MS_DNS1 $MS_DNS2" -t - << EOT
 		    If you do not like the ipppd to change your nameserver
-		    settings remove the option DYNAMICDNS for this connection 
+		    settings remove the option USEPEERDNS for this connection 
 EOT
 	fi
-
+	# ip_resend hook
+	test "$IP_RESEND" = "yes" -a -x /usr/sbin/ip_resend_wakeup && \
+	    /usr/sbin/ip_resend_wakeup -m $LOCALIP -o $INTERFACE
 	#
 	# SuSE Firewall script: If you installed and configured your firewall
 	# in /etc/sysconfig/firewall it will be started here:
@@ -100,7 +105,7 @@ EOT
 	# /etc/fetchmailrc and can use UUCP to fetch mail over TCP/IP, provided
 	# that UUCP is configured properly. Last not least it also calls sendmail
 	# to send any queued mail. Uncomment the line below.
-	# /etc/ppp/poll.tcpip
+	test "$RUN_POLL_TCPIP" = "no" || /etc/ppp/poll.tcpip
 
 	# call ip-up.local if it exists and is executable:
 	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local "$@"
@@ -109,7 +114,7 @@ EOT
 	#
 	# Restore the nameservers (got with ipppd option ms-get-dns):
 	#
-	if [ "$DYNAMICDNS" = "yes" -a -n "$MS_DNS1" ]; then
+	if [ "$USEPEERDNS" = "yes" -a -n "$MS_DNS1" ]; then
 		/sbin/modify_resolvconf restore -s ipppd -e "$INTERFACE"
 	fi
 
@@ -130,6 +135,9 @@ EOT
 
 	# call ip-down.local if it exists and is executable:
 	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local "$@"
+	# ip_resend hook
+	test "$IP_RESEND" = "yes" -a -x /usr/sbin/ip_resend && \
+	    /usr/sbin/ip_resend -o $INTERFACE $IP_RESEND_PARAMETER
 	;;
     *)
 	;;
@@ -184,8 +192,9 @@ EOT
 	# /etc/sysconfig/xntp). It supports fetchmail with a system-wide
 	# /etc/fetchmailrc and can use UUCP to fetch mail over TCP/IP, provided
 	# that UUCP is configured properly. Last not least it also calls sendmail
-	# to send any queued mail. Uncomment the line below.
-	# /etc/ppp/poll.tcpip
+	# to send any queued mail.
+	test -n "$IPPARAM" -a -z "${IPPARAM##*no_poll_tcpip*}" || \
+	    /etc/ppp/poll.tcpip
 
 	# call ip-up.local if it exists and is executable:
 	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local "$@"
