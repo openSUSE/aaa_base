@@ -56,13 +56,17 @@ echo_warning /etc/SuSEconfig/csh.cshrc \
         > $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 
 if test "$CWD_IN_ROOT_PATH" = "yes" ; then
-    echo "test \"\$UID\" = 0 && PATH=\"\$PATH:.\"" \
+    echo "test \"\$UID\" -lt 100 && PATH=\"\$PATH:.\"" \
         >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "if ( \"\$uid\" == \"0\" ) set path=( \$path . )" \
+    echo "if ( \"\$uid\" < \"100\" ) set path=( \$path . )" \
         >> $r/etc/SuSEconfig/csh.login.SuSEconfig
 fi
-
-
+if test "$CWD_IN_USER_PATH" = "yes" ; then
+    echo "test \"\$UID\" -ge 100 && PATH=\"\$PATH:.\"" \
+        >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "if ( \"\$uid\" >= \"100\" ) set path=( \$path . )" \
+        >> $r/etc/SuSEconfig/csh.login.SuSEconfig
+fi
 
 # start of i18n support
 echo '# start of i18n support'       >> $r/etc/SuSEconfig/profile.SuSEconfig

@@ -340,9 +340,16 @@ OWNER_TO_KEEP_IN_TMP="root"
 
 #
 # Do you want to have "." in root path?  This is not recommended, but
-# many people do prefer it (yes/no).
+# many people do prefer it (yes/no). The setting affects all system
+# users (with uid < 100)
 #
 CWD_IN_ROOT_PATH="no"
+
+#
+# Do you want to have "." in the path for normal users?
+# Defaults to "yes" since this has been the case for years.
+#
+CWD_IN_USER_PATH="yes"
 
 #
 # If you want that new passwords will be checked through cracklib,

@@ -167,6 +167,8 @@ fi
 
 echo $$ > $IS_RUNNING
 
+trap "rm -f $IS_RUNNING ; exit 1" 1 2 15
+
 #
 # the following stuff should be done in running system...
 #

@@ -101,7 +101,6 @@ if test -z "$PROFILEREAD" ; then
 	test -d $dir && PATH=$PATH:$dir
     done
     unset dir
-    test $UID -lt 100 || PATH="$PATH:."
     export PATH
 fi
 
