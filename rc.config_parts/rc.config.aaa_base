@@ -305,7 +305,7 @@ UPDATEDB_NETPATHS=""
 # uptdatedb can skip directories for its database. The following parameter
 # says which ones.
 #
-UPDATEDB_PRUNEPATHS="/S.u.S.E. /mnt /cdrom /tmp /usr/tmp /var/tmp /var/spool /proc"
+UPDATEDB_PRUNEPATHS="/S.u.S.E. /mnt /cdrom /tmp /usr/tmp /var/tmp /var/spool /proc /media"
 
 #
 # Search net paths as ? (e.g. nobody)
