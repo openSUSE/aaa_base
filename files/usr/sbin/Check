@@ -42,7 +42,8 @@ IFS="$OLD_IFS"
 if test -n "$RPM_BUILD_ROOT" ; then
     TDIRS=""
     for DIR in $DIRS ; do
-        TDIRS="$TDIRS $DIR ${RPM_BUILD_ROOT%/}/$DIR"
+        test "$UID" = 0 && TDIRS="$TDIRS $DIR"
+        TDIRS="$TDIRS ${RPM_BUILD_ROOT%/}/$DIR"
     done
     DIRS="$TDIRS"
 fi
@@ -63,8 +64,8 @@ for DIR in $DIRS ; do
         \! -name dir \! -name dir.old \! -name localdir \
         \! -name whatis \! -name fonts.alias \! -name fonts.dir \
         \! -name "fonts.*" \! -name ".fonts-*" \
-	\! -name "*.spd" \! -name "*.pfa" \
-        \! -name "*.pfb" \! -name "*.phont" \! -name ".*.gz" \
+	\! -name "*.spd" \! -name "*.pfa" \! -name "*.pfb" \
+	\! -name "*.pfm" \! -name "*.phont" \! -name ".*.gz" \
         \! -name ".*.Z" \! -name ".*.spd" \! -name ".*.pfa" \
         \! -name ".*.pfb" \! -name ".*.phont" \! -name URW \
         \! -name "*.ttf" \! -name "*.TTF" \! -name "encodings.dir" \
@@ -88,7 +89,11 @@ if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
     done
     if test -n "$RPM_BUILD_ROOT" ; then
         cat $TMPFILE | sed -e"s:^/:$RPM_BUILD_ROOT/:" > $TMPFILE2
-        cat $TMPFILE2 >> $TMPFILE
+	if test "$UID" = 0 ; then
+		cat $TMPFILE2 >> $TMPFILE
+	else
+		cat $TMPFILE2 > $TMPFILE
+	fi
         rm -f $TMPFILE2
     fi
 
