@@ -146,7 +146,7 @@ case "$1" in
 
 	# move to intermezzo package ?
 	# First umount intermezzo filesystems
-	test -x /usr/sbin/umountizo -a ! -z "`grep -i intermezzo <$mounts`" && /usb/sbin/umountizo >/dev/null 2>&1
+	test -x /usr/sbin/umountizo -a ! -z "`grep -i intermezzo <$mounts`" && /usr/sbin/umountizo >/dev/null 2>&1
 
 	reverse < $mounts | \
 	while read des fs type rest; do
