@@ -19,6 +19,12 @@ alias char-major-86       off
 # the "powerpc32 bash" triggers that one
 alias personality-8       off
 
+# there are not soo many IDE controllers 
+alias block-major-88	off
+alias block-major-89	off
+alias block-major-90	off
+alias block-major-91	off
+
 alias parport_lowlevel    parport_pc
 # options parport_pc io=0x3bc irq=none,none
 # If you have multiple parallel ports, specify them this way:
