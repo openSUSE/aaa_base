@@ -94,11 +94,10 @@ function rc_reset ()
 if   test "$_rc_todo" = "status" ; then
 function rc_status ()
 {
+    rc_check
     for i ; do
 	case "$i" in
-	"") rc_check ;;
 	-v|-v[1-9]|-v[1-9][0-9])
-	    rc_check
 	    echo -en "$rc_save"
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    case "$_rc_status" in
@@ -120,11 +119,10 @@ function rc_status ()
 elif test -n "$_rc_todo" ; then
 function rc_status ()
 {
+    rc_check
     for i ; do
 	case "$i" in
-	"") rc_check ;;
 	-v|-v[1-9]|-v[1-9][0-9])
-	    rc_check
 	    echo -en "$rc_save"
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    case "$_rc_status" in
@@ -152,11 +150,10 @@ function rc_status ()
 else
 function rc_status ()
 {
+    rc_check
     for i ; do
 	case "$i" in
-	"") rc_check ;;
 	-v|-v[1-9]|-v[1-9][0-9])
-	    rc_check
 	    echo -en "$rc_save"
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    test $_rc_status -gt 0 && echo -en "$rc_failed" || echo -en "$rc_done"

@@ -183,7 +183,7 @@ if test -n "$skipped" ; then
     n=$((${#skipped} + 2))
     echo -n  "Skipped services in runlevel ${RUNLEVEL}: "
     test $n -lt 41 && echo -en "\033[${COLUMNS}C\033[${n}D"
-    echo -e  "${warn}${skipped}${norm}"
+    echo -e  "${attn}${skipped}${norm}"
 fi
 
 #
