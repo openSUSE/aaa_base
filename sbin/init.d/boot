@@ -62,12 +62,13 @@ swapon -a || ECHO_RETURN=$rc_failed_up
 echo -e "$ECHO_RETURN"
 
 
-#
-# you will need "update".
-#
 ECHO_RETURN=$rc_done
-echo -n "Running update (bdflush) daemon"
-/sbin/update || ECHO_RETURN=$rc_failed
+case `uname -r` in
+    0.*|1.*|2.0.*)
+        echo -n "Running update (bdflush) daemon"
+        /sbin/update || ECHO_RETURN=$rc_failed
+	;;
+esac
 echo -e "$ECHO_RETURN"
 
 #

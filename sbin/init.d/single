@@ -61,8 +61,13 @@ case "$1" in
 	;;
     stop)
         ECHO_RETURN=$rc_done
-        echo -n "Running update (bdflush) daemon"
-        /sbin/update || ECHO_RETURN=$rc_failed
+	case `uname -r` in
+	    0.*|1.*|2.0.*)
+	        echo -n "Running update (bdflush) daemon"
+	        /sbin/update || ECHO_RETURN=$rc_failed
+	        echo -e "$ECHO_RETURN"
+		;;
+	esac
         echo -e "$ECHO_RETURN"
 	;;
     *)
