@@ -63,7 +63,8 @@ case "$CPU" in
 esac
   OSTYPE=linux
 MACHTYPE=${CPU}-suse-${OSTYPE}
-export UID EUID USER MAIL HOST CPU HOSTNAME LOGNAME HOSTTYPE OSTYPE MACHTYPE
+# Do NOT export UID, EUID, USER, MAIL, and LOGNAME
+export HOST CPU HOSTNAME HOSTTYPE OSTYPE MACHTYPE
 
 #
 # Adjust some size limits (see bash(1) -> ulimit)

@@ -1,4 +1,4 @@
---- etc/init.d/rc.old	Tue Aug 21 17:09:39 2001
+--- etc/init.d/rc	Tue Aug 21 17:09:39 2001
 +++ etc/init.d/rc	Thu Aug 23 15:18:57 2001
 @@ -111,6 +111,9 @@
      test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
@@ -20,7 +20,7 @@
  
      # Log to /var/log/boot.msg
      blogger "$i start"
---- etc/init.d/boot.old	Tue Aug 21 17:09:45 2001
+--- etc/init.d/boot	Tue Aug 21 17:09:45 2001
 +++ etc/init.d/boot	Fri Aug 24 11:42:33 2001
 @@ -108,6 +108,8 @@
      fi
@@ -57,7 +57,7 @@
  
  #
  # initialize loopback device
---- etc/rc.status.old	Thu Aug 23 14:03:02 2001
+--- etc/rc.status	Thu Aug 23 14:03:02 2001
 +++ etc/rc.status	Fri Aug 24 12:40:39 2001
 @@ -26,6 +26,10 @@
  #    \015          carriage return (without newline)
@@ -79,3 +79,26 @@
 +{
 +    test "$_rc_splash" -eq 1 && /bin/splash "$1"
  }
+--- etc/init.d/rc	Wed Aug 29 17:32:00 2001
++++ etc/init.d/rc	Thu Aug 30 18:34:20 2001
+@@ -181,6 +181,9 @@
+ #    FAIL : 7 - program is not running (doing "start")
+ #    OK   : 7 - program is not running (doing "stop")
+ #
++
++rc_splash "master ${RUNLEVEL}"
++
+ echo -n "Master Resource Control: "
+ echo -e "runlevel ${RUNLEVEL} has been ${stat}${extd}reached${norm}"
+ if test -n "$failed" ; then
+--- etc/init.d/halt	Mon Aug 20 16:28:00 2001
++++ etc/init.d/halt	Thu Aug 30 18:40:26 2001
+@@ -16,6 +16,8 @@
+ trap "echo" SIGINT SIGSEGV SIGQUIT SIGTERM
+ set +e
+ 
++rc_splash "reboot"
++
+ case "$0" in
+ 	*halt)
+ 		message="The system will be halted immediately."

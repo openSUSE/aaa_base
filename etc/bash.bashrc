@@ -36,6 +36,15 @@ if test -x /usr/bin/dircolors ; then
 fi
 
 #
+# ksh/ash soemtimes do not know
+#
+test -z "$UID"  &&  UID=`id -ur 2> /dev/null`
+test -z "$EUID" && EUID=`id -u  2> /dev/null`
+test -z "$USER" && USER=`id -un 2> /dev/null`
+test -z "$MAIL" && MAIL=/var/spool/mail/$USER
+test -z "$LOGNAME"  && LOGNAME=$USER
+
+#
 # ls color option depends on the terminal
 #
 if test "$UID" = 0 ; then
