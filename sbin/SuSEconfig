@@ -368,12 +368,12 @@ test "$CHECK_INITTAB" = yes && {
       SERIAL_CON_LINE=${SERIAL_CONSOLE%%,*}
       SERIAL_CON_SPEED=${SERIAL_CONSOLE##*,}
       SERIAL_CON_SHORT=${SERIAL_CON_LINE##tty}
-      SERIAL_CON_STRING="$SERIAL_CON_SHORT:123:respawn:/sbin/agetty -L $SERIAL_CON_SPEED $SERIAL_CON_LINE"
+      SERIAL_CON_STRING="$SERIAL_CON_SHORT:2345:respawn:/sbin/agetty -L $SERIAL_CON_SPEED $SERIAL_CON_LINE"
     else
       SERIAL_CON_LINE=""
       SERIAL_CON_SPEED=""
       SERIAL_CON_SHORT=""
-      SERIAL_CON_STRING="#S0:123:respawn:/sbin/agetty -L 9600 ttyS0"
+      SERIAL_CON_STRING="#S0:2345:respawn:/sbin/agetty -L 9600 ttyS0"
     fi
 
     cp -p $r/etc/inittab $r/etc/inittab.SuSEconfig || {
