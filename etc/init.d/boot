@@ -29,7 +29,8 @@ rc_status -v1 -r
 #
 # Start blogd, requires /proc and /dev/pts
 #
-test -x /sbin/blogd && /sbin/blogd
+REDIRECT="`showconsole 2>/dev/null`"
+test -x /sbin/blogd && /sbin/blogd $REDIRECT
 
 #
 # possibly there are file systems on devices, which need a kernel 
@@ -207,7 +208,6 @@ if test ! -f /fastboot -a -z "$fastboot" ; then
         # were corrected, but that the boot may proceed.
         # A return code of 2 or larger indicates failure.
         FSCK_RETURN=$?
-        echo "Checking file systems"
 	test $FSCK_RETURN -lt 2
 	rc_status -v1 -r
         if test $FSCK_RETURN -gt 1; then
@@ -322,8 +322,6 @@ rc_status
 mount -fv -t devpts $optpts devpts /dev/pts
 rc_status
 mount -av -t nonfs,noproc,nodevpts
-rc_status
-echo "Mounting local file systems"
 rc_status -v1 -r
 
 #
@@ -585,6 +583,7 @@ killproc -QUIT /sbin/blogd
 #
 if test -e /var/adm/setup/setup.newinst -o -e /usr/lib/YaST/.configured2 ; then
     if test -w / -a "$NO_AUTO_SETUP" != true ; then
+	exec 0<> $REDIRECT 1>&0 2>&0
         if test -e /usr/lib/YaST/.configured2 ; then
             echo
             echo It seems, that last installation setup has not been finished...
@@ -609,6 +608,7 @@ fi
 # Let YaST2 finish its installation, if you installed with YaST2
 #
 if test -f /var/lib/YaST2/runme_at_boot ; then
+    exec 0<> $REDIRECT 1>&0 2>&0
     test -x     /lib/YaST2/bin/YaST2.firstboot &&     /lib/YaST2/bin/YaST2.firstboot
     test -x /usr/lib/YaST2/bin/YaST2.firstboot && /usr/lib/YaST2/bin/YaST2.firstboot
 fi
