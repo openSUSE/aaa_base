@@ -52,6 +52,10 @@ case "$1" in
         dd if=/dev/urandom of=$random_seed count=1 bs=512 2>/dev/null
 	rc_status -v
 	;;
+    status)
+	echo -n "Checking for random generator (always true)"
+	rc_status -v
+	;;
     *)
 	echo "Usage: $0 {start|stop}"
 	exit 1

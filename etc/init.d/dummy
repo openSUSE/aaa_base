@@ -77,10 +77,14 @@ case "$1" in
 	;;
     status)
 	echo -n "Checking status for dummy device:"
-	case "`ifconfig $dummy 2>&1`" in
+	if [ "$dev" = "dhcpclient" ]  ; then
+	  rc_failed 3
+	else
+	  case "`ifconfig $dummy 2>&1`" in
 	    ${dummy}*UP*) ;;
 	    ${dummy}*) rc_failed 3 ;;
-	esac
+	  esac
+	fi
 	rc_status -v
 	;;
     probe)

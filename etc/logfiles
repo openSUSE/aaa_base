@@ -34,6 +34,7 @@
 /var/log/uucp/Stats          +1024k   644      uucp.uucp
 # syslog
 /var/log/allmessages           +4096k   640      root.root
+/var/log/localmessages         +4096k   640      root.root
 /var/log/messages              +4096k   640      root.root
 /var/log/mail                  +4096k   640      root.root
 /var/log/news.all              +4096k   640      root.news
