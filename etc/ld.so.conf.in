@@ -4,6 +4,7 @@
 /usr/X11R6/lib
 /usr/X386/lib
 /usr/i486-linux/lib
+/usr/i486-linux-libc5/lib
 /usr/i486-linuxaout/lib
 /usr/local/lib
 /usr/openwin/lib
