@@ -255,11 +255,6 @@ if test -d $r/usr/lib/qt ; then
     echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv QTDIR /usr/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
-if test -d $r/opt/gnome ; then
-    echo "GNOMEDIR=/opt/gnome" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export GNOMEDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv GNOMEDIR /opt/gnome" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
 if test -d $r/usr/X11R6/lib/xad ; then
     echo "XADIDIR=/usr/X11R6/lib/xad" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export XADIDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig

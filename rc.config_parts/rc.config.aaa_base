@@ -458,8 +458,6 @@ HOW_TO_HANDLE_COMMERCIAL_LIBS=link
 #
 START_NSCD=yes
 
-umask 022
-
 #
 # Attention! This variable PATH is NOT setting the PATH for user or root
 # shells. It is only used internally for /etc/init.d/*, SuSEconfig and 

@@ -18,6 +18,7 @@
 #
 
 echo "Starting SuSEconfig, the SuSE Configuration Tool..."
+umask 022
 
 # check if we are started as root
 # only one of UID and USER must be set correctly
