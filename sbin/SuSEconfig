@@ -790,7 +790,7 @@ if test -z "$r" ; then
             echo Module $ONLY_MODULE does not exist
         fi
     elif test "$FASTRUN" = "true" ; then
-        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.sendmail /sbin/conf.d/SuSEconfig.ypclient /sbin/conf.d/SuSEconfig.kdm"
+        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.pam /sbin/conf.d/SuSEconfig.sendmail /sbin/conf.d/SuSEconfig.ypclient /sbin/conf.d/SuSEconfig.kdm"
     else
         SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.*"
     fi

@@ -40,7 +40,9 @@ do
 done
 
 case "$DISPLAYMANAGER" in
-    kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde/bin/kdm   ;;
+    kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde/bin/kdm
+			 test -x /opt/kde2/bin/kdm && \
+			 DISPLAYMANAGER=/opt/kde2/bin/kdm  ;;
     gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/bin/gdm ;;
     *)			 DISPLAYMANAGER=/usr/X11R6/bin/xdm ;;
 esac
@@ -67,6 +69,10 @@ case "$1" in
 	;;
     stop)
 	echo -n "Shutting down service $DM"
+	# 
+	# killproc(8) sleep upto five seconds and sends
+	# SIGKILL if xdm does not terminate within
+	#
 	killproc -TERM $DISPLAYMANAGER
 	rc_status -v
 	;;
