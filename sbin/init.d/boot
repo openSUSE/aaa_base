@@ -45,6 +45,17 @@ fi
 fi
 
 #
+# check if STOP-A should be enabled
+#
+if test -e /proc/sys/kernel/stop-a ; then
+if test "$ENABLE_STOP_A" = yes ; then
+    echo "1" > /proc/sys/kernel/stop-a
+else
+    echo "0" > /proc/sys/kernel/stop-a
+fi
+fi
+
+#
 # maybe we use "Multiple devices".  So initialize MD.
 #
 if test -f /etc/mdtab -a -x /sbin/mdadd ; then

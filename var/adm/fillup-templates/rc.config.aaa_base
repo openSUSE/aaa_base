@@ -657,11 +657,6 @@ DEFAULT_WM=kde
 CONSOLE_SHUTDOWN=reboot
 
 #
-# Should isapnp be used to initialize your PNP at bootup?  (yes/no)
-#
-START_ISAPNP=yes
-
-#
 # run the Name Service Caching Daemon at boot time? (yes/no)
 #
 START_NSCD=yes
