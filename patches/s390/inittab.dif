@@ -12,7 +12,7 @@
 -# special keyboard request (Alt-UpArrow)
 -# look into the kbd-0.90 docs for this
 -kb::kbrequest:/bin/echo "Keyboard Request -- edit /etc/inittab to let this work."
-+~~:S:respawn:/sbin/sulogin /dev/console
++~~:S:respawn:/sbin/sulogin /dev/ttyS0
  
  # what to do when power fails/returns
  pf::powerwait:/etc/init.d/powerfail start
@@ -44,7 +44,7 @@
 -#7:3:respawn:+/etc/init.d/rx tty7
 -
 +# on S/390 enable console login in all runlevels
-+1:012356:respawn:/sbin/sulogin /dev/console
++1:012356:respawn:/sbin/sulogin /dev/ttyS0
  
  # modem getty.
  # mo:235:respawn:/usr/sbin/mgetty -s 38400 modem

@@ -32,6 +32,10 @@
 #
 # ChangeLog:
 #
+# 13/9/2002:    v1.34
+# - fix module dependency handling
+# - fix zfcp handling
+# - fix mod_dasd support
 # 12/9/2002:    v1.33
 # - resolve module dependencies for each kernel
 # 03/9/2002:    v1.32
@@ -436,7 +440,7 @@ fi
 cat /proc/modules | grep -q "^zfcp" && do_zfcp=1
 
 zfcp_conf_contents=0
-test -f $root_dir/etc/zfcp.conf && zfcp_conf_contents=$(sed -s '
+test -f $root_dir/etc/zfcp.conf && zfcp_conf_contents=$(sed -e '
 s,#.*,,
 /^[[:blank:]]*$/d
 ' $root_dir/etc/zfcp.conf | wc -c)
@@ -447,7 +451,7 @@ test $zfcp_conf_contents -ne 0 && do_zfcp=1
 #
 # DASD
 #
-cat /proc/modules | grep -q -e "^dasd_mod" && do_dasd=1
+cat /proc/modules | grep -q -e "^dasd" && do_dasd=1
 
 # the dasd module has to be configured in root_dir/etc/zipl.conf or
 # with a parameter in modules.conf
@@ -466,9 +470,13 @@ test -f $root_dir/etc/zipl.conf && {
 
 grep -q '^[[:space:]]*options[[:space:]]\+dasd' $root_dir/etc/modules.conf && dasd_modules_conf=1
 
-# we won't add the dasd module automatically, until our kernel always
-# comes with a dasd-module:
-#test "$zipl_conf_with_dasd" -o "$dasd_modules_conf" && do_dasd=1
+# if dasd= is mentioned in zipl.conf, assume dasd module usage.  the
+# mk_initrd will create an initrd without dasd module, if the dasd
+# support is compiled into the kernel.
+test "$zipl_conf_with_dasd" && do_dasd=1
+
+# if it is mentioned in modules.conf, assume it should be used:
+test "$dasd_modules_conf" && do_dasd=1
 
 ###################################################################
 
@@ -510,6 +518,7 @@ for i in $modules ; do
     raid[01]|linear|multipath) do_raid=1 ;;
     raid5) do_raid=1 do_raid5=1 ;;
     zfcp) do_zfcp=1 ; has_zfcp=1;;
+    sd_mod) has_sd_mod=1;;
     dasd) do_dasd=1 ; has_dasd=1;;
     xor) has_xor=1 ;;
     jfs) has_jfs=1 ;;
@@ -536,7 +545,12 @@ done
 # dasd needs either fba or eckd
 test "$do_dasd" && {
     test "$has_dasd_eckd" -o "$has_dasd_fba" || {
-	error 1 "unload dasd_mod or load dasd_fba_mod or dasd_eckd_mod"
+	# ??? the probing is done on $modules, not /proc/modules
+	echo "\
+note: required dasd module support can not be guessed from currently
+running system.  loading all dasd modules.  this means the system uses
+somewhat more memory than it probably has to."
+	modules="dasd dasd_eckd_mod dasd_fba_mod dasd_diag_mod $modules"
     }
 }
 
@@ -551,6 +565,7 @@ test "$do_dasd" && {
 # add zfcp modules
 test "$do_zfcp" && {
     test "$has_zfcp" || modules="zfcp $modules"
+    test "$has_sd_mod" || modules="$modules sd_mod"
 }
 
 ###################################################################
@@ -672,7 +687,7 @@ for k in $kernels ; do
       echo 'none /proc proc defaults 0 0' > $tmp_mnt/etc/fstab
       cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
       cp -a $root_dir/dev/dasd* $tmp_mnt/dev 2>/dev/null
-      cp -a $root_dir/dev/{i2o,ida,cciss,rd} $tmp_mnt/dev
+      cp -a $root_dir/dev/{i2o,ida,cciss,rd} $tmp_mnt/dev 2>/dev/null
       cp -a $root_dir/$lib/ld* $tmp_mnt/$lib
       cp -a $root_dir/$lib/libc.so.6 $tmp_mnt/$lib
       cp -a $root_dir/$lib/libz.so.1* $tmp_mnt/$lib
@@ -714,12 +729,6 @@ for k in $kernels ; do
       cp -a $root_dir/$lib/libcom_err.so.* $tmp_mnt/$lib
     fi
 
-    if [ "$do_zfcp" ] ; then
-      echo " - zfcp support"
-      cp -a --parents $root_dir/bin/cat       $tmp_mnt/
-      cp -a --parents $root_dir/etc/zfcp.conf $tmp_mnt/
-    fi
-
     echo '#! /bin/sh' >$lx_rc
     echo >>$lx_rc
     echo "export PATH=/bin" >>$lx_rc
@@ -730,10 +739,11 @@ for k in $kernels ; do
     # resolve module dependencies, individually for each kernel version
     # kernel version is $vv
     rm -f $tmp_modconf
-    echo "depfile=$root_dir/lib/modules/$vv" >$tmp_modconf
+    echo "depfile=$root_dir/lib/modules/$vv/modules.dep" >$tmp_modconf
     mods2=
     for mod in $modules ; do
       modlist=`/sbin/modprobe -C $tmp_modconf -v -n $mod 2>/dev/null | sed -ne 's#^/sbin/insmod.*/\(.*\)\.o.*#\1#p'`
+
       [ "$modlist" ] || modlist=$mod
       for i in $modlist ; do
         [ "$mods2" = "${mods2/ $i / }" ] && mods2="$mods2 $i "
@@ -772,10 +782,16 @@ for k in $kernels ; do
 
     if [ "$do_zfcp" ] ; then
       echo " - zfcp support"
-      echo "echo \"zfcp ...\" " >>$lx_rc
-      echo "cat /etc/zfcp.conf > /proc/scsi/zfcp/add_map" >>$lx_rc
-      echo "echo \"done ...\" " >>$lx_rc
-      echo >>$lx_rc
+      cp -a --parents $root_dir/bin/cat       $tmp_mnt/
+      cp -a --parents $root_dir/etc/zfcp.conf $tmp_mnt/
+      cat >>$lx_rc <<EOF
+echo "zfcp ..."
+mount -n -tproc none /proc
+cat /etc/zfcp.conf > /proc/scsi/zfcp/add_map
+umount -n /proc
+echo "done ..."
+
+EOF
     fi
 
     if [ "$do_raid" ] ; then
