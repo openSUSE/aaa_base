@@ -2,10 +2,8 @@
 %config(noreplace) /etc/DIR_COLORS
 %config(noreplace) /etc/host.conf
 %config(noreplace) /etc/inittab
-%config(noreplace) /etc/modprobe.conf.local
 %config /root/bin/cron.daily
 %config /root/bin/cron.daily.local
-%config /etc/modprobe.conf
 %config /etc/csh.cshrc
 %config /etc/csh.login
 %config /etc/inputrc

@@ -1,9 +1,0 @@
-# begin of sparc64 part for modprobe.conf
-
-install char-major-4      /bin/true
-install char-major-5      /bin/true
-
-alias parport_lowlevel    parport_pc
-
-# end of sparc64 part for modprobe.conf
-

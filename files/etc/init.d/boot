@@ -231,7 +231,7 @@ if test -n "$startpar" ; then
 fi
 
 echo -n "System Boot Control: "
-echo -e "The system has been ${stat}${extd}setup${norm}"
+echo -e "The system has been ${stat}${extd}set up${norm}"
 if test -n "$failed" ; then
     n=$((${#failed} + 7))
     echo -n  "Failed features: "
