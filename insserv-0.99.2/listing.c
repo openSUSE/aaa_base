@@ -631,10 +631,8 @@ out:
 }
 
 /*
- *
- *
+ * The virtual facilities provides real services.
  */
-
 void virtprov(const char * virt, const char * real)
 {
     char * token, * ptr;
@@ -649,7 +647,13 @@ void virtprov(const char * virt, const char * real)
 
     while ((token = strsep(&ptr, delimeter))) {
 	if (*token) {
-	    dir_t * tmp = providedir(token);
+	    dir_t * tmp;
+	    /*
+	     * optional real services are noted by a `+' sign
+	     */
+	    if (*token == '+')
+		token++;
+	    tmp = providedir(token);
 	    ln_sf(virt, token);
 	    dir->lvl |= tmp->lvl;
 	}

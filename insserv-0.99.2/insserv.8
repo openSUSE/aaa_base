@@ -19,7 +19,7 @@ Insserv \- Enable an installed system init script
 .RI [[ / ] path/to/init.d/ ] script \ ...
 .PP
 .B insserv
-.RI [[ / ] path/to/init.d/ ] script [ ,start=lvl1 [ ,lvl2 ]]\ ...
+.RI [[ / ] path/to/init.d/ ] script [ ,start=<lvl1> [ ,<lvl2> ]]\ ...
 .PP
 .B insserv
 .B -r
@@ -46,8 +46,8 @@ by reading the comment header of the script, e.g.:
  # Provides:       boot_facility_1 [ boot_facility_2 ...]
  # Required-Start: boot_facility_1 [ boot_facility_2 ...]
  # Required-Stop:  boot_facility_1 [ boot_facility_2 ...]
- # X-SuSE-Should-Start: boot_facility_1 [ boot_facility_2 ...]
- # X-SuSE-Should-Stop:  boot_facility_1 [ boot_facility_2 ...]
+ # X-UnitedLinux-Should-Start: boot_facility_1 [ boot_facility_2 ...]
+ # X-UnitedLinux-Should-Stop:  boot_facility_1 [ boot_facility_2 ...]
  # Default-Start:  run_level_1 [ run_level_2 ...]
  # Default-Stop:   run_level_1 [ run_level_2 ...]
  # Description:    multiline_description
@@ -59,7 +59,7 @@ and calculating the dependencies between all scripts.
 Please note, that the
 .BR Required-Stop,
 .\" .BR Should-Stop ,
-.BR X-SuSE-Should-Stop ,
+.BR X-UnitedLinux-Should-Stop ,
 and
 .B Default-Stop
 are ignored in SuSE Linux, because the SuSE boot script concept
@@ -125,6 +125,10 @@ Here is an example for
 .fi
 .in -1l
 .sp 1
+Names starting with a `+' sign are marked as optional.
+If the service with the name after the plus sign is
+available it will be used, if not available it is
+ignored silently.
 .\"
 .SH OPTIONS
 Currently there is only two options for
@@ -173,13 +177,16 @@ checks for the existence of these scripts.
 For the runlevels the information found in
 the script is used.
 .TP
-.RI [[ / ] path/to/init.d/ ] script [ ,start=lvl1 [ ,lvl2 ]]\ ...
+.RI [[ / ] path/to/init.d/ ] script [ ,start=<lvl1> [ ,<lvl2> ]]\ ...
 List of scripts which have to be added to
 the specified runlevels to be started with.
 You may use this extension to overwrite the default values
 for start and stop runlevels of the script.
+Note that
+.BR <lvl1> ,\  <lvl2> ,\ ...
+are the known runlevels explained above.
 The extension
-.IR ,stop=lvl1 [ ,lvl2 ]]
+.IR ,stop=<lvl1> [ ,<lvl2> ]]
 is possible but ignored on SuSE Linux.
 .TP
 .RI \fB\-r\fR\ [[ / ] path/to/init.d/ ] script\ ...

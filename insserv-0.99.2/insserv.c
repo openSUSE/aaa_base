@@ -40,13 +40,14 @@
 #define VALUE		":[[:blank:]]*([[:print:][:blank:]]*)"
 /* The second substring contains our value (the first is all) */
 #define SUBNUM		2
+#define SUBNUM_SHD	3
 #define START		"[-_]+start"
 #define STOP		"[-_]+stop"
 
 /* The main regular search expressions */
 #define PROVIDES	COMM "provides" VALUE
 #define REQUIRED	COMM "required"
-#define SHOULD		COMM "(x[-_]+suse)?should"
+#define SHOULD		COMM "(x[-_]+[a-z0-9_-]+)?should"
 #define DEFAULT		COMM "default"
 #define REQUIRED_START  REQUIRED START VALUE
 #define REQUIRED_STOP	REQUIRED STOP  VALUE
@@ -220,7 +221,7 @@ out:
 }
 
 /*
- * Expand requested services
+ * Expand requested services for sorting
  */
 static void expandreq(const char *name, req_t * cur)
 {
@@ -228,7 +229,7 @@ static void expandreq(const char *name, req_t * cur)
     list_t * ptr;
 
     if (cur->serv)
-	link(name, cur->serv);
+	requiresv(name, cur->serv);
 
     for (ptr = req_start->next; ptr != req_start; ptr = ptr->next) {
 	char * needed = getreq(ptr)->serv;
@@ -238,48 +239,64 @@ static void expandreq(const char *name, req_t * cur)
 }
 
 /*
- * Remember required services
+ * Remember requests for required or should services and expand `$' token
  */
 static void rememberreq(serv_t *serv, req_t * cur, char * required)
 {
-    list_t * req_start = &(cur->list);
     char * token, * tmp = strdupa(required);
+    req_t * old = cur;
 
     while ((token = strsep(&tmp, delimeter))) {
-	req_t * this = NULL;
+	list_t * ptr;
 
 	if (!*token)
 	    continue;
+	cur = old;			/* The default list */
 
-	if (!cur->serv) {
-	    this = cur;
-	} else {
-	    this = (req_t *)malloc(sizeof(req_t)); 
-	    if (!this) 
-		error("%s", strerror(errno));
-	    insert(&(this->list), req_start->prev);
-	    this->serv = NULL;
-	}
+	if (*token != '$') {
+	    req_t * this = NULL;
 
-	if (*token == '$') {
-	    list_t * ptr;
-	    for (ptr = sysfaci_start->next; ptr != sysfaci_start; ptr = ptr->next) {
-		if (!strcmp(token, getfaci(ptr)->name)) {
-		    rememberreq(NULL, this, getfaci(ptr)->repl);
-		    break;
-		}
+	    /*
+	     * Optional real services are noted by a `+' sign
+	     */
+	    if (*token == '+') {
+		token++;
+		cur = &serv->shd;
+		if (*token == '$')
+		    goto dollar;	/* Someone uses `+$' */
 	    }
-	    continue;
-	}
-	this->serv = xstrdup(token);
-    }
 
-    if (serv)
-	expandreq(serv->name, cur);
+	    if (!cur->serv) {
+		this = cur;
+	    } else {
+		list_t * req_start = &(cur->list);
+
+		this = (req_t *)malloc(sizeof(req_t)); 
+		if (!this) 
+		    error("%s", strerror(errno));
+		insert(&(this->list), req_start->prev);
+		this->serv = NULL;
+	    }
+	    this->serv = xstrdup(token);
+
+	    continue;			/* Below we handle `$' token */
+	}
+dollar:
+	/* Expand the `$' token recursively down */
+	for (ptr = sysfaci_start->next; ptr != sysfaci_start; ptr = ptr->next) {
+	    if (!strcmp(token, getfaci(ptr)->name)) {
+		rememberreq(serv, cur, getfaci(ptr)->repl);
+		break;
+	    }
+	}
+
+    }
+    /* At last: expand requested services for sorting */
+    expandreq(serv->name, old);
 }
 
 /*
- * Check requested services
+ * Check required services
  */
 static boolean chkrequired(const char * name)
 {
@@ -296,10 +313,8 @@ static boolean chkrequired(const char * name)
     /*
      * If only _one_  required service is misssed we run on an error.
      */
-    if (!findserv(serv->req.serv)) {
+    if (!findserv(serv->req.serv))
 	warn("Service %s has to be enabled for service %s\n", serv->req.serv, name);
-	goto out;
-    }
 
     ret = true;
     if (req_start == req_start->next)
@@ -504,7 +519,7 @@ static void scan_script_defaults(const char *path)
     regex_t reg_def_start;
     regex_t reg_def_stop;
     regex_t reg_desc;
-    regmatch_t subloc[SUBNUM], *val = &subloc[SUBNUM - 1];
+    regmatch_t subloc[SUBNUM_SHD+1], *val = &subloc[SUBNUM-1], *shl = &subloc[SUBNUM_SHD-1];
     FILE *script;
     char *pbuf = buf;
 
@@ -541,6 +556,7 @@ static void scan_script_defaults(const char *path)
     xreset(description);
 
 #define COMMON_ARGS	buf, SUBNUM, subloc, 0
+#define COMMON_SHD_ARGS	buf, SUBNUM_SHD, subloc, 0
     while (fgets(buf, sizeof(buf), script)) {
 	if (!provides       && regexecutor(&reg_prov,      COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
@@ -563,17 +579,17 @@ static void scan_script_defaults(const char *path)
 	    } else
 		required_stop = empty;
 	}
-	if (!should_start && regexecutor(&reg_shl_start, COMMON_ARGS) == true) {
-	    if (val->rm_so < val->rm_eo) {
-		*(pbuf+val->rm_eo) = '\0';
-		should_start = xstrdup(pbuf+val->rm_so);
+	if (!should_start && regexecutor(&reg_shl_start,   COMMON_SHD_ARGS) == true) {
+	    if (shl->rm_so < shl->rm_eo) {
+		*(pbuf+shl->rm_eo) = '\0';
+		should_start = xstrdup(pbuf+shl->rm_so);
 	    } else
 		should_start = empty;
 	}
-	if (!should_stop  && regexecutor(&reg_shl_stop,  COMMON_ARGS) == true) {
-	    if (val->rm_so < val->rm_eo) {
-		*(pbuf+val->rm_eo) = '\0';
-		should_stop = xstrdup(pbuf+val->rm_so);
+	if (!should_stop  && regexecutor(&reg_shl_stop,    COMMON_SHD_ARGS) == true) {
+	    if (shl->rm_so < shl->rm_eo) {
+		*(pbuf+shl->rm_eo) = '\0';
+		should_stop = xstrdup(pbuf+shl->rm_so);
 	    } else
 		should_stop = empty;
 	}
@@ -602,6 +618,7 @@ static void scan_script_defaults(const char *path)
 	}
     }
 #undef COMMON_ARGS
+#undef COMMON_SHD_ARGS
     regfree(&reg_prov);
     regfree(&reg_req_start);
     regfree(&reg_req_stop);
@@ -1152,7 +1169,7 @@ int main (int argc, char *argv[])
 			 * Compare all bits, which means `==' and not `&' and overwrite
 			 * the defaults of the current script.
 			 */
-			if ((deflvls != service->lvls) && !defaults) {
+			if ((deflvls != service->lvls) && service->lvls && !defaults) {
 			    if (!del && chkfor(d->d_name, argv, argc) && !(argr[curr_argc]))
 				warn("Warning, current runlevel(s) of script `%s' overwrites defaults.\n",
 				     d->d_name);
