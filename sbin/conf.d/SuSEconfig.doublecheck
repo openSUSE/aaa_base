@@ -1,0 +1,49 @@
+#! /bin/sh
+# Copyright (c) 2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996-97
+#         Bernhard Kaindl <bk@suse.de>, 1999
+#         Rüdiger Oertel <ro@suse.de>, 2000-01
+#
+# This module checks for duplicate variables in /etc/rc.config
+
+# check if we are started as root
+# only one of UID and USER must be set correctly
+if test "$UID" != 0 -a "$USER" != root; then
+    echo "You must be root to start $0."
+    exit 1
+fi
+
+test -n "$ROOT" && exit 0
+
+test -f /lib/YaST/SuSEconfig.functions || {
+    echo "ERROR - can not find /lib/YaST/SuSEconfig.functions!!"
+    echo "This should not happen.  Exit..."
+    exit 1
+}
+. /lib/YaST/SuSEconfig.functions
+
+test -f /etc/rc.config || {
+    echo "No /etc/rc.config found."
+    exit 1
+}
+. /etc/rc.config
+
+#
+# safety-check: look for duplicated variables in /etc/rc.config
+#
+MYTMP=`mktemp -d /tmp/rcconfigchk.XXXXXX`
+grep -vh "^#" /etc/rc.config /etc/rc.config.d/*.rc.config | grep -v "^$" | cut -d= -f1 | sort | uniq -d \
+  > $MYTMP/toomuch
+if [ -s $MYTMP/toomuch ] ; then
+  echo "This is a warning message." > $MYTMP/rc.config_check
+  echo "The following variables seem to be doubled in /etc/rc.config" >> $MYTMP/rc.config_check
+  echo "and/or the files in /etc/rc.config.d :" >> $MYTMP/rc.config_check
+  cat $MYTMP/toomuch >> $MYTMP/rc.config_check
+  echo "Please check which of the instances is correct." >> $MYTMP/rc.config_check
+  test -d /var/adm/notify/warnings && \
+    mv $MYTMP/rc.config_check /var/adm/notify/warnings
+fi
+rm -rf $MYTMP
+
+

@@ -85,14 +85,9 @@ test "$FASTRUN" = false -a "$CHECK_NEWPACKAGE" = true && \
 # where can SuSEconfig store data in running system?
 #
 LIBDIR=$r/var/adm/SuSEconfig
-
-#
-# LASTRUN and must be a file name placed in LIBDIR
-#
-LASTRUN=$LIBDIR/lastrun
-IS_RUNNING=$r/var/lock/SuSEconfig-is-running
 MD5DIR=$LIBDIR/md5
 export MD5DIR
+IS_RUNNING=$r/var/lock/SuSEconfig-is-running
 
 test -f $r/lib/YaST/SuSEconfig.functions || {
     echo "ERROR - can not find $r/lib/YaST/SuSEconfig.functions!!"
@@ -125,25 +120,8 @@ fi
 #
 # first of all test if we have space.  If not abort.
 #
-for DIR in $r/etc $r/usr/lib/irc $r/var/lib/news ; do
-    my_test_write $DIR || continue
-    dd if=/dev/zero of=$DIR/testforspace.SuSEconfig bs=1k count=50 \
-        2> /dev/null  || {
-        rm -f $DIR/testforspace.SuSEconfig
-        echo
-        echo
-        echo We do not have enough disk space in $DIR. Exit.
-        echo
-        exit 1
-    }
-    rm -f $DIR/testforspace.SuSEconfig
-done
+my_test_for_space $r/etc || exit 1
 
-
-#
-# now make sure, that LIBDIR exists
-#
-test -e $LIBDIR || mkdir -p $LIBDIR
 
 #
 # delete very old lock files
@@ -189,179 +167,6 @@ fi
 
 echo $$ > $IS_RUNNING
 
-test -n "$ORGANIZATION" && {
-    echo "$ORGANIZATION" > $r/etc/organization.SuSEconfig
-    check_md5_and_move $r/etc/organization
-}
-
-test -n "$NNTPSERVER" && {
-    echo "$NNTPSERVER" > $r/etc/nntpserver.SuSEconfig
-    check_md5_and_move $r/etc/nntpserver
-}
-
-test -n "$FROM_HEADER" && {
-    echo "$FROM_HEADER" > $r/etc/inews_mail_gateway.SuSEconfig
-    check_md5_and_move $r/etc/inews_mail_gateway
-}
-
-if test -n "$TIMEZONE" -a "$TIMEZONE" != "YAST_ASK" -a -x /usr/sbin/zic ; then
-    /usr/sbin/zic -l $TIMEZONE
-fi
-
-if test -n "$MOUSE" -a "$MOUSE" != "YAST_ASK" ; then
-    rm -f $r/dev/mouse
-    ln -sf $MOUSE $r/dev/mouse
-fi
-if test -n "$MODEM" -a "$MODEM" != "YAST_ASK" ; then
-    rm -f $r/dev/modem
-    ln -sf $MODEM $r/dev/modem
-fi
-
-if test ! -e /sbin/conf.d/SuSEconfig.sendmail -a \
-    "$SENDMAIL_TYPE" != no -a "$SENDMAIL_TYPE" != "YAST_ASK" ; then
-        SENDMAIL_FILE=$r/etc/sendmail.smtp.cf
-        if test "$SENDMAIL_TYPE" = uucp-only; then
-                SENDMAIL_FILE=$r/etc/sendmail.uucp.cf
-        fi
-        test -e $SENDMAIL_FILE && \
-        sed -e "s/^DS.*\$/DS${SENDMAIL_SMARTHOST}/" \
-                -e "s/^Cw.*\$/Cw${SENDMAIL_LOCALHOST}/" \
-                -e "s/^DR.*\$/DR${SENDMAIL_RELAY}/" \
-                -e "s/^DH.*\$/DH${SENDMAIL_RELAY}/" \
-                -e "s/^DM.*\$/DM${FROM_HEADER}/" \
-                < $SENDMAIL_FILE > $r/etc/sendmail.cf.SuSEconfig
-        test -e $SENDMAIL_FILE && check_md5_and_move $r/etc/sendmail.cf
-fi
-
-
-if test -n "$FROM_HEADER" -a -d $r/var/lib/news/ ; then
-    echo "$FROM_HEADER" > $r/var/lib/news/mailname.SuSEconfig
-    check_md5_and_move $r/var/lib/news/mailname
-    echo "$FROM_HEADER" > $r/var/lib/news/whoami.SuSEconfig
-    check_md5_and_move $r/var/lib/news/whoami
-fi
-
-if test "$SORT_PASSWD_BY_UID" = yes ; then
-    for i in passwd group ; do
-        cat $r/etc/$i | grep "^root:" > $r/etc/$i.t
-        cat $r/etc/$i | grep -v "^+" | grep -v ":-[0-9]:-[0-9]:" | \
-            grep -v "^root:" | sort -n -t : +2 >> $r/etc/$i.t
-        test -s $r/etc/$i.t && {
-            cat $r/etc/$i | grep ":-[0-9]:-[0-9]:" >> $r/etc/$i.t
-            cat $r/etc/$i | grep "^+" >> $r/etc/$i.t
-            cmp -s $r/etc/$i $r/etc/$i.t || {
-                echo "Sorting /etc/$i. Saving old to /etc/$i.unsorted."
-                mv $r/etc/$i $r/etc/$i.unsorted
-                cp $r/etc/$i.t $r/etc/$i
-            }
-        }
-        rm $r/etc/$i.t
-    done
-fi
-
-#
-# check login mode
-#
-test "$CHECK_INITTAB" = yes && {
-    XCONFIGFILE=/etc/XF86Config
-    test -f $r/etc/X11/XF86Config && XCONFIGFILE=/etc/X11/XF86Config
-    if [ ! -r $r/$XCONFIGFILE -a "$DISPLAYMANAGER" != console ]; then
-        echo -n "XFree86 not configured yet! No graphical login. "
-        echo "Check /etc/X11/XF86Config or /etc/XF86Config."
-        DISPLAYMANAGER=none
-    fi
-
-    case "$DISPLAYMANAGER" in
-        kdm|KDM|xdm|XDM|gdm|GDM|wdm|WDM) INITRL=5;;
-        *)               INITRL=3;;
-    esac
-
-    case "$CONSOLE_SHUTDOWN" in
-        ignore)
-          CA_SEARCH="^ca::ctrlaltdel.*"
-          CA_LINE="#ca::ctrlaltdel:/sbin/shutdown -h -t 4 now"
-        ;;
-        halt)
-          CA_SEARCH="^ca::ctrlaltdel.*"
-          CA_LINE="ca::ctrlaltdel:/sbin/shutdown -h -t 4 now"
-        ;;
-        reboot)
-          CA_SEARCH="^ca::ctrlaltdel.*"
-          CA_LINE="ca::ctrlaltdel:/sbin/shutdown -r -t 4 now"
-        ;;
-        *)
-          CA_SEARCH="wrzlgnmpf-this-should-not-be-found"
-          CA_LINE=""
-        ;;
-    esac
-    if test -n "$SERIAL_CONSOLE" ; then
-      SERIAL_CON_LINE=${SERIAL_CONSOLE%%,*}
-      SERIAL_CON_SPEED=${SERIAL_CONSOLE##*,}
-      SERIAL_CON_SHORT=${SERIAL_CON_LINE##tty}
-      SERIAL_CON_STRING="$SERIAL_CON_SHORT:12345:respawn:/sbin/agetty -L $SERIAL_CON_SPEED $SERIAL_CON_LINE"
-    else
-      SERIAL_CON_LINE=""
-      SERIAL_CON_SPEED=""
-      SERIAL_CON_SHORT=""
-      SERIAL_CON_STRING="#S0:12345:respawn:/sbin/agetty -L 9600 ttyS0"
-    fi
-
-    cp -p $r/etc/inittab $r/etc/inittab.SuSEconfig || {
-        echo "Unexpected Error - emergency exit..."
-        rm -f $IS_RUNNING
-        exit 1
-    }
-
-    cat $r/etc/inittab | \
-        sed -e "s%^id:[0-9sSa-cA-C]*:initdefault:%id:$INITRL:initdefault:%" \
-            -e "s%$CA_SEARCH%$CA_LINE%" \
-            -e "s%.*/sbin/agetty -L.*%$SERIAL_CON_STRING%" \
-        > $r/etc/inittab.SuSEconfig
-
-    test -s $r/etc/inittab.SuSEconfig || {
-        echo "Unexpected Error - emergency exit..."
-        rm -f $IS_RUNNING
-        exit 1
-    }
-
-    cmp -s $r/etc/inittab.SuSEconfig $r/etc/inittab || {
-        mv $r/etc/inittab.SuSEconfig $r/etc/inittab
-        echo "Installing new $r/etc/inittab"
-    }
-    rm -f $r/etc/inittab.SuSEconfig
-
-    if test -n "$SERIAL_CON_LINE" ; then
-     grep "$SERIAL_CON_LINE" $r/etc/securetty >/dev/null 2>/dev/null || \
-       { 
-         echo $SERIAL_CON_LINE >> $r/etc/securetty
-         echo "Added $SERIAL_CON_LINE to /etc/securetty"
-       }
-     rm -f $r/etc/securetty.SuSEconfig
-    fi
-    unset INITRL
-    unset SERIAL_CON_LINE
-    unset SERIAL_CON_SPEED
-    unset SERIAL_CON_SHORT
-    unset SERIAL_CON_STRING
-}
-
-#
-# setting dosemu security level.
-#
-if test -n "$PERMISSION_SECURITY" ; then
-    for LEVEL in $PERMISSION_SECURITY ; do
-        if test -f $r/etc/dosemu.users.$LEVEL -a \
-                -L $r/etc/dosemu.users ; then
-            rm -f $r/etc/dosemu.users
-            ln -s dosemu.users.$LEVEL $r/etc/dosemu.users
-        fi
-    done
-fi
-
-test -x /sbin/ldconfig -a -z "$r" -a "$CHECK_NEWPACKAGE" != false && \
-    /sbin/ldconfig
-
-
 #
 # the following stuff should be done in running system...
 #
@@ -377,7 +182,7 @@ if test -z "$r" ; then
             echo Module $ONLY_MODULE does not exist
         fi
     elif test "$FASTRUN" = "true" ; then
-        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.pam /sbin/conf.d/SuSEconfig.sendmail /sbin/conf.d/SuSEconfig.ypclient /sbin/conf.d/SuSEconfig.kdm"
+        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.aaa_at_first /sbin/conf.d/SuSEconfig.pam /sbin/conf.d/SuSEconfig.sendmail /sbin/conf.d/SuSEconfig.ypclient"
     else
         SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.*"
     fi
@@ -422,146 +227,8 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
                 /sbin/depmod -a 2> /dev/null > /dev/null
             fi
         fi
-
-        if test "$HOW_TO_HANDLE_COMMERCIAL_LIBS" = link -o \
-                "$HOW_TO_HANDLE_COMMERCIAL_LIBS" = clean ; then
-            if test -x /usr/bin/ldd -a \
-                    -x /usr/bin/dirname -a \
-                    -x /usr/bin/basename ; then
-                for DYNBIN in /bin/*.SuSE-dynamic \
-                              /sbin/*.SuSE-dynamic \
-                              /usr/bin/*.SuSE-dynamic \
-                              /usr/sbin/*.SuSE-dynamic \
-                              /usr/X11R6/bin/*.SuSE-dynamic ; do
-                    test -x $DYNBIN || continue
-                    DYNDIR=`/usr/bin/dirname $DYNBIN`
-                    DYNBASE=`/usr/bin/basename $DYNBIN .SuSE-dynamic`
-                    test -e $DYNDIR/$DYNBASE -a ! -L $DYNDIR/$DYNBASE && {
-                        echo skipping $DYNBIN. $DYNDIR/$DYNBASE is not a link...
-                        continue
-                    }
-                    test ! -e $DYNDIR/$DYNBASE.SuSE-static -a \
-                           "$HOW_TO_HANDLE_COMMERCIAL_LIBS" != clean && {
-                        echo skipping $DYNBIN. $DYNDIR/$DYNBASE.SuSE-static does not exist...
-                        continue
-                    }
-                    LIBS_MISSING=false
-                    for DUMMY in `/usr/bin/ldd $DYNBIN | grep "not found"` ; do
-                        LIBS_MISSING=true
-                    done
-                    if test "$LIBS_MISSING" = true ; then
-                        USEDDYN=$DYNBASE.SuSE-static
-                        OTHERDYN=$DYNDIR/$DYNBASE.SuSE-dynamic
-                    else
-                        USEDDYN=$DYNBASE.SuSE-dynamic
-                        OTHERDYN=$DYNDIR/$DYNBASE.SuSE-static
-                    fi
-                    test -e $DYNDIR/$USEDDYN || {
-                        echo skipping $DYNBIN - please check for $USEDDYN...
-                        continue
-                    }
-                    rm -f $DYNDIR/$DYNBASE
-                    ln -s $USEDDYN $DYNDIR/$DYNBASE
-                    test "$HOW_TO_HANDLE_COMMERCIAL_LIBS" = clean -a \
-                         -e "$OTHERDYN" && {
-                        echo deleting obsolete $OTHERDYN...
-                        rm -f $OTHERDYN
-                    }
-                done
-            fi
-        fi
-
-        if test -n "$CREATE_INFO_DIR" -a "$CREATE_INFO_DIR" = "yes" -a \
-            "$CHECK_NEWPACKAGE" != false ; then
-            if test -x /usr/bin/perl -a -d /usr/share/info/ ; then
-                if test ! -f /usr/share/info/dir \
-                    -o /usr/share/info/dir -ot /usr/share/info/ \
-                    -o /usr/share/info/dir -ot /usr/info/ \
-                    -o /usr/share/info/dir -ot /usr/lib/info/ \
-                    -o /usr/share/info/dir -ot /usr/local/info/ \
-                    -o /usr/share/info/dir -ot /usr/local/lib/info/ \
-                    -o /usr/share/info/dir -ot /usr/X11R6/info/ \
-                    -o /usr/share/info/dir -ot /usr/X11R6/lib/info/ \
-                    -o /usr/share/info/dir -ot /usr/X11R6/lib/xemacs/info/ \
-                    ; then
-                    my_test_write /usr/share/info && {
-                        echo "Creating /usr/share/info/dir..."
-                        /usr/bin/mkinfodir
-                    }
-                fi
-            fi
-        fi
-
-        if test -x /usr/bin/mandb -a "$CHECK_NEWPACKAGE" != false ; then
-            echo "Processing index files of all manpages..."
-            /usr/bin/mandb -q -s
-        fi
-    fi
-
-    if test -n "$CHECK_PERMISSIONS" -a \
-            -x /usr/bin/perl -a -x /usr/bin/chkstat ; then
-
-        PERMISSIONS_FILES=""
-	PACKAGE_PERMFILES=(/etc/permissions.d/*)
-	PACKAGE_PERMFILES=(${PACKAGE_PERMFILES[*]##*/})
-	PACKS=${PACKAGE_PERMFILES[*]%%.*}
-	if test -n "$PACKS" ; then
-	    test -x /usr/bin/sort && {
-	        PACKS=`for j in $PACKS ; do echo $j ; done | /usr/bin/sort -u`
-	    }
-	    RPMPACKS=(`rpm -q $PACKS 2> /dev/null`)
-	    RPMPACKS=(${RPMPACKS[*]%-*-*})
-            for i in ${RPMPACKS[*]} ; do
-                test -e /etc/permissions.d/$i && \
-                    PERMISSIONS_FILES="$PERMISSIONS_FILES /etc/permissions.d/$i"
-                for PERMEXT in $PERMISSION_SECURITY ; do
-                    test -e /etc/permissions.d/$i.$PERMEXT && \
-                        PERMISSIONS_FILES="$PERMISSIONS_FILES /etc/permissions.d/$i.$PERMEXT"
-                done
-            done
-	fi
-    
-        test -e /etc/permissions && \
-          PERMISSIONS_FILES="$PERMISSIONS_FILES /etc/permissions"
-        for PERMEXT in $PERMISSION_SECURITY ; do
-            test -e /etc/permissions.$PERMEXT && \
-                PERMISSIONS_FILES="$PERMISSIONS_FILES /etc/permissions.$PERMEXT"
-        done
-    
-        for PERMFILE in $PERMISSIONS_FILES ; do
-            if test "$CHECK_PERMISSIONS" = "set" ; then
-    	    /usr/bin/chkstat -set $PERMFILE
-            elif test "$CHECK_PERMISSIONS" = "warn" ; then
-    	    /usr/bin/chkstat $PERMFILE
-            fi
-        done
-    fi
-
-    if test ! -e /sbin/conf.d/SuSEconfig.sendmail -a ! -e /etc/aliases.db ; then
-        #
-        # maybe we have smail installed - make sure /etc/aliases is setup
-        # correctly
-        #
-        NEWALIASES=`type -p newaliases`
-        test -n "$NEWALIASES" && eval $NEWALIASES
     fi
 fi
-
-#
-# safety-check: look for duplicated variables in /etc/rc.config
-#
-MYTMP=`mktemp -d /tmp/rcconfigchk.XXXXXX`
-grep -v "^#" $r/etc/rc.config | grep -v "^$" | cut -d= -f1 | uniq -d \
-  > $MYTMP/toomuch
-if [ -s $MYTMP/toomuch ] ; then
-  echo "This is a warning message." > $MYTMP/rc.config_check
-  echo "The following variables seem to be doubled in /etc/rc.config:" >> $MYTMP/rc.config_check
-  cat $MYTMP/toomuch >> $MYTMP/rc.config_check
-  echo "Please check which of the instances is correct." >> $MYTMP/rc.config_check
-  test -d /var/adm/notify/warnings && \
-    mv $MYTMP/rc.config_check /var/adm/notify/warnings
-fi
-rm -rf $MYTMP
 
 #
 # now look for reports and mail them
@@ -585,17 +252,6 @@ if test -z "$r" -a "$SENDMAIL_TYPE" != "YAST_ASK" -a \
         sleep 2
     done
     rm -f /var/adm/notify/log/*
-fi
-
-#
-# Now store date for next call
-#
-if test -z "$r" -a "$FASTRUN" != "true" ; then
-    if test -x /bin/date ; then
-        /bin/date > $LASTRUN
-    else
-        cat /dev/null > $LASTRUN
-    fi
 fi
 
 #

@@ -36,6 +36,8 @@ fi
 
 # set LIBDIR if not set already
 : ${LIBDIR=$r/var/adm/SuSEconfig}
+# now make sure, that LIBDIR exists
+test -e $LIBDIR || mkdir -p $LIBDIR
 # OLDHOSTENTRY must be a file name placed in LIBDIR
 OLDHOSTENTRY=$LIBDIR/oldhostentry
 

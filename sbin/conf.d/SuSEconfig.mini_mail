@@ -1,0 +1,65 @@
+#! /bin/sh
+# Copyright (c) 2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996-97
+#         Bernhard Kaindl <bk@suse.de>, 1999
+#         Rüdiger Oertel <ro@suse.de>, 2000-01
+#
+# This module generates a miniature sendmail.cf if no normal sendmail
+# package is installed and makes sure that /etc/aliases exists.
+
+# check if we are started as root
+# only one of UID and USER must be set correctly
+if test "$UID" != 0 -a "$USER" != root; then
+    echo "You must be root to start $0."
+    exit 1
+fi
+
+r=$ROOT
+
+test -f $r/lib/YaST/SuSEconfig.functions || {
+    echo "ERROR - can not find $r/lib/YaST/SuSEconfig.functions!!"
+    echo "This should not happen.  Exit..."
+    exit 1
+}
+. $r/lib/YaST/SuSEconfig.functions
+
+test -f $r/etc/rc.config || {
+    echo "No $r/etc/rc.config found."
+    exit 1
+}
+. $r/etc/rc.config
+
+if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
+    echo "SuSEconfig is disabled in $r/etc/rc.config. Exit..."
+    exit 0
+fi
+
+test -e $r/sbin/conf.d/SuSEconfig.sendmail && exit 0
+
+if test "$SENDMAIL_TYPE" != no -a "$SENDMAIL_TYPE" != "YAST_ASK" ; then
+        SENDMAIL_FILE=$r/etc/sendmail.smtp.cf
+        if test "$SENDMAIL_TYPE" = uucp-only; then
+                SENDMAIL_FILE=$r/etc/sendmail.uucp.cf
+        fi
+        test -e $SENDMAIL_FILE && \
+        sed -e "s/^DS.*\$/DS${SENDMAIL_SMARTHOST}/" \
+                -e "s/^Cw.*\$/Cw${SENDMAIL_LOCALHOST}/" \
+                -e "s/^DR.*\$/DR${SENDMAIL_RELAY}/" \
+                -e "s/^DH.*\$/DH${SENDMAIL_RELAY}/" \
+                -e "s/^DM.*\$/DM${FROM_HEADER}/" \
+                < $SENDMAIL_FILE > $r/etc/sendmail.cf.SuSEconfig
+        test -e $SENDMAIL_FILE && check_md5_and_move $r/etc/sendmail.cf
+fi
+
+test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode || exit 0
+
+if test ! -e /etc/aliases.db ; then
+    #
+    # maybe we have smail installed - make sure /etc/aliases is setup
+    # correctly
+    #
+    NEWALIASES=`type -p newaliases`
+    test -n "$NEWALIASES" && eval $NEWALIASES
+fi
+

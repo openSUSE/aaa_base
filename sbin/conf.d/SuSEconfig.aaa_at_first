@@ -1,0 +1,53 @@
+#! /bin/sh
+# Copyright (c) 2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996-97
+#         Bernhard Kaindl <bk@suse.de>, 1999
+#         Rüdiger Oertel <ro@suse.de>, 2000-01
+#
+# This module mainly runs ldconfig
+
+# check if we are started as root
+# only one of UID and USER must be set correctly
+if test "$UID" != 0 -a "$USER" != root; then
+    echo "You must be root to start $0."
+    exit 1
+fi
+
+test -n "$ROOT" && exit 0
+
+test -f /lib/YaST/SuSEconfig.functions || {
+    echo "ERROR - can not find /lib/YaST/SuSEconfig.functions!!"
+    echo "This should not happen.  Exit..."
+    exit 1
+}
+. /lib/YaST/SuSEconfig.functions
+
+test -f /etc/rc.config || {
+    echo "No /etc/rc.config found."
+    exit 1
+}
+. /etc/rc.config
+
+test -n "$ORGANIZATION" && {
+    echo "$ORGANIZATION" > /etc/organization.SuSEconfig
+    check_md5_and_move /etc/organization
+}
+
+if test -n "$TIMEZONE" -a "$TIMEZONE" != "YAST_ASK" -a -x /usr/sbin/zic ; then
+    /usr/sbin/zic -l $TIMEZONE
+fi
+
+if test -n "$MOUSE" -a "$MOUSE" != "YAST_ASK" ; then
+    rm -f /dev/mouse
+    ln -sf $MOUSE /dev/mouse
+fi
+if test -n "$MODEM" -a "$MODEM" != "YAST_ASK" ; then
+    rm -f /dev/modem
+    ln -sf $MODEM /dev/modem
+fi
+
+test -x /sbin/ldconfig -a "$CHECK_NEWPACKAGE" != false && \
+    /sbin/ldconfig
+
+

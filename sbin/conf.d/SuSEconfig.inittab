@@ -1,0 +1,123 @@
+#! /bin/sh
+# Copyright (c) 2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996-97
+#         Bernhard Kaindl <bk@suse.de>, 1999
+#         Rüdiger Oertel <ro@suse.de>, 2000-01
+#
+# This module checks and modifies /etc/inittab
+
+# check if we are started as root
+# only one of UID and USER must be set correctly
+if test "$UID" != 0 -a "$USER" != root; then
+    echo "You must be root to start $0."
+    exit 1
+fi
+
+r=$ROOT
+
+test -f $r/lib/YaST/SuSEconfig.functions || {
+    echo "ERROR - can not find $r/lib/YaST/SuSEconfig.functions!!"
+    echo "This should not happen.  Exit..."
+    exit 1
+}
+. $r/lib/YaST/SuSEconfig.functions
+
+test -f $r/etc/rc.config || {
+    echo "No $r/etc/rc.config found."
+    exit 1
+}
+. $r/etc/rc.config
+
+if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
+    echo "SuSEconfig is disabled in $r/etc/rc.config. Exit..."
+    exit 0
+fi
+
+#
+# check login mode
+#
+test "$CHECK_INITTAB" = yes || exit 0
+
+    XCONFIGFILE=/etc/XF86Config
+    test -f $r/etc/X11/XF86Config && XCONFIGFILE=/etc/X11/XF86Config
+    if [ ! -r $r/$XCONFIGFILE -a "$DISPLAYMANAGER" != console ]; then
+        echo -n "XFree86 not configured yet! No graphical login. "
+        echo "Check /etc/X11/XF86Config or /etc/XF86Config."
+        DISPLAYMANAGER=none
+    fi
+
+    case "$DISPLAYMANAGER" in
+        kdm|KDM|xdm|XDM|gdm|GDM|wdm|WDM) INITRL=5;;
+        *)               INITRL=3;;
+    esac
+
+    case "$CONSOLE_SHUTDOWN" in
+        ignore)
+          CA_SEARCH="^ca::ctrlaltdel.*"
+          CA_LINE="#ca::ctrlaltdel:/sbin/shutdown -h -t 4 now"
+        ;;
+        halt)
+          CA_SEARCH="^ca::ctrlaltdel.*"
+          CA_LINE="ca::ctrlaltdel:/sbin/shutdown -h -t 4 now"
+        ;;
+        reboot)
+          CA_SEARCH="^ca::ctrlaltdel.*"
+          CA_LINE="ca::ctrlaltdel:/sbin/shutdown -r -t 4 now"
+        ;;
+        *)
+          CA_SEARCH="wrzlgnmpf-this-should-not-be-found"
+          CA_LINE=""
+        ;;
+    esac
+    if test -n "$SERIAL_CONSOLE" ; then
+      SERIAL_CON_LINE=${SERIAL_CONSOLE%%,*}
+      SERIAL_CON_SPEED=${SERIAL_CONSOLE##*,}
+      SERIAL_CON_SHORT=${SERIAL_CON_LINE##tty}
+      SERIAL_CON_STRING="$SERIAL_CON_SHORT:12345:respawn:/sbin/agetty -L $SERIAL_CON_SPEED $SERIAL_CON_LINE"
+    else
+      SERIAL_CON_LINE=""
+      SERIAL_CON_SPEED=""
+      SERIAL_CON_SHORT=""
+      SERIAL_CON_STRING="#S0:12345:respawn:/sbin/agetty -L 9600 ttyS0"
+    fi
+
+    cp -p $r/etc/inittab $r/etc/inittab.SuSEconfig || {
+        echo "Unexpected Error - emergency exit..."
+        rm -f $IS_RUNNING
+        exit 1
+    }
+
+    cat $r/etc/inittab | \
+        sed -e "s%^id:[0-9sSa-cA-C]*:initdefault:%id:$INITRL:initdefault:%" \
+            -e "s%$CA_SEARCH%$CA_LINE%" \
+            -e "s%.*/sbin/agetty -L.*%$SERIAL_CON_STRING%" \
+        > $r/etc/inittab.SuSEconfig
+
+    test -s $r/etc/inittab.SuSEconfig || {
+        echo "Unexpected Error - emergency exit..."
+        rm -f $IS_RUNNING
+        exit 1
+    }
+
+    cmp -s $r/etc/inittab.SuSEconfig $r/etc/inittab || {
+        mv $r/etc/inittab.SuSEconfig $r/etc/inittab
+        echo "Installing new $r/etc/inittab"
+    }
+    rm -f $r/etc/inittab.SuSEconfig
+
+    if test -n "$SERIAL_CON_LINE" ; then
+     grep "$SERIAL_CON_LINE" $r/etc/securetty >/dev/null 2>/dev/null || \
+       {
+         echo $SERIAL_CON_LINE >> $r/etc/securetty
+         echo "Added $SERIAL_CON_LINE to /etc/securetty"
+       }
+     rm -f $r/etc/securetty.SuSEconfig
+    fi
+    unset INITRL
+    unset SERIAL_CON_LINE
+    unset SERIAL_CON_SPEED
+    unset SERIAL_CON_SHORT
+    unset SERIAL_CON_STRING
+
+

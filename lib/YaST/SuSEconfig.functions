@@ -81,3 +81,20 @@ my_test_write () {  # function to test if a directory is really writable
     rm -f $TESTFILE $TESTFILE.*
     eval $RETURN
 }
+
+my_test_for_space () { # test if we have enough space
+    local RETURN=true
+    my_test_write $1 && {
+      dd if=/dev/zero of=$1/testforspace.SuSEconfig bs=1k count=50 \
+        2> /dev/null  || {
+        rm -f $1/testforspace.SuSEconfig
+        echo
+        echo
+        echo We do not have enough disk space in $DIR. Exit.
+        echo
+        RETURN=false
+      }
+      rm -f $1/testforspace.SuSEconfig
+    }
+    eval $RETURN
+}
