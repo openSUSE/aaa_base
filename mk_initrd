@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.17
+# Version 1.18
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
@@ -29,6 +29,11 @@
 # (c) 2000 Karsten Keil   option and kernel 2.4 support
 #
 # ChangeLog:
+#
+# 14/8/2001:	v1.18
+#  - run 'raidautorun' only if raid is used
+#  - add xor module if missing
+#  - hint to run lilo
 #
 # 13/8/2001:	v1.17
 #  - run 'raidautorun' after loading all modules
@@ -274,6 +279,25 @@ fi
   error 0 "no initrd required"
 }
 
+do_raid=
+do_raid5=
+has_xor=
+for i in $modules ; do
+  case $i in
+    raid[01]|linear) do_raid=1 ;;
+    raid5) do_raid=1 do_raid5=1 ;;
+    xor) has_xor=1 ;;
+  esac
+done
+
+# raid5 needs xor
+[ "$do_raid5" -a ! "$has_xor" ] && modules="xor $modules"
+
+if [ "$root_lvm" = 1 ] ; then
+  # add lvm-mod if missing
+  echo " $modules " | grep -q " lvm-mod " || modules="lvm-mod $modules"
+fi
+
 initrd_a=($initrds)
 
 exit_code=0
@@ -366,11 +390,13 @@ for k in $kernels ; do
 #        continue 2
       fi
     done
-    echo "-> raidautorun"
-    echo "echo \"raidautorun ...\" " >>$lx_rc
-    echo "raidautorun" >>$lx_rc
-    echo "echo \"done ...\" " >>$lx_rc
-    echo >>$lx_rc
+    if [ "$do_raid" ] ; then
+      echo "-> raidautorun"
+      echo "echo \"raidautorun ...\" " >>$lx_rc
+      echo "raidautorun" >>$lx_rc
+      echo "echo \"done ...\" " >>$lx_rc
+      echo >>$lx_rc
+    fi
 
     if [ $root_lvm -eq 1 ]
     then
@@ -423,5 +449,11 @@ for k in $kernels ; do
   kernel_idx=$((kernel_idx+1))
 
 done
+
+if [ "$exit_code" = 0 -a -f /etc/lilo.conf ] ; then
+  if grep -q initrd /etc/lilo.conf ; then
+    echo -e "\n\nIf you're using lilo as bootmanager, you may want to run 'lilo' now.\n"
+  fi
+fi
 
 exit $exit_code
