@@ -32,6 +32,10 @@ function idedma_main() {
     devices_not_found=""
     devices_error=""
 
+    if [ "$DEVICES_FORCE_IDE_DMA_ON" == "" -a "$DEVICES_FORCE_IDE_DMA_OFF" == "" ]; then
+	exit 0;
+    fi
+
     echo -n "Setting up IDE DMA mode"
 
     if [ "$DEVICES_FORCE_IDE_DMA_ON" != "" ]; then
@@ -75,14 +79,14 @@ function idedma_main() {
 	echo -n -e "\nFailed setting DMA: $devices_error"
 	rc_failed
     fi
+
+    rc_status -v
 }
 
 
 case "$1" in
     start|restart)
 	idedma_main
-	# Remember status and be verbose
-	rc_status -v
 	;;
     stop)
 	rc_failed 3
