@@ -365,10 +365,17 @@ test -n "$YP_DOMAINNAME" && {
 # set and adjust the CMOS clock
 echo -n Setting up the CMOS clock
 ECHO_RETURN=$rc_done
-test "$GMT" != "YAST_ASK" && hwclock --hctosys $GMT || ECHO_RETURN=$rc_failed
+CLOCKCMD=hwclock
+while read line; do
+	case "$line" in
+        	*MacRISC*)  CLOCKCMD=clock ;;
+	esac
+done < /proc/cpuinfo
+
+test "$GMT" != "YAST_ASK" && $CLOCKCMD --hctosys $GMT || ECHO_RETURN=$rc_failed
 test -f /etc/adjtime || echo "0.0 0 0.0" > /etc/adjtime
 test "$GMT" != "YAST_ASK"  -a "$START_XNTPD" != "yes" && {
-    hwclock --adjust $GMT || ECHO_RETURN=$rc_failed
+    $CLOCKCMD --adjust $GMT || ECHO_RETURN=$rc_failed
 }
 echo -e "$ECHO_RETURN"
 

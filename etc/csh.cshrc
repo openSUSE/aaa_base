@@ -16,17 +16,8 @@ set echo_style=both
 #
 setenv OPENWINHOME /usr/openwin
 setenv HELPPATH $OPENWINHOME/lib/help
-set tmp=/usr/man
-foreach man ( /usr/local/man \
-              /usr/X11R6/man \
-              /usr/openwin/man )
-	if ( -d $man ) then
-	   set tmp=${tmp}:${man}
-	endif
-end
-setenv MANPATH $tmp
-unset  tmp man
-setenv MINICOM "-c on"
+setenv MANPATH  "`(unsetenv MANPATH; manpath -q)`"
+setenv MINICOM  "-c on"
 setenv HOSTNAME "`hostname -f`"
 setenv HOST     "`hostname -s`"
 if ( -f /etc/organization ) then
