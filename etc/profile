@@ -1,11 +1,17 @@
 # /etc/profile
 
+# PLEASE DON'T CHANGE /etc/profile. Chances are that your changes will
+#  be lost during the next upgrade. 
+# Use /etc/profile.local for your favourite global aliases, your VISUAL and
+#  EDITOR variables, etc ...
+
 PROFILEREAD=true
 
 
 umask 022
 
 # adjust some limits (see bash(1))
+# Note: You may instead use /etc/initscript to set up ulimits and your PATH.
 #ulimit -c 20000		# only core-files less than 20 MB are written
 #ulimit -d 15000		# max data size of a program is 15 MB
 #ulimit -s 15000		# max stack size of a program is 15 MB
@@ -28,15 +34,16 @@ PATH=/usr/local/bin:/usr/bin:/usr/X11R6/bin:/bin
 for DIR in ~/bin/$MACHINE ~/bin ; do
     test -d $DIR && PATH=$DIR:$PATH
 done
-test "$UID" = 0 && PATH=/sbin:/usr/sbin:$PATH
-for DIR in /usr/openwin/bin \
-           /usr/lib/java/bin \
+#test "$UID" = 0 && PATH=/sbin:/usr/sbin:$PATH
+test "$UID" = 0 && PATH=/sbin:/usr/sbin:/usr/local/sbin/$PATH
+for DIR in /usr/lib/java/bin \
            /var/lib/dosemu \
            /usr/games/bin \
            /usr/games \
            /opt/bin \
            /opt/gnome/bin \
-           /opt/kde/bin ; do
+           /opt/kde/bin \
+	   /usr/openwin/bin ; do
     test -d $DIR && PATH=$PATH:$DIR
 done
 test "$UID" = 0 || PATH="$PATH:."
@@ -184,6 +191,9 @@ alias dos2unix='recode ibmpc:lat1'
 alias unzip='unzip -L'
 alias which='type -p'
 alias rehash='hash -r'
+alias beep='echo -en "\x07"'
+
+alias unmount='echo "Error: Try the command: umount"'
 
 function startx { /usr/X11R6/bin/startx $* 2>&1 | tee ~/.X.err ; }
 function remount { /bin/mount -o remount,$* ; }
@@ -279,10 +289,13 @@ test -d /etc/profile.d && \
     done
   }
 
+
+# source some aliases which provide help for DOS users
+#test -e /etc/profile.dos && . /etc/profile.dos
+
 #
-# and now let's look if there is a local profile (for stuff not done in
-# SuSE Linux).
+# and now let's look if there is a local profile (for stuff not 
+# defined by SuSE Linux, but your friendly admin)
 #
 test -e /etc/profile.local && . /etc/profile.local
-
 

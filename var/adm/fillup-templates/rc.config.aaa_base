@@ -607,6 +607,11 @@ CWD_IN_ROOT_PATH="no"
 #
 ROOT_LOGIN_REMOTE="no"
 
+#
+# If you want that new passwords will be checked through cracklib,
+# set PASSWD_USE_CRACKLIB to "yes".
+#
+PASSWD_USE_CRACKLIB="no"
 
 #
 # Some packages by SuSE include dynamically linked motif progs as well

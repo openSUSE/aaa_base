@@ -656,6 +656,32 @@ if test -n "$ROOT_LOGIN_REMOTE" ; then
 fi
 
 #
+# Now set PASSWD_USE_CRACKLIB.
+#
+if test -n "$PASSWD_USE_CRACKLIB" ; then
+    # Please note that the sed expression contains a true tab between \1 and strict.
+    if test "$PASSWD_USE_CRACKLIB" = "yes" ; then
+        cat $r/etc/pam.d/login | \
+            sed 's@\(^[[:space:]]*password[[:space:]].*[/[:space:]]pam_unix.so\).*$@\1	strict=true@' \
+            > $r/etc/pam.d/login.SuSEconfig
+        cat $r/etc/pam.d/passwd | \
+            sed 's@\(^[[:space:]]*password[[:space:]].*[/[:space:]]pam_unix.so\).*$@\1  strict=true@' \
+            > $r/etc/pam.d/passwd.SuSEconfig
+    else
+        cat $r/etc/pam.d/login | \
+            sed 's@\(^[[:space:]]*password[[:space:]].*[/[:space:]]pam_unix.so\).*$@\1	strict=false@' \
+            > $r/etc/pam.d/login.SuSEconfig
+        cat $r/etc/pam.d/passwd | \
+            sed 's@\(^[[:space:]]*password[[:space:]].*[/[:space:]]pam_unix.so\).*$@\1  strict=false@' \
+            > $r/etc/pam.d/passwd.SuSEconfig
+
+    fi
+    check_md5_and_move $r/etc/pam.d/login
+    check_md5_and_move $r/etc/pam.d/passwd
+fi
+
+
+#
 # check login mode
 #
 test "$CHECK_INITTAB" = yes && {

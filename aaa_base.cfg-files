@@ -1,6 +1,7 @@
 root/bin/cron.daily
 root/bin/cron.daily.local
 etc/conf.modules
+#etc/modules.conf
 etc/csh.cshrc
 etc/csh.login
 etc/inittab

@@ -57,6 +57,7 @@ echo "Turning off swap"
 sync ; sync
 swapoff -a || ECHO_RETURN=$rc_failed_up
 echo -e "$ECHO_RETURN"
+setterm -bfreq 200 -blen 500 &>/dev/null
 
 UMOUNT_FAILED=false
 ECHO_RETURN=$rc_done_up
@@ -97,5 +98,10 @@ fi
 mount -no remount,ro / 2> /dev/null
 sync
 
+# Make reboot noise and wait a few seconds to give harddisks the chance
+# to really flush their buffers before power goes down.
+echo -en "\x07"
+sleep 2
 echo $message
+echo -en "\x07"
 exec $command -d -f

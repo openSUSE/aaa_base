@@ -66,6 +66,7 @@ case "$1" in
 	/usr/sbin/kexportfs -au
 	killproc -n -KILL nfsd                  || return=$rc_failed
 	killproc    -TERM /usr/sbin/rpc.kmountd || return=$rc_failed
+	killproc    -TERM /usr/sbin/rpc.kstatd
       else
         echo -n "Shutting down NFS server"
         killproc -TERM /usr/sbin/rpc.mountd     || return=$rc_failed
