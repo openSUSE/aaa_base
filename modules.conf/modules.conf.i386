@@ -12,4 +12,9 @@ alias parport_lowlevel    parport_pc
 alias char-major-10-219 mwavedd
 # options mwavedd dspirq=10 dspio=0x130 uartirq=3 uartio=0x2f8
 
+# IBM thinkpad tpctl
+# see /usr/share/doc/packages/tpctl/
+alias char-major-10-170 thinkpad
+# options thinkpad enable_smapi=0
+
 # end of i386 part for modules.conf
