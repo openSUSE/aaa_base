@@ -101,7 +101,7 @@ export MANPATH
 #
 # set INFOPATH to tell xemacs where he can find the info files
 #
-INFODIR=/usr/local/info:/usr/info
+INFODIR=/usr/local/info:/usr/share/info:/usr/info
 INFOPATH=$INFODIR
 export INFODIR INFOPATH
 
