@@ -4,7 +4,7 @@
 . /etc/rc.config
 . /etc/sysconfig/security
 
-test "$UID" = 0 || {
+test "$UID" = 0 -o ! -z "$RPM_BUILD_ROOT" || {
     echo Check does not work for normal users.
     exit 1
 }
@@ -79,7 +79,7 @@ TMPFILE=`mktemp /tmp/Check.perms.XXXXXX`
 TMPFILE2=`mktemp /tmp/Check.perms.XXXXXX`
 
 if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
-        -x /usr/bin/perl -a -x /usr/bin/chkstat ; then
+        -x /usr/bin/perl -a -x /usr/bin/chkstat -a "$UID" = 0 ; then
 
     cat /etc/permissions > $TMPFILE
     for PERMEXT in $PERMISSION_SECURITY ; do
