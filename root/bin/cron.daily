@@ -297,9 +297,18 @@ for DUMMY in `find /var/lib/locatedb -ctime -8 2> /dev/null` ; do
             -name core -type f \
             -ctime +$MAX_DAYS_FOR_CORE 2> /dev/null` ; do
             if [ -n "$DELETE_OLD_CORE" -a "$DELETE_OLD_CORE" = "yes" ] ; then
+                echo "Deleting core file older than $MAX_DAYS_FOR_CORE days: $i"
+                if test -x /usr/bin/file ; then
+                    echo file $i
+                    /usr/bin/file $i
+                fi
                 rm -f $i
             else
                 echo "Found core file older than $MAX_DAYS_FOR_CORE days: $i"
+                if test -x /usr/bin/file ; then
+                    echo file $i
+                    /usr/bin/file $i
+                fi
             fi
         done
     done

@@ -255,6 +255,7 @@
 # 'normal stuff' (e.g. former suid stuff)
 #
 /usr/X11R6/bin/SuperProbe              root.root         755
+/usr/X11R6/bin/XBF_NeoMagic            root.root         755
 /usr/X11R6/bin/XF86_8514               root.root         755
 /usr/X11R6/bin/XF86_AGX                root.root         755
 /usr/X11R6/bin/XF86_I128               root.root         755
@@ -268,6 +269,10 @@
 /usr/X11R6/bin/XF86_SVGA               root.root         755
 /usr/X11R6/bin/XF86_VGA16              root.root         755
 /usr/X11R6/bin/XF86_W32                root.root         755
+/usr/X11R6/bin/XFCom_3DLabs            root.root         755
+/usr/X11R6/bin/XFCom_Cyrix             root.root         755
+/usr/X11R6/bin/XFCom_Rendition         root.root         755
+/usr/X11R6/bin/XFCom_SiS               root.root         755
 /usr/X11R6/bin/XSuSE_AT3D              root.root         755
 /usr/X11R6/bin/XSuSE_Elsa_GLoria       root.root         755
 /usr/X11R6/bin/XSuSE_Matrox            root.root         755

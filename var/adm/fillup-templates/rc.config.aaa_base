@@ -374,7 +374,7 @@ UPDATEDB_NETPATHS=""
 # uptdatedb can skip directories for its database. The following parameter
 # says which.
 #
-UPDATEDB_PRUNEPATHS="/mnt /cdrom /tmp /usr/tmp /var/tmp /var/spool /proc"
+UPDATEDB_PRUNEPATHS="/S.u.S.E. /mnt /cdrom /tmp /usr/tmp /var/tmp /var/spool /proc"
 
 #
 # search net paths as ? (e.g. nobody)
@@ -508,8 +508,10 @@ CHECK_INITTAB=yes
 #
 # Here you can set the default Display manager (kdm/xdm/console).
 # Attention: CHECK_INITTAB has to be set to yes, to activate this feature.
+# If DISPLAYMANAGER is set to console, SuSEconfig will not bother you
+# with a missing XF86Config.
 #
-DISPLAYMANAGER=console
+DISPLAYMANAGER=""
 
 #
 # CONSOLE_SHUTDOWN determines how ctrl-alt-del is handled.

@@ -51,7 +51,7 @@ fi
 #
 POVRAYOPT=-l/usr/lib/povray/include
 export POVRAYOPT
-test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/fvwm2
+test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/startkde
 TEXINPUTS="$TEXINPUTS:~/.TeX:/usr/doc/.TeX"
 export TEXINPUTS
 PRINTER='lp'

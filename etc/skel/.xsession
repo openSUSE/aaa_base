@@ -8,7 +8,7 @@ if [ -f $HOME/.xinitrc ]; then
 	exec /bin/sh  $HOME/.xinitrc
 else
     if test -z "$WINDOWMANAGER" ; then
-        WINDOWMANAGER=/usr/X11R6/bin/fvwm2
+        WINDOWMANAGER=/usr/X11R6/bin/startkde
     fi
     exec $WINDOWMANAGER
 fi

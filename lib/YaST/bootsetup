@@ -113,7 +113,6 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
         echo_welcome_e
     else
         echo_welcome_e
-        echo_welcome_g
     fi
 
     echo "------------------------------------------------------------------------------"
@@ -127,7 +126,6 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
             echo_passwd_e
         else
             echo_passwd_e
-            echo_passwd_g
         fi
 
         passwd
@@ -142,7 +140,6 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
         echo_todo_e
     else
         echo_todo_e
-        echo_todo_g
     fi
 
     echo "------------------------------------------------------------------------------"
@@ -191,7 +188,6 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
         echo_please_wait_e
     else
         echo_please_wait_e
-        echo_please_wait_g
     fi
 
     sleep 3

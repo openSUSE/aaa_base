@@ -57,6 +57,7 @@ echo "Running update (bdflush) daemon."
 #
 # do fsck and start sulogin, if it fails.
 #
+FSCK_RETURN=0
 if test ! -f /fastboot; then
     # on an umsdos root fs this mount will fail, so direct error messages 
     # to /dev/null.
@@ -68,7 +69,8 @@ if test ! -f /fastboot; then
         # A return code of 1 indicates that file system errors
         # were corrected, but that the boot may proceed.
         # A return code of 2 or larger indicates failure.
-        if test $? -gt 1; then
+        FSCK_RETURN=$?
+        if test $FSCK_RETURN -gt 1; then
             if test -f /etc/default.keytab -a -x /bin/loadkeys; then
                 /bin/loadkeys /etc/default.keytab
             fi
@@ -97,15 +99,7 @@ if test ! -f /fastboot; then
 
             sync
             reboot
-        elif test $? -gt 0 -a -n "$START_QUOTA" -a "$START_QUOTA"="yes" ; then
-              # Check quota and then turn quota on.
-              if test -x /usr/sbin/quotacheck ; then
-                  echo "Checking quotas. This may take some time."
-                  /usr/sbin/quotacheck -avug
-                  echo " Done."
-              fi
         fi
-
         sync
         mount -n -o remount,rw /
     else
@@ -147,6 +141,18 @@ echo "Mounting local file systems..."
 mount -f /proc
 mount -av -t nonfs,noproc
 mount -a -t proc
+
+#
+# reinit quota, if fsck has returned value != 0
+#
+if test $FSCK_RETURN -gt 0 -a -n "$START_QUOTA" -a "$START_QUOTA"="yes" ; then
+      # Check quota and then turn quota on.
+      if test -x /sbin/quotacheck ; then
+          echo "Checking quotas. This may take some time."
+          /sbin/quotacheck -avug
+          echo " Done."
+      fi
+fi
 
 # Let ld.so rebuild its cache.
 test -x /sbin/ldconfig && /sbin/ldconfig -X 2>/dev/null

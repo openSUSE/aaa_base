@@ -490,7 +490,7 @@ fi
 # check login mode
 #
 test "$CHECK_INITTAB" = yes && {
-    if [ ! -r $r/etc/XF86Config ]; then
+    if [ ! -r $r/etc/XF86Config -a "$DISPLAYMANAGER" != console ]; then
         echo -n "XFree86 not configured yet! No graphical login. "
         echo "Check /etc/XF86Config."
         DISPLAYMANAGER=none

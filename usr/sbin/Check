@@ -46,8 +46,8 @@ for DIR in $DIRS ; do
 done
 
 
-TMPFILE=/tmp/Check.perms.$$
-rm -f $TMPFILE
+TMPFILE=`mktemp /tmp/Check.perms.XXXXXX`
+TMPFILE2=`mktemp /tmp/Check.perms.XXXXXX`
 
 if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
         -x /usr/bin/perl -a -x /usr/bin/chkstat ; then
@@ -58,9 +58,9 @@ if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
 	    cat /etc/permissions."$PERMEXT" >> $TMPFILE
     done
     if test -n "$RPM_BUILD_ROOT" ; then
-        cat $TMPFILE | sed -e"s:^/:$RPM_BUILD_ROOT/:" > $TMPFILE.t
-        cat $TMPFILE.t >> $TMPFILE
-        rm -f $TMPFILE.t
+        cat $TMPFILE | sed -e"s:^/:$RPM_BUILD_ROOT/:" > $TMPFILE2
+        cat $TMPFILE2 >> $TMPFILE
+        rm -f $TMPFILE2
     fi
 
     if test "$CHECK_PERMISSIONS" = "set" ; then
@@ -70,4 +70,4 @@ if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
     fi
 fi
 
-rm -rf $TMPFILE
+rm -rf $TMPFILE $TMPFILE2

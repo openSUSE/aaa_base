@@ -11,7 +11,7 @@ export TERM=xterm
 #
 
 if test -z "$WINDOWMANAGER" ; then
-    WINDOWMANAGER=/usr/X11R6/bin/fvwm2
+    WINDOWMANAGER=/usr/X11R6/bin/startkde
 fi
 
 #
