@@ -1,5 +1,5 @@
 ## Path:	System/Kernel
-## Description:	
+## Description:	Modules to load from initrd
 ## Type:	string
 #
 # This variable contains the list of modules to be added to the initial
@@ -7,6 +7,15 @@
 # (like drivers for scsi-controllers, for lvm or reiserfs)
 #
 INITRD_MODULES=""
+
+## Path:        System/Kernel
+## Description: Modules to load after initial boot
+## Type:        string
+#
+# This variable contains the list of modules to be loaded
+# once the main filesystem is active
+#
+MODULES_LOADED_ON_BOOT=""
 
 ## Type:	integer
 #
