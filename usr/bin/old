@@ -12,30 +12,30 @@
 #
 
 function usage() {
-    echo usage: $0 file\|dir [file\|dir ...]
+    echo usage: "$0" file\|dir [file\|dir ...]
 }
 
 
-if [ -z "$@" ] ; then
+if [ $# -eq 0 ] ; then
     usage
     exit
 fi
 
 DATESTRING=`date +"%Y%m%d"`
 
-for i in $@ ; do
+for i in "$@" ; do
     i=${i%%/}
-    if [ -e $i ] ; then
+    if [ -e "$i" ] ; then
         NEWNAME=$i-$DATESTRING
         NUMBER=0
-        while [ -e $NEWNAME ] ; do
+        while [ -e "$NEWNAME" ] ; do
             NEWNAME=$i-$DATESTRING-$NUMBER
             let NUMBER=$NUMBER+1
         done
-        echo moving $i to $NEWNAME
-        mv $i $NEWNAME
+        echo moving "$i" to "$NEWNAME"
+        mv "$i" "$NEWNAME"
     else
-        echo $i does not exist.
+        echo "$i" does not exist.
     fi
 done
 

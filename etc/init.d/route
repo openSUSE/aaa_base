@@ -5,7 +5,7 @@
 #         Werner Fink <werner@suse.de>, 1996-2000
 #      
 #
-# /etc/init.d/route		Version 0.6
+# /etc/init.d/route		Version 0.7
 #
 ### BEGIN INIT INFO
 # Provides: route
@@ -327,16 +327,9 @@ case "$todo" in
 		    esac
 		esac
 	    esac
-	done < <(   dynamic="$(type -p routed)"
-		    if   test -s ${ROUTECONF}.old ; then
-			reverse < ${ROUTECONF}.old
-			rm -f ${ROUTECONF}.old
-		    elif test -n "$dynamic" && checkproc $dynamic ; then
-			reverse < $ROUTECONF
-		    else
-			list_route | reverse
-		    fi
-		)
+	    # If necessary this script can be called with
+	    # ROUTECONF being overwritten with an older version
+	done < <(reverse < ${ROUTECONF})
 	rc_status || echo -n "Shutting down routing"
 	rc_status -v
 	;;
@@ -349,19 +342,22 @@ case "$todo" in
 	rc_status
 	;;
     status)
+	declare -i m
 	while read  des what mask iface ; do
-	    n=$((n + 1))
-	    control="$control ${des}:${what}${mask}:${iface}"
+	    control="$control ${des}:${what}:${mask}:${iface}"
 	done < <(list_route)
 
-	declare -i m
+	n=0
 	m=0
 	while read  des what mask iface rest ; do
+	    case "$des" in \#*|"")    continue ;; esac
+	    test "${iface}" = "lo" && continue
+	    n=$((n + 1))
 	    test "$what"  = "-" &&  what=""
 	    test "$mask"  = "-" &&  mask=""
 	    test "$iface" = "-" && iface=""
 	    for ctr in $control ; do
-		if test "$ctr" = "${des}:${what}${mask}:${iface}" ; then
+		if test "$ctr" = "${des}:${what}:${mask}:${iface}" ; then
 		    m=$((m + 1))
 		    test "${des}"  = "default" && des="default "
 		    test "${what}" = "0.0.0.0" && what="0.0.0.0 "
