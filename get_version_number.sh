@@ -1,1 +1,1 @@
-get_date_version_string `find_newest_file *.*`
+echo ${BUILD_DISTRIBUTION_VERSION%-*}

@@ -39,17 +39,14 @@ RC_LC_MESSAGES=""
 #
 RC_LC_CTYPE=""
 
-## Type:	string(POSIX)
-## Default:	POSIX
+## Type:	string
+## Default:	""
 #
 # This defines the locale for sorting strings and characters.
 # It is used by the libc to obtain the alphabetical order of characters
 # (e.g. for string comparisons).
 #
-# To keep bash and possibly other apps from misbehaviour, you should
-# probably keep this at POSIX and set it only for the apps that need it.
-#
-RC_LC_COLLATE="POSIX"
+RC_LC_COLLATE=""
 
 ## Type:	string
 ## Default:	""
