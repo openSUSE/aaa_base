@@ -174,13 +174,9 @@ if test "$USE_MAKE" = "yes" -a -n "$startpar" ; then
     startopt="-p4 -t 20 -T 3"
     test -x /sbin/splash -a "$SPLASH" != "no" && startopt="$startopt -S"
 
-    eval $($startpar $startopt -M stop  -P $PREVLEVEL -R $RUNLEVEL)
+    eval $($startpar $startopt -M boot)
     failed="${failed:+$failed }$failed_service"
     skipped="${skipped:+$skipped }$skipped_service"
-
-    eval $($startpar $startopt -M start -P $PREVLEVEL -R $RUNLEVEL)
-    failed="${failed:+$failed }$failed_service"
-    skipped="${skipped:+$skipped }$skipped_service" 
 
     unset failed_service skipped_service
     unset startopt startpar
