@@ -79,9 +79,9 @@ setenv COLORTERM 1
 if (! ${?CSHRCREAD} ) then
     setenv CSHRCREAD true
     set -r CSHRCREAD=$CSHRCREAD
-    if ( -r /etc/profile.d/csh.ssh ) source /etc/profile.d/csh.ssh
+    if ( -r /etc/profile.d/csh.ssh )    source /etc/profile.d/csh.ssh
+    if ( -r /etc/SuSEconfig/csh.cshrc ) source /etc/SuSEconfig/csh.cshrc
     if (! ${?SSH_SENDS_LOCALE} ) then
-	if ( -r /etc/SuSEconfig/csh.cshrc ) source /etc/SuSEconfig/csh.cshrc
 	if ( -r /etc/sysconfig/language && -r /etc/profile.d/csh.utf8 ) then
 	    set _tmp=`sh -c '. /etc/sysconfig/language; echo $AUTO_DETECT_UTF8'`
 	    if ( ${_tmp} == "yes" ) source /etc/profile.d/csh.utf8
