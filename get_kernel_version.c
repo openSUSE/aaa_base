@@ -26,7 +26,8 @@ int
 main (int argc, char *argv[])
 {
   FILE *fp;
-  char buffer[4096 + 15]; /* buffer + sizeof ("Linux version ") */
+#define MAX_VERSION_LENGTH 80
+  char buffer[4096 + MAX_VERSION_LENGTH]; /* buffer + sizeof ("Linux version .....") */
   char command[512] = "";
   int found = 0;
 
@@ -79,7 +80,8 @@ main (int argc, char *argv[])
       ssize_t in;
       int i;
 
-      in = fread (&buffer[14], 1, sizeof (buffer) - 15, fp);
+      in = fread (&buffer[MAX_VERSION_LENGTH],
+		  1, sizeof (buffer) - MAX_VERSION_LENGTH, fp);
 
       if (in <= 0)
 	break;
@@ -105,23 +107,12 @@ main (int argc, char *argv[])
 	}
       else
 	{
-	  if (in < (sizeof (buffer) - 15))
+	  if (in < (sizeof (buffer) - MAX_VERSION_LENGTH))
 	    break;
-	  buffer[0] = buffer[sizeof (buffer) - 15];
-	  buffer[1] = buffer[sizeof (buffer) - 14];
-	  buffer[2] = buffer[sizeof (buffer) - 13];
-	  buffer[3] = buffer[sizeof (buffer) - 12];
-	  buffer[4] = buffer[sizeof (buffer) - 11];
-	  buffer[5] = buffer[sizeof (buffer) - 10];
-	  buffer[6] = buffer[sizeof (buffer) - 9];
-	  buffer[7] = buffer[sizeof (buffer) - 8];
-	  buffer[8] = buffer[sizeof (buffer) - 7];
-	  buffer[9] = buffer[sizeof (buffer) - 6];
-	  buffer[10] = buffer[sizeof (buffer) - 5];
-	  buffer[11] = buffer[sizeof (buffer) - 4];
-	  buffer[12] = buffer[sizeof (buffer) - 3];
-	  buffer[13] = buffer[sizeof (buffer) - 2];
-	  memset (&buffer[14], 0, sizeof (buffer) - 14);
+	  memcpy (&buffer[0], &buffer[sizeof (buffer) - MAX_VERSION_LENGTH],
+		  MAX_VERSION_LENGTH);
+	  memset (&buffer[MAX_VERSION_LENGTH], 0,
+		  sizeof (buffer) - MAX_VERSION_LENGTH);
 	}
     }
 
