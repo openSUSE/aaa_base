@@ -19,7 +19,7 @@
 id:3:initdefault:
 
 # First script to be executed, if not booting in emergency (-b) mode
-si:I:bootwait:/etc/init.d/boot
+si::bootwait:/etc/init.d/boot
 
 # /etc/init.d/rc takes care of runlevel handling
 #
