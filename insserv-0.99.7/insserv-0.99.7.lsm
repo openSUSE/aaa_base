@@ -1,14 +1,14 @@
 Begin3
 Title:		insserv tool for boot scripts
-Version:	0.99.6
-Entered-date:	19AUG02
+Version:	0.99.7
+Entered-date:	19SEP02
 Description:	Used for enabling of installed boot scripts
  		by scanning comment headers which are LSB conform.
 Keywords:	boot service control, LSB
 Author:		Werner Fink <werner@suse.de>
 Maintained-by:	Werner Fink <werner@suse.de>
 Primary-site:	sunsite.unc.edu /pub/Linux/system/daemons/init
-		@UNKNOWN insserv-0.99.6.tar.gz
+		@UNKNOWN insserv-0.99.7.tar.gz
 Alternate-site:	ftp.suse.com /pub/projects/init
 Platforms:	Linux with System VR2 or higher boot scheme
 Copying-policy:	GPL

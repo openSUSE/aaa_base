@@ -30,9 +30,9 @@
 int maxorder = 0;  /* Maximum order of runlevels 0 upto 6 and S */
 
 /* See listing.c for list_t and list_entry() macro */
-#define getdir(list)  list_entry((list), struct dir_struct, d_list)
-#define getlink(list) list_entry((list), struct link_struct, l_list)
-#define getnode(list) list_entry((list), struct loop_struct, n_list)
+#define getdir(list)		list_entry((list), struct dir_struct, d_list)
+#define getlink(list)		list_entry((list), struct link_struct, l_list)
+#define getlinkdir(list)	(list_empty(list) ? NULL : getlink((list)->next)->target)
 
 /*
  * We handle services (aka scripts) as directories because
@@ -48,7 +48,8 @@ typedef struct link_struct {
 
 typedef struct dir_struct {
     list_t	      d_list;	/* The linked list to other directories */
-    link_t	        link;   /* First symbolic link in this directory */
+    list_t	        link;   /* symbolic links in this directory */
+    unsigned int       flags;
     char	       order;
     char	      * name;
     char	    * script;
@@ -57,12 +58,8 @@ typedef struct dir_struct {
 
 static list_t dirs = { &(dirs), &(dirs) }, * d_start = &dirs;
 
-typedef struct loop_struct {
-    list_t	      n_list;	/* The linked list to other symbolic links */
-    struct dir_struct * node;
-} loop_t;			/* This is a "symbolic link" */
-
-static list_t nodes = { &(nodes), &(nodes) }, * n_start = &nodes;
+#define DIR_SCAN	0x00000001
+#define DIR_LOOP	0x00000002
 
 /*
  * Provide or find a service dir, set initial states and
@@ -73,22 +70,22 @@ static dir_t * providedir(const char * name)
     dir_t  * this;
     list_t * ptr;
 
-    for (ptr = d_start->next; ptr != d_start; ptr = ptr->next)
+    list_for_each(ptr, d_start)
 	if (!strcmp(getdir(ptr)->name,name))
 	    goto out;
 
     this = (dir_t *)malloc(sizeof(dir_t));
     if (this) {
-	list_t * l_start = &(this->link.l_list);
-	insert(&(this->d_list), d_start->prev);
+	list_t * l_start = &(this->link);
 	l_start->next = l_start;
 	l_start->prev = l_start;
-	this->link.target = NULL;
+	insert(&(this->d_list), d_start->prev);
+	ptr = d_start->prev;
 	this->name   = xstrdup(name);
 	this->script = NULL;
 	this->order  = 0;
+	this->flags  = 0;
 	this->lvl    = 0;
-	ptr = d_start->prev;
 	goto out;
     }
     ptr = NULL;
@@ -106,7 +103,7 @@ static dir_t * findscript(const char * script)
     list_t * ptr;
     register boolean found = false;
 
-    for (ptr = d_start->next; ptr != d_start; ptr = ptr->next) {
+    list_for_each(ptr, d_start) {
 	dir_t * tmp = getdir(ptr);
 
 	if (!tmp->script)
@@ -132,23 +129,17 @@ static void ln_sf(const char * isprovided, const char * itrequires)
 {
     dir_t * target = providedir(isprovided);
     dir_t * dir    = providedir(itrequires);
-    list_t * l_start = &(dir->link.l_list);
+    list_t * l_start = &(dir->link);
+    list_t * dent;
     link_t * this;
 
     if (target == dir)
 	goto out;
 
-    /* Do not link in if already done */
-    if (!dir->link.target) {
-	dir->link.target = target;
-	goto out;
-    } else {
-	list_t * dent;
-	for (dent = l_start->next; dent != l_start; dent = dent->next) {
-	    dir_t * target = getlink(dent)->target;
-	    if (!strcmp(target->name, isprovided))
-		goto out;
-	}
+    list_for_each(dent, l_start) {
+	dir_t * target = getlink(dent)->target;
+	if (!strcmp(target->name, isprovided))
+	    goto out;
     }
 
     this = (link_t *)malloc(sizeof(link_t));
@@ -165,25 +156,15 @@ out:
 /*
  * Remember loops
  */
-static boolean remembernode (dir_t * dir)
+static boolean inline remembernode (dir_t * dir)
 {
-    list_t * ptr;
-    loop_t * this;
-    boolean ret = false;
+    boolean ret = true;
 
-    for (ptr = n_start->next; ptr !=  n_start; ptr = ptr->next)
-	if (dir == getnode(ptr)->node) {
-	    ret = true;
-	    goto out;
-	}
-
-    this = (loop_t *)malloc(sizeof(loop_t));
-    if (this) {
-	insert(&(this->n_list), n_start->prev);
-	this->node = dir;
+    if (dir->flags & DIR_LOOP)
 	goto out;
-    }
-    error("%s", strerror(errno));
+
+    ret = false;
+    dir->flags |= DIR_LOOP;
 out:
     return ret;
 }
@@ -194,19 +175,40 @@ out:
  * Just like a `find * -follow' within a directory tree
  * of depth one with cross linked dependencies.
  */
-static void __follow (dir_t * dir, dir_t * skip, int level, int offset)
+
+static void __follow (dir_t * dir, dir_t * skip, const int level)
 {
-    dir_t *tmp;
+    dir_t * tmp;
     register int deep = level;	/* Link depth, maybe we're called recursive */
     static boolean warned = false;
 
-#ifdef SYSFAC_NOT_EXPANDED
-    if (*dir->name == '$') 	/* Dirty hack to decrease the order caused by */
-	offset--;		/* system facilities, may fail */
-#endif
+    if (dir->flags & DIR_SCAN) {
+	if (skip) {
+	    if (!remembernode(skip) || !remembernode(dir))
+		warn("There is a loop between service %s and %s\n",
+		     dir->name, skip->name);
+	} else {
+	    /* Does this happen? */
+	    if (!remembernode(dir))
+		warn("There is a loop at service %s\n", dir->name);
+	}
+	return;
+    }
 
-    for (tmp = dir; tmp; tmp = tmp->link.target) {
-	list_t * dent, * l_start = &(tmp->link.l_list);
+    for (tmp = dir; tmp; tmp = getlinkdir(&(tmp->link))) {
+	list_t *dent;
+
+	if (!(dir->lvl & tmp->lvl))
+	     continue;		/* Not same boot level */
+
+	/*
+	 * As higher the link depth, as higher the start order.
+	 */
+	if (tmp->order > deep) {
+	    deep = tmp->order;
+	}
+	if (tmp->order < deep)
+	    tmp->order = deep;
 
 	if (++deep > MAX_DEEP) {
 	    if (!warned)
@@ -215,45 +217,44 @@ static void __follow (dir_t * dir, dir_t * skip, int level, int offset)
 	    break;
 	}
 
-	if (!(dir->lvl & tmp->lvl))
-	     continue;		/* Not same boot level */
+	tmp->flags |= DIR_SCAN; /* Mark this service for loop detection */
 
 	/*
-	 * As higher the link depth, as higher the start order.
+	 * If there are links in the links included, follow them
 	 */
-	if (tmp->order < (deep + offset))
-	    tmp->order = (deep + offset);
-
-	/*
-	 * If more than one link is included, follow them all
-	 */
-	for (dent = l_start->next; dent != l_start; dent = dent->next) {
+	list_for_each(dent, &(tmp->link)) {
 	    dir_t * target = getlink(dent)->target;
 
 	    if (!(dir->lvl & target->lvl))
 		continue;	/* Not same boot level */
 
+	    if (target == tmp)
+		break;		/* Loop detected */
+	
 	    if (target == dir)
 		break;		/* Loop detected */
-
-	    if (skip && target == skip) {
-		if (!remembernode(skip))
-		    warn("There is a loop at service %s\n",  skip->name);
-		break;		/* Cross over detected */
+	
+	    if (skip && skip == target) {
+		if (!remembernode(skip) || !remembernode(tmp))
+		    warn("There is a loop between service %s and %s\n",
+			 dir->name, skip->name);
+		return;		/* Loop detected, stop recursion */
 	    }
 
-	    __follow(target, tmp, deep, offset);
+	    __follow(target, tmp, deep);
 	}
+
+	tmp->flags &= ~DIR_SCAN; /* Remove loop detection mark */
     }
 }
 
 /*
- * Helper for follow_all: start with depth zero.
+ * Helper for follow_all: start with depth one.
  */
 inline static void follow(dir_t * dir)
 {
-    /* Link depth and offset starts here with zero */
-    __follow(dir, NULL, 0, 0);
+    /* Link depth starts here with one */
+    __follow(dir, NULL, 1);
 }
 
 /*
@@ -263,7 +264,6 @@ inline static void follow(dir_t * dir)
  */
 static void guess_order(dir_t * dir)
 {
-    dir_t * target = dir->link.target;
     register int min = 99, lvl = 0;
     int deep = 0;
 
@@ -273,20 +273,18 @@ static void guess_order(dir_t * dir)
     if (*dir->name == '$')	/* Don't touch our system facilities */
 	goto out;
 
-    if (!target)		/* No target available */
-	goto out;
-
-    {   /* No full loop required because we seek for the lowest order */
-
-	list_t * dent, * l_start = &(dir->link.l_list);
+    /* No full loop required because we seek for the lowest order */
+    if (!list_empty(&(dir->link))) {
+	dir_t * target = getlinkdir(&(dir->link));
+	list_t * dent;
 
 	if (min > target->order)
 	    min = target->order;
 
 	lvl |= target->lvl;
 
-	for (dent = l_start->next; dent != l_start; dent = dent->next) {
-	    target = getlink(dent)->target;
+	list_for_each(dent, &(dir->link)) {
+	    dir_t * target = getlink(dent)->target;
 
 	    if (++deep > MAX_DEEP)
 		break;
@@ -305,7 +303,6 @@ static void guess_order(dir_t * dir)
 	} else
 	    dir->lvl  = LVL_BOOT;
     }
-
 out:
     return;
 }
@@ -320,17 +317,17 @@ void follow_all()
     /*
      * Follow all scripts and calculate the main ordering.
      */
-    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next)
+    list_for_each(tmp, d_start)
 	follow(getdir(tmp));
 
     /*
      * Guess order of not installed scripts in comparision
      * to the well known scripts.
      */
-    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next)
+    list_for_each(tmp, d_start)
 	guess_order(getdir(tmp));
 
-    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
+    list_for_each(tmp, d_start) {
 	if (!(getdir(tmp)->lvl & LVL_ALL))
 	    continue;
 	if (maxorder < getdir(tmp)->order)
@@ -341,11 +338,11 @@ void follow_all()
 /*
  * For debuging: show all services
  */
-#if 1 // defined(DEBUG) && (DEBUG > 0)
+#if defined(DEBUG) && (DEBUG > 0)
 void show_all()
 {
     list_t *tmp;
-    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
+    list_for_each(tmp, d_start) {
 	dir_t * dir = getdir(tmp);
 	if (dir->script)
 	    fprintf(stderr, "%.2d %s 0x%.2x (%s)\n",
@@ -380,7 +377,7 @@ boolean notincluded(const char * script, const int runlevel)
 	    warn("Wrong runlevel %d\n", runlevel);
     }
 
-    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
+    list_for_each(tmp, d_start) {
 	dir_t * dir = getdir(tmp);
 
 	if (!dir->script)	/* No such file */
@@ -431,9 +428,11 @@ boolean foreach(char ** script, int * order, const int runlevel)
 	ret = false;
 	if (tmp == d_start)
 	    break;
-
 	dir = getdir(tmp);
-
+#if defined (IGNORE_LOOPS) && (IGNORE_LOOPS > 0)
+	if (dir->flags & DIR_LOOP)
+	    continue;
+#endif
 	ret = true;
 	*script = dir->script;
 	*order = dir->order;
@@ -564,11 +563,10 @@ char * lvl2str(const unsigned int lvl)
  * Reorder all services starting with a service
  * being in same runlevels.
  */
-void setorder(const char * script, const int order)
+void setorder(const char * script, const int order, boolean recursive)
 {
     dir_t * dir = findscript(script);
     list_t * tmp;
-    int offset = 0;
 
     if (!dir)
 	goto out;
@@ -576,26 +574,29 @@ void setorder(const char * script, const int order)
     if (dir->order >= order) /* nothing to do */
 	goto out;
 
+    if (!recursive) {
+	dir->order = order;
+	goto out;
+    }
+
     /*
      * Follow the script and re-calculate the ordering.
      */
-    offset = order - (dir->order + 1);
-    __follow(dir, NULL, dir->order, offset);
+    __follow(dir, NULL, order);
 
     /*
      * Guess order of not installed scripts in comparision
      * to the well known scripts.
      */
-    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next)
+    list_for_each(tmp, d_start)
 	guess_order(getdir(tmp));
-
-    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
+ 
+    list_for_each(tmp, d_start) {
 	if (!(getdir(tmp)->lvl & LVL_ALL))
 	    continue;
 	if (maxorder < getdir(tmp)->order)
 	    maxorder = getdir(tmp)->order;
     }
-
 out:
     return;
 }

@@ -17,6 +17,10 @@
 
 . /etc/rc.status
 
+# to get max number of parallel fsck processes
+. /etc/sysconfig/boot
+
+export FSCK_MAX_INST
 
 rc_reset
 

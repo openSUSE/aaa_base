@@ -78,7 +78,20 @@ typedef struct lsb_struct {
     char *description;
 } lsb_t;
 
+/* Search results points here */
+typedef struct reg_struct {
+    regex_t prov;
+    regex_t req_start;
+    regex_t req_stop;
+    regex_t shl_start;
+    regex_t shl_stop;
+    regex_t def_start;
+    regex_t def_stop;
+    regex_t desc;
+} reg_t;
+
 static lsb_t script_inf = {NULL, NULL, NULL, NULL, NULL, NULL };
+static reg_t reg;
 static char empty[1] = "";
 
 /* Delimeters used for spliting results with strsep(3) */
@@ -146,20 +159,24 @@ static list_t sysfaci = { &(sysfaci), &(sysfaci) }, *sysfaci_start = &(sysfaci);
  * Linked list of required services of a service
  */
 typedef struct req_serv {
-    list_t	 list;
-    char       * serv;
+    list_t	  list;
+    unsigned int flags;
+    char        * serv;
 } req_t;
+#define	REQ_MUST	0x00000001
+#define	REQ_SHLD	0x00000002
 #define getreq(arg)	list_entry((arg), struct req_serv, list)
 
 /*
  * Linked list to hold hold information of services
  */
-#define SERV_KNOWN	0x0001
+#define SERV_KNOWN	0x00000001
+#define SERV_NOTLSB	0x00000002
+
 typedef struct serv_struct {
     list_t	   id;
     unsigned int opts;
-    req_t         req;
-    req_t         shd;
+    list_t	  req;
     char	order;
     char       * name;
     unsigned int lvls;
@@ -179,21 +196,17 @@ static serv_t * addserv(const char * serv)
     serv_t * this;
     list_t * ptr;
 
-    for (ptr = serv_start->next; ptr != serv_start;  ptr = ptr->next)
+    list_for_each(ptr, serv_start) {
 	if (!strcmp(getserv(ptr)->name, serv))
 	    goto out;
+    }
 
     this = (serv_t *)malloc(sizeof(serv_t));
     if (this) {
-	list_t * req_start = &(this->req.list);
-	list_t * shd_start = &(this->shd.list);
+	list_t * req_start = &(this->req);
 	insert(&(this->id), serv_start->prev);
 	req_start->next = req_start;
 	req_start->prev = req_start;
-	shd_start->next = shd_start;
-	shd_start->prev = shd_start;
-	this->req.serv = NULL;
-	this->shd.serv = NULL;
 	this->opts  = 0;
 	this->name  = xstrdup(serv);
 	this->order = 0;
@@ -215,102 +228,79 @@ static serv_t * findserv(const char * serv)
     if (!serv)
 	goto out;
 
-    for (ptr = serv_start->next; ptr != serv_start;  ptr = ptr->next)
+    list_for_each(ptr, serv_start) {
 	if (!strcmp(getserv(ptr)->name, serv)) {
 	    ret = getserv(ptr);
 	    break;
 	}
+    }
 out:
     return ret;
 }
 
 /*
- * Expand requested services for sorting
- */
-static void expandreq(const char *name, req_t * cur)
-{
-    list_t * req_start = &(cur->list);
-    list_t * ptr;
-
-    if (cur->serv)
-	requiresv(name, cur->serv);
-
-    for (ptr = req_start->next; ptr != req_start; ptr = ptr->next) {
-	char * needed = getreq(ptr)->serv;
-	if (needed)
-	    requiresv(name, needed);
-    }
-}
-
-/*
  * Remember requests for required or should services and expand `$' token
  */
-static void rememberreq(serv_t *serv, req_t * cur, char * required)
+static void rememberreq(serv_t *serv, unsigned int bit, char * required)
 {
     char * token, * tmp = strdupa(required);
-    req_t * old = cur;
+    list_t * ptr;
+    unsigned int old = bit;
 
     while ((token = strsep(&tmp, delimeter))) {
-	list_t * ptr;
+	boolean found = false;
+	req_t * this;
 
 	if (!*token)
 	    continue;
-	cur = old;			/* The default list */
 
-	if (*token != '$') {
-	    req_t * this = NULL;
-
-	    /*
-	     * Optional real services are noted by a `+' sign
-	     */
-	    if (*token == '+') {
-		token++;
-		cur = &serv->shd;
-		if (*token == '$')
-		    goto dollar;	/* Someone uses `+$' */
-	    }
-
-	    if (!cur->serv) {
-		this = cur;
-		this->serv = xstrdup(token);
-	    } else {
-		list_t * req_start = &(cur->list);
-		boolean found = false;
-
-		/* Do not link in if already done */
-		if (!strcmp(cur->serv, token)) {
+	bit = old;
+again:
+	switch(*token) {
+	default:
+	    list_for_each(ptr, &(serv->req)) {
+		if (!strcmp(getreq(ptr)->serv, token)) {
 		    found = true;
-		} else {
-		    for (ptr = req_start->next; ptr != req_start; ptr = ptr->next) {
-			if (!strcmp(getreq(ptr)->serv, token)) {
-			    found = true;
-			    break;
-			}
-		    }
-		}
-
-		if (!found) {
-		    this = (req_t *)malloc(sizeof(req_t)); 
-		    if (!this) 
-			error("%s", strerror(errno));
-		    insert(&(this->list), req_start->prev);
-		    this->serv = xstrdup(token);
+		    break;
 		}
 	    }
-
-	    continue;			/* Below we handle `$' token */
-	}
-dollar:
-	/* Expand the `$' token recursively down */
-	for (ptr = sysfaci_start->next; ptr != sysfaci_start; ptr = ptr->next) {
-	    if (!strcmp(token, getfaci(ptr)->name)) {
-		rememberreq(serv, cur, getfaci(ptr)->repl);
+	    if (found) {
+		getreq(ptr)->flags |= bit;
 		break;
 	    }
+
+	    this = (req_t *)malloc(sizeof(req_t));
+	    if (!this)
+		error("%s", strerror(errno));
+	    insert(&(this->list), (&(serv->req))->prev);
+	    this->serv  = xstrdup(token);
+	    this->flags = bit;
+
+	    break;
+	case '$':
+	    /* Expand the `$' token recursively down */
+	    list_for_each(ptr, sysfaci_start) {
+		if (!strcmp(token, getfaci(ptr)->name)) {
+		    rememberreq(serv, bit, getfaci(ptr)->repl);
+		    break;
+		}
+	    }
+	    break;
+	case '+':
+	    /* This is an optional token */
+	    token++;
+	    bit = REQ_SHLD;
+	    goto again;
+	    break;
 	}
     }
-    /* At last: expand requested services for sorting */
-    expandreq(serv->name, old);
+
+    /* Expand requested services for sorting */
+    list_for_each(ptr, &(serv->req)) {
+	char * needed = getreq(ptr)->serv;
+	if (needed)
+	    requiresv(serv->name, needed);
+    }
 }
 
 /*
@@ -319,28 +309,26 @@ dollar:
 static boolean chkrequired(const char * name)
 {
     serv_t * serv = findserv(name);
-    list_t * req_start, * ptr;
-    serv_t * required;
+    list_t * req_start, * pos;
     boolean ret = true;
 
-    if (serv && serv->req.serv)
-	req_start = &(serv->req.list);
+    if (serv && !list_empty(&(serv->req)))
+	req_start = &(serv->req);
     else
 	goto out;
 
-    /*
-     * If the first required service is misssed we run on an error.
-     */
-    if (!(required = findserv(serv->req.serv)) || !(required->lvls)) {
-	warn("Service %s has to be enabled for service %s\n", serv->req.serv, name);
-	ret = false;
-    }
+    list_for_each(pos, req_start) {
+	req_t *req = getreq(pos);
+	serv_t * must;
 
-    for (ptr = req_start->next; ptr != req_start; ptr = ptr->next)
-	if (!(required = findserv(getreq(ptr)->serv)) || !(required->lvls)) {
-	    warn("Service %s has to be enabled for service %s\n", getreq(ptr)->serv, name);
+	if (!(req->flags & REQ_MUST))
+	    continue;
+
+	if (!(must = findserv(req->serv)) || !(must->lvls)) {
+	    warn("Service %s has to be enabled for service %s\n", req->serv, name);
 	    ret = false;
 	}
+    }
 out:
     return ret;
 }
@@ -353,25 +341,20 @@ static boolean chkdependencies(const char * name)
     list_t * srv;
     boolean ret = true;
 
-    for (srv = serv_start->next; srv != serv_start; srv = srv->next) {
+    list_for_each(srv, serv_start) {
 	serv_t * cur = getserv(srv);
-	list_t * req_start, * req;
+	list_t * pos;
 
-	if (!cur || !cur->req.serv)
+	if (!cur || list_empty(&(cur->req)) || !cur->lvls)
 	    continue;
 
-	if (!cur->lvls)
-	    continue;
+	list_for_each(pos, &(cur->req)) {
+	    req_t *req = getreq(pos);
 
-	req_start = &(cur->req.list);
+	    if (!(req->flags & REQ_MUST))
+		continue;
 
-	if (!strcmp(cur->req.serv, name)) {
-	    warn("Service %s has to be enabled for service %s\n", name, cur->name);
-	    ret = false;
-	}
-
-	for (req = req_start->next; req != req_start; req = req->next) {
-	    if (!strcmp(getreq(req)->serv, name)) {
+	    if (!strcmp(req->serv, name)) {
 		warn("Service %s has to be enabled for service %s\n", name, cur->name);
 		ret = false;
 	    }
@@ -406,6 +389,18 @@ static serv_t * current_structure(const char * this, const char order, const int
     return serv;
 }
 
+/*
+ * This helps us to set non LSB conform scripts to max order
+ */
+static inline void nonlsb_script(int maxorder)
+{
+    list_t * pos;
+
+    list_for_each(pos, serv_start) {
+	if (getserv(pos)->opts & SERV_NOTLSB)
+	    setorder(getserv(pos)->name, maxorder, false);
+    }
+}
 
 /*
  * Internal logger
@@ -469,7 +464,7 @@ static DIR * openrcdir(const char * rcpath)
 /*
  * Wrapper for regcomp(3)
  */
-static void regcompiler (regex_t *preg, const char *regex, int cflags)
+static inline void regcompiler (regex_t *preg, const char *regex, int cflags)
 {
     register int ret = regcomp(preg, regex, cflags);
     if (ret) {
@@ -483,7 +478,7 @@ static void regcompiler (regex_t *preg, const char *regex, int cflags)
 /*
  * Wrapper for regexec(3)
  */
-static boolean regexecutor (regex_t *preg, const char *string,
+static inline boolean regexecutor (regex_t *preg, const char *string,
 			size_t nmatch, regmatch_t pmatch[], int eflags)
 {
     register int ret = regexec(preg, string, nmatch, pmatch, eflags);
@@ -497,20 +492,29 @@ static boolean regexecutor (regex_t *preg, const char *string,
 
 /*
  * The script scanning engine.
+ * We have to alloc the regular expressions first before
+ * calling scan_script_defaults().  After the last call
+ * of scan_script_defaults() we may free the expressions.
  */
-static void scan_script_defaults(const char *path)
+static inline void scan_script_regalloc()
 {
-    regex_t reg_prov;
-    regex_t reg_req_start;
-    regex_t reg_req_stop;
-    regex_t reg_shl_start;
-    regex_t reg_shl_stop;
-    regex_t reg_def_start;
-    regex_t reg_def_stop;
-    regex_t reg_desc;
+    regcompiler(&reg.prov,      PROVIDES,       REG_EXTENDED|REG_ICASE);
+    regcompiler(&reg.req_start, REQUIRED_START, REG_EXTENDED|REG_ICASE|REG_NEWLINE);
+    regcompiler(&reg.req_stop,  REQUIRED_STOP,  REG_EXTENDED|REG_ICASE|REG_NEWLINE);
+    regcompiler(&reg.shl_start, SHOULD_START,   REG_EXTENDED|REG_ICASE|REG_NEWLINE);
+    regcompiler(&reg.shl_stop,  SHOULD_STOP,    REG_EXTENDED|REG_ICASE|REG_NEWLINE);
+    regcompiler(&reg.def_start, DEFAULT_START,  REG_EXTENDED|REG_ICASE|REG_NEWLINE);
+    regcompiler(&reg.def_stop,  DEFAULT_STOP,   REG_EXTENDED|REG_ICASE|REG_NEWLINE);
+    regcompiler(&reg.desc,      DESCRIPTION,    REG_EXTENDED|REG_ICASE|REG_NEWLINE);
+}
+
+static boolean scan_script_defaults(const char *path)
+{
     regmatch_t subloc[SUBNUM_SHD+1], *val = &subloc[SUBNUM-1], *shl = &subloc[SUBNUM_SHD-1];
     FILE *script;
     char *pbuf = buf;
+    char *begin = NULL, *end = NULL;
+    boolean ret = false;
 
 #define provides	script_inf.provides
 #define required_start	script_inf.required_start
@@ -520,15 +524,6 @@ static void scan_script_defaults(const char *path)
 #define default_start	script_inf.default_start
 #define default_stop	script_inf.default_stop
 #define description	script_inf.description
-
-    regcompiler(&reg_prov,	PROVIDES,	REG_EXTENDED|REG_ICASE);
-    regcompiler(&reg_req_start, REQUIRED_START, REG_EXTENDED|REG_ICASE|REG_NEWLINE);
-    regcompiler(&reg_req_stop,  REQUIRED_STOP,	REG_EXTENDED|REG_ICASE|REG_NEWLINE);
-    regcompiler(&reg_shl_start, SHOULD_START,   REG_EXTENDED|REG_ICASE|REG_NEWLINE);
-    regcompiler(&reg_shl_stop,  SHOULD_STOP,	REG_EXTENDED|REG_ICASE|REG_NEWLINE);
-    regcompiler(&reg_def_start, DEFAULT_START,	REG_EXTENDED|REG_ICASE|REG_NEWLINE);
-    regcompiler(&reg_def_stop,  DEFAULT_STOP,	REG_EXTENDED|REG_ICASE|REG_NEWLINE);
-    regcompiler(&reg_desc,	DESCRIPTION,	REG_EXTENDED|REG_ICASE|REG_NEWLINE);
 
     script = fopen(path, "r");
     if (!script)
@@ -547,42 +542,47 @@ static void scan_script_defaults(const char *path)
 #define COMMON_ARGS	buf, SUBNUM, subloc, 0
 #define COMMON_SHD_ARGS	buf, SUBNUM_SHD, subloc, 0
     while (fgets(buf, sizeof(buf), script)) {
-	if (!provides       && regexecutor(&reg_prov,      COMMON_ARGS) == true) {
+
+	/* Skip scanning above from LSB magic start */
+	if (!begin && !(begin = strstr(buf, "### BEGIN INIT INFO")))
+	    continue;
+
+	if (!provides       && regexecutor(&reg.prov,      COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 	        provides = xstrdup(pbuf+val->rm_so);
 	    } else
 		provides = empty;
 	}
-	if (!required_start && regexecutor(&reg_req_start, COMMON_ARGS) == true) {
+	if (!required_start && regexecutor(&reg.req_start, COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 		required_start = xstrdup(pbuf+val->rm_so);
 	    } else
 		required_start = empty;
 	}
-	if (!required_stop  && regexecutor(&reg_req_stop,  COMMON_ARGS) == true) {
+	if (!required_stop  && regexecutor(&reg.req_stop,  COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 		required_stop = xstrdup(pbuf+val->rm_so);
 	    } else
 		required_stop = empty;
 	}
-	if (!should_start && regexecutor(&reg_shl_start,   COMMON_SHD_ARGS) == true) {
+	if (!should_start && regexecutor(&reg.shl_start,   COMMON_SHD_ARGS) == true) {
 	    if (shl->rm_so < shl->rm_eo) {
 		*(pbuf+shl->rm_eo) = '\0';
 		should_start = xstrdup(pbuf+shl->rm_so);
 	    } else
 		should_start = empty;
 	}
-	if (!should_stop  && regexecutor(&reg_shl_stop,    COMMON_SHD_ARGS) == true) {
+	if (!should_stop  && regexecutor(&reg.shl_stop,    COMMON_SHD_ARGS) == true) {
 	    if (shl->rm_so < shl->rm_eo) {
 		*(pbuf+shl->rm_eo) = '\0';
 		should_stop = xstrdup(pbuf+shl->rm_so);
 	    } else
 		should_stop = empty;
 	}
-	if (!default_start  && regexecutor(&reg_def_start, COMMON_ARGS) == true) {
+	if (!default_start  && regexecutor(&reg.def_start, COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 		default_start = xstrdup(pbuf+val->rm_so);
@@ -590,7 +590,7 @@ static void scan_script_defaults(const char *path)
 		default_start = empty;
 	}
 #ifndef SUSE
-	if (!default_stop   && regexecutor(&reg_def_stop,  COMMON_ARGS) == true) {
+	if (!default_stop   && regexecutor(&reg.def_stop,  COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 		default_stop = xstrdup(pbuf+val->rm_so);
@@ -598,25 +598,23 @@ static void scan_script_defaults(const char *path)
 		default_stop = empty;
 	}
 #endif
-	if (!description    && regexecutor(&reg_desc,      COMMON_ARGS) == true) {
+	if (!description    && regexecutor(&reg.desc,      COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 		description = xstrdup(pbuf+val->rm_so);
 	    } else
 		description = empty;
 	}
+
+	/* Skip scanning below from LSB magic end */
+	if ((end = strstr(buf, "### END INIT INFO")))
+	    break;
     }
 #undef COMMON_ARGS
 #undef COMMON_SHD_ARGS
-    regfree(&reg_prov);
-    regfree(&reg_req_start);
-    regfree(&reg_req_stop);
-    regfree(&reg_shl_start);
-    regfree(&reg_shl_stop);
-    regfree(&reg_def_start);
-    regfree(&reg_def_stop);
-    regfree(&reg_desc);
+
     fclose(script);
+    ret = begin && provides && end;
 
 #undef provides
 #undef required_start
@@ -627,7 +625,19 @@ static void scan_script_defaults(const char *path)
 #undef default_stop
 #undef description
 
-    return;
+    return ret;
+}
+
+static inline void scan_script_regfree()
+{
+    regfree(&reg.prov);
+    regfree(&reg.req_start);
+    regfree(&reg.req_stop);
+    regfree(&reg.shl_start);
+    regfree(&reg.shl_stop);
+    regfree(&reg.def_start);
+    regfree(&reg.def_stop);
+    regfree(&reg.desc);
 }
 
 /*
@@ -665,6 +675,7 @@ static void scan_script_locations(const char * path)
 	    char * ptr = d->d_name;
 	    char order = 0;
 	    char* begin = (char*)NULL; /* Remember address of ptr handled by strsep() */
+	    boolean lsb;
 
 	    if (*ptr != 'S')
 		continue;
@@ -680,7 +691,7 @@ static void scan_script_locations(const char * path)
 		continue;
 	    }
 
-	    scan_script_defaults(d->d_name);
+	    lsb = scan_script_defaults(d->d_name);
 	    if (!script_inf.provides || script_inf.provides == empty)
 		script_inf.provides = xstrdup(ptr);
 
@@ -688,7 +699,7 @@ static void scan_script_locations(const char * path)
 	    while ((token = strsep(&script_inf.provides, delimeter)) && *token) {
 		serv_t * service = NULL;
 		if (*token == '$') {
-		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
+		    warn("script %s provides system facility %s, skipped!\n", d->d_name, token);
 		    continue;
 		}
 		service = current_structure(token, order, runlevel);
@@ -697,12 +708,15 @@ static void scan_script_locations(const char * path)
 		    continue;
 		service->opts |= SERV_KNOWN;
 
+		if (!lsb)
+		    service->opts |= SERV_NOTLSB;
+
 		if (script_inf.required_start && script_inf.required_start != empty) {
-		    rememberreq(service, &service->req, script_inf.required_start);
+		    rememberreq(service, REQ_MUST, script_inf.required_start);
 		    requiresv(token, script_inf.required_start);
 		}
 		if (script_inf.should_start && script_inf.should_start != empty) {
-		    rememberreq(service, &service->shd, script_inf.should_start);
+		    rememberreq(service, REQ_SHLD, script_inf.should_start);
 		    requiresv(token, script_inf.should_start);
 		}
 	    }
@@ -767,7 +781,7 @@ static void scan_conf(void)
 	    if (virt) {
 		list_t * ptr;
 		boolean found = false;
-		for (ptr = sysfaci_start->next; ptr != sysfaci_start; ptr = ptr->next) {
+		list_for_each(ptr, sysfaci_start) {
 		    if (!strcmp(getfaci(ptr)->name, virt)) {
 			found = true;
 			break;
@@ -797,7 +811,7 @@ err:
 static void expand_conf()
 {
     list_t * ptr;
-    for (ptr = sysfaci_start->next; ptr != sysfaci_start; ptr = ptr->next)
+    list_for_each(ptr, sysfaci_start)
 	virtprov(getfaci(ptr)->name, getfaci(ptr)->repl);
 }
 
@@ -806,7 +820,7 @@ static void expand_conf()
  * We start were we leave the directory, the upper level
  * has to call rewinddir(3) if necessary.
  */
-static char * scan_for(DIR * rcdir, const char * script, char type)
+static inline char *  scan_for(DIR * rcdir, const char * script, char type)
 {
     struct dirent *d;
     char * ret = NULL;
@@ -834,7 +848,7 @@ static char * scan_for(DIR * rcdir, const char * script, char type)
  *  Check for script in list.
  */
 static int curr_argc = -1;
-static boolean chkfor(const char * script, char **list, const int cnt)
+static inline boolean chkfor(const char * script, char **list, const int cnt)
 {
     boolean isinc = false;
     register int c = cnt;
@@ -996,6 +1010,11 @@ int main (int argc, char *argv[])
     scan_conf();
 
     /*
+     * Initialize the regular scanner for the scripts.
+     */
+    scan_script_regalloc();
+
+    /*
      * Scan always for the runlevel links to see the current
      * link scheme of the services.
      */
@@ -1012,6 +1031,7 @@ int main (int argc, char *argv[])
 	char * end;
 	char * token;
 	char* begin = (char*)NULL;  /* Remember address of ptr handled by strsep() */
+	boolean lsb = false;
 	errno = 0;
 
 	/* d_type seems not to work, therefore use stat(2) */
@@ -1019,8 +1039,11 @@ int main (int argc, char *argv[])
 	    warn("can not stat(%s)\n", d->d_name);
 	    continue;
 	}
-	if (!S_ISREG(st_script.st_mode) || !(S_IXUSR & st_script.st_mode))
+	if (!S_ISREG(st_script.st_mode) || !(S_IXUSR & st_script.st_mode)) {
+	    if (chkfor(d->d_name, argv, argc))
+		warn("script %s is not executable, skipped!\n", d->d_name);
 	    continue;
+	}
 
 	if (!strncmp(d->d_name, "README", strlen("README")))
 	    continue;
@@ -1070,7 +1093,7 @@ int main (int argc, char *argv[])
 	    continue;
 
 	/* main scanner for LSB comment in current script */
-	scan_script_defaults(d->d_name);
+	lsb = scan_script_defaults(d->d_name);
 
 	/* Common script ... */
 	if (!strcmp(d->d_name, "halt")) {
@@ -1112,7 +1135,8 @@ int main (int argc, char *argv[])
 		 */
 		if (!script_inf.required_start || script_inf.required_start == empty) {
 		    list_t * ptr = NULL;
-		    for (ptr = (&(guess->id))->prev; ptr != serv_start; ptr = ptr->prev) {
+
+		    list_for_each_prev(ptr, &(guess->id)) {
 			if (getserv(ptr)->order >= guess->order)
 			    continue;
 			if (getserv(ptr)->lvls & guess->lvls) {
@@ -1131,24 +1155,19 @@ int main (int argc, char *argv[])
 		 * Note, this means that the first requiring service wins.
 		 */
 		if (!script_inf.default_start || script_inf.default_start == empty) {
-		    list_t * ptr = NULL;
-		    for (ptr = serv_start->next; ptr != serv_start; ptr = ptr->next) {
+		    list_t * ptr;
+
+		    list_for_each(ptr, serv_start) {
 			serv_t * cur = getserv(ptr);
-			list_t * req_start, * req;
+			list_t * req;
 
 			if (script_inf.default_start && script_inf.default_start != empty)
 			   break;
 
-			if (!cur || !cur->req.serv || !cur->lvls)
+			if (!cur || list_empty(&(cur->req)) || !cur->lvls)
 			    continue;
 
-			if (!strcmp(cur->req.serv, script_inf.provides)) {
-			    script_inf.default_start = xstrdup(lvl2str(getserv(ptr)->lvls));
-			    break;
-			}
-
-			req_start = &(cur->req.list);
-			for (req = req_start->next; req != req_start; req = req->next) {
+			list_for_each(req, &(cur->req)) {
 			    if (!strcmp(getreq(req)->serv, script_inf.provides)) {
 				script_inf.default_start = xstrdup(lvl2str(getserv(ptr)->lvls));
 				break;
@@ -1169,7 +1188,7 @@ int main (int argc, char *argv[])
 	    begin = provides;
 	    while ((token = strsep(&provides, delimeter)) && *token) {
 		if (*token == '$') {
-		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
+		    warn("script %s provides system facility %s, skipped!\n", d->d_name, token);
 		    continue;
 		}
 
@@ -1186,11 +1205,11 @@ int main (int argc, char *argv[])
 		    service->opts |= SERV_KNOWN;
 
 		    if (!known && script_inf.required_start && script_inf.required_start != empty) {
-			rememberreq(service, &service->req, script_inf.required_start);
+			rememberreq(service, REQ_MUST, script_inf.required_start);
 			requiresv(token, script_inf.required_start);
 		    }
 		    if (!known && script_inf.should_start && script_inf.should_start != empty) {
-			rememberreq(service, &service->shd, script_inf.should_start);
+			rememberreq(service, REQ_SHLD, script_inf.should_start);
 			requiresv(token, script_inf.should_start);
 		    }
 
@@ -1284,6 +1303,10 @@ int main (int argc, char *argv[])
 	}
 	script_inf.provides = begin;
 
+	/* Remember if not LSB conform script */
+	if (!lsb && service)
+	    service->opts |= SERV_NOTLSB;
+
     }
     /* Reset remaining pointers */
     xreset(script_inf.provides);
@@ -1295,11 +1318,28 @@ int main (int argc, char *argv[])
     xreset(script_inf.default_stop);
     xreset(script_inf.description);
 
+    /*
+     * Free the regular scanner for the scripts.
+     */
+    scan_script_regfree();
+
     /* back */
     popd();
     closedir(initdir);
 
     expand_conf();
+
+    /*
+     *  Set initial order of some services
+     */
+    setorder("network",	 5, false);
+    setorder("inetd",	20, false);
+    setorder("halt",	20, false);
+    setorder("reboot",	20, false);
+    setorder("single",	20, false);
+    setorder("serial",	10, false);
+    setorder("gpm",	20, false);
+    setorder("boot.setup", 20, false);
 
     /*
      * Now generate for all scripts the dependencies
@@ -1312,32 +1352,9 @@ int main (int argc, char *argv[])
      * Stable means that new scripts should not
      * force a full re-order of all starting numbers.
      */
-
-    if ((order = getorder("network")) > 0) {
-	if (order < 5) setorder("network", 5);
-	if (getorder("route") > 0)
-	    setorder("route", (getorder("network") + 2));
-    }
-    if ((order = getorder("inetd"))  > 0 && order < 20) setorder("inetd",  20);
-
-    /*
-     * Set order of some singluar scripts
-     * (no dependencies or single link).
-     */
-    if ((order = getorder("halt"))   > 0 && order < 20) setorder("halt",   20);
-    if ((order = getorder("reboot")) > 0 && order < 20) setorder("reboot", 20);
-    if ((order = getorder("single")) > 0) {
-	if (order < 20) setorder("single", 20);
-	if (getorder("kbd") > 0)
-	    setorder("single", (getorder("kbd") + 2));
-    }
-
-    /*
-     * Do not overwrite good old links.
-     */
-    if ((order = getorder("serial"))     > 0 && order < 10) setorder("serial",     10);
-    if ((order = getorder("boot.setup")) > 0 && order < 20) setorder("boot.setup", 20);
-    if ((order = getorder("gpm"))        > 0 && order < 20) setorder("gpm",        20);
+    setorder("route",	(getorder("network") + 2), true);
+    setorder("single",	(getorder("kbd") + 2),	   true);
+    nonlsb_script(maxorder);
 
     /*
      * Sorry but we support only [KS][0-9][0-9]<name>

@@ -17,3 +17,12 @@ CONFIRM_PROMPT_TIMEOUT="5"
 # flow control).
 #
 FLOW_CONTROL="no"
+
+#
+# This  variable will limits the maximum number of file system
+# checkers that can be running at one time.  This allows configurations
+# which have a large number of disks to avoid fsck starting too many file
+# system checkers at once, which might overload CPU and memory resources
+# available on the system.
+#
+FSCK_MAX_INST=10

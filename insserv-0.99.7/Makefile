@@ -9,9 +9,10 @@ INITDIR  =	/etc/init.d
 INSCONF  =	/etc/insserv.conf
 #DESTDIR =	/tmp/root
 #DEBUG	 =	-DDEBUG=1
+#LOOPS	 =	-DIGNORE_LOOPS=1
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.99.6
+VERSION	 =	0.99.7
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #
@@ -30,7 +31,7 @@ else
 	  COPTS = -O2 -fomit-frame-pointer -fschedule-insns2
 endif
 endif
-	 CFLAGS = -Wall $(COPTS) $(DEBUG) -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
+	 CFLAGS = -Wall $(COPTS) $(DEBUG) $(LOOPS) -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
 		  -DSUSE -DINITDIR=\"$(INITDIR)\" -DINSCONF=\"$(INSCONF)\" -pipe
 	  CLOOP = -funroll-loops
 	     CC = gcc

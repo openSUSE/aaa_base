@@ -10,7 +10,7 @@
  */
 
 typedef struct list_struct {
-    struct list_struct * prev, * next;
+    struct list_struct * next, * prev;
 } list_t;
 
 /*
@@ -39,28 +39,7 @@ static inline void delete (list_t * entry)
     prev->next = next;
 }
 
-/*
- * Swap two entries within on linked list.
- */
-/*
-static inline void swap (list_t ** this, list_t ** that)
-{
-    list_t * pos1 = (*that)->prev;
-    list_t * pos2 = (*this)->prev;
-    list_t * tmp;
-
-    delete(*this);
-    delete(*that);
-    insert(*this, pos1);
-    insert(*that, pos2);
-
-//     tmp  = *this;
-//    *this = *that;
-//    *that =  tmp;
-}
-*/
-
-static __inline__ void join(list_t *list, list_t *head)
+static inline void join(list_t *list, list_t *head)
 {
     list_t *first = list->next;
 
@@ -76,8 +55,17 @@ static __inline__ void join(list_t *list, list_t *head)
     }
 }
 
-#define list_entry(ptr, type, member) \
+static inline int list_empty(list_t *head)
+{
+        return head->next == head;
+}
+
+#define list_entry(ptr, type, member)	\
 	((type *)((char *)(ptr)-(unsigned long)(&((type *)0)->member)))
+#define list_for_each(pos, head)	\
+	for (pos = (head)->next; pos != (head); pos = pos->next)
+#define list_for_each_prev(pos, head)	\
+	for (pos = (head)->prev; pos != (head); pos = pos->prev)
 
 typedef enum _boolean {false, true} boolean;
 extern void follow_all();
@@ -88,7 +76,7 @@ extern void runlevels(const char * this, const char * lvl);
 extern unsigned int str2lvl(const char * lvl);
 extern char * lvl2str(const unsigned int lvl);
 extern int makeprov(const char * name, const char * script);
-extern void setorder(const char * script, const int order);
+extern void setorder(const char * script, const int order, boolean recursive);
 extern int getorder(const char * script);
 extern boolean notincluded(const char * script, const int runlevel);
 extern boolean foreach(char ** script, int * order, const int runlevel);
