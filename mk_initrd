@@ -1013,7 +1013,7 @@ EOF
 
     # now create a second initrd with minimal size
 
-    img_size=`expr \`df -k $tmp_mnt | sed '1d' | awk '{print $3}'\` + 2000`
+    img_size=`expr \`df -kP $tmp_mnt | sed '1d' | awk '{print $3}'\` + 2000`
     mkdir $tmp_mnt_small
 
     dd if=/dev/zero of=$tmp_initrd_small bs=1k count=$img_size 2>/dev/null
