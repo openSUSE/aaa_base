@@ -38,7 +38,10 @@ _file_ ()
     local c=${COMP_WORDS[COMP_CWORD]}
     local a="${COMP_WORDS[@]}"
     local o="$IFS"
-    local e
+    local e s g=0
+
+    shopt -q extglob && g=1
+    test $g -eq 0 && shopt -s extglob
 
     case "$1" in
     compress)		e='*.Z'					;;
@@ -72,10 +75,37 @@ _file_ ()
     tex|latex)		e='!*.+(tex|TEX|texi|latex)'		;;
     *)			e='!*'
     esac
+
+    case "$(complete -p $1)" in
+	*-d*) ;;
+	*) s="/"  
+    esac
+
     IFS='
 '
-    COMPREPLY=($(compgen -f -X "$e" -- $c))
+    case "$c" in
+    \$\(*\))		COMPREPLY=(${c}) ;;
+    \$\(*)		COMPREPLY=($(compgen -c -P '$(' -S ')'  -- ${c#??}))	;;
+    \`*\`)		COMPREPLY=(${c}) ;;
+    \`*)		COMPREPLY=($(compgen -c -P '\`' -S '\`' -- ${c#?}))	;;
+    \$\{*\})		COMPREPLY=(${c}) ;;
+    \$\{*)		COMPREPLY=($(compgen -v -P '${' -S '}'  -- ${c#??}))	;;
+    \$*)		COMPREPLY=($(compgen -v -P '$'          -- ${c#?}))	;;
+    ~*/*)		COMPREPLY=($(compgen -f -X "$e"         -- ${c}))	;;
+    ~*)			COMPREPLY=($(compgen -u ${s:+-S$s} 	-- ${c}))	;;
+    *@*)		COMPREPLY=($(compgen -A hostname -P '@' -S ':' -- ${c#*@})) ;;
+    *[*?[]*)		COMPREPLY=($(compgen -G "${c}"))			;;
+    *[?*+\!@]\(*\)*)
+	if test $g -eq 0 ; then
+			COMPREPLY=($(compgen -f -X "$e" -- $c))
+			return
+	fi
+			COMPREPLY=($(compgen -G "${c}"))			;;
+    *)			COMPREPLY=($(compgen -f -X "$e" -- $c))			;;
+    esac
     IFS="$o"
+
+    test $g -eq 0 && shopt -u extglob
 }
 
 complete -d -X '.[^./]*' -F _file_	compress \
@@ -90,15 +120,15 @@ complete -d -X '.[^./]*' -F _file_	compress \
 					acroread xpdf \
 					dvips xdvi \
 					tex latex
-complete -A directory -F _file_		chown chgrp chmod chattr ln
-complete -A directory -F _file_		more cat less strip grep vi ed
+#complete -A directory -F _file_	chown chgrp chmod chattr ln
+#complete -A directory -F _file_	more cat less strip grep vi ed
 
 complete -A function -A alias -A command -A builtin type
 
 complete -A function			function
 complete -A alias			alias unalias
 complete -A variable			unset local readonly
-complete -A variable -F _file_		export
+complete -A variable			export
 complete -A variable -A export		unset
 complete -A shopt			shopt
 complete -A setopt			set
@@ -107,7 +137,7 @@ complete -A user			talk su login sux
 complete -A builtin			builtin
 complete -A export			printenv
 complete -A command			command which nohup exec nice eval 
-complete -A command -F _file_		ltrace strace gdb
+complete -A command 			ltrace strace gdb
 HOSTFILE=""
 test -s $HOME/.hosts && HOSTFILE=$HOME/.hosts
 complete -A hostname			ping telnet rsh ssh slogin \

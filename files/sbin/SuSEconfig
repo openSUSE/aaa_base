@@ -229,10 +229,17 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
     fi
 
     if test "$FASTRUN" != "true" ; then
-        if test -x /sbin/depmod ; then
-            MOD_DIR=/lib/modules/`uname -r`
-            if test -d $MOD_DIR ; then
-                /sbin/depmod -a 2> /dev/null > /dev/null
+        MODULES_DIR=/lib/modules/`uname -r`
+        if test -x /sbin/depmod -a -d $MODULES_DIR ; then
+            for i in $MODULES_DIR/* $MODULES_DIR/*/* /etc/modules.conf ; do
+                test -e $i || continue
+                if test $i -nt $MODULES_DIR/modules.dep ; then
+                    rm -f $MODULES_DIR/modules.dep
+                    break
+                fi
+            done
+            if test ! -e $MODULES_DIR/modules.dep ; then
+                /sbin/depmod -a > /dev/null 2>&1
             fi
         fi
     fi
