@@ -21,10 +21,11 @@
 # USA.
 
 
-# Version 1.33
+# Version 1.40
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 #         Susanne Oberhauser  <froh@suse.de>
+#         Bernhard Kaindl     <bk@suse.de>
 #
 # (c) 1999-2002 SuSE Linux AG
 # (c) 1999 Heiko Eißfeldt bugfix, add module parameter passing
@@ -32,6 +33,27 @@
 #
 # ChangeLog:
 #
+# 16/11/2002:   v1.40
+# - use $root_dir for checking if the initrd needs lib64 libs and ld.so
+# 14/11/2002:   v1.39
+# - more inodes are needed in mk_initrd if libc is added (#20822)
+# 10/11/2002:   v1.38
+# - initialize zfcp with module parameter instead of
+#   /proc/scsi/zfcp/add_map, so the disks are available without echo
+#   "scsi add-single-device>/proc/scsi/scsi" after module load. (#20709)
+# 08/9/2002:    v1.37
+# - fix missing /lib/ld64.so on s390x
+# - if zfcp is set up but not configured copy current setup to zfcp.conf
+# - handle zipl like lilo: on success tell the admin to call zipl!
+# - fix adding of dasd disciplines to check which disciplines are needed
+# - fix remaining references to the module dasd to use dasd_mod
+# - s390/s390x: show architecture when showing the kernel version
+# 27/9/2002:    v1.36
+# - mount proc if not mounted and unmount it at cleanup time before exit
+# - avoid printing overlong files during initrd creation process and
+#   format the output in the same change.
+# - s390: if dasd_mod has no options in modules.conf, use the env set by
+#   the kernel parameter to find the needed dasds
 # 24/9/2002:    v1.35
 # - remove explicit inclusion of module dasd.o, which gives the freedom to
 #   rename it to dasd_mod.o some day (soon).
@@ -314,6 +336,17 @@ if [ -z "$kernels" ] ; then
    fi
 fi
 
+# *full* paths
+[ -z "$boot_dir" ] && boot_dir=/boot
+
+# *full* paths
+[ -z "$tmp_dir" ] && tmp_dir=/var/tmp
+
+# ppc magic: kernel can be either vmlinux or vmlinuz
+if [ "$arch" = ppc -a "$kernels_default" = vmlinux ] ; then
+  [ ! -f "$boot_dir/vmlinux" ] && kernels_default="vmlinuz"
+fi
+
 # the kernel images to use; must be in $boot_dir
 [ -z "$kernels" ] && kernels="$kernels_default"
 
@@ -326,18 +359,6 @@ if [ $kc != $ic ] ; then
     echo "item count in -k and -i lists have to match"
     exit 1
 fi
-
-
-# *full* paths
-[ -z "$boot_dir" ] && boot_dir=/boot
-
-# ppc magic: kernel can be either vmlinux or vmlinuz
-if [ "$arch" = ppc -a "$kernels_default" = vmlinux ] ; then
-  [ ! -f "$boot_dir/vmlinux" ] && kernels_default="vmlinuz"
-fi
-
-# *full* paths
-[ -z "$tmp_dir" ] && tmp_dir=/var/tmp
 
 
 static_shell=/bin/ash.static
@@ -361,6 +382,11 @@ lx_rc=$tmp_mnt/linuxrc
 is_mounted=
 is_mounted_small=
 
+umount_proc() {
+  [ "$mounted_proc" ] && umount $mounted_proc
+  mounted_proc=
+}
+
 clean_up () {
   rm -f $tmp_modconf
   [ "$is_mounted" ] && umount $tmp_mnt
@@ -373,9 +399,17 @@ clean_up () {
   [ -d $tmp_mnt_small ] && rmdir $tmp_mnt_small
 }
 
+enable_module () {
+  modules="$modules $1"
+  echo -e "\nNote: If you want to add $2 support for later mkinitrd"
+  echo "calls where possibly no $2 is found, add $1"
+  echo 'to INITRD_MODULES in /etc/sysconfig/kernel'
+}
+
 error () {
   echo "$2"
   clean_up
+  umount_proc
   exit $1
 }
 
@@ -389,6 +423,12 @@ tmp_initrd=$root_dir/$tmp_dir/initrd$$
 tmp_initrd_small=${tmp_initrd}_small
 
 ###################################################################
+
+mounted_proc=
+if [ ! -r /proc/mounts ]; then
+  mounted_proc=/proc
+  mount -t proc proc $mounted_proc
+fi
 
 if [ -z "$rootdev" ] ; then
   # no rootdev specified, get current root from /etc/fstab
@@ -442,13 +482,25 @@ fi
 #
 cat /proc/modules | grep -q "^zfcp" && do_zfcp=1
 
-zfcp_conf_contents=0
+#
+# If the initial zfcp setup is not done, do it (important for
+# installation):
+#
+test "$do_zfcp" -a ! -s $root_dir/etc/zfcp.conf && {
+    fcpconf=`cat /proc/scsi/zfcp/map`
+    test -n "$fcpconf" && {
+	echo "$fcpconf" > $root_dir/etc/zfcp.conf
+	chmod 644 $root_dir/etc/zfcp.conf
+    }
+}
+
+zfcp_conf_contents=""
 test -f $root_dir/etc/zfcp.conf && zfcp_conf_contents=$(sed -e '
 s,#.*,,
 /^[[:blank:]]*$/d
-' $root_dir/etc/zfcp.conf | wc -c)
+' $root_dir/etc/zfcp.conf)
 
-test $zfcp_conf_contents -ne 0 && do_zfcp=1
+test -n "$zfcp_conf_contents" && do_zfcp=1
 
 ###################################################################
 #
@@ -471,7 +523,7 @@ test -f $root_dir/etc/zipl.conf && {
 	| grep -qv 'dasd=' && zipl_conf_no_dasd=1
 }
 
-grep -q '^[[:space:]]*options[[:space:]]\+dasd' $root_dir/etc/modules.conf && dasd_modules_conf=1
+grep -q '^[[:space:]]*options[[:space:]]\+dasd_mod' $root_dir/etc/modules.conf && dasd_modules_conf=1
 
 # if dasd= is mentioned in zipl.conf, assume dasd module usage.  the
 # mk_initrd will create an initrd without dasd module, if the dasd
@@ -522,7 +574,7 @@ for i in $modules ; do
     raid5) do_raid=1 do_raid5=1 ;;
     zfcp) do_zfcp=1 ; has_zfcp=1;;
     sd_mod) has_sd_mod=1;;
-    dasd) do_dasd=1 ;;
+    dasd_mod) do_dasd=1 ;;
     xor) has_xor=1 ;;
     jfs) has_jfs=1 ;;
     dasd_fba_mod) has_dasd_fba=1 ;;
@@ -545,23 +597,20 @@ done
 # zfcp needs qdio
 [ "$do_zfcp" -a ! "$has_qdio" ] && modules="qdio $modules"
 
-# dasd needs either fba or eckd
+# add dasd disciplines
 test "$do_dasd" && {
-    test "$has_dasd_eckd" -o "$has_dasd_fba" || {
-	# ??? the probing is done on $modules, not /proc/modules
-	echo "\
-note: required dasd module support can not be guessed from currently
-running system.  loading all dasd modules.  this means the system uses
-somewhat more memory than it probably has to."
-	modules="dasd_eckd_mod dasd_fba_mod dasd_diag_mod $modules"
-    }
-}
-
-# add dasd modules
-test "$do_dasd" && {
-    test "$has_dasd_eckd" || modules="$modules dasd_eckd_mod"
-    test "$has_dasd_fba"  || modules="$modules dasd_fba_mod"
-    test "$has_dasd_diag" || modules="$modules dasd_diag_mod"
+  test -z "$has_dasd_eckd" && grep -q ECKD /proc/dasd/devices && {
+     echo -e "\nFound ECKD dasd, adding dasd eckd discipline!"
+     enable_module dasd_eckd_mod 'ECKD dasd'
+  }
+  test -z "$has_dasd_fba"  && grep -q FBA  /proc/dasd/devices && {
+     echo -e "\nFound FBA dasd, adding dasd fba discipline!"
+     enable_module dasd_fba_mod  'FBA dasd'
+  }
+  test -z "$has_dasd_diag" && grep -q DIAG /proc/dasd/devices && {
+     echo -e "\nFound DIAG dasd, adding dasd diag discipline!"
+     enable_module dasd_diag_mod 'DIAG dasd'
+  }
 }
 
 # add zfcp modules
@@ -596,7 +645,7 @@ in root_dir/etc/zipl.conf:"
 }
 
 # zFCP
-test "$do_zfcp" = 1 -a "$zfcp_conf_contents" -eq 0 && {
+test "$do_zfcp" = 1 -a -z "$zfcp_conf_contents" && {
     error 1 "zfcp module loaded but root_dir/etc/zfcp.conf empty.
 don't know how to configure zfcp in initrd.
 
@@ -613,13 +662,13 @@ need_libc=
 if [ "$need_libc" ] ; then
   static_shell=/bin/ash
   static_insmod=/sbin/insmod
-  image_inodes=7000
+  image_inodes=8000
 fi
 
 lib=lib
-case `uname -m` in
-  s390x)  lib=lib64 ;;
+case $arch in
   x86_64) lib=lib64 ;;
+  s390)   [ -s $root_dir/lib/ld64.so.1 ] && lib=lib64 ;;
 esac
 
 # put the initrds in an array
@@ -644,7 +693,10 @@ for k in $kernels ; do
     ii="${ii/#\/\///}"
 
     echo
-    echo "creating initrd \"$ii\" for kernel \"$kk\" ($vv)"
+    echo "creating initrd \"$ii\" for kernel \"$kk\""
+    echo -n "(version $vv)"
+    [ $arch = s390 ] && echo " ($HOSTTYPE)"
+    echo
 
     [ -d "$root_dir/lib/modules/$vv/misc" ] || \
     [ -d "$root_dir/lib/modules/$vv/kernel" ] || {
@@ -653,7 +705,7 @@ for k in $kernels ; do
     }
 
     # create an empty initrd
-    mkdir $tmp_mnt
+    mkdir $tmp_mnt || error 1 "could not create temporary directory"
     dd if=/dev/zero of=$tmp_initrd bs=1k count=$image_blocks 2>/dev/null
     mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd 2>/dev/null 1>&2
     tune2fs -i 0 $tmp_initrd >/dev/null 2>&1
@@ -690,6 +742,9 @@ for k in $kernels ; do
       cp -a $root_dir/dev/dasd* $tmp_mnt/dev 2>/dev/null
       cp -a $root_dir/dev/{i2o,ida,cciss,rd} $tmp_mnt/dev 2>/dev/null
       cp -a $root_dir/$lib/ld* $tmp_mnt/$lib
+      if [ $arch = s390 -a -s $tmp_mnt/lib64/ld64.so.1 ]; then
+	mv $tmp_mnt/lib64/ld* $tmp_mnt/lib
+      fi
       cp -a $root_dir/$lib/libc.so.6 $tmp_mnt/$lib
       cp -a $root_dir/$lib/libz.so.1* $tmp_mnt/$lib
       cp -a $root_dir/bin/{mount,umount} $tmp_mnt/bin
@@ -768,9 +823,16 @@ for k in $kernels ; do
         fi
         modparms=`grep "^[	]*options \<$i\>" "$root_dir"/etc/modules.conf`
         modparms="${modparms#* * }"
+	if [ "$i" = dasd_mod -a -z "$modparms" ]; then
+	  modparms='dasd=$dasd'
+	fi
+        if [ "$i" = zfcp -a -z "$modparms" ]; then
+	  modparms="map=\"
+$zfcp_conf_contents\""
+	fi
 	test -n "$modparms" && modparms=" $modparms"
-        echo "echo \"Loading module $i$modparms ...\"" >>$lx_rc
-        echo " - insmod $i$modparms ($x)"
+        echo "echo 'Loading module $i$modparms ...'" >>$lx_rc
+        echo " - insmod `printf %-19s "$i$modparms"` (${x#lib/modules/[^/]*/})"
         echo "insmod $i$modparms" >>$lx_rc
         echo >>$lx_rc
       else
@@ -922,6 +984,7 @@ EOF
 
     rmdir $tmp_mnt_small/lost+found
     cp -a $tmp_mnt/* $tmp_mnt_small || error 6 "copy big image to small image failed"
+    chown -R 0.0 $tmp_mnt
 
     umount $tmp_mnt_small
     is_mounted_small=
@@ -963,10 +1026,16 @@ EOF
 
 done
 
+umount_proc
+
 if [ "$exit_code" = 0 -a -f "$root_dir/etc/lilo.conf" ] ; then
   if grep -q initrd "$root_dir/etc/lilo.conf" ; then
     echo -e "\nIf you're using lilo as bootmanager, you may want to run 'lilo' now.\n"
   fi
+fi
+
+if [ "$exit_code" = 0 -a -f "$root_dir/etc/zipl.conf" ] ; then
+  echo -e "\nRun zipl now to update the IPL record!\n"
 fi
 
 exit $exit_code
