@@ -76,6 +76,25 @@ ippp*)
 
         /sbin/route add default gw $REMOTEIP dev $INTERFACE
 	
+	# Get the nameservers (works with ipppd option ms-get-dns):
+
+	if [ "$MS_DNS1" ]; then
+		rm -f /etc/ppp/resolv.prev
+		if [ -f /etc/resolv.conf ]; then
+			cp -p /etc/resolv.conf /etc/ppp/resolv.prev
+			grep domain /etc/ppp/resolv.prev > /etc/resolv.conf
+			grep search /etc/ppp/resolv.prev >> /etc/resolv.conf
+			echo "nameserver $MS_DNS1" >> /etc/resolv.conf
+			echo "nameserver $MS_DNS2" >> /etc/resolv.conf
+			echo "Modified /etc/resolv.conf for DNS at $INTERFACE"
+		else
+			echo "nameserver $MS_DNS1" >> /etc/resolv.conf
+			echo "nameserver $MS_DNS2" >> /etc/resolv.conf
+			chmod 644 /etc/resolv.conf
+			echo "Installed /etc/resolv.conf for DNS at $INTERFACE"
+		fi
+	fi
+
 	# maybe you want to start mail services:
         # set follow variables in /etc/rc.config 
         #    SENDMAIL_TYPE="yes"
@@ -85,8 +104,24 @@ ippp*)
         #    SENDMAIL_NOCANONIFY="yes"
         #/usr/bin/fetchmail -a -v >>/var/log/fetchmail 2>&1 &
 		  #/usr/sbin/sendmail -q &
+
+	# call ip-up.local if it exists and is executable:
+	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local $*
         ;;
     ip-down)
+
+	# Restore the nameservers (got with ipppd option ms-get-dns):
+
+	if [ -n "$MS_DNS1" ]; then
+		if [ -f /etc/ppp/resolv.prev ]; then
+			cp -fp /etc/ppp/resolv.prev /etc/resolv.conf
+			echo "Restored original /etc/resolv.conf"
+		else
+			rm -f /etc/resolv.conf
+			echo "Deinstalled /etc/resolv.conf"
+		fi
+	fi
+
         # restart interface
         /sbin/ifconfig $INTERFACE down
 	# workaround due to kernel problem with 'kernd':
@@ -100,6 +135,9 @@ ippp*)
         # set routes from /etc/route.conf 
         test -z "$DEST"    || /sbin/route add -host $DEST dev $INTERFACE
         test -z "$DEFAULT" || /sbin/route add default gw $DEFAULT 
+
+	# call ip-down.local if it exists and is executable:
+	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local $*
         ;;
     *)
         ;;
@@ -123,12 +161,15 @@ ppp*)
 			cp -p /etc/resolv.conf /etc/ppp/resolv.prev
 			grep domain /etc/ppp/resolv.prev > /etc/resolv.conf
 			grep search /etc/ppp/resolv.prev >> /etc/resolv.conf
-			cat /etc/ppp/resolv.conf >> /etc/resolv.conf
+			cat /etc/ppp/resolv.conf /etc >> /etc/resolv.conf
 			echo "Modified /etc/resolv.conf for DNS at $INTERFACE"
 		else
 			cp /etc/ppp/resolv.conf /etc
 			chmod 644 /etc/resolv.conf
                         echo "Installed /etc/resolv.conf for DNS at $INTERFACE"
+		fi
+		if [ "$START_NSCD" = yes ]; then
+			/sbin/init.d/nscd restart &
 		fi
 	fi
 	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local $*
@@ -147,15 +188,17 @@ ppp*)
 			rm -f /etc/resolv.conf
 			echo "Deinstalled /etc/resolv.conf"
 		fi
+		if [ "$START_NSCD" = yes ]; then
+			/sbin/init.d/nscd restart &
+		fi
 	fi
 	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local $*
         ;;
     *)
         ;;
-    esac | logger -t $BASENAME
+    esac
     ;;
 *)
     # dont know...
     ;;
-esac
-
+esac | logger -t $BASENAME
