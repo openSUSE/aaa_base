@@ -45,6 +45,7 @@
 /usr/bin/suidperl                      root.root         755
 #/usr/bin/suidperl                     root.root        4755
 /bin/umount                            root.root        4755
+/usr/bin/z81                           root.root        4755
 /usr/bin/zgv                           root.root        4755
 /usr/games/abuse-1.10/keydrv           root.root        4755
 /usr/games/bdash                       root.root        4755

@@ -57,7 +57,10 @@ fi
 #
 # maybe we use "Multiple devices".  So initialize MD.
 #
-if test -f /etc/mdtab -a -x /sbin/mdadd ; then
+if test -f /etc/raidtab -a -x /sbin/raid0run ; then
+    echo "Initializing Multiple Devices..."
+    /sbin/raid0run -a
+elif test -f /etc/mdtab -a -x /sbin/mdadd ; then
     echo "Initializing Multiple Devices..."
     /sbin/mdadd -ar && MDADD_RETURN=0 || MDADD_RETURN=1
     if test $MDADD_RETURN -ne 0 ; then
