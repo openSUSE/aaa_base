@@ -159,8 +159,9 @@ case "$1" in
 	else
 	    if test "$ROOTFS_FSCK" != "0" ; then
 		echo "root file system (/) is NOT being checked."
-		mount -n -o remount,rw /
 	    fi
+	    # remount in any case to apply additional options like xattr
+	    mount -n -o remount,rw /
 	fi
 	# unmount devfs passed from initrd
         if test -d /lib/klibc/dev/.udevdb ; then
