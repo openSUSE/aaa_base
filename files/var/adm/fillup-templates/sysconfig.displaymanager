@@ -35,6 +35,7 @@ DISPLAYMANAGER_STARTS_XSERVER="yes"
 
 ## Type:        yesno
 ## Default:     no
+## Config:      xdm
 #
 # Tcp port 6000 of Xserver. When set to "no" (default) Xserver is 
 # started with "-nolisten tcp". Only set this to "yes" if you really 
