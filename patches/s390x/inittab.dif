@@ -1,0 +1,50 @@
+--- etc/inittab	2002/04/25 10:49:58	1.1
++++ etc/inittab	2002/04/25 11:01:23
+@@ -41,14 +41,7 @@
+ 
+ # what to do in single-user mode
+ ls:S:wait:/etc/init.d/rc S
+-~~:S:respawn:/sbin/sulogin
+-
+-# what to do when CTRL-ALT-DEL is pressed
+-ca::ctrlaltdel:/sbin/shutdown -r -t 4 now
+-
+-# special keyboard request (Alt-UpArrow)
+-# look into the kbd-0.90 docs for this
+-kb::kbrequest:/bin/echo "Keyboard Request -- edit /etc/inittab to let this work."
++~~:S:respawn:/sbin/sulogin /dev/console
+ 
+ # what to do when power fails/returns
+ pf::powerwait:/etc/init.d/powerfail start
+@@ -59,29 +52,8 @@
+ # for ARGO UPS
+ sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
+ 
+-# getty-programs for the normal runlevels
+-# <id>:<runlevels>:<action>:<process>
+-# The "id" field  MUST be the same as the last
+-# characters of the device (after "tty").
+-1:2345:respawn:/sbin/mingetty --noclear tty1
+-2:2345:respawn:/sbin/mingetty tty2
+-3:2345:respawn:/sbin/mingetty tty3
+-4:2345:respawn:/sbin/mingetty tty4
+-5:2345:respawn:/sbin/mingetty tty5
+-6:2345:respawn:/sbin/mingetty tty6
+-#
+-#S0:12345:respawn:/sbin/agetty -L 9600 ttyS0 vt102
+-
+-#
+-#  Note: Do not use tty7 in runlevel 3, this virtual line
+-#  is occupied by the programm xdm.
+-#
+-
+-#  This is for the package xdmsc, after installing and
+-#  and configuration you should remove the comment character
+-#  from the following line:
+-#7:3:respawn:+/etc/init.d/rx tty7
+-
++# on S/390 enable console login in all runlevels
++1:012356:respawn:/sbin/sulogin /dev/console
+ 
+ # modem getty.
+ # mo:235:respawn:/usr/sbin/mgetty -s 38400 modem
