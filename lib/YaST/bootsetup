@@ -292,7 +292,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     echo " "
     echo " "
 
-
+    exec > /etc/issue-SuSE-first-run
     #
     # Ring the bell
     #
