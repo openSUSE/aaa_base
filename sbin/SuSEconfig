@@ -590,11 +590,16 @@ test -x /sbin/ldconfig -a -z "$r" -a "$CHECK_NEWPACKAGE" != false && \
 # first things, that have to be done in 'normal' systems as well as in
 # 'demo mode' system.
 #
-if test -z "$r" -a "$FASTRUN" != "true" ; then
+if test -z "$r" ; then
+    if test "$FASTRUN" = "true" ; then
+        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.sendmail /sbin/conf.d/SuSEconfig.ypclient"
+    else
+        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.*"
+    fi
     #
     # Now start the package skripts
     #
-    for SKRIPT in /sbin/conf.d/SuSEconfig.* ; do
+    for SKRIPT in $SUB_SCRIPTS ; do
         test -f $SKRIPT || continue
         case "$SKRIPT" in
           *~|*.swp|*.bak|*.sav|*.save)
