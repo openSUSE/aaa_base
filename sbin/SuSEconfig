@@ -470,8 +470,11 @@ echo "export WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo "if ( ! \${?WINDOWMANAGER} ) setenv WINDOWMANAGER $WINDOWMANAGER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 
 test -n "$CONSOLE_MAGIC" && {
-    echo "echo -en \"\\033\$CONSOLE_MAGIC\"" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "echo -n \"\\033\$CONSOLE_MAGIC\"" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
+    	echo "# The following sequence is needed for most non-west-european languages" >> $r/etc/SuSEconfig/profile.SuSEconfig
+	echo "test \"\$TERM\" = \"linux\" && echo -en \"\\033"$CONSOLE_MAGIC\"\
+ >> $r/etc/SuSEconfig/profile.SuSEconfig
+    	echo "# The following sequence is needed for most non-west-european languages" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
+    echo "test \"\$TERM\" = \"linux\" && echo -n \"\\033"$CONSOLE_MAGIC\" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
 }
 
 check_md5_and_move $r/etc/SuSEconfig/profile
