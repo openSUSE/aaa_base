@@ -5,7 +5,7 @@ testsequence: parameter replacement
 	@echo ""
 	ls -al */DIFF*
 	@echo ""
-	cat */DIFF*/*.txt
+	-cat */DIFF*/*.txt
 
 
 parameter:
@@ -14,4 +14,8 @@ parameter:
 replacement:
 	make -C REPLACEMENT
 
+clean:
+	rm -rf ./fillup
+	make -C PARAMETERS clean
+	make -C REPLACEMENT clean
 

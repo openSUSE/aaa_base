@@ -390,8 +390,10 @@ consumePossibleVariableName
     {
         Counter = 1;
         buffer++;
-        while( ( Counter < lineLength ) && 
-               ( ( isalnum( *buffer ) )  || ( *buffer == '_' ) ) && 
+        while( ( Counter < lineLength )        &&
+               ( ( isalnum( *buffer ) )   ||
+                 ( *buffer == '_' )       ||
+                 ( *buffer == '.' ) )          &&
                ( *buffer != delimiterStart ) )
         {
             Counter++;
@@ -1020,13 +1022,15 @@ handleEqualVariableBlockIdentifiers
 {
     char             firstBuffer[ cfg_MaxVariableLength ];
     char             secondBuffer[ cfg_MaxVariableLength ];
+    Eval_t           evaluationClass;
 
     copyVariableName( headOfBaseFileList, firstBuffer );
     copyVariableName( headOfAdditionalFileList, secondBuffer );
 
-    while( ( headOfBaseFileList != NULL ) &&
-           ( headOfAdditionalFileList != NULL ) &&
-           ( Equal == compareStrings( firstBuffer, secondBuffer ) ) )
+    /* all three conditions are fullfilled */
+    if( ( headOfBaseFileList != NULL ) &&
+        ( headOfAdditionalFileList != NULL ) &&
+        ( Equal == compareStrings( firstBuffer, secondBuffer ) ) )
     {
         if( TRUE == queryParameter( Exchange ) )
         {
@@ -1041,7 +1045,6 @@ handleEqualVariableBlockIdentifiers
             displayVerbose( "base", headOfBaseFileList );
             setVEvaluationClass( headOfAdditionalFileList, Output );
             displayVerbose( "additional", headOfAdditionalFileList );
-            setNext( &headOfBaseFileList, firstBuffer );
         }
         else    /* ( TRUE == queryParameter( Maintain ) ) */
         {
@@ -1056,17 +1059,29 @@ handleEqualVariableBlockIdentifiers
             displayVerbose( "base", headOfBaseFileList );
             setVEvaluationClass( headOfAdditionalFileList, Ignored );
             displayVerbose( "additional", headOfAdditionalFileList );
-            setNext( &headOfAdditionalFileList, secondBuffer );
         }
     }
 
-    if( TRUE == queryParameter( Exchange ) )
+    evaluationClass = getVEvaluationClass( headOfBaseFileList );
+    setNext( &headOfBaseFileList, firstBuffer );
+    while( ( headOfBaseFileList != NULL ) &&
+           ( Equal == compareStrings( firstBuffer, secondBuffer ) ) )
     {
-        headOfAdditionalFileList = getVSucc( headOfAdditionalFileList );
+        /* same vairiable name => same evaluation class */
+        setVEvaluationClass( headOfBaseFileList, evaluationClass );
+        displayVerbose( "base", headOfBaseFileList );
+        setNext( &headOfBaseFileList, firstBuffer );
     }
-    else
+
+    evaluationClass = getVEvaluationClass( headOfAdditionalFileList );
+    setNext( &headOfAdditionalFileList, firstBuffer );
+    while( ( headOfAdditionalFileList != NULL ) &&
+           ( Equal == compareStrings( firstBuffer, secondBuffer ) ) ) 
     {
-        headOfBaseFileList = getVSucc( headOfBaseFileList );
+        /* same vairiable name => same evaluation class */
+        setVEvaluationClass( headOfAdditionalFileList, evaluationClass ); 
+        displayVerbose( "additional", headOfAdditionalFileList );
+        setNext( &headOfAdditionalFileList, firstBuffer );
     }
 }
 

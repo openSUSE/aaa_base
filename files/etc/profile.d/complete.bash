@@ -73,6 +73,13 @@ _file_ ()
     dvips)		e='!*.+(dvi|DVI)'			;;
     xdvi)		e='!*.+(dvi|dvi.gz|DVI|DVI.gz)'		;;
     tex|latex)		e='!*.+(tex|TEX|texi|latex)'		;;
+    export)
+	case "$c" in
+	*=*)		c=${c#*=}				;;
+	*)		COMPREPLY=($(compgen -v -- ${c}))
+			return					;;
+	esac
+	;;
     *)			e='!*'
     esac
 
@@ -128,7 +135,7 @@ complete -A function -A alias -A command -A builtin type
 complete -A function			function
 complete -A alias			alias unalias
 complete -A variable			unset local readonly
-complete -A variable			export
+complete -A variable -d -F _file_	export
 complete -A variable -A export		unset
 complete -A shopt			shopt
 complete -A setopt			set

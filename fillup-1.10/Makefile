@@ -14,3 +14,9 @@ compile:
 install:
 	make -C SRC install
 
+test:
+	make -C TEST
+
+clean:
+	make -C SRC clean
+	make -C TEST clean

@@ -33,8 +33,6 @@ logger -t poll.tcpip -p mail.notice " Starting mail and news send/fetch"
 # Check resources and settings
 #
 . /etc/rc.config
-test -r /etc/sysconfig/xntp && \
-. /etc/sysconfig/xntp
 
 #
 # Time to get a stable connenction
@@ -47,11 +45,10 @@ sleep 5
 #
 while true ; do
     set -- $(runlevel)
-    test -e /sbin/init.d/rc${2}.d/S*xntpd  && break
+    test -e /etc/init.d/rc${2}.d/S*xntpd  && break
     test -x   /usr/sbin/ntpdate            || break
     checkproc /usr/sbin/xntpd &> /dev/null && break
-    test -n  "$XNTPD_INITIAL_NTPDATE"      || break
-    /usr/sbin/ntpdate -s $XNTPD_INITIAL_NTPDATE
+    /usr/sbin/rcxntpd ntptimeset
     break
 done
 
