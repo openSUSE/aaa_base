@@ -372,7 +372,7 @@ fi
 static_shell=/bin/ash.static
 static_insmod=/sbin/insmod.static
 
-bootsplash_picture_dir="$root_dir/usr/share/splash/themes/current"
+bootsplash_picture_dir="$root_dir/etc/bootsplash/themes/current"
 # maximum initrd size
 image_blocks=10000
 image_inodes=2000
@@ -1043,18 +1043,22 @@ EOF
     }
 
     if [ -n "$splash" -a -x /sbin/splash.bin ] ; then
-      for size in ${splash//,/ }; do
-	bootsplash_picture="$bootsplash_picture_dir/images/bootsplash-$size.jpg"
-	cfgname="$bootsplash_picture_dir/config/bootsplash-$size.cfg"
-	echo " - splash picture ($size)"
-	if [ ! -r $cfgname ] ; then
-	  echo "config file missing ($cfgname)."
-	elif [ ! -r $bootsplash_picture ] ; then
-	  echo "picture missing ($bootsplash_picture)."
-	else
-	  /sbin/splash.bin -s -f $cfgname >> $ii
-	fi
-      done
+      if [ -d $bootsplash_picture_dir -o -L $bootsplash_picture_dir ]; then
+        for size in ${splash//,/ }; do
+	  bootsplash_picture="$bootsplash_picture_dir/images/bootsplash-$size.jpg"
+	  cfgname="$bootsplash_picture_dir/config/bootsplash-$size.cfg"
+	  if [ ! -r $cfgname ] ; then
+	    echo " - bootsplash disabled for resolution $size"
+	  elif [ ! -r $bootsplash_picture ] ; then
+	    echo " - no picture for resolution $size"
+	  else
+	    echo " - bootsplash picture ($size)"
+	    /sbin/splash.bin -s -f $cfgname >> $ii
+	  fi
+        done
+      else
+        echo " - no bootsplash theme selected."
+      fi
     fi
 
     clean_up
