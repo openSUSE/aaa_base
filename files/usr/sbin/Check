@@ -61,6 +61,7 @@ for DIR in $DIRS ; do
 	*/usr/X11R6/lib/X11/fonts/TTF) continue ;;
     esac
     test -d $DIR && find $DIR \! -name "*.gz" \! -name "*.Z" \
+	\! -name "*.bz2" \
         \! -name dir \! -name dir.old \! -name localdir \
         \! -name whatis \! -name fonts.alias \! -name fonts.dir \
         \! -name "fonts.*" \! -name ".fonts-*" \
