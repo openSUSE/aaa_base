@@ -305,9 +305,9 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     tput bold; tput setab 7; tput setaf 7
     echo -n Ú
     echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
     tput sgr0; tput setab 7; tput setaf 0
-    echo -n  ¿
+    echo ¿
     tput rmacs
 
     #
@@ -318,10 +318,13 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
         tput smacs; echo -n '³'; tput rmacs; echo -n "  "
         tput sgr0; tput setab 7; tput setaf 1
 
-        echo -n "$line" ; tput el; tput hpa 79
+        echo -n "$line" ; tput el; tput hpa 78
 
         tput sgr0; tput setab 7; tput setaf 0
-        tput smacs; echo -n '³'; tput rmacs; tput cud1
+        tput smacs; echo -n '³'; tput rmacs
+        tput setab 0; tput setaf 7; tput el
+        tput cud1
+
     done
 
     #
@@ -332,8 +335,8 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     echo -n À
     tput sgr0; tput setab 7; tput setaf 0
     echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-    echo -n Ù
+    echo -n ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    echo Ù
     tput rmacs
 
     tput setab 0; tput setaf 7; tput sgr0; tput cud1
