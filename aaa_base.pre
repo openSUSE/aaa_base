@@ -75,7 +75,7 @@ xok:x:41:
 trusted:x:42:
 modem:x:43:
 named:x:44:
-ftp:x:50:
+ftp:x:49:
 man:x:62:
 users:x:100:
 nobody:x:65533:nobody
