@@ -43,8 +43,10 @@ case "$1" in
 	fi
 	
 	# /dev/shm is already there, call blkid might be needed
-	blkid -c /dev/shm/tmp_blkid.tab > /dev/null
-	export BLKID_FILE=/dev/shm/tmp_blkid.tab
+	if [ -x /sbin/blkid ] ; then
+	    /sbin/blkid -c /dev/shm/tmp_blkid.tab > /dev/null
+	    export BLKID_FILE=/dev/shm/tmp_blkid.tab
+	fi
 
 	# find out about root fs type
 	mounts=/etc/mtab
@@ -140,6 +142,8 @@ case "$1" in
 		    echo
 		fi
 	    fi
+	    unset BLKID_FILE
+	    rm -f /dev/shm/tmp_blkid.tab
 	else
 	    echo "File systems are NOT being checked."
 	    mount -n -o remount,rw /
