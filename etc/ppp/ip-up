@@ -124,11 +124,12 @@ ppp*)
 			grep domain /etc/ppp/resolv.prev > /etc/resolv.conf
 			grep search /etc/ppp/resolv.prev >> /etc/resolv.conf
 			cat /etc/ppp/resolv.conf /etc >> /etc/resolv.conf
+			echo "Modified /etc/resolv.conf for DNS at $INTERFACE"
 		else
 			cp /etc/ppp/resolv.conf /etc
+                        echo "Installed /etc/resolv.conf for DNS at $INTERFACE"
 		fi
 	fi
-
         ;;
     ip-down)
 	#
@@ -139,13 +140,16 @@ ppp*)
 	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf ]; then
 		if [ -f /etc/ppp/resolv.prev ]; then
 			cp -f /etc/ppp/resolv.prev /etc/resolv.conf
+			echo "Restored original /etc/resolv.conf"
 		else
 			rm -f /etc/resolv.conf
+			echo "Deinstalled /etc/resolv.conf"
 		fi
 	fi
+        ;;
     *)
         ;;
-    esac
+    esac | logger -t $BASENAME
     ;;
 *)
     # dont know...
