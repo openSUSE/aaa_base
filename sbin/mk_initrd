@@ -296,7 +296,8 @@ for k in $kernels ; do
 	cp -a $root_dir/dev/md? $root_dir/dev/dasd* $tmp_mnt/dev
 	cp -a $root_dir/dev/{i2o,ida,cciss} $tmp_mnt/dev
 	cp -a $root_dir/lib/{ld-2.2.so,ld-linux.so.2} $tmp_mnt/lib
-	cp -a $root_dir/lib/{liblvm.so,libc.so.6} $tmp_mnt/lib
+	cp -a $root_dir/lib/liblvm*.so* $tmp_mnt/lib
+	cp -a $root_dir/lib/libc.so.6 $tmp_mnt/lib
 	cp -a $root_dir/lib/libz.so.1* $tmp_mnt/lib
 	cp -a $root_dir/sbin/{vgscan,vgchange}  $tmp_mnt/bin
 	cp -a $root_dir/bin/{rm,mount,umount}  $tmp_mnt/bin
