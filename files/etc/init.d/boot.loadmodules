@@ -20,7 +20,7 @@
 rc_reset
 
 case "$1" in
-  start)
+  start|restart)
     # Read variable for sysconfig and load all mentioned modules
     echo Loading required kernel modules
     . /etc/sysconfig/kernel
@@ -38,7 +38,7 @@ case "$1" in
     rc_status -v
     ;;
   *)
-    echo "Usage: $0 {start|stop|status}"
+    echo "Usage: $0 {start|stop|status|restart}"
     exit 1
     ;;
 esac

@@ -176,7 +176,7 @@ case "$1" in
 	mount -av -t nonfs,noproc,nodevpts,nosmbfs
 	rc_status -v1 -r
 	;;
-    stop)
+    stop|restart)
 	rc_failed 3
 	rc_status -v
 	;;
@@ -185,7 +185,7 @@ case "$1" in
 	rc_status -v
 	;;
     *)
-	echo "Usage: $0 {start|stop|status}"
+	echo "Usage: $0 {start|stop|status|restart}"
 	exit 1
 	;;
 esac

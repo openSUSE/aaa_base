@@ -2,6 +2,7 @@
 ## Description:	Controlling of the boot process
 ## Type:	yesno
 ## Default:	no
+## Config:
 #
 # For interactive debugging of the startup process. If set
 # to "yes" the system will ask whether to confirm every

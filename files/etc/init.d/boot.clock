@@ -20,7 +20,7 @@
 rc_reset
 
 case "$1" in
-  start)
+  start|restart)
    # set and adjust the CMOS clock
    if [ "$HOSTTYPE" = "s390" -o "$HOSTTYPE" = "s390x" ] ; then
     echo -n Setting up the system clock
@@ -66,7 +66,7 @@ case "$1" in
     rc_status -v
     ;;
   *)
-    echo "Usage: $0 {start|stop|status}"
+    echo "Usage: $0 {start|stop|status|restart}"
     exit 1
     ;;
 esac

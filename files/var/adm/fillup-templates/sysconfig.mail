@@ -1,7 +1,9 @@
-## Path:	Network/Mail/General
-## Description:	
-## Type:	string
-## Default:	""
+## Path:		Network/Mail/General
+## Description:         From line for email and news postings
+## Type:		string
+## Default:		""
+## Config:		sendmail,postfix
+## ServiceReload:	sendmail,postfix
 #
 # From:-Line in email and News postings
 # (otherwise the FQDN is used)

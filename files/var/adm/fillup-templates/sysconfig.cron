@@ -2,6 +2,7 @@
 ## Description:	
 ## Type:	integer
 ## Default:	0
+## Config:
 #
 # cron.daily can check for old files in tmp-dirs. It will delete all files
 # not accessed for more than MAX_DAYS_IN_TMP. If MAX_DAYS_IN_TMP is not set

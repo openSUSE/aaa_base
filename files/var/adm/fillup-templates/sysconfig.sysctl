@@ -1,7 +1,8 @@
-## Path:	Network/General
-## Description:	activate dynamic-IP-patch at bootup
-## Type:	yesno
-## Default:	no
+## Path:		Network/General
+## Description:		activate dynamic-IP-patch at bootup
+## Type:		yesno
+## Default:		no
+## ServiceRestart:	boot.ipconfig
 # Do you want the "dynamic IP patch" to be enabled at bootup? (yes/no)
 #
 IP_DYNIP="no"

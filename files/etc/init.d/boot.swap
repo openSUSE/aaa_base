@@ -12,7 +12,7 @@
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
-# Description:       start rest of swap devices and shmfs
+# Description:       start rest of swap devices and shmfs/tmpfs
 ### END INIT INFO
 
 . /etc/rc.status
@@ -33,7 +33,7 @@ case "$1" in
 	
 	
 	#
-	# mount shmfs is necessary (2.4 kernels)
+	# mount shmfs/tmpfs is necessary (2.4 kernels)
 	#
 	unset HAVE_SHM
 	while read dev type; do
@@ -49,12 +49,12 @@ case "$1" in
 	    ECHO_RETURN=$rc_done
 	    test -d /dev/shm || mkdir /dev/shm
 	    echo -n "Mounting shared memory FS on /dev/shm"
-	    mount -t shm $SHMFS_OPTIONS shmfs /dev/shm || ECHO_RETURN=$rc_failed
+	    mount -t tmpfs $SHMFS_OPTIONS shmfs /dev/shm || ECHO_RETURN=$rc_failed
 	    echo -e $ECHO_RETURN
 	fi
 	#unset HAVE_SHM
 	;;
-    stop)
+    stop|restart)
 	rc_failed 3
 	rc_status -v
 	;;
@@ -63,7 +63,7 @@ case "$1" in
 	rc_status -v
 	;;
     *)
-	echo "Usage: $0 {start|stop|status}"
+	echo "Usage: $0 {start|stop|status|restart}"
 	exit 1
 	;;
 esac

@@ -1,13 +1,17 @@
-## Path:	System/Environment/Clock
-## Description:	
-## Type:	string
+## Path:		System/Environment/Clock
+## Description:		does the RTC run at UTC or localtime
+## Type:		string
+## ServiceRestart:	boot.clock
 #
 # Set to "-u" if your system clock is set to UTC, and to "--localtime"
 # if your clock runs that way.
 #
 HWCLOCK=""
 
-## Type:	string(Europe/Berlin,Europe/London,Europe/Paris)
+## Path:		System/Environment/Clock
+## Description:		Timezone the system should run in
+## Type:		string(Europe/Berlin,Europe/London,Europe/Paris)
+## ServiceRestart:	boot.clock
 #
 # Timezone (e.g. CET)
 # (this will set /usr/lib/zoneinfo/localtime)

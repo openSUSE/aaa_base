@@ -8,9 +8,10 @@
 #
 INITRD_MODULES=""
 
-## Path:        System/Kernel
-## Description: Modules to load after initial boot
-## Type:        string
+## Path:		System/Kernel
+## Description:		Modules to load after initial boot
+## Type:		string
+## ServiceRestart:	boot.loadmodules
 #
 # This variable contains the list of modules to be loaded
 # once the main filesystem is active

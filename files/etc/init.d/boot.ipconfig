@@ -21,7 +21,7 @@
 rc_reset
 
 case "$1" in
-  start)
+  start|restart)
    #
    # Enable "dynamic IP patch"
    #
@@ -117,7 +117,7 @@ case "$1" in
     rc_status -v
     ;;
   *)
-    echo "Usage: $0 {start|stop|status}"
+    echo "Usage: $0 {start|stop|status|restart}"
     exit 1
     ;;
 esac

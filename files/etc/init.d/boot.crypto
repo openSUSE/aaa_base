@@ -169,8 +169,13 @@ case "$1" in
 	rc_failed 4
 	rc_status -v
 	;;
+    restart)
+	$0 stop
+	$0 start
+	rc_status
+	;;
     *)
-	echo "Usage: $0 {start|stop|status}"
+	echo "Usage: $0 {start|stop|status|restart}"
 	exit 1
 	;;
 esac

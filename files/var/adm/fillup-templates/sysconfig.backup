@@ -2,6 +2,7 @@
 ## Description:	
 ## Type:	string(/var/adm/backup/rpmdb)
 ## Default:	/var/adm/backup/rpmdb
+## Config:
 #
 # If you want cron.daily to backup the rpm database, specify a directory
 # where the backups will be stored. (This is recommended!) The backups
