@@ -9,16 +9,16 @@
 
 shopt -s extglob
 
-declare -i _tmp=${BASH_VERSINFO[1]%[a-z]*}
-if test $_tmp '>' 4 ; then
+_def=; _dir=; _file=; _nosp=
+if complete -o default _nullcommand &> /dev/null ; then
     _def="-o default"
     _dir="-o dirnames"
     _file="-o filenames"
 fi
-if test $_tmp '>' 5 ; then
+if complete -o nospace _nullcommand &> /dev/null ; then
     _nosp="-o nospace"
 fi
-unset _tmp
+complete -r _nullcommand &> /dev/null
 
 # Expanding shell function for directories
 function _cd_ ()
@@ -32,9 +32,14 @@ function _cd_ ()
     *)	 COMPREPLY=($(compgen -d -- "$c"))
 	 case "$1" in
 	 mkdir)
-	     for x in $(compgen -f -S .d -- "${c%.}") ; do
-		 test -d "${x%.d}" || COMPREPLY=(${COMPREPLY[@]} ${x})
-	     done
+	    if test "$c" != "." -a "$c" != ".." ; then
+		for x in $(compgen -f -S .d -- "${c%.}") ; do
+		    if test -d "${x}" -o -d "${x%.d}" ; then
+			continue
+		    fi
+		    COMPREPLY=(${COMPREPLY[@]} ${x})
+		done
+	    fi
 	 esac
     esac
     IFS="$o"
@@ -121,14 +126,19 @@ _exp_ ()
 			return
 	fi
 			COMPREPLY=($(compgen -G "${c}"))			;;
-    *)			COMPREPLY=($(compgen -f -X "$e" -- $c))			;;
+    *)
+	if test "$c" = ".." ; then
+			COMPREPLY=($(compgen -d -X "$e" -S / ${_nosp} -- $c))
+	else
+			COMPREPLY=($(compgen -f -X "$e" -- $c))
+	fi									;;
     esac
     IFS="$o"
 
     test $g -eq 0 && shopt -u extglob
 }
 
-complete -d -X '.[^./]*' -F _exp_ ${_def} \
+complete -d -X '.[^./]*' -F _exp_ ${_file} \
 				 	compress \
 					bzip2 \
 					bunzip2 \
@@ -141,8 +151,10 @@ complete -d -X '.[^./]*' -F _exp_ ${_def} \
 					acroread xpdf \
 					dvips xdvi \
 					tex latex
-complete -d -F _exp_ ${_def}		chown chgrp chmod chattr ln
-complete -d -F _exp_ ${_def}		more cat less strip grep vi ed
+# No clean way to hande variable expansion _and_ file/dir name expansion
+# with the same string. So let the default expansion on for that commands.
+#complete -d -F _exp_ ${_def}		chown chgrp chmod chattr ln
+#complete -d -F _exp_ ${_def}		more cat less strip grep vi ed
 
 complete -A function -A alias -A command -A builtin \
 					type
