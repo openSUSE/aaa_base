@@ -94,7 +94,7 @@ fi
 if [ ! -f etc/sysconfig/language -a -f etc/rc.config.d/lang.rc.config ] ; then
   mv etc/rc.config.d/lang.rc.config etc/sysconfig/language
 fi
-for i in language backup displaymanager mouse kernel \
+for i in language backup boot displaymanager mouse kernel \
 	suseconfig clock proxy windowmanager sysctl java mail \
 	hardware cron printer news security ; do
 %{fillup_only -n $i}
