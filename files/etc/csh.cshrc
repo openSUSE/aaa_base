@@ -66,28 +66,27 @@ if ( -f /usr/lib/teTeX/texmf.cnf ) then
    if ( -d /usr/bin/TeX ) set path=( /usr/bin/TeX $path )
 endif
 #
-# Which C-lib or locale db takes what?
-# setenv LC_CTYPE iso_8859_1
-# setenv LC_CTYPE ISO8859-1
-# setenv LC_CTYPE ISO-8859-1
-# setenv LC_CTYPE de_DE
-# setenv LC_CTYPE en_GB
-# setenv LANG de_DE
+# For all readline library based applications
 #
 if (-r /etc/inputrc) setenv INPUTRC /etc/inputrc
 setenv COLORTERM 1
 #
 # SuSEconfig stuff
 #
-# (but do not source this if LANG is already set to avoid overriding locale
-# variables already present in the environment)
+# But do not source this if CSHRCREAD is already set to avoid
+# overriding locale variables already present in the environment
 #
-if ( -r /etc/SuSEconfig/csh.cshrc ) then
-    if (! ${?LANG} ) then
-        source /etc/SuSEconfig/csh.cshrc
-    endif
-    if (`sh -c '. /etc/sysconfig/language; echo $AUTO_DETECT_UTF8'` == "yes" ) then
-	if ( -r /etc/profile.d/csh.utf8 ) source /etc/profile.d/csh.utf8
+if (! ${?CSHRCREAD} ) then
+    setenv CSHRCREAD true
+    set -r CSHRCREAD=$CSHRCREAD
+    if ( -r /etc/profile.d/csh.ssh ) source /etc/profile.d/csh.ssh
+    if (! ${?SSH_SENDS_LOCALE} ) then
+	if ( -r /etc/SuSEconfig/csh.cshrc ) source /etc/SuSEconfig/csh.cshrc
+	if ( -r /etc/sysconfig/language && -r /etc/profile.d/csh.utf8 ) then
+	    set _tmp=`sh -c '. /etc/sysconfig/language; echo $AUTO_DETECT_UTF8'`
+	    if ( ${_tmp} == "yes" ) source /etc/profile.d/csh.utf8
+	    unset _tmp
+	endif
     endif
 endif
 
