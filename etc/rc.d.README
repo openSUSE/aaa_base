@@ -1,18 +1,17 @@
-Hi,
 
+Hi!
 
-some people do expect here the scripts for booting up the machine.
-We skipped this structure. You can find the equivalent files under
-/etc/init.d ('binary' scripts) and /etc/rc.config (configuration).
+Some people expect here the scripts for booting up the machine.
+We skipped this structure. You can find the equivalent files in
+/etc/init.d/ ('binary' scripts) and /etc/rc.config (configuration).
 
-For detailed information please look into the manual for SuSE Linux.
-If you don't have a printed manual, you can find it machine readable
-under /docu on the first CD or in the package books.
+For detailed information please look into the SuSE Linux manual.
+If you don't have a printed manual, you can find the electronic version
+of it in /docu on the first CDROM or in the package 'books.rpm'.
 
-Read /etc/init.d/README for more information also.
+You may also want to read /etc/init.d/README for more information.
 
 Have a lot of fun
 
                      Your SuSE Team
-
 

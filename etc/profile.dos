@@ -1,7 +1,9 @@
 # /etc/profile.dos
-# Provides aliases, which return a help when using D*S command names
-#  that are different on Un*x.
-# To get rid of these aliases, just delete or rename this file.
+#
+# Provides aliases which return (hopefully) helpful messages when
+# D*S command names are entered on the shell. This might help some
+# users to get used to the Unix environment more easily.
+# To get rid of these aliases, just rename or delete this file.
 
 alias del="echo 'Error: Try the command: rm -iv'"
 alias move="echo 'Error: Try the command: mv -iv'"
@@ -12,10 +14,15 @@ alias cd..="echo 'Error: Try: cd ..'"
 alias chkdsk="echo -e 'Error: Your filesystems are checked on bootup.\n\
 	If you want to do it manually, use fsck.\n\
 	Use df and mount for an overview of your disks.'"
-alias A:="echo -e 'Error: There is no such thing as a drive A: in Un*x!\n\
-	Use mtools, mount or autofs to access your floppy.'"
-alias C:="echo -e 'Error: There is no such thing as a drive C: in Un*x!\n\
+alias sys="echo -e 'Error: Linux cannot be transferred like that.\n\
+	If you want to install Linux or create bootfloppies, please use YaST.' #"
+alias A:="echo -e 'Error: There is no such thing as a drive A: in Linux.\n\
+    If you want to access your floppy, try \"mount /dev/fd0\" and then look\n\
+    in the directory /media/floppy !'"
+alias C:="echo -e 'Error: There is no such thing as a drive C: in Linux!\n\
 	Your harddisk should already be mounted (via /etc/fstab or autofs).'"
-alias format="echo -e 'Error: The D*S concept of formatting a disk is screwed.\n\
-	Maybe you want to create a filesystem? Use mkfs then.'"
-
+alias a:="A:"
+alias c:="C:"
+alias format="echo -e 'Error: The DOS concept of formatting disk media is screwed.\n\
+	If you want to create a filesystem use \"mkfs\". To format a floppy, use\n\
+	\"fdformat /dev/fd0\" and then \"mkfs.minix /dev/fd0\".' #"

@@ -1,13 +1,18 @@
+# /etc/rc.status
+# Definition of boot script return messages
 #
-# Formating the boot script messages:
-#   The boot scripts should use the variables rc_done and rc_fail to
-#   symbolize their success.  See /etc/init.d/skeleton for an example
-#   how to use the shell function rc_status and rc_reset.
-#   Internally these function uses the variables rc_done and rc_failed.
-#   rc_done_up and rc_failed_up do the same as rc_done and rc_failed
-#   but one line above (usefull for starting daemons who talk to user).
+#   The bootscripts should use the variables rc_done and rc_failed to
+#   report whether they failed or succeeded.  See /etc/init.d/skeleton for
+#   an example how the shell functions rc_status and rc_reset are used.
+#
+#   These functions make use of the variables rc_done and rc_failed;
+#   rc_done_up and rc_failed_up are the same as rc_done and rc_failed
+#   but contain a terminal code to move up one line before the output
+#   of the actual string. (This is particularly useful when the script
+#    starts a daemon which produces user output with a newline character)
+#
 #   The variable rc_reset is used by the master resource control script
-#   /etc/init.d/rc to turn off all attributes and switch on the standard
+#   /etc/init.d/rc to turn off all attributes and switch to the standard
 #   character set.
 #
 #    \033          ascii ESCape
@@ -16,11 +21,11 @@
 #    \033[<NUM>D   move <NUM> columns backward but only upto first column
 #    \033[<NUM>A   move <NUM> rows up
 #    \033[<NUM>B   move <NUM> rows down
-#    \033[1m       switch bold on
-#    \033[31m      switch red on
-#    \033[32m      switch green on
-#    \033[33m      switch yellow on
-#    \033[m        switch color/bold off
+#    \033[1m       switch on bold
+#    \033[31m      switch on red
+#    \033[32m      switch on green
+#    \033[33m      switch on yellow
+#    \033[m        switch on color/bold
 #    \017          exit alternate mode (xterm, vt100, linux console)
 #    \033[10m      exit alternate mode (linux console)
 #    \015          carriage return (without newline)
@@ -46,7 +51,7 @@ if test "$TERM" != "raw" ; then
      rc_done="${stat}${done}done${norm}"
   rc_running="${stat}${done}running${norm}"
    rc_failed="${stat}${warn}failed${norm}"
-   rc_missed="${stat}${warn}missed${norm}"
+   rc_missed="${stat}${warn}missing${norm}"
   rc_skipped="${stat}${attn}skipped${norm}"
      rc_dead="${stat}${warn}dead${norm}"
    rc_unused="${stat}${extd}unused${norm}"
@@ -68,7 +73,7 @@ else
      rc_done="..done"
   rc_running="..running"
    rc_failed="..failed"
-   rc_missed="..missed"
+   rc_missed="..missing"
   rc_skipped="..skipped"
      rc_dead="..dead"
    rc_unused="..unused"
