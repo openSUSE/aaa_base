@@ -181,11 +181,11 @@ if test "$UMOUNT_FAILED" = true ; then
     echo "... hope now it's ok to reboot."
 fi
 
-umount -anvt proc
-
 if test -d /etc/lvmtab.d -a -x /sbin/vgchange ; then
     /sbin/vgchange -a n
 fi
+
+umount -anvt proc
 
 # maybe we use Multiple devices
 if test -f /etc/mdtab -a -x /sbin/mdstop ; then
