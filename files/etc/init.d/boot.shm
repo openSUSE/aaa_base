@@ -1,0 +1,73 @@
+#! /bin/sh
+#
+# Copyright (c) 2001-2002 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
+#
+# /etc/init.d/boot.swap
+#
+### BEGIN INIT INFO
+# Provides:          boot.shm
+# Required-Start:    boot.proc
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       start shmfs/tmpfs
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/sysconfig/kernel
+
+rc_reset
+
+case "$1" in
+  start)
+	#
+	# mount shmfs/tmpfs is necessary (2.4 kernels)
+	#
+	unset HAVE_SHM
+	while read dev type; do
+	    test "$type" = "tmpfs" && HAVE_SHM=1
+	done < /proc/filesystems
+	if test ! -z "$HAVE_SHM"; then
+	    # SHMFS_SIZE is set in /etc/sysconfig/kernel
+	    if test -n "$SHMFS_SIZE" ; then
+		SHMFS_OPTIONS="-osize=$SHMFS_SIZE"
+	    else
+		SHMFS_OPTIONS=""
+	    fi
+	    ECHO_RETURN=$rc_done
+	    test -d /dev/shm || mkdir /dev/shm
+	    echo -n "Mounting shared memory FS on /dev/shm"
+	    mount -t tmpfs $SHMFS_OPTIONS tmpfs /dev/shm || ECHO_RETURN=$rc_failed
+	    echo -e $ECHO_RETURN
+	fi
+	#unset HAVE_SHM
+	;;
+    stop)
+	unset HAVE_SHM
+	while read dev type; do
+	    test "$type" = "tmpfs" && HAVE_SHM=1
+	done < /proc/filesystems
+	if test ! -z "$HAVE_SHM"; then
+	    ECHO_RETURN=$rc_done
+	    echo -n "Unmounting shared memory FS from /dev/shm"
+	    umount /dev/shm || ECHO_RETURN=$rc_failed
+	    echo -e $ECHO_RETURN
+	fi
+	;;
+    restart)
+	$0 stop
+	$0 start
+	;;
+    status)
+	rc_failed 4
+	rc_status -v
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status|restart}"
+	exit 1
+	;;
+esac
+
+rc_exit
+

@@ -7,12 +7,12 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.localfs
-# Required-Start:    boot.proc
+# Required-Start:    boot.rootfsck
 # X-UnitedLinux-Should-Start: boot.ibmsis boot.md boot.lvm dasd_devfs_compat boot.scsidev
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
-# Description:       check and mount local filesystems
+# Description:       check and mount local filesystems except /
 ### END INIT INFO
 
 . /etc/rc.status
@@ -43,19 +43,6 @@ rc_reset
 case "$1" in
   start)
 	#
-	# fsck may need a huge amount of memory, so make sure, it is there.
-	#
-	# However, in the case of an active LKCD configuration, we need to
-	# recover the crash dump from the swap partition first, so we cannot
-	# yet activate them.
-	#
-	if [ "$DUMP_ACTIVE" != "1" ]; then
-		echo "Activating swap-devices in /etc/fstab..."
-		swapon -a &> /dev/null
-		rc_status -v1 -r
-	fi
-	
-	#
 	# If we use a serial console, don't use the fsck progress bar
 	#
 	FSCK_PROGRESSBAR="-V"
@@ -67,13 +54,8 @@ case "$1" in
 	if test ! -f /fastboot -a -z "$fastboot" ; then
 	    FSCK_FORCE=""
 	    test -f /forcefsck && FSCK_FORCE="-f"
-	    # on an umsdos root fs this mount will fail,
-	    # so direct error messages to /dev/null.
-	    # this seems to be ugly, but should not really be a problem.
-	    mount -n -o remount,ro / 2> /dev/null
-	    if test $? = 0; then
 	        echo "Checking file systems..."
-	        fsck $FSCK_PROGRESSBAR -A -a $FSCK_FORCE
+	        fsck $FSCK_PROGRESSBAR -R -A -a $FSCK_FORCE
 	        # A return code of 1 indicates that file system errors
 	        # were corrected, but that the boot may proceed.
 	        # A return code of 2 or larger indicates failure.
@@ -125,27 +107,7 @@ case "$1" in
 	            reboot -f
 	        fi
 	        sync
-	        mount -n -o remount,rw /
 		test $FSCK_RETURN -gt 0 && touch /fsck_corrected_errors
-	    else
-		mounts=/etc/mtab
-		test -r /proc/mounts && mounts=/proc/mounts
-		while read des fs type rest; do
-		    case "$fs" in
-		        /) break ;;
-		        *)       ;;
-		    esac
-		done < $mounts
-
-		if test "$fs" = / -a "$type" != "umsdos" ; then
-		    echo
-		    echo '*** ERROR!  Cannot fsck because root is not read-only!'
-		    echo
-		fi
-	    fi
-	else
-	    echo "File systems are NOT being checked."
-	    mount -n -o remount,rw /
 	fi
 
 	#
@@ -183,6 +145,7 @@ case "$1" in
 	#
 	echo "Mounting local file systems..."
 	mount -fv -t proc proc /proc
+	mount -fv -t tmpfs tmpfs /dev/shm
 	rc_status
 	optpts="-o mode=0620,gid=5"
 	mount -fv -t devpts $optpts devpts /dev/pts

@@ -1,0 +1,165 @@
+#! /bin/sh
+#
+# Copyright (c) 2001-2002 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
+#
+# /etc/init.d/boot.rootfsck
+#
+### BEGIN INIT INFO
+# Provides:          boot.rootfsck
+# Required-Start:    boot.shm
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       check and mount root filesystem
+### END INIT INFO
+
+. /etc/rc.status
+
+# to get max number of parallel fsck processes
+. /etc/sysconfig/boot
+
+if [ -f /etc/sysconfig/dump ]; then
+	. /etc/sysconfig/dump
+fi
+
+export FSCK_MAX_INST
+
+rc_reset
+
+case "$1" in
+  start)
+	#
+	# fsck may need a huge amount of memory, so make sure, it is there.
+	#
+	# However, in the case of an active LKCD configuration, we need to
+	# recover the crash dump from the swap partition first, so we cannot
+	# yet activate them.
+	#
+	if [ "$DUMP_ACTIVE" != "1" ]; then
+		echo "Activating swap-devices in /etc/fstab..."
+		swapon -a &> /dev/null
+		rc_status -v1 -r
+	fi
+	
+	# /dev/shm is already there, call blkid might be needed
+	blkid -c /dev/shm/tmp_blkid.tab > /dev/null
+	export BLKID_FILE=/dev/shm/tmp_blkid.tab
+
+	# find out about root fs type
+	mounts=/etc/mtab
+	test -r /proc/mounts && mounts=/proc/mounts
+	rootfstype=""
+	while read des fs type rest; do
+	    case "$fs" in
+		/)
+		    test "$des" = "rootfs" && continue
+		    rootfstype="-t $type"
+		    break
+		    ;;
+	    esac
+        done < $mounts
+
+	#
+	# If we use a serial console, don't use the fsck progress bar
+	#
+	FSCK_PROGRESSBAR="-V"
+        [ -x /sbin/showconsole ] && [ `/sbin/showconsole` = "/dev/tty1" ] && FSCK_PROGRESSBAR="-C"
+	#
+	# do fsck and start sulogin, if it fails.
+	#
+	FSCK_RETURN=0
+	if test ! -f /fastboot -a -z "$fastboot" ; then
+	    FSCK_FORCE=""
+	    test -f /forcefsck && FSCK_FORCE="-f"
+
+	    # on an umsdos root fs this mount will fail,
+	    # so direct error messages to /dev/null.
+	    # this seems to be ugly, but should not really be a problem.
+	    mount -n -o remount,ro / 2> /dev/null
+	    if test $? = 0; then
+	        echo "Checking root file system..."
+	        fsck $FSCK_PROGRESSBAR -a $FSCK_FORCE $rootfstype /
+	        # A return code of 1 indicates that file system errors
+	        # were corrected, but that the boot may proceed.
+	        # A return code of 2 or larger indicates failure.
+	        FSCK_RETURN=$?
+		test $FSCK_RETURN -lt 4
+		rc_status -v1 -r
+		if test $FSCK_RETURN -gt 1 -a $FSCK_RETURN -lt 4 ; then
+		    # if appropriate, switch bootsplash to verbose 
+		    # mode to make text messages visible.
+		    test -f /proc/splash && echo "verbose" > /proc/splash
+		    echo
+		    echo "fsck succeed, but reboot is required."
+		    echo
+		    sleep 1
+		    sync
+		    reboot -f
+		elif test $FSCK_RETURN -gt 3; then
+		    # if appropriate, switch bootsplash to verbose 
+		    # mode to make text messages visible.
+		    test -f /proc/splash && echo "verbose" > /proc/splash
+		    # Stop blogd since we reboot after sulogin
+		    test -x /sbin/blogd && killproc -QUIT /sbin/blogd
+		    if test -x /etc/init.d/kbd ; then
+			/etc/init.d/kbd start
+		    fi
+	            echo
+	            echo "fsck failed.  Please repair manually and reboot. The root"
+	            echo "file system is currently mounted read-only. To remount it"
+	            echo "read-write do:"
+	            echo
+	            echo "   bash# mount -n -o remount,rw /"
+	            echo
+	            echo "Attention: Only CONTROL-D will reboot the system in this"
+	            echo "maintanance mode. shutdown or reboot will not work."
+	            echo
+	            PS1="(repair filesystem) # "
+	            export PS1
+	            /sbin/sulogin /dev/console
+
+	            # if the user has mounted something rw, this should be umounted
+	            echo "Unmounting file systems (ignore error messages)"
+	            umount -avn
+
+	            # on umsdos fs this would lead to an error message.
+		    # so direct errors to /dev/null
+	            mount -no remount,ro / 2> /dev/null
+
+	            sync
+	            reboot -f
+	        fi
+	        sync
+	        mount -n -o remount,rw /
+		test $FSCK_RETURN -gt 0 && touch /fsck_corrected_errors
+	    else
+		if test "$rootfstype" != "-t umsdos" ; then
+		    echo
+		    echo '*** ERROR!  Cannot fsck because root is not read-only!'
+		    echo
+		fi
+	    fi
+	else
+	    echo "File systems are NOT being checked."
+	    mount -n -o remount,rw /
+	fi
+	;;
+    stop)
+	;;
+    restart)
+	rc_failed 3
+	rc_status -v
+	;;
+    status)
+	rc_failed 4
+	rc_status -v
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status|restart}"
+	exit 1
+	;;
+esac
+
+rc_exit
+

@@ -12,7 +12,7 @@
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
-# Description:       start rest of swap devices and shmfs/tmpfs
+# Description:       start rest of swap devices
 ### END INIT INFO
 
 . /etc/rc.status
@@ -30,31 +30,8 @@ case "$1" in
 	swapon -a &> /dev/null
 	rc_status -v1 -r
 	rc_splash "fsck stop"
-	
-	
-	#
-	# mount shmfs/tmpfs is necessary (2.4 kernels)
-	#
-	unset HAVE_SHM
-	while read dev type; do
-	    test "$type" = "tmpfs" && HAVE_SHM=1
-	done < /proc/filesystems
-	if test ! -z "$HAVE_SHM"; then
-	    # SHMFS_SIZE is set in /etc/sysconfig/kernel
-	    if test -n "$SHMFS_SIZE" ; then
-		SHMFS_OPTIONS="-osize=$SHMFS_SIZE"
-	    else
-		SHMFS_OPTIONS=""
-	    fi
-	    ECHO_RETURN=$rc_done
-	    test -d /dev/shm || mkdir /dev/shm
-	    echo -n "Mounting shared memory FS on /dev/shm"
-	    mount -t tmpfs $SHMFS_OPTIONS tmpfs /dev/shm || ECHO_RETURN=$rc_failed
-	    echo -e $ECHO_RETURN
-	fi
-	#unset HAVE_SHM
 	;;
-    stop|restart)
+    stop)
 	echo "Turning off swap"
 	sync ; sync
 	rc_reset
@@ -70,6 +47,10 @@ case "$1" in
 		swapoff $des &> /dev/null
 	    done
 	fi
+	;;
+    restart)
+	$0 stop
+	$0 start
 	;;
     status)
 	rc_failed 4
