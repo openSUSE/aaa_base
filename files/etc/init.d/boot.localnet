@@ -48,7 +48,9 @@ case "$1" in
 	    echo -n Setting up NIS domainname \'$XDOMAINNAME\'
         }
 	domainname "$XDOMAINNAME"
+        test -n "$XDOMAINNAME" && {
 	rc_status -v -r
+        }
 	
 	unset XHOSTNAME
 	unset XDOMAINNAME
