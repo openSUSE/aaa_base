@@ -541,10 +541,12 @@ fi
 #
 # insert memstat module for xosview
 #
-if test -f $MODULES_DIR/misc/memstat.o ; then
+if test "$LOAD_MEMSTAT_MODULE" = yes ; then
+  if test -f $MODULES_DIR/misc/memstat.o ; then
     echo Loading memstat module
     insmod $MODULES_DIR/misc/memstat.o
     rc_status -v1 -r
+  fi
 fi
 
 #
