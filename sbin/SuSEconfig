@@ -792,7 +792,7 @@ test -x /sbin/ldconfig -a -z "$r" -a "$CHECK_NEWPACKAGE" != false && \
 #
 if test -z "$r" ; then
     if test "$FASTRUN" = "true" ; then
-        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.sendmail /sbin/conf.d/SuSEconfig.ypclient"
+        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.sendmail /sbin/conf.d/SuSEconfig.ypclient /sbin/conf.d/SuSEconfig.kdm"
     else
         SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.*"
     fi
