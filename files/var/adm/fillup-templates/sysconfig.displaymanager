@@ -17,7 +17,7 @@ DISPLAYMANAGER=""
 #
 DISPLAYMANAGER_REMOTE_ACCESS="no"
 
-## Type:	string
+## Type:	yesno
 ## Default:	no
 #
 # Allow remote access of the user root to your display manager
