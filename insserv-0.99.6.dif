@@ -1,0 +1,33 @@
+--- insserv.c
++++ insserv.c	Tue Aug 20 11:48:14 2002
+@@ -688,7 +688,7 @@
+ 	    while ((token = strsep(&script_inf.provides, delimeter)) && *token) {
+ 		serv_t * service = NULL;
+ 		if (*token == '$') {
+-		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
++		    warn("script %s provides system facility %s, skipped!\n", d->d_name, token);
+ 		    continue;
+ 		}
+ 		service = current_structure(token, order, runlevel);
+@@ -1019,8 +1019,11 @@
+ 	    warn("can not stat(%s)\n", d->d_name);
+ 	    continue;
+ 	}
+-	if (!S_ISREG(st_script.st_mode) || !(S_IXUSR & st_script.st_mode))
++	if (!S_ISREG(st_script.st_mode) || !(S_IXUSR & st_script.st_mode)) {
++	    if (chkfor(d->d_name, argv, argc))
++		warn("script %s is not executable, skipped!\n", d->d_name);
+ 	    continue;
++	}
+ 
+ 	if (!strncmp(d->d_name, "README", strlen("README")))
+ 	    continue;
+@@ -1169,7 +1172,7 @@
+ 	    begin = provides;
+ 	    while ((token = strsep(&provides, delimeter)) && *token) {
+ 		if (*token == '$') {
+-		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
++		    warn("script %s provides system facility %s, skipped!\n", d->d_name, token);
+ 		    continue;
+ 		}
+ 
