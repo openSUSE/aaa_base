@@ -459,6 +459,25 @@ if test -n "$NO_PROXY" ; then
     echo "setenv no_proxy '$NO_PROXY'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 
+WINDOWMANAGER=`type -p $DEFAULT_WM`
+test -z "$WINDOWMANAGER" -a -n "$DEFAULT_WM" && {
+    test -x /usr/X11R6/bin/$DEFAULT_WM && \
+        WINDOWMANAGER=/usr/X11R6/bin/$DEFAULT_WM
+}
+test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/kde
+echo "test -z \"\$WINDOWMANAGER\" && WINDOWMANAGER=$WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
+echo "export WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
+echo "if ( ! \${?WINDOWMANAGER} ) setenv WINDOWMANAGER $WINDOWMANAGER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+
+test -n "$CONSOLE_MAGIC" && {
+    echo "echo -en \"\\033\$CONSOLE_MAGIC\"" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "echo -n \"\\033\$CONSOLE_MAGIC\"" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
+}
+
+check_md5_and_move $r/etc/SuSEconfig/profile
+check_md5_and_move $r/etc/SuSEconfig/csh.login
+check_md5_and_move $r/etc/SuSEconfig/csh.cshrc
+
 if test "$SORT_PASSWD_BY_UID" = yes ; then
     for i in passwd group ; do
         cat $r/etc/$i | grep "^root:" > $r/etc/$i.t
@@ -476,21 +495,6 @@ if test "$SORT_PASSWD_BY_UID" = yes ; then
         rm $r/etc/$i.t
     done
 fi
-
-WINDOWMANAGER=`type -p $DEFAULT_WM`
-test -z "$WINDOWMANAGER" -a -n "$DEFAULT_WM" && {
-    test -x /usr/X11R6/bin/$DEFAULT_WM && \
-        WINDOWMANAGER=/usr/X11R6/bin/$DEFAULT_WM
-}
-test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/kde
-echo "test -z \"\$WINDOWMANAGER\" && WINDOWMANAGER=$WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo "export WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo "if ( ! \${?WINDOWMANAGER} ) setenv WINDOWMANAGER $WINDOWMANAGER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-
-
-check_md5_and_move $r/etc/SuSEconfig/profile
-check_md5_and_move $r/etc/SuSEconfig/csh.login
-check_md5_and_move $r/etc/SuSEconfig/csh.cshrc
 
 #
 # Now set ROOT_LOGIN_REMOTE.
