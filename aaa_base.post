@@ -21,11 +21,10 @@ test -e etc/psdevtab && rm -f etc/psdevtab
 # and use inittab.rpmnew. RPM will overwrite old rpmnew files, so this
 # should really the new one.
 #
-grep sbin.init.d etc/inittab > /dev/null 2>&1
-if [ $? -eq 0 -a -f etc/inittab.rpmnew ] ; then
+test -f etc/inittab.rpmnew && grep sbin.init.d etc/inittab >/dev/null 2>&1 && {
    mv -f etc/inittab etc/inittab.sbin.init.d
    mv -f etc/inittab.rpmnew etc/inittab
-fi
+}
 #
 # the following rc.config-variables changed their names during the releases,
 # so we have to change them here ...
@@ -124,8 +123,8 @@ for i in passwd group shadow gshadow ; do
     fi
     rm -f etc/$i.tmp
     # If we have a NIS system, we have to make sure, that "^+" is at the end
-    grep -v "^+" etc/$i > etc/$i.tmp
-    grep "^+" etc/$i >> etc/$i.tmp
+    grep -v "^+" etc/$i > etc/$i.tmp || :
+    grep "^+" etc/$i >> etc/$i.tmp || :
     test -s etc/$i.tmp && cat etc/$i.tmp > etc/$i
     rm -f etc/$i.tmp
   else
@@ -142,7 +141,7 @@ done
 # make sure that nobody and nogroup are set to 65534 (we had -2 in former times)
 #
 for i in etc/passwd etc/group ; do
-    cat $i | sed -e"s/:-2:/:65534:/g" -e"s/:-2:/:65534:/g" > $i.t
+    sed -e"s/:-2:/:65534:/g" -e"s/:-2:/:65534:/g" < $i > $i.t
     test -s $i.t && {
         cat $i.t > $i
     }

@@ -30,6 +30,9 @@
 #
 # ChangeLog:
 #
+# 12/7/2002:	v1.27
+#  - ignore comments in lilo.conf
+#
 # 13/6/2002:	v1.26
 #  - nicer output
 #  - don't do pivot_root for ext3, too dangerous with newer kernels
@@ -216,7 +219,7 @@ shift `expr $OPTIND - 1`
 [ "x$splash" = xoff ] && splash=
 if [ "x$splash" = xauto ] ; then
     splash=
-    for vga in `test -f $root_dir/etc/lilo.conf && sed -ne 's/[ 	]*vga[ 	]*='//p <$root_dir/etc/lilo.conf`; do
+    for vga in `test -f $root_dir/etc/lilo.conf && sed -n -e '/^[ 	]*#/d' -e 's/[ 	]*vga[ 	]*='//p <$root_dir/etc/lilo.conf`; do
 	splashsize=
 	case $vga in
 	    785|786|0x311|0x312) splashsize=640x480   ;;
