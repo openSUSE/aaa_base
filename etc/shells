@@ -3,10 +3,10 @@
 /bin/bash1
 /bin/csh
 /bin/false
-/bin/passwd
 /bin/sh
 /bin/tcsh
 /usr/bin/csh
 /usr/bin/ksh
+/usr/bin/passwd
 /usr/bin/tcsh
 /usr/bin/zsh

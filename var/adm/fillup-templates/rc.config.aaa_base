@@ -576,6 +576,11 @@ CONSOLE_SHUTDOWN=reboot
 #
 START_ISAPNP=yes
 
+#
+# Should the Name Switch Caching Daemon be started at bootup?  (yes/no)
+#
+START_NSCD=yes
+
 umask 022
 
 #
