@@ -82,7 +82,11 @@ case "$1" in
 	# killproc(8) sleep upto five seconds and sends
 	# SIGKILL if xdm does not terminate within
 	#
-	killproc $PIDFILE -TERM $DISPLAYMANAGER
+	if [ "$DISPLAYMANAGER" == "/opt/gnome2/bin/gdm" ]; then
+	    killproc $PIDFILE -TERM /opt/gnome2/bin/gdm-binary
+	else
+	    killproc $PIDFILE -TERM $DISPLAYMANAGER
+	fi
 	rc_status -v
 	;;
     restart)
@@ -92,12 +96,20 @@ case "$1" in
 	;;
     reload|force-reload)
 	echo -n "Reload service $DM"
-	killproc $PIDFILE -HUP  $DISPLAYMANAGER
+	if [ "$DISPLAYMANAGER" == "/opt/gnome2/bin/gdm" ]; then
+	    killproc $PIDFILE -HUP  /opt/gnome2/bin/gdm-binary
+	else
+	    killproc $PIDFILE -HUP  $DISPLAYMANAGER
+	fi
 	rc_status -v
 	;;
     status|check)
 	echo -n "Checking for service ${DM}: "
-	checkproc $PIDFILE $DISPLAYMANAGER
+	if [ "$DISPLAYMANAGER" == "/opt/gnome2/bin/gdm" ]; then
+	    checkproc $PIDFILE /opt/gnome2/bin/gdm-binary
+	else
+	    checkproc $PIDFILE $DISPLAYMANAGER
+	fi
 	rc_status -v
 	;;
     probe)
