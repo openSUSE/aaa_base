@@ -26,6 +26,13 @@ test -f etc/inittab.rpmnew && grep sbin.init.d etc/inittab >/dev/null 2>&1 && {
    mv -f etc/inittab.rpmnew etc/inittab
 }
 #
+# if the old nsswitch.conf contains dns6, replace it with dns
+#
+test -f etc/nsswitch.conf.rpmnew && grep dns6 etc/nsswitch.conf >/dev/null 2>&1 && {
+   cp etc/nsswitch.conf etc/nsswitch.conf.aaa_base
+   sed "s|dns6|dns|g" < etc/nsswitch.conf.aaa_base > etc/nsswitch.conf
+}
+#
 # the following rc.config-variables changed their names during the releases,
 # so we have to change them here ...
 # FONT        to CONSOLE_FONT
