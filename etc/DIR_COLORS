@@ -1,4 +1,5 @@
 # Configuration file for the color ls utility
+#
 # This file goes in the /etc directory, and must be world readable.
 # You can copy this file to .dir_colors in your $HOME directory to override
 # the system defaults.
@@ -36,12 +37,14 @@ EIGHTBIT 1
 
 # Below are the color init strings for the basic file types. A color init
 # string consists of one or more of the following numeric codes:
+#
 # Attribute codes: 
 # 00=none 01=bold 04=underscore 05=blink 07=reverse 08=concealed
 # Text color codes:
 # 30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
 # Background color codes:
 # 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
+
 NORMAL 00	# global default, although everything should be something.
 FILE 00 	# normal file
 DIR 01;34 	# directory
@@ -57,11 +60,14 @@ EXEC 01;31
 # List any file extensions like '.gz' or '.tar' that you would like ls
 # to colorize below. Put the extension, a space, and the color init string.
 # (and any comments you want to add after a '#')
+
 .cmd 01;32 # executables (bright green)
 .exe 01;32
 .com 01;32
-.btm 01;32
 .bat 01;32
+.btm 01;32
+.dll 01;32
+
 .tar 00;31 # archives or compressed (red)
 .tbz 00;31
 .tgz 00;31
@@ -74,10 +80,22 @@ EXEC 01;31
 .Z   00;31
 .gz  00;31
 .bz2 00;31
-.jpg 01;35 # image formats
-.gif 01;35
+.tbz2 00;31
+
+.png 01;35 # image formats
 .bmp 01;35
+.gif 01;35
+.jpg 01;35
+.jpeg 01;35
+.pcx 01;35
+.ppm 01;35
+.tif 01;35
 .xbm 01;35
 .xpm 01;35
-.tif 01;35
-.png 01;35
+
+.wav  00;32 # sound formats
+.mp3  00;32
+.au   00;32
+.aiff 00;32
+.mid  00;32
+.voc  00;32

@@ -13,22 +13,21 @@
 # file for changes is /etc/rc.config.
 #
 
-# default runlevel
+# The default runlevel is defined here
 id:3:initdefault:
 
-# check system on startup
-# first script to be executed if not booting in emergency (-b) mode
+# First script to be executed, if not booting in emergency (-b) mode
 si:I:bootwait:/etc/init.d/boot
 
 # /etc/init.d/rc takes care of runlevel handling
 #
-# runlevel 0  is  System halt   (Do never use this for initdefault)
+# runlevel 0  is  System halt   (Do not use this for initdefault!)
 # runlevel 1  is  Single user mode
 # runlevel 2  is  Local multiuser without remote network (e.g. NFS)
 # runlevel 3  is  Full multiuser with network
 # runlevel 4  is  Not used
 # runlevel 5  is  Full multiuser with network and xdm
-# runlevel 6  is  System reboot (Do never use this for initdefault)
+# runlevel 6  is  System reboot (Do not use this for initdefault!)
 #
 l0:0:wait:/etc/init.d/rc 0
 l1:1:wait:/etc/init.d/rc 1
@@ -50,10 +49,10 @@ ca::ctrlaltdel:/sbin/shutdown -r -t 4 now
 kb::kbrequest:/bin/echo "Keyboard Request -- edit /etc/inittab to let this work."
 
 # what to do when power fails/returns
-pf::powerwait:/etc/init.d/powerfail    start
+pf::powerwait:/etc/init.d/powerfail start
 pn::powerfailnow:/etc/init.d/powerfail now
 #pn::powerfail:/etc/init.d/powerfail now
-po::powerokwait:/etc/init.d/powerfail  stop
+po::powerokwait:/etc/init.d/powerfail stop
 
 # for ARGO UPS
 sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
@@ -71,7 +70,6 @@ sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
 #S0:12345:respawn:/sbin/agetty -L 9600 ttyS0 vt102
 
 #
-#
 #  Note: Do not use tty7 in runlevel 3, this virtual line
 #  is occupied by the programm xdm.
 #
@@ -80,7 +78,6 @@ sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
 #  and configuration you should remove the comment character
 #  from the following line:
 #7:3:respawn:+/etc/init.d/rx tty7
-
 
 
 # modem getty.
