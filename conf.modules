@@ -13,7 +13,14 @@ alias scsi_hostadapter off
 
 # only used for Mylex or Compaq Raid as module
 alias block-major-48   off
+alias block-major-49   off
 alias block-major-72   off
+alias block-major-73   off
+
+# only needed for fifth and sixth IDE adaptor
+alias block-major-56   off
+alias block-major-57   off
+
 
 # mouse (for older busmice)
 alias char-major-10    off
@@ -286,6 +293,8 @@ alias block-major-29      aztcd
 alias block-major-32      cm206
 alias block-major-33      off
 alias block-major-34      off
+# network block device
+alias block-major-43      off
 alias block-major-45      pd
 alias block-major-46      pcd
 alias block-major-47      pf

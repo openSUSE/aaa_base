@@ -91,7 +91,7 @@ fi
 umount -anvt proc
 
 if test -x /sbin/vgchange ; then
-    /sbin/vgchange -an
+    /sbin/vgchange -a n
 fi
 
 # maybe we use Multiple devices
