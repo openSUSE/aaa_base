@@ -75,7 +75,7 @@ EOT
 
 	#
 	# SuSE Firewall script: If you installed the package firewals
-	# and configured your firewall in /etc/rc.config.d/firewall.rc.config 
+	# and configured your firewall in /etc/sysconfig/firewall
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#
@@ -88,7 +88,7 @@ EOT
 	#test -x /etc/ppp/inet_chains.local && /etc/ppp/inet_chains.local "$@"
 
 	# maybe you want to start mail services:
-	# set follow variables in /etc/rc.config.d/sendmail.rc.config
+	# set follow variables in /etc/sysconfig/sendmail
 	#    SENDMAIL_TYPE="yes"
 	#    SENDMAIL_SMARTHOST="<ISP-mailserver>"
 	#    SENDMAIL_ARGS="-bd -om"
@@ -123,7 +123,7 @@ EOT
 	/etc/init.d/route start $INTERFACE
 	#
 	# SuSE Firewall script: If you installed the package firewals
-	# and configured your firewall in /etc/rc.config.d/firewall.rc.config 
+	# and configured your firewall in /etc/sysconfig/firewall
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#
@@ -161,7 +161,7 @@ EOT
 
 	#
 	# SuSE Firewall script: If you installed the package firewals
-	# and configured your firewall in /etc/rc.config.d/firewall.rc.config 
+	# and configured your firewall in /etc/sysconfig/firewall
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#
@@ -188,7 +188,7 @@ EOT
 
 	#
 	# SuSE Firewall script: If you installed the package firewals
-	# and configured your firewall in /etc/rc.config.d/firewall.rc.config 
+	# and configured your firewall in /etc/sysconfig/firewall
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#

@@ -33,12 +33,13 @@ test -f /etc/rc.config || {
 # safety-check: look for duplicated variables in /etc/rc.config
 #
 MYTMP=`mktemp -d /tmp/rcconfigchk.XXXXXX`
-grep -vh "^#" /etc/rc.config /etc/rc.config.d/*.rc.config | grep "=" | cut -d= -f1 | sort | uniq -d \
+ls /etc/rc.config /etc/sysconfig/* | grep -v ".rpmorig$" | grep -v ".rpmsave$" | \
+xargs grep -vh "^#" | grep "=" | cut -d= -f1 | sort | uniq -d \
   > $MYTMP/toomuch
 if [ -s $MYTMP/toomuch ] ; then
   echo "This is a warning message." > $MYTMP/rc.config_check
   echo "The following variables seem to be doubled in /etc/rc.config" >> $MYTMP/rc.config_check
-  echo "and/or the files in /etc/rc.config.d :" >> $MYTMP/rc.config_check
+  echo "and/or the files in /etc/sysconfig :" >> $MYTMP/rc.config_check
   cat $MYTMP/toomuch >> $MYTMP/rc.config_check
   echo "Please check which of the instances is correct." >> $MYTMP/rc.config_check
   test -d /var/adm/notify/warnings && \

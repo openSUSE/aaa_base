@@ -23,8 +23,8 @@ export PATH
 #
 # get information from /etc/rc.config
 #
-if [ -f /etc/rc.config.d/backup.rc.config ] ; then
-    . /etc/rc.config.d/backup.rc.config
+if [ -f /etc/sysconfig/backup ] ; then
+    . /etc/sysconfig/backup
 fi
 
 #

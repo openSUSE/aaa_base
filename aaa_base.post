@@ -80,22 +80,24 @@ if [ -x bin/fillup ] ; then
   bin/fillup -q -t -r -i -d "=" etc/rc.config var/adm/fillup-templates/rc.config.aaa_base.oldstat /dev/null
   test -s etc/rc.config.new && mv etc/rc.config.new etc/rc.config
 fi
-# Add rc.config.d/lang.rc.config
-if ! [ -d etc/rc.config.d ] ; then
-  mkdir -p etc/rc.config.d
+if ! [ -d etc/sysconfig ] ; then
+  mkdir -p etc/sysconfig
 fi
 for i in lang backup displaymanager updatedb ; do
  echo "Updating etc/$i.rc.config..."
   if [ -x bin/fillup ] ; then
-    if ! [ -f etc/rc.config.d/$i.rc.config ] ; then
-      bin/fillup -q -r -i etc/rc.config var/adm/fillup-templates/rc.config.d.$i etc/rc.config.d/$i.rc.config
+    if [ ! -f etc/sysconfig/$i -a -f etc/rc.config.d/$i.rc.config ] ; then
+      mv etc/rc.config.d/$i.rc.config etc/sysconfig/$i
+    fi
+    if ! [ -f etc/sysconfig/$i ] ; then
+      bin/fillup -q -r -i etc/rc.config var/adm/fillup-templates/sysconfig.$i etc/sysconfig/$i
       mv etc/rc.config.new etc/rc.config
     else
-      bin/fillup -q etc/rc.config.d/$i.rc.config var/adm/fillup-templates/rc.config.d.$i
+      bin/fillup -q etc/sysconfig/$i var/adm/fillup-templates/sysconfig.$i
     fi
   else
     echo "ERROR: fillup not found. This should not happen. Please compare"
-    echo "etc/rc.config.d/$i.rc.config and var/adm/fillup-templates/$i.rc.config "
+    echo "etc/sysconfig/$i and var/adm/fillup-templates/sysconfig.$i "
     echo "and update by hand."
   fi
 done

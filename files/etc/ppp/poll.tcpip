@@ -30,8 +30,8 @@ echo $$ > /var/run/poll.lock
 # Check resources and settings
 #
 . /etc/rc.config
-test -r /etc/rc.config.d/xntp.rc.config && \
-. /etc/rc.config.d/xntp.rc.config
+test -r /etc/sysconfig/xntp && \
+. /etc/sysconfig/xntp
 
 #
 # Time to get a stable connenction
