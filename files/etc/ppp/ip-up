@@ -74,9 +74,11 @@ ippp*)
 		    settings remove the option USEPEERDNS for this connection
 EOT
 	fi
+
 	# ip_resend hook
 	test "$IP_RESEND" = "yes" -a -x /usr/sbin/ip_resend_wakeup && \
 	    /usr/sbin/ip_resend_wakeup -m $LOCALIP -o $INTERFACE
+
 	#
 	# SuSE Firewall script: If you installed and configured your firewall
 	# in /etc/sysconfig/firewall it will be started here:
@@ -130,8 +132,12 @@ EOT
 	/sbin/ip link set $INTERFACE down
 	/sbin/ip link set $INTERFACE up $LINK_OPT
 	/sbin/ip address add dev $INTERFACE local $IPADDR peer $PTPADDR
-	# set routes from /etc/sysconfig/network/routes
-        /etc/sysconfig/network/scripts/ifup-route $INTERFACE
+
+	# set routes from /etc/sysconfig/network/routes (only for dod)
+	if [ "$DIALMODE" = "auto" ] ; then
+	    /etc/sysconfig/network/scripts/ifup-route $INTERFACE
+	fi
+
 	#
 	# SuSE Firewall script: If you installed and configured your firewall
 	# in /etc/sysconfig/firewall it will be started here:
