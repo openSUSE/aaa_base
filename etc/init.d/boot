@@ -74,6 +74,7 @@ if test -e /proc/splash ; then
 if test "$BOOT_SPLASH" = "no" ; then
     echo "0" > /proc/splash
 fi
+fi
 
 # Disable ECN if required.
 if test "$DISABLE_ECN" = "yes" -a -f /proc/sys/net/ipv4/tcp_ecn; then
@@ -86,6 +87,9 @@ fi
 if test -f /etc/raidtab -a -x /sbin/raid0run ; then
     echo "Initializing Multiple Devices..."
     /sbin/raid0run -a
+    if test -x /sbin/raidstart ; then
+	/sbin/raidstart -a
+    fi
 elif test -f /etc/mdtab -a -x /sbin/mdadd ; then
     echo "Initializing Multiple Devices..."
     /sbin/mdadd -ar && MDADD_RETURN=0 || MDADD_RETURN=1
