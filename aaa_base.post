@@ -67,6 +67,16 @@ else
   bin/fillup -q -d "=" etc/rc.config var/adm/fillup-templates/rc.config.aaa_base
   bin/fillup -q -t -r -i -d "=" etc/rc.config var/adm/fillup-templates/rc.config.aaa_base.oldstat /dev/null
   test -s etc/rc.config.new && mv etc/rc.config.new etc/rc.config
+  # Add rc.config.d/lang.rc.config
+  if ! [ -d etc/rc.config.d ] ; then
+     mkdir -p etc/rc.config.d
+  fi
+  if ! [ -f etc/rc.config.d/lang.rc.config ] ; then
+     bin/fillup -q -r -i etc/rc.config var/adm/fillup-templates/rc.config.d.lang etc/rc.config.d/lang.rc.config
+     mv etc/rc.config.new etc/rc.config
+  else
+     bin/fillup -q etc/rc.config.d/lang.rc.config var/adm/fillup-templates/rc.config.d.lang
+  fi
  else
   echo "ERROR: fillup not found. This should not happen. Please compare"
   echo "etc/rc.config and var/adm/fillup-templates/rc.config.aaa_base "
