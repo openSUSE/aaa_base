@@ -14,9 +14,10 @@ done
 
 if [ "$SET_JAVA_PL_HELP" = "yes" ] ; then
   # help printed, so print own help prefix
-  echo "This script changes the link /usr/lib/java defining default java"
-  echo "for your computer or it changes another compatibility links in"
-  echo "the directory /usr/lib"
+  echo "This script sets the link /usr/lib/java which defines default java for"
+  echo "your computer. It sets additional links defined by the tag \"alternative\""
+  echo "in configuration files located in /etc/java. It is also able set another";
+  echo "compactibility links in the directory /usr/lib."
   echo
 fi
 

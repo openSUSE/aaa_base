@@ -22,8 +22,15 @@ test -f $r/etc/sysconfig/java || {
 
 test "$CREATE_JAVALINK" = "yes" || exit 0
 
-# create java compat links if it is not valid
-# right java is selected by priority in /etc/java/*.conf
+# link various alternative files and directories (man pages, compat links, etc.)
+# the right java is selected by the priority defined in /etc/java/*.conf;
+# there are also saved all information about available alternatives;
+# note that the main link /usr/lib/java is created also if it is not
+# explicitly defined in /etc/java/*.conf
+setJava.pl link --noreplace --alljavas >/dev/null 2>&1
+
+# the following comands are obsolete by the previous one now and are only
+# useful if the base compat links are not defined in /etc/java/*.conf
 # /usr/lib/java
 setJava.pl link --noreplace >/dev/null 2>/dev/null
 # /usr/lib/java1

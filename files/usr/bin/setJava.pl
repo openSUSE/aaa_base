@@ -8,8 +8,12 @@ use strict;
 
 # the directory where to find java configuration files
 my $configDir = '/etc/java';
+# alternative for $configDir which is usable as a pattern in regular expressions
+my $configDirRegExp = '\/etc\/java';
 # default suffix for java configuration files
 my $configSuf = '.conf';
+# alternative for $configSuf which is usable as a pattern in regular expressions
+my $configSufRegExp = '\.conf';
 # in this direcory are installed all javas
 my $libdir = '/usr/lib';
 
@@ -29,7 +33,10 @@ my $reqFunc;
 
 # values from configs in $configDir/*$configSuf
 # it is list of references to hashes with config values
+# javas are sorted by priority
 my @javas;
+# this hash transforms config names to indexes to @javas
+my %javasConfigToIndex;
 
 # required values
 my %reqJava;
@@ -92,8 +99,11 @@ sub CommonHelp
   print " 	3. Set any java with version 1.3.1\n";
   print "	   $command --strict --version 1.3.1\n\n";
 
-  print " 	2. Set any java from Sun Microsystems\n";
+  print " 	4. Set any java from Sun Microsystems\n";
   print "	   $command --vendor Sun\n\n";
+
+  print " 	5. Set the java defined in the config file $configDir/IBMJava2-JRE.conf\n";
+  print "	   $command --config IBMJava2-JRE\n\n";
   
   print "Appendix: Transformation table for java_name argument\n\n";
   
@@ -124,6 +134,7 @@ sub SetEnvHelp
 
   print "Usage: $command --help\n";
   print "       $command [--devel][--strict][--vendor vendor][--version version]\n";
+  print "       $command [--devel] --config config\n";
   print "       $command [--devel] java_name\n\n";
 
   print "Command line options:\n";
@@ -132,6 +143,8 @@ sub SetEnvHelp
   print "	--strict  - defines that you request strict java version\n";
   print "	--vendor  - defines strict java vendor name\n";
   print "	--version - defines minimal or strict java version (see below)\n\n";
+
+  print "	--config  - defines the required java by the config file from $configDir\n\n";
   
   print "	java_name - added for backward compatibility with old setJava script\n";
   print "                    valid java_name is transformed into equivalent --version\n";
@@ -147,31 +160,50 @@ sub LinkHelp
   if ($encaps) {
     $command = $encaps;
   } else {
-    $command = "$myName setenv";
+    $command = "$myName link";
   }
   
   my $commandLen = length $command;
   
   unless ($encaps) {
-    print "This script changes the link \"$libdir/java\" which defines default java\n";
-    print "for your computer or it changes another compactibility links in\n";
-    print "the directory \"$libdir\"\n\n";
+    print "This script sets the link $libdir/java which defines default java for\n";
+    print "your computer. It sets additional links defined by the tag \"alternative\"\n";
+    print "in configuration files located in $configDir. It is also able set another\n";
+    print "compactibility links in the directory $libdir.\n\n";
   }    
 
   printf "Usage: %-" . $commandLen . "s --help\n", $command;
-  printf "       %-" . $commandLen . "s [--noreplace][--devel][--strict][--linkname link_name\n", $command;
-  printf "       %-" . $commandLen . "s [--vendor vendor][--version version]\n", "";
-  printf "       %-" . $commandLen . "s [--noreplace][--devel] java_name\n\n", $command;
+  printf "       %-" . $commandLen . "s [--noreplace/--remove][--linkname link_name/--ownalt]\n", $command;
+  printf "       %-" . $commandLen . "s [--lesschecks][--devel][--strict][--version version]\n", "";
+  printf "       %-" . $commandLen . "s [--vendor vendor][--alljavas]\n", "";
+  printf "       %-" . $commandLen . "s [--noreplace/--remove][--linkname link_name/--ownalt]\n", $command;
+  printf "       %-" . $commandLen . "s [--lesschecks] --config config\n", "";
+  printf "       %-" . $commandLen . "s [--noreplace/--remove][--linkname link_name/--ownalt]\n", $command;
+  printf "       %-" . $commandLen . "s [--lesschecks][--devel] java_name\n\n", "";
 
   print "Command line options:\n";
   print "	--help      - print this help\n";
   print "	--noreplace - do not change valid link\n";
-  print "	--devel	    - defines that you request the development kit\n";
-  print "	--strict    - defines that you request strict java version\n";
+  print "	--remove    - removes links istead of to be created\n";
   print "	--linkname  - defines another java link name in /usr/lib\n";
   print "		      default value is \"java\"\n";
+  print "	--ownalt      only links the alternatives defined in the related\n";
+  print "	              configuration file, does not follow tags\n";
+  print "	              \"more_alternatives\"\n";
+  print "	--lesschecks - does not make some checks for valid configuration; it\n";
+  print "	              is used in SDK subpackages to fix situation when the\n";
+  print "	              JRE part is removed before the rest of SDK. A normal\n";
+  print "	              user should not need to use it\n";
+  print "	--devel	    - defines that you request the development kit\n";
+  print "	--strict    - defines that you request strict java version\n";
+  print "	--version   - defines minimal or strict java version (see below)\n";
   print "	--vendor    - defines strict java vendor name\n";
-  print "	--version   - defines minimal or strict java version (see below)\n\n";
+  print "	--alljavas  - sets links for all the selected javas instead of only\n";
+  print "	              for the one with the highest priority; the selection can\n";
+  print "	              be still filtered by the options --version, --vendor, etc.\n\n";
+
+  print "	--config    - defines the required java by the config file from\n";
+  print "	              $configDir\n\n";
   
   print "	java_name   - added due to compactibility with old setJava script\n";
   print "		      valid java_name is transformed into equivalent --version\n";
@@ -226,6 +258,17 @@ sub ReadSetEnvArgs
       $reqJava{'Strict'} = 1;
       next;
     }  
+    if ($curArg eq '--config') {
+      unless ($reqJava{'Config'} = shift @argv) {
+        print STDERR "Error: A value for --config option is missing\n";
+	exit 1;
+      }
+      # add suffix $configSuf if needed
+      $reqJava{'Config'} .= "$configSuf" unless ($reqJava{'Config'} =~ /$configSufRegExp$/);
+      # remove $configDir if used
+      $reqJava{'Config'} =~ s/^$configDirRegExp\///;
+      next;
+    }
     if ($curArg eq '--vendor') {
       unless ($reqJava{'Vendor'} = shift @argv) {
         print STDERR "Error: A value for vendor option is missing\n";
@@ -252,18 +295,30 @@ sub ReadSetEnvArgs
     }
     if ((defined $reqJava{'Vendor'}) ||
         (defined $reqJava{'Version'}) ||
-	(defined $reqJava{'Strict'})) {
-      print STDERR "Error: Options --strict, --vendor and  --version may not\n";
+	(defined $reqJava{'Strict'}) ||
+	(defined $reqJava{'Config'})) {
+      print STDERR "Error: The options --strict, --vendor, --version or --config may not\n";
       print STDERR "       be used with java_name parametr\n";
       exit 1;
     }      
   }
+  # check conflicts with the option --config
+  if ((defined $reqJava{'Config'}) &&
+      ((defined $reqJava{'Vendor'}) ||
+       (defined $reqJava{'Version'}) ||
+       (defined $reqJava{'Strict'}) ||
+       (defined $reqJava{'Devel'}) ||
+       (defined $reqJava{'JavaName'}))) {
+    print STDERR "Error: The options --strict, --vendor, --version, -devel or the parametr\n";
+    print STDERR "       java_name may not be used with the option --config\n";
+    exit 1;
+  }    
 }
 
 # process options for link function
 # It is the same as ReadSetEnvArgs
 # Only LinkHelp is called instead of SetEnvHelp
-# In Addition --noreplace --linkname options are here
+# In Addition --noreplace --lesschecks --remove --ownalt --alljavas --linkname options are here
 sub ReadLinkArgs
 {
   my $curArg;
@@ -273,8 +328,24 @@ sub ReadLinkArgs
       LinkHelp;
       exit 0;
     }
+    if ($curArg eq '--lesschecks') {
+      $reqJava{'LessChecks'} = 1;
+      next;
+    }  
     if ($curArg eq '--noreplace') {
       $reqJava{'NoReplace'} = 1;
+      next;
+    }  
+    if ($curArg eq '--remove') {
+      $reqJava{'Remove'} = 1;
+      next;
+    }
+    if ($curArg eq '--ownalt') {
+      $reqJava{'OwnAlt'} = 1;
+      next;
+    }  
+    if ($curArg eq '--alljavas') {
+      $reqJava{'AllJavas'} = 1;
       next;
     }  
     if ($curArg eq '--devel') {
@@ -285,6 +356,17 @@ sub ReadLinkArgs
       $reqJava{'Strict'} = 1;
       next;
     }  
+    if ($curArg eq '--config') {
+      unless ($reqJava{'Config'} = shift @argv) {
+        print STDERR "Error: A value for --config option is missing\n";
+	exit 1;
+      }
+      # add suffix $configSuf if needed
+      $reqJava{'Config'} .= "$configSuf" unless ($reqJava{'Config'} =~ /$configSufRegExp$/);
+      # remove $configDir if used
+      $reqJava{'Config'} =~ s/^$configDirRegExp\///;
+      next;
+    }
     if ($curArg eq '--linkname') {
       unless ($reqJava{'LinkName'} = shift @argv) {
         print STDERR "Error: A value for --linkname option is missing\n";
@@ -318,12 +400,36 @@ sub ReadLinkArgs
     }
     if ((defined $reqJava{'Vendor'}) ||
         (defined $reqJava{'Version'}) ||
-	(defined $reqJava{'Strict'})) {
-      print STDERR "Error: Options --strict, --vendor and  --version may not\n";
+	(defined $reqJava{'Strict'}) ||
+	(defined $reqJava{'Config'})) {
+      print STDERR "Error: The options --strict, --vendor, --version or --config may not\n";
       print STDERR "       be used with java_name parametr\n";
       exit 1;
     }      
   }
+  # check conflicts with the option --config
+  if ((defined $reqJava{'Config'}) &&
+      ((defined $reqJava{'Vendor'}) ||
+       (defined $reqJava{'Version'}) ||
+       (defined $reqJava{'Strict'}) ||
+       (defined $reqJava{'Devel'}) ||
+       (defined $reqJava{'JavaName'}))) {
+    print STDERR "Error: The options --strict, --vendor, --version, -devel or the parametr\n";
+    print STDERR "        java_name may not be used with the option --config\n";
+    exit 1;
+  }    
+  # check conflicts between --noreplace and --remove
+  if ((defined $reqJava{'NoReplace'}) &&
+      (defined $reqJava{'Remove'})) {
+    print STDERR "Error: The options --noreplace and --remove may not be used together\n";
+    exit 1;
+  }  
+  # check conflicts between --linkname and --ownalt
+  if ((defined $reqJava{'LinkName'}) &&
+      (defined $reqJava{'OwnAlt'})) {
+    print STDERR "Error: The options --linkname and --ownalt may not be used together\n";
+    exit 1;
+  }  
 }
 
 # generates related requested values from java_name parametr
@@ -385,9 +491,21 @@ sub IsConfigValue
 # read all configuration files into internal structure @javas
 sub ReadConfigs
 {
+  # the array for all valid java configuration before they are
+  # sorted by priority
+  my @javasUnsorted;
+
   foreach my $file (@_) {
     # hash for current Java values
     my %curJava;
+    # hash for alternatives; note that the alternative for
+    # $libdir/$defaultJava is added by default due to
+    # backward compatibility
+    my %alternatives = ();
+    $curJava{'Alternatives'} = \%alternatives;
+    # array for more alternatives
+    my @moreAlternatives = ();
+    $curJava{'MoreAlternatives'} = \@moreAlternatives;
 
     # open config file    
     unless (open FILE, "$configDir/$file") {
@@ -429,6 +547,20 @@ sub ReadConfigs
         $curJava{'SDK_HOME'} = $1 if $1;
       } elsif ($line =~ /^\s*JAVA_LINK\s*[:=]\s*([^\s]+)\s*$/) {
         $curJava{'JAVA_LINK'} = $1 if $1;
+      } elsif ($line =~ /^\s*alternative\s*[:=]\s*([^\s]+)\s*([^\s]+)\s*$/) {
+	$alternatives{"$2"} = "$1" if (($1) && ($2));
+      } elsif ($line =~ /^\s*more_alternatives\s*[:=]\s*([^\s]+)\s*$/) {
+        if ($1) {
+	  # save the value and the current line
+	  # the value will be later checked and converted to the index
+	  # to the array @javas, see end of this subroutine
+	  my @moreAltConfig = ("$1", $.);
+          # add suffix $configSuf if needed
+	  $moreAltConfig[0] .= "$configSuf" unless ($moreAltConfig[0] =~ /$configSufRegExp$/);
+          # remove $configDir if used
+	  $moreAltConfig[0] =~ s/^$configDirRegExp\///;
+	  push @moreAlternatives, \@moreAltConfig;
+	}
       } elsif ($line =~ /^\s*$/) {
         # empty line
       } else {
@@ -467,40 +599,86 @@ sub ReadConfigs
         push @checkDirList, 'SDK_HOME';
       }
     }  	
+    # the following checks break removing links in %preun in rpm
+    # if the packages are removed in wrong order
+    unless (defined $reqJava{'LessChecks'}) {
+      my $areDirValid = 1;
+      foreach my $dirName (@checkDirList) {
+        stat $curJava{$dirName};
+        unless (-d _) {
+          print STDERR "Warning: The directory \"" . $curJava{$dirName} . "\" does not exist\n";
+	  print STDERR "         Please fix $dirName in $configDir/$file\n";
+	  print STDERR "         Java from $configDir/$file is ignored\n";
+	  $areDirValid = 0;
+	  last;
+        }	
+      }  
+      next unless ($areDirValid);
 
-    my $areDirValid = 1;
-    foreach my $dirName (@checkDirList) {
-      stat $curJava{$dirName};
-      unless (-d _) {
-        print STDERR "Warning: The directory \"" . $curJava{$dirName} . "\" does not exist\n";
-	print STDERR "         Please fix $dirName in $configDir/$file\n";
-	print STDERR "         Java from $configDir/$file is ignored\n";
-	$areDirValid = 0;
-	last;
-      }	
-    }  
-    next unless ($areDirValid);
-
-    my @checkBinList = ('/java');
-    if ($curJava{'Devel'}) {
-      push @checkBinList, '/javac';
-    }
+      my @checkBinList = ('/java');
+      if ($curJava{'Devel'}) {
+        push @checkBinList, '/javac';
+      }
     
-    my $areBinValid = 1;
-    foreach my $fileName (@checkBinList) {
-      stat $curJava{'JAVA_BINDIR'} . $fileName;
-      unless (-x _) {
-        print STDERR "Warning: The binary \"" . $curJava{'JAVA_BINDIR'} . $fileName . "\" is not executable\n";
-	print STDERR "         Possibly JAVA_BINDIR in $configDir/$file has invalid value\n";
-	print STDERR "         Java from $configDir/$file is ignored\n";
-	$areBinValid = 0;
-	last;
-      }	
-    } 
-    next unless ($areBinValid);
+      my $areBinValid = 1;
+      foreach my $fileName (@checkBinList) {
+        stat $curJava{'JAVA_BINDIR'} . $fileName;
+        unless (-x _) {
+          print STDERR "Warning: The binary \"" . $curJava{'JAVA_BINDIR'} . $fileName . "\" is not executable\n";
+	  print STDERR "         Possibly JAVA_BINDIR in $configDir/$file has invalid value\n";
+	  print STDERR "         Java from $configDir/$file is ignored\n";
+	  $areBinValid = 0;
+	  last;
+        }	
+      } 
+      next unless ($areBinValid);
+    }
+    # add the the alternative for $libdir/$defaultJava
+    # by default due to backward compatibility
+    # do not do it if the link should be removed because
+    # we do not want to remove the link if the SDK
+    # is removed but JRE remains
+    unless ((defined $reqJava{'Remove'}) ||
+            (defined $alternatives{"$libdir/$defaultJava"})) {
+      $alternatives{"$libdir/$defaultJava"} = $curJava{'JAVA_LINK'};
+    }
 
-    # all values are valid, we can save them into main array
-    push @javas, \%curJava;
+    # all values are valid, we can save them into the array
+    push @javasUnsorted, \%curJava;
+  }
+  
+  # sort javas by priority and save them to the global array
+  my @idx = ();
+  for (@javasUnsorted) {
+    push @idx, $_->{'Priority'};
+  }
+  @javas = @javasUnsorted[ sort { $idx[$a] <=> $idx[$b] } 0 .. $#idx ];
+
+  # fill the hash javasConfigToIndex
+  foreach my $ind (0 .. $#javas) {
+    $javasConfigToIndex{$javas[$ind]->{'ConfigName'}} = $ind;
+  }
+
+  # check config names from the tags "more_alternatives" and convert them
+  # to the index
+  foreach my $java (@javas) {
+    my @moreAlt = @{$java->{'MoreAlternatives'}};
+    my @moreAltInd;
+    foreach my $moreAltConf (@moreAlt) {
+      if (defined $javasConfigToIndex{"$moreAltConf->[0]"}) {
+        push @moreAltInd, $javasConfigToIndex{"$moreAltConf->[0]"};
+      } else {
+        # do not warn if the option --ownalt is used
+	# in this case this tag is ignored anyway
+        unless (defined $reqJava{'OwnAlt'}) {
+          print STDERR "Warning: The config file \"$configDir/$moreAltConf->[0]\" does not exist.\n";
+          print STDERR "         The tag \"more_alternatives\" in the file \"$configDir/$java->{'ConfigName'}\",\n";
+	  print STDERR "         line $moreAltConf->[1] will be ignored.\n";
+	}
+      }
+    }
+    # replace the older information in the array with indexes to @javas
+    $java->{'MoreAlternatives'} = \@moreAltInd;
   }
 }      
 
@@ -564,8 +742,9 @@ sub IsVendorValid
   return 0;
 }
 
-# try to find Valid Java
-sub FindBestJava
+# check which javas correspond to the limitations set by
+# options --version, --vendor and --devel
+sub CheckValidJavas
 {
   my @validJavas;
   my $curJavaNum = 0;
@@ -578,12 +757,31 @@ sub FindBestJava
     $validJavas[$curJavaNum] = IsVendorValid($curJavaNum) if ($validJavas[$curJavaNum]);
     $curJavaNum += 1;
   }
+  return @validJavas;
+}
 
+# try to find the best java
+sub FindBestJava
+{
+  # prefer java defined by the option --config
+  if (defined $reqJava{'Config'}) {
+    if (defined $javasConfigToIndex{$reqJava{'Config'}}) {
+      # the prefered java by the option --config
+      return $javasConfigToIndex{$reqJava{'Config'}}
+    } else {
+      printf STDERR "Error: The config file \"$configDir/$reqJava{'Config'}\"\n";
+      printf STDERR "       selected by the option --config does not exist.\n";
+      exit 1;
+    }
+  }
+
+  # elsewhere we must select a java from valid javas 
+  my @validJavas = CheckValidJavas;
+  
   # find the best java by priority
   my $bestJava;
   my $bestPriority;
-  
-  $curJavaNum = 0;
+  my $curJavaNum = 0;
   while ($curJavaNum < @javas) {
     if ($validJavas[$curJavaNum]) {
       unless (defined $bestPriority) {
@@ -598,7 +796,7 @@ sub FindBestJava
     }  	  
     $curJavaNum += 1;
   }
-  
+  # the prefered java by priority
   return $bestJava;
 }
 
@@ -680,6 +878,44 @@ sub CheckCurrentLink
   return 1;
 }
 
+# check link of an alternative
+# returns:  0 - the link exists, corresponds to the given alternative,
+#		the target exists
+# returns:  1 - the link exists, corresponds to the given alternative,
+#		the target does not exist
+#	    2 - the link exists, does not corresponds to the given alternative,
+#		the target exists
+#	    3 - the link exists, does not corresponds to the given alternative,
+#		the target does not exist
+#	    4 - the file is not a link
+#	    5 - the file does not exist at all
+sub CheckAltLink
+{
+  my $altTarget = shift;
+  my $altLink = shift;
+
+  my @altLinkStat = lstat "$altLink";
+  # return undefine value when link does not exist
+  return 5 unless (@altLinkStat);
+  #check wheter it is really link
+  return 4 unless (-l _);
+  # check if the target exists
+  my @altStat = stat "$altLink";
+  if (-r _) {
+    # yes, it exists
+    # corresponds to the given alternative?
+    return 2 unless (readlink($altLink) eq $altTarget);
+    return 0;
+  } else {
+    # the target does not exits
+    # corresponds to the given alternative?
+    return 3 unless (readlink($altLink) eq $altTarget);
+    return 1;
+  }  
+}
+
+# it is needed to delete the default link $libdir/$defaultJava
+# it is used only due to backward compatibility
 sub DeleteInvalidLink
 {
   # which link name should we check
@@ -704,62 +940,190 @@ sub DeleteInvalidLink
   }
 }
 
-# create requested link if needed
-sub CreateLink
+# remove link only if it corresponds to the given alternative
+sub RemoveAltLink
 {
-  my $javaNum = shift;
-
-  my $linkPath;
-  if (defined $reqJava{'LinkName'}) {
-    $linkPath = "$libdir/$reqJava{'LinkName'}";
-  } else {
-    $linkPath = "$libdir/$defaultJava";
-  }
- 
-  my $linkStat = CheckCurrentLink($linkPath);
-  # nothink to do when link is valid and --noreplace is used
-  if (($linkStat == 0) && (defined $reqJava{'NoReplace'})) {
-    print "Current link \"$linkPath\" points to valid java directory\n";
-    print "Nothing changed!\n";
-    return;
-  }
-  
-  # delete old link if needed
-  if (($linkStat == 0) || ($linkStat == 1)) {
-    # save current link target and delete it
-    my $oldLinkTarget = readlink($linkPath);
-    # in has new link another target?
-    if ($oldLinkTarget eq $javas[$javaNum]->{'JAVA_LINK'}) {
-      print "Current link $linkPath points to required java directory\n";
-      print "Nothing changed!\n";
-      return;
-    }
-    # delete old link  
-    if (unlink "$linkPath") {
-      print "Link removed: $linkPath -> $oldLinkTarget\n";
+  my $altTarget = shift;
+  my $altLink = shift;
+  # delete old link only if it corresponds to the given alternative
+  my $altLinkStat = CheckAltLink($altTarget, $altLink);
+  if (($altLinkStat == 0) || ($altLinkStat == 1)) {
+    if (unlink "$altLink") {
+      print "Link removed: $altLink -> $altTarget\n";
     } else {
       print STDERR "Error: $!\n";
-      print STDERR "       Can not delete link \"$linkPath\"\n";
-      exit 1;
+      print STDERR "       Can not delete link \"$altLink\"\n";
+      return;
+    }  
+  }
+}
+
+# remove alternatives for given javas
+sub RemoveAlt
+{
+  foreach my $javaNum (@_) {
+    my %alternatives = %{$javas[$javaNum]->{'Alternatives'}};
+    foreach my $altLink (keys %alternatives) {
+      RemoveAltLink($alternatives{$altLink}, $altLink);
+    }
+  }
+}
+
+# create link for given alternative
+sub CreateAltLink
+{
+  my $altTarget = shift;
+  my $altLink = shift;
+  my $altLinkStat = CheckAltLink($altTarget, $altLink);
+  # nothing to do if the link:
+  # 	- corresponds to the alternative
+  #	- exist, the target exists and the option --noreplace was used
+  #	- it is not a link; it must be directory or a regular file,
+  #       so the place for alternatives is not usable
+  return if (($altLinkStat == 0) ||
+      (($altLinkStat == 2) && (defined $reqJava{'NoReplace'})) ||
+      ($altLinkStat == 4));
+  
+  # check the situation that the link corresponds to the given alternative
+  # but the target does not exist
+  if ($altLinkStat == 1) {
+    print STDERR "Error: The link $altLink -> $altTarget already exists\n";
+    print STDERR "       but the target does not.\n";
+    print STDERR "       Check definitions of alternatives in $configDir, please.\n";
+    return;    
+  }
+
+  # delete old link if needed
+  if (($altLinkStat == 2) || ($altLinkStat == 3)) {
+    # save current link target and delete it
+    my $oldAltTarget = readlink($altLink);
+    # delete it  
+    if (unlink "$altLink") {
+      print "Link removed: $altLink -> $oldAltTarget\n";
+    } else {
+      print STDERR "Error: $!\n";
+      print STDERR "       Can not delete link \"$altLink\"\n";
+      return;
     }  
   }
   
   # create new link
-  unless (symlink $javas[$javaNum]->{'JAVA_LINK'}, $linkPath) {
+  unless (symlink "$altTarget", "$altLink") {
     print STDERR "Error: $!\n";
-    print STDERR "       Can not create symbolic link $linkPath -> $javas[$javaNum]->{'JAVA_LINK'}\n";
-    exit 1;
+    print STDERR "       Can not create symbolic link $altLink -> $altTarget\n";
+    return;
   }
-  
-  print "Link created: $linkPath -> $javas[$javaNum]->{'JAVA_LINK'}\n";
-  
-  # does new link point to valid java directory
-  if (CheckCurrentLink($linkPath) == 1) {
-    print STDERR "Error: New link $linkPath does not pointo to valid java directory\n";
-    print STDERR "       Please, fix JAVA_LINK value in $configDir/$javas[$javaNum]->{'ConfigName'}\n";
-    print STDERR "       and run this script again\n";
+  print "Link created: $altLink -> $altTarget\n";
+
+  # check the link if the target exists
+  $altLinkStat = CheckAltLink($altTarget, $altLink);
+  if ($altLinkStat == 1) {
+    print STDERR "Error: The link $altLink -> $altTarget has been created\n";
+    print STDERR "       but the target does not exist.\n";
+    print STDERR "       Check definitions of alternatives in $configDir, please.\n";
+    return;    
   }
-  return;
+}
+
+# create alternative links for given javas
+sub LinkAlt
+{
+  # the same link could be for more alternatives
+  # first of all the conflicts must be removed to
+  # avoid repeated relinking
+  my %affectedAlternatives;
+  foreach my $javaNum (@_) {
+    my %alternatives = %{$javas[$javaNum]->{'Alternatives'}};
+    foreach my $altLink (keys %alternatives) {
+      $affectedAlternatives{$altLink} = $alternatives{$altLink} unless (defined $affectedAlternatives{$altLink});
+    }
+  }
+
+  # finally, create the links
+  foreach my $altLink (keys %affectedAlternatives) {
+    CreateAltLink($affectedAlternatives{$altLink}, $altLink);
+  }
+}
+
+# process javas recursively by the tag more_alternatives
+sub AddMoreAlternatives
+{
+  # already used java sorted by priority
+  my $selectedMoreJavasRef = shift;
+  # already used javas by index
+  my $usedJavasRef = shift;
+  # current java
+  my $curJavaNum = shift;
+  
+  # has been this java already used?
+  unless (defined $$usedJavasRef[$curJavaNum]) {
+    # no, so save it
+    push @$selectedMoreJavasRef, $curJavaNum;
+    $$usedJavasRef[$curJavaNum] = 1;
+    # and recursive process more alternatives
+    foreach my $moreAlt (@{$javas[$curJavaNum]->{'MoreAlternatives'}}) {
+      AddMoreAlternatives($selectedMoreJavasRef, $usedJavasRef, $moreAlt);
+    }
+  }
+}
+
+# do the real job of the function "setJava.pl link" (remove
+# or create links)
+sub ProcessLink
+{
+  my $preferredJava = shift;
+
+  # set only the one link if the option --linkname is used
+  if (defined $reqJava{'LinkName'}) {
+    # removing or creating is required?
+    if (defined $reqJava{'Remove'}) {
+      RemoveAltLink($javas[$preferredJava]->{'JAVA_LINK'}, "$libdir/$reqJava{'LinkName'}");
+    } else {
+      CreateAltLink($javas[$preferredJava]->{'JAVA_LINK'}, "$libdir/$reqJava{'LinkName'}");
+    }
+    return
+  }
+
+  # this array is for javas selected directly by the commandline options
+  my @selectedJavas;
+
+  if (defined $reqJava{'AllJavas'}) {
+    # use all valid javas if the option --alljavas was used
+    my @validJavas = CheckValidJavas;
+    my $curJavaNum = 0;
+    while ($curJavaNum < @javas) {
+      push @selectedJavas, $curJavaNum if $validJavas[$curJavaNum];
+      $curJavaNum += 1;
+    }
+  } else {
+    # use the one prefered java otherwise
+    push @selectedJavas, $preferredJava;
+  }
+
+  # this aray is for all affected javas (java configs)
+  # they can be selected also indirectly by the more_alternatives
+  # tags in config files
+  my @selectedMoreJavas;
+
+
+  # add also references to more alternatives if it is enabled
+  if (defined $reqJava{'OwnAlt'}) {
+    # ignore the tag more_alternatives if the option --ownalt was used
+    @selectedMoreJavas = @selectedJavas;
+  } else {
+    # archive already used javas to avoid duplicities and cycles within recursion
+    my @usedJavas;
+    foreach my $curJavaNum (@selectedJavas) {
+      AddMoreAlternatives(\@selectedMoreJavas, \@usedJavas, $curJavaNum);
+    }
+  }
+
+  # finally, remove or create the links
+  if (defined $reqJava{'Remove'}) {
+    RemoveAlt(@selectedMoreJavas);
+  } else {
+    LinkAlt(@selectedMoreJavas);
+  }
 }
 
 #####################################################
@@ -796,4 +1160,4 @@ unless (defined $bestJava) {
 
 # process requested function
 PrintEnv($bestJava) if ($reqFunc eq 'setenv');
-CreateLink($bestJava) if ($reqFunc eq 'link');
+ProcessLink($bestJava) if ($reqFunc eq 'link');
