@@ -517,8 +517,8 @@ ROOT_LOGIN_REMOTE="no"
 
 #
 # Some packages by SuSE include dynamically linked motif progs as well
-# as statically linked (<p>.SuSE-dynamic resp. <p>.SuSE-static). SuSEconfig 
-# can analyze your system and link the matching program to <p>.  If you
+# as statically linked (*.SuSE-dynamic resp. *.SuSE-static). SuSEconfig 
+# can analyze your system and link the matching program to *.  If you
 # set this to "clean", the other binary will be deleted. (no/link/clean)
 #
 HOW_TO_HANDLE_COMMERCIAL_LIBS=link
