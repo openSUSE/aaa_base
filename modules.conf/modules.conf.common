@@ -326,6 +326,12 @@ alias net-pf-11           rose
 # alias net-pf-11           off
 alias net-pf-17           af_packet
 
+alias md-personality-1  linear
+alias md-personality-2  raid0
+alias md-personality-3  raid1
+alias md-personality-4  raid5
+alias md-personality-7  multipath
+
 alias tap0                ethertap
 alias tap1                ethertap
 alias tap2                ethertap

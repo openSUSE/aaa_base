@@ -12,6 +12,8 @@
 # Provides:       nfs
 # Required-Start: $network $portmap
 # Required-Stop:
+# X-UnitedLinux-Should-Start: nfslock
+# X-UnitedLinux-Should-Stop:
 # Default-Start:  3 5
 # Default-Stop:
 # Description:    Imports remote Network File Systems (NFS)
@@ -19,8 +21,6 @@
 
 . /etc/rc.status
 
-NEED_NFS=no
-rc_active autofs && NEED_NFS=yes
 nfs=no
 while read  where what type options rest  ; do
     case "$where" in
@@ -31,27 +31,12 @@ while read  where what type options rest  ; do
 	   fi ;;
     esac
 done < /etc/fstab
-test "$nfs" = yes && NEED_NFS=yes
-
-case `uname -r` in
-   0.*|1.*|2.0.*) RPCSTATD="" ;;
-   *)
-      test -x /usr/sbin/rpc.statd && RPCSTATD=/usr/sbin/rpc.statd
-      test -x /usr/sbin/rpc.kstatd && RPCSTATD=/usr/sbin/rpc.kstatd
-      test -x /sbin/rpc.statd && RPCSTATD=/sbin/rpc.statd
-      ;;
-esac
 
 rc_reset
 case "$1" in
     start|reload)
-	test "$NEED_NFS" = "yes" || exit 0;
-	echo -n "Importing Net File System (NFS)"
-	if test -n "$RPCSTATD" ; then
-	  checkproc $RPCSTATD || startproc $RPCSTATD
-	  rc_status
-	fi
 	if test "$nfs" = yes ; then
+	echo -n "Importing Net File System (NFS)"
 	# Mount all auto NFS devices (-> nfs(5) and mount(8) )
 	#  NFS-Server sometime not reachable during boot phase.
 	#  It's sometime usefull to mount NFS devices in

@@ -2,9 +2,9 @@
 ## /etc/inputrc
 ##
 ## Attempt to put different TERMs together in one readline init file.
-## Copyright (c) 1997,2000 SuSE Linux AG, Nuernberg, Germany.
+## Copyright (c) 1997,2000,2002 SuSE Linux AG, Nuernberg, Germany.
 ##
-## Author: Werner Fink,  <werner@suse.de>
+## Author: Werner Fink,  <feedback@suse.de>
 ##
 ################################################################################
 #
@@ -31,6 +31,10 @@ $endif
 "\e[5~":	history-search-backward
 "\e[6~":	history-search-forward
 $if term=xterm
+"\e[2;2~":	yank
+"\e[3;2~":	delete-char
+"\e[5;2~":	history-search-backward
+"\e[6;2~":	history-search-forward
 "\e[2;5~":	yank
 "\e[3;5~":	delete-char
 "\e[5;5~":	history-search-backward
@@ -42,6 +46,14 @@ $endif
 "\e[B":		next-history
 $if term=xterm
 "\e[E":		re-read-init-file
+"\e[2C":	forward-word
+"\e[2D":	backward-word
+"\e[2A":	history-search-backward
+"\e[2B":	history-search-forward
+"\e[5C":	forward-word
+"\e[5D":	backward-word
+"\e[5A":	history-search-backward
+"\e[5B":	history-search-forward
 $else
 "\e[G":		re-read-init-file
 $endif
@@ -67,9 +79,15 @@ $if term=xterm
 "\e[4~":	set-mark
 "\e[H":		beginning-of-line
 "\e[F":		end-of-line
+"\e[2H":	beginning-of-line
+"\e[2F":	end-of-line
+"\e[5H":	beginning-of-line
+"\e[5F":	end-of-line
 # Home and End of application keypad and cursor of xterm
 "\eOH":		beginning-of-line
 "\eOF":		end-of-line
+"\eO2H":	beginning-of-line
+"\eO2F":	end-of-line
 "\eO5H":	beginning-of-line
 "\eO5F":	end-of-line
 $else
@@ -94,6 +112,14 @@ $if term=xterm
 "\eOA":         previous-history
 "\eOB":         next-history
 "\eOE":         re-read-init-file
+"\eO2D":        backward-word
+"\eO2C":        forward-word
+"\eO2A":        history-search-backward
+"\eO2B":        history-search-forward
+"\eO5D":        backward-word
+"\eO5C":        forward-word
+"\eO5A":        history-search-backward
+"\eO5B":        history-search-forward
 # DEC keyboard KP_F1 - KP_F4 or
 # XTerm of XFree86 in VT220 mode F1 - F4
 "\eOP":		prefix-meta

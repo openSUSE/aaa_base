@@ -80,7 +80,8 @@ fi
 #
 # Initialize runlevel links
 #
-%{fillup_and_insserv -py nscd halt nfs random reboot single xdm boot.clock boot.ipconfig boot.klog boot.ldconfig boot.localfs boot.localnet boot.proc boot.swap boot.idedma}
+# etc/init.d/nfs removed from list (no longer on by default)
+%{fillup_and_insserv -py nscd halt random reboot single xdm boot.clock boot.ipconfig boot.klog boot.ldconfig boot.localfs boot.localnet boot.proc boot.swap boot.idedma}
 %{fillup_and_insserv -psy boot.crypto START_CRYPTO_FILESYSTEMS}
 ## powerfail probably needs empty header ...
 
