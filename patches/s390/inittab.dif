@@ -1,13 +1,13 @@
 --- etc/inittab	2002/04/25 10:49:58	1.1
 +++ etc/inittab	2002/04/25 11:01:23
-@@ -41,14 +41,7 @@
+@@ -41,14 +41,10 @@
  
  # what to do in single-user mode
  ls:S:wait:/etc/init.d/rc S
 -~~:S:respawn:/sbin/sulogin
--
--# what to do when CTRL-ALT-DEL is pressed
--ca::ctrlaltdel:/sbin/shutdown -r -t 4 now
+ 
+ # what to do when CTRL-ALT-DEL is pressed
+ ca::ctrlaltdel:/sbin/shutdown -r -t 4 now
 -
 -# special keyboard request (Alt-UpArrow)
 -# look into the kbd-0.90 docs for this
@@ -16,7 +16,7 @@
  
  # what to do when power fails/returns
  pf::powerwait:/etc/init.d/powerfail start
-@@ -59,29 +52,8 @@
+@@ -59,29 +55,8 @@
  # for ARGO UPS
  sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
  
