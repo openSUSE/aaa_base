@@ -122,17 +122,34 @@ case "$1" in
 	rc_status
 	;;
     status)
+	echo -n "Checking status for configured network devices:"
+	ONE_FOUND="false"
+	ONE_DOWN="false"
 	for I in $NETCONFIG; do
 	    eval NETDEV=\$NETDEV$I
+	    eval IFCONFIG=\$IFCONFIG$I
+	    case $IFCONFIG in
+		dhcpclient)
+		    continue
+		    ;;
+	    esac
 	    case $NETDEV in
 		ippp*|ppp*|isdn*)
 		    # Should be done in i4l boot scripts, therefore
 		    continue
 		    ;;
 		*)
-		    ifconfig $NETDEV
+		    case "`ifconfig $NETDEV 2>&1`" in
+			${NETDEV}*UP*) ONE_FOUND="true" ;;
+			${NETDEV}*) ONE_DOWN="true" ;;
+		    esac
+		    ;;
 	    esac
 	done
+	if test "$ONE_FOUND" = "false" -o "$ONE_DOWN" = "true" ; then
+	  rc_failed 3
+	fi
+	rc_status -v
 	;;
     probe)
 	r=""
