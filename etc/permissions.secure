@@ -60,6 +60,7 @@
 /usr/local/bin/spic                    root.root         755
 /usr/sbin/amcheck                      root.root         755
 /usr/sbin/suexec                       root.root         755
+/sbin/isdnctrl                         root.root         750
 
 
 #
