@@ -82,6 +82,12 @@ if ( -r /etc/SuSEconfig/csh.cshrc ) then
     endif
 endif
 #
+# Local configuration
+#
+if ( -r /etc/csh.cshrc.local ) then
+    source /etc/csh.cshrc.local
+endif
+#
 # source extensions for special packages
 #
 if ( -d /etc/profile.d ) then

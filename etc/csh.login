@@ -52,7 +52,13 @@ unset _xpath
 if ( -r /etc/SuSEconfig/csh.login ) then
     source /etc/SuSEconfig/csh.login
 endif
-
+#
+# Local configuration
+#
+if ( -r /etc/csh.login.local ) then
+    source /etc/csh.login.local
+endif
+#
 if ( "$uid" == "0" ) then
     set who=( "%n has %a %l from %M." )
     set watch=( any any )
