@@ -140,8 +140,9 @@ complete -A command			command which nohup exec nice eval
 complete -A command 			ltrace strace gdb
 HOSTFILE=""
 test -s $HOME/.hosts && HOSTFILE=$HOME/.hosts
-complete -A hostname			ping telnet rsh ssh slogin \
-					rlogin traceroute nslookup
+complete -A hostname			ping telnet slogin rlogin \
+					traceroute nslookup
+complete -A hostname -A directory -A file rsh ssh scp
 complete -A stopped -P '%'		bg
 complete -A job -P '%'			fg jobs disown
 

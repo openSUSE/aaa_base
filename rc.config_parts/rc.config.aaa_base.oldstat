@@ -38,11 +38,47 @@ YP_SERVER=""
 CREATE_YP_CONF="yes"
 
 #
+# SuSEconfig can create and check the /etc/host.conf for you. Should this
+# be done ("yes" or "no").
+#
+CREATE_HOSTCONF="yes"
+
+#
 # Which device is the modem ? (e.g. "/dev/ttyS1")
 # (can be safely removed during update, the link is set already
 #  then, on installation, YaST2 sets the link)
 MODEM=""
 
+#
+# Enable this in order to automatically load the memstat
+# kernel module for xosview at boot time if the module is
+# available for the currently running kernel.
+#
+LOAD_MEMSTAT_MODULE="no"
+
+#
+# May SuSEconfig run h2ph when kernelsources have changed
+#
+GENERATE_PERL_SYSTEM_INCLUDES="yes"
+
+#
+# Do you want ide dma mode to be started?
+# Some notes:
+# * If ide dma mode works, depends on your hardware, if you assume that you
+#   have new, good non-flaky hardware, you can use it.
+# * which ide drives should use dma mode can be set in /etc/rc.config.d/idedma.rc.config
+#
+START_IDEDMA="no"
+
+#
+# Do you want USB support to be started?
+# This allows autoloading of USB drivers for printer, scanner etc.
+# The support for mouse and keyboard is either compiled into the kernel
+# or loaded via a initrd.
+# Some notes:
+# * you need to enable USB in the BIOS on an i386 compatible machine
+#
+START_USB="yes"
 
 ##
 ## Formatting the boot script messages:
