@@ -230,7 +230,9 @@ case "$-" in
 	    elif test -s /etc/profile.d/complete.bash ; then
 		. /etc/profile.d/complete.bash
 	    fi
-
+	    for s in /etc/bash_completion.d/*.sh ; do
+		test -r $s && . $s
+	    done
 	    ;;
 	*)  ;;
 	esac
