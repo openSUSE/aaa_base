@@ -55,7 +55,7 @@ cat /dev/null > $TMPDIR/cron.daily.$$
 if [ -n "$RUN_UPDATEDB" -a "$RUN_UPDATEDB" = "yes" -a \
      -x /usr/bin/updatedb ] ; then
   for DUMMY in `find /var/lib/locatedb -ctime -7 2> /dev/null` ; do
-      for i in `locate '*/core'` ; do
+      for i in `locate '*/core' '*/core.[0-9]*'` ; do
           if [ -f $i ] ; then
               echo $i >> $TMPDIR/cron.daily.$$
           fi
@@ -77,7 +77,7 @@ fi
 
 for COREFILE in `cat $TMPDIR/cron.daily.$$`; do
     for i in `find $COREFILE ! \( -fstype nfs -o -fstype NFS \) \
-        -name core -type f \
+        \( -name core -o -name "core.[0-9]*" \) -type f \
         -ctime +$MAX_DAYS_FOR_CORE 2> /dev/null` ; do
         if [ -n "$DELETE_OLD_CORE" -a "$DELETE_OLD_CORE" = "yes" ] ; then
             echo "Deleting core file older than $MAX_DAYS_FOR_CORE days: $i"
