@@ -259,6 +259,12 @@ if test -n "$CREATE_RESOLVCONF" -a "$CREATE_RESOLVCONF" = "yes" -a \
         done
         check_md5_and_move $r/etc/resolv.conf
     fi
+    test -x /sbin/init.d/nscd -a -x /usr/bin/find -a -z "$r" && {
+        for DUMMY in `/usr/bin/find /etc/resolv.conf -mmin -1` ; do
+            /sbin/init.d/nscd restart
+            break
+        done
+    }
 fi
 
 

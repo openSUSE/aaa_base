@@ -179,6 +179,28 @@ mount -av -t nonfs,noproc || ECHO_RETURN=$rc_failed_up
 echo -e "$ECHO_RETURN"
 
 #
+# mount /dev/pts if not done by /etc/fstab.
+#
+DEV_PTS_MOUNTED=false
+mounts=/etc/mtab
+test -r /proc/mounts && mounts=/proc/mounts
+while read des fs type rest; do
+    case "$fs" in
+        /dev/pts) DEV_PTS_MOUNTED=true ; break ;;
+        *)       ;;
+    esac
+done < $mounts
+
+if test $DEV_PTS_MOUNTED = false ; then
+    ECHO_RETURN=$rc_done_up
+    echo -n Mounting /dev/pts.
+    mount -t devpts -ogid=5 -omode=0620 devpts /dev/pts || \
+        ECHO_RETURN=$rc_failed_up
+    echo -e "$ECHO_RETURN"
+fi
+
+
+#
 # reinit quota, if fsck has returned value != 0
 #
 if test $FSCK_RETURN -gt 0 -a -n "$START_QUOTA" -a "$START_QUOTA"="yes" ; then

@@ -16,6 +16,14 @@
 base=${0##*/}
 link=${base#*[SK][0-9][0-9]}
 
+# Be compatible with older SuSE Linux versions
+if test "$DHCLIENT" = "yes" -a "$NETCONFIG" = "_0" ; then
+    test -z "${IFCONFIG_0}" && \
+    test "${IFCONFIG_1}" != "dhcpclient" &&
+    test "${IFCONFIG_2}" != "dhcpclient" &&
+    test "${IFCONFIG_3}" != "dhcpclient" && IFCONFIG_0="dhcpclient"
+fi
+
 # If not called by a runlevel directory, maybe the device
 # is given as *second* argument
 if test $link = $base -a -n "$2" ; then

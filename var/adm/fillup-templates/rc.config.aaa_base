@@ -60,7 +60,7 @@ RC_LC_CTYPE=""
 RC_LC_COLLATE=""
 
 #
-# This defines the locale for formatting date and time output.
+# This defines the locale for date and time output formats.
 # i.e.: 06/09/1999 vs. 09.06.1999
 #
 RC_LC_TIME=""
@@ -84,8 +84,8 @@ ROOT_USES_LANG="no"
 
 #
 # SuSEconfig can mail reports (created by YaST or included in packages)
-# to you.  Here you can set the address.  If you don't want it, simply
-# set it to "".
+# to you.  Here you can set the address.  If you don't want reports to
+# be send, then simply set it to "".
 #
 MAIL_REPORTS_TO="root"
 
@@ -102,7 +102,7 @@ MAIL_LEVEL="warn"
 MOUSE="YAST_ASK"
 
 #
-# Which device is the modem ? (e.g. "/dev/cua1")
+# Which device is the modem ? (e.g. "/dev/ttyS1")
 #
 MODEM="YAST_ASK"
 
@@ -113,12 +113,12 @@ MODEM="YAST_ASK"
 KEYTABLE="de-latin1-nodeadkeys"
 
 #
-# what font for console shall be loaded?
+# Load this console font upon bootup:
 #
 CONSOLE_FONT=""
 
 #
-# does your console font need a screenmap. so add it to CONSOLE_SCREENMAP.
+# Does your console font need a screenmap? Insert it into CONSOLE_SCREENMAP.
 #
 CONSOLE_SCREENMAP=""
 
@@ -138,7 +138,7 @@ CONSOLE_MAGIC=""
 #
 # keyboard repeat rate (2.0 - 30.0)
 # keyboard delay time in ms (250, 500, 750, 1000)
-# (you have to set both, if "kbdrate" should be called)
+# (If you want "kbdrate" to be executed, you have to set both of them.)
 #
 KBD_RATE=""
 KBD_DELAY=""
@@ -227,14 +227,14 @@ IP_DYNIP=no
 IP_TCP_SYNCOOKIES=yes
 
 #
-# 2 you can configure at runtime, if the host may forward
-# IP packages or not.  Is this host a router? (yes/no)
+# runtime-configurable parameter: forward IP packets.
+# Is this host a router? (yes/no)
 #
 IP_FORWARD=no
 
 
 #
-# SuSEconfig can do some checks and modifications for /etc/hosts. 
+# SuSEconfig can do some checks and modifications in /etc/hosts. 
 # If this is not wanted, set the following variable to 'no' (yes, no).
 #
 CHECK_ETC_HOSTS=yes
@@ -273,7 +273,7 @@ CREATE_HOSTCONF="yes"
 # If set to yes and one of SEARCHLIST and NAMESERVER is empty,
 # it is assumed, that no DNS is wanted and /etc/resolv.conf will
 # be deleted. If yes and both are filled out, it will be created.
-# "no" simply lets /etc/resolv.conf untouched.
+# "no" leaves /etc/resolv.conf untouched.
 #
 CREATE_RESOLVCONF=yes
 
@@ -369,8 +369,8 @@ CRON="yes"
 #
 # start portmap? ("yes" or "no")
 # this is needed, if the NFS server is started or if NIS is used
-# Attention! If NFS_SERVER is set to "yes", START_PORTMAP will be
-# ignored and portmap will be startet in any case.
+# Caution! The portmapper will be started with no regard to
+# START_PORTMAP if NFS_SERVER is set to "yes"!
 #
 START_PORTMAP="YAST_ASK"
 
@@ -388,12 +388,12 @@ NFS_SERVER="YAST_ASK"
 USE_KERNEL_NFSD="no"
 
 #
-# the kernel nfs-server supports multiple server processes 
+# the kernel nfs-server supports multiple server threads
 #
 USE_KERNEL_NFSD_NUMBER="4"
 
 #
-# should translate server client for userid and goupid be started 
+# translates userid and goupid between server and client
 # ("yes" or "no"). Needs to be started on NFS clients.
 #
 NFS_SERVER_UGID="yes"
@@ -648,7 +648,7 @@ CONSOLE_SHUTDOWN=reboot
 START_ISAPNP=yes
 
 #
-# Should the Name Switch Caching Daemon be started at bootup?  (yes/no)
+# run the Name Service Caching Daemon at boot time? (yes/no)
 #
 START_NSCD=yes
 
