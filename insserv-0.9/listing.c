@@ -21,25 +21,11 @@
 
 #define MAX_DEEP 99
 
-#define LVL_HALT	0x001
-#define LVL_ONE		0x002
-#define LVL_TWO		0x004
-#define LVL_THREE	0x008
-#define LVL_FOUR	0x010
-#define LVL_FIVE	0x020
-#define LVL_REBOOT	0x040
-#define LVL_SINGLE	0x080
-#define LVL_BOOT	0x100
-
 /*
  * LVL_BOOT is already done if  one of the LVL_ALL will be entered.
  */
 #define LVL_ALL		\
 (LVL_HALT|LVL_ONE|LVL_TWO|LVL_THREE|LVL_FOUR|LVL_FIVE|LVL_REBOOT|LVL_SINGLE)
-
-extern const char *delimeter;
-extern void error (const char *fmt, ...);
-extern void warn (const char *fmt, ...);
 
 int maxorder = 0;  /* Maximum order of runlevels 0 upto 6 and S */
 
@@ -47,19 +33,26 @@ int maxorder = 0;  /* Maximum order of runlevels 0 upto 6 and S */
 #define getdir(list)  list_entry((list), struct dir_struct, d_list)
 #define getlink(list) list_entry((list), struct link_struct, l_list)
 
+/*
+ * We handle services (aka scripts) as directories because
+ * dependencies can be handels as symbolic links therein.
+ * A provided service will be linked into a required service.
+ * For the general typ of linked list see listing.h.
+ */
+
 typedef struct link_struct {
-    list_t		l_list;
+    list_t		l_list;	/* The linked list to other symbolic links */
     struct dir_struct * target;
-} link_t;
+} link_t;			/* This is a "symbolic link" */
 
 typedef struct dir_struct {
-    list_t	      d_list;
-    link_t	        link;   /* first link in a directory */
+    list_t	      d_list;	/* The linked list to other directories */
+    link_t	        link;   /* First symbolic link in this directory */
     char	       order;
     char	      * name;
     char	    * script;
     unsigned int	 lvl;
-} dir_t;
+} dir_t;			/* This is a "directory" */
 
 static list_t dirs = { &(dirs), &(dirs) }, * d_start = &dirs;
 
@@ -83,16 +76,13 @@ static dir_t * providedir(const char * name)
 	l_start->next = l_start;
 	l_start->prev = l_start;
 	this->link.target = NULL;
-	this->name  = strdup(name);
-	if (!this->name)
-	    goto err;
+	this->name  = xstrdup(name);
 	this->script = NULL;
-	this->order = 0;
-	this->lvl   = 0;
+	this->order  = 0;
+	this->lvl    = 0;
 	ptr = d_start->prev;
 	goto out;
     }
-err:
     ptr = NULL;
     error("%s", strerror(errno));
 out:
@@ -334,7 +324,7 @@ boolean notincluded(const char * script, const int runlevel)
 	case 7: lvl = LVL_SINGLE; break;
 	case 8: lvl = LVL_BOOT;   break;
 	default:
-	    error("Wrong runlevel %d\n", runlevel);
+	    warn("Wrong runlevel %d\n", runlevel);
     }
 
     for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
@@ -381,7 +371,7 @@ boolean foreach(char ** script, int * order, const int runlevel)
 	case 7: lvl = LVL_SINGLE; break;
 	case 8: lvl = LVL_BOOT;	  break;
 	default:
-	    error("Wrong runlevel %d\n", runlevel);
+	    warn("Wrong runlevel %d\n", runlevel);
     }
 
     do {
@@ -392,7 +382,7 @@ boolean foreach(char ** script, int * order, const int runlevel)
 	dir = getdir(tmp);
 
 	ret = true;
-	*script  = dir->script;
+	*script = dir->script;
 	*order = dir->order;
 
 	tmp = tmp->next;
@@ -447,10 +437,19 @@ void requiresv(const char * this, const char * requires)
  */
 void runlevels(const char * this, const char * lvl)
 {
-
     dir_t * dir = providedir(this);
+
+    dir->lvl = str2lvl(lvl);
+}
+
+/*
+ * Two helpers for runlevel bits and strings.
+ */
+unsigned int str2lvl(const char * lvl)
+{
     char * token, *tmp = strdupa(lvl);
     int num;
+    unsigned int ret = 0;
 
     if (!tmp)
 	error("%s", strerror(errno));
@@ -467,18 +466,45 @@ void runlevels(const char * this, const char * lvl)
 	else
 	    num = atoi(token);
 	switch (num) {
-	    case 0: dir->lvl |= LVL_HALT;   break;
-	    case 1: dir->lvl |= LVL_ONE;    break;
-	    case 2: dir->lvl |= LVL_TWO;    break;
-	    case 3: dir->lvl |= LVL_THREE;  break;
-	    case 4: dir->lvl |= LVL_FOUR;   break;
-	    case 5: dir->lvl |= LVL_FIVE;   break;
-	    case 6: dir->lvl |= LVL_REBOOT; break;
-	    case 7: dir->lvl |= LVL_SINGLE; break;
-	    case 8: dir->lvl |= LVL_BOOT;   break;
-	    default: break;
+	    case 0: ret |= LVL_HALT;   break;
+	    case 1: ret |= LVL_ONE;    break;
+	    case 2: ret |= LVL_TWO;    break;
+	    case 3: ret |= LVL_THREE;  break;
+	    case 4: ret |= LVL_FOUR;   break;
+	    case 5: ret |= LVL_FIVE;   break;
+	    case 6: ret |= LVL_REBOOT; break;
+	    case 7: ret |= LVL_SINGLE; break;
+	    case 8: ret |= LVL_BOOT;   break;
+	    default:
+		warn("Wrong runlevel %d\n", num);
 	}
     }
+
+    return ret;
+}
+
+char * lvl2str(const unsigned int lvl)
+{
+    char str[20], * ptr = str;
+    int num;
+    unsigned int bit = 0x001;
+
+    memset(ptr , '\0', sizeof(str));
+    for (num = 0; num < 9; num++) {
+	if (bit & lvl) {
+	    if      (num < 7)
+		*(ptr++) = num + 48;
+	    else if (num == 7)
+		*(ptr++) = 'S';
+	    else if (num == 8)
+		*(ptr++) = 'B';
+	    else
+		error("Wrong runlevel %d\n", num + 48);
+	    *(ptr++) = ' ';
+	}
+	bit <<= 1;
+    }
+    return xstrdup(str);
 }
 
 /*
@@ -549,9 +575,7 @@ int makeprov(const char * name, const char * script)
 
     if (!dir->script) {
 	if (!alias) {
-	    dir->script = strdup(script);
-    	    if (!dir->script)
-		error("%s", strerror(errno));
+	    dir->script = xstrdup(script);
 	} else
 	    dir->script = alias->script;
 	goto out;

@@ -73,6 +73,9 @@ test -e /etc/init.d/halt.local && {
 # Write to wtmp file before unmounting /var
 $command -w 
 
+# Set a flag that we had success upto this point
+> /success
+
 # Stop blogd before umounting /var
 killproc -QUIT /sbin/blogd
 
@@ -114,7 +117,8 @@ while read des fs type rest; do
 	""|\#*)	   continue ;;
 	/dev/loop*)
 		   umount $fs
-		   losetup -d $des ;;
+		   losetup $des &> /dev/null
+		   test $? -eq 0 && losetup -d $des ;;
     esac
     case "$fs"   in
 	/proc)     continue ;;

@@ -14,19 +14,25 @@ Insserv \- Enable an installed system init script
 .SH SYNOPSIS
 .\"
 .B insserv
+.RB [ -d ]
 .RI [[ / ] path/to/init.d/ ]
 .PP
 .B insserv
+.RB [ -d ]
 .RI [[ / ] path/to/init.d/ ] script \ ...
 .PP
 .B insserv
+.RI [[ / ] path/to/init.d/ ] script [ ,start=lvl1 [ ,lvl2 ]]\ ...
+.PP
+.B insserv
 .B -r
+.RB [ -d ]
 .RI [[ / ] path/to/init.d/ ] script \ ...
 .PP
-.RB [ /usr ] /lib/lsb/install_initd
+.RB /usr/lib/lsb/install_initd
 .RI [[ / ] path/to/init.d/script ]
 .PP
-.RB [ /usr ] /lib/lsb/remove_initd
+.RB /usr/lib/lsb/remove_initd
 .RI [[ / ] path/to/init.d/script ]
 .SH DESCRIPTION
 .B insserv
@@ -114,13 +120,20 @@ Here is an example for
 .fi
 .in -1l
 .sp 1
-\."
+.\"
 .SH OPTIONS
-Currently there is only one option for
+Currently there is only two options for
 .BR insserv .
 .TP
 .B \-r
 Remove the listed scripts from all runlevels.
+.TP
+.B \-d
+Use default runlevels a defined in the scripts.
+This may restore an edited runlevel link scheme.
+.PP
+But you may use the argument syntax described in the
+following section.
 .SH ARGUMENTS
 .TP
 .RI [[ / ] path/to/init.d/ ]
@@ -133,7 +146,8 @@ In this case
 does not add or remove a script to the runlevels
 declared in the script headers, but may re-order the
 runlevels if the order of the currently enabled scripts
-has changed.
+has changed (see option
+.BR \-d ).
 Note that if a relative path is used
 .B insserv
 has to be called from the root directory.
@@ -145,6 +159,17 @@ should point to the absolute or relative
 location of the boot scripts.
 .B insserv
 checks for the existence of these scripts.
+For the runlevels the information found in
+the script is used.
+.TP
+.RI [[ / ] path/to/init.d/ ] script [ ,start=lvl1 [ ,lvl2 ]]\ ...
+List of scripts which have to be added to
+the specified runlevels to be started with.
+You may use this extension to overwrite the default values
+for start and stop runlevels of the script.
+The extension
+.IR ,stop=lvl1 [ ,lvl2 ]]
+is possible but ignored on SuSE Linux.
 .TP
 .RI \fB\-r\fR\ [[ / ] path/to/init.d/ ] script\ ...
 List of scripts which should be removed from
@@ -153,7 +178,7 @@ should point to the absolute or relative
 location of the boot scripts.
 .B insserv
 checks for the existence of these scripts.
-\."
+.\"
 .SH BUGS
 Boot script sometimes misses comments.
 .SH FILES

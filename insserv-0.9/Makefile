@@ -11,7 +11,7 @@ INSCONF  =	/etc/insserv.conf
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.8
+VERSION	 =	0.9
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #
@@ -21,13 +21,17 @@ DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 #
 # egcs used with -O2 includes -fno-force-mem which is/was buggy (1998/10/08)
 #
-ifeq ($(ARCH),i386)
-	  COPTS = -mcpu=i486 -fomit-frame-pointer -fschedule-insns2
+ifdef RPM_OPT_FLAGS
+	  COPTS = $(RPM_OPT_FLAGS)
 else
-	  COPTS = -fomit-frame-pointer -fschedule-insns2
+ifeq ($(ARCH),i386)
+	  COPTS = -O2 -mcpu=i486 -fomit-frame-pointer -fschedule-insns2
+else
+	  COPTS = -O2 -fomit-frame-pointer -fschedule-insns2
 endif
-	 CFLAGS = -O2 $(COPTS) $(DEBUG) -D_GNU_SOURCE \
-		  -DINITDIR=\"$(INITDIR)\" -DINSCONF=\"$(INSCONF)\" -Wall -pipe
+endif
+	 CFLAGS = -Wall $(COPTS) $(DEBUG) -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
+		  -DSUSE -DINITDIR=\"$(INITDIR)\" -DINSCONF=\"$(INSCONF)\" -pipe
 	  CLOOP = -funroll-loops
 	     CC = gcc
 	     RM = rm -f
@@ -48,7 +52,7 @@ endif
 	SBINDIR = $(DESTDIR)/sbin
 	CONFDIR = $(DESTDIR)/etc
 	 LSBDIR = $(DESTDIR)/lib/lsb
-      OLDLSBDIR = $(DESTDIR)/usr/lib/lsb
+      USRLSBDIR = $(DESTDIR)/usr/lib/lsb
 #
 #
 #
@@ -71,14 +75,13 @@ install:	$(TODO)
 	$(MKDIR)   $(CONFDIR)
 	$(MKDIR)   $(LSBDIR)
 	$(MKDIR)   $(DESTDIR)/usr/lib
+	$(MKDIR)   $(USRLSBDIR)
 	$(INSTBIN) insserv        $(SBINDIR)/
 	$(INSTDOC) insserv.8      $(SDOCDIR)/
 	$(INSTCON) insserv.conf   $(CONFDIR)/
 	$(INSTCON) init-functions $(LSBDIR)/
-	$(INSTSRP) install_initd  $(LSBDIR)/
-	$(INSTSRP) remove_initd   $(LSBDIR)/
-	$(RMDIR)   $(OLDLSBDIR)/
-	$(LINK)    ../../lib/lsb  $(OLDLSBDIR)
+	$(INSTSRP) install_initd  $(USRLSBDIR)/
+	$(INSTSRP) remove_initd   $(USRLSBDIR)/
 
 #
 # Make distribution

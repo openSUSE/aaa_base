@@ -32,7 +32,6 @@
 # define INSCONF	"/etc/insserv.conf"
 #endif
 
-
 /*
  * For a description of regular expressions see regex(7).
  */
@@ -63,22 +62,23 @@
 static char buf[LINE_MAX];
 
 /* Search results points here */
-static char *provides = NULL;
-static char *required_start = NULL;
-static char *required_stop = NULL;
-static char *default_start = NULL;
-static char *default_stop = NULL;
-static char *description = NULL;
+typedef struct lsb_struct {
+    char *provides;
+    char *required_start;
+    char *required_stop;
+    char *default_start;
+    char *default_stop;
+    char *description;
+} lsb_t;
+
+static lsb_t script_inf = {NULL, NULL, NULL, NULL, NULL, NULL };
 static char empty[1] = "";
 
 /* Delimeters used for spliting results with strsep(3) */
 const char *delimeter = " ,;\t";
 
-/* declare */
-void error (const char *fmt, ...);
-
 /*
- * push and pod directory changes
+ * push and pop directory changes: pushd() and popd()
  */
 typedef struct pwd_struct {
     list_t	deep;
@@ -122,6 +122,146 @@ static void popd(void)
 out:
 }
 
+
+/*
+ * Linked list to hold current service structure
+ */
+typedef struct serv_struct {
+    list_t	   id;
+    char	*name;
+    char	order;
+    unsigned int lvls;
+#ifndef SUSE
+    unsigned int lvlk;
+#endif
+} serv_t;
+#define getserv(list)	list_entry((list), struct serv_struct, id)
+
+static list_t serv = { &(serv), &(serv) }, *serv_start = &(serv);
+
+/*
+ * Find or add and initialize a service
+ */
+static serv_t * addserv(const char * serv)
+{
+    serv_t * this;
+    list_t * ptr;
+
+    for (ptr = serv_start->next; ptr != serv_start;  ptr = ptr->next)
+	if (!strcmp(getserv(ptr)->name, serv))
+	    goto out;
+
+    this = (serv_t *)malloc(sizeof(serv_t));
+    if (this) {
+	insert(&(this->id), serv_start->prev);
+	this->name  = xstrdup(serv);
+	this->order = 0;
+	this->lvls  = 0;
+	ptr = serv_start->prev;
+	goto out;
+    }
+    ptr = NULL;
+    error("%s", strerror(errno));
+out:
+    return getserv(ptr);
+}
+
+static serv_t * findserv(const char * serv)
+{
+    list_t * ptr;
+    serv_t * ret = NULL;
+
+    for (ptr = serv_start->next; ptr != serv_start;  ptr = ptr->next)
+	if (!strcmp(getserv(ptr)->name, serv)) {
+	    ret = getserv(ptr);
+	    break;
+	}
+    return ret;
+}
+
+static void swapserv(list_t * this, list_t * that)
+{
+    serv_t * cont1 = getserv(this);
+    serv_t * cont2 = getserv(that);
+    char        *name = cont1->name;
+    char        order = cont1->order;
+    unsigned int lvls = cont1->lvls;
+#ifndef SUSE
+    unsigned int lvlk = cont1->lvlk;
+#endif
+
+    cont1->name  = cont2->name;
+    cont1->order = cont2->order;
+    cont1->lvls  = cont2->lvls;
+#ifndef SUSE
+    cont1->lvlk  = cont2->lvlk;
+#endif
+
+    cont2->name  = name;
+    cont2->order = order;
+    cont2->lvls  = lvls;
+#ifndef SUSE
+    cont2->lvlk  = lvlk;
+#endif
+}
+
+static void qsortserv(list_t * left, list_t * right)
+{
+    list_t * start = left->next;
+    list_t * stop  = right->prev;
+    list_t * ptr;
+
+    if (start == stop)
+	goto out;
+
+    ptr = start;
+    do {
+	ptr = ptr->next;
+
+	if (getserv(start)->order < getserv(ptr)->order)
+	    swapserv(start, ptr);
+
+    } while (ptr != stop);
+
+    swapserv(start, ptr);
+
+    if (ptr->prev != serv_start)
+	if (left != ptr->prev && ptr != start)
+	    qsortserv(left, ptr); 
+
+    if (ptr->next != serv_start)
+	if (ptr != stop && right != ptr->next)
+	    qsortserv(ptr, right);
+ out:
+}
+
+/*
+ * This helps us to work out the current symbolic link structure
+ */
+static void current_structure(const char * this, const char order, const int runlvl)
+{
+    serv_t * serv = addserv(this);
+
+    if (serv->order < order)
+	serv->order = order;
+
+    switch (runlvl) {
+	case 0: serv->lvls |= LVL_HALT;   break;
+	case 1: serv->lvls |= LVL_ONE;    break;
+	case 2: serv->lvls |= LVL_TWO;    break;
+	case 3: serv->lvls |= LVL_THREE;  break;
+	case 4: serv->lvls |= LVL_FOUR;   break;
+	case 5: serv->lvls |= LVL_FIVE;   break;
+	case 6: serv->lvls |= LVL_REBOOT; break;
+	case 7: serv->lvls |= LVL_SINGLE; break;
+	case 8: serv->lvls |= LVL_BOOT;   break;
+	default: break;
+    }
+
+    return;
+}
+
+
 /*
  * Internal logger
  */
@@ -160,6 +300,28 @@ void warn (const char *fmt, ...)
 }
 
 /*
+ * Open a runlevel directory, if it not
+ * exists than create one.
+ */
+static DIR * openrcdir(const char * rcpath)
+{
+   DIR * rcdir;
+   struct stat st;
+
+    if (stat(rcpath, &st) < 0) {
+	if (errno == ENOENT)
+	    mkdir(rcpath, (S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH));
+	else
+	    error("can not stat(%s): %s\n", rcpath, strerror(errno));
+    }
+
+    if ((rcdir = opendir(rcpath)) == NULL)
+	error("can not opendir(%s): %s\n", rcpath, strerror(errno));
+
+    return rcdir;
+}
+
+/*
  * Wrapper for regcomp(3)
  */
 static void regcompiler (regex_t *preg, const char *regex, int cflags)
@@ -191,7 +353,7 @@ static boolean regexecutor (regex_t *preg, const char *string,
 /*
  * The script scanning engine.
  */
-static void scan_script(const char *path)
+static void scan_script_defaults(const char *path)
 {
     regex_t reg_prov;
     regex_t reg_req_start;
@@ -202,6 +364,13 @@ static void scan_script(const char *path)
     regmatch_t subloc[SUBNUM], *val = &subloc[SUBNUM - 1];
     FILE *script;
     char *pbuf = buf;
+
+#define provides	script_inf.provides
+#define required_start	script_inf.required_start
+#define required_stop	script_inf.required_stop
+#define default_start	script_inf.default_start
+#define default_stop	script_inf.default_stop
+#define description	script_inf.description
 
     regcompiler(&reg_prov,	PROVIDES,	REG_EXTENDED|REG_ICASE);
     regcompiler(&reg_req_start, REQUIRED_START, REG_EXTENDED|REG_ICASE|REG_NEWLINE);
@@ -215,66 +384,56 @@ static void scan_script(const char *path)
 	error("fopen(%s): %s\n", path, strerror(errno));
 
     /* Reset old results */
-    provides = NULL;
-    required_start = NULL;
-    required_stop = NULL;
-    default_start = NULL;
-    default_stop = NULL;
-    description = NULL;
+    xreset(provides);
+    xreset(required_start);
+    xreset(required_stop);
+    xreset(default_start);
+    xreset(default_stop);
+    xreset(description);
 
 #define COMMON_ARGS	buf, SUBNUM, subloc, 0
     while (fgets(buf, sizeof(buf), script)) {
-	if (!provides       && regexecutor(&reg_prov,	   COMMON_ARGS) == true) {
+	if (!provides       && regexecutor(&reg_prov,      COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
-		provides = strdup(pbuf+val->rm_so);
-		if (!provides)
-		    error("%s", strerror(errno));
+	        provides = xstrdup(pbuf+val->rm_so);
 	    } else
 		provides = empty;
 	}
 	if (!required_start && regexecutor(&reg_req_start, COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
-		required_start = strdup(pbuf+val->rm_so);
-		if (!required_start)
-		    error("%s", strerror(errno));
+		required_start = xstrdup(pbuf+val->rm_so);
 	    } else
 		required_start = empty;
 	}
 	if (!required_stop  && regexecutor(&reg_req_stop,  COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
-		required_stop = strdup(pbuf+val->rm_so);
-		if (!required_stop)
-		    error("%s", strerror(errno));
+		required_stop = xstrdup(pbuf+val->rm_so);
 	    } else
 		required_stop = empty;
 	}
 	if (!default_start  && regexecutor(&reg_def_start, COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
-		default_start = strdup(pbuf+val->rm_so);
-		if (!default_start)
-		    error("%s", strerror(errno));
+		default_start = xstrdup(pbuf+val->rm_so);
 	    } else
 		default_start = empty;
 	}
+#ifndef SUSE
 	if (!default_stop   && regexecutor(&reg_def_stop,  COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
-		default_stop = strdup(pbuf+val->rm_so);
-		if (!default_stop)
-		    error("%s", strerror(errno));
+		default_stop = xstrdup(pbuf+val->rm_so);
 	    } else
 		default_stop = empty;
 	}
-	if (!description    && regexecutor(&reg_desc,	   COMMON_ARGS) == true) {
+#endif
+	if (!description    && regexecutor(&reg_desc,      COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
-		description = strdup(pbuf+val->rm_so);
-		if (!description)
-		    error("%s", strerror(errno));
+		description = xstrdup(pbuf+val->rm_so);
 	    } else
 		description = empty;
 	}
@@ -288,11 +447,71 @@ static void scan_script(const char *path)
     regfree(&reg_desc);
     fclose(script);
 
+#undef provides
+#undef required_start
+#undef required_stop
+#undef default_start
+#undef default_stop
+#undef description
+
     return;
 }
 
 /*
- * The script scanning engine.
+ *
+ */
+static void scan_script_locations(const char * path)
+{
+    int runlevel;
+
+    pushd(path);
+    for (runlevel = 0; runlevel < 9; runlevel++) {
+	char * rcd = NULL;
+	DIR  * rcdir;
+	struct dirent *d;
+
+	switch (runlevel) {
+	    case 0: rcd = "rc0.d/";  break;
+	    case 1: rcd = "rc1.d/";  break;
+	    case 2: rcd = "rc2.d/";  break;
+	    case 3: rcd = "rc3.d/";  break;
+	    case 4: rcd = "rc4.d/";  break;
+	    case 5: rcd = "rc5.d/";  break;
+	    case 6: rcd = "rc6.d/";  break;
+	    case 7: rcd = "rcS.d/";  break;  /* runlevel S */
+	    case 8: rcd = "boot.d/"; break;  /* runlevel B */
+	    default:
+		error("Wrong runlevel %d\n", runlevel);
+	}
+
+	rcdir = openrcdir(rcd); /* Creates runlevel directory if necessary */
+	pushd(rcd);
+	while ((d = readdir(rcdir)) != NULL) {
+	    char * ptr = d->d_name;
+	    char order = 0;
+
+	    if (*ptr != 'S')
+		continue;
+	    ptr++;
+
+	    if (strspn(ptr, "0123456789") != 2)
+		continue;
+	    order = atoi(ptr);
+	    ptr += 2;
+
+	    current_structure(ptr, order, runlevel);
+	}
+	popd();
+	closedir(rcdir);
+    }
+    popd();
+    qsortserv(serv_start, serv_start);
+
+    return;
+}
+
+/*
+ * The /etc/insserv.conf scanning engine.
  */
 static void scan_conf(void)
 {
@@ -343,28 +562,6 @@ err:
 }
 
 /*
- * Open a runlevel directory, if it not
- * exists than create one.
- */
-static DIR * openrcdir(const char * rcpath)
-{
-   DIR * rcdir;
-   struct stat st;
-
-    if (stat(rcpath, &st) < 0) {
-	if (errno == ENOENT)
-	    mkdir(rcpath, (S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH));
-	else
-	    error("can not stat(%s): %s\n", rcpath, strerror(errno));
-    }
-
-    if ((rcdir = opendir(rcpath)) == NULL)
-	error("can not opendir(%s): %s\n", rcpath, strerror(errno));
-
-    return rcdir;
-}
-
-/*
  * Scan for a Start or Kill script within a runlevel directory.
  * We start were we leave the directory, the upper level
  * has to call rewinddir(3) if necessary.
@@ -396,13 +593,17 @@ static char * scan_for(DIR * rcdir, const char * script, char type)
 /*
  *  Check for script in list.
  */
+static int curr_argc = -1;
 static boolean chkfor(const char * script, char **list, const int cnt)
 {
     boolean isinc = false;
     register int c = cnt;
+
+    curr_argc = -1;
     while (c--) {
 	if (!strcmp(script, list[c])) {
 	    isinc = true;
+	    curr_argc = c;
 	    break;
 	}
     }
@@ -417,15 +618,22 @@ int main (int argc, char *argv[])
     DIR * initdir;
     struct dirent *d;
     struct stat st_script;
-    char * end;
+    char * argr[argc];
     char * path = INITDIR;
     int runlevel, order, c;
     boolean del = false;
+    boolean defaults = false;
 
     myname = basename(*argv);
 
-    while ((c = getopt(argc, argv, "r")) != -1) {
+    for (c = 0; c < argc; c++)
+	argr[c] = NULL;
+
+    while ((c = getopt(argc, argv, "drh")) != -1) {
 	switch (c) {
+	    case 'd':
+		defaults = true;
+		break;
 	    case 'r':
 		del = true;
 		break;
@@ -445,6 +653,16 @@ int main (int argc, char *argv[])
 	error("usage: %s [[-r] init_script|init_directory]\n", myname);
 
     if (*argv) {
+	char * token = strpbrk(*argv, delimeter);
+
+	/*
+	 * Let us separate the script/service name from the additional arguments.
+	 */
+	if (token && *token) {
+	    *token = '\0';
+	    *argr = ++token;
+	}
+
 	if (stat(*argv, &st_script) < 0) {
 	    if (errno != ENOENT)
 		error("%s: %s\n", *argv, strerror(errno));
@@ -463,9 +681,8 @@ int main (int argc, char *argv[])
 	    if (argc)
 		error("usage: %s [[-r] init_script|init_directory]\n", myname);
 	} else {
-	    char * base, * ptr = strdup(*argv);
-	    if (!ptr)
-		error("%s", strerror(errno));
+	    char * base, * ptr = xstrdup(*argv);
+
 	    if ((base = strrchr(ptr, '/'))) {
 		*(++base) = '\0';
 		path = ptr;
@@ -477,6 +694,16 @@ int main (int argc, char *argv[])
     c = argc;
     while (c--) {
 	char * base;
+	char * token = strpbrk(argv[c], delimeter);
+
+	/*
+	 * Let us separate the script/service name from the additional arguments.
+	 */
+	if (token && *token) {
+	    *token = '\0';
+	    argr[c] = ++token;
+	}
+
 	if (stat(argv[c], &st_script) < 0) {
 	    if (errno != ENOENT)
 		error("%s: %s\n", argv[c], strerror(errno));
@@ -491,12 +718,29 @@ int main (int argc, char *argv[])
 	}
     }
 
+#if defined(DEBUG) && (DEBUG > 0)
+    for (c = 0; c < argc; c++)
+	if (argr[c])
+	    printf("Overwrite argument for %s is %s\n", argv[c], argr[c]);
+#endif
+
+    /*
+     * Scan always for the runlevel links to see the current
+     * link scheme of the services.
+     */
+    scan_script_locations(path);
+
     if ((initdir = opendir(path)) == NULL)
 	error("can not opendir(%s): %s\n", path, strerror(errno));
-
+    /*
+     * Now scan for the service scripts and their LSB comments.
+     */
     pushd(path);
     while ((d = readdir(initdir)) != NULL) {
+	serv_t * service = NULL;
+	char * end;
 	errno = 0;
+
 	/* d_type seems not to work, therefore use stat(2) */
 	if (stat(d->d_name, &st_script) < 0) {
 	    warn("can not stat(%s)\n", d->d_name);
@@ -552,8 +796,8 @@ int main (int argc, char *argv[])
 	if (strspn(d->d_name, "0123456789$.#_-\\*"))
 	    continue;
 
-	/* main scanner */
-	scan_script(d->d_name);
+	/* main scanner for LSB comment in current script */
+	scan_script_defaults(d->d_name);
 
 	/* Common script ... */
 	if (!strcmp(d->d_name, "halt")) {
@@ -572,23 +816,94 @@ int main (int argc, char *argv[])
 	/* Common script for single mode */
 	if (!strcmp(d->d_name, "single")) {
 	    makeprov("single", d->d_name);
-#if 0
-	    runlevels("single", "S");
-#else
 	    runlevels("single", "1 S");
 	    requiresv("single", "kbd");
-#endif
 	    continue;
 	}
 
-	if (!provides || provides == empty) {
+	/*
+	 * Use guessed service to find it within the the runlevels
+	 * (by using the list from the first scan for script locations).
+	 */
+	service = findserv(script_inf.provides);
+
+	if (!script_inf.provides || script_inf.provides == empty) {
 	    /* Oops, no comment found, guess one */
-	    provides = d->d_name;
+	    script_inf.provides = xstrdup(d->d_name);
+
+	    if (service) {
+		if (!script_inf.required_start || script_inf.required_start == empty) {
+		    list_t * ptr = NULL;
+		    for (ptr = (&(service->id))->prev; ptr != serv_start; ptr = ptr->prev) {
+			if (getserv(ptr)->lvls & service->lvls) {
+			    script_inf.required_start = xstrdup(getserv(ptr)->name);
+			    break;
+			}
+		    }
+		}
+	    }
 	}
 
-	if (provides) {
+	if (service) {
+	    if (script_inf.default_start && script_inf.default_start != empty) {
+		unsigned int deflvls = str2lvl(script_inf.default_start);
+
+		/*
+		 * Compare all bits, which means `==' and not `&' and overwrite
+		 * the defaults.
+		 */
+		if ((deflvls != service->lvls) && !defaults) {
+		    warn("Warning, current runlevel(s) of service `%s' overwrites defaults.\n",
+			 service->name);
+		    xreset(script_inf.default_start);
+		    script_inf.default_start = lvl2str(service->lvls);
+		}
+	    } else
+		script_inf.default_start = lvl2str(service->lvls);
+
+	    /*
+	     * required_stop and default_stop arn't used in SuSE Linux.
+	     */
+	}
+
+	if (script_inf.provides) {
 	    char * token;
-	    while ((token = strsep(&provides, delimeter))) {
+
+	    if (chkfor(script_inf.provides, argv, argc)) {
+		if (argr[curr_argc]) {
+		    char * ptr = argr[curr_argc];
+		    struct _mark {
+			const char * wrd;
+			char * order;
+			char ** str;
+		    } mark[] = {
+			{"start=", NULL, &script_inf.default_start},
+			{"stop=",  NULL, &script_inf.default_stop },
+			{NULL, NULL, NULL}
+		    };
+
+		    for (c = 0; mark[c].wrd; c++) {
+			char * order = strstr(ptr, mark[c].wrd);
+			if (order)
+			    mark[c].order = order;
+		    }
+
+		    for (c = 0; mark[c].wrd; c++)
+			if (mark[c].order) {
+			    *(mark[c].order) = '\0';
+			    mark[c].order += strlen(mark[c].wrd);
+			}
+
+
+		    for (c = 0; mark[c].wrd; c++)
+			if (mark[c].order) {
+			    xreset(*(mark[c].str));
+			    *(mark[c].str) = xstrdup(mark[c].order);
+			}
+		}
+	    }
+
+	    while ((token = strsep(&script_inf.provides, delimeter))) {
 		if (*token == '$') {
 		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
 		    continue;
@@ -597,24 +912,29 @@ int main (int argc, char *argv[])
 		    warn("script %s: service %s already provided!\n", d->d_name, token);
 		    continue;
 		}
-		if (required_start && required_start != empty)
-		    requiresv(token, required_start);
+		if (script_inf.required_start && script_inf.required_start != empty)
+		    requiresv(token, script_inf.required_start);
 
 		/* Ahh ... set default multiuser with network */
-		if (!default_start)
-		    default_start = "3 5";
-		runlevels(token, default_start);
+		if (!script_inf.default_start)
+		    script_inf.default_start = xstrdup("3 5");
+		runlevels(token, script_inf.default_start);
 
 		/*
 		 * required_stop and default_stop arn't used in SuSE Linux.
 		 */
 	    }
 	}
-
-	/*
-	 * reset pointers for the next script
-	 */
     }
+    /* Reset remaining pointers */
+    xreset(script_inf.provides);
+    xreset(script_inf.required_start);
+    xreset(script_inf.required_stop);
+    xreset(script_inf.default_start);
+    xreset(script_inf.default_stop);
+    xreset(script_inf.description);
+
+    /* back */
     popd();
     closedir(initdir);
 
@@ -671,7 +991,7 @@ int main (int argc, char *argv[])
     printf("Maxorder %d\n", maxorder);
     show_all();
 #else
-
+# ifdef SUSE
     pushd(path);
     for (runlevel = 0; runlevel < 9; runlevel++) {
 	char * script;
@@ -696,9 +1016,6 @@ int main (int argc, char *argv[])
 	script = NULL;
 	rcdir = openrcdir(rcd); /* Creates runlevel directory if necessary */
 	pushd(rcd);
-
-#define xremove(x) if (remove(x) < 0) \
-	warn ("can not remove(%s%s): %s\n", rcd, x, strerror(errno))
 
 	/*
 	 * See if we found scripts which should not be
@@ -726,9 +1043,6 @@ int main (int argc, char *argv[])
 	 * Seek for scripts which are included, link or
 	 * correct order number if necessary.
 	 */
-
-#define xsymlink(x,y) if (symlink(x, y) < 0) \
-	warn ("can not symlink(%s, %s%s): %s\n", x, rcd, y, strerror(errno))
 
 	while (foreach(&script, &order, runlevel)) {
 	    char * clink;
@@ -809,6 +1123,9 @@ int main (int argc, char *argv[])
 	popd();
 	closedir(rcdir);
     }
+# else  /* SUSE */
+#  error Additive link scheme not yet implemented
+# endif /* SUSE */
 #endif
 
     /*

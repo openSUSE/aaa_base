@@ -3,7 +3,7 @@
 # Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Ruediger Oertel <ro@suse.de>, 1996-2000
-#         Werner Fink <werner@suse.de>, 1996-2000
+#         Werner Fink <werner@suse.de>, 1996-2001
 #         Burchard Steinbild <bs@suse.de>, 1996-2000
 #         Florian La Roche <florian@suse.de>, 1996
 #
@@ -284,7 +284,7 @@ fi
 #
 # clean up
 #
-rm -f /etc/mtab* /etc/nologin /nologin /fastboot
+rm -f /etc/mtab* /etc/nologin /nologin /fastboot /forcefsck /success
 
 #
 # initialize database for kerneld.  This should be done earlier, but
