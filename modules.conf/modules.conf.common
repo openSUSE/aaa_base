@@ -257,9 +257,10 @@ alias char-major-175      mxser
 alias InterMezzo intermezzo
 alias char-major-185 intermezzo
 
+alias char-major-188	  usbserial
+
 alias char-major-195      NVdriver
 alias char-major-206      osst
-alias char-major-240	  usb-serial
 
 alias binfmt-204          binfmt_aout
 alias binfmt-263          binfmt_aout
