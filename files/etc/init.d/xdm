@@ -64,6 +64,13 @@ rc_reset
 case "$1" in
     start)
 	echo -n "Starting service $DM"
+	# Don't start xdm if no Xserver is configured and xdm is not 
+	# configured for remote access 
+	if [ ! -x /usr/X11R6/bin/X -a \ 
+		"$DISPLAYMANAGER_REMOTE_ACCESS" == "no" ]; then 
+			rc_status -u 
+			rc_exit 
+	fi 
 	startproc $PIDFILE $DISPLAYMANAGER || rc_failed
 	# After a crash or a kill signal we may have
 	# a wrong owner ship of /dev/xconsole

@@ -26,5 +26,6 @@ DISPLAYMANAGER_ROOT_LOGIN_REMOTE="no"
 #
 # let the displaymanager start a local Xserver
 # set to "no" for remote-access only
+# set to "no" on architectures without any Xserver (e.g. s390/s390x)
 #
 DISPLAYMANAGER_STARTS_XSERVER="yes"
