@@ -37,23 +37,6 @@ MAIL_LEVEL="warn"
 CREATE_INFO_DIR="yes"
 
 ## Type:	yesno
-## Default:	yes
-#
-# SuSEconfig can do some checks and modifications in /etc/hosts.
-# If this is not wanted, set the following variable to 'no' (yes/no).
-#
-CHECK_ETC_HOSTS="yes"
-
-## Type:	yesno
-## Default:	no
-#
-# If CHECK_ETC_HOSTS is set to yes, SuSEconfig sorts your /etc/hosts.
-# But in some cases this may be unwanted. So here is a flag which tells
-# SuSEconfig to "beautify" your /etc/hosts. (yes/no)
-#
-BEAUTIFY_ETC_HOSTS="no"
-
-## Type:	yesno
 ## Default:	no
 #
 # If SORT_PASSWD_BY_UID is set to yes, SuSEconfig sorts your /etc/passwd

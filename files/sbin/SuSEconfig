@@ -190,7 +190,8 @@ if test -z "$r" -o "$FASTRUN" = "true" ; then
             echo Module $ONLY_MODULE does not exist
         fi
     elif test "$FASTRUN" = "true" ; then
-        SUB_SCRIPTS="$r/sbin/conf.d/SuSEconfig.aaa_at_first $r/sbin/conf.d/SuSEconfig.hostname $r/sbin/conf.d/SuSEconfig.inittab $r/sbin/conf.d/SuSEconfig.pam $r/sbin/conf.d/SuSEconfig.sendmail $r/sbin/conf.d/SuSEconfig.ypclient"
+	# to be deleted ... all other scripts do not exist any more
+        SUB_SCRIPTS="$r/sbin/conf.d/SuSEconfig.sendmail"
     else
         SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.*"
     fi

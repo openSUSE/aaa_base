@@ -104,6 +104,12 @@ KWM_GIMMICK_PIXMAP=""
 # obsolete variable
 DEFAULT_LANGUAGE=""
 
+# obsolete variable
+CHECK_ETC_HOSTS=""
+
+# obsolete variable
+BEAUTIFY_ETC_HOSTS=""
+
 ##
 ## Formatting the boot script messages:
 ##   The boot scripts should use the variables rc_done and rc_fail to
