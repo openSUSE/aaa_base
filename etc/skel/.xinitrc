@@ -25,8 +25,26 @@ export TERM=xterm
 #
 # choose a window manager
 #
+if test -n "$WINDOWMANAGER" ; then
+    WINDOWMANAGER=`type -p $WINDOWMANAGER`
+fi
 if test -z "$WINDOWMANAGER" ; then
-    WINDOWMANAGER=/usr/X11R6/bin/startkde
+    if test -x /usr/X11R6/bin/startkde ; then
+        WINDOWMANAGER=/usr/X11R6/bin/startkde
+    elif test -x /usr/X11R6/bin/fvwm2 ; then
+        WINDOWMANAGER=/usr/X11R6/bin/fvwm2
+    elif test -x /usr/X11R6/bin/wmlist ; then
+        for i in `/usr/X11R6/bin/wmlist` ; do
+            WINDOWMANAGER=`type -p $i`
+            test -n "$WINDOWMANAGER" && break
+        done
+    fi
+fi
+
+if test -z "$WINDOWMANAGER" ; then
+    echo "Error. Can not find a window manager.  Please install one."
+    echo "Exit for now."
+    exit 1
 fi
 
 #
