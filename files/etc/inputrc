@@ -50,10 +50,18 @@ $if term=xterm
 "\e[2D":	backward-word
 "\e[2A":	history-search-backward
 "\e[2B":	history-search-forward
+"\e[1;2C":	forward-word
+"\e[1;2D":	backward-word
+"\e[1;2A":	history-search-backward
+"\e[1;2B":	history-search-forward
 "\e[5C":	forward-word
 "\e[5D":	backward-word
 "\e[5A":	history-search-backward
 "\e[5B":	history-search-forward
+"\e[1;5C":	forward-word
+"\e[1;5D":	backward-word
+"\e[1;5A":	history-search-backward
+"\e[1;5B":	history-search-forward
 $else
 "\e[G":		re-read-init-file
 $endif

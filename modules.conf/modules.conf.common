@@ -334,6 +334,12 @@ alias net-pf-10           ipv6
 alias net-pf-11           rose
 # alias net-pf-11           off
 alias net-pf-17           af_packet
+alias net-pf-31           bluez
+
+alias bt-proto-0 l2cap
+alias bt-proto-2 sco
+alias bt-proto-3 rfcomm
+alias bt-proto-4 bnep
 
 alias md-personality-1  linear
 alias md-personality-2  raid0
