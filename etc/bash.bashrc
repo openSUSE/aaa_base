@@ -195,10 +195,7 @@ case "$-" in
 	    complete -A directory		cd rmdir pushd mkdir chroot chrootx
 	    complete -A directory -A file	chown chgrp chmod chattr ln
 	    complete -A file			more cat less strip grep vi ed
-	    complete -A file -X '*.bz2'		bzip2
-	    complete -A file -X '*.gz'		gzip
 	    complete -A file -X '*.Z'		compress
-	    complete -A file -X '*.zip'		zip
 	    complete -A file -X '!*.bz2'	bunzip2
 	    complete -A file -X '!*.gz'		gunzip
 	    complete -A file -X '!*.Z'		uncompress
