@@ -24,6 +24,8 @@ if [ ! -f "$TIMESTAMP" ]; then
     touch "$TIMESTAMP"
 fi
 
+RUN_XFTCACHE=false
+
 if test "$CHECK_NEWPACKAGE" != false -a -x /usr/X11R6/bin/mkfontdir ; then
     for FDIR in /usr/X11R6/lib/X11/fonts/truetype \
                 /usr/X11R6/lib/X11/fonts/TTF \
@@ -64,13 +66,14 @@ if test "$CHECK_NEWPACKAGE" != false -a -x /usr/X11R6/bin/mkfontdir ; then
             FSHORT=${FDIR##/usr/X11R6/lib/X11/fonts/}
             echo "Updating X11 font directory $FSHORT..."
             /usr/X11R6/bin/mkfontdir $MKXPARMS $FDIR
+	    RUN_XFTCACHE=true
         fi
     done
     touch $TIMESTAMP
     touch -r $TIMESTAMP $FDIRLIST
 fi
 
-if [ -x /usr/X11R6/bin/xftcache ]; then
+if [ -x /usr/X11R6/bin/xftcache -a $RUN_XFTCACHE = "true" ]; then
     echo "create XftCache files ..."
     /usr/X11R6/bin/xftcache
 fi

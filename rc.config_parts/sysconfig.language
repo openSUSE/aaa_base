@@ -1,8 +1,7 @@
 #
 # This language is used in YaST. This is also the default
 # for local users, if RC_LANG and RC_LC_ALL are not set. Root
-# uses this language if ROOT_USES_LANG is set to "YES". You
-# can find this variable in /etc/rc.config.d/lang.rc.config.
+# uses this language if ROOT_USES_LANG is set to "YES".
 #
 DEFAULT_LANGUAGE=
 

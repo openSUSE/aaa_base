@@ -133,7 +133,7 @@ options dummy1 -o dummy1
 alias cipcb0 cipcb
 alias cipcb1 cipcb
 
-options cipcb    cipe_maxdev=2 cipe_debug=0
+options cipcb    cipe_debug=0
 
 ########################################################################
 # block dev aliases
