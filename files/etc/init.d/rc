@@ -78,7 +78,7 @@ if test "$SPLASH" = yes ; then
     SPLASHSTART=0
     SPLASHEND=65535
     case "$PREVLEVEL-$RUNLEVEL" in
-        N-[3-5]) SPLASHSTART=13107 ;;
+        N-[3-5]) SPLASHSTART=20000 ;;
     esac
     rex="[0-9][0-9]"
     for i in $prerc/K${rex}*; do
@@ -108,9 +108,9 @@ function splashprogress() {
     test "$SPLASH" = yes || return
     test "$SPLASHNUM" -ge 1 || SPLASHNUM=1
     SPLASHDIFF=$(( ( $SPLASHEND - $SPLASHSTART ) / $SPLASHNUM ))
+    /sbin/splash -p "$SPLASHSTART:$SPLASHDIFF" -t "$1" "$SPLASHCFG"
     SPLASHSTART=$(( $SPLASHSTART + $SPLASHDIFF ))
     SPLASHNUM=$(( $SPLASHNUM - 1 ))
-    /sbin/splash -p $SPLASHSTART -t "$1" "$SPLASHCFG"
 }
 
 

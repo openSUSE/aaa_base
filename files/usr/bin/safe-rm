@@ -14,20 +14,20 @@ test -x /bin/pwd    || exit 2
 
 for d; do
     if [[ "$d" != /* ]] ; then
-	echo "usage: $0 _absolute_path_to_file" 2>&1
+	echo "usage: $0 _absolute_path_to_file" 1>&2
 	exit 1
     fi
     path=${d//\/.\//\/}
     name=${path##*/}
 
     if test "/$name" = "$path" ; then
-	echo "$0: usage in root directory not allowed" 2>&1
+	echo "$0: usage in root directory not allowed" 1>&2
 	exit 1
     fi
     path=${path%/*}
 
     if test -z "${path}" ; then
-	echo "$0: empty dirname not allowed" 2>&1
+	echo "$0: empty dirname not allowed" 1>&2
 	exit 1
     fi
 
@@ -36,12 +36,12 @@ for d; do
 	if test "$PWD" = "$(/bin/pwd)" ; then
 	    /bin/$todo $opts -- "$name"
 	else
-	    echo "$0: no symlinks allowed in the path of $d" 2>&1
+	    echo "$0: no symlinks allowed in the path of $d" 1>&2
 	    exit 1
 	fi
 
     else
-	echo "$0: no symlinks allowed in the path of $d" 2>&1
+	echo "$0: no symlinks allowed in the path of $d" 1>&2
 	exit 1
     fi
 done

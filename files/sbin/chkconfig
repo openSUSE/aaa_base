@@ -672,6 +672,14 @@ if ($mode eq 'a' || $mode eq 'd') {
 if ($mode eq 'l') {
   initlinks_rc();
   my $usecolor = -t STDOUT;
+  if (!@ARGV) {
+    my $l;
+    my %ison;
+    for $l (0, 1, 2, 3, 4, 5, 6) {
+      $ison{$_} = 1 for keys %{$links{$l}};
+    }
+    @services = grep {!/^boot\./ || $ison{$_}} @services;
+  }
   for $s (@services) {
     if (!$known_rc{$s}) {
       print STDERR "$s: unknown service\n" unless $known_all{$s};

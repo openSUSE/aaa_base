@@ -22,7 +22,7 @@ get_swap_id() {
     local line;
     fdisk -l | while read line; do
 	case "$line" in
-	/*Linux\ swap) echo "${line%% *}"
+	/*Linux\ [sS]wap*) echo "${line%% *}"
 	esac
     done
 }

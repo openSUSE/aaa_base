@@ -166,7 +166,7 @@ fi
 SPLASHNUM=0
 if test "$SPLASH" = yes ; then
     SPLASHSTART=100
-    SPLASHEND=13107
+    SPLASHEND=20000
     for i in $bootrc/S${rex}*; do
         test -x "$i" || continue
         SPLASHNUM=$(( $SPLASHNUM + 1 ))
@@ -182,9 +182,9 @@ function splashprogress() {
     test "$SPLASH" = yes || return
     test "$SPLASHNUM" -ge 1 || SPLASHNUM=1
     SPLASHDIFF=$(( ( $SPLASHEND - $SPLASHSTART ) / $SPLASHNUM ))
+    /sbin/splash -p "$SPLASHSTART:$SPLASHDIFF" -t "$1" "$SPLASHCFG"
     SPLASHSTART=$(( $SPLASHSTART + $SPLASHDIFF ))
     SPLASHNUM=$(( $SPLASHNUM - 1 ))
-    /sbin/splash -p $SPLASHSTART -t "$1" "$SPLASHCFG"
 }
 
 splashtrigger "rlchange B"

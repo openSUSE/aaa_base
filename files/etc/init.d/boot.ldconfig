@@ -8,7 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.ldconfig
 # Required-Start:    boot.clock
-# Should-Start: boot.crypto boot.swap boot.quota
+# Should-Start:      boot.crypto boot.swap
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
