@@ -144,7 +144,7 @@ fi
 #
 # handle password files
 #
-for i in passwd group shadow gshadow ; do
+for i in passwd group shadow ; do
     test -e var/adm/fillup-templates/$i.aaa_base || continue
     echo -n "Updating etc/$i..."
   if test -f etc/$i ; then
@@ -171,7 +171,7 @@ for i in passwd group shadow gshadow ; do
   fi
 done
 # check/fix owner and permission of shadow files
-for i in etc/shadow etc/gshadow ; do
+for i in etc/shadow ; do
     chmod 640 $i
     chgrp shadow $i
 done

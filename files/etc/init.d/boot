@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 1996-2003 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
 # Author: Ruediger Oertel <ro@suse.de>, 1996-2002
@@ -14,6 +14,9 @@
 #
 # first script to be executed from init on system startup
 #
+
+# Before we do anything else, try at first to activate SELinux support
+test -d /selinux && mount -n -t selinuxfs none /selinux &> /dev/null
 
 #
 # Get terminal size of standard input of the system console

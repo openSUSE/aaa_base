@@ -93,12 +93,6 @@ while read LINE ; do
   esac
 done < var/adm/fillup-templates/passwd.aaa_base
 
-rm -f var/adm/fillup-templates/gshadow.aaa_base
-while read LINE ; do
-  echo "${LINE%%%%:*}:*:root:root" \
-	>> var/adm/fillup-templates/gshadow.aaa_base
-done < var/adm/fillup-templates/group.aaa_base
-
 # etc/passwd update
 if test -e etc/passwd ; then
   sed " 
@@ -122,7 +116,7 @@ if test -e etc/shadow ; then
 fi
 
 # Rename game -> games, wwwadmin -> www
-for i in etc/group etc/gshadow ; do
+for i in etc/group ; do
   if test -e $i ; then
     sed -e "s|^game:|games:|" -e "s|^wwwadmin:|www:|" $i > $i.t
     cat $i.t > $i
