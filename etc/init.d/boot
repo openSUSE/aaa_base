@@ -353,7 +353,32 @@ swapon -a &> /dev/null
 rc_status -v1 -r
 
 # set and adjust the CMOS clock
-if test "$HWCLOCK_ACCESS" != "no" ; then
+if test "$HWCLOCK_ACCESS" = "no" ; then
+    echo -n Setting up the system clock
+    # On s390 the hwclock is set outside Linux currently.  The kernel
+    # always assumes it to be set to UTC.  So if it is set to local
+    # time, we have to compensate for that.  We might achieve this
+    # using this special settimeofday(2) linux feature:
+    #  Under  Linux there is some peculiar `warp clock' semantics
+    #  associated to the settimeofday system call if on the  very
+    #  first  call  (after  booting) that has a non-NULL tz argu-
+    #  ment, the tv argument is NULL and the tz_minuteswest field
+    #  is  nonzero.  In  such  a case it is assumed that the CMOS
+    #  clock is on local time, and that it has to be  incremented
+    #  by  this  amount to get UTC system time.  No doubt it is a
+    #  bad idea to use this feature.  (settimeofday(2) man page)
+    # But unless someone complains we simply will use date(1) to shift
+    # the system time by the difference between UTC and local time, if
+    # the system clock is set to local time.  This will introduce a
+    # minimal shift due to the delay between gettimeofday and
+    # settimeofday, and it only works as long as $0 is executed
+    # exactly once, at boot.
+    if test "$GMT" = ""; then
+        date $(date -u +'%m%d%H%M%Y')
+       rc_status
+    fi
+    rc_status -v -r
+else
     echo -n Setting up the CMOS clock
     test -f /etc/adjtime || echo "0.0 0 0.0" > /etc/adjtime
     if test "$GMT" != "YAST_ASK" ; then

@@ -107,24 +107,22 @@ perforce:x:60:perforce
 sapdb:x:61:sapdb
 users:x:100:
 nogroup:x:65534:root" > var/adm/fillup-templates/group.aaa_base
-if test ! -e etc/passwd ; then
-  cp var/adm/fillup-templates/passwd.aaa_base etc/passwd
-else
-  cat etc/passwd | grep -v "^news:" | grep -v "^uucp:" | grep -v "^man:" > etc/passwd.t
+
+if test -e etc/passwd ; then
+  grep -v "^news:\|^uucp:\|^man:" etc/passwd > etc/passwd.t
   cat etc/passwd.t > etc/passwd
   rm -f etc/passwd.t
-  test -x /bin/fillup && \
-    /bin/fillup -q -d ":" etc/passwd var/adm/fillup-templates/passwd.aaa_base
 fi
-if test ! -e etc/group ; then
-  cp var/adm/fillup-templates/group.aaa_base etc/group
-else
-  test -x /bin/fillup && \
-    /bin/fillup -q -d ":" etc/group var/adm/fillup-templates/group.aaa_base
-fi
-# fix permissions if this script is called with strange umask
-chmod 644 etc/passwd
-chmod 644 etc/group
+
+for file in passwd group ; do
+  # like fillup, but : is the only separator
+  touch etc/$file
+  sort +0 -1 -t: -u etc/$file var/adm/fillup-templates/$file.aaa_base \
+  | sort +0 -1 -t: etc/$file - | uniq -u >> etc/$file
+  # fix permissions if this script is called with strange umask
+  chmod 644 etc/$file
+done
+
 if test -d sbin/init.d -a ! -L sbin/init.d ; then
    if test -L etc/init.d ; then
      rm -f etc/init.d
