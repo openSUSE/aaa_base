@@ -27,7 +27,6 @@ if [ -f /etc/sysconfig/cron ] ; then
     . /etc/sysconfig/cron
 fi
 
-test "$MAX_DAYS_IN_TMP" -gt 0 2> /dev/null || exit 0
 #
 # Delete apropriate files in tmp directories.
 #
@@ -36,14 +35,26 @@ for i in $OWNER_TO_KEEP_IN_TMP ; do
     OMIT="$OMIT  ( ! -user $i )"
 done
 
-for TMP_DIR in $TMP_DIRS_TO_CLEAR ; do
-  test -x /usr/bin/safe-rm && {
-  find $TMP_DIR/. $OMIT ! -type d ! -type s ! -type p \
-    -atime +$MAX_DAYS_IN_TMP -exec /usr/bin/safe-rm {} \;
-  } || echo "Error: Can not find /usr/bin/safe-rm"
-  find $TMP_DIR/. $OMIT -depth -type d -empty -mindepth 1 \
-    -mtime +$MAX_DAYS_IN_TMP -exec rmdir {} \;
-done
+function cleanup_tmp
+{
+  MAX_DAYS=$1
+  shift
+  DIRS_TO_CLEAR="$@"
+ 
+  if [ "$MAX_DAYS" -gt 0 ]; then
+    for DIR in $DIRS_TO_CLEAR ; do
+      test -x /usr/bin/safe-rm && {
+      find $DIR/. $OMIT ! -type d ! -type s ! -type p \
+        -atime +$MAX_DAYS -exec /usr/bin/safe-rm {} \;
+      } || echo "Error: Can not find /usr/bin/safe-rm"
+      find $DIR/. $OMIT -depth -type d -empty -mindepth 1 \
+        -mtime +$MAX_DAYS -exec rmdir {} \;
+    done
+  fi 
+}
+
+cleanup_tmp ${MAX_DAYS_IN_TMP:-0} ${TMP_DIRS_TO_CLEAR:-/tmp}
+cleanup_tmp ${MAX_DAYS_IN_LONG_TMP:-0} ${LONG_TMP_DIRS_TO_CLEAR}
 
 exit 0
 

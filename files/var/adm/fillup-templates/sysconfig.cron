@@ -1,5 +1,5 @@
 ## Path:	System/Cron
-## Description:	
+## Description:	days to keep old files in tmp-dirs, 0 to disable
 ## Type:	integer
 ## Default:	0
 ## Config:
@@ -10,14 +10,30 @@
 #
 MAX_DAYS_IN_TMP="0"
 
+## Type:	integer
+## Default:	0
+#
+# see MAX_DAYS_IN_TMP. This allows to specify another frequency for
+# a second set of directories.
+#
+MAX_DAYS_IN_LONG_TMP="0"
+
 ## Type:	string
 ## Default:	"/tmp"
 #
 # This variable contains a list of directories, in which old files are to
-# be searched and deleted. Used to contain /var/tmp as well, so if cleaning
-# of /var/tmp is wanted add it here.
+# be searched and deleted. The frequency is determined by MAX_DAYS_IN_TMP
 #
 TMP_DIRS_TO_CLEAR="/tmp"
+
+## Type:	string
+## Default:	""
+#
+# This variable contains a list of directories, in which old files are to
+# be searched and deleted. The frequency is determined by MAX_DAYS_IN_LONG_TMP
+# If cleaning of /var/tmp is wanted add it here.
+#
+LONG_TMP_DIRS_TO_CLEAR=""
 
 ## Type:	string
 ## Default:	root
