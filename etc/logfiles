@@ -1,8 +1,8 @@
 #
 # This file tells cron.daily, which log files have to be watched
 #
-# File                       max size   mode     ownership
-#
+# File                       max size   mode     ownership    service 
+#                                                           (reload if changed)
 /var/log/mgetty.*              +1024k   644      root.root
 /var/log/vbox.tty*             +1024k   644      root.root
 /var/adm/isdn.log              +1024k   644      root.root
@@ -11,8 +11,8 @@
 /var/log/allmessages           +4096k   640      root.root
 /var/log/autobuild             +4096k   644      root.root
 /var/log/debug                 +1024k   640      root.root
-/var/log/httpd.access_log      +4096k   644      root.root
-/var/log/httpd.error_log       +1024k   644      root.root
+/var/log/httpd.access_log      +4096k   644      root.root     apache
+/var/log/httpd.error_log       +1024k   644      root.root     apache
 /var/log/isdn                  +4096k   644      root.root
 /var/log/isdn.log              +4096k   644      root.root    
 /var/log/isdncalls             +1024k   644      root.root

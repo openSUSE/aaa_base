@@ -13,9 +13,6 @@
 
 case "$1" in
     start)
-        if test -x /usr/sbin/klogconsole ; then
-                ( test -c /dev/tty8 && > /dev/tty8 ) > /dev/null 2>&1 && /usr/sbin/klogconsole -r 8
-        fi
         if test -d /usr/lib/kbd/consolefonts -a \
            -n "$CONSOLE_FONT" -a "$CONSOLE_FONT" != "YAST_ASK" ; then
             if test -x /usr/bin/setfont ; then

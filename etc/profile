@@ -186,8 +186,8 @@ if [ -z "$KSH_VERSION" ]; then
 fi
 alias rd=rmdir
 alias md='mkdir -p'
-alias unix2dos='recode lat1:ibmpc'
-alias dos2unix='recode ibmpc:lat1'
+alias unix2dos='recode lat1..ibmpc'
+alias dos2unix='recode ibmpc..lat1'
 alias unzip='unzip -L'
 alias which='type -p'
 alias rehash='hash -r'

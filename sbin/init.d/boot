@@ -41,6 +41,7 @@ if test -f /etc/mdtab -a -x /sbin/mdadd ; then
     if test $MDADD_RETURN != 0 ; then
         if test  -x /sbin/ckraid ; then
             echo "Initializing Multiple Devices failed.  Trying to recover it..."
+	    /sbin/mdstop -a	
             for i in /etc/raid?.conf ; do
                 /sbin/ckraid --fix $i
             done
@@ -327,11 +328,23 @@ if test -x /usr/sbin/klogd ; then
         ECHO_RETURN=$rc_done_up
         echo Creating /var/log/boot.msg
         rm -f /var/log/boot.msg
-        /usr/sbin/klogd -f /var/log/boot.msg -o 
+        /usr/sbin/klogd -s -o -n -f /var/log/boot.msg
         /bin/sleep 1
         test -s /var/log/boot.msg || ECHO_RETURN=$rc_failed_up
         echo -e "$ECHO_RETURN"
+elif test -x /bin/dmesg ; then
+	ECHO_RETURN=$rc_done_up
+	echo Creating /var/log/boot.msg
+	rm -f /var/log/boot.msg
+	/bin/dmesg -s16384 > /var/log/boot.msg
+	/bin/sleep 1
+	test -s /var/log/boot.msg || ECHO_RETURN=$rc_failed_up
+	echo -e "$ECHO_RETURN"
 fi
+if test -x /usr/sbin/klogconsole ; then
+	( test -c /dev/tty10 && > /dev/tty10 ) > /dev/null 2>&1 && /usr/sbin/klogconsole -r10 
+fi
+
 
 #
 # enable DEXE binary format

@@ -103,6 +103,9 @@ check_log_file () {
         echo "The following backup(s) do exist now:"
         ls -l "$1"-[0-9]*
         echo
+        if test -x /sbin/init.d/$5 ; then
+            /sbin/init.d/$5 reload
+        fi
     fi
 }
 
@@ -111,7 +114,7 @@ check_log_file () {
 # First check file sizes of log files.
 #
 if test "$MAX_DAYS_FOR_LOG_FILES" -gt 0 -a -f /etc/logfiles ; then
-    while read FILES SIZE MODE OWNERSHIP REST ; do
+    while read FILES SIZE MODE OWNERSHIP RSERVICE REST ; do
         case "$FILES" in
           \#*|"") 
             continue
@@ -119,14 +122,15 @@ if test "$MAX_DAYS_FOR_LOG_FILES" -gt 0 -a -f /etc/logfiles ; then
         esac
         test -n "$REST" -o -z "$OWNERSHIP" && {
             echo invalid line in /etc/logfiles:
-            echo "    \"$FILES $SIZE $MODE $OWNERSHIP $REST\""
+            echo "    \"$FILES $SIZE $MODE $OWNERSHIP $RSERVICE $REST\""
             echo skipping it...
             continue
         }
         for FILE in $FILES ; do
             test -f $FILE && \
-                check_log_file $FILE $SIZE $MODE $OWNERSHIP
+                check_log_file $FILE $SIZE $MODE $OWNERSHIP $RSERVICE
         done
+	$RSERVICE=""
     done < /etc/logfiles
 fi
 

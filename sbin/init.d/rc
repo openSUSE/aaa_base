@@ -2,7 +2,7 @@
 # Copyright (c) 1996-98 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
-#	  Werner Fink <werner@suse.de>, 1994,96,98
+#	  Werner Fink <werner@suse.de>, 1994,96,98,99
 #
 # /sbin/init.d/rc   --    The Master Resource Control Script
 #
@@ -16,20 +16,51 @@
 # avoid being interrupted by child or keyboard
 trap "echo" SIGINT
 
+#
+# Get terminal size of standard input of the system console
+#
+test -z "$CONSOLE" && CONSOLE=/dev/console
+set -- $(stty size < $CONSOLE)
+  LINES=$1
+COLUMNS=$2
+export LINES COLUMNS CONSOLE
+
+#
+# Configuration
+#
+
 . /etc/rc.config
 
-# on runlevel 0 (halt) and 6 (reboot) switch to first vc
-# for vebose messages.
-# on previous runlevel identical with current runlevel
+#
+# On previous runlevel identical with current runlevel
 # do not re-examine current runlevel.
-if test "$RUNLEVEL" = "0" -o "$RUNLEVEL" = "6" ;  then
-    exec 0<> /dev/tty1 1>&0 2>&0
-    test -x /usr/bin/chvt && /usr/bin/chvt 1
+#
+test "$PREVLEVEL" = "$RUNLEVEL" && exit 0
+
+#
+# This redirects all rc messages during reboot and halt
+# to tty1 if the system console is bound on VGA (tty0).
+#
+if test $COLUMNS -gt 0 ; then
+    # VGA
+    if test "$RUNLEVEL" = "0" -o "$RUNLEVEL" -o "6" ; then
+	CONSOLE=/dev/tty1
+	test -x /usr/bin/chvt && /usr/bin/chvt 1
+    fi
 else
-    test "$PREVLEVEL" = "$RUNLEVEL" && exit 0
+    # Serial: columns and lines are not defined
+      LINES=24
+    COLUMNS=80
 fi
 
-# set onlcr to avoid staircase effect and do not lock scrolling
+#
+# Redirect I/O of this script and its childs
+#
+exec 0<> $CONSOLE 1>&0 2>&0
+
+#
+# Set onlcr to avoid staircase effect and do not lock scrolling
+#
 stty onlcr -ixon 0>&1
 
 #     \033[1m       switch bold on
