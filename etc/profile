@@ -53,8 +53,6 @@ export PATH
 #
 # set some environment variables
 #
-POVRAYOPT=-l/usr/lib/povray/include
-export POVRAYOPT
 if test -n "$TEXINPUTS" ; then
   TEXINPUTS=":$TEXINPUTS:~/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
 else
@@ -64,13 +62,11 @@ export TEXINPUTS
 
 
 LESSCHARSET=latin1
-export LESSCHARSET
 LESS="-M -S -I"
-export LESS
 LESSKEY=/etc/lesskey.bin
-export LESSKEY
-LESSOPEN="|lesspipe.sh %s"
-export LESSOPEN
+LESSOPEN="lessopen.sh %s"
+LESSCLOSE="lessclose.sh %s %s"
+export LESSOPEN LESSCLOSE LESSCHARSET LESS LESSKEY
 
 MINICOM="-c on"
 export MINICOM
