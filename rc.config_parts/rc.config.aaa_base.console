@@ -105,13 +105,9 @@ CHECK_INITTAB=yes
 
 #
 # Here you can set the default Display manager (kdm/xdm/gdm/wdm/console).
+# see also /etc/rc.config.d/xdm.rc.config
 #
 DISPLAYMANAGER=""
-
-#
-# Allow remote access to your display manager (kdm only for now)
-#
-DISPLAYMANAGER_REMOTE_ACCESS="no"
 
 #
 # Here you can set the default window manager (kde, fvwm, ...)
