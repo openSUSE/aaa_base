@@ -8,7 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.localnet
 # Required-Start:    boot.ldconfig
-# X-UnitedLinux-Should-Start: boot.quota
+# Should-Start: boot.quota
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:

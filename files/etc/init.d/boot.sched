@@ -8,7 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.sched
 # Required-Start:	boot.proc
-# X-UnitedLinux-Should-Start:	boot.localfs boot.ldconfig
+# Should-Start:	boot.localfs boot.ldconfig
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
