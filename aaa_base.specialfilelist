@@ -1,6 +1,5 @@
 %config(noreplace) /root/.exrc
 %config(noreplace) /etc/DIR_COLORS
-%config(noreplace) /etc/netgroup
 %config(noreplace) /etc/host.conf
 %config(noreplace) /etc/inittab
 %config(noreplace) /etc/modules.conf.local
