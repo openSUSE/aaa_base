@@ -43,7 +43,7 @@ case "$1" in
 	#  background with an ampersand (&) and a sleep time of
 	#  two or more seconds, e.g:
 	#  
-	#   mount -at nfs &
+	#   sleep 2 && mount -at nfs &
 	#   sleep 2 
 	#  
 	#  Note: Some people importing the /usr partition.
