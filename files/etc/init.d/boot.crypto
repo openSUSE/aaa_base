@@ -112,9 +112,9 @@ case "$1" in
 		# Setting up loop device
 		#
 		if test -n "$info" ; then
-		    prmt="${extd}Please enter passphrase for \"$info\" ($physdev). ${norm}"
+		    prmt="${extd}Please enter passphrase for \"$info\" ($physdev): ${norm}"
 		else
-		    prmt="${extd}Please enter passphrase for $physdev. ${norm}"
+		    prmt="${extd}Please enter passphrase for $physdev: ${norm}"
 		fi
 		setprompt
 		losetup -t $TIMEOUT -e $crypto $loopdev $physdev < $REDIRECT > $REDIRECT 2>&1
