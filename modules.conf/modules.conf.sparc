@@ -3,7 +3,10 @@
 alias char-major-4        off
 alias char-major-5        off
 
+if `kernelversion` == "2.2"
 alias parport_lowlevel    parport_ax
-
+else
+alias parport_lowlevel    parport_pc
+fi
 # end of sparc part for modules.conf
 

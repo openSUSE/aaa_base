@@ -96,7 +96,8 @@ MAIL_REPORTS_TO="root"
 MAIL_LEVEL="warn"
 
 #
-# Set to "-u" if your system clock is set to GMT, otherwise "".
+# Set to "-u" if your system clock is set to GMT, and to "--localtime"
+# if your clock runs that way.
 #
 GMT="YAST_ASK"
 

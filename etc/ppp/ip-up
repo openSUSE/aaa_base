@@ -135,19 +135,18 @@ ppp*)
 	# by pppd when the link goes down.
 	#
 	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf -a "$START_NAMED" != "yes" ]; then
-		rm -f /etc/ppp/resolv.prev
-		if [ -f /etc/resolv.conf ]; then
-			cp -p /etc/resolv.conf /etc/ppp/resolv.prev
-			grep domain /etc/ppp/resolv.prev > /etc/resolv.conf
-			grep search /etc/ppp/resolv.prev >> /etc/resolv.conf
-			cat /etc/ppp/resolv.conf >> /etc/resolv.conf
-			echo "Modified /etc/resolv.conf for DNS at $INTERFACE"
-		else
-			cp /etc/ppp/resolv.conf /etc
-			chmod 644 /etc/resolv.conf
-			echo "Installed /etc/resolv.conf for DNS at $INTERFACE"
-		fi
+		/sbin/modify_resolvconf modify -s pppd -p pppd \
+                  -f /etc/ppp/ip-up -n "$DNS1 $DNS2" -t - << EOT
+                  This is a temporary resolv.conf created by ipppd. The previous
+                  file has been saved as <see "Backup: field above>. It will be
+                  restored when ippp disconnects.
+
+                  If you don't like ipppd to change your nameserver settings
+                  then set MODIFY_RESOLV_CONF_DYNAMICALLY=no in /etc/rc.config
+                  or remove the option ms-get-dns from /etc/ppp/options.ippp*.
+EOT
 	fi
+
 	#
 	# SuSE Firewall script: If you installed the package firewals
 	# and configured your firewall in /etc/rc.config.d/firewall.rc.config 
@@ -173,14 +172,9 @@ ppp*)
 	# resolv.conf was modified for the supplied dns server adresses.
 	#
 	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf -a "$START_NAMED" != "yes" ]; then
-		if [ -f /etc/ppp/resolv.prev ]; then
-			cp -fp /etc/ppp/resolv.prev /etc/resolv.conf
-			echo "Restored original /etc/resolv.conf"
-		else
-			rm -f /etc/resolv.conf
-			echo "Deinstalled /etc/resolv.conf"
-		fi
+                /sbin/modify_resolvconf restore -s pppd
 	fi
+
 	#
 	# SuSE Firewall script: If you installed the package firewals
 	# and configured your firewall in /etc/rc.config.d/firewall.rc.config 

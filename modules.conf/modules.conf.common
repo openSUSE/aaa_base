@@ -400,6 +400,7 @@ pre-remove   pppox rmmod  mssclampfw
 else
 alias char-major-108      ppp_async
 alias char-major-144      pppoe
+alias net-pf-24           pppoe
 endif
 
 # IrDA
