@@ -245,16 +245,18 @@ if test "$is" != "ash" ; then
 fi
 
 #
-# Avoid overwriting
+# Avoid overwriting user settings
 #
 PROFILEREAD=true
 
 #
 # System BASH specials, maybe also good for other shells
 #
-test -r /etc/bash.bashrc && . /etc/bash.bashrc
-if test "$is" = "bash" ; then
-    test -r $HOME/.bashrc    && . $HOME/.bashrc
+test -r /etc/bash.bashrc   && . /etc/bash.bashrc
+if test "$is" = "bash" -a -z "$_HOMEBASHRC" ; then
+    # loop detection
+    readonly _HOMEBASHRC=true
+    test -r $HOME/.bashrc  && . $HOME/.bashrc
 fi
 
 #
@@ -262,6 +264,10 @@ fi
 #
 if test "$is" = "ksh" ; then
     test -r /etc/ksh.kshrc && . /etc/ksh.kshrc
+fi
+if test "$is" = "ksh"  -a -z "$_HOMEKSHRC"  ; then
+    # loop detection
+    readonly _HOMEKSHRC=true
     test -r $HOME/.kshrc   && . $HOME/.kshrc
 fi
 

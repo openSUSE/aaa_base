@@ -420,15 +420,7 @@ if [ -n "$OLDMODCONF" ] ; then
 fi
 GPG_IMPORT_FAIL=false
 if test -f root/.gnupg/pubring.gpg ; then
-   GPG_EXECUTABLE=true
-   if test ! -x usr/bin/gpg ; then
-     GPG_EXECUTABLE=false
-   fi
-   NFOUND=`chroot . ldd /usr/bin/gpg 2>&1 | grep "not found"`
-   if test -n "$NFOUND" ; then
-      GPG_EXECUTABLE=false
-   fi
-   if test "$GPG_EXECUTABLE" = "true" ; then
+   if test -x usr/bin/gpg -a -f usr/lib/libgdbm.so.2 ; then
       chroot . usr/bin/gpg --export --armor --keyring root/.gnupg/suse_build_key \
          build@suse.de | usr/bin/gpg --import || true
       if ! chroot . usr/bin/gpg --list-keys build@suse.de >/dev/null 2>&1 ; then
