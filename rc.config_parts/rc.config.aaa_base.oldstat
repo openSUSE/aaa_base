@@ -101,6 +101,9 @@ USE_KERNEL_NFSD=""
 # obsolete variable
 KWM_GIMMICK_PIXMAP=""
 
+# obsolete variable
+DEFAULT_LANGUAGE=""
+
 ##
 ## Formatting the boot script messages:
 ##   The boot scripts should use the variables rc_done and rc_fail to

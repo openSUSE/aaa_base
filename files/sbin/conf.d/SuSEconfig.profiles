@@ -70,24 +70,6 @@ fi
 echo '# start of i18n support'       >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo '# start of i18n support'       >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 
-if test -z "$RC_LANG" ; then
-        case "$DEFAULT_LANGUAGE" in
-                italian)        RC_LANG=it_IT.ISO-8859-1 ;;
-                russian)        RC_LANG=ru_RU.KOI8-R     ;;
-                brazilian)      RC_LANG=pt_BR.ISO-8859-1 ;;
-                english)        RC_LANG=en_US            ;;
-                korean)         RC_LANG=ko_KR            ;;
-        esac
-fi
-if test -z "$RC_LANG" -a -n "$DEFAULT_LANGUAGE" ; then
-  LOCALIAS=$r/usr/share/locale/locale.alias
-  if grep "$DEFAULT_LANGUAGE" $LOCALIAS >/dev/null 2>&1 ; then
-     RC_LANG=`sed -n "s/^$DEFAULT_LANGUAGE[[:space:]]*\([a-zA-Z_]*\)\..*/\1/p" $LOCALIAS`
-  else
-     RC_LANG=$DEFAULT_LANGUAGE
-  fi
-fi
-
 locale_vars="\
 LANG         \
 LC_ALL       \

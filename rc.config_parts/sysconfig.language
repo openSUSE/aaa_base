@@ -1,11 +1,4 @@
 #
-# This language is used in YaST. This is also the default
-# for local users, if RC_LANG and RC_LC_ALL are not set. Root
-# uses this language if ROOT_USES_LANG is set to "YES".
-#
-DEFAULT_LANGUAGE=
-
-#
 #
 # Local users will get RC_LANG as their default language, i.e. the
 # environment variable $LANG . $LANG is the default of all $LC_*-variables,
