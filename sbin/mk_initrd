@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.14
+# Version 1.15
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
@@ -29,6 +29,10 @@
 # (c) 2000 Karsten Keil   option and kernel 2.4 support
 #
 # ChangeLog:
+#
+# 10/5/2001:	v1.15
+#  - copy ld-*so* to initrd, not ld-2.2.so
+#  - make it work in chroot environment
 #
 # 7/5/2001:	v1.14
 #  - drop vmlinuz_24 (no longer exists)
@@ -219,7 +223,7 @@ oops () {
 
 tmp_initrd=$root_dir/tmp/initrd$$
 
-x1=`mount 2>/dev/null | grep "on $root_dir "`
+x1=`mount 2>/dev/null | grep "on $root_dir " | tail -1`
 x2=`echo \`echo "$x1" | wc -l\``
 x3=`echo "$x1" | cut -f 1 -d " "`
 
@@ -311,8 +315,8 @@ for k in $kernels ; do
 	cp -a $root_dir/dev/lvm  $tmp_mnt/dev
 	cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
 	cp -a $root_dir/dev/md? $root_dir/dev/dasd* $tmp_mnt/dev
-	cp -a $root_dir/dev/{i2o,ida,cciss} $tmp_mnt/dev
-	cp -a $root_dir/lib/{ld-2.2.so,ld-linux.so.2} $tmp_mnt/lib
+	cp -a $root_dir/dev/{i2o,ida,cciss,rd} $tmp_mnt/dev
+	cp -a $root_dir/lib/ld-*so* $tmp_mnt/lib
 	cp -a $root_dir/lib/liblvm*.so* $tmp_mnt/lib
 	cp -a $root_dir/lib/libc.so.6 $tmp_mnt/lib
 	cp -a $root_dir/lib/libz.so.1* $tmp_mnt/lib
