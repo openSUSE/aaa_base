@@ -1,5 +1,5 @@
 --- SGML/fillup.sgml
-+++ SGML/fillup.sgml	1998/10/29 09:52:29
++++ SGML/fillup.sgml	1999/08/24 12:37:29
 @@ -1,4 +1,4 @@
 -<!doctype linuxdoc system "/home/alex/maddin/sgml/linuxdoc.dtd">
 +<!doctype linuxdoc system>
@@ -7,7 +7,7 @@
    <article>
  
 --- SRC/Makefile
-+++ SRC/Makefile	1998/10/29 09:52:29
++++ SRC/Makefile	1999/08/24 12:39:12
 @@ -38,7 +38,7 @@
  DEFINES   = -DVERSION=${VERSION}
  
@@ -17,6 +17,29 @@
  TM	  = \"LINUX\"
  INC       = -I/usr/include
  COMPILER  = -DGCC=1
+@@ -49,19 +49,19 @@
+ 
+ ifeq ($(COMPILE_OPTION),DEBUG)
+   # compile for debugging
+-  COMPILE  = gcc -DDEBUG -ansi -g -c ${WARNINGS} -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
++  COMPILE  = gcc -fsigned-char -DDEBUG -ansi -g -c ${WARNINGS} -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
+   LINK	   = gcc -g
+ endif
+ 
+ ifeq ($(COMPILE_OPTION),OPTIMIZE)
+   # compile with all optimizations
+-  COMPILE  = gcc -ansi -c $(OPTIS) $(WARNINGS) -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
++  COMPILE  = gcc -fsigned-char -ansi -c $(OPTIS) $(WARNINGS) -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
+   LINK	   = gcc -O -s
+ endif
+ 
+ ifeq ($(COMPILE_OPTION),PROFILE)
+   # compile for use with "gprof"
+-  COMPILE  = gcc -ansi -pg -c ${WARNINGS} -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
++  COMPILE  = gcc -fsigned-char -ansi -pg -c ${WARNINGS} -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
+   LINK	   = gcc -pg
+ endif
+ 
 @@ -105,7 +105,7 @@
  #----------------------------------- any functions ------------------------------------#
  
