@@ -102,6 +102,7 @@ function rc_check ()
 function rc_reset ()
 {
     _rc_status=0
+    _rc_status_all=0
     rc_check
     return 0
 }
@@ -136,6 +137,12 @@ function rc_status ()
 {
     rc_check
     test "$_rc_status" -gt 7 && rc_failed 1
+    case "$_rc_todo" in
+    stop)
+	# program is not running which
+	# is success if we stop service
+	test "$_rc_status" -eq 7 && rc_failed 0 ;;
+    esac
     for i ; do
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])
@@ -149,11 +156,7 @@ function rc_status ()
 	    4)	echo -en "$rc_failed"  1>&2 ;; # insufficient privilege
 	    5)	echo -en "$rc_skipped" 1>&2 ;; # program is not installed
 	    6)	echo -en "$rc_unused"  1>&2 ;; # program is not configured
-	    7)	test "$_rc_todo" = "stop" && {
-		    echo -en "$rc_done"		# program is not running which
-		    rc_failed 0			# is success if we stop service
-		} || \
-		echo -en "$rc_failed"  1>&2 ;; # program is not running
+	    7)	echo -en "$rc_failed"  1>&2 ;; # program is not running
 	    *)	echo -en "$rc_failed"  1>&2 ;; # unknown (maybe used in future)
 	    esac
 	    echo -en "$rc_restore"
@@ -190,6 +193,7 @@ fi
 
 function rc_failed ()
 {
+    rc_reset
     case "$1" in
     [0-7]) _rc_status=$1 ;;
     "")    _rc_status=1
