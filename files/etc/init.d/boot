@@ -1,16 +1,46 @@
-#! /bin/sh
+#! /bin/bash
 #
 # Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
 # Author: Ruediger Oertel <ro@suse.de>, 1996-2002
-#         Werner Fink <werner@suse.de>, 1996-2002
+#         Werner Fink <werner@suse.de>, 1996-2003
 #         Burchard Steinbild <feedback@suse.de>, 1996-2000
 #         Florian La Roche <feedback@suse.de>, 1996
 #
 # /etc/init.d/boot
 #
 # first script to be executed from init on system startup
+#
+
+#
+# Get terminal size of standard input of the system console
+#
+test -z "$CONSOLE" && CONSOLE=/dev/console
+set -- $(stty size < $CONSOLE)
+  LINES=$1
+COLUMNS=$2
+export LINES COLUMNS CONSOLE
+
+#
+# Set I/O of this script and its childs to console
+#
+exec 0<> $CONSOLE 1>&0 2>&0
+
+#
+# Export the real device in variable REDIRECT.
+#
+REDIRECT="`showconsole 2>/dev/null`"
+export REDIRECT
+if test $COLUMNS -eq 0 ; then
+    # Serial: columns and lines are not defined
+      LINES=24
+    COLUMNS=80
+    test "$TERM" = "linux" -o -z "$TERM" && TERM=vt102
+fi
+
+#
+# Configuration and coloring of the boot messages
 #
 
 . /etc/rc.status
@@ -21,8 +51,12 @@ export progress=0
 export sscripts=45                                                             
 export kscripts=45                                                             
 
+echo -n "System Boot Control: "
 echo "Running $0"
 
+#
+# Start of e.g. blogd, requires /proc and /dev/pts.
+#
 rc_reset
 echo -n "Mounting /proc device"
 mount -n -t proc proc /proc
@@ -56,7 +90,8 @@ test -z "$CONFIRM_PROMPT_TIMEOUT" && CONFIRM_PROMPT_TIMEOUT=5
 if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
     echo -en "${extd}Enter Interactive startup mode?${norm}"
     rc_timer_on "$CONFIRM_PROMPT_TIMEOUT" 37
-    read -t "$CONFIRM_PROMPT_TIMEOUT" -n 1 -p " ${extd}y${norm}/[${extd}n${norm}]("${CONFIRM_PROMPT_TIMEOUT}s") " answer
+    read -t "$CONFIRM_PROMPT_TIMEOUT" -n 1 \
+	-p " ${extd}y${norm}/[${extd}n${norm}]("${CONFIRM_PROMPT_TIMEOUT}s") " answer
     rc_timer_off
     case "$answer" in
     [yYiI]) DO_CONFIRM=yes ;;
@@ -71,19 +106,63 @@ export DO_CONFIRM
 # Start blogd, requires /proc and /dev/pts.
 # Export the real device in variable REDIRECT.
 #
-REDIRECT="`showconsole 2>/dev/null`"
 test -x /sbin/blogd -a -n "$REDIRECT" && /sbin/blogd $REDIRECT
 : ${REDIRECT:=/dev/tty}
-export REDIRECT
+
+#
+# Common used variables
+#
+bootrc=/etc/init.d/boot.d
+rex="[0-9][0-9]"
+failed=""
+skipped=""
+callord=""
+
+#
+# The call shell function
+#
+call ()
+{
+    local script=${1#*S$rex}
+    local status
+
+    rc_splash "$script start"
+    blogger   "$script start"
+
+    rc_init
+    if test -x "$1" ; then
+	# Active boot scripts, should have their own messages
+	$1 start <> $CONSOLE 2>&0 1>&0
+	status=$?
+    else
+	# Old boot scripts, may not have any message
+        echo Running $1	<> $CONSOLE 2>&0 1>&0
+	/bin/sh $1 b	<> $CONSOLE 2>&0 1>&0
+	rc_status -v1	<> $CONSOLE 2>&0 1>&0
+	status=$?
+	rc_status -r
+    fi
+    echo -en "$rc_reset" > $CONSOLE
+
+    blogger "'$script start' exits with status $status"
+
+    test -p /dev/stdin && cat -
+    echo $script=$status
+}
 
 #
 # Start bootup client scripts.
 #
-if test -d /etc/init.d/boot.d/ ; then
-    for i in /etc/init.d/boot.d/S*; do
+if test -d ${bootrc}/ ; then
+    for i in ${bootrc}/S*; do
 	test -f $i || continue
+
+	B=${i##*/}
+	script=${B#*S$rex}
+	B=${B%$script}
+
 	if test "$DO_CONFIRM" = "yes" ; then
-	    rc_confirm -t 5 "Start bootup script ${i##*/S[0-9][0-9]}" < $REDIRECT > $REDIRECT 2>&1
+	    rc_confirm -t 5 "Start bootup script ${script}" < $REDIRECT > $REDIRECT 2>&1
 	    case "$?" in
 	    0) true     ;;
 	    1) continue ;;
@@ -91,27 +170,56 @@ if test -d /etc/init.d/boot.d/ ; then
 	    esac
 	fi
 
-        rc_splash "$i start"
-	if test -x "$i" ; then
-	    # Active boot scripts, should have their own messages
-	    $i start
-	else
-	    # Old boot scripts, may not have any message
-	    echo Running $i
-	    /bin/sh $i b
-	    rc_status -v1 -r
-	fi
+	# Current vector
+	eval cur=\${$B}
+	test -n "$cur" || callord="${callord:+"$callord "}$B"
+
+	# Remember scripts
+	start="${bootrc}/$B$script"
+	eval $B="\${cur:+call $start\|}\${cur:-call $start}"
     done
+fi
+
+#
+# Call the scripts in correct order
+#
+for p in $callord ; do
+    eval p="\${$p}"
+
+    while read x ; do
+	case "${x#*=}" in
+	    [1-47])  failed="${failed:+"$failed "}${x%=*}" ;;
+	    [56])   skipped="${skipped:+"$skipped "}${x%=*}" ;;
+	    0|*)    ;;
+	esac
+    done < <(eval $p)
+
+done
+
+echo -n "System Boot Control: "
+echo -e "The system has been ${stat}${extd}setup${norm}"
+if test -n "$failed" ; then
+    n=$((${#failed} + 7))
+    echo -n  "Failed features: "
+    test $n -lt 47 && echo -en "\033[${COLUMNS}C\033[${n}D"
+    echo -e  "${warn}${failed}${norm}"
+fi
+if test -n "$skipped" ; then
+    n=$((${#skipped} + 7))
+    echo -n  "Skipped features: "
+    test $n -lt 47 && echo -en "\033[${COLUMNS}C\033[${n}D"
+    echo -e  "${attn}${skipped}${norm}"
 fi
 
 #
 # Start user defined bootup script.
 #
 if test -f /etc/init.d/boot.local ; then
-        echo "Running /etc/init.d/boot.local"
-        /bin/sh /etc/init.d/boot.local
-	rc_status -v1 -r
-        rc_splash "boot.local start"
+    echo -n "System Boot Control: "
+    echo "Running /etc/init.d/boot.local"
+    /bin/sh /etc/init.d/boot.local
+    rc_status -v1 -r
+    rc_splash "boot.local start"
 fi
 
 #

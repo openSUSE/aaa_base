@@ -1,10 +1,10 @@
 #! /bin/bash
 #
-# Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 1996-2003 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
 # Author: Florian La Roche <feedback@suse.de> 1996
-#	  Werner Fink <werner@suse.de> 1994-99,2000-2002
+#	  Werner Fink <werner@suse.de> 1994-99,2000-2003
 #
 # /etc/init.d/rc   --    The Master Resource Control Script
 #
@@ -41,31 +41,31 @@ if test "$PREVLEVEL" = "N" ; then
 fi
 
 #
-# initialize boosplash progressbar variables
+# Initialize boosplash progressbar variables
 #
 runrc=/etc/init.d/rc${RUNLEVEL}.d
 prerc=/etc/init.d/rc${PREVLEVEL}.d
 
 SSC=($runrc/S*)
 case "$SSC" in
-   *\*) sscripts=0 ;;
-   *)   sscripts=${#SSC[*]}
+    *\*) sscripts=0 ;;
+    *)   sscripts=${#SSC[*]}
 esac
 export sscripts
 if test "$PREVLEVEL" != "N" ; then
-   KSC=($prerc/K*)
-   case "$KSC" in
-      *\*) kscripts=0 ;;
-      *)   kscripts=${#KSC[*]}
-   esac
-   export kscripts
+    KSC=($prerc/K*)
+    case "$KSC" in
+	*\*) kscripts=0 ;;
+	*)   kscripts=${#KSC[*]}
+    esac
+    export kscripts
 fi
 
-if [ "$PREVLEVEL" == "N" -a "$RUNLEVEL" == "5" ]; then
-export progress=16
-sscripts=$(( $sscripts+15 ))
+if test "$PREVLEVEL" == "N" -a "$RUNLEVEL" == "5" ; then
+    export progress=16
+    sscripts=$(( $sscripts+15 ))
 else
-export progress=0
+    export progress=0
 fi
 
 #
@@ -194,11 +194,32 @@ echo -n "Master Resource Control: "
 echo -n "previous runlevel: $PREVLEVEL, "
 echo -e "switching to runlevel: ${stat}${extd}${RUNLEVEL}${norm}"
 
-runrc=/etc/init.d/rc${RUNLEVEL}.d
-prerc=/etc/init.d/rc${PREVLEVEL}.d
 rex="[0-9][0-9]"
 failed=""
 skipped=""
+callord=""
+
+#
+# The call shell function
+#
+call ()
+{
+    local serv=${1#*[KS]$rex}
+    local status
+
+    rc_splash "$serv $2"
+    blogger   "$serv $2"
+
+    rc_init
+    $@ <> $CONSOLE 2>&0 1>&0
+    status=$?
+    echo -en "$rc_reset" > $CONSOLE
+
+    blogger "'$serv $2' exits with status $status"
+
+    test -p /dev/stdin && cat -
+    echo $serv=$status
+}
 
 #
 # First check and test services of previous and current (new) runlevel.
@@ -209,30 +230,20 @@ for i in $prerc/K${rex}*; do
     #
     # Don't stop service if the new runlevel requires the service.
     #
-    service=${i#*/K$rex}
+    K=${i##*/}
+    service=${K#*K$rex}
+    K=${K%$service}
     set -- $runrc/S$rex$service
     test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
     test -x "$1"  && continue
 
-    # send information to splash icon viewer.
-    rc_splash  "$i stop"
+    # Current vector
+    eval cur=\${$K}
+    test -n "$cur" || callord="${callord:+"$callord "}$K"
 
-    # Log to /var/log/boot.msg
-    blogger "$i stop"
-
-    # Stop the services of the previous runlevel if they are missed
-    # within the current (new) runlevel.
-
-    $i stop; status=$?
-    case $status in
-	[1-4])	 failed="${failed}  ${service}" ;;
-	[56])	skipped="${skipped} ${service}" ;;
-	[07]|*)	;;
-    esac
-    echo -en "$rc_reset"
-
-    # Log to /var/log/boot.msg
-    blogger "'$i stop' exits with status $status"
+    # Remember services
+    stop="$prerc/$K$service stop"
+    eval $K="\${cur:+call $stop\|}\${cur:-call $stop}"
 done
 
 for i in $runrc/S${rex}*; do
@@ -241,39 +252,61 @@ for i in $runrc/S${rex}*; do
     #
     # Don't start service if previous runlevel includes the service.
     #
-    service=${i#*/S$rex}
+    S=${i##*/}
+    service=${S#*S$rex}
+    S=${S%$service}
     set -- $prerc/K$rex$service
     test $# -gt 1 && echo -e "$attn$prerc/: more than one link for service $service$norm"
     test -x "$1"  && continue
 
+    #
+    # Ask the user if wanted
+    #
     if test "$DO_CONFIRM" = "yes" ; then
 	rc_confirm -t 5 "Start service $service"
 	case "$?" in
-	0) true     ;;
-	1) continue ;;
+	0) true		;;
+	1) continue	;;
 	2) DO_CONFIRM=""
 	esac
     fi
 
-    # send information to splash icon viewer.
-    rc_splash  "$i start"
+    # Current vector
+    eval cur=\${$S}
+    test -n "$cur" || callord="${callord:+"$callord "}$S"
 
-    # Log to /var/log/boot.msg
-    blogger "$i start"
+    # Remember services
+    start="$runrc/$S$service start"
+    eval $S="\${cur:+call $start\|}\${cur:-call $start}"
+done
 
-    # Start the services of the current (new) runlevel if they are missed
-    # within the previous runlevel.
+#
+# Stop the services of the previous runlevel if they are missed
+# within the current (new) runlevel.
+# Start the services of the current (new) runlevel if they are missed
+# within the previous runlevel.
+#
+for p in $callord ; do
+    todo=$p
+    eval p="\${$p}"
 
-    $i start; status=$?
-    case $status in
-	[1-47])	 failed="${failed}  ${service}" ;;
-	[56])	skipped="${skipped} ${service}" ;;
-	0|*)	;;
-    esac
-    echo -en "$rc_reset"
+    while read x ; do
+	case $todo in
+	K*)
+	    case "${x#*=}" in
+		[1-4])	 failed="${failed:+"$failed "}${x%=*}" ;;
+		[56])	skipped="${skipped:+"$skipped "}${x%=*}" ;;
+		[07]|*)	;;
+	    esac ;;
+	S*)
+	    case "${x#*=}" in
+		[1-47])	 failed="${failed:+"$failed "}${x%=*}" ;;
+		[56])	skipped="${skipped:+"$skipped "}${x%=*}" ;;
+		0|*)	;;
+	    esac ;;
+	esac
+    done < <(eval $p)
 
-    # Log to /var/log/boot.msg
-    blogger "'$i start' exits with status $status"
 done
 
 #

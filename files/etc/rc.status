@@ -25,7 +25,7 @@
 #    \033[31m      switch on red
 #    \033[32m      switch on green
 #    \033[33m      switch on yellow
-#    \033[m        switch on color/bold
+#    \033[m        switch off color/bold
 #    \017          exit alternate mode (xterm, vt100, linux console)
 #    \033[10m      exit alternate mode (linux console)
 #    \015          carriage return (without newline)
@@ -66,6 +66,8 @@ rc_failed_up="${esc}[1A${rc_failed}"
     rc_reset="${norm}"
      rc_save="${esc}7"
   rc_restore="${esc}8"
+    function rc_init () { return; }
+    function rc_goto () { return; }
     function rc_cuu () { echo -en "\033[${1}A"; }
     function rc_timer_on () {
 	# Draw seconds of running timout to column.
@@ -110,6 +112,8 @@ rc_failed_up="${rc_failed}"
     rc_reset=""
      rc_save=""
   rc_restore=""
+    function rc_init () { return; }
+    function rc_goto () { return; }
     function rc_cuu () { return; }
     function rc_timer_on  () { return; }
     function rc_timer_off () { return; }
@@ -142,6 +146,7 @@ function rc_status ()
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])
 	    echo -en "$rc_save"
+	    rc_goto
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    case "$_rc_status" in
 	    0)	echo -en "$rc_running"	 ;; # service running
@@ -178,6 +183,7 @@ function rc_status ()
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])
 	    echo -en "$rc_save"
+	    rc_goto
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    case "$_rc_status" in
 	    0)	echo -en "$rc_done"	    ;; # success
@@ -211,6 +217,7 @@ function rc_status ()
 	case "$i" in
 	-v|-v[1-9]|-v[1-9][0-9])
 	    echo -en "$rc_save"
+	    rc_goto
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    test $_rc_status -gt 0 && echo -en "$rc_failed" || echo -en "$rc_done"
 	    echo -en "$rc_restore"
