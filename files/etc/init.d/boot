@@ -58,7 +58,7 @@ echo "Running $0"
 # Start of e.g. blogd, requires /proc and /dev/pts.
 #
 rc_reset
-echo -n "Mounting /proc device"
+echo -n "Mounting /proc filesystem"
 mount -n -t proc proc /proc
 rc_status -v -r
 
