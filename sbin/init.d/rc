@@ -85,7 +85,7 @@ done
 echo -n "Master Resource Control: "
 if test -n "$failed" ; then
     echo
-    echo -n "Failed services in runlvel ${RUNLEVEL}:"
+    echo -n "Failed services in runlevel ${RUNLEVEL}:"
     echo -e "${extd}${failed}${norm}"
 else
     echo -e "runlevel ${RUNLEVEL} has been ${stat}${warn}reached${norm}"
