@@ -61,18 +61,18 @@ if [ -n "$RUN_UPDATEDB" -a "$RUN_UPDATEDB" = "yes" -a \
           fi
       done
   done
-else
-  cat /proc/mounts | \
-  while read device where fstype rest ; do
-    case $fstype in
-      nfs|NFS|autofs|proc|devpts|smbfs|ncpfs)
-        ;;
-      *)
-        find $where -mount -type f ! \( -fstype nfs -o -fstype NFS \) \
-        -name core 2>/dev/null  >> $TMPDIR/cron.daily.$$
-        ;;
-    esac
-  done
+#else
+#  cat /proc/mounts | \
+#  while read device where fstype rest ; do
+#    case $fstype in
+#      nfs|NFS|autofs|proc|devpts|smbfs|ncpfs)
+#        ;;
+#      *)
+#        find $where -mount -type f ! \( -fstype nfs -o -fstype NFS \) \
+#        -name core 2>/dev/null  >> $TMPDIR/cron.daily.$$
+#        ;;
+#    esac
+#  done
 fi
 
 for COREFILE in `cat $TMPDIR/cron.daily.$$`; do

@@ -145,9 +145,11 @@ function rc_status ()
 	    4)	echo -en "$rc_failed"  1>&2 ;; # insufficient privilege
 	    5)	echo -en "$rc_skipped" 1>&2 ;; # program is not installed
 	    6)	echo -en "$rc_unused"  1>&2 ;; # program is not configured
-	    7)	test "$_rc_todo" = "stop"   && \
-		echo -en "$rc_failed"	    || \
-		echo -en "$rc_running" 1>&2 ;; # program is not running
+	    7)	test "$_rc_todo" = "stop" && {
+		    echo -en "$rc_done"		# program is not running which
+		    rc_failed 0			# is success if we stop service
+		} || \
+		echo -en "$rc_failed"  1>&2 ;; # program is not running
 	    *)	echo -en "$rc_failed"  1>&2 ;; # unknown (maybe used in future)
 	    esac
 	    echo -en "$rc_restore"

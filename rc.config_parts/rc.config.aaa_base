@@ -351,14 +351,6 @@ CWD_IN_ROOT_PATH="no"
 PASSWD_USE_CRACKLIB="no"
 
 #
-# Some packages by SuSE include dynamically linked motif progs as well
-# as statically linked (*.SuSE-dynamic resp. *.SuSE-static). SuSEconfig 
-# can analyze your system and link the matching program to *.  If you
-# set this to "clean", the other binary will be deleted. (no/link/clean)
-#
-HOW_TO_HANDLE_COMMERCIAL_LIBS=link
-
-#
 # Run the Name Service Caching Daemon at boot time? (yes/no)
 #
 START_NSCD=yes
@@ -407,7 +399,7 @@ MODIFY_RESOLV_CONF_DYNAMICALLY="yes"
 INITRD_MODULES=""
 
 #
-# Set to "yes" or "quin" to play a quint tone sequence at system halt or reboot
+# Set to "yes" or "quint" to play a quint tone sequence at system halt or reboot
 # or set to "octave" to play octave sound at that occasion.
 #
 HALT_SOUND="no"

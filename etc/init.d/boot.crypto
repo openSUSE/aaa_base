@@ -6,7 +6,7 @@
 #
 # /etc/init.d/boot.crypto
 #
-#### BEGIN INIT INFO
+### BEGIN INIT INFO
 # Provides:          boot.crypto
 # Required-Start:    
 # Required-Stop:
