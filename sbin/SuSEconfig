@@ -659,18 +659,20 @@ fi
 # Now set PASSWD_USE_CRACKLIB.
 #
 if test -n "$PASSWD_USE_CRACKLIB" ; then
-    # Please note that the sed expression contains a true tab between \1 and strict.
-    for program in login rlogin passwd ; do
-	if test "$PASSWD_USE_CRACKLIB" = "yes" ; then
-	    cat $r/etc/pam.d/$program | \
-		sed 's@\(^[[:space:]]*password[[:space:]].*[/[:space:]]pam_unix.so\).*$@\1	strict=true@' \
-		> $r/etc/pam.d/$program.SuSEconfig
-	else
-	    cat $r/etc/pam.d/$program | \
-		sed 's@\(^[[:space:]]*password[[:space:]].*[/[:space:]]pam_unix.so\).*$@\1	strict=false@' \
-		> $r/etc/pam.d/$program.SuSEconfig
+    for program in login rlogin passwd sshd gdm ; do
+    	if test -f $r/etc/pam.d/$program ; then
+	    if test "$PASSWD_USE_CRACKLIB" = "yes" ; then
+		sed '\@^[[:space:]]*password[[:space:]].*[/[:space:]]pam_pwcheck.so@ {
+     		   s@[[:space:]]*use_cracklib@@g
+     		   s@$@ use_cracklib@
+   		}' < $r/etc/pam.d/$program > $r/etc/pam.d/$program.SuSEconfig
+	    else
+		sed '\@^[[:space:]]*password[[:space:]].*[/[:space:]]pam_pwcheck.so@ {
+     		   s@[[:space:]]*use_cracklib@@g
+   		}' < $r/etc/pam.d/$program > $r/etc/pam.d/$program.SuSEconfig
+	    fi
+	    check_md5_and_move $r/etc/pam.d/$program
 	fi
-	check_md5_and_move $r/etc/pam.d/$program
     done
 fi
 
