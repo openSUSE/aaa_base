@@ -42,13 +42,6 @@ done
 test "$UID" = 0 || PATH="$PATH:."
 export PATH
 
-# for all programs that use the GNU readline library (bash, gdb)
-if ! test -f ~/.inputrc ; then
-  INPUTRC=/etc/inputrc
-  export INPUTRC
-fi
-
-
 #
 # set some environment variables
 #
@@ -224,10 +217,13 @@ if test -z "$EMACS" ; then
 	    fi
 	}
     elif [ -n "$BASH_VERSION" ] ; then
-        PROMPT_COMMAND='test "$UID" = 0 && \
-                PS1="\h:`pwd -P` # " || \
-                PS1="\u@\h:`pwd -P` > "'
-	export PROMPT_COMMAND
+        if test "$UID" = 0 ; then
+            # set -P
+            set -p
+            PS1="\h:\w # "
+        else
+            PS1="\u@\h:\w > "
+        fi
     fi
 fi
 

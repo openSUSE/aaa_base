@@ -142,12 +142,18 @@ IP_DYNIP=no
 CHECK_ETC_HOSTS=yes
 
 #
-# If CHECK_ETC_HOSTS is set to yes, you can let SuSEconfig sort your
+# If CHECK_ETC_HOSTS is set to yes, SuSEconfig sorts your
 # /etc/hosts.  But in some cases this may be unwanted.  So here is a
 # flag, where you can configure if /etc/hosts should be "beautified".
 # (yes/no)
 #
 BEAUTIFY_ETC_HOSTS=yes
+
+#
+# if SORT_PASSWD_BY_UID is set to yes, SuSEconfig sorts your /etc/passwd
+# and /etc/group by uid/gid.
+#
+SORT_PASSWD_BY_UID=yes
 
 
 #
@@ -530,6 +536,11 @@ CHECK_INITTAB=yes
 # with a missing XF86Config.
 #
 DISPLAYMANAGER=""
+
+#
+# Here you can set the default window manager (kde, fvwm, ...)
+#
+DEFAULT_WM=kde
 
 #
 # CONSOLE_SHUTDOWN determines how ctrl-alt-del is handled.

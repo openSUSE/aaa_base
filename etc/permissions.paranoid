@@ -33,7 +33,6 @@
 /usr/X11R6/bin/v4l-conf                root.video        755
 /usr/X11R6/bin/xtvscreen.SuSE-dynamic  root.video        755
 /usr/X11R6/bin/xtvscreen.SuSE-static   root.video        755
-/usr/bin/bttvgrab                      root.root         755
 /usr/bin/bttvgrab                      root.video        755
 /usr/bin/chage                         root.shadow       755
 /usr/bin/chfn                          root.shadow       755
