@@ -76,7 +76,7 @@ export LESSOPEN
 MINICOM="-c on"
 export MINICOM
 
-MANPATH=/usr/local/man:/usr/man:/usr/X11R6/man
+MANPATH=/usr/local/man:/usr/share/man:/usr/man:/usr/X11R6/man
 for DIR in /usr/openwin/man \
            /usr/man/allman \
            /usr/man/de \

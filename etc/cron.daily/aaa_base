@@ -130,7 +130,7 @@ if test "$MAX_DAYS_FOR_LOG_FILES" -gt 0 -a -f /etc/logfiles ; then
             test -f $FILE && \
                 check_log_file $FILE $SIZE $MODE $OWNERSHIP $RSERVICE
         done
-	$RSERVICE=""
+	RSERVICE=""
     done < /etc/logfiles
 fi
 
