@@ -11,15 +11,21 @@
 
 test "$START_PORTMAP" = yes -o "$NFS_SERVER" = yes || exit 0
 
+if test -x /sbin/portmap ; then
+    PORTMAP=/sbin/portmap
+else
+    PORTMAP=/usr/sbin/portmap
+fi
+
 case "$1" in
     start)
 	echo "Starting RPC portmap daemon."
-	/usr/sbin/portmap
+	eval $PORTMAP
 	/bin/sleep 1
 	;;
     stop)
 	echo -n "Shutting down RPC services:"
-	killproc -TERM /usr/sbin/portmap
+	killproc -TERM $PORTMAP
 	echo
 	;;
     *)
