@@ -211,11 +211,13 @@ case "$-" in
     if test "$is" = "bash" ; then
 	case "$BASH_VERSION" in
 	2.*)
-	    # Read in bash complete settings. We can not do this in place
-	    # because other shells and their parsers do not like the bash
-	    # way of assigning arrays
-
-	    test -s /etc/profile.d/complete.bash && . /etc/profile.d/complete.bash
+	    if test -e $HOME/.bash_completion ; then
+		. $HOME/.bash_completion
+	    elif test -e /etc/bash_completion ; then
+		. /etc/bash_completion
+	    elif test -s /etc/profile.d/complete.bash ; then
+		. /etc/profile.d/complete.bash
+	    fi
 
 	    ;;
 	*)  ;;
