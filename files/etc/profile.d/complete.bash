@@ -35,7 +35,7 @@ _file_ ()
     bunzip2)		COMPREPLY=($($e '!*.bz2'		$c)) ;;
     gunzip)		COMPREPLY=($($e '!*.gz'			$c)) ;;
     uncompress)		COMPREPLY=($($e '!*.Z'			$c)) ;;
-    unzip)		COMPREPLY=($($e '!*.+(zip|jar)'		$c)) ;;
+    unzip)		COMPREPLY=($($e '!*.+(zip|jar|exe)'	$c)) ;;
     gs|ghostview)	COMPREPLY=($($e '!*.+(ps|PS|pdf|PDF)'	$c)) ;;
     gv)			COMPREPLY=($($e '!*.+(ps|ps.gz|pdf|PDF)' $c)) ;;
     acroread|xpdf)	COMPREPLY=($($e '!*.+(pdf|PDF)'		$c)) ;;
