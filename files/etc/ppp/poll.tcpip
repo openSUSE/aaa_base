@@ -32,7 +32,6 @@ logger -t poll.tcpip -p mail.notice " Starting mail and news send/fetch"
 #
 # Check resources and settings
 #
-. /etc/rc.config
 
 #
 # Time to get a stable connenction

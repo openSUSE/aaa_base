@@ -15,7 +15,6 @@
 ### END INIT INFO
 
 . /etc/rc.status
-. /etc/rc.config
 . /etc/sysconfig/cron
 
 rc_reset

@@ -21,7 +21,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 export PATH
 
 #
-# get information from /etc/rc.config
+# get information from /etc/sysconfig
 #
 if [ -f /etc/sysconfig/backup ] ; then
     . /etc/sysconfig/backup

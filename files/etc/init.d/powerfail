@@ -14,8 +14,6 @@
 # up again (if it does in time!)
 #
 
-. /etc/rc.config
-
 trap "echo" SIGINT SIGSEGV SIGTERM
 
 POWERFAIL='THE POWER IS FAILED! SYSTEM GOING DOWN! PLEASE LOG OFF NOW!'

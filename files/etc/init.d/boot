@@ -14,7 +14,6 @@
 #
 
 . /etc/rc.status
-. /etc/rc.config
 echo "Running $0"
 
 rc_reset

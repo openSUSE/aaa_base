@@ -1,7 +1,6 @@
 #!/bin/sh
 
 . /etc/profile
-. /etc/rc.config
 . /etc/sysconfig/security
 
 test "$UID" = 0 -o ! -z "$RPM_BUILD_ROOT" || {

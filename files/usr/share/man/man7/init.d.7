@@ -17,7 +17,7 @@ INIT.D \- The SuSE boot concept
 .\"
 .B /etc/init.d/*
 .PP
-.B /etc/rc.config
+.B /etc/sysconfig
 .\"
 .SH DESCRIPTION
 The scripts for controlling the system are placed in
@@ -79,9 +79,9 @@ the names of the start and stop links.
 To control the order of service starts and stops, the start
 and stop links include a number in their link name.
 .PP
-The system configuration file
-.IR /etc/rc.config
-contains most of the variables used to configure the installed
+The system configuration files in
+.IR /etc/sysconfig
+contain most of the variables used to configure the installed
 services.
 These variables can easily be changed by
 .B YaST
@@ -246,7 +246,7 @@ to include your own script into a run level.
 .br
 .I /etc/inittab
 .br
-.I /etc/rc.config
+.I /etc/sysconfig
 .\"
 .SH SEE ALSO
 .BR insserv (8),

@@ -10,7 +10,6 @@
 #
 
 . /etc/rc.status
-. /etc/rc.config
 
 #
 # Avoid being interrupted by child or keyboard

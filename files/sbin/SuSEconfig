@@ -8,7 +8,7 @@
 #  & Aleksey Novodvorsky <aen@logic.ru> from IPLabs Linux Team, Moscow.
 # Attention! The shell must be restarted before localisation takes effect!
 #
-# Rewrote i18n support to use RC_LANG and RC_LC_* rc.config variables
+# Rewrote i18n support to use RC_LANG and RC_LC_* sysconfig variables
 # Bernhard Kaindl <bk@suse.de>, 1999
 #
 # Change ROOT_LOGIN_REMOTE support to edit PAM config files.
@@ -102,19 +102,18 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 
 . $r/lib/YaST/SuSEconfig.functions
 
-echo "Reading $r/etc/rc.config and updating the system..."
+echo "Reading $r/etc/sysconfig and updating the system..."
 
-for i in $r/etc/rc.config \
-	 $r/etc/sysconfig/suseconfig ; do
+for i in $r/etc/sysconfig/suseconfig ; do
   test -f $i && . $i
 done
 
 if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
-    echo "SuSEconfig is disabled in $r/etc/rc.config. Exit..."
+    echo "SuSEconfig is disabled in $r/etc/sysconfig/suseconfig. Exit..."
     exit 0
 fi
 
-# rc.config sets a new PATH
+# set a new PATH
 if test "$r" != ""; then
         PATH=$PATH:$r/bin:$r/usr/bin:$r/sbin:$r/usr/sbin
         export PATH

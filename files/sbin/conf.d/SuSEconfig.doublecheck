@@ -26,7 +26,7 @@ test -f /lib/YaST/SuSEconfig.functions || {
 . /lib/YaST/SuSEconfig.functions
 
 #
-# safety-check: look for duplicated variables in /etc/rc.config
+# safety-check: look for duplicated variables in sysconfig
 #
 MYTMP=`mktemp -d /tmp/rcconfigchk.XXXXXX`
 FIND_CMD="find /etc/rc.config /etc/sysconfig -type f -maxdepth 1 \
@@ -40,13 +40,13 @@ if [ -s $MYTMP/toomuch ] ; then
   while read DOUBLE ; do
     $FIND_CMD | xargs grep -H "^$DOUBLE=" >> $MYTMP/toomuch.out
   done < $MYTMP/toomuch
-  echo "This is a warning message." > $MYTMP/rc.config_check
-  echo "The following variables seem to be doubled in /etc/rc.config" >> $MYTMP/rc.config_check
-  echo "and/or the files in /etc/sysconfig :" >> $MYTMP/rc.config_check
-  cat $MYTMP/toomuch.out >> $MYTMP/rc.config_check
-  echo "Please check which of the instances is correct." >> $MYTMP/rc.config_check
+  echo "This is a warning message." > $MYTMP/sysconfig_check
+  echo "The following variables seem to be doubled in /etc/rc.config" >> $MYTMP/sysconfig_check
+  echo "and/or the files in /etc/sysconfig :" >> $MYTMP/sysconfig_check
+  cat $MYTMP/toomuch.out >> $MYTMP/sysconfig_check
+  echo "Please check which of the instances is correct." >> $MYTMP/sysconfig_check
   test -d /var/adm/notify/warnings && \
-    mv $MYTMP/rc.config_check /var/adm/notify/warnings
+    mv $MYTMP/sysconfig_check /var/adm/notify/warnings
 fi
 rm -rf $MYTMP
 

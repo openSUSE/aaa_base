@@ -19,7 +19,6 @@
 ### END INIT INFO
 
 . /etc/rc.status
-. /etc/rc.config
 . /etc/sysconfig/displaymanager
 . /etc/SuSEconfig/profile
 

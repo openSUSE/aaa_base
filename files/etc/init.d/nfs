@@ -18,7 +18,6 @@
 ### END INIT INFO
 
 . /etc/rc.status
-. /etc/rc.config
 
 NEED_NFS=no
 rc_active autofs && NEED_NFS=yes

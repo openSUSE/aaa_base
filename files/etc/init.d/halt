@@ -9,7 +9,6 @@
 #
 
 . /etc/rc.status
-. /etc/rc.config
 . /etc/sysconfig/clock
 . /etc/sysconfig/suseconfig
 

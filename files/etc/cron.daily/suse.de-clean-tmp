@@ -21,11 +21,8 @@ umask 022
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 export PATH
 #
-# get information from /etc/rc.config
+# get information from /etc/sysconfig
 #
-if [ -f /etc/rc.config ] ; then
-    . /etc/rc.config
-fi
 if [ -f /etc/sysconfig/cron ] ; then
     . /etc/sysconfig/cron
 fi

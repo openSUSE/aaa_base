@@ -99,7 +99,6 @@ fi
 #
 
 . /etc/rc.status
-. /etc/rc.config
 
 #
 # Save old terminal settings and set -nl to avoid staircase

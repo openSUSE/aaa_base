@@ -25,7 +25,8 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 }
 . $r/lib/YaST/SuSEconfig.functions
 
-for i in $r/etc/rc.config $r/etc/sysconfig/language $r/etc/sysconfig/windowmanager $r/etc/sysconfig/suseconfig $r/etc/sysconfig/mail $r/etc/sysconfig/printer $r/etc/sysconfig/proxy ; do
+for i in $r/etc/sysconfig/language $r/etc/sysconfig/windowmanager $r/etc/sysconfig/suseconfig \
+	 $r/etc/sysconfig/mail $r/etc/sysconfig/printer $r/etc/sysconfig/proxy ; do
   test -f $i || {
     echo "No $i found."
     exit 1
@@ -83,9 +84,9 @@ LC_MONETARY"
 if test "$ROOT_USES_LANG" = yes ; then
     message="\
 #
-# /etc/rc.config: ROOT_USES_LANG = yes:
+# /etc/sysconfig/language: ROOT_USES_LANG = yes:
 #
-# All users get all the locale variables from /etc/rc.config:
+# All users get all the locale variables from /etc/sysconfig/language:
 #"
 
     # sh und ksh:
@@ -115,34 +116,34 @@ else
     if test "$ROOT_USES_LANG" = ctype ; then
     root_message="\
     #
-    # /etc/rc.config: ROOT_USES_LANG = ctype:
+    # /etc/sysconfig/language: ROOT_USES_LANG = ctype:
     #
     # root uses only the LC_CTYPE, we export all the other locale variables
-    # from /etc/rc.config as-is, and don't assign them to their effective
+    # from /etc/sysconfig/language as-is, and don't assign them to their effective
     # counterparts. We unset all effective locale variables but LC_CTYPE
     # and set LANG to POSIX.
     # This is necessary for non iso-8859-1 roots to be able to type all
     # the characters in X Windows.
     # root can later decide to use specific locale variables with simple
-    # assignments and do not need to source rc.config. i.e. LANG=\$RC_LANG
+    # assignments and do not need to source sysconfig. i.e. LANG=\$RC_LANG
     #"
     else
     root_message="\
     #
-    # /etc/rc.config: ROOT_USES_LANG != yes|ctype:
+    # /etc/sysconfig/language: ROOT_USES_LANG != yes|ctype:
     #
     # root doesn't use locales, we export the locale variables from
-    # /etc/rc.config as-is, and don't assign them to their effective
+    # /etc/sysconfig/language as-is, and don't assign them to their effective
     # counterparts. We unset all effective locale variables and set
     # LANG to POSIX.
     # root can later decide to use specific locale variables with simple
-    # assignments and do not need to source rc.config. i.e. LANG=\$RC_LANG
+    # assignments and do not need to source sysconfig. i.e. LANG=\$RC_LANG
     #"
     fi
 
     user_message="\
     #
-    # All other users get all the locale variables from /etc/rc.config:
+    # All other users get all the locale variables from /etc/sysconfig/language:
     #"
 
     # sh und ksh:

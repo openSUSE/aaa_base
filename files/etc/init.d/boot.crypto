@@ -17,7 +17,6 @@
 ### END INIT INFO
 
 . /etc/rc.status
-. /etc/rc.config
 
 trap "echo" SIGINT SIGSEGV
 set +e
