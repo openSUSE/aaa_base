@@ -17,6 +17,8 @@ lnx:*:root:root
 mdom:*:root:root
 yard:*:root:root
 dosemu:*:root:root
+firewall:*:root:root
+public:*:root:root
 game:*:root:root
 users:*:root:root
 nogroup:*:root:root

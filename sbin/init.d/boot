@@ -97,7 +97,7 @@ if test ! -f /fastboot; then
 
             sync
             reboot
-        elif test $? -gt 0 -a -n "$START_QUOTA" -a "$START_QUOTA"="yes" then
+        elif test $? -gt 0 -a -n "$START_QUOTA" -a "$START_QUOTA"="yes" ; then
               # Check quota and then turn quota on.
               if test -x /usr/sbin/quotacheck ; then
                   echo "Checking quotas. This may take some time."
