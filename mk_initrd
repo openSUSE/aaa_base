@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.16
+# Version 1.17
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
@@ -29,6 +29,10 @@
 # (c) 2000 Karsten Keil   option and kernel 2.4 support
 #
 # ChangeLog:
+#
+# 13/8/2001:	v1.17
+#  - run 'raidautorun' after loading all modules
+#    (note: raidautorun is a ash/sash builtin)
 #
 # 14/5/2001:	v1.16
 #  - automagically add lvm-mod.o
@@ -313,7 +317,7 @@ for k in $kernels ; do
 
     rmdir $tmp_mnt/lost+found
     mkdir $tmp_mnt/{bin,dev}
-    cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console} $tmp_mnt/dev
+    cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console,md0} $tmp_mnt/dev
     cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 4 "no static shell"
     cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 5 "no static insmod"
     if [ $root_lvm -eq 1 ]
@@ -322,7 +326,7 @@ for k in $kernels ; do
 	touch $tmp_mnt/etc/fstab
 	cp -a $root_dir/dev/lvm  $tmp_mnt/dev
 	cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
-	cp -a $root_dir/dev/md? $root_dir/dev/dasd* $tmp_mnt/dev
+	cp -a $root_dir/dev/dasd* $tmp_mnt/dev
 	cp -a $root_dir/dev/{i2o,ida,cciss,rd} $tmp_mnt/dev
 	cp -a $root_dir/lib/ld-*so* $tmp_mnt/lib
 	cp -a $root_dir/lib/liblvm*.so* $tmp_mnt/lib
@@ -362,6 +366,11 @@ for k in $kernels ; do
 #        continue 2
       fi
     done
+    echo "-> raidautorun"
+    echo "echo \"raidautorun ...\" " >>$lx_rc
+    echo "raidautorun" >>$lx_rc
+    echo "echo \"done ...\" " >>$lx_rc
+    echo >>$lx_rc
 
     if [ $root_lvm -eq 1 ]
     then
