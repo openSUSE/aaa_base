@@ -363,7 +363,13 @@ echo '# start of i18n support'       >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo '# start of i18n support'       >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 
 if test -z "$RC_LANG" ; then
-	RC_LANG="$LANGUAGE"
+	case "$LANGUAGE" in
+		russian)	RC_LANG=ru_RU.KOI8-R     ;;
+		brazilian)	RC_LANG=pt_BR.ISO-8859-1 ;;
+		danish)		RC_LANG=dansk            ;;
+		english)	RC_LANG=POSIX            ;;
+		*)		RC_LANG="$LANGUAGE"      ;;
+	esac
 fi
 
 locale_vars="\

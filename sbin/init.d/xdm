@@ -10,6 +10,27 @@
 #
 
 . /etc/rc.config
+. /etc/SuSEconfig/profile
+
+locale_vars="\
+LANG         \
+LC_ALL       \
+LC_MESSAGES  \
+LC_CTYPE     \
+LC_COLLATE   \
+LC_TIME      \
+LC_NUMERIC   \
+LC_MONETARY"
+
+for var in $locale_vars
+do
+    if eval test "\$RC_$var"; then
+        eval $var="\$RC_$var"  
+        export $var
+    else
+        unset $var
+    fi
+done
 
 case "$DISPLAYMANAGER" in
     kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde/bin/kdm   ;;
