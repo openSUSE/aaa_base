@@ -56,6 +56,7 @@ done
 for DIR in $DIRS ; do
     test "$DIR" = "/usr/X11R6/lib/X11/fonts/CID" && continue
     test "$DIR" = "/usr/X11R6/lib/X11/fonts/truetype" && continue
+    test "$DIR" = "/usr/X11R6/lib/X11/fonts/TTF" && continue
     test -d $DIR && find $DIR \! -name "*.gz" \! -name "*.Z" \
         \! -name dir \! -name dir.old \! -name localdir \
         \! -name whatis \! -name fonts.alias \! -name fonts.dir \
