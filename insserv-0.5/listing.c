@@ -1,3 +1,14 @@
+/*
+ * listing.c
+ *
+ * Copyright 2000 Werner Fink, 2000 SuSE GmbH Nuernberg, Germany.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ */
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +19,7 @@
 #include <ctype.h>
 #include "listing.h"
 
-#define MAX_DEEP 20
+#define MAX_DEEP 99
 
 #define LVL_HALT	0x001
 #define LVL_ONE		0x002
@@ -20,11 +31,17 @@
 #define LVL_SINGLE	0x080
 #define LVL_BOOT	0x100
 
+/*
+ * LVL_BOOT is already done if  one of the LVL_ALL will be entered.
+ */
+#define LVL_ALL		\
+(LVL_HALT|LVL_ONE|LVL_TWO|LVL_THREE|LVL_FOUR|LVL_FIVE|LVL_REBOOT|LVL_SINGLE)
+
 extern const char *delimeter;
 extern void error (const char *fmt, ...);
 extern void warn (const char *fmt, ...);
 
-int maxorder = 0;
+int maxorder = 0;  /* Maximum order of runlevels 0 upto 6 and S */
 
 typedef struct list_struct {
     struct list_struct * prev, * next;
@@ -99,6 +116,33 @@ out:
 }
 
 /*
+ * Find a service dir by its script name.
+ */
+static dir_t * findscript(const char * script)
+{
+    dir_t  * this = NULL;
+    list_t * ptr;
+    register boolean found = false;
+
+    for (ptr = d_start->next; ptr != d_start; ptr = ptr->next) {
+	dir_t * tmp = getdir(ptr);
+
+	if (!tmp->script)
+	    continue;
+
+	if (!strcmp(tmp->script,script)) {
+	    found = true;
+	    break;
+	}
+    }
+
+    if (found)
+	this = getdir(ptr);
+
+    return this;
+}
+
+/*
  * Link a provided service into a required service.
  * If the services do not exist, they will be created.
  */
@@ -114,7 +158,7 @@ static void ln_sf(const char * isprovided, const char * itrequires)
 
     if (!dir->link.target) {
 	dir->link.target = target;
-	insert(&(dir->link.l_list), l_start->prev);
+	insert(l_start, l_start->prev);
 	goto out;
     }
 
@@ -133,10 +177,13 @@ out:
  * Just like a `find * -follow' within a directory tree
  * of deep one with cross linked dependencies.
  */
-static void __follow (dir_t * dir, int level)
+static void __follow (dir_t * dir, int level, int offset)
 {
     dir_t *tmp;
-    register int deep = level; /* Link deep, maybe we're called recursive */
+    register int deep = level;	/* Link deep, maybe we're called recursive */
+
+    if (*dir->name == '$') 	/* Dirty hack to decrease the order caused by */
+	offset--;		/* system facilities, may fail */
 
     for (tmp = dir; tmp; tmp = tmp->link.target) {
 	list_t * dent, * l_start = &(tmp->link.l_list);
@@ -154,8 +201,8 @@ static void __follow (dir_t * dir, int level)
 	/*
 	 * As higher the link deep, as higher the start order.
 	 */
-	if (tmp->order < deep)
-	    tmp->order = deep;
+	if (tmp->order < (deep + offset))
+	    tmp->order = (deep + offset);
 
 	/*
 	 * If more than one link is included, follow them all
@@ -169,7 +216,7 @@ static void __follow (dir_t * dir, int level)
 	    if (target == dir)
 		break;		/* Loop detected */
 
-	    __follow(target, deep);
+	    __follow(target, deep, offset);
 	}
     }
 }
@@ -179,8 +226,8 @@ static void __follow (dir_t * dir, int level)
  */
 inline static void follow(dir_t * dir)
 {
-    int deep = 0;	       /* Link deep, starts here with zero */
-    __follow(dir, deep);
+    /* Link deep and offset starts here with zero */
+    __follow(dir, 0, 0);
 }
 
 /*
@@ -195,6 +242,9 @@ static void guess_order(dir_t * dir)
     int deep = 0;
 
     if (dir->script)		/* Skip it because we have read it */
+	goto out;
+
+    if (*dir->name == '$')	/* Don't touch our system facilities */
 	goto out;
 
     if (!target)		/* No target available */
@@ -223,9 +273,13 @@ static void guess_order(dir_t * dir)
 
 	    lvl |= target->lvl;
 	}
-	dir->order = min - 1;	/* Set guessed order of this unknown script */
-	dir->lvl |= lvl;	/* Set guessed runlevels of this unknown script */
+	if (min > 1) {		/* Set guessed order of this unknown script */
+	    dir->order = min - 1;
+	    dir->lvl |= lvl;	/* Set guessed runlevels of this unknown script */
+	} else
+	    dir->lvl  = LVL_BOOT;
     }
+
 out:
 }
 
@@ -249,25 +303,32 @@ void follow_all()
     for (tmp = d_start->next; tmp != d_start; tmp = tmp->next)
 	guess_order(getdir(tmp));
 
-    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next)
+    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
+	if (!(getdir(tmp)->lvl & LVL_ALL))
+	    continue;
 	if (maxorder < getdir(tmp)->order)
 	    maxorder = getdir(tmp)->order;
+    }
 }
 
 /*
  * For debuging: show all services
  */
+#if defined(DEBUG) && (DEBUG > 0)
 void show_all()
 {
     list_t *tmp;
     for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
 	dir_t * dir = getdir(tmp);
 	if (dir->script)
-	    printf("%.2d %s 0x%.2x\n", dir->order, dir->name, dir->lvl);
+	    printf("%.2d %s 0x%.2x (%s)\n",
+		   dir->order, dir->script, dir->lvl, dir->name);
 	else
-	    printf("%.2d %s 0x%.2x (guessed)\n", dir->order, dir->name, dir->lvl); 
+	    printf("%.2d %s 0x%.2x (%%%s)\n",
+		   dir->order, dir->name, dir->lvl, *dir->name == '$' ? "system" : "guessed");
     }
 }
+#endif
 
 /*
  * Used within loops to get names not included in this runlevel.
@@ -358,7 +419,7 @@ boolean foreach(char ** script, int * order, const int runlevel)
 }
 
 /*
- * The same as requiresv, bbut here we use
+ * The same as requiresv, but here we use
  * several arguments instead of one string.
  */
 void requiresl(const char * this, ...)
@@ -385,10 +446,12 @@ void requiresv(const char * this, const char * requires)
     int count = 0;
     char * token, * tmp = strdupa(requires);
 
+    if (!tmp)
+	error("%s", strerror(errno));
+
     while ((token = strsep(&tmp, delimeter))) {
-	if (*token) {
+	if (*token)
 	    ln_sf(this, token);
-	}
 	count++;
     }
     if (!count)
@@ -404,6 +467,9 @@ void runlevels(const char * this, const char * lvl)
     dir_t * dir = providedir(this);
     char * token, *tmp = strdupa(lvl);
     int num;
+
+    if (!tmp)
+	error("%s", strerror(errno));
 
     while ((token = strsep(&tmp, delimeter))) {
 	if (!*token || strlen(token) != 1)
@@ -435,35 +501,23 @@ void runlevels(const char * this, const char * lvl)
  * Reorder all services starting with a service
  * being in same runlevels.
  */
-void setorder(const char * name, const int order)
+void setorder(const char * script, const int order)
 {
-    dir_t * dir = providedir(name);
+    dir_t * dir = findscript(script);
     list_t * tmp;
     int offset = 0;
+
+    if (!dir)
+	goto out;
 
     if (dir->order >= order) /* nothing to do */
 	goto out;
 
-    if (dir->order == 1) {   /* no dependencies, act as minorder */
-	dir->order = order;
-	goto out;
-    }
-
-    offset = order - dir->order;
-    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
-	dir_t * cur = getdir(tmp);
-
-	/*
-	 * The scripts should be belong to
-	 * similar runlevels.
-	 */
-	if (!(cur->lvl & dir->lvl))
-	    continue;
-
-	if (cur->order > dir->order)
-	    cur->order += offset;
-    }
-    dir->order += offset;
+    /*
+     * Follow the script and re-calculate the ordering.
+     */
+    offset = order - (dir->order + 1);
+    __follow(dir, dir->order, offset);
 
     /*
      * Guess order of not installed scripts in comparision
@@ -472,48 +526,50 @@ void setorder(const char * name, const int order)
     for (tmp = d_start->next; tmp != d_start; tmp = tmp->next)
 	guess_order(getdir(tmp));
 
-    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next)
+    for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
+	if (!(getdir(tmp)->lvl & LVL_ALL))
+	    continue;
 	if (maxorder < getdir(tmp)->order)
 	    maxorder = getdir(tmp)->order;
+    }
+
 out:
-}
-
-/*
- * Set order number of a service. This may change
- * ordering. Only usefull if order is known and/or
- * no dependencies have to satisfied.
- */
-void minorder(const char * name, const int order)
-{
-    dir_t * dir = providedir(name);
-    if (dir->order < order)
-	dir->order = order;
-
-    if (maxorder < dir->order)
-	maxorder = dir->order;
 }
 
 /*
  * Get the order of a service.
  */
-int getorder(const char * name)
+int getorder(const char * script)
 {
-    dir_t * dir = providedir(name);
-    return getdir(dir)->order;
+    dir_t * dir = findscript(script);
+    int order = -1;
+
+    if (dir)
+	order = getdir(dir)->order;
+
+    return order;
 }
 
 /*
  * Provide a service if the corresponding script
  * was read and the scripts name was remembered.
  * A given script name marks a service as a readed one.
+ * One script and several provided facilities leads
+ * to the same order for those facilities.
  */
 int makeprov(const char * name, const char * script)
 {
-    dir_t * dir = providedir(name);
+    dir_t * alias = findscript(script);
+    dir_t * dir   = providedir(name);
     int ret = 0;
 
     if (!dir->script) {
-	dir->script = strdup(script);
+	if (!alias) {
+	    dir->script = strdup(script);
+    	    if (!dir->script)
+		error("%s", strerror(errno));
+	} else
+	    dir->script = alias->script;
 	goto out;
     }
 
@@ -521,4 +577,34 @@ int makeprov(const char * name, const char * script)
 	ret = -1;
 out:
     return ret;
+}
+
+/*
+ *
+ *
+ */
+
+void virtprov(const char * virt, const char * real)
+{
+    char * token, * ptr;
+    dir_t * dir = providedir(virt);
+
+    if (!real)
+	goto out;
+
+    ptr = strdupa(real);
+    if (!ptr)
+	error("%s", strerror(errno));
+
+    while ((token = strsep(&ptr, delimeter))) {
+	if (*token) {
+	    dir_t * tmp = providedir(token);
+	    ln_sf(virt, token);
+	    dir->lvl |= tmp->lvl;
+	}
+    }
+
+out: 
+    if (!dir->lvl)		/* Unknown runlevel means before any runlevel */
+	dir->lvl |= LVL_BOOT;
 }

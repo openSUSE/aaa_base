@@ -1,3 +1,14 @@
+/*
+ * insserv(.c)
+ *
+ * Copyright 2000 Werner Fink, 2000 SuSE GmbH Nuernberg, Germany.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ */
+
 #include <pwd.h>
 #include <string.h>
 #include <unistd.h>
@@ -15,7 +26,10 @@
 #include "listing.h"
 
 #ifndef  INITDIR
-# define INITDIR	"/sbin/init.d"
+# define INITDIR	"/etc/init.d"
+#endif
+#ifndef  INSCONF
+# define INSCONF	"/etc/insserv.conf"
 #endif
 
 
@@ -38,6 +52,12 @@
 #define DEFAULT_START	DEFAULT  START VALUE
 #define DEFAULT_STOP	DEFAULT  STOP  VALUE
 #define DESCRIPTION	COMM "description" VALUE
+
+/* System facility search within /etc/insserv.conf */
+#define EQSIGN		"([[:blank:]]?[=:]?[[:blank:]]?|[[:blank:]]+)"
+#define CONFLINE	"^(\\$[a-z0-9_-]+)" EQSIGN "([[:print:][:blank:]]*)"
+#define SUBCONF		2
+#define SUBCONFNUM	4
 
 /* The main line buffer if unique */
 static char buf[LINE_MAX];
@@ -163,36 +183,48 @@ static void scan_script(const char *path)
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 		provides = strdup(pbuf+val->rm_so);
+		if (!provides)
+		    error("%s", strerror(errno));
 	    }
 	}
 	if (!required_start && regexecutor(&reg_req_start, COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 		required_start = strdup(pbuf+val->rm_so);
+		if (!required_start)
+		    error("%s", strerror(errno));
 	    }
 	}
 	if (!required_stop  && regexecutor(&reg_req_stop,  COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 		required_stop = strdup(pbuf+val->rm_so);
+		if (!required_stop)
+		    error("%s", strerror(errno));
 	    }
 	}
 	if (!default_start  && regexecutor(&reg_def_start, COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 		default_start = strdup(pbuf+val->rm_so);
+		if (!default_start)
+		    error("%s", strerror(errno));
 	    }
 	}
 	if (!default_stop   && regexecutor(&reg_def_stop,  COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 		default_stop = strdup(pbuf+val->rm_so);
+		if (!default_stop)
+		    error("%s", strerror(errno));
 	    }
 	}
 	if (!description    && regexecutor(&reg_desc,	   COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
 		*(pbuf+val->rm_eo) = '\0';
 		description = strdup(pbuf+val->rm_so);
+		if (!description)
+		    error("%s", strerror(errno));
 	    }
 	}
     }
@@ -206,6 +238,56 @@ static void scan_script(const char *path)
     fclose(script);
 
     return;
+}
+
+/*
+ * The script scanning engine.
+ */
+static void scan_conf(void)
+{
+    regex_t reg_conf;
+    regmatch_t subloc[SUBCONFNUM], *val = NULL;
+    FILE *conf;
+    char *pbuf = buf, * fptr = INSCONF;
+
+    regcompiler(&reg_conf, CONFLINE, REG_EXTENDED|REG_ICASE);
+
+again:
+    conf = fopen(fptr, "r");
+    if (!conf) {
+	if (errno != ENOENT)
+	    goto err;
+	if (*fptr == '/') {	/* Try relativ location */
+	    fptr++;
+	    goto again;
+	}
+	goto err;
+    }
+
+    while (fgets(buf, sizeof(buf), conf)) {
+	if (*pbuf == '#')
+	    continue;
+	if (regexecutor(&reg_conf, buf, SUBCONFNUM, subloc, 0) == true) {
+	    char * virt = NULL, * real = NULL;
+	    val = &subloc[SUBCONF - 1];
+	    if (val->rm_so < val->rm_eo) {
+		*(pbuf+val->rm_eo) = '\0';
+		virt = pbuf+val->rm_so;
+	    }
+	    val = &subloc[SUBCONFNUM - 1];
+	    if (val->rm_so < val->rm_eo) {
+		*(pbuf+val->rm_eo) = '\0';
+		real = pbuf+val->rm_so;
+	    }
+	    if (virt)
+		virtprov(virt, real);
+	}
+    }
+    regfree(&reg_conf);
+    fclose(conf);
+    return;
+err:
+    warn("fopen(%s): %s\n", fptr, strerror(errno));
 }
 
 /*
@@ -317,6 +399,9 @@ int main (int argc, char *argv[])
 	if (!strncmp(d->d_name, "README", strlen("README")))
 	    continue;
 
+	if (!strncmp(d->d_name, "core", strlen("core")))
+	    continue;
+
 	/* Common scripts not used within runlevels */
 	if (!strcmp(d->d_name, "rc")	   ||
 	    !strcmp(d->d_name, "rx")	   ||
@@ -329,26 +414,33 @@ int main (int argc, char *argv[])
 
 	if ((end = strrchr(d->d_name, '.'))) {
 	    end++;
-	    if (!strcmp(end, "local"))
+	    if (!strcmp(end,  "local"))
 		continue;
-	    if (!strcmp(end, "rpmsave"))
+	    /* .rmporig, .rpmnew, .rmpsave, ... */
+	    if (!strncmp(end, "rpm", 3))
 		continue;
-	    if (!strcmp(end, "rpmnew"))
+	    /* .bak, .backup, ... */
+	    if (!strncmp(end, "ba", 2))
 		continue;
-	    if (!strcmp(end, "rpmorig"))
+	    if (!strcmp(end,  "old"))
 		continue;
-	    if (!strcmp(end, "bak"))
+	    if (!strcmp(end,  "new"))
 		continue;
-	    if (!strcmp(end, "old"))
+	    if (!strcmp(end,  "save"))
 		continue;
-	    if (!strcmp(end, "save"))
+	    /* Used by vi like editors */
+	    if (!strcmp(end,  "swp"))
+		continue;
+	    /* modern core dump */
+	    if (!strcmp(end,  "core"))
 		continue;
 	}
 
-	/* Leaved by editors */
-	if (*(d->d_name) == '#' || *(d->d_name) == '.')
-	    continue;
+	/* Leaved by emacs like editors */
 	if (d->d_name[strlen(d->d_name)-1] == '~')
+	    continue;
+
+	if (strspn(d->d_name, "0123456789$.#_-\\*"))
 	    continue;
 
 	/* main scanner */
@@ -388,9 +480,12 @@ int main (int argc, char *argv[])
 	if (provides) {
 	    char * token;
 	    while ((token = strsep(&provides, delimeter))) {
+		if (*token == '$') {
+		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
+		    continue;
+		}
 		if (makeprov(token, d->d_name) < 0) {
-		    warn("%s: script %s: service %s already provided!\n",
-			 myname, d->d_name, token);
+		    warn("script %s: service %s already provided!\n", d->d_name, token);
 		    continue;
 		}
 		if (required_start)
@@ -414,6 +509,11 @@ int main (int argc, char *argv[])
     closedir(initdir);
 
     /*
+     * Scan and set our configuration for virtual services.
+     */
+    scan_conf();
+
+    /*
      * Now generate for all scripts the dependencies
      */
     follow_all();
@@ -425,25 +525,31 @@ int main (int argc, char *argv[])
      * force a full re-order of all starting numbers.
      */
 
-    if (getorder("network")    <  5) setorder("network",     5);
-    setorder("route", (getorder("network") + 2));
-    if (getorder("inetd")      < 20) setorder("inetd",      20);
+    if ((order = getorder("network")) > 0) {
+	if (order < 5) setorder("network", 5);
+	if (getorder("route") > 0)
+	    setorder("route", (getorder("network") + 2));
+    }
+    if ((order = getorder("inetd"))  > 0 && order < 20) setorder("inetd",  20);
 
     /*
      * Set order of some singluar scripts
      * (no dependencies or single link).
      */
-    if (getorder("halt")       < 20) minorder("halt",       20);
-    if (getorder("reboot")     < 20) minorder("reboot",     20);
-    if (getorder("single")     < 20) minorder("single",     20);
-    minorder("single", (getorder("kbd") + 2));
+    if ((order = getorder("halt"))   > 0 && order < 20) setorder("halt",   20);
+    if ((order = getorder("reboot")) > 0 && order < 20) setorder("reboot", 20);
+    if ((order = getorder("single")) > 0) {
+	if (order < 20) setorder("single", 20);
+	if (getorder("kbd") > 0)
+	    setorder("single", (getorder("kbd") + 2));
+    }
 
     /*
      * Do not overwrite good old links.
      */
-    if (getorder("serial")     < 10) setorder("serial",     10);
-    if (getorder("boot.setup") < 20) minorder("boot.setup", 20);
-    if (getorder("gpm")        < 20) setorder("gpm",        20);
+    if ((order = getorder("serial"))     > 0 && order < 10) setorder("serial",     10);
+    if ((order = getorder("boot.setup")) > 0 && order < 20) setorder("boot.setup", 20);
+    if ((order = getorder("gpm"))        > 0 && order < 20) setorder("gpm",        20);
 
     /*
      * Sorry but we support only [KS][0-9][0-9]<name>
@@ -515,6 +621,9 @@ int main (int argc, char *argv[])
 	while (foreach(&script, &order, runlevel)) {
 	    char * clink;
 	    boolean found;
+
+	    if (*script == '$')		/* Do not link in virtual dependencies */
+		continue;
 
 	    sprintf(olink, "../%s",   script);
 	    sprintf(nlink, "S%.2d%s", order, script);

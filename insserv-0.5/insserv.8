@@ -1,5 +1,5 @@
 .\"
-.\" Copyright 1994-2000 Werner Fink, 1996-2000 SuSE GmbH Nuernberg, Germany.
+.\" Copyright 2000 Werner Fink, 2000 SuSE GmbH Nuernberg, Germany.
 .\"
 .\" This program is free software; you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -52,13 +52,52 @@ With known dependencies and runlevel(s)
 sets and reorders the corresponding symbolic links
 of the concerned runlevels directories (see
 .IR init.d (7)).
+.PP
+.B insserv
+scans for
+.B System Facilities
+in the configuration file
+.IR /etc/insserv.conf .
+Each line which begins with
+.B $
+and a following name defines a system facility
+accordingly to the Linux Standard Base Specification (LSB),
+All names followed by such a system facility
+will declare the required dependencies of the facility.
+Here is an example for
+.IR /etc/insserv.conf :
+.sp 1
+.in +1l
+.nf
+ # All local filesystems are mounted
+ # (done during boot phase)
+ $local_fs       boot
+
+ # Low level networking
+ $network        network route
+
+ # Named is operational
+ $named          named
+
+ # All remote filesystems are mounted
+ # (in some cases /usr may be remote).
+ $remote_fs      $local_fs nfs
+
+ # System logger is operational
+ $syslog         syslog
+
+ # All network daemons are running
+ $netdaemons     portmap inetd
+.fi
+.in -1l
+.sp 1
 \."
 .SH ARGUMENTS
 .TP
 .RI [ / ] path/to/init.d/
 Relative or absolute path to the init base directory.
 This defaults to
-.I /sbin/init.d/
+.I /etc/init.d/
 the path of the SuSE boot concept (SystemV conform).
 Note that if a relative path is used
 .B insserv
@@ -73,13 +112,14 @@ check the existence of the script.
 Boot script sometimes misses comments.
 .SH FILES
 .TP
-.I /sbin/init.d/
-path to the SuSE boot concept script base directory.
+.I /etc/insserv.conf
+configuration file of
+.B insserv
+which defines the LSB System Facilities.
 .TP
-.I /etc/init.d
-symbolic link to
-.IR /sbin/init.d/ .
-This is required by the Linux Standard Base Specification (LSB).
+.I /etc/init.d/
+path to the SuSE boot concept script base directory as
+required by the Linux Standard Base Specification (LSB).
 .\"
 .SH SEE ALSO
 .BR init.d (7),

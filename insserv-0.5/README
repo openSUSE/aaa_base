@@ -15,9 +15,9 @@ The syntax is simple:
 
    insserv
 
-   insserv sbin/init.d
+   insserv etc/init.d
 
-   insserv sbin/init.d/myscript
+   insserv etc/init.d/myscript
 
 See manual page for more information.
 

@@ -4,12 +4,14 @@
 # Author: Werner Fink,  <werner@suse.de>
 #
 
-INITDIR  =	/sbin/init.d
+INITDIR  =	/etc/init.d
+#INITDIR  =	/sbin/init.d
+INSCONF  =	/etc/insserv.conf
 #DEBUG	 =	-DDEBUG=1
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.4
+VERSION	 =	0.5
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #
@@ -24,7 +26,8 @@ ifeq ($(ARCH),i386)
 else
 	  COPTS = -fomit-frame-pointer -fschedule-insns2
 endif
-	 CFLAGS = -O2 $(COPTS) $(DEBUG) -D_GNU_SOURCE -Wall -pipe
+	 CFLAGS = -O2 $(COPTS) $(DEBUG) -D_GNU_SOURCE \
+		  -DINITDIR=\"$(INITDIR)\" -DINSCONF=\"$(INSCONF)\" -Wall -pipe
 	  CLOOP = -funroll-loops
 	     CC = gcc
 	     RM = rm -f
@@ -34,11 +37,14 @@ endif
 	INSTBIN = install $(INSTBINFLAGS)
    INSTDOCFLAGS = -c -m 0444
 	INSTDOC = install $(INSTDOCFLAGS)
+   INSTCONFLAGS = -c -m 0644
+	INSTCON = install $(INSTDOCFLAGS)
 	   LINK = ln -sf
 
 #
 	SDOCDIR = $(DESTDIR)/usr/share/man/man8
 	SBINDIR = $(DESTDIR)/sbin
+	CONFDIR = $(DESTDIR)/etc
 	 LSBDIR = $(DESTDIR)/usr/lib/lsb
 #
 #
@@ -51,7 +57,7 @@ listing.o:	listing.c listing.h
 	$(CC) $(CFLAGS) $(CLOOP) -c $<
 
 insserv:	insserv.c listing.o
-	$(CC) $(CFLAGS) $(CLOOP) -DINITDIR=\"$(INITDIR)\" -o $@ $^
+	$(CC) $(CFLAGS) $(CLOOP) -o $@ $^
 
 clean:
 	$(RM) *.o *~ insserv
@@ -59,21 +65,24 @@ clean:
 install:	$(TODO)
 	$(MKDIR)   $(SBINDIR)
 	$(MKDIR)   $(SDOCDIR)
+	$(MKDIR)   $(CONFDIR)
 	$(MKDIR)   $(LSBDIR)
-	$(INSTBIN) insserv     $(SBINDIR)/
-	$(INSTDOC) insserv.8   $(SDOCDIR)/
-	$(LINK)   /sbin/insserv $(LSBDIR)/install_initd
+	$(INSTBIN) insserv       $(SBINDIR)/
+	$(INSTDOC) insserv.8     $(SDOCDIR)/
+	$(INSTCON) insserv.conf  $(CONFDIR)/
+	$(LINK)    /sbin/insserv $(LSBDIR)/install_initd
 
 #
 # Make distribution
 #
-FILES	= README      \
-	  COPYING     \
-	  Makefile    \
-	  listing.c   \
-	  listing.h   \
-	  insserv.8   \
-	  insserv.c   \
+FILES	= README       \
+	  COPYING      \
+	  Makefile     \
+	  listing.c    \
+	  listing.h    \
+	  insserv.8    \
+	  insserv.c    \
+	  insserv.conf \
 	  insserv-$(VERSION).lsm
 
 dest:
@@ -100,12 +109,3 @@ End' | sed 's@^ @@g;s@^x@@g' > insserv-$(VERSION).lsm
 	sed "s:@UNKNOWN:$$1:" < insserv-$(VERSION).lsm > \
 	insserv-$(VERSION).lsm.tmp ; \
 	mv insserv-$(VERSION).lsm.tmp insserv-$(VERSION).lsm
-
-tar.gz: all
-	$(MKDIR) -p tmpr/sbin
-	$(MKDIR) -p tmpr/usr/share/man/man8
-	chown root:root tmpr/*
-	install -s -m 0700 -o root -g root insserv tmpr/sbin/
-	gzip -c -9 insserv.8   > tmpr/usr/share/man/man8/insserv.8.gz
-	cd tmpr/; tar cfsSpz ../insserv.tgz sbin/ usr/
-	rm -rf tmpr/
