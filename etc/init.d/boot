@@ -118,8 +118,14 @@ if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
 	esac
     done < /etc/fstab
 
-    fsck $FSCK_PROGRESSBAR -a -t $type /
-    FSCK_RETURN=$?
+    FSCK_RETURN=0
+    # on first startup of a system with a lvm root device lvm /dev entries 
+    # may not exist at this time, so skip fsck in this case
+    if [ -f $des ]  
+    then
+	fsck $FSCK_PROGRESSBAR -a -t $type /
+	FSCK_RETURN=$?
+    fi
     # A return code of 1 indicates that file system errors
     # were corrected, but that the boot may proceed.
     # A return code of 2 or larger indicates failure.

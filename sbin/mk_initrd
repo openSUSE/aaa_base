@@ -75,19 +75,32 @@ root_dir="$1"
 
 tmp_initrd=$root_dir/tmp/initrd$$
 
+x1=`mount 2>/dev/null | grep "on $root_dir "`
+x2=`echo \`echo "$x1" | wc -l\``
+x3=`echo "$x1" | cut -f 1 -d " "`
+
+root_lvm=0
+if [ -z "$rootdev" ] 
+then
+    [ "$x2" = 1 -a -b "$x3" ] && rootdev="$x3"
+    major=`ls -l "$rootdev" | sed -e "s/.* \\([0-9]\+\\), *[0-9]\+.*/\\1/"`
+    [ "$major" -ne 58 ] || root_lvm=1
+fi
+
+if [ $root_lvm -eq 1 ]
+then
+    echo root device is LVM
+    static_shell=/bin/ash
+    static_insmod=/sbin/insmod
+    image_blocks=6000
+    image_inodes=2000
+fi
+
 if [ "$root_dir" != / ] ; then
   LD_LIBRARY_PATH=$root_dir/usr/lib
   PATH=$root_dir/usr/bin:$PATH
   [ -x "$root_dir$static_shell" ] && static_shell="$root_dir$static_shell"
   [ -x "$root_dir$static_insmod" ] && static_insmod="$root_dir$static_insmod"
-fi
-
-x1=`mount 2>/dev/null | grep "on $root_dir "`
-x2=`echo \`echo "$x1" | wc -l\``
-x3=`echo "$x1" | cut -f 1 -d " "`
-
-if [ -z "$rootdev" ] ; then
-    [ "$x2" = 1 -a -b "$x3" ] && rootdev="$x3"
 fi
 
 [ "$rootdev" ] || error 1 "usage: mk_initrd [root_dir]"
@@ -99,7 +112,7 @@ echo "using \"$rootdev\" as root device (mounted on \"$root_dir\")"
 modules="$INITRD_MODULES"
 
 ( cd $root_dir$boot_dir ; rm -f $initrds )
-[ "$modules" ] || error 0 "no initrd required"
+[ "$modules" -o $root_lvm -ne 1 ] || error 0 "no initrd required"
 
 initrd_a=($initrds)
 
@@ -142,6 +155,20 @@ for k in $kernels ; do
     cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console} $tmp_mnt/dev
     cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 4 "no static shell"
     cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 5 "no static insmod"
+    if [ $root_lvm -eq 1 ]
+    then
+	mkdir $tmp_mnt/{lib,etc,proc}
+	touch $tmp_mnt/etc/fstab
+	cp -a $root_dir/dev/lvm  $tmp_mnt/dev
+	cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
+	cp -a $root_dir/dev/md? $root_dir/dev/dasd* $tmp_mnt/dev
+	cp -a $root_dir/dev/{i2o,ida,cciss} $tmp_mnt/dev
+	cp -a $root_dir/lib/{ld-2.2.so,ld-linux.so.2} $tmp_mnt/lib
+	cp -a $root_dir/lib/{liblvm.so,libc.so.6} $tmp_mnt/lib
+	cp -a $root_dir/lib/libz.so.1* $tmp_mnt/lib
+	cp -a $root_dir/sbin/{vgscan,vgchange}  $tmp_mnt/bin
+	cp -a $root_dir/bin/{rm,mount,umount}  $tmp_mnt/bin
+    fi
 
     echo '#! /bin/sh' >$lx_rc
     echo >>$lx_rc
@@ -169,6 +196,14 @@ for k in $kernels ; do
         error 7 "no such module: $i"
       fi
     done
+
+    if [ $root_lvm -eq 1 ]
+    then
+	echo "mount -tproc none /proc" >> $lx_rc
+	echo "vgscan" >> $lx_rc
+	echo "vgchange -a y" >> $lx_rc
+	echo "umount /proc" >> $lx_rc
+    fi
 
     umount $tmp_mnt
     is_mounted=
