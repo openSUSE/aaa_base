@@ -269,3 +269,10 @@ for DIR in etc/rc.d usr/X11 ; do
     fi
 done
 
+# Backup YP_DOMAINNAME, before we remove it
+if test ! -f etc/defaultdomain ; then
+  eval `grep YP_DOMAINNAME etc/rc.config`
+  echo $YP_DOMAINNAME > etc/defaultdomain
+  chmod 644 etc/defaultdomain
+fi
+

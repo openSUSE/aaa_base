@@ -29,9 +29,9 @@ test -n "$FQHOSTNAME" && {
     hostname ${FQHOSTNAME%%.*}
     rc_status -v -r
 }
-test -n "$YP_DOMAINNAME" && {
-    echo -n Setting up YP domainname
-    domainname $YP_DOMAINNAME
+test -f /etc/defaultdomain && {
+    echo -n Setting up domainname
+    domainname `cat /etc/defaultdomain`
     rc_status -v -r
 } || domainname ""
 
