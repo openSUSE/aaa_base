@@ -35,6 +35,12 @@ IP_FORWARD="no"
 #
 IPV6_FORWARD="no"
 
+#
+# Runtime-configurable parameter: use temporary IPv6 addresses
+# instead of using the EUI-64 interface identifer
+#
+IPV6_PRIVACY=no
+
 ## Path:	Network/General
 ## Description:	activate ECN network configuration at bootup
 ## Type:	yesno

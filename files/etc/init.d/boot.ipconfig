@@ -69,9 +69,15 @@ case "$1" in
    #
    # Enable IPv6 forwarding ?
    #
+   LOAD_IPV6="no"
    case $IPV6_FORWARD in
-      yes) /sbin/modprobe ipv6 >/dev/null 2>&1 ;;
+      yes) LOAD_IPV6="yes" ;;
    esac
+   case $IPV6_PRIVACY in
+      yes) LOAD_IPV6="yes" ;;
+   esac
+   test "$LOAD_IPV6" = "yes" && /sbin/modprobe ipv6 >/dev/null 2>&1
+   #
    if test -e /proc/sys/net/ipv6/conf/all/forwarding -a -n "$IPV6_FORWARD" ; then
     case $IPV6_FORWARD in
       yes)
@@ -82,6 +88,22 @@ case "$1" in
 	echo -n "Disabling IPv6 forwarding"
 	echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
 	;;
+    esac
+    rc_status -v -r
+   fi
+    #
+    # Enable IPv6 privacy?
+    #
+    if test -e /proc/sys/net/ipv6/conf/all/use_tempaddr -a -n "$IPV6_PRIVACY"; then
+    case $IPV6_PRIVACY in
+      yes)
+       echo -n "Enabling IPv6 privacy"
+       echo "1" > /proc/sys/net/ipv6/conf/all/use_tempaddr
+       ;;
+      *)
+       echo -n "Disabling IPv6 privacy"
+       echo "0" > /proc/sys/net/ipv6/conf/all/use_tempaddr
+       ;;
     esac
     rc_status -v -r
    fi
