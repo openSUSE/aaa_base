@@ -1,0 +1,12 @@
+--- install_initd
++++ install_initd	2002/02/25 13:26:17
+@@ -1,2 +1,2 @@
+-#/bin/sh
++#!/bin/sh
+ exec /sbin/insserv ${1+"$@"}
+--- remove_initd
++++ remove_initd	2002/02/25 13:26:23
+@@ -1,2 +1,2 @@
+-#/bin/sh
++#!/bin/sh
+ exec /sbin/insserv -r ${1+"$@"}
