@@ -77,16 +77,21 @@ setterm -bfreq 200 -blen 500 &>/dev/null
 mounts=/etc/fstab
 test -r /proc/mounts && mounts=/proc/mounts
 while read des fs type rest; do
-    test "$fs" = "/proc"  && continue
-    test "$type" = "proc" && umount -t proc $fs
+    test "$fs" = "/proc"    && continue
+    test "$fs" = "/dev/pts" && continue
+    test "$fs" = "/dev"     && continue
+    test "$fs" = "/var/shm" && continue
+    test "$type" = "proc"   && umount -t proc   $fs
     test "$type" = "devpts" && umount -t devpts $fs
+    test "$type" = "devfs"  && umount -t devfs  $fs
+    test "$type" = "shm"    && umount -t shm    $fs
 done < $mounts
 
 UMOUNT_FAILED=false
 echo "Unmounting file systems"
-umount -avt noproc || {
-    UMOUNT_FAILED=true
+umount -avt noproc,nonfs || {
     rc_status
+    UMOUNT_FAILED=true
 }
 rc_status -v1 -r
 

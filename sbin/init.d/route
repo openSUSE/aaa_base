@@ -15,17 +15,7 @@
 base=${0##*/}
 link=${base#*[SK][0-9][0-9]}
 
-# If not called by a runlevel directory, maybe the device
-# is given as *second* argument
-if test $link = $base -a -n "$2" ; then
-    NETCONFIG=""
-    for I in _0 _1 _2 _3; do
-        eval NETDEV=\$NETDEV$I
-        test "$2" = "$NETDEV" && NETCONFIG="$I"
-    done
-fi
-
-test -n "$NETCONFIG" -a "$NETCONFIG" != "YAST_ASK" || exit 0
+test -n "$NETCONFIG" -a "$NETCONFIG" != "YAST_ASK" -o -n "$2" || exit 0
 
 : ${ROUTECONF:=/etc/route.conf}
 test -f $ROUTECONF || exit 0
