@@ -22,9 +22,8 @@
 ### END INIT INFO
 
 . /etc/rc.status
-. /etc/rc.config
 
-random_seed=/var/run/random-seed
+random_seed=/var/lib/misc/random-seed
 
 rc_reset
 case "$1" in
@@ -36,7 +35,7 @@ case "$1" in
                 cat $random_seed > /dev/urandom
 		rc_status
         else
-                touch $random_seed
+                > $random_seed
 		rc_status
         fi
         chmod 600 $random_seed
@@ -47,8 +46,10 @@ case "$1" in
         # Carry a random seed from shut-down to start-up
         # Save 512 bytes, which is the size of the entropy pool
         echo -n "Saving random seed"
-        touch $random_seed
-	rc_status
+        if test ! -f $random_seed ; then
+                > $random_seed
+		rc_status
+	fi
         chmod 600 $random_seed
         dd if=/dev/urandom of=$random_seed count=1 bs=512 2>/dev/null
 	rc_status -v
@@ -58,7 +59,7 @@ case "$1" in
 	rc_status -v
 	;;
     *)
-	echo "Usage: $0 {start|stop}"
+	echo "Usage: $0 {start|stop|status}"
 	exit 1
 esac
 rc_exit
