@@ -17,6 +17,7 @@ link=${base#*[SK][0-9][0-9]}
 # Force execution if not called by a runlevel directory.
 test $link = $base && START_NSCD=yes
 test "$START_NSCD" = yes || exit 0
+test -x /usr/sbin/nscd || exit 0
 
 # The echo return value for success (defined in /etc/rc.config).
 return=$rc_done
