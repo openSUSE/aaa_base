@@ -18,6 +18,22 @@ INITRD_MODULES=""
 #
 MODULES_LOADED_ON_BOOT=""
 
+## Description:	Should the dsdt be attomatically attached to the initrd (when mk_initrd is invoked)?
+## Type:        yesno
+## Default:     no
+# Set this variable in conjunction with DSDT_PATH and the DSDT (acpi) will be attached to the initrd.
+# If support to load DSDT from the initrd is compiled into the kernel the DSDT from the BIOS
+# will be overridden 
+ATT_DSDT=""
+
+## Description:	Load ACPI DSDT from initrd
+## Type:	string
+## Default:     /proc/acpi/dsdt
+# This variable sets the path to the dsdt that should be attached to the 
+# initrd by the script "mk_initrd". The ATT_DSDT variable above must be set to yes!
+#
+DSDT_PATH="/proc/acpi/dsdt"
+
 ## Type:	integer
 #
 # Size parameter for mounting the shmfs filesystem. The kernel defaults
