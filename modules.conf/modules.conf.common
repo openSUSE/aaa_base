@@ -446,8 +446,17 @@ alias slip0               slip
 alias sl0                 slip
 alias slip1               slip
 alias sl1                 slip
+
+# the kernel 2.2 uses ppp.o as ppp driver,
+# the kernel 2.4 uses ppp_generic.o
+if `uname -r | cut -f -2 -d .` = 2.2
 alias ppp0                ppp
 alias ppp1                ppp
+else
+alias ppp0                ppp_generic
+alias ppp1                ppp_generic
+endif
+
 alias plip0               plip
 alias plip1               plip
 
