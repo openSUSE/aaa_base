@@ -2,6 +2,8 @@
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /* Copyrights to S.u.S.E. GmbH Fuerth (c) 1998                                */
+/* Copyrights to SuSE GmbH            (c) until 2001                          */
+/* Copyrights to SuSE Linux AG        (c) 2002                                */
 /*                                                                            */
 /* Time-stamp:                                                                */
 /* Project:    fillup                                                         */
@@ -1358,26 +1360,88 @@ writeBaseFileHeader
 )
 {
     char                      * baseFileHeader;
+    char                      * commentMarkerString;
+    char                      * delimiterString;
+    long                        commentMarkerStringLength;
+    long                        endOfHeader;
+    BlockClass_t                classifier;
     long                        length;
     long                        loop;
 
     getVBeginOfBlock( baseFileBlock, &baseFileHeader );
     length = getVLength( baseFileBlock );
 
+    queryStringParameter( CommentMarker, &commentMarkerString );
+    queryStringParameter( Delimiter, &delimiterString );
+    commentMarkerStringLength = stringLength( commentMarkerString );
+
     loop = 0;
+    endOfHeader = 0;
     while( loop < length )
     {
-       if( '\n' == baseFileHeader[ loop ] )
+       loop += consumeSpaces( &baseFileHeader[ loop ], length );
+       if( ( loop + commentMarkerStringLength ) < length )
        {
-           if( 0 == loop ) break;   /* empty header */
-
-           if( '\n' == baseFileHeader[ loop+1 ] )
+           if( Equal ==
+               compareStringsExactly( commentMarkerString, 
+                                      &baseFileHeader[ loop ] ) )
            {
-               writeVariableBlock( baseFileHeader, loop+1, filePointer );
+               /* here the comment marker is detected */
+               /* and line is read upto newline       */
+               loop += commentMarkerStringLength;
+               while( loop < length )
+               {
+                   if( '\n' != baseFileHeader[ loop ] ) loop++;
+                   else
+                   {
+                       endOfHeader = loop;
+                       if( length < endOfHeader ) endOfHeader = 0; /*error*/ 
+                       break;
+                   }
+               }
+
+               /* check for end of header:                  */
+               /* the criterion is a newline character next */
+               if( '\n' == baseFileHeader[ endOfHeader + 1 ] )
+               {
+                   break;
+               }
+           }
+           else
+           {
+               /* no comment */
                break;
            }
        }
+       else
+       {
+           /* no comment */
+           break;
+       }
+
        loop++;
+    }
+
+    classifier = getVClassifier( baseFileBlock );
+    switch( classifier )
+    {
+        case CompleteVariableBlock:
+        case CommentedVariableBlock:
+             {
+                 displayVerboseString( "\nHeader is written\n" );
+                 writeVariableBlock( baseFileHeader, endOfHeader, filePointer );
+             } break;
+
+        case TrailingCommentBlock:
+             {
+                 if( 1 == numberOfUsedBaseBlocks )
+                 {
+                     displayVerboseString( "\nSingle trailing comment as header is written\n" );
+                     writeVariableBlock( baseFileHeader, endOfHeader, filePointer );
+                 } 
+             } break;
+             
+        default: break;   /* do nothing */
     }
 }
 

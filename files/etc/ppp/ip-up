@@ -52,33 +52,23 @@ start_firewall() {
 case "$INTERFACE" in
 ippp*)
 
-    # find the device
-    found=0
-    for I in $NETCONFIG $NETCONFIG_PCMCIA; do
-	eval NETDEV=\$NETDEV$I
-	if [ $NETDEV = $INTERFACE ]; then
-	    found=1
-	    break;
-	fi
-    done
-    if [ $found -eq 0 ]; then
-	echo "Device '$INTERFACE' not configured in '/etc/rc.config'"
-	exit 1
+    if [ -f /etc/sysconfig/network/ifcfg-$INTERFACE ] ; then
+        . /etc/sysconfig/network/ifcfg-$INTERFACE
+    else
+        echo "Device '$INTERFACE' has no sysconfig file";
+        exit 1
     fi
-
-    eval IFCONFIG=\$IFCONFIG$I
 
     case "$BASENAME" in
     ip-up)
 	#
 	# Get the nameservers (works with ipppd option ms-get-dns):
 	#
-	if [ -n "$MS_DNS1" ]; then
+	if [ "$DYNAMICDNS" = "yes" -a -n "$MS_DNS1" ]; then
 		/sbin/modify_resolvconf modify -s ipppd -e "$INTERFACE" \
 		    -p ipppd -f /etc/ppp/ip-up -n "$MS_DNS1 $MS_DNS2" -t - << EOT
 		    If you do not like the ipppd to change your nameserver
-		    settings remove the option ms-get-dns from
-		    /etc/ppp/options.ippp*.
+		    settings remove the option DYNAMICDNS for this connection 
 EOT
 	fi
 
@@ -86,8 +76,7 @@ EOT
 	# SuSE Firewall script: If you installed and configured your firewall
 	# in /etc/sysconfig/firewall it will be started here:
 	#
-	start_firewall
-
+	test "$FIREWALL" = "yes" && start_firewall
 	#
 	# You may choose to use a default firewall script, configured for
 	# the standard dialup user(install package ipchains):
@@ -120,20 +109,24 @@ EOT
 	#
 	# Restore the nameservers (got with ipppd option ms-get-dns):
 	#
-	if [ -n "$MS_DNS1" ]; then
+	if [ "$DYNAMICDNS" = "yes" -a -n "$MS_DNS1" ]; then
 		/sbin/modify_resolvconf restore -s ipppd -e "$INTERFACE"
 	fi
 
 	# restart interface
-	/sbin/ifconfig $INTERFACE $IFCONFIG
-	# set routes from /etc/route.conf
-	/etc/init.d/route start $INTERFACE
-
+	LINK_OPT=""
+	test "$DYNAMICIP" = "yes" && LINK_OPT="$LINK_OPT dynamic on"
+	/sbin/ip address flush dev $INTERFACE
+	/sbin/ip link set $INTERFACE down
+	/sbin/ip link set $INTERFACE up $LINK_OPT
+	/sbin/ip address add dev $INTERFACE local $IPADDR peer $PTPADDR
+	# set routes from /etc/sysconfig/network/routes
+        /etc/sysconfig/network/scripts/ifup-route $INTERFACE
 	#
 	# SuSE Firewall script: If you installed and configured your firewall
 	# in /etc/sysconfig/firewall it will be started here:
 	#
-	start_firewall
+	test "$FIREWALL" = "yes" && start_firewall
 
 	# call ip-down.local if it exists and is executable:
 	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local "$@"
