@@ -33,7 +33,7 @@ RUN_PARALLEL=yes
 # by using the make command and if RUN_PARALLEL is
 # set to "yes" just use a make like boot behaviour
 #
-USE_MAKE=no
+USE_MAKE=yes
 
 ## Type:	yesno
 ## Default:	no
