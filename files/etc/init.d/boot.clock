@@ -50,9 +50,9 @@ case "$1" in
    else
     echo -n Setting up the CMOS clock
     test -f /etc/adjtime || echo "0.0 0 0.0" > /etc/adjtime
-    /sbin/hwclock_wrapper --adjust $UTC
+    /sbin/hwclock --adjust $UTC
     rc_status
-    /sbin/hwclock_wrapper --hctosys $UTC
+    /sbin/hwclock --hctosys $UTC
     rc_status
     rc_status -v -r
    fi

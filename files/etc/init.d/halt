@@ -104,7 +104,7 @@ if test "$HWCLOCK_ACCESS" != "no" ; then
     if rc_active xntpd ; then
 	echo -n "Set Hardware Clock to the current System Time"
         # write back to hardware clock and calculate adjtime
-	/sbin/hwclock_wrapper --systohc $UTC
+	/sbin/hwclock --systohc $UTC
 	rc_status -v -r
     fi
 fi
