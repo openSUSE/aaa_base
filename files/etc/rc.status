@@ -119,9 +119,8 @@ _rc_status_all=0
 _rc_todo=$1
 function rc_check ()
 {
-    _rc_check_ret=$?
-    test $_rc_check_ret -eq 0 || _rc_status=$_rc_check_ret
-    test $_rc_status    -eq 0 || _rc_status_all=$_rc_status
+    _rc_status=$?
+    test $_rc_status -eq 0 || _rc_status_all=$_rc_status
     return $_rc_check_ret
 }
 function rc_reset ()
