@@ -403,6 +403,7 @@
 /opt/kde2/bin/kv4lsetup                 root.video      4755
 /opt/kde2/bin/kdesud                    root.nogroup    2755
 /opt/kde2/bin/konsole_grantpty          root.root       4755
+/opt/kde2/bin/artswrapper               root.root       4755
 /opt/kde2/bin/kcheckpass                root.shadow     2755
 
 

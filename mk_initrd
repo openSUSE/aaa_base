@@ -361,7 +361,12 @@ fi
 
 [ "$rootdev" ] || error 1 "usage: mk_initrd [root_dir]"
 
-echo "using \"$rootdev\" as root device (mounted on \"$root_dir\")"
+x1=`cat /etc/fstab /proc/mounts 2>/dev/null | grep -E "$rootdev[[:space:]]" | tail -1`
+rootfstype=`echo $x1 | cut -f 3 -d " "`
+
+[ "$rootfstype" = ext3 ] && use_pivot_root=1
+
+echo "using \"$rootdev\" as root device (mounted on \"$root_dir\" as \"$rootfstype\")"
 
 [ -f "$root_dir/etc/rc.config" ] && . $root_dir/etc/rc.config
 
@@ -483,6 +488,18 @@ for k in $kernels ; do
 	cp -a $root_dir/usr/bin/expr  $tmp_mnt/bin
     fi
 
+    if [ "$use_pivot_root" ] ; then
+	mkdir -p $tmp_mnt/{lib,etc,proc,mnt}
+	touch $tmp_mnt/etc/fstab
+	cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
+	cp -a $root_dir/lib/ld-*so* $tmp_mnt/lib
+	cp -a $root_dir/lib/libc.so.6 $tmp_mnt/lib
+	cp -a $root_dir/lib/libz.so.1* $tmp_mnt/lib
+	cp -a $root_dir/bin/{mount,umount}  $tmp_mnt/bin
+	cp -a $root_dir/bin/{rm,mkdir} $tmp_mnt/bin
+	cp -a $root_dir/sbin/pivot_root $tmp_mnt/bin
+    fi
+
     echo '#! /bin/sh' >$lx_rc
     echo >>$lx_rc
     echo "export PATH=/bin" >>$lx_rc
@@ -536,6 +553,19 @@ for k in $kernels ; do
     fi
 
     [ -n "$oem" ] && cat $oem >> $lx_rc
+
+    if [ "$use_pivot_root" ] ; then
+      cat >>$lx_rc <<xxx
+mount -n -t proc proc /proc
+mount -n -t $rootfstype $rootdev /mnt
+rm -f /mnt/.initrd 2>/dev/null
+mkdir -p /mnt/.initrd
+cd /mnt
+pivot_root . .initrd
+umount -n /.initrd/proc
+exec sh -c 'umount -n /.initrd ; rmdir /.initrd ; mount -n -oremount,ro /' </dev/console >/dev/console 2>&1
+xxx
+    fi
 
     # now create a second initrd with minimal size
     

@@ -412,6 +412,7 @@
 /usr/X11R6/bin/xosview.bin              root.root        755
 /usr/X11R6/bin/xosview                  root.root        755
 /usr/bin/cu                             root.root        755
+/usr/bin/cdrecord                       root.root        755
 /usr/bin/elm                            root.root        755
 /usr/bin/filter                         root.root        755
 /usr/bin/deliver                        root.root        755
@@ -447,6 +448,7 @@
 /opt/kde2/bin/kv4lsetup                 root.video      0755
 /opt/kde2/bin/kdesud                    root.nogroup    0755
 /opt/kde2/bin/konsole_grantpty          root.root       0755
+/opt/kde2/bin/artswrapper               root.root       0755
 /opt/kde2/bin/kcheckpass                root.shadow     0755
 
 
