@@ -18,11 +18,6 @@ ENABLE_SYSRQ=no
 DISABLE_ECN="yes"
 
 #
-# Which device is the mouse ? (e.g. "/dev/ttyS0")
-#
-MOUSE="YAST_ASK"
-
-#
 # Which device is the modem ? (e.g. "/dev/ttyS1")
 #
 MODEM="YAST_ASK"
@@ -39,12 +34,6 @@ ROOT_LOGIN_REMOTE="no"
 # this, set CHECK_INITTAB to "no".  (yes/no)
 #
 CHECK_INITTAB=yes
-
-#
-# Here you can set the default Display manager (kdm/xdm/gdm/wdm/console).
-# see also /etc/rc.config.d/xdm.rc.config
-#
-DISPLAYMANAGER=""
 
 #
 # Here you can set the default window manager (kde, fvwm, ...)

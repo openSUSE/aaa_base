@@ -26,6 +26,9 @@ trap 'rm -f /var/run/poll.lock; exit 1' SIGTRAP SIGBUS SIGKILL SIGPIPE SIGTERM
 trap 'rm -f /var/run/poll.lock; exit 0' EXIT
 echo $$ > /var/run/poll.lock
 
+# Tell system what we're doing
+logger -t poll.tcpip -p mail.notice " Starting mail and news send/fetch"
+
 #
 # Check resources and settings
 #
@@ -92,9 +95,23 @@ while true ; do
 done
 
 #
-# Let's throw our mails out here.
+# Do we get news with fetchnews?
+#
+while true ; do
+    test -x   /usr/sbin/fetchnews           || break
+    test -s   /etc/leafnode/config          || break
+    test -e   /var/lock/news/fetchnews.lck  && break
+    /usr/sbin/fetchnews
+    break
+done
+
+#
+# Let's throw our mails out here. This is done as the last
+# point to avoid mail loops.
 #
 /usr/sbin/sendmail -q
 
+# Tell system what we're done
+logger -t poll.tcpip -p mail.notice " Done mail and news send/fetch"
 # 
 exit 0

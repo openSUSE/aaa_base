@@ -1,0 +1,5 @@
+#
+# Which device is the mouse ? (e.g. "/dev/ttyS0")
+#
+MOUSE="YAST_ASK"
+

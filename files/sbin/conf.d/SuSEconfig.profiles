@@ -30,11 +30,11 @@ test -f $r/etc/rc.config || {
 }
 . $r/etc/rc.config
 
-test -f $r/etc/sysconfig/lang || {
-    echo "No $r/etc/sysconfig/lang found."
+test -f $r/etc/sysconfig/language || {
+    echo "No $r/etc/sysconfig/language found."
     exit 1
 }
-. $r/etc/sysconfig/lang
+. $r/etc/sysconfig/language
 
 if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
     echo "SuSEconfig is disabled in $r/etc/rc.config. Exit..."

@@ -19,6 +19,7 @@
 
 . /etc/rc.status
 . /etc/rc.config
+. /etc/sysconfig/displaymanager
 . /etc/SuSEconfig/profile
 
 locale_vars="\

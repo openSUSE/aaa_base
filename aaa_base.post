@@ -49,6 +49,7 @@ if test -s etc/rc.config ; then
     > etc/rc.config.t && mv etc/rc.config.t etc/rc.config
     rm -f etc/rc.config.t
 fi
+
 if [ ! -e etc/rc.config ]; then
   cat << EOF > etc/rc.config
 #
@@ -76,6 +77,13 @@ fi
 %{fillup_and_insserv -psy boot.crypto START_CRYPTO_FILESYSTEMS boot.loopback START_LOOPBACK }
 %{fillup_and_insserv -py nscd halt network nfs random reboot route single xdm boot.clock boot.ibmsis boot.ipconfig boot.klog boot.ldconfig boot.localfs boot.localnet boot.lvm boot.md boot.proc boot.quota boot.swap }
 ## powerfail probably needs empty header ...
+
+# hack: DEFAULT_LANGUAGE was the first variable in rc.config
+# and we want to move it out
+awk 'BEGIN { i=0; } /^$/ { if (i==0) { print "DUMMY_SEPARATOR=dummy\n" ; i++ ; next } else { print } } { print } ' etc/rc.config > etc/rc.config.new
+mv etc/rc.config.new etc/rc.config
+#
+# remove old stuff from rc.config (oldstuff only has removed variables)
 if [ -x bin/fillup ] ; then
   bin/fillup -q -t -r -i -d "=" etc/rc.config var/adm/fillup-templates/rc.config.aaa_base.oldstat /dev/null
   test -s etc/rc.config.new && mv etc/rc.config.new etc/rc.config
@@ -83,25 +91,19 @@ fi
 if ! [ -d etc/sysconfig ] ; then
   mkdir -p etc/sysconfig
 fi
-for i in lang backup displaymanager updatedb ; do
- echo "Updating etc/$i.rc.config..."
-  if [ -x bin/fillup ] ; then
-    if [ ! -f etc/sysconfig/$i -a -f etc/rc.config.d/$i.rc.config ] ; then
-      mv etc/rc.config.d/$i.rc.config etc/sysconfig/$i
-    fi
-    if ! [ -f etc/sysconfig/$i ] ; then
-      bin/fillup -q -r -i etc/rc.config var/adm/fillup-templates/sysconfig.$i etc/sysconfig/$i
-      mv etc/rc.config.new etc/rc.config
-    else
-      bin/fillup -q etc/sysconfig/$i var/adm/fillup-templates/sysconfig.$i
-    fi
-  else
-    echo "ERROR: fillup not found. This should not happen. Please compare"
-    echo "etc/sysconfig/$i and var/adm/fillup-templates/sysconfig.$i "
-    echo "and update by hand."
-  fi
+# language was called lang before
+if [ ! -f etc/sysconfig/language -a -f etc/rc.config.d/lang.rc.config ] ; then
+  mv etc/rc.config.d/lang.rc.config etc/sysconfig/language
+fi
+for i in language backup displaymanager updatedb mouse ; do
+%{fillup_only -n $i}
 done
-
+# hack: remove the separator line again
+grep -v "^DUMMY_SEPARATOR" etc/rc.config > etc/rc.config.new
+mv etc/rc.config.new etc/rc.config
+#
+# handle password files
+#
 for i in passwd group shadow gshadow ; do
     test -e var/adm/fillup-templates/$i.aaa_base || continue
     echo -n "Updating etc/$i..."
@@ -427,6 +429,7 @@ if [ -n "$OLDMODCONF" ] ; then
     fi
     echo "done"
 fi
+### import suse package build key to gpg keyring
 GPG_IMPORT_FAIL=false
 if test -f root/.gnupg/pubring.gpg ; then
    if test -x usr/bin/gpg -a -f usr/lib/libgdbm.so.2 ; then

@@ -1,4 +1,9 @@
 #
+# Here you can set the default Display manager (kdm/xdm/gdm/wdm/console).
+#
+DISPLAYMANAGER=""
+
+#
 # Allow remote access to your display manager (kdm only for now)
 #
 DISPLAYMANAGER_REMOTE_ACCESS="no"

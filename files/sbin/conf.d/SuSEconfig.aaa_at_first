@@ -28,6 +28,7 @@ test -f /etc/rc.config || {
     exit 1
 }
 . /etc/rc.config
+test -f /etc/sysconfig/mouse && . /etc/sysconfig/mouse
 
 test -n "$ORGANIZATION" && {
     echo "$ORGANIZATION" > /etc/organization.SuSEconfig

@@ -13,11 +13,6 @@ ROOT_LOGIN_REMOTE="yes"
 CHECK_INITTAB=no
 
 #
-# Here you can set the default Display manager (kdm/xdm/gdm/wdm/console).
-#
-DISPLAYMANAGER=""
-
-#
 # Here you can set the default window manager (kde, fvwm, ...)
 #
 DEFAULT_WM=kde
