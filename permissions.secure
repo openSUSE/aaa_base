@@ -325,6 +325,20 @@
 # ssh is not suid here any more. If a user needs the rsh fallback feature,
 # she should use /usr/bin/rsh.
 /usr/bin/ssh                            root.root       0755
+# ham radio
+/usr/bin/kamplus                        root.localham   0750
+/usr/bin/endhost                        root.localham   0750
+/etc/kamrc                              root.localham    664
+/var/lib/kamplus                        root.localham    775
+/var/lib/kamplus/parms                  root.localham    775
+/var/lib/kamplus/cq                     root.localham    664
+/var/lib/kamplus/messages               root.localham    664
+/var/lib/kamplus/helpfile-qt            root.localham    664
+/var/lib/kamplus/capture.txt            root.localham    664
+/var/lib/kamplus/parms/tnc.parms        root.localham    664
+/var/lib/kamplus/parms/home             root.localham    664
+/var/lib/kamplus/parms/away             root.localham    664
+
 
 #
 # dialup networking programs
