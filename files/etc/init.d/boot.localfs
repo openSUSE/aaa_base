@@ -151,6 +151,6 @@ mount -fv -t proc proc /proc
 rc_status
 mount -fv -t devpts $optpts devpts /dev/pts
 rc_status
-mount -av -t nonfs,noproc,nodevpts
+mount -av -t nonfs,noproc,nodevpts,nosmbfs
 rc_status -v1 -r
 
