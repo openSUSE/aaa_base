@@ -5,8 +5,10 @@
 /bin/false
 /bin/sh
 /bin/tcsh
+/bin/true
 /usr/bin/csh
 /usr/bin/ksh
 /usr/bin/passwd
-/usr/bin/tcsh
+/usr/bin/rbash
+/usr/bin/tcs
 /usr/bin/zsh
