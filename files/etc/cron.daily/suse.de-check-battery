@@ -25,7 +25,7 @@ test -r /proc/rtc && \
     BATT_STATUS=$(awk '$1 == "batt_status" { print $3 }' /proc/rtc)
 
 
-test -n "$BATT_STATUS" && "$BATT_STATUS" != "okay" && \
+test -n "$BATT_STATUS" -a "$BATT_STATUS" != "okay" && \
     echo "CMOS battery empty -- expect problems"
 
 exit 0
