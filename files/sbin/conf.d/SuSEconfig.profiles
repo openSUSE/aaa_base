@@ -25,7 +25,7 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 }
 . $r/lib/YaST/SuSEconfig.functions
 
-for i in $r/etc/rc.config $r/etc/sysconfig/language $r/etc/sysconfig/windowmanager $r/etc/sysconfig/suseconfig $r/etc/sysconfig/mail $r/etc/sysconfig/printer ; do
+for i in $r/etc/rc.config $r/etc/sysconfig/language $r/etc/sysconfig/windowmanager $r/etc/sysconfig/suseconfig $r/etc/sysconfig/mail $r/etc/sysconfig/printer $r/etc/sysconfig/proxy ; do
   test -f $i || {
     echo "No $i found."
     exit 1
