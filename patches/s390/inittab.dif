@@ -16,7 +16,7 @@
  
  # what to do when power fails/returns
  pf::powerwait:/etc/init.d/powerfail start
-@@ -59,29 +55,8 @@
+@@ -59,29 +55,9 @@
  # for ARGO UPS
  sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
  
@@ -45,6 +45,7 @@
 -
 +# on S/390 enable console login in all runlevels
 +1:012356:respawn:/sbin/sulogin /dev/ttyS0
++#2:012356:respawn:/sbin/sulogin /dev/ttyS1
  
  # modem getty.
  # mo:235:respawn:/usr/sbin/mgetty -s 38400 modem

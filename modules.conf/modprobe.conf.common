@@ -261,6 +261,7 @@ alias char-major-188      usbserial
 
 alias char-major-195      NVdriver
 alias char-major-206      osst
+alias char-major-212      /bin/true
 
 alias binfmt-204          binfmt_aout
 alias binfmt-263          binfmt_aout
