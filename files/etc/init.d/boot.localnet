@@ -35,7 +35,7 @@ case "$1" in
 	    XHOSTNAME=`cat /etc/HOSTNAME`
 	}
 	test -n "$XHOSTNAME" && {
-	    echo -n Setting up hostname \'$XHOSTNAME\'
+	    echo -n Setting up hostname \'${XHOSTNAME%%.*}\'
 	    hostname ${XHOSTNAME%%.*}
 	    rc_status -v -r
 	}
@@ -44,7 +44,9 @@ case "$1" in
 	test -f /etc/defaultdomain && {
 	    XDOMAINNAME=`cat /etc/defaultdomain`
 	}
-	echo -n Setting up domainname \'$XDOMAINNAME\'
+        test -n "$XDOMAINNAME" && {
+	    echo -n Setting up NIS domainname \'$XDOMAINNAME\'
+        }
 	domainname "$XDOMAINNAME"
 	rc_status -v -r
 	
