@@ -1,0 +1,7 @@
+# begin of s390 part for modules.conf
+
+alias char-major-4        off
+alias char-major-5        off
+
+# end of s390 part for modules.conf
+

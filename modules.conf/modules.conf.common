@@ -26,12 +26,6 @@ alias block-major-57   off
 # mouse (for older busmice)
 alias char-major-10    off
 
-alias parport_lowlevel    parport_pc
-options parport_pc io=0x378 irq=none,none
-
-# If you have multiple parallel ports, specify them this way:
-# options parport_pc io=0x378,0x278  irq=none,none
-
 # We want to use the new autofs4
 alias autofs           autofs4
 
@@ -360,8 +354,6 @@ alias block-major-45      pd
 alias block-major-46      pcd
 alias block-major-47      pf
 
-alias char-major-4        serial
-alias char-major-5        serial
 alias char-major-6        lp
 alias char-major-9        st
 alias char-major-10-130   softdog
@@ -499,3 +491,5 @@ alias tap15               ethertap
 pre-install mga  modprobe "-k" "agpgart"
 pre-install r128 modprobe "-k" "agpgart"
 options agpgart agp_try_unsupported=1
+
+# end of common part for modules.conf

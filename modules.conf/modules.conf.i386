@@ -1,0 +1,11 @@
+# begin of i386 part for modules.conf
+
+alias char-major-4        serial
+alias char-major-5        serial
+
+alias parport_lowlevel    parport_pc
+options parport_pc io=0x378 irq=none,none
+# If you have multiple parallel ports, specify them this way:
+# options parport_pc io=0x378,0x278  irq=none,none
+
+# end of i386 part for modules.conf
