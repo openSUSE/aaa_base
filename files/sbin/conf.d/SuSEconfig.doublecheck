@@ -29,7 +29,8 @@ test -f /lib/YaST/SuSEconfig.functions || {
 # safety-check: look for duplicated variables in sysconfig
 #
 MYTMP=`mktemp -d /tmp/rcconfigchk.XXXXXX`
-FIND_CMD="find /etc/rc.config /etc/sysconfig -type f -maxdepth 1 \
+test -f /etc/rc.config && RCCONFIG="/etc/rc.config"
+FIND_CMD="find $RCCONFIG /etc/sysconfig -type f -maxdepth 1 \
  ! -name \"*.rpmsave\" ! -name \"*.rpmorig\" ! -name \"*~\" \
  ! -name \"*.old\" ! -name \"*.tmp\" ! -name \"*.orig\" \
  ! -name \"*.sav\" ! -name \"*.org\" "
