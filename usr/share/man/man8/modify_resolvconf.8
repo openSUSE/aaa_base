@@ -24,16 +24,22 @@ modify_resolvconf \- modify /etc/resolv.conf
 .LP
 \fBmodify_resolvconf\fP
 .IR modify
-.B \-s \fI<service>\fP \-p \fI<process>\fP \-f \fI<path to script>\fP \-t \fI<text>\fP\||\fI-\fP [ \-l \fI<list of search domains>\fP ] [ \-d \fI<domainname>\fP ] [ \-n \fI<list of nameservers>\fP ] [ \-o \|| \-a \fI<pathname of file>\fP ]
+.B \-s \fI<service>\fP \-p \fI<process>\fP \-f \fI<path to script>\fP \-t \fI<text>\fP\||\fI-\fP [ \-l \fI<list of search domains>\fP ] [ \-d \fI<domainname>\fP \||\ \-n \fI<list of nameservers>\fP ] [ \-o \|| \-a \fI<pathname of file>\fP ] [ \-e \fI<string>\fP ] [ \-v ] [ \-q ]
 .\" 
 .LP
 \fBmodify_resolvconf\fP
 .IR restore
-.B \-s \fI<service>\fP
+.B \-s \fI<service>\fP [ \-e \fI<string>\fP ] [ \-o \fI<pathname of file>\fP ] [ \-k ] [ \-v ] [ \-q ]
+.\" 
+.LP
+\fBmodify_resolvconf\fP
+.IR check
+.B [ \-v ] [ \-q ]
 .\" 
 .LP
 \fBmodify_resolvconf\fP
 .IR cleanup
+.B [ \-v ] [ \-q ]
 .\" 
 .LP
 \fBmodify_resolvconf\fP
@@ -52,6 +58,9 @@ that can be restored later. Therefore, a fixed naming scheme is used (see below)
 to the new resolv.conf that informs the user (or other programs) who changed the file, why it was done how to avoid it in the future. This header is automatically created by
 .B modify_resolvconf
 and is therefore standardized. This again allows certain programs (e.g. YaST) to handle a temporary resolv.conf.
+The presence of this header is also used by
+.B modify_resolvconf
+to recognize that resolv.conf is temporary or not.
 
 .PP
 The naming scheme used for backup copies is:
@@ -77,13 +86,16 @@ In SuSE's \fI/etc/rc.config\fP, there is a variable named \fBMODIFY_RESOLV_CONF_
 .SH ACTIONS
 .TP
 .B modify
-write a new resolv.conf with the supplied data and create a backup of the old one
+write a new resolv.conf with the supplied data and create a backup of the old one.
 .TP
 .B restore
-take a backup and rename it to \fI/etc/resolv.conf\fP
+take a backup (if it exists) and rename it to \fI/etc/resolv.conf\fP, and remove all other backups of the given service (resolv.conf.saved.by.<service>*).
 .TP
 .B cleanup
-FIXME
+remove all backups of resolv.conf.saved.by.* while trying to restore the original one.
+.TP
+.B check
+return 0 if resolv.conf has not been modified dynamically and write a status message to stderr. If resolv.conf has been modified dynamically, it returns 1 and echoes the text contained in the Info: tag to stderr.
 .\" 
 .\"                    OPTIONS
 .\" 
@@ -113,14 +125,17 @@ the domain to be used
 .B \-n, \-\-nameservers \fI<list of nameservers>
 the (space separated and quoted if necessary) list of nameservers to be used
 .TP
+.B \-e, \-\-extension \fI<string>
+appends an additional extension to the backup filename (this can be used by a service to create more than one backup like for different ppp devices)
+.TP
 .B \-o, \-\-save_now \fI<pathname of file>
-FIXME
+creates an additional backup with the specified filename
 .TP
 .B \-a, \-\-save_later \fI<pathname of file>
-FIXME
+inserts an additional tag into the informational header specifying a filename to use for an additional backup to be done at restore time.
 .TP
 .B \-k, \-\-keep
-FIXME
+if used with restore, --keep puts the current resolver data into the resolv.conf that is being restored.
 .TP
 .B \-v, \-\-verbose
 be verbose
@@ -161,9 +176,9 @@ would create:
 .br
 search suse.de
 .br
-nameserver 10.10.10.1
+nameserver 10.10.0.1
 .br
-nameserver 10.10.11.1
+nameserver 10.10.0.2
 .br
 
 .LP
@@ -178,7 +193,7 @@ nameserver 10.10.11.1
 .\"
 .SH BUGS
 .br
-save_now, save_later are not yet implemented. The private extension is not implemented.
+save_later does not work properly if restoring one resolv.conf out of a stack of backups.
 .\"
 .\"                SEE ALSO
 .\"
