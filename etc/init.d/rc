@@ -57,6 +57,10 @@ if test $COLUMNS -gt 0 ; then
 	case "$REDIRECT" in /dev/tty[1-9]*)
 	    export REDIRECT=/dev/tty1
 	    setconsole $REDIRECT < $CONSOLE
+	    set -- $(stty size < $REDIRECT)
+	    LINES=$1
+	    COLUMNS=$2
+	    export LINES COLUMNS
 	esac
     fi
 else

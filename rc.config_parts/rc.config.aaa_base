@@ -299,20 +299,6 @@ PERMISSION_SECURITY="easy local"
 MAX_DAYS_FOR_LOG_FILES=365
 
 #
-# If you want cron.daily to backup the rpm database, specify a directory
-# where the backups will be stored. (This is recommended!) The backups
-# will be made every time cron.daily is called and the db has changed.
-# Setting the variable to "" disables this feature.
-#
-RPMDB_BACKUP_DIR=/var/adm/backup/rpmdb
-
-#
-# Here you can set the maximum number of backup files for the rpm
-# database.
-#
-MAX_RPMDB_BACKUPS=5
-
-#
 # cron.daily can check for old files in tmp-dirs. It will delete all files
 # not accessed for more than MAX_DAYS_IN_TMP. If MAX_DAYS_IN_TMP is not set
 # or set to 0, this feature will be disabled. 

@@ -44,25 +44,12 @@ case `uname -r` in
       test -x /sbin/rpc.statd && RPCSTATD=/sbin/rpc.statd
       ;;
 esac
-# no explicit start for lockd needed for 2.4
-case `uname -r` in
-   0.*|1.*|2.0.*|2.4.*) RPCLOCKD="" ;;
-   *)
-      test -x /usr/sbin/rpc.lockd && RPCLOCKD=/usr/sbin/rpc.lockd
-      test -x /usr/sbin/rpc.klockd && RPCLOCKD=/usr/sbin/rpc.klockd
-      test -x /sbin/rpc.lockd && RPCLOCKD=/sbin/rpc.lockd
-      ;;
-esac
 
 rc_reset
 case "$1" in
     start|reload)
 	test "$NEED_NFS" = "yes" || exit 0;
 	echo -n "Importing Net File System (NFS)"
-	if test -n "$RPCLOCKD" ; then
-	  startproc $RPCLOCKD
-	  rc_status
-	fi
 	if test -n "$RPCSTATD" ; then
 	  checkproc $RPCSTATD || startproc $RPCSTATD
 	  rc_status
