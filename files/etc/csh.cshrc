@@ -86,6 +86,9 @@ if ( -r /etc/SuSEconfig/csh.cshrc ) then
     if (! ${?LANG} ) then
         source /etc/SuSEconfig/csh.cshrc
     endif
+    if (`sh -c '. /etc/sysconfig/language; echo $AUTO_DETECT_UTF8'` == "yes" ) then
+	if ( -r /etc/profile.d/csh.utf8 ) source /etc/profile.d/csh.utf8
+    endif
 endif
 
 #

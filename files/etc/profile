@@ -229,6 +229,9 @@ fi
 #
 if test -z "$PROFILEREAD" ; then
     test -e /etc/SuSEconfig/profile && . /etc/SuSEconfig/profile
+    if test "$(. /etc/sysconfig/language; echo $AUTO_DETECT_UTF8)" = "yes" ; then
+	test -r /etc/profile.d/sh.utf8 && . /etc/profile.d/sh.utf8
+    fi
 fi
 
 if test "$is" != "ash" ; then

@@ -1,0 +1,18 @@
+#
+# Try to autodetect UTF-8 capable terminal line
+#
+where testutf8 > /dev/null
+if ( $? == 0 && ${?LANG} ) then
+    testutf8
+    if ( $? == 2 ) then
+	switch ($LANG)
+	case POSIX:
+	    breaksw
+	case *.UTF-8:
+	    breaksw
+	default:
+	    setenv LANG `echo ${LANG}|sed 's/[\.@].*//'`.UTF-8
+	    breaksw
+	endsw
+    endif
+endif

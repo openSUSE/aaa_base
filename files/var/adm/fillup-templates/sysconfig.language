@@ -80,3 +80,11 @@ RC_LC_MONETARY=""
 # Value "ctype" means that root uses just LC_CTYPE. 
 #
 ROOT_USES_LANG="ctype"
+
+## Type:        yesno
+## Default:     no
+#
+# Workaround for missing forward of LANG and LC variables
+# of e.g. ssh login connections.
+#
+AUTO_DETECT_UTF8="no"

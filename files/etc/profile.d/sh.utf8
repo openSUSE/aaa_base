@@ -1,0 +1,13 @@
+#
+# Try to autodetect UTF-8 capable terminal line
+#
+if test -n "$LANG" && type -p testutf8 > /dev/null 2>&1 ; then
+    testutf8
+    if test "$?" -eq 2 ; then
+	case "$LANG" in
+	POSIX)	 ;;
+	*.UTF-8) ;;
+	*)	 LANG=${LANG%[.@]*}.UTF-8
+	esac
+    fi
+fi
