@@ -176,8 +176,55 @@ case "$-" in
 	    alias beep='echo -en "\x07"'
 	fi
 	alias unmount='echo "Error: Try the command: umount" 1>&2; false'
+	test -s $HOME/.alias && . $HOME/.alias
     fi
-    test -s $HOME/.alias && . $HOME/.alias
+
+    # Complete builtin of the bash 2.0 and higher
+    if test "$is" = "bash" ; then
+	case "$BASH_VERSION" in
+	2.*)
+	    complete -A directory		cd rmdir pushd mkdir chroot chrootx
+	    complete -A directory -A file	chown chgrp chmod chattr ln
+	    complete -A file			more cat less strip grep vi ed
+	    complete -A file -X '*.bz2'		bzip2
+	    complete -A file -X '*.gz'		gzip
+	    complete -A file -X '*.Z'		compress
+	    complete -A file -X '*.zip'		zip
+	    complete -A file -X '!*.bz2'	bunzip2
+	    complete -A file -X '!*.gz'		gunzip
+	    complete -A file -X '!*.Z'		uncompress
+	    complete -A file -X '!*.zip'	unzip
+
+	    complete -A file -X '!*.+(ps|pdf)'	gs ghostview
+	    complete -A file -X '!*.+(ps|ps.gz|pdf)'	gv
+	    complete -A file -X '!*.pdf'	acroread xpdf
+	    complete -A file -X '!*.dvi'	dvips xdvi
+	    complete -A file -X '!*.tex'	tex latex
+
+	    complete -A function -A alias -A command -A builtin type
+
+	    complete -A function		function
+	    complete -A alias			alias unalias
+	    complete -A variable		export unset local readonly
+	    complete -A variable -A export	unset
+	    complete -A shopt			shopt
+	    complete -A setopt			set
+	    complete -A helptopic		help
+	    complete -A user			talk su login sux
+	    complete -A builtin			builtin
+	    complete -A export			printenv
+	    complete -A command			command which nohup exec nice \
+						eval ltrace strace gdb
+	    HOSTFILE=""
+	    test -s $HOME/.hosts && HOSTFILE=$HOME/.hosts
+	    complete -A hostname		ping telnet rsh ssh slogin \
+						rlogin traceroute nslookup
+	    complete -A stopped -P '%'		bg
+	    complete -A job -P '%'		fg jobs disown
+	    ;;
+	*)  ;;
+	esac
+    fi
 
     # Do not save dupes in the bash history file
     HISTCONTROL=ignoredups

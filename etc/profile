@@ -133,13 +133,13 @@ export TEXINPUTS
 # Configure the default pager on SuSE Linux
 #
 if test -z "$LESS" ; then
-  LESS="-M"
-  LESSKEY=/etc/lesskey.bin
-  LESSOPEN="lessopen.sh %s"
-  LESSCLOSE="lessclose.sh %s %s"
-  LESS_ADVANCED_PREPROCESSOR="no"
-  PAGER=less
-  export LESSOPEN LESSCLOSE LESS LESSKEY PAGER
+    LESS="-M"
+    LESSKEY=/etc/lesskey.bin
+    LESSOPEN="lessopen.sh %s"
+    LESSCLOSE="lessclose.sh %s %s"
+    LESS_ADVANCED_PREPROCESSOR="no"
+    PAGER=less
+    export LESSOPEN LESSCLOSE LESS LESSKEY PAGER
 fi
 
 #
@@ -212,7 +212,7 @@ export COLORTERM
 # (but do not source it if LANG is already set to avoid overriding locale
 # variables already present in the environment)
 #
-if [ -z "$LANG" ]; then
+if test -z "$LANG" ; then
     test -e /etc/SuSEconfig/profile && . /etc/SuSEconfig/profile
 fi
 
@@ -245,10 +245,12 @@ fi
 PROFILEREAD=true
 
 #
-# BASH specials, maybe also good for other shells
+# System BASH specials, maybe also good for other shells
 #
 test -r /etc/bash.bashrc && . /etc/bash.bashrc
-test -r $HOME/.bashrc    && . $HOME/.bashrc
+if test "$is" = "bash" ; then
+    test -r $HOME/.bashrc    && . $HOME/.bashrc
+fi
 
 #
 # KSH specials
