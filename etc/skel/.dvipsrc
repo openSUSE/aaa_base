@@ -1,7 +1,0 @@
-% Paper size information.  First definition is the default.
-%
-% If your default is a4 uncomment the following definition
-% and comment out the letterSize definition.
-%
-@ a4size 210mm 297mm
-@+ %%PaperSize: a4

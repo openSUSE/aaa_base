@@ -350,7 +350,6 @@
 /etc/conf.modules                      root.root         644
 /etc/csh.cshrc                         root.root         644
 /etc/csh.login                         root.root         644
-/etc/default.keytab                    root.root         644
 /etc/diphosts                          root.root         644
 /etc/dosemu.conf                       root.root         644
 /etc/dosemu.users                      root.root         644

@@ -747,6 +747,7 @@ case "$todo" in
 	do_restore=no
     ;;
     insert)
+	do_restore=yes
 	genlevels
 	inittable
 	checkrl $fallback
@@ -760,6 +761,7 @@ case "$todo" in
 	    exit 1
 	fi
 	insertscript $singlescript
+	do_restore=no
     ;;
     *) usage
     ;;

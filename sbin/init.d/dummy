@@ -7,61 +7,78 @@
 #
 
 . /etc/rc.config
-    
-if test "$NETCONFIG" != "YAST_ASK" ; then
-    if grep -q dummy: /proc/net/dev ; then
-        dummy=dummy
-    else
-        dummy=dummy0
+
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
+
+test $link = $base && SETUPDUMMYDEV=yes
+test "$NETCONFIG" != "YAST_ASK" -a "$SETUPDUMMYDEV" = "yes" || exit 0
+
+if grep -q dummy: /proc/net/dev ; then
+    dummy=dummy
+else
+    dummy=dummy0
+fi
+ethdev=""
+defdev=""
+ipdef=""
+ipaddr=""
+for dev in $NETCONFIG; do
+    eval ndev=\$NETDEV$dev
+    if test -z "$defdev" ; then
+        eval defdev=\$IPADDR$dev
+        ipdef=$defdev
     fi
-    ethdev=""
-    defdev=""
-    ipdef=""
-    ipaddr=""
-    for dev in $NETCONFIG; do
-        eval ndev=\$NETDEV$dev
-        if [ -z "$defdev" ]; then
-            eval defdev=\$IPADDR$dev
-            ipdef=$defdev
-        fi
-        case "$ndev" in
-            eth*|tr*)
-                if [ -z "$ethdev" ]; then
-                    eval ethdev=\$IFCONFIG$dev
-                    eval ipeth=\$IPADDR$dev
-                fi
-                ;;
-        esac
-    done
-    if [ -n "$ethdev" ]; then
-        dev=$ethdev
-        ipaddr=$ipeth
-    else
-        dev=$defdev
-        ipaddr=$ipdef
-    fi
+    case "$ndev" in
+        eth*|tr*)
+            if test -z "$ethdev" ; then
+                eval ethdev=\$IFCONFIG$dev
+                eval ipeth=\$IPADDR$dev
+            fi
+            ;;
+    esac
+done
+if test -n "$ethdev" ; then
+    dev=$ethdev
+    ipaddr=$ipeth
+else
+    dev=$defdev
+    ipaddr=$ipdef
 fi
 
+test -n "$dev" || exit 0
+
+return=$rc_done
 case "$1" in
     start)
-    if test "$NETCONFIG" != "YAST_ASK" ; then
-        if test -n "$SETUPDUMMYDEV" -a "$SETUPDUMMYDEV" == "yes" ; then
-            if [ -n "$dev" ]; then
-                test -n "$dev" && ifconfig $dummy $dev && route add $ipaddr dev $dummy
-            fi
-        fi
-    fi
-    ;;
+	echo -n "Setting up $dummy device"
+	ifconfig  $dummy $dev         && \
+	route add $ipaddr dev $dummy  || \
+	return=$rc_failed 
+	echo -e "$return"
+	;;
     stop)
-    if test "$NETCONFIG" != "YAST_ASK" ; then
-        if test -n "$SETUPDUMMYDEV" -a "$SETUPDUMMYDEV" = "yes" ; then
-            test -n "$dev" && ifconfig $dummy down
-        fi
-    fi
-    ;;
+	echo -n "Removing $dummy device"
+	ifconfig $dummy down || return=$rc_failed
+	echo -e "$return"
+	;;
+    reload|restart)
+	$0 stop && $0 start || return=$rc_failed
+	;;
+    status)
+	ifconfig $dummy
+	;;
+    probe)
+	probe="`ifconfig $dummy 2>&1`"
+	case "$probe" in
+	    ${dummy}:*unknown*interface*) echo start ;;
+	    ${dummy}*) ;;
+	esac
+	;;
     *)
     echo "Usage: $0 {start|stop}"
     exit 1
 esac
 
+test "$return" = "$rc_done" || exit 1
 exit 0

@@ -24,6 +24,7 @@ fi
 DATESTRING=`date +"%y%m%d"`
 
 for i in $* ; do
+    i=${i%%/}
     if [ -e $i ] ; then
         NEWNAME=$i-$DATESTRING
         NUMBER=0

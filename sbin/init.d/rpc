@@ -9,6 +9,10 @@
 
 . /etc/rc.config
 
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
+
+test $link = $base && START_PORTMAP=yes
 test "$START_PORTMAP" = yes -o "$NFS_SERVER" = yes || exit 0
 
 if test -x /sbin/portmap ; then
@@ -17,20 +21,29 @@ else
     PORTMAP=/usr/sbin/portmap
 fi
 
+return=$rc_done
 case "$1" in
     start)
-	echo "Starting RPC portmap daemon."
-	eval $PORTMAP
+	echo -n "Starting RPC portmap daemon"
+	startproc $PORTMAP || return=$rc_failed
 	/bin/sleep 1
+	echo -e "$return"
 	;;
     stop)
-	echo -n "Shutting down RPC services:"
-	killproc -TERM $PORTMAP
-	echo
+	echo -n "Shutting down RPC services"
+	killproc -TERM $PORTMAP || return=$rc_failed
+	echo -e "$return"
+	;;
+    restart|reload)
+	$0 stop && $0 start || return=$rc_failed
+	;;
+    status)
+	checkproc $PORTMAP && echo "OK" || echo "No process"
 	;;
     *)
 	echo "Usage: $0 {start|stop}"
 	exit 1
 esac
 
+test "$return" = "$rc_done" || exit 1
 exit 0

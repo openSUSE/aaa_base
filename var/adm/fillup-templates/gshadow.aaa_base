@@ -22,5 +22,9 @@ public:*:root:root
 video:*:root:root
 informix:*:root:root
 game:*:root:root
+xok:*:root:root
+trusted:*:root:root
+modem:*:root:root
+named:*:root:root
 users:*:root:root
 nogroup:*:root:root

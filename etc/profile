@@ -54,8 +54,11 @@ fi
 #
 POVRAYOPT=-l/usr/lib/povray/include
 export POVRAYOPT
-test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/startkde
-TEXINPUTS="$TEXINPUTS:~/.TeX:/usr/doc/.TeX"
+if test -n "$TEXINPUTS" ; then
+  TEXINPUTS=":$TEXINPUTS:~/.TeX:/usr/doc/.TeX"
+else
+  TEXINPUTS=":~/.TeX:/usr/doc/.TeX"
+fi
 export TEXINPUTS
 PRINTER='lp'
 export PRINTER
@@ -159,12 +162,29 @@ MM_RUNASROOT=true
 export MM_RUNASROOT
 
 # Further options for the 'ls' command are in /etc/DIR_COLORS.
-alias ls='ls --color=tty'
+unalias ls 2>/dev/null
+if test "$UID" = 0 ; then
+    LS_OPTIONS='-a -N --color=tty -T 0';
+else
+    LS_OPTIONS='-N --color=tty -T 0';
+fi
+export LS_OPTIONS
+if test -n "$ZSH_VERSION" ; then
+    alias ls='eval /bin/ls $LS_OPTIONS'
+else
+    alias ls='ls $LS_OPTIONS'
+fi
 alias dir='ls -l'
 alias ll='ls -l'
 alias la='ls -la'
 alias l='ls -alF'
 alias ls-l='ls -l'
+# Handle emacs
+if test "$EMACS" = "t" ; then
+    LS_OPTIONS='-N --color=none -T 0';
+    tset -I -Q
+    stty cooked pass8 dec nl -echo
+fi
 alias o='less'
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -193,12 +213,23 @@ export COLORTERM
 PAGER=less
 export PAGER
 
-PROMPT_COMMAND='PS1=`if test "$UID" = 0 ; then \
-        echo "\h:\`pwd -P\` # " ; \
-    else \
-        echo "\u@\h:\`pwd -P\` > " ; \
-    fi `'
-export PROMPT_COMMAND
+if test -z "$EMACS" ; then
+    if   [ -n "$ZSH_VERSION" ]; then
+	precmd ()
+	{
+	    if test "$UID" = 0; then
+		PS1="%m:`pwd -r` # "
+	    else
+		PS1="%n@%m:`pwd -r` > "
+	    fi
+	}
+    elif [ -n "$BASH_VERSION" ] ; then
+        PROMPT_COMMAND='test "$UID" = 0 && \
+                PS1="\h:`pwd -P` # " || \
+                PS1="\u@\h:`pwd -P` > "'
+	export PROMPT_COMMAND
+    fi
+fi
 
 # I had problems using 'eval tset' instead of 'TERM=', but you might want to 
 # try it anyway. I think with the right /etc/termcap it would work great.
@@ -222,9 +253,9 @@ fi
 #PS1='`hostname`:`pwd`# '
 if [ "$SHELL" = "/usr/bin/pdksh" -o "$SHELL" = "/usr/bin/ksh" -o "$SHELL" = "/bin/ksh" ]; then
  PS1="! $ "
-elif [ "$SHELL" = "/usr/bin/zsh" ]; then
+elif [ -n "$ZSH_VERSION" ]; then
  PS1="%m:%~%# "
-elif [ "$SHELL" = "/usr/bin/ash" ]; then
+elif [ "$SHELL" = "/usr/bin/ash" -o "$SHELL" = "/bin/ash" ]; then
  PS1="$ "
 else
  PS1='\h:\w \$ '
@@ -247,6 +278,15 @@ fi
 #
 test -e /etc/SuSEconfig/profile && . /etc/SuSEconfig/profile
 
+#
+# now source profile extensions for special packages
+#
+test -d /etc/profile.d && \
+  {
+    for s in /etc/profile.d/*.sh ; do
+      test -r $s && . $s
+    done
+  }	
 
 #
 # and now let's look if there is a local profile (for stuff not done in

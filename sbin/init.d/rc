@@ -1,14 +1,14 @@
 #! /bin/bash
-# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
+# Copyright (c) 1996-98 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
-#	  Werner Fink <werner@suse.de>, 1996
+#	  Werner Fink <werner@suse.de>, 1994,96,98
 #
-# /sbin/init.d/rc
+# /sbin/init.d/rc   --    The Master Resource Control Script
 #
-# This file is responsible for starting/stopping services
-# when the runlevel changes. If the action for a particular
-# feature in the new run-level is the same as the action in
+# This file is responsible  for  starting/stopping  services
+# when the runlevel changes.  If the action for a particular
+# feature in the new run-level is the same as  the action in
 # the previous run-level, this script will neither start nor
 # stop that feature.
 #
@@ -29,31 +29,43 @@ else
     test "$PREVLEVEL" = "$RUNLEVEL" && exit 0
 fi
 
-# set onlcr to avoid staircase effect
-stty onlcr 0>&1
+# set onlcr to avoid staircase effect and do not lock scrolling
+stty onlcr -ixon 0>&1
 
-echo "$0: Previous runlevel: $PREVLEVEL, current runlevel: $RUNLEVEL."
+#     \033[1m       switch bold on
+#     \033[31m      switch red on
+#     \033[32m      switch green on
+#     \033[33m      switch yellow on
+#     \033[m        switch color/bold off
+extd="\033[1m"
+warn="\033[1m"
+norm="\033[m"
+stat="\033[71G"
+
+echo -n "Master Resource Control: "
+echo -n "previous runlevel: $PREVLEVEL, "
+echo -e "switching to runlevel: ${extd}${RUNLEVEL}${norm}"
 
 curdir=/sbin/init.d/rc$RUNLEVEL.d
 prevdir=/sbin/init.d/rc$PREVLEVEL.d
 rex="[0-9][0-9]"
 
-if test "$PREVLEVEL" != N; then
-	#
-	# run the KILL scripts of the previous runlevel
-	#
-	for i in $prevdir/K*; do
-	   test -x "$i" || continue
+failed=""
+#
+# run the KILL scripts of the previous runlevel
+#
+for i in $prevdir/K*; do
+    test -x "$i" || continue
 
-	   # don't run the kill script, if the new runlevel has a start script
-	   start=${i##*/K$rex}
-	   set -- $curdir/S$rex$start
-	   test -n "$2" && echo -e "$0: more than one start link\n -- $@"
-	   test -f $1 && continue
+    # don't run the kill script, if the new runlevel has a start script
+    start=${i##*/K$rex}
+    set -- $curdir/S$rex$start
+    test -n "$2" && echo -e "$0: more than one start link\n -- $@"
+    test -f $1 && continue
 
-	   $i stop
-	done
-fi
+    $i stop || failed="${failed} ${start}"
+    echo -n -e "$rc_reset"
+done
 #
 # run the START scripts of the current (new) runlevel
 #
@@ -61,14 +73,22 @@ for i in $curdir/S*; do
     test -x "$i" || continue
 
     # don't run start script, if previous runlevel had a kill script
-    if test "$PREVLEVEL" != N; then
-	start=${i##*/S$rex}
-	set -- $prevdir/K$rex$start
-	test -n "$2" && echo -e "$0: more than one kill link\n -- $@"
-	test -f $1 && continue
-    fi
+    start=${i##*/S$rex}
+    set -- $prevdir/K$rex$start
+    test -n "$2" && echo -e "$0: more than one kill link\n -- $@"
+    test -f $1 && continue
 
-    $i start
+    $i start || failed="${failed} ${start}"
+    echo -n -e "$rc_reset"
 done
+
+echo -n "Master Resource Control: "
+if test -n "$failed" ; then
+    echo
+    echo -n "Failed services in runlvel ${RUNLEVEL}$:"
+    echo -e "${extd}${failed}${norm}"
+else
+    echo -e "runlevel ${RUNLEVEL} has been ${stat}${warn}reached${norm}"
+fi
 
 exit 0

@@ -50,7 +50,11 @@ if [ -f /usr/lib/teTeX/texmf.cnf ] ; then
 fi
 
 
-test -n "$MAX_DAYS_FOR_LOG_FILES" && export MAX_DAYS_FOR_LOG_FILES
+test "$MAX_DAYS_FOR_LOG_FILES" -gt 0 2> /dev/null || MAX_DAYS_FOR_LOG_FILES=0
+export MAX_DAYS_FOR_LOG_FILES
+
+test "$MAX_DAYS_IN_TMP" -gt 0 2> /dev/null || MAX_DAYS_IN_TMP=0
+export MAX_DAYS_IN_TMP
 
 #
 # this function checks log files. It has four parameters: 
@@ -92,8 +96,7 @@ check_log_file () {
     #
     # now check for old files...
     #
-    if [ -n "$MAX_DAYS_FOR_LOG_FILES" -a \
-         $MAX_DAYS_FOR_LOG_FILES -gt 0 ] ; then
+    if [ "$MAX_DAYS_FOR_LOG_FILES" -gt 0 ] ; then
         find "$1"-*.gz -mtime +$MAX_DAYS_FOR_LOG_FILES -type f -print0 2> /dev/null | \
             xargs --no-run-if-empty --max-lines=200 --null -- rm -f 
     fi
@@ -109,8 +112,7 @@ check_log_file () {
 #
 # First check file sizes of log files.
 #
-if test -n "$MAX_DAYS_FOR_LOG_FILES" -a "$MAX_DAYS_FOR_LOG_FILES" -gt 0 \
-     -a -f /etc/logfiles ; then
+if test "$MAX_DAYS_FOR_LOG_FILES" -gt 0 -a -f /etc/logfiles ; then
     while read FILES SIZE MODE OWNERSHIP REST ; do
         case "$FILES" in
           \#*|"") 
@@ -143,7 +145,7 @@ fi
 #
 # Delete apropriate files in tmp directories.
 #
-if [ -n "$MAX_DAYS_IN_TMP" -a "$MAX_DAYS_IN_TMP" -gt 0 ] ; then
+if [ "$MAX_DAYS_IN_TMP" -gt 0 ] ; then
     OMIT=""
     for i in $OWNER_TO_KEEP_IN_TMP ; do
         OMIT="$OMIT  ( ! -user $i )"
@@ -253,7 +255,7 @@ fi
 # look for old YaST log files
 #
 
-if test -n "$MAX_DAYS_FOR_LOG_FILES" -a $MAX_DAYS_FOR_LOG_FILES -gt 0 ; then
+if test $MAX_DAYS_FOR_LOG_FILES -gt 0 ; then
     find /var/adm/inst-log/ -name "installation-*" -ctime +90 \
         -type f \! -name "*.gz" -print0 2> /dev/null | \
         xargs --no-run-if-empty --max-lines=200 --null -- gzip -9
@@ -270,7 +272,7 @@ fi
 if [ -z "$MAX_DAYS_FOR_CORE" ] ; then
     MAX_DAYS_FOR_CORE=5
 fi
-for DUMMY in `find /var/lib/locatedb -ctime -8 2> /dev/null` ; do
+for DUMMY in `find /var/lib/locatedb -ctime -7 2> /dev/null` ; do
     cat /dev/null > $TMPDIR/cron.daily.$$
     for i in `locate '*/core'` ; do
         if [ -f $i ] ; then
@@ -322,7 +324,8 @@ if test "$REINIT_MANDB" = yes ; then
         for DIR in /usr/openwin/man /usr/man/allman /usr/man/de ; do
             test -d $DIR && manpath=$manpath:$DIR
         done
-        export manpath
+        MANPATH=$manpath
+        export manpath MANPATH
 
         /usr/sbin/makewhatis
     fi

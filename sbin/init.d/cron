@@ -10,23 +10,43 @@
 
 . /etc/rc.config
 
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
+
+test $link = $base && CRON=yes
 test "$CRON" = yes || exit 0
 
+test -x /usr/sbin/cron || exit 0
+
+return=$rc_done
 case "$1" in
     start)
-        if test -x /usr/sbin/cron ; then
-	    echo "Starting CRON clock daemon."
-	    /usr/sbin/cron
-        fi
+        echo -n "Starting CRON daemon"
+	startproc /usr/sbin/cron || return=$rc_failed
+	echo -e "$return"
 	;;
     stop)
-	echo -n "Shutting down CRON clock daemon:"
-	killproc -TERM /usr/sbin/cron
-	echo
+	echo -n "Shutting down CRON daemon"
+	killproc -TERM /usr/sbin/cron || return=$rc_failed
+	echo -e "$return"
+	;;
+    retart)
+	$0 stop && $0 start || return=$rc_failed
+	;;
+    reload)
+	# CRON will examine when a crontab file was modified
+	;;
+    status)
+	echo -n "Checking for CRON daemon"
+	checkproc /usr/sbin/cron && echo "CRON is up" || echo "No CRON daemon"
+	;;
+    probe)
+	# CRON will examine when a crontab file was modified
 	;;
     *)
-	echo "Usage: $0 {start|stop}"
+	echo "Usage: $0 {start|stop|status|restart}"
 	exit 1
 esac
 
+test "$return" = "$rc_done" || exit 1
 exit 0

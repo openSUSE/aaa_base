@@ -23,6 +23,7 @@
 /var/log/news                  +4096k   640      root.news
 /var/log/ntp                   +2048k   640      root.root
 /var/log/pop3svr.log           +1024k   640      root.root
+/var/log/postgresql.log        +1024k   644      postgres.daemon
 /var/log/pvf.log               +1024k   640      root.root
 /var/log/setup_autobuild       +4096k   644      root.root
 /var/log/warn                  +1024k   640      root.root

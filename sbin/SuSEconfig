@@ -291,23 +291,8 @@ if test -n "$IRCSERVER" ; then
     fi
 fi
 
-if test -e $r/etc/shells.in ; then
-        echo_warning /etc/shells \
-            "# Change /etc/shells.in instead." \
-            > $r/etc/shells.SuSEconfig
-
-        (for shell in `cat $r/etc/shells.in` ; do
-                test -x $r/$shell && echo $shell
-        done) >> $r/etc/shells.SuSEconfig
-        check_md5_and_move $r/etc/shells
-fi
-
-if test -n "$TIMEZONE" -a "$TIMEZONE" != "YAST_ASK" -a \
-   -e $r/usr/lib/zoneinfo/$TIMEZONE ; then
-        my_test_write $r/usr/lib/zoneinfo/ && {
-            rm -f $r/usr/lib/zoneinfo/localtime 
-            cat $r/usr/lib/zoneinfo/$TIMEZONE > $r/usr/lib/zoneinfo/localtime
-        }
+if test -n "$TIMEZONE" -a "$TIMEZONE" != "YAST_ASK" -a -x /usr/sbin/zic ; then
+    /usr/sbin/zic -l $TIMEZONE
 fi
 
 if test -n "$MOUSE" -a "$MOUSE" != "YAST_ASK" ; then
@@ -340,11 +325,6 @@ if test -n "$FROM_HEADER" -a -d $r/var/lib/news/ ; then
     check_md5_and_move $r/var/lib/news/mailname
     echo "$FROM_HEADER" > $r/var/lib/news/whoami.SuSEconfig
     check_md5_and_move $r/var/lib/news/whoami
-fi
-
-if test -n "$KEYTABLE" -a -e $r/usr/lib/kbd/keytables/$KEYTABLE.map ; then
-    cp -p $r/usr/lib/kbd/keytables/$KEYTABLE.map $r/etc/default.keytab.SuSEconfig
-    check_md5_and_move $r/etc/default.keytab
 fi
 
 #
@@ -396,14 +376,15 @@ if test -d $r/opt/kde ; then
     echo "export KDEDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv KDEDIR /opt/kde" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
+if test -d $r/usr/X11R6/lib/qt ; then
+    echo "QTDIR=/usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv QTDIR /usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
 if test -d $r/usr/lib/qt ; then
     echo "QTDIR=/usr/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv QTDIR /usr/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-elif test -d $r/usr/X11R6/lib/qt ; then
-    echo "QTDIR=/usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv QTDIR /usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test -d $r/opt/gnome ; then
     echo "GNOMEDIR=/opt/gnome" >> $r/etc/SuSEconfig/profile.SuSEconfig
@@ -475,6 +456,18 @@ if test -n "$NO_PROXY" ; then
     echo "export no_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv no_proxy '$NO_PROXY'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
+
+WINDOWMANAGER=`type -p $DEFAULT_WM`
+test -z "$WINDOWMANAGER" && {
+    test -x /usr/X11R6/bin/$DEFAULT_WM && \
+        WINDOWMANAGER=/usr/X11R6/bin/$DEFAULT_WM
+}
+test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/startkde
+echo "WINDOWMANAGER=$WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
+echo "export WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
+echo "setenv WINDOWMANAGER $WINDOWMANAGER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+
+
 check_md5_and_move $r/etc/SuSEconfig/profile
 check_md5_and_move $r/etc/SuSEconfig/csh.login
 check_md5_and_move $r/etc/SuSEconfig/csh.cshrc
@@ -668,7 +661,7 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
             fi
         fi
 
-        for i in 100dpi Type1 75dpi cyrillic misc Speedo; do
+        for i in 100dpi Type1 75dpi cyrillic misc Speedo local ; do
             FDIR=/usr/X11R6/lib/X11/fonts/$i
             if test -d $FDIR -a -x /usr/X11R6/bin/mkfontdir -a \
                 "$CHECK_NEWPACKAGE" != false ; then

@@ -2,7 +2,7 @@
 # System csh.login for tcsh,
 # (c) Werner Fink '93
 #
-if ( -o /dev/$tty ) then
+if ( -o /dev/$tty && ${?prompt} ) then
     # Console
     if ( ! ${?TERM} )           setenv TERM linux
     if ( "$TERM" == "unknown" ) setenv TERM linux

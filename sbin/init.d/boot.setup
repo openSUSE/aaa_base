@@ -16,17 +16,28 @@ case "$1" in
         if test -x /usr/sbin/klogconsole ; then
                 /usr/sbin/klogconsole -r 8
         fi
-        if test -f /etc/default.keytab -a -x /bin/loadkeys; then
-                /bin/loadkeys /etc/default.keytab
-        fi
         if test -n "$FONT" -a "$FONT" != "YAST_ASK" -a \
-                -x /usr/bin/setfont -a -x /usr/bin/loadunimap -a \
-                -d /usr/lib/kbd/consolefonts ; then
-                /usr/bin/setfont $FONT
-                /usr/bin/loadunimap
+                -x /usr/bin/setfont -a -d /usr/lib/kbd/consolefonts
+        then
+                ECHO_RETURN=$rc_done_up
+                echo Loading console font $FONT
+                /usr/bin/setfont $FONT || ECHO_RETURN=$rc_failed_up
+                if test -x /usr/bin/loadunimap -a -d /usr/lib/kbd/consoletrans
+                then
+                        test -n "$TRANSLATION" -a "$TRANSLATION" != "none" && {
+                               /usr/bin/loadunimap $TRANSLATION || \
+                                   ECHO_RETURN=$rc_failed_up
+                        }
+	        else
+                        /usr/bin/loadunimap || ECHO_RETURN=$rc_failed_up
+                fi
+                echo -e "$ECHO_RETURN"
         fi
         if test -n "$KBD_RATE" -a -n "$KBD_DELAY" -a -x /sbin/kbdrate; then
-                /sbin/kbdrate -r $KBD_RATE -d $KBD_DELAY
+                ECHO_RETURN=$rc_done_up
+                /sbin/kbdrate -r $KBD_RATE -d $KBD_DELAY || \
+                        ECHO_RETURN=$rc_failed_up
+                echo -e "$ECHO_RETURN"
         fi
         # setleds
         if test "$KBD_NUMLOCK" = "yes"; then

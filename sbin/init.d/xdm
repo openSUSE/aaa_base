@@ -2,7 +2,7 @@
 # Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
-#	  Werner Fink <werner@suse.de>, 1996
+#	  Werner Fink <werner@suse.de>, 1996,98
 #         Martin Scherbaum <maddin@suse.de>, 1997
 #         Reinhard Max <max@suse.de>, 1997
 #
@@ -18,61 +18,49 @@ esac
 test ! -x "$DISPLAYMANAGER" && DISPLAYMANAGER=/usr/X11R6/bin/xdm
 
 DM=${DISPLAYMANAGER##*/}
-PF=/var/lib/xdm/xdm-pid
-xdmpid=0
 
-xdmrun ()
-{
-    test  -s $PF && xdmpid="`cat $PF`"
-    pidof -s $DISPLAYMANAGER >/dev/null && return 0
-    return 1
-}
-
+return=$rc_done
 case "$1" in
-
     start)
-	if xdmrun ; then
-	    echo "Warning: $DM is already running"
-	    ps cux$xdmpid
-	else
-	    # After a crash or a kill signal we may have
-	    # a wrong owner ship of /dev/console
+	echo -n "Starting service $DM"
+	startproc $DISPLAYMANAGER || return=$rc_failed
+	# After a crash or a kill signal we may have
+	# a wrong owner ship of /dev/console
+	if test "$return" = "$rc_done" ; then
 	    chown root:tty /dev/console /dev/tty0
 	    chmod 622      /dev/console /dev/tty0
-	    #
-	    test -z "$RE" && echo -n "Starting $DM... "
-	    $DISPLAYMANAGER
-	    test -z "$RE" && echo "Done."
 	fi
+	echo -e "$return"
 	;;
     stop)
-	if xdmrun ; then
-	    killproc /usr/X11R6/bin/xconsole &> /dev/null
-	    test -z "$RE" && echo -n "Shutting down $DM... "
-	    kill -TERM $xdmpid 
-	    test -z "$RE" && echo "Done."
-	fi
+	echo -n "Shutting down service $DM"
+	killproc -TERM $DISPLAYMANAGER || return=$rc_failed
+	echo -e "$return"
 	;;
-    restart|reload)
-	export RE=yes
-	echo -n "Restarting $DM... "
-	$0 stop
-	sleep 1
-	$0 start
-	echo "Done."
+    restart)
+	$0 stop && $0 start || return=$rc_failed
 	;;
-    check)
-	echo -n "Checking $DM ... "
-	if xdmrun ; then
-	    echo "is running"
-	    ps cux$xdmpid
-	else
-	    echo "is NOT running"
+    reload)
+	echo -n "Reload service $DM"
+	killproc -HUP  $DISPLAYMANAGER || return=$rc_failed
+	echo -e "$return"
+	;;
+    status|check)
+	echo -n "Checking for service ${DM}: "
+	checkproc $DISPLAYMANAGER && echo "is running" || echo "is NOT running"
+	;;
+    probe)
+	XDMDIR=/usr/X11R6/lib/X11/xdm
+	if test $XDMDIR/xdm-config -nt /var/run/xdm.pid -o \
+	        $XDMDIR/Xservers   -nt /var/run/xdm.pid
+	then
+	    echo reload
 	fi
 	;;
     *)
-	echo "Usage: $0 {start|stop|restart}"
+	echo "Usage: $0 {start|stop|status|restart|reload|probe}"
 	exit 1
 esac
 
+test "$return" = "$rc_done" || exit 1
 exit 0

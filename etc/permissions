@@ -160,6 +160,7 @@
 /etc/nwserv.conf                       root.root         664
 /etc/psdevtab                          root.root         664
 /etc/shadow                            root.shadow       640
+/etc/shadow-                           root.shadow       640
 /etc/gshadow                           root.shadow       640
 /etc/lilo.conf                         root.root         600
 /etc/ppp/chap-secrets                  root.root         600
@@ -187,7 +188,6 @@
 /etc/conf.modules                      root.root         644
 /etc/csh.cshrc                         root.root         644
 /etc/csh.login                         root.root         644
-/etc/default.keytab                    root.root         644
 /etc/diphosts                          root.root         644
 /etc/dosemu.conf                       root.root         644
 /etc/dosemu.users                      root.root         644

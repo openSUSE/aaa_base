@@ -18,7 +18,7 @@ id:2:initdefault:
 
 # check system on startup
 # first script to be executed if not booting in emergency (-b) mode
-si:I:wait:/sbin/init.d/boot
+si:I:bootwait:/sbin/init.d/boot
 
 # /sbin/init.d/rc takes care of runlevel handling
 #
@@ -32,6 +32,8 @@ l0:0:wait:/sbin/init.d/rc 0
 l1:1:wait:/sbin/init.d/rc 1
 l2:2:wait:/sbin/init.d/rc 2
 l3:3:wait:/sbin/init.d/rc 3
+#l4:4:wait:/sbin/init.d/rc 4
+#l5:5:wait:/sbin/init.d/rc 5
 l6:6:wait:/sbin/init.d/rc 6
 
 # what to do in single-user mode

@@ -41,7 +41,7 @@ case "$1" in
 	# allow users to log in
 	rm -f /etc/nologin
 	;;
-  *)
+    *)
 	echo "Usage: $0 {start|now|stop}"
 	exit 1
 	;;

@@ -12,34 +12,74 @@
 
 . /etc/rc.config
 
+# Determine the base and follow a runlevel link name.
 base=${0##*/}
-test -n "${base##rc}" -a ${base} = rc${base#rc} && START_FOO=yes
+link=${base#*[SK][0-9][0-9]}
 
+# Force execution if not called by a runlevel directory.
+test $link = $base && START_FOO=yes
 test "$START_FOO" = yes || exit 0
 
+# The echo return value for success (defined in /etc/rc.config).
+return=$rc_done
 case "$1" in
     start)
-	echo "Starting foo."
-	#/usr/sbin/foo
+	echo -n "Starting service foo"
+	## Start daemon with startproc(8). If this fails
+	## the echo return value is set appropriate.
+
+	#startproc /usr/sbin/foo || return=$rc_failed
+
+	echo -e "$return"
 	;;
     stop)
-	echo -n "Shutting down foo:"
-	#killproc -TERM /usr/sbin/foo
-	echo
+	echo -n "Shutting down service foo"
+	## Stop daemon with killproc(8) and if this fails
+	## set echo the echo return value.
+
+	#killproc -TERM /usr/sbin/foo || return=$rc_failed
+
+	echo -e "$return"
 	;;
-    restart|reload)
-	$0 stop
-	$0 start
+    restart)
+	## If first returns OK call the second, if first or
+	## second command fails, set echo return value.
+	$0 stop  &&  $0 start  ||  return=$rc_failed
 	;;
-    check|status)
-	echo -n "Checking for foo, pid is:"
-	#pidof /usr/sbin/foo
-	echo
+    reload)
+	## Choose ONE of the following two cases:
+
+	## First possibility: A few services accepts a signal
+	## to reread the (changed) configuration.
+
+	#echo -n "Reload service foo"
+	#killproc -HUP /usr/sbin/foo || return=$rc_failed
+	#echo -e "$return"
+
+	## Exclusive possibility: Some services must be stopped
+	## and started to force a new load of the configuration.
+
+	#$0 stop  &&  $0 start  ||  return=$rc_failed
+	;;
+    status)
+	echo -n "Checking for service foo: "
+	## Check status with checkproc(8), if process is running
+	## checkproc will return with exit status 0.
+
+	#checkproc /usr/sbin/foo && echo OK || echo No process
+	;;
+    probe)
+	## Optional: Probe for the necessity of a reload,
+	## give out the argument which is required for a reload.
+
+	#test /etc/foo.conf -nt /var/run/foo.pid && echo reload
 	;;
     *)
-	echo "Usage: $0 {start|stop|restart|check}"
+	echo "Usage: $0 {start|stop|status|restart|reload[|probe]}"
 	exit 1
 	;;
 esac
 
+# Inform the caller not only verbosely and set an exit status.
+test "$return" = "$rc_done" || exit 1
 exit 0

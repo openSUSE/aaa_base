@@ -1,3 +1,0 @@
-#XFM
-<host>:::rlogin.xpm:exec rsh <host> xterm -T <host> -display `hostname`\:0:
-FTP ftp.x.org:::terminal.xpm:exec xterm -T 'FTP ftp.x.org' -e ftp ftp.x.org:

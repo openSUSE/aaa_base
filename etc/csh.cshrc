@@ -80,6 +80,17 @@ if ( -r /etc/SuSEconfig/csh.cshrc ) then
     source /etc/SuSEconfig/csh.cshrc
 endif
 #
+# source extensions for special packages
+#
+if ( -d /etc/profile.d ) then
+  foreach s ( /etc/profile.d/*.csh )
+    if ( -r $s ) then
+      source $s
+    endif
+  end
+endif
+#
+#
 if (! ${?prompt}) goto end
 #
 # Interactive session
@@ -116,11 +127,11 @@ if ( -x /usr/bin/dircolors ) then
 endif
 unalias ls
 if ( "$uid" == "0" ) then
-    setenv LS_OPTIONS '-a -N -T 0';
+    setenv LS_OPTIONS '-a -N --color=tty -T 0';
 else
-    setenv LS_OPTIONS '-N -T 0';
+    setenv LS_OPTIONS '-N --color=tty -T 0';
 endif
-alias ls 'ls $LS_OPTIONS --color=tty'
+alias ls 'ls $LS_OPTIONS'
 alias la 'ls -AF --color=none'
 alias ll 'ls -l  --color=none'
 alias l  'll'

@@ -24,11 +24,18 @@ while read  where what type options rest  ; do
     esac
 done < /etc/fstab
 
-case "$1" in
-    start)
-    test "$nfs" = "yes" || exit 0;
+case `uname -r` in
+   0.*|1.*|2.0.*) RPCSTATD="" ;;
+   *) test -x /usr/sbin/rpc.kstatd && RPCSTATD=/usr/sbin/rpc.kstatd
+esac
 
-	echo "Importing Net File System (NFS)."
+return=$rc_done
+case "$1" in
+    start|reload)
+	test "$nfs" = "yes" || exit 0;
+
+	test -n "$RPCSTATD" && startproc $RPCSTATD
+	echo -n "Importing Net File System (NFS)"
 	# Mount all auto NFS devices (-> nfs(5) and mount(8) )
 	#  NFS-Server sometime not reachable during boot phase.
 	#  It's sometime usefull to mount NFS devices in
@@ -41,25 +48,35 @@ case "$1" in
 	#  Note: Some people importing the /usr partition.
 	#        Therefore we do _NOT_ use an ampersand!
 	#
-	mount -at nfs
+	mount -at nfs || return=$rc_failed
 	sleep 1
 	#
     	# generate new list of available shared libraries
 	#
 	ldconfig -X 2>/dev/null
+	echo -e "$return"
 	;;
     stop)
-	test "$nfs" = "yes" && echo "Remove Net File System (NFS)."
+	test "$nfs" = "yes" && echo -n "Remove Net File System (NFS)"
 	#
 	# Unmount in background because during long timeouts
 	#
-	sleep 1
 	umount -at nfs &
-	sleep 1
+	sleep 2
+	test "$nfs" = "yes" && echo -e "$return"
+	;;
+    restart)
+	$0 stop && $0 start || return=$rc_failed
+	;;
+    status)
+	mount -t nfs | while read from x point rest ; do
+	    echo -e "$from\033[50G$point"
+	done
 	;;
     *)
-	echo "Usage: $0 {start|stop}"
+	echo "Usage: $0 {start|stop|status|reload|restart}"
 	exit 1
 esac
 
+test "$return" = "$rc_done" || exit 1
 exit 0

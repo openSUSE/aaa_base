@@ -1,9 +1,0 @@
-#
-# sample xfm device configuration   Thu Apr 28 1994   AG
-# Adapt this to your system configuration.
-#
-##########################################################################
-
-/disk/a:mount /disk/a:umount /disk/a
-/disk/b:mount /disk/b:umount /disk/b
-

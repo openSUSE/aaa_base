@@ -28,7 +28,10 @@ esac
 # first do local stuff
 #
 test -e /sbin/init.d/halt.local && {
-    sh /sbin/init.d/halt.local
+    echo Running /sbin/init.d/halt.local
+    ECHO_RETURN=$rc_done_up
+    sh /sbin/init.d/halt.local || ECHO_RETURN=$rc_failed_up
+    echo -e "$ECHO_RETURN"
 }
 
 # Write to wtmp file before unmounting /var
@@ -36,6 +39,7 @@ $command -w
 
 echo "Sending all processes the TERM signal..."
 killall5 -15
+echo -e "$rc_done_up"
 
 if [ "$1" = "fast" ]; then
 	sleep 1
@@ -45,13 +49,19 @@ fi
 
 echo "Sending all processes the KILL signal..."
 killall5 -9
+echo -e "$rc_done_up"
 
-echo "Turning off swap."
+ECHO_RETURN=$rc_done_up
+echo "Turning off swap"
 sync ; sync
-swapoff -a
+swapoff -a || ECHO_RETURN=$rc_failed_up
+echo -e "$ECHO_RETURN"
 
+ECHO_RETURN=$rc_done_up
 echo "Unmounting file systems"
-umount -avt noproc
+umount -avt noproc || ECHO_RETURN=$rc_failed_up
+echo -e "$ECHO_RETURN"
+
 
 if [ "$?" != "0" ]; then
     echo "Oops: umount failed :-(  --  trying to remount readonly..."
@@ -71,9 +81,10 @@ umount -anvt proc
 
 # maybe we use Multiple devices
 if test -f /etc/mdtab -a -x /sbin/mdadd ; then
+    ECHO_RETURN=$rc_done
     echo -n "Disable Multiple Devices"
-    /sbin/mdstop -a
-    echo "."
+    /sbin/mdstop -a || ECHO_RETURN=$rc_failed
+    echo -e "$ECHO_RETURN"
 fi
 
 # on umsdos fs this would lead to an error message. so direct errors to

@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Burchard Steinbild <bs@suse.de>, 1996
@@ -8,22 +8,35 @@
 
 . /etc/rc.config
 
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
+
+test $link = $base && START_ROUTED=yes
 test "$START_ROUTED" = "yes" || exit 0
 
+return=$rc_done
 case "$1" in
     start)
-	echo "Starting routed."
-	/usr/sbin/routed
-    sleep 1
+	echo -n "Starting routed"
+	startproc /usr/sbin/routed || return=$rc_failed
+	sleep 1
+	echo -e "$return"
 	;;
     stop)
-	echo -n "Shutting down routed:"
-	killproc -TERM /usr/sbin/routed
-	echo
+	echo -n "Shutting down routed"
+	killproc -TERM /usr/sbin/routed || return=$rc_failed
+	echo -e "$return"
+	;;
+    restart|reload)
+	$0 start && $0 stop || return=$rc_failed
+	;;
+    status)
+        route -n
 	;;
     *)
 	echo "Usage: $0 {start|stop}"
 	exit 1
 esac
 
+test "$return" = "$rc_done" || exit 1
 exit 0

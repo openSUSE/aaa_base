@@ -23,8 +23,9 @@ etc/permissions.paranoid
 etc/permissions.secure
 etc/profile
 etc/runlevel.fallback
-etc/shells.in
+etc/shells
 etc/ttytype
+etc/zshrc
 sbin/init.d/boot
 sbin/init.d/boot.setup
 sbin/init.d/cron

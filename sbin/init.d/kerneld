@@ -10,33 +10,45 @@
 
 . /etc/rc.config
 
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
+
+test $link = $base && START_KERNELD=yes
+test "$START_KERNELD" = yes || exit 0
+
+test -x /sbin/kerneld             || exit 0
+test -e /proc/sys/kernel/modprobe && exit 0
+
+MODLIB="/lib/modules/`uname -r`"
+
+if test ! -d $MODLIB ; then
+    echo "No modules found in $MODLIB. No kerneld."
+    exit 0
+fi
+
+return=$rc_done_up
 case "$1" in
     start)
-    if test -n "$START_KERNELD" -a "$START_KERNELD" = yes -a \
-        -x /sbin/kerneld -a ! -e /proc/sys/kernel/modprobe ; then
-        if test -d /lib/modules/`uname -r` ; then
-            killproc -TERM /sbin/kerneld > /dev/null
-            echo -n "Re-"
-            /sbin/kerneld 
-        else
-            echo "No modules found in /lib/modules/`uname -r`. No kerneld."
-        fi
-    fi
-    ;;
+	checkproc /sbin/kerneld && {
+            killproc /sbin/kerneld 2> /dev/null
+	    echo -n "Re-"
+        }
+	/sbin/kerneld || return=$rc_failed_up
+	echo -e "$return"
+	;;
     stop)
-    if test -n "$START_KERNELD" -a "$START_KERNELD" = yes -a \
-        -x /sbin/kerneld -a ! -e /proc/sys/kernel/modprobe ; then
-        if test -d /lib/modules/`uname -r` ; then
-            echo -n "Shutting down kerneld:"
-            killproc -TERM /sbin/kerneld 
-            echo
-        else
-            echo "No modules found in /lib/modules/`uname -r`. No kerneld."
-        fi
-    fi
-    ;;
+	echo "Stopping kerneld"
+	killproc -TERM /sbin/kerneld || return=$rc_failed_up
+	echo -e "$return"
+	;;
+    restart|reload)
+	$0 stop && $0 start || return=$rc_failed_up
+	;;
+    status)
+	checkproc /sbin/kerneld && echo "OK" || echo "No process"
+	;;
     *)
-	echo "Usage: $0 {start|stop}"
+	echo "Usage: $0 {start|stop|status|restart|reload}"
 	exit 1
     ;;
 esac
