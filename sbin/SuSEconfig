@@ -6,6 +6,7 @@
 # i18n support added by Aleksey Smirnov <smi@logic.ru>
 #  & Aleksey Novodvorsky <aen@logic.ru> from IPLabs Linux Team, Moscow.
 # Attention! The shell must be restarted before localisation takes effect!
+#
 # Rewrote i18n support to use RC_LANG and RC_LC_* rc.config variables
 # Bernhard Kaindl <bk@suse.de>, 1999
 #
@@ -356,9 +357,14 @@ if test "$CWD_IN_ROOT_PATH" = "yes" ; then
 fi
 
 
+
 # start of i18n support
 echo '# start of i18n support'       >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo '# start of i18n support'       >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+
+if test -z "$RC_LANG" ; then
+	RC_LANG="$LANGUAGE"
+fi
 
 locale_vars="\
 LANG         \
@@ -469,6 +475,8 @@ fi
 echo '# end of i18n support'         >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo '# end of i18n support'         >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 # end of i18n support
+
+
 
 if test -n "$FROM_HEADER" ; then
     echo "FROM_HEADER=\"$FROM_HEADER\"" >> $r/etc/SuSEconfig/profile.SuSEconfig

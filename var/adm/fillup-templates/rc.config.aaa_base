@@ -13,14 +13,14 @@ ENABLE_SUSECONFIG=yes
 
 #
 # This variable will get local users as their $LANG variable.
-# Setting this variable also for daemons and the root user
-# is controlled by the variables INIT_SCRIPT_USE_LANG and 
-# ROOT_USES_LANG.
-#
 # $LANG is the default of all $LC_*-variables, as long as
 # $LC_ALL is not set, which overrules all $LC_-variables.
+# If empty, LANGUAGE will be used.
 #
-RC_LANG="POSIX"
+# Setting this variable for the root user is controlled by the
+# variable ROOT_USES_LANG.
+#
+RC_LANG=""
 
 #
 # This varible will get local users as their $LC_ALL variable.
