@@ -71,7 +71,11 @@ case "$1" in
 	    echo "Network is going down now!" | /usr/bin/wall
 	    sleep 1
 	fi
+	REVNETCONFIG=""
 	for I in $NETCONFIG; do
+	    REVNETCONFIG="$I $REVNETCONFIG"
+	done
+	for I in $REVNETCONFIG; do
 	    eval NETDEV=\$NETDEV$I
 	    eval IFCONFIG=\$IFCONFIG$I
 	    case "$IFCONFIG" in
