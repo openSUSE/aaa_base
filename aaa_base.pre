@@ -40,7 +40,7 @@ lp:x:4:7:Printing daemon:/var/spool/lpd:/bin/bash
 news:x:9:13:News system:/etc/news:/bin/bash
 uucp:x:10:14:Unix-to-Unix CoPy system:/etc/uucp:/bin/bash
 games:x:12:100:Games account:/var/games:/bin/bash
-man:x:13:2:Manual pages viewer:/var/cache/man:/bin/bash
+man:x:13:62:Manual pages viewer:/var/cache/man:/bin/bash
 at:x:25:25:Batch jobs daemon:/var/spool/atjobs:/bin/bash
 postgres:x:26:2:Postgres database admin:/var/lib/pgsql:/bin/bash
 mdom:x:28:28:Mailing list agent:/usr/lib/majordomo:/bin/bash
@@ -105,6 +105,7 @@ logmastr:x:57:
 maildrop:x:59:
 perforce:x:60:perforce
 sapdb:x:61:sapdb
+man:x:62:
 users:x:100:
 nogroup:x:65534:root" > var/adm/fillup-templates/group.aaa_base
 

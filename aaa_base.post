@@ -116,6 +116,7 @@ for i in passwd group shadow gshadow ; do
     rm -f etc/$i.tmp
   else
     cat var/adm/fillup-templates/$i.aaa_base > etc/$i
+    echo "new"
   fi
 done
 # check/fix owner and permission of shadow files

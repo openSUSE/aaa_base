@@ -1,5 +1,5 @@
 --- insserv.8
-+++ insserv.8	2001/08/13 12:30:48
++++ insserv.8	Wed Sep 19 11:28:25 2001
 @@ -110,7 +110,7 @@
  
   # All remote filesystems are mounted
@@ -10,7 +10,19 @@
   # System logger is operational
   $syslog         syslog
 --- insserv.conf
-+++ insserv.conf	2001/08/13 12:30:40
++++ insserv.conf	Wed Sep 19 11:28:53 2001
+@@ -4,9 +4,9 @@
+ $local_fs	boot
+ 
+ #
+-# Low level networking (ethernet card; may imply PCMCIA running)
++# Low level networking (ethernet card)
+ #
+-$network	network pcmcia route
++$network	network route
+ 
+ #
+ # Named is operational
 @@ -18,7 +18,7 @@
  # be remote. Most applications that care will probably require
  # both $local_fs and $remote_fs)

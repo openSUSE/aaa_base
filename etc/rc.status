@@ -39,7 +39,7 @@ test $LINES   -eq 0 && LINES=24
 test $COLUMNS -eq 0 && COLUMNS=80
 export LINES COLUMNS
 
-if test "$TERM" != "raw" ; then
+if test "$TERM" != "raw" && stty size > /dev/null 2>&1 ; then
 	 esc=`echo -en "\033"`
         extd="${esc}[1m"
         warn="${esc}[1;31m"
