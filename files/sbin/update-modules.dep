@@ -64,12 +64,19 @@ fi
 if test -x /sbin/depmod -a -d $MODULES_DIR ; then
     for dir in $MODULES_DIR \
 	       ${MODULES_DIR%%-*}-override-${MODULES_DIR##*-}; do
-	for module in $(find $dir '*.ko|*.o'); do
-	    if test $module -nt $MODULES_DIR/modules.dep; then
+	# This is run at boot.  We can't rely on the existance of /usr .
+	if test -x /usr/bin/find; then
+	    if test -n "`/usr/bin/find $dir -newer $MODULES_DIR/modules.dep \( -name '*.o' -o -name '*.ko' \) 2>/dev/null`"; then
 		rm -f $MODULES_DIR/modules.dep
-		break
 	    fi
-	done
+	else
+	    for module in $(find $dir '*.ko|*.o'); do
+		if test $module -nt $MODULES_DIR/modules.dep; then
+		    rm -f $MODULES_DIR/modules.dep
+		    break
+		fi
+	    done
+	fi
     done
     if test ! -s $MODULES_DIR/modules.dep ; then
 	rm -f $MODULES_DIR/modules.dep
