@@ -76,9 +76,6 @@ case "$todo" in
 	    echo "No interface $sdev found"
 	    ret=$rc_failed
 	fi
-	dests=$(route -n | while read dest rest ; do
-	    test $(( i = $i + 1 )) -gt 2 && echo "$dest"
-	done)
 	#
 	# Read /etc/route.conf and add routings
 	#
@@ -106,10 +103,6 @@ case "$todo" in
 		fi
 		;;
 	    *)
-		for dest in $dests ; do
-		    test "$dest" = "$des" && break;
-		done
-		test "$dest" = "$des" && continue;
 		card=""
 		test -n "$iface" && card="dev $iface"
 		case "$what" in

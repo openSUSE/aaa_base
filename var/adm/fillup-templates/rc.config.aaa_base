@@ -323,7 +323,7 @@ USE_KERNEL_NFSD_NUMBER="4"
 
 #
 # should translate server client for userid and goupid be started 
-# ("yes" or "no") - will only be started, if NFS_SERVER is "yes".
+# ("yes" or "no"). Needs to be started on NFS clients.
 #
 NFS_SERVER_UGID="yes"
 
