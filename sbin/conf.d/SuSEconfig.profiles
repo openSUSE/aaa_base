@@ -247,19 +247,14 @@ if test -n "$DOC_HOST" ; then
     echo "setenv SUSE_DOC_HOST $DOC_HOST" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test -d $r/opt/kde ; then
-    echo "KDEDIR=/opt/kde" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "KDEDIR=/opt/kde2" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export KDEDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv KDEDIR /opt/kde" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    echo "setenv KDEDIR /opt/kde2" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
-if test -d $r/usr/X11R6/lib/qt ; then
-    echo "QTDIR=/usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
+if test -d $r/usr/lib/qt2 ; then
+    echo "QTDIR=/usr/lib/qt2" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv QTDIR /usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/qt ; then
-    echo "QTDIR=/usr/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv QTDIR /usr/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    echo "setenv QTDIR /usr/lib/qt2" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test -d $r/usr/X11R6/lib/xad ; then
     echo "XADIDIR=/usr/X11R6/lib/xad" >> $r/etc/SuSEconfig/profile.SuSEconfig

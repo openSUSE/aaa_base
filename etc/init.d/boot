@@ -468,7 +468,7 @@ fi
 if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
   echo -n "Cleaning temporary directories $TMP_DIRS_TO_CLEAR"
   for CURDIR in $TMP_DIRS_TO_CLEAR ; do
-    find $CURDIR -printf '%P\n' | ( cd $CURDIR ; xargs rm -rf )
+    find $CURDIR -printf '%P\0' | ( cd $CURDIR ; xargs -0 rm -rf )
   done
   for CURDIR in /tmp /tmp/.X11-unix /var/tmp /var/tmp/vi.recover ; do
 	test -d $CURDIR || mkdir -p $CURDIR
