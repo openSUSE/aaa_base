@@ -275,8 +275,15 @@ if test -z "$r" -a -x /usr/bin/mail -a -x /usr/sbin/sendmail \
     fi
     for FILE in $FILES_TO_MAIL ; do
         test -f $FILE || continue
-        cat $FILE | /usr/bin/mail $MAIL_REPORTS_TO \
-            -s "SuSEconfig: `basename $FILE`"
+	if /usr/bin/iconv --from UTF-8 --to UTF-8 < $FILE > /dev/null 2>&1 ; then
+	    # the file to be mailed is UTF-8 encoded
+            LC_CTYPE=en_US.UTF-8 charset=utf-8 /usr/bin/mail \
+	    $MAIL_REPORTS_TO -s "SuSEconfig: `basename $FILE`" < $FILE
+	else
+	    # the file to be mailed is ISO-8859-15 encoded
+            LC_CTYPE=de_DE@euro charset=iso-8859-15 /usr/bin/mail \
+	    $MAIL_REPORTS_TO -s "SuSEconfig: `basename $FILE`" < $FILE
+	fi
 	echo "----------------------------------------------------------------------" >> $UPDATE_MESSAGES
 	echo "----------------------------------------------------------------------" >> $UPDATE_MESSAGES
 	basename $FILE >> $UPDATE_MESSAGES
