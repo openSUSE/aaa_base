@@ -31,8 +31,6 @@ foreach _d (~/bin/$MACHTYPE ~/bin \
 	/var/lib/dosemu \
 	/usr/games \
 	/opt/bin \
-	/opt/gnome2/bin \
-	/opt/gnome/bin \
 	/opt/kde3/bin \
 	/opt/kde2/bin \
 	/opt/kde/bin \

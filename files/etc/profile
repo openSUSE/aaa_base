@@ -102,8 +102,6 @@ if test -z "$PROFILEREAD" ; then
     for dir in  /var/lib/dosemu \
 		/usr/games \
 		/opt/bin \
-		/opt/gnome2/bin \
-		/opt/gnome/bin \
 		/opt/kde3/bin \
 		/opt/kde2/bin \
 		/opt/kde/bin \
