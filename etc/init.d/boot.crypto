@@ -32,6 +32,7 @@ test "$START_CRYPTO_FILESYSTEMS" = "yes" || exit 0
 # Redirect to real device (e.g. in case of boot logging)
 : ${CRYPTOTAB:=/etc/cryptotab}
 : ${REDIRECT:=/dev/tty}
+: ${TIMEOUT:=120}
 test -s $CRYPTOTAB || exit 0
 type -p losetup &> /dev/null || exit 0
 
@@ -78,7 +79,7 @@ case "$1" in
 		# Setting up loop device
 		#
 		echo -n "${extd}Please enter passphrase for $physdev. ${norm}"
-		losetup -e $crypto $loopdev $physdev < $REDIRECT > $REDIRECT 2>&1
+		losetup -t $TIMEOUT -e $crypto $loopdev $physdev < $REDIRECT > $REDIRECT 2>&1
 		rc_status
 		test $? -ne 0 && continue 2
 

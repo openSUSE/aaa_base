@@ -192,20 +192,43 @@ case "$-" in
     if test "$is" = "bash" ; then
 	case "$BASH_VERSION" in
 	2.*)
+	    shopt -s extglob
+	    shopt -s cdspell
 	    complete -A directory		cd rmdir pushd mkdir chroot chrootx
 	    complete -A directory -A file	chown chgrp chmod chattr ln
-	    complete -A file			more cat less strip grep vi ed
-	    complete -A file -X '*.Z'		compress
-	    complete -A file -X '!*.bz2'	bunzip2
-	    complete -A file -X '!*.gz'		gunzip
-	    complete -A file -X '!*.Z'		uncompress
-	    complete -A file -X '!*.zip'	unzip
+	    complete -A directory -A file	more cat less strip grep vi ed
 
-	    complete -A file -X '!*.+(ps|pdf)'	gs ghostview
-	    complete -A file -X '!*.+(ps|ps.gz|pdf)'	gv
-	    complete -A file -X '!*.pdf'	acroread xpdf
-	    complete -A file -X '!*.dvi'	dvips xdvi
-	    complete -A file -X '!*.tex'	tex latex
+	    _file_ ()
+	    {
+		# bash `complete' is broken because you can not combine
+		# -d, -f, and -X pattern without missing directories.
+		local c=${COMP_WORDS[COMP_CWORD]}
+		local e="compgen -f -X"
+
+		case "$1" in
+		compress)	COMPREPLY=($($e '*.Z'			$c)) ;;
+		bunzip2)	COMPREPLY=($($e '!*.bz2'		$c)) ;;
+		gunzip)		COMPREPLY=($($e '!*.gz'			$c)) ;;
+		uncompress)	COMPREPLY=($($e '!*.Z'			$c)) ;;
+		unzip)		COMPREPLY=($($e '!*.+(zip|jar)'		$c)) ;;
+		gs|ghostview)	COMPREPLY=($($e '!*.+(ps|PS|pdf|PDF)'	$c)) ;;
+		gv)		COMPREPLY=($($e '!*.+(ps|ps.gz|pdf|PDF)' $c)) ;;
+		acroread|xpdf)	COMPREPLY=($($e '!*.+(pdf|PDF)'		$c)) ;;
+		dvips|xdvi)	COMPREPLY=($($e '!*.+(dvi|DVI)'		$c)) ;;
+		tex|latex)	COMPREPLY=($($e '!*.+(tex|TEX|texi)'	$c)) ;;
+		esac
+	    }
+
+	    complete -d -X '.*' -F _file_	compress \
+						bunzip2 \
+						gunzip \
+						uncompress \
+						unzip \
+						gs ghostview \
+						gv \
+						acroread xpdf \
+						dvips xdvi \
+						tex latex
 
 	    complete -A function -A alias -A command -A builtin type
 
