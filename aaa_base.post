@@ -80,8 +80,7 @@ fi
 
 # hack: DEFAULT_LANGUAGE was the first variable in rc.config
 # and we want to move it out
-awk 'BEGIN { i=0; } /^$/ { if (i==0) { print "DUMMY_SEPARATOR=dummy\n" ; i++ ; next } else { print } } { print } ' etc/rc.config > etc/rc.config.new 2>/dev/null
-mv etc/rc.config.new etc/rc.config
+awk 'BEGIN { i=0; } /^$/ { if (i==0) { print "DUMMY_SEPARATOR=dummy\n" ; i++ ; next } else { print } } { print } ' etc/rc.config > etc/rc.config.new 2>/dev/null && mv etc/rc.config.new etc/rc.config
 #
 # remove old stuff from rc.config (oldstuff only has removed variables)
 if [ -x bin/fillup ] ; then
