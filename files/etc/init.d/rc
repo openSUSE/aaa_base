@@ -101,7 +101,12 @@ fi
 
 function splashtrigger () {
     test "$SPLASH" = yes || return
-    /sbin/splash -p $SPLASHSTART -t "$1" "$SPLASHCFG"
+    # use nosetsid option if going down otherwise killall5 will kill us
+    if test "$RUNLEVEL" = 0 -o "$RUNLEVEL" = 6 ; then
+	/sbin/splash -S -p $SPLASHSTART -t "$1" "$SPLASHCFG"
+    else
+	/sbin/splash -p $SPLASHSTART -t "$1" "$SPLASHCFG"
+    fi
 }
 
 function splashprogress() {

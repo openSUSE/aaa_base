@@ -101,12 +101,22 @@ if test -d /etc/init.d/boot.d/ ; then
     done
 fi
 
+# kill splash animation
+test "$SPLASH" = yes && /sbin/splash -q
+
 umount -anvt proc
 
 # on umsdos fs this would lead to an error message, so direct errors to
 # /dev/null
 mount -no remount,ro / 2> /dev/null
 sync
+
+# show "the system is down" message
+if test "$SPLASH" = yes ; then
+    mount -nt proc proc /proc
+    /sbin/splash -q -t "isdown"
+    umount -n /proc
+fi
 
 # Make reboot noise and wait a few seconds to give harddisks the chance
 # to really flush their buffers before power goes down.
