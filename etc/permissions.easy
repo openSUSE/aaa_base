@@ -30,6 +30,7 @@
 #
 /usr/X11R6/bin/cardinfo                root.root        4755
 /usr/X11R6/bin/v4l-conf                root.video       4755
+/usr/X11R6/bin/rxvt                    root.tty         4755
 /usr/X11R6/bin/xtvscreen.SuSE-dynamic  root.video       4755
 /usr/X11R6/bin/xtvscreen.SuSE-static   root.video       4755
 /usr/bin/bttvgrab                      root.root        4755
@@ -86,6 +87,7 @@
 /opt/kde/bin/kswarm.kss                root.root        4755
 /opt/kde/bin/kppp                      root.root        4755
 /opt/kde/bin/kbat.kss                  root.root        4755
+/opt/kde/bin/kvt                       root.tty         4755
 
 
 #
