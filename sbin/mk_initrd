@@ -11,7 +11,7 @@
 #   exit code > 0
 #
 
-# Version 1.11
+# Version 1.12
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
@@ -19,6 +19,12 @@
 # (c) 2000 Karsten Keil   option and kernel 2.4 support
 #
 # ChangeLog:
+#
+# 13/1/2001:	v1.12
+#  - continue with next kernel/initrd on errors
+#  - create initrd even if modules are missing
+#    (exit code 9 is returned in these cases)
+#  - keep old initrd if a new one could not be made
 #
 # 18/12/2000:   v1.11 Karsten Keil <kkeil@suse.de>
 #  - adapt changes from pre 7.1
@@ -29,9 +35,9 @@
 #  - optional parameter for easy use with other kernel versions
 #
 #  6/7/2000:	v1.09
-#    - started log
-#    - use get_kernel_version instead of file
-#    - increased initrd size to 2000k
+#  - started log
+#  - use get_kernel_version instead of file
+#  - increased initrd size to 2000k
 #
 
 #
@@ -167,6 +173,7 @@ is_mounted=
 
 clean_up () {
   [ "$is_mounted" ] && umount $tmp_mnt
+  is_mounted=
   rm -f $tmp_initrd $tmp_initrd.gz $tmp_msg
   [ -d $tmp_mnt ] && rmdir $tmp_mnt
 }
@@ -175,6 +182,11 @@ error () {
   echo "$2"
   clean_up
   exit $1
+}
+
+oops () {
+  echo "$2"
+  clean_up
 }
 
 [ -n "$1" ] && root_dir="$1"
@@ -218,10 +230,14 @@ echo "using \"$rootdev\" as root device (mounted on \"$root_dir\")"
 
 [ -z "$modules" ] && modules="$INITRD_MODULES"
 
-( cd $root_dir$boot_dir ; rm -f $initrds )
-[ "$modules" -o $root_lvm = 1 ] || error 0 "no initrd required"
+[ "$modules" -o $root_lvm = 1 ] || {
+  ( cd $root_dir$boot_dir ; rm -f $initrds )
+  error 0 "no initrd required"
+}
 
 initrd_a=($initrds)
+
+exit_code=0
 
 kernel_idx=0
 for k in $kernels ; do
@@ -238,8 +254,10 @@ for k in $kernels ; do
     echo "creating initrd \"$ii\" for kernel \"$kk\" ($vv)"
 
     [ -d "$root_dir/lib/modules/$vv/misc" ] || \
-    [ -d "$root_dir/lib/modules/$vv/kernel" ] || \
-    error 2 "no version \"$vv\" modules found"
+    [ -d "$root_dir/lib/modules/$vv/kernel" ] || {
+      oops 2 "no version \"$vv\" modules found"
+      continue
+    }
 
     mkdir $tmp_mnt
 
@@ -293,7 +311,8 @@ for k in $kernels ; do
         tar -C $root_dir -cf - $x 2>/dev/null | tar -C $tmp_mnt -xpf - 2>/dev/null
         if [ $? != 0 ] ; then
           echo "failed to add module \"/$x\""
-          error 6 "initrd too small"
+          oops 6 "initrd too small"
+          continue 2
         fi
         modparms=`grep "^[ 	]*options $i" "$root_dir"/etc/modules.conf`
         modparms="${modparms#* * }"
@@ -302,7 +321,10 @@ for k in $kernels ; do
         echo "insmod $i $modparms" >>$lx_rc
         echo >>$lx_rc
       else
-        error 7 "no such module: $i"
+        echo "no such module: $i"
+        exit_code=9
+#        oops 7 "no such module: $i"
+#        continue 2
       fi
     done
 
@@ -319,7 +341,10 @@ for k in $kernels ; do
 
     gzip -9 $tmp_initrd
 
-    cp $tmp_initrd.gz $ii || error 8 "failed to install initrd"
+    cp -f $tmp_initrd.gz $ii || {
+      oops 8 "failed to install initrd"
+      continue
+    }
 
     clean_up
 
@@ -333,3 +358,4 @@ for k in $kernels ; do
 
 done
 
+exit $exit_code
