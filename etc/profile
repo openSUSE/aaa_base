@@ -8,14 +8,18 @@
 #
 # Check which shell is reading this file
 #
-case "`/bin/ls -l /proc/$$/exe`" in
+if test -f /proc/mounts ; then
+  case "`/bin/ls -l /proc/$$/exe`" in
     */bash)	is=bash ;;
     */rbash)	is=bash ;;
     */ash)	is=ash  ;;
     */ksh)	is=ksh  ;;
     */zsh)	is=zsh  ;;
     */*)	is=sh   ;;
-esac
+  esac
+else
+  is=sh
+fi
 
 #
 # Initialize terminal
