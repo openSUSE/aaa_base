@@ -90,7 +90,7 @@ fi
 
 umount -anvt proc
 
-if test -x /sbin/vgchange ; then
+if test -d /etc/lvmtab.d -a -x /sbin/vgchange ; then
     /sbin/vgchange -a n
 fi
 
