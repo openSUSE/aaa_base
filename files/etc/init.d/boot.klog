@@ -44,6 +44,8 @@ case "$1" in
 		    /usr/sbin/klogconsole -l 7 -r 0
 		fi
 	fi
+    elif test -x /bin/dmesg ; then
+	/bin/dmesg -n 7
     fi
     #
     # Say blogd that I/O is possible now
