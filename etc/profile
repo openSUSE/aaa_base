@@ -183,8 +183,10 @@ alias unix2dos='recode lat1:ibmpc'
 alias dos2unix='recode ibmpc:lat1'
 alias unzip='unzip -L'
 alias which='type -p'
+alias rehash='hash -r'
 
 function startx { /usr/X11R6/bin/startx $* 2>&1 | tee ~/.X.err ; }
+function remount { /bin/mount -o remount,$* ; }
 
 #
 # Midnight Commander needs this to run in color mode
