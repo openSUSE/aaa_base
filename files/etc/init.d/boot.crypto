@@ -152,6 +152,16 @@ case "$1" in
 	rc_status -v1
 	;;
     stop)
+	reverse ()
+	{
+	    local _line
+	    while read -r _line ; do
+		case "$_line" in \#*|"") continue ;; esac
+		reverse
+		echo "$_line"
+		break
+	    done
+	}
 	echo "Turning off crypto devices using $CRYPTOTAB ... "
 	while read loopdev physdev access filesys crypto mopt rest ; do
 	    case "$loopdev" in
@@ -176,7 +186,7 @@ case "$1" in
 		losetup -d $loopdev
 		rc_status
 	    fi
-	done < $CRYPTOTAB
+	done < <(reverse < $ROUTECONF)
 	test $main_status -gt 0 && rc_failed 1 || true
 	rc_status -v1
 	;;

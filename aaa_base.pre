@@ -114,6 +114,12 @@ if test -e etc/passwd ; then
   cat etc/passwd.t > etc/passwd
   rm -f etc/passwd.t
 fi
+if test -e etc/shadow ; then
+    # nobody had sp_lstchg set to 0 in 8.0 and older
+    sed "/^nobody:[^:]*:0:/d" < etc/shadow > etc/shadow.t
+    cat etc/shadow.t > etc/shadow
+    rm -f etc/shadow.t
+fi
 
 # Rename game -> games, wwwadmin -> www
 for i in etc/group etc/gshadow ; do
