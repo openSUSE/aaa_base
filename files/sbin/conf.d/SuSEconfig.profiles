@@ -82,6 +82,7 @@ LC_CTYPE     \
 LC_COLLATE   \
 LC_TIME      \
 LC_NUMERIC   \
+LC_PAPER     \
 LC_MONETARY"
 
 if test "$ROOT_USES_LANG" = yes ; then

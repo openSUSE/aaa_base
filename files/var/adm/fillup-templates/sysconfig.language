@@ -72,6 +72,13 @@ RC_LC_NUMERIC=""
 #
 RC_LC_MONETARY=""
 
+## Type:	string
+## Default:	""
+#
+# This defines the locale for format of paper.
+#
+RC_LC_PAPER=""
+
 ## Type:	string(ctype)
 ## Default:	ctype
 #
