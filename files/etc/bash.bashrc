@@ -217,7 +217,7 @@ case "$-" in
     # Complete builtin of the bash 2.0 and higher
     if test "$is" = "bash" ; then
 	case "$BASH_VERSION" in
-	2.*)
+	[2-9].*)
 	    if test -e $HOME/.bash_completion ; then
 		. $HOME/.bash_completion
 	    elif test -e /etc/bash_completion ; then
