@@ -44,7 +44,6 @@ games:x:12:100:Games account:/var/games:/bin/bash
 man:x:13:62:Manual pages viewer:/var/cache/man:/bin/bash
 wwwrun:x:30:65534:WWW daemon apache:/var/lib/wwwrun:/bin/bash
 ftp:x:40:49:FTP account:/srv/ftp:/bin/bash
-named:x:44:44:Nameserver daemon:/var/named:/bin/bash
 nobody:x:65534:65533:nobody:/var/lib/nobody:/bin/bash" \
  > var/adm/fillup-templates/passwd.aaa_base
 
@@ -74,7 +73,6 @@ games:x:40:
 xok:x:41:
 trusted:x:42:
 modem:x:43:
-named:x:44:
 ftp:x:49:
 man:x:62:
 users:x:100:
