@@ -2,7 +2,7 @@
 ## /etc/inputrc
 ##
 ## Attempt to put different TERMs together in one readline init file.
-## Copyright (c) 1997 SuSE GmbH Nuernberg, Germany.
+## Copyright (c) 1997,2000 SuSE GmbH Nuernberg, Germany.
 ##
 ## Author: Werner Fink,  <werner@suse.de>
 ##
@@ -13,6 +13,7 @@
 set meta-flag on
 set output-meta on
 set convert-meta off
+set term xy
 #
 # VI line editing
 #
@@ -27,10 +28,14 @@ $endif
 "\e[2~":	yank
 "\e[3~":	delete-char
 "\e[4~":	end-of-line
-#"\e[5~":	previous-history
-#"\e[6~":	next-history
-"\e[5~":history-search-backward
-"\e[6~":history-search-forward
+"\e[5~":	history-search-backward
+"\e[6~":	history-search-forward
+$if term=xterm
+"\e[2;5~":	yank
+"\e[3;5~":	delete-char
+"\e[5;5~":	history-search-backward
+"\e[6;5~":	history-search-forward
+$endif
 "\e[C":		forward-char
 "\e[D":		backward-char
 "\e[A":		previous-history
@@ -65,9 +70,17 @@ $if term=xterm
 # Home and End of application keypad and cursor of xterm
 "\eOH":		beginning-of-line
 "\eOF":		end-of-line
+"\eO5H":	beginning-of-line
+"\eO5F":	end-of-line
 $else
+$if term=kvt
+"\e[1~":	history-search-backward
+"\e[4~":	set-mark
+"\eOH":		beginning-of-line
+"\eOF":		end-of-line
+$endif
 #
-# TERM=linux or console
+# TERM=linux or console or gnome
 #
 "\e[1~":	beginning-of-line
 "\e[4~":	end-of-line
@@ -81,10 +94,18 @@ $if term=xterm
 "\eOA":         previous-history
 "\eOB":         next-history
 "\eOE":         re-read-init-file
-# DEC keyboard KP_F1 - KP_F4
+# DEC keyboard KP_F1 - KP_F4 or
+# XTerm of XFree86 in VT220 mode F1 - F4
 "\eOP":		prefix-meta
 "\eOQ":		undo
 "\eOR":		""  
+"\eOS":		kill-line
+$endif
+$if term=gnome
+# or gnome terminal F1 - F4
+"\eOP":		prefix-meta
+"\eOQ":		undo
+"\eOR":		""
 "\eOS":		kill-line
 $endif
 #
@@ -94,19 +115,19 @@ $if term=linux
 #
 # On console the first five function keys
 #
-"\e[[A":	""
-"\e[[B":	""
+"\e[[A":	prefix-meta
+"\e[[B":	undo
 "\e[[C":	""
-"\e[[D":	""
+"\e[[D":	kill-line
 "\e[[E":	""
 $else
 #
 # The first five standard function keys
 #
-"\e[11~":	""
-"\e[12~":	""
+"\e[11~":	prefix-meta
+"\e[12~":	undo
 "\e[13~":	""
-"\e[14~":	""
+"\e[14~":	kill-line
 "\e[15~":	""
 $endif
 "\e[17~":	""
@@ -149,10 +170,8 @@ $if term=xterm
 "\eOj":		"*"
 "\eOm":		"-"
 "\eOk":		"+"
-"\eOl":		"+"
+"\eOl":		","
 "\eOM":		accept-line
-# Colon and dot
-# "\eOl":		","
 "\eOn":		"."
 # Numbers
 "\eOp":		"0"

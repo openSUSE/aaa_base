@@ -35,7 +35,7 @@
 /var/lib/xdm/authdir/authfiles         root.root         700
 /var/lock                              root.uucp         775
 /var/man2html                          root.root        1777
-/var/run                               root.uucp         775
+/var/run                               root.root         755
 /var/run/sudo                          root.root         700
 /var/spool/atjobs                      at.at             700
 /var/spool/atspool                     at.at             700
