@@ -53,15 +53,17 @@ sub flush {
 #
 # Open the main dir file
 #
+$rand = int(rand(32767));
 if ( $#ARGV == 0 ) {
     $mdir    = "$ARGV[0]";
     $mdirbak = "$ARGV[0].bak";
-    $mdirtmp = "$ARGV[0].tmp$$";
+    $mdirtmp = "$ARGV[0].tmp$$.$rand";
 } else {
     $mdir    = "$PATHS[0]/dir";
     $mdirbak = "$PATHS[0]/dir.bak";
-    $mdirtmp = "$PATHS[0]/dir.tmp$$";
+    $mdirtmp = "$PATHS[0]/dir.tmp$$.$rand";
 }
+
 sub cleanup {
     unlink $mdirtmp;
     exit(1);
@@ -74,13 +76,15 @@ $SIG{'PIPE'} = 'IGNORE';
 if ( !-e $mdir ) { `touch $mdir 2>&1 /dev/null`; }
 
 if ( -w $mdir ) {
+    # sysopen(FH, $mdirtmp, O_RDWR|O_CREAT|O_EXCL) or die "Cannot create $mdirtmp\n";
+    # close(FH);
     if ( -s $mdir && !-e $mdirbak ) {
 	`cp -p $mdir $mdirbak`;
 	if ( !-e $mdirbak ) { exit(1); }
     }
     `cp -p $mdir $mdirtmp`;
     if ( !-e $mdirtmp ) { exit(1); }
-    $filehandle = $mdir ;
+    $filehandle = ">$mdir" ;
 } else {
     printf(STDERR "%s: Warning, can not write to %s\n", $0, $mdir);
     printf(STDERR "  ... using STDOUT!\n", $0, $mdir);
@@ -151,7 +155,7 @@ sub path {
     return ($name);
 }
 
-open(DIR, "$filehandle") || die "Cannot open $filehandle\n";
+open(DIR, "$filehandle") or die "Cannot open $filehandle\n";
 
 ##
 ## define top format
