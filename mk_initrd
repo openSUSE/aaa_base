@@ -270,6 +270,9 @@ if [ "x$splash" = xauto ] ; then
 	    791|792|0x317|0x318) splashsize=1024x768  ;;
 	    794|0x31a|0x31A)     splashsize=1280x1024 ;;
 	    795|0x31b|0x31B)     splashsize=1280x1024 ;;
+            882|0x372)           splashsize=1600x1200 ;;
+	    883|884|0x373|0x374) splashsize=1600x1200 ;;
+            
 	esac
 	test -n "$splashsize" && test "x${splash/$splashsize/}" = "x$splash" && splash="$splash,$splashsize"
     done
