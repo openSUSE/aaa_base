@@ -388,7 +388,7 @@ alias char-major-89       i2c-dev
 alias char-major-96       pt
 alias char-major-97       pg
 alias char-major-107      3dfx
-alias char-major-109      lvm
+alias char-major-109      lvm-mod
 
 # ppp over ethernet
 # the kernel 2.2 uses pppox
