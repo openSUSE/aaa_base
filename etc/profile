@@ -1,5 +1,4 @@
 # /etc/profile
-# 2 lines with LC_CTYPE are commented by IPLabs
 
 PROFILEREAD=true
 
@@ -56,10 +55,6 @@ export TEXINPUTS
 PRINTER='lp'
 export PRINTER
 
-
-# commented by IPLAbs
-#LC_CTYPE=de_DE
-#export LC_CTYPE
 
 LESSCHARSET=latin1
 export LESSCHARSET
