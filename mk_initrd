@@ -1041,7 +1041,7 @@ EOF
       continue
     }
 
-    if [ -n "$splash" -a -x /bin/splash ] ; then
+    if [ -n "$splash" -a -x /sbin/splash.bin ] ; then
       for size in ${splash//,/ }; do
 	bootsplash_picture="$bootsplash_picture_dir/images/bootsplash-$size.jpg"
 	cfgname="$bootsplash_picture_dir/config/bootsplash-$size.cfg"
@@ -1051,7 +1051,7 @@ EOF
 	elif [ ! -r $bootsplash_picture ] ; then
 	  echo "picture missing ($bootsplash_picture)."
 	else
-	  /bin/splash -s -f $cfgname >> $ii
+	  /sbin/splash.bin -s -f $cfgname >> $ii
 	fi
       done
     fi

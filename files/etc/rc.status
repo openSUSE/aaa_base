@@ -269,7 +269,8 @@ function rc_confirm()
 
 function rc_splash()
 {
-    test "$BOOT_SPLASH" != "no" && test "$_rc_splash" -eq 1 && /bin/splash "$1"
+    test "$BOOT_SPLASH" != "no" && test "$_rc_splash" -eq 1 && /sbin/splash "$1"
+    progress=$(( $progress + 1 ))
 }
 
 function rc_active ()

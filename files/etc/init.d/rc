@@ -41,6 +41,24 @@ if test "$PREVLEVEL" = "N" ; then
 fi
 
 #
+# initialize boosplash progressbar variables
+#
+runrc=/etc/init.d/rc${RUNLEVEL}.d
+prerc=/etc/init.d/rc${PREVLEVEL}.d
+
+export sscripts="`ls -1 $runrc/S*|wc -l`"
+if [ $PREVLEVEL != "N" ]; then
+  export kscripts="`ls -1 $prerc/K*|wc -l`"
+fi
+
+if [ "$PREVLEVEL" == "N" -a "$RUNLEVEL" == "5" ]; then
+export progress=16
+sscripts=$(( $sscripts+15 ))
+else
+export progress=0
+fi
+
+#
 # Up from runlevel S we have to check if the system was
 # cold booted into single user mode and call /etc/init.d/boot.
 #

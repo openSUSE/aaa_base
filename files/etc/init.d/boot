@@ -15,6 +15,12 @@
 
 . /etc/rc.status
 . /etc/sysconfig/boot
+
+# reasonable start values for bootsplash progress.
+export progress=0                                                              
+export sscripts=45                                                             
+export kscripts=45                                                             
+
 echo "Running $0"
 
 rc_reset
@@ -84,6 +90,8 @@ if test -d /etc/init.d/boot.d/ ; then
 	    2) DO_CONFIRM=""
 	    esac
 	fi
+
+        rc_splash "$i start"
 	if test -x "$i" ; then
 	    # Active boot scripts, should have their own messages
 	    $i start
@@ -103,6 +111,7 @@ if test -f /etc/init.d/boot.local ; then
         echo "Running /etc/init.d/boot.local"
         /bin/sh /etc/init.d/boot.local
 	rc_status -v1 -r
+        rc_splash "boot.local start"
 fi
 
 #

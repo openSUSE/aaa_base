@@ -17,6 +17,7 @@
 
 . /etc/rc.status
 . /etc/sysconfig/sysctl
+test -f /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
 
 rc_reset
 
@@ -48,7 +49,7 @@ case "$1" in
 	# check if splashscreen should be disabled
 	#
 	if test -e /proc/splash ; then
-	if test "$BOOT_SPLASH" = "no" ; then
+	if test "$SPLASH" = "no" ; then
 	    echo "0" > /proc/splash
 	fi
 	fi
