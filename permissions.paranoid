@@ -559,7 +559,6 @@
 /usr/lib/news/bin/startinnfeed          root.news       0755
 /usr/lib/news/bin/inndstart             root.news       0755
 /usr/lib/news/bin/inews                 news.news       0755
-/usr/lib/news/bin/input/newsspool       news.news       6555
 
 
 #
