@@ -35,4 +35,6 @@ users:*:root:root
 postfix:*:root:root
 dbmaker:*:root:root
 fix:*:root:root,informix
+oinstall:*:root:root
+dba:*:root:root
 nogroup:*:root:root
