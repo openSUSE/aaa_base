@@ -21,7 +21,7 @@ if [ -z "$*" ] ; then
     exit
 fi
 
-DATESTRING=`date +"%y%m%d"`
+DATESTRING=`date +"%Y%m%d"`
 
 for i in $* ; do
     i=${i%%/}
