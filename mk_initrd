@@ -405,16 +405,15 @@ for k in $kernels ; do
     cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console,md0} $tmp_mnt/dev
     cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 4 "no static shell"
     cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 5 "no static insmod"
-    echo "here"
-    if [ $splash -eq 1 ]
-    then
-    	echo -n "Adding bootsplash animation... "
-    	cp $static_fbmngplay $tmp_mnt/bin/fbmngplay 2>/dev/null || \
-		error 6 "no splashanim package installed?"
-	cp $bootsplash_anim $tmp_mnt 2>/dev/null || \
-		error 7 "splash animation not found."
-	echo "done."
-    fi
+    #if [ $splash -eq 1 ]
+    #then
+    #	echo -n "Adding bootsplash animation... "
+    #	cp $static_fbmngplay $tmp_mnt/bin/fbmngplay 2>/dev/null || \
+	#	error 6 "no splashanim package installed?"
+	#cp $bootsplash_anim $tmp_mnt 2>/dev/null || \
+	#	error 7 "splash animation not found."
+	#echo "done."
+    #fi
     
     
     if [ $root_lvm -eq 1 ]
@@ -438,11 +437,11 @@ for k in $kernels ; do
     echo "export PATH=/bin" >>$lx_rc
     echo >>$lx_rc
 
-    if [ $splash -eq 1 ]
-    then
-    	echo "fbmngplay -b -x 878 -y 35 `basename $bootsplash_anim` &" >> $lx_rc
-	echo "" >>$lx_rc
-    fi
+    #if [ $splash -eq 1 ]
+    #then
+    #	echo "fbmngplay -b -x 878 -y 35 `basename $bootsplash_anim` &" >> $lx_rc
+	#echo "" >>$lx_rc
+    #fi
     
     chmod 755 $lx_rc
 

@@ -180,7 +180,7 @@
 /usr/X11R6/lib/adamem/adamem            root.root       4755
 /usr/X11R6/bin/v4l-conf                 root.video      4755
 # vmware
-/usr/bin/vmware                         root.root       6755
+/usr/bin/vmware.bin                     root.root       6755
 /usr/bin/vmware-ping                    root.root       6755
 # iBCS2 binary emulator
 /shlib/protlib_s.emu                    root.root        755
