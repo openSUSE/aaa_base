@@ -474,3 +474,11 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 #
 CREATE_JAVALINK="yes"
 
+# This variable determines if encrypted filesystems are automatically 
+# activated on bootup. Since this requires the input of the crypto passwort, 
+# this might be unwanted in certain situations where you want to be sure the 
+# machine should boot automatically without any user intervention. If you 
+# set this variable to "no", encrypted filesystems need to be mounted 
+# manually by "/etc/init.d/boot.crypto start".
+START_CRYPTO_FILESYSTEMS="yes"
+

@@ -44,7 +44,7 @@ export LINES COLUMNS
 
 if test "$TERM" != "raw" ; then
      rc_done="${stat}${done}done${norm}"
-  rc_already="${stat}${done}already${norm}"
+  rc_running="${stat}${done}running${norm}"
    rc_failed="${stat}${warn}failed${norm}"
    rc_missed="${stat}${warn}missed${norm}"
   rc_skipped="${stat}${attn}skipped${norm}"
@@ -59,7 +59,7 @@ rc_failed_up="${esc}[1A${rc_failed}"
     function rc_cuu () { echo -en "\033[${1}A"; }
 else
      rc_done="..done"
-  rc_already="..already"
+  rc_running="..running"
    rc_failed="..failed"
    rc_missed="..missed"
   rc_skipped="..skipped"
@@ -133,12 +133,12 @@ function rc_status ()
 	    5)	echo -e "$rc_skipped" 1>&2 ;; # program is not installed
 	    6)	echo -e "$rc_unused"  1>&2 ;; # program is not configured
 	    7)	test "$_rc_todo" = "stop"  && \
-		echo -e "$rc_already"	   || \
-		echo -e "$rc_failed"  1>&2 ;; # program is not running
+		echo -e "$rc_failed"	   || \
+		echo -e "$rc_running" 1>&2 ;; # program is not running
 	    esac
 	    echo -en "$rc_restore" ;;
 	-r) rc_reset ;;
-	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
+	*)  echo "rc_status: Usage: [-v[<num>]] [-r]" 1>&2 ; return 0 ;;
 	esac
     done
     return $_rc_status
@@ -156,7 +156,7 @@ function rc_status ()
 	    test $_rc_status -gt 0 && echo -e "$rc_failed" || echo -e "$rc_done"
 	    echo -en "$rc_restore" ;;
 	-r) rc_reset ;;
-	*)  echo "rc_status: Usage: [-v[<num>] [-r]|-s|-u]" 1>&2 ; return 0 ;;
+	*)  echo "rc_status: Usage: [-v[<num>]] [-r]" 1>&2 ; return 0 ;;
 	esac
     done
     return $_rc_status

@@ -23,6 +23,7 @@ fi
 HISTSIZE=500
 HISTFILE=${HOME}/.zsh_history
 SAVEHIST=200
+RPROMPT="[%T]"
 #
 # Set/unset  shell options
 #
@@ -31,40 +32,51 @@ setopt   correctall autocd recexact longlistjobs autoresume
 setopt   histignoredups pushdsilent appendhistory histexpiredupsfirst
 setopt   autopushd pushdminus extendedglob rcquotes mailwarning
 unsetopt bgnice autoparamslash
-#
+
 # Setup some basic programmable completions.  To see more examples
 # of these, check out /usr/doc/packages/zsh/compctl-examples.
+# You you have a slow machine, you might want to comment the lines below
+# with compctl in, and comment the below two lines out.
 #
-compctl -g '*(-/)' cd pushd
-compctl -g '*(/)' rmdir dircmp
-compctl -j -P % -x 's[-] p[1]' -k signals -- kill
-compctl -j -P % fg bg wait jobs disown
-compctl -A shift
-compctl -caF type whence which
-compctl -F unfunction
-compctl -a unalias
-compctl -v unset typeset declare vared readonly export integer
-compctl -e disable
-compctl -d enable
+# compctl -g '*(-/)' cd pushd
+# compctl -g '*(/)' rmdir dircmp
+# compctl -j -P % -x 's[-] p[1]' -k signals -- kill
+# compctl -j -P % fg bg wait jobs disown
+# compctl -A shift
+# compctl -caF type whence which
+# compctl -F unfunction
+# compctl -a unalias
+# compctl -v unset typeset declare vared readonly export integer
+# compctl -e disable
+# compctl -d enable
 #
-# An alternate way is the usage of the new completer
-# (compstyle is a shell function which calls zstyle)
-#
-#autoload -U compinit
-#compinit
+# The default way is the usage of the zsh built-in completer
+# Comment the two below lines out, if you are on a slow machine, and
+# comment the above compctl lines in.
+
+autoload -U compinit
+compinit
+
 #compstyle '*' completer _complete _correct _approximate
-#
+
 # Online help
-#
+
 unalias  run-help 2>/dev/null || true
 autoload run-help
-#
+
 # Common standard keypad and cursor
-#
+
 bindkey    "^[[2~"		yank
 bindkey    "^[[3~"		delete-char
-bindkey    "^[[5~"		up-history
-bindkey    "^[[6~"		down-history
+
+# History completion on pgup and pgdown
+
+autoload -U history-search-end
+zle -N history-beginning-search-backward-end history-search-end
+zle -N history-beginning-search-forward-end history-search-end
+bindkey "^[[5~" history-beginning-search-backward-end
+bindkey "^[[6~" history-beginning-search-forward-end
+
 if [[ "$TERM" == "xterm" ]] then
     bindkey    "^[2;5~"		yank
     bindkey    "^[3;5~"		delete-char

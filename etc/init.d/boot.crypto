@@ -1,0 +1,99 @@
+#!/bin/bash
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.
+#
+# Author:  Werner Fink <werner@suse.de>, 2001
+#
+# /etc/init.d/boot.crypto
+#
+#### BEGIN INIT INFO
+# Provides:          boot.crypto
+# Required-Start:    
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       Enable crypto file systems before leaving boot phase
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/rc.config
+
+# Determine the base and follow a runlevel link name.
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
+
+# Force execution if not called by the boot  directory.
+test $link = $base && START_CRYPTO_FILESYSTEMS=yes
+test "$START_CRYPTO_FILESYSTEMS" = "yes" || exit 0
+
+: ${CRYPTOTAB:=/etc/cryptotab}
+test -s $CRYPTOTAB || exit 0
+type -p losetup &> /dev/null || exit 0
+
+rc_reset
+case "$1" in
+    start|b)
+	echo "Activating crypto devices using $CRYPTOTAB ... "
+	while read loopdev physdev access filesys crypto mopt rest ; do
+	    #
+	    # Seeking for crypto modules
+	    #
+	    case "$crypto" in
+		twofish)  modprobe loop_fish2 ;;
+	    esac
+	    rc_status
+	    test $? -ne 0 && continue
+	    #
+	    # Setting up loop device
+	    #
+	    losetup -e $crypto $loopdev $physdev
+	    rc_status
+	    test $? -ne 0 && continue
+	    #
+	    # Checking the structure on the loop device
+	    #
+	    fsck -a -t $loopdev
+	    FSCK_RETURN=$?
+	    test $FSCK_RETURN -lt 2
+	    rc_status
+	    if test $FSCK_RETURN -gt 1; then
+		echo "fsck of $loopdev failed.  Please repair manually."
+		PS1="(repair filesystem) # "
+		/sbin/sulogin
+		sync
+	    fi
+	    #
+	    # Mounting loop device to mount point
+	    #
+	    case "$mopt" in
+		default|"") mopt=""	    ;;
+		*)	    mopt="-o $mopt" ;;
+	    esac
+	    mount -t $filesys $mopt $loopdev $access
+	    rc_status
+	done < $CRYPTOTAB
+	rc_status -v
+	;;
+    stop)
+	echo "Turning off crypto devices using $CRYPTOTAB ... "
+	while read loopdev physdev access filesys crypto mopt rest ; do
+	    #
+	    # Umount loop device
+	    #
+	    umount $loopdev
+	    rc_status
+	    test $? -ne 0 && continue
+	    #
+	    # Remove loop device
+	    #
+	    losetup -d $loopdev
+	    rc_status
+	done < $CRYPTOTAB
+	rc_status -v
+	;;
+    *)
+	echo "Usage: $0 {start|stop}"
+	exit 1
+	;;
+esac
+rc_exit

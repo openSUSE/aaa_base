@@ -388,7 +388,6 @@ alias char-major-89       i2c-dev
 alias char-major-96       pt
 alias char-major-97       pg
 alias char-major-107      3dfx
-alias char-major-108      ppp_async
 alias char-major-109      lvm
 
 # ppp over ethernet
@@ -399,6 +398,7 @@ alias char-major-144      pppox
 post-install pppox insmod mssclampfw
 pre-remove   pppox rmmod  mssclampfw
 else
+alias char-major-108      ppp_async
 alias char-major-144      pppoe
 post-install pppoe insmod mssclampfw
 pre-remove   pppoe rmmod  mssclampfw
