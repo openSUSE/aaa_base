@@ -193,7 +193,7 @@ case "$1" in
 		losetup -d $loopdev
 		rc_status
 	    fi
-	done < <(reverse < $ROUTECONF)
+	done < <(reverse < $CRYPTOTAB)
 	test $main_status -gt 0 && rc_failed 1 || true
 	rc_status -v1
 	;;

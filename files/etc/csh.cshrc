@@ -234,6 +234,9 @@ switch ( `locale charmap` )
     case EUC-KR:
 	set dspmbyte=euc
         breaksw
+    case GB2312:
+	set dspmbyte=euc
+	breaksw
     case SHIFT_JIS:
 	set dspmbyte=sjis
         breaksw

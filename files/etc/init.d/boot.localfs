@@ -127,7 +127,7 @@ case "$1" in
 	# 
 	MODULES_DIR=/lib/modules/`uname -r` 
 	if test -x /sbin/depmod -a -d $MODULES_DIR ; then
-	    for i in $MODULES_DIR/* $MODULES_DIR/*/* /etc/modules.conf ; do
+	    for i in $MODULES_DIR/* $MODULES_DIR/*/* /etc/modprobe.conf /etc/modprobe.d/* ; do
 	        test -e $i || continue
 	        if test $i -nt $MODULES_DIR/modules.dep ; then
 	            rm -f $MODULES_DIR/modules.dep
