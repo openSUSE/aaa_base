@@ -1,1 +1,1 @@
-../../etc/init.d/nscd
+/etc/init.d/nscd
