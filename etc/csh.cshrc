@@ -24,14 +24,14 @@ if ( -f /etc/organization ) then
    setenv ORGANIZATION "`cat /etc/organization`"
 endif
 setenv MACHTYPE `uname -m`
-setenv LESSCHARSET latin1
-setenv LESS -sM
-setenv LESSOPEN "|lesspipe.sh %s"
+setenv LESS "-M -S -I"
+setenv LESSOPEN "lessopen.sh %s"
+setenv LESSCLOSE "lessclose.sh %s %s"
 if ( -f /etc/lesskey.bin ) then
    setenv LESSKEY /etc/lesskey.bin
 endif
 setenv MORE -sl
-setenv PAGER '/usr/bin/less -sM'
+setenv PAGER '/usr/bin/less'
 setenv GZIP -9
 setenv CSHEDIT emacs
 setenv INFODIR /usr/info:/usr/share/info:/usr/local/info
@@ -73,8 +73,13 @@ setenv COLORTERM 1
 #
 # SuSEconfig stuff
 #
+# (but do not source this if LANG is already set to avoid overriding locale
+# variables already present in the environment)
+#
 if ( -r /etc/SuSEconfig/csh.cshrc ) then
-    source /etc/SuSEconfig/csh.cshrc
+    if (! ${?LANG} ) then
+        source /etc/SuSEconfig/csh.cshrc
+    endif
 endif
 #
 # source extensions for special packages
@@ -198,6 +203,21 @@ if ($?tcsh) then
 	source /etc/profile.d/complete.tcsh
     endif
     unset _rev _rel
+endif
+#
+# Enable editing in EUC encoding for the languages where this make sense:
+#
+if ( ${?LANG} ) then
+    switch ( ${LANG:r} )
+    case ja*:
+	set dspmbyte=euc
+        breaksw
+    case ko*:
+	set dspmbyte=euc
+        breaksw
+    default:
+        breaksw
+    endsw
 endif
 #
 end:

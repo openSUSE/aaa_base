@@ -43,36 +43,25 @@ games:x:12:100::/var/games:/bin/bash
 man:x:13:2::/var/cache/man:/bin/bash
 at:x:25:25::/var/spool/atjobs:/bin/bash
 postgres:x:26:2:Postgres Database Admin:/var/lib/pgsql:/bin/bash
-lnx:x:27:27:LNX Database Admin:/usr/lib/lnx:/bin/bash
 mdom:x:28:28:Mailing list agent:/usr/lib/majordomo:/bin/bash
-yard:x:29:29:YARD Database Admin:/usr/lib/YARD:/bin/bash
 wwwrun:x:30:65534:Daemon user for apache:/var/lib/wwwrun:/bin/bash
 squid:x:31:65534:WWW proxy squid:/var/squid:/bin/bash
 fax:x:33:14:Facsimile Agent:/var/spool/fax:/bin/bash
 gnats:x:34:65534:Gnats Gnu Backtracking System:/usr/lib/gnats:/bin/bash
 adabas:x:36:100:Adabas-D Database Admin:/usr/lib/adabas:/bin/bash
 amanda:x:37:6:Amanda Admin:/var/lib/amanda:/bin/bash
-ixess:x:38:29:IXware Admin:/usr/lib/ixware:/bin/bash
 irc:x:39:65534:IRC Daemon:/usr/lib/ircd:/bin/bash
 ftp:x:40:2:ftp account:/usr/local/ftp:/bin/bash
 firewall:x:41:31:firewall account:/var/lib/firewall:/bin/false
 named:x:44:44:Nameserver Daemon:/var/named:/bin/bash
-virtuoso:x:45:100:Virtuoso Admin:/opt/virtuoso-lite:/bin/bash
 fnet:x:49:14:FidoNet:/var/spool/fnet:/bin/bash
 gdm:x:50:15:Gnome Display Manager:/var/lib/gdm:/bin/bash
 postfix:x:51:51:Postfix:/var/spool/postfix:/bin/false
 cyrus:x:96:12:User for Imapd:/usr/cyrus:/bin/bash
-nps:x:53:100:NPS admin:/opt/nps:/bin/bash
-skyrix:x:54:100:SKYRIX admin:/opt/skyrix:/bin/bash
-dbmaker:x:55:52:Dbmaker Database Admin:/usr/lib/dbmaker:/bin/bash
-fixadm:x:56:53:Linux Fincancial Suite Admin:/opt/fsuite/home/fixadm:/bin/ksh
-fib:x:57:53:Linux Fincancial Suite fib:/opt/fsuite/home/fib:/bin/ksh
-fixlohn:x:58:53:Linux Fincancial Suite fixlohn:/opt/fsuite/home/fixlohn:/bin/ksh
 oracle:x:59:54:Oracle User:/opt/oracle:/bin/bash
 mysql:x:60:2:MySQL Database User:/var/lib/mysql:/bin/false
 dpbox:x:61:56:DpBox User:/var/spool/dpbox:/bin/false
 ingres:x:62:3:Ingres DataBase administrator:/opt/tngfw/ingres:/bin/bash
-codadmin:x:63:58:Codine Administrator:/var/lib/codadmin:/bin/bash
 zope:x:64:2:Zope Server:/var/lib/zope:/bin/false
 vscan:x:65:65534:vscan user:/var/spool/vscan:/bin/false
 wnn:x:66:100:Wnn System Account:/var/lib/wnn:/bin/false
@@ -97,9 +86,7 @@ shadow:x:15:root,gdm
 dialout:x:16:root
 audio:x:17:root
 at:x:25:at
-lnx:x:27:
 mdom:x:28:
-yard:x:29:
 dosemu:x:30:
 firewall:x:31:
 public:x:32:
@@ -110,13 +97,10 @@ trusted:x:42:
 modem:x:43:
 named:x:44:named
 postfix:x:51:postfix
-dbmaker:x:52:
-fix:x:53:
 oinstall:x:54:
 dba:x:55:oracle
 localham:x:56:dpbox
 logmastr:x:57:
-codine:x:58:codadmin
 maildrop:x:59:
 perforce:x:60:perforce
 sapdb:x:61:sapdb
