@@ -59,7 +59,7 @@ fi
 # Find and activate volume groups (HM 1/1/1999)
 #
 if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
-    echo "Run file syetem check on root for LVM activation"
+    echo "Run file system check on root for LVM activation"
     while read des fs type rest; do
 	case "$fs" in
 	    /) break ;;
