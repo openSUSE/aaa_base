@@ -2,9 +2,10 @@
 #
 # Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
-# Author: Florian La Roche <florian@suse.de>, 1996
-#         Werner Fink <werner@suse.de>, 1996
-#         Burchard Steinbild <bs@suse.de>, 1996
+# Author: Ruediger Oertel <ro@suse.de>, 1996-2000
+#         Werner Fink <werner@suse.de>, 1996-2000
+#         Burchard Steinbild <bs@suse.de>, 1996-2000
+#         Florian La Roche <florian@suse.de>, 1996
 #
 # /sbin/init.d/boot
 #
@@ -267,10 +268,37 @@ if test $FSCK_RETURN -gt 0 -a -n "$START_QUOTA" -a "$START_QUOTA"="yes" ; then
 fi
 
 # Let ld.so rebuild its cache.
-test -x /sbin/ldconfig && {
+# But do some tests before if it is really needed (bs@suse.de 01/2000)
+LDCONFIG_NEEDED=false
+test -s /etc/ld.so.cache || LDCONFIG_NEEDED=true
+test "$run_ldconfig" = true && LDCONFIG_NEEDED=true
+test -x /usr/bin/find -a "$LDCONFIG_NEEDED" = false && {
+    for DUMMY in `/usr/bin/find /etc/ld.so.cache -mtime +30` ; do
+        LDCONFIG_NEEDED=true
+    done
+}
+LIBDIRS="/lib /usr/lib /usr/local/lib"
+test -s /etc/ld.so.conf && {
+    for DIR in `cat /etc/ld.so.conf` ; do
+        case $DIR in
+          /*)
+            test -d "$DIR" && LIBDIRS="$LIBDIRS $DIR"
+          ;;
+        esac
+    done
+}
+for DIR in $LIBDIRS ; do
+    test $DIR -nt /etc/ld.so.cache && {
+        LDCONFIG_NEEDED=true
+        break
+    }
+done
+
+test -x /sbin/ldconfig -a "$LDCONFIG_NEEDED" = true && {
     ECHO_RETURN=$rc_done
-    echo -n "Setting up /etc/ld.so.cache"
-    /sbin/ldconfig -X 2>/dev/null || ECHO_RETURN=$rc_failed
+    echo -n "Starting ldconfig (setting up /etc/ld.so.cache)"
+    { /sbin/ldconfig -X 2>/dev/null || \
+        { echo ; echo -e "ldconfig $rc_failed" ; } ; } &
     echo -e "$ECHO_RETURN"
 }
 
