@@ -62,7 +62,7 @@
 /opt/gnome/bin/gnome-pty-helper        root.tty         2755
 /opt/kde/bin/konsole_grantpty          root.root        4755
 /opt/kde/bin/kcheckpass                root.root        4755
-/opt/kde/bin/kvt                       root.tty         4755
+/opt/kde/bin/kvt                       root.tty         2755
 /sbin/cardctl                          root.root        4755
 /sbin/isdnbutton                       root.root        4755
 /usr/X11R6/bin/Xwrapper                root.root        4755
