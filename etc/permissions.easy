@@ -61,6 +61,7 @@
 /usr/sbin/amcheck                      root.root        4755
 /usr/sbin/suexec                       root.root        4755
 /opt/kde/bin/apm_proxy                 root.root        4755
+/opt/kde/bin/kv4lsetup                 root.root        4755
 /usr/sbin/isdnctrl                     root.uucp        4750
 
 #
@@ -74,6 +75,7 @@
 # sgid video
 #
 /opt/kde/bin/kradio                    root.video       2755
+/opt/kde/bin/kwintv                    root.video       2755
 /usr/X11R6/bin/xawtv                   root.video       2755
 /usr/bin/radio                         root.video       2755
 

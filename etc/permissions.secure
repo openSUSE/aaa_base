@@ -61,12 +61,14 @@
 /usr/sbin/amcheck                      root.root         755
 /usr/sbin/suexec                       root.root         755
 /usr/sbin/isdnctrl                     root.root         750
+/opt/kde/bin/kv4lsetup                 root.root         755
 
 
 #
 # sgid video
 #
 /opt/kde/bin/kradio                    root.video        755
+/opt/kde/bin/kwintv                    root.video        755
 /usr/X11R6/bin/xawtv                   root.video        755
 /usr/bin/radio                         root.video        755
 
