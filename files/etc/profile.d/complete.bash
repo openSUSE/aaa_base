@@ -32,8 +32,8 @@ function _cd_ ()
     shopt -q extglob && g=1
     test $g -eq 0 && shopt -s extglob
 
-    case "$(complete -p $1)" in
-	mkdir) ;;
+    case "$(complete -p ${1##*/} 2> /dev/null)" in
+	mkdir)	;;
 	*) s="-S/"  
     esac
 
@@ -77,7 +77,7 @@ _exp_ ()
     cd='*-?(c)d*'
     dc='*-d?(c)*'
 
-    case "$1" in
+    case "${1##*/}" in
     compress)		e='*.Z'					;;
     bzip2)
 	case "$c" in
@@ -126,9 +126,9 @@ _exp_ ()
     *)			e='!*'
     esac
 
-    case "$(complete -p $1)" in
-	*-d*) ;;
-	*) s="-S/"  
+    case "$(complete -p ${1##*/} 2> /dev/null)" in
+	*-d*)	;;
+	*) s="-S/"
     esac
 
     IFS='
