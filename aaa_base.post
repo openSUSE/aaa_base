@@ -6,6 +6,8 @@
 # Copyright (c) 2003 SuSE Linux AG Nuernberg, Germany.
 #
 #
+# Run this script in C-Locale, or some tools will fail.
+export LC_ALL=C
 #
 # to make shure, var/lib/YaST/bin/bootsetup runs fine, delete
 # usr/lib/YaST/.configured2
@@ -206,6 +208,13 @@ for i in etc/passwd etc/group ; do
     rm -f $i.t
     chmod 644 $i
 done
+#
+# Change primary group of nobody to nobody
+#
+if [ -x /usr/sbin/usermod ]; then
+  /usr/sbin/usermod -g nobody nobody 2> /dev/null ||:
+fi
+
 #
 # create mtab if it does not exist
 #

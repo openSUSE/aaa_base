@@ -1,5 +1,5 @@
 ## Path:		System/Environment/Clock
-## Description:		does the RTC run at UTC or localtime
+## Description:		Information about your timezone and time
 ## Type:		string
 ## ServiceRestart:	boot.clock
 #
@@ -8,8 +8,6 @@
 #
 HWCLOCK=""
 
-## Path:		System/Environment/Clock
-## Description:		Timezone the system should run in
 ## Type:		string(Europe/Berlin,Europe/London,Europe/Paris)
 ## ServiceRestart:	boot.clock
 #

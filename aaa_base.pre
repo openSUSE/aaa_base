@@ -1,5 +1,7 @@
 #!/bin/bash
 #
+# Run this script in C-Locale, or some tools will fail.
+export LC_ALL=C
 # /boot should be the first directory.  This increases the probability, that
 # lilo stuff lies before 1024 cyl.
 mkdir -p boot
@@ -76,7 +78,7 @@ modem:x:43:
 ftp:x:49:
 man:x:62:
 users:x:100:
-nobody:x:65533:nobody
+nobody:x:65533:
 nogroup:x:65534:nobody" > var/adm/fillup-templates/group.aaa_base
 
 rm -f var/adm/fillup-templates/shadow.aaa_base

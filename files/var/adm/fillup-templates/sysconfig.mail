@@ -1,5 +1,5 @@
 ## Path:		Network/Mail/General
-## Description:         From line for email and news postings
+## Description:
 ## Type:		string
 ## Default:		""
 ## Config:		sendmail,postfix

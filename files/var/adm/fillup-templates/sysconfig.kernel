@@ -1,5 +1,5 @@
 ## Path:	System/Kernel
-## Description:	Modules to load from initrd
+## Description:
 ## Type:	string
 ## Command:     /sbin/mkinitrd
 #
@@ -9,8 +9,6 @@
 #
 INITRD_MODULES=""
 
-## Path:		System/Kernel
-## Description:		Modules to load after initial boot
 ## Type:		string
 ## ServiceRestart:	boot.loadmodules
 #
@@ -19,7 +17,6 @@ INITRD_MODULES=""
 #
 MODULES_LOADED_ON_BOOT=""
 
-## Description: ACPI DSDT (Differentiated System Description Table)
 ## Type:        string
 ## Default:     ""
 #
@@ -33,7 +30,6 @@ MODULES_LOADED_ON_BOOT=""
 #
 ACPI_DSDT=""
 
-## Description:	tmpfs/shmfs memory limit
 ## Type:	integer
 #
 # Size parameter for mounting the tmpfs/shmfs filesystem. The kernel defaults
@@ -42,7 +38,6 @@ ACPI_DSDT=""
 #
 SHMFS_SIZE=""
 
-## Description: Minimum timeslice for CPU scheduling
 ## Type:	integer(1000:50000)
 ## Default:	1000
 #
@@ -60,7 +55,6 @@ SHMFS_SIZE=""
 # 
 SCHED_MINTIMESLICE=""
 
-## Description: Maximum timeslice for CPU scheduling
 ## Type:	integer(20000:1000000)
 ## Default:	40000
 #
