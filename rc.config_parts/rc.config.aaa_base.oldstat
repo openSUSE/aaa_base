@@ -5,6 +5,20 @@
 #
 YP_DOMAINNAME=""
 
+#
+# YP-Servers. Attention! You've to fill in IP adresses, a name or a nick
+# name here. It must be defined in /etc/hosts (case sensitive).
+# (e.g. "192.168.116.11 192.168.7.7")
+#
+YP_SERVER=""
+
+#
+# Should /etc/yp.conf be created automatically? ("yes" or "no")
+# If set to yes /etc/passwd and /etc/group will also be checked.
+# ypbind will not be startet if /etc/yp.conf does not exist.
+#
+CREATE_YP_CONF="yes"
+
 ##
 ## Formatting the boot script messages:
 ##   The boot scripts should use the variables rc_done and rc_fail to
