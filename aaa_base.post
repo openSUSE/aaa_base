@@ -240,6 +240,9 @@ if test ! -e etc/permissions.local ; then
 # Always check if there are no conflicts between your \"local\" changes here
 # and the settings in the other permissions files by calling
 # \"SuSEconfig\" as root!
+# Please remember that logfiles might be modified by the logfile
+# rotation facilities (e.g. logrotate) so local settings might
+# be overridden.
 #
 # example:
 #/usr/local/bin/mtr         root.root       4755
