@@ -44,8 +44,7 @@ RC_LC_CTYPE=""
 #
 # This defines the locale for sorting strings and characters.
 # It is used by the libc to obtain the alphabetical order of characters
-# (e.g. for string comparisons). NOTE: sort(1) does NOT use these
-# function calls, but other applications (e.g. databases) might use it.
+# (e.g. for string comparisons).
 #
 # To keep bash and possibly other apps from misbehaviour, you should
 # probably keep this at POSIX and set it only for the apps that need it.
