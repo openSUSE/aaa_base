@@ -1,0 +1,85 @@
+#!/bin/sh
+#
+#
+# clean_core. This script was split off cron.daily
+# Please add your local changes to cron.daily.local
+# since this file will be overwritten, when updating your system.
+#
+# Copyright (c) 1996-2000 SuSE GmbH Nuernberg, Germany.   
+#
+# please send bugfixes or comments to feedback@suse.de.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996
+#         Florian La Roche <florian@suse.de>, 1996
+#
+#
+#
+
+
+#
+# paranoia settings
+#
+umask 022
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+TMPDIR=/var/tmp/cron.daily.$$
+rm -rf $TMPDIR
+mkdir $TMPDIR || {
+    echo
+    echo Security problems detected.
+    echo
+    echo can not create a new directory $TMPDIR - due to security problems 
+    echo it is better to abort.  Good Luck.
+    echo
+    exit 1
+}
+export TMPDIR
+
+#
+# get information from /etc/rc.config
+#
+if [ -f /etc/rc.config ] ; then
+    . /etc/rc.config
+fi
+
+#
+# look for old core files and tell user about it.
+#
+if [ -z "$MAX_DAYS_FOR_CORE" ] ; then
+    MAX_DAYS_FOR_CORE=5
+fi
+for DUMMY in `find /var/lib/locatedb -ctime -7 2> /dev/null` ; do
+    cat /dev/null > $TMPDIR/cron.daily.$$
+    for i in `locate '*/core'` ; do
+        if [ -f $i ] ; then
+            echo $i >> $TMPDIR/cron.daily.$$
+        fi
+    done
+
+    for COREFILE in `cat $TMPDIR/cron.daily.$$`; do
+        for i in `find $COREFILE ! \( -fstype nfs -o -fstype NFS \) \
+            -name core -type f \
+            -ctime +$MAX_DAYS_FOR_CORE 2> /dev/null` ; do
+            if [ -n "$DELETE_OLD_CORE" -a "$DELETE_OLD_CORE" = "yes" ] ; then
+                echo "Deleting core file older than $MAX_DAYS_FOR_CORE days: $i"
+                if test -x /usr/bin/file ; then
+                    echo file $i
+                    /usr/bin/file $i
+                fi
+                rm -f $i
+            else
+                echo "Found core file older than $MAX_DAYS_FOR_CORE days: $i"
+                if test -x /usr/bin/file ; then
+                    echo file $i
+                    /usr/bin/file $i
+                fi
+            fi
+        done
+    done
+    rm -f $TMPDIR/cron.daily.$$
+done
+
+rm -rf $TMPDIR
+
+exit 0

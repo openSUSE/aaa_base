@@ -1,0 +1,64 @@
+#!/bin/sh
+#
+#
+# clean_tmp. This script was split off cron.daily
+# Please add your local changes to cron.daily.local
+# since this file will be overwritten, when updating your system.
+#
+# Copyright (c) 1996-2000 SuSE GmbH Nuernberg, Germany.   
+#
+# please send bugfixes or comments to feedback@suse.de.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996
+#         Florian La Roche <florian@suse.de>, 1996
+#
+#
+#
+
+
+#
+# paranoia settings
+#
+umask 022
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+#
+# get information from /etc/rc.config
+#
+if [ -f /etc/rc.config ] ; then
+    . /etc/rc.config
+fi
+
+test "$MAX_DAYS_IN_TMP" -gt 0 2> /dev/null || MAX_DAYS_IN_TMP=0
+export MAX_DAYS_IN_TMP
+#
+# Delete apropriate files in tmp directories.
+#
+if [ "$MAX_DAYS_IN_TMP" -gt 0 ] ; then
+    OMIT=""
+    for i in $OWNER_TO_KEEP_IN_TMP ; do
+        OMIT="$OMIT  ( ! -user $i )"
+    done
+
+    for TMP_DIR in $TMP_DIRS_TO_CLEAR ; do
+        for DEL_FILE in `find $TMP_DIR/. $OMIT \( -type f -o -type l \) \
+                         -atime +$MAX_DAYS_IN_TMP -printf "\"%p\"\n" \
+			 | sort -r` ; do
+            rm -f $DEL_FILE
+            DEL_DIR=`dirname $DEL_FILE`
+            if [ "$DEL_DIR" != "$TMP_DIR/." ] ; then
+                rmdir $DEL_DIR 2> /dev/null
+            fi
+        done
+        for DEL_DIR in `find $TMP_DIR/. $OMIT \( -type d \) \
+                        -ctime +$MAX_DAYS_IN_TMP -printf "\"%p\"\n" \
+			| sort -r` ; do
+	    if [ "$DEL_DIR" != "$TMP_DIR/." ] ; then
+		rmdir $DEL_DIR 2> /dev/null
+	    fi
+	done
+    done
+fi
+
+exit 0
