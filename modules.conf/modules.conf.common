@@ -175,6 +175,7 @@ alias block-major-47      pf
 alias char-major-6        lp
 alias char-major-9        st
 alias char-major-10-130   softdog
+alias char-major-10-134   off
 alias char-major-10-135   off
 alias char-major-10-175   agpgart
 alias char-major-10-181   toshiba
