@@ -63,7 +63,7 @@ export LC_CTYPE
 
 LESSCHARSET=latin1
 export LESSCHARSET
-LESS=-M -S -I
+LESS="-M -S -I"
 export LESS
 LESSKEY=/etc/lesskey.bin
 export LESSKEY
