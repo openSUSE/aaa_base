@@ -69,25 +69,25 @@
 #
 # KDE Binaries
 #
-/opt/kde/bin/kbanner.kss               root.root        4755
-/opt/kde/bin/kblankscrn.kss            root.root        4755
-/opt/kde/bin/kblob.kss                 root.root        4755
-/opt/kde/bin/kbouboule.kss             root.root        4755
-/opt/kde/bin/kflame.kss                root.root        4755
-/opt/kde/bin/kforest.kss               root.root        4755
-/opt/kde/bin/khop.kss                  root.root        4755
-/opt/kde/bin/klaser.kss                root.root        4755
-/opt/kde/bin/klines.kss                root.root        4755
-/opt/kde/bin/klissie.kss               root.root        4755
-/opt/kde/bin/klock                     root.root        4755
-/opt/kde/bin/kpolygon.kss              root.root        4755
-/opt/kde/bin/kpyro.kss                 root.root        4755
-/opt/kde/bin/krock.kss                 root.root        4755
-/opt/kde/bin/kscience.kss              root.root        4755
-/opt/kde/bin/kslip.kss                 root.root        4755
-/opt/kde/bin/kswarm.kss                root.root        4755
+/opt/kde/bin/kbanner.kss               root.shadow      2755
+/opt/kde/bin/kblankscrn.kss            root.shadow      2755
+/opt/kde/bin/kblob.kss                 root.shadow      2755
+/opt/kde/bin/kbouboule.kss             root.shadow      2755
+/opt/kde/bin/kflame.kss                root.shadow      2755
+/opt/kde/bin/kforest.kss               root.shadow      2755
+/opt/kde/bin/khop.kss                  root.shadow      2755
+/opt/kde/bin/klaser.kss                root.shadow      2755
+/opt/kde/bin/klines.kss                root.shadow      2755
+/opt/kde/bin/klissie.kss               root.shadow      2755
+/opt/kde/bin/klock                     root.shadow      2755
+/opt/kde/bin/kpolygon.kss              root.shadow      2755
+/opt/kde/bin/kpyro.kss                 root.shadow      2755
+/opt/kde/bin/krock.kss                 root.shadow      2755
+/opt/kde/bin/kscience.kss              root.shadow      2755
+/opt/kde/bin/kslip.kss                 root.shadow      2755
+/opt/kde/bin/kswarm.kss                root.shadow      2755
 /opt/kde/bin/kppp                      root.root        4755
-/opt/kde/bin/kbat.kss                  root.root        4755
+/opt/kde/bin/kbat.kss                  root.shadow      2755
 /opt/kde/bin/kvt                       root.tty         4755
 
 
