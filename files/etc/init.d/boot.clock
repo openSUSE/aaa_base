@@ -58,8 +58,12 @@ case "$1" in
    fi
    ;;
   stop)
-    rc_failed 3
-    rc_status -v
+    if [ "$HOSTTYPE" != "s390" -a "$HOSTTYPE" != "s390x" ] ; then
+	echo -n "Set Hardware Clock to the current System Time"
+	# write back to hardware clock and calculate adjtime
+	/sbin/hwclock --systohc $HWCLOCK
+	rc_status -v -r
+    fi
     ;;
   status)
     rc_failed 4

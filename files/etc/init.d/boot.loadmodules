@@ -30,8 +30,7 @@ case "$1" in
     rc_status -v1 -r
    ;;
   stop)
-    rc_failed 3
-    rc_status -v
+    # skip / nothing to do
     ;;
   status)
     rc_failed 4

@@ -176,7 +176,70 @@ case "$1" in
 	mount -av -t nonfs,noproc,nodevpts,nosmbfs -O no_netdev
 	rc_status -v1 -r
 	;;
-    stop|restart)
+    stop)
+	mounts=/etc/fstab
+	test -r /proc/mounts && mounts=/proc/mounts
+
+	# move to intermezzo package ?
+	# First umount intermezzo filesystems
+	test -x /usr/sbin/umountizo -a ! -z "`grep -i intermezzo <$mounts`" && /usb/sbin/umountizo >/dev/null 2>&1
+
+	reverse < $mounts | \
+	while read des fs type rest; do
+	    case "$des"  in
+	        ""|\#*)    continue ;;
+	        /dev/loop*)
+	                   umount $fs
+	                   losetup $des &> /dev/null
+	                   test $? -eq 0 && losetup -d $des ;;
+	    esac
+	    case "$fs"   in
+	        /proc)     continue ;;
+	        /dev/pts)  continue ;;
+	        /dev)      continue ;;
+	        /dev/shm)  continue ;;
+	    esac
+	    case "$type" in
+	        proc)      umount -t proc     $fs ;;
+	        devpts)    umount -t devpts   $fs ;;
+	        devfs)     umount -t devfs    $fs ;;
+	        shm)       umount -t shm      $fs ;;
+	        usbfs)     umount -t usbfs    $fs ;;
+	        usbdevfs)  umount -t usbdevfs $fs ;;
+	    esac
+	done
+	UMOUNT_FAILED=false
+	echo "Unmounting file systems"
+	umount -avt noproc,nonfs,nosmbfs || {
+	    rc_status
+	    UMOUNT_FAILED=true
+	}
+	rc_status -v1 -r
+
+	if test "$UMOUNT_FAILED" = true ; then
+	    echo "Oops: umount failed :-(  --  trying to remount readonly..."
+	    mounts=/etc/fstab
+	    test -r /proc/mounts && mounts=/proc/mounts
+	    # Use cat and a pipe because umount changes
+	    # /proc/mounts during direct read call
+	    cat $mounts | \
+	    while read des fs type rest; do
+	        case "$des" in ""|\#*) continue ;; esac
+	        case "$type" in
+	            swap)     continue ;; # No umount on swap devices
+	            proc)     continue ;; # Required
+	            nfs)      continue ;; # Avoid hanging reboot/halt
+	            smbfs)    continue ;; # Avoid hanging reboot/halt
+	        esac
+	        mount -v -n -o remount,ro $fs
+	    done
+
+	    echo "extra sync..."
+	    sync; sync
+	    echo "... hope now it's ok to reboot."
+	fi
+	;;
+    restart)
 	rc_failed 3
 	rc_status -v
 	;;

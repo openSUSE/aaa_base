@@ -99,6 +99,21 @@ echo "Sending all processes the KILL signal..."
 killall5 -9
 echo -e "$rc_done_up"
 
+if test -d /etc/init.d/boot.d/ ; then
+    for i in /etc/init.d/boot.d/K*; do
+        test -f $i || continue
+        if test -x "$i" ; then
+            # Active boot scripts, should have their own messages
+            $i stop
+        else
+            # Old boot scripts, may not have any message
+            echo Skipping $i, not executable
+        fi
+    done
+fi
+
+
+### now in boot.clock
 if test "$HOSTTYPE" = "s390" ; then
     HWCLOCK_ACCESS=no
 fi
@@ -108,7 +123,9 @@ if test "$HWCLOCK_ACCESS" != "no" ; then
 	/sbin/hwclock --systohc $HWCLOCK
 	rc_status -v -r
 fi
+### end in boot.clock
 
+### now in boot.swap
 echo "Turning off swap"
 sync ; sync
 rc_reset
@@ -124,8 +141,9 @@ if test -r /proc/swaps ; then
 	swapoff $des &> /dev/null
     done
 fi
+### end in boot.swap
 
-
+### now in boot.localfs
 mounts=/etc/fstab
 test -r /proc/mounts && mounts=/proc/mounts
 
@@ -187,26 +205,15 @@ if test "$UMOUNT_FAILED" = true ; then
     sync; sync
     echo "... hope now it's ok to reboot."
 fi
+### end in boot.localfs
 
+### now in boot.lvm
 if test -d /etc/lvmtab.d -a -x /sbin/vgchange ; then
     /sbin/vgchange -a n
 fi
+### end in boot.lvm
 
 umount -anvt proc
-
-# maybe we use Multiple devices
-if test -f /etc/mdtab -a -x /sbin/mdstop ; then
-    echo -n "Disable Multiple Devices"
-    /sbin/mdstop -a
-    rc_status -v1 -r
-fi
-# commented out since raidstop needs an argument
-# normal shutdown is done automatically
-#if test -f /etc/raidtab -a -x /sbin/raidstop ; then
-#    echo -n "Disable Multiple Devices"
-#    /sbin/raidstop --all
-#    rc_status -v1 -r
-#fi
 
 # on umsdos fs this would lead to an error message, so direct errors to
 # /dev/null

@@ -60,8 +60,7 @@ case "$1" in
 	rc_splash "fsck start"
 	;;
     stop|restart)
-	rc_failed 3
-	rc_status -v
+        # skip / nothing to do
 	;;
     status)
 	rc_failed 4

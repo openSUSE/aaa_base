@@ -62,8 +62,7 @@ case "$1" in
 	idedma_main
 	;;
     stop)
-	rc_failed 3
-	rc_status -v
+	# skip / nothing to do
 	;;
     try-restart)
 	## Stop the service and if this succeeds (i.e. the 

@@ -55,8 +55,21 @@ case "$1" in
 	#unset HAVE_SHM
 	;;
     stop|restart)
-	rc_failed 3
-	rc_status -v
+	echo "Turning off swap"
+	sync ; sync
+	rc_reset
+	swapoff -a &> /dev/null
+	rc_status -v1 -r
+	# Something forgotten?
+	if test -r /proc/swaps ; then
+	    # Use cat and a pipe because swapoff changes
+	    # /proc/swaps during direct read call
+	    cat /proc/swaps | \
+	    while read des rest ; do
+		test "$des" = "Filename" && continue
+		swapoff $des &> /dev/null
+	    done
+	fi
 	;;
     status)
 	rc_failed 4
