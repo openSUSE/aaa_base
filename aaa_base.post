@@ -421,7 +421,8 @@ if [ -n "$OLDMODCONF" ] ; then
 	    eth[0-9]|tr[0-9]|ci[0-9]\
 	    |scsi_hostadapter|usb-hostadapter|char-major-14\
 	    |char-major-116|sound|snd-card-[0-9]|sound-slot-[0-9]\
-	    |sound-service-[0-9]-[0-9]|sound-service-[0-9]-[0-9][0-9]|midi)
+	    |char-major-81-[0-9]|sound-service-[0-9]-[0-9]\
+	    |sound-service-[0-9]-[0-9][0-9]|midi)
 	      if [ "$target" != "off" ] ; then
 		echo -n "$orig..."
 		echo "s@^alias $orig \(.*\)@# alias $orig \1@" \

@@ -219,6 +219,7 @@ callord=""
 #
 startpar=$(type -p startpar)
 test "$RUN_PARALLEL" = "yes" || startpar=""
+test "$DO_CONFIRM"   = "yes" && startpar=""
 
 #
 # First check and test services of previous and current (new) runlevel.

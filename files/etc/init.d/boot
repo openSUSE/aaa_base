@@ -138,6 +138,7 @@ callord=""
 #
 startpar=$(type -p startpar)
 test "$RUN_PARALLEL" = "yes" || startpar=""
+test "$DO_CONFIRM"   = "yes" && startpar=""
 
 #
 # Start bootup client scripts.
