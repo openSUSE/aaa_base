@@ -102,12 +102,13 @@ function rc_status ()
 	    echo -en "$rc_save"
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    case "$_rc_status" in
-	    0)	echo -e "$rc_running"   ;; # service running
-	    1)	echo -e "$rc_dead" 1>&2 ;; # service dead (no pid file)
-	    2)	echo -e "$rc_dead" 1>&2 ;; # service dead (no lock if any)
-	    3)	echo -e "$rc_unused"	;; # service not running
+	    0)	echo -en "$rc_running"   ;; # service running
+	    1)	echo -en "$rc_dead" 1>&2 ;; # service dead (no pid file)
+	    2)	echo -en "$rc_dead" 1>&2 ;; # service dead (no lock if any)
+	    3)	echo -en "$rc_unused"	;; # service not running
 	    esac
-	    echo -en "$rc_restore" ;;
+	    echo -en "$rc_restore"
+	    test -z "${i#-v}" && echo ;;
 	-r) rc_reset ;;
 	-s) echo -e "$rc_skipped" ; rc_failed 3 ;;
 	-u) echo -e "$rc_unused"  ; rc_failed 3 ;;

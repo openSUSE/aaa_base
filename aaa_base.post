@@ -188,9 +188,11 @@ fi
 ##
 ## generate permissions.local
 ##
-if test -e etc/permissions.local.rpmorig -a ! -e etc/permissions.local ; then
-   mv etc/permissions.local.rpmorig etc/permissions.local
-fi
+for suffix in rpmorig rpmsave ; do
+ if test -e etc/permissions.local.$suffix -a ! -e etc/permissions.local ; then
+  mv etc/permissions.local.$suffix etc/permissions.local
+ fi
+done
 if test ! -e etc/permissions.local ; then
    cat << EOT > etc/permissions.local
 #

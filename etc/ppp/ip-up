@@ -137,13 +137,12 @@ ppp*)
 	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf -a "$START_NAMED" != "yes" ]; then
 		/sbin/modify_resolvconf modify -s pppd -p pppd \
                   -f /etc/ppp/ip-up -n "$DNS1 $DNS2" -t - << EOT
-                  This is a temporary resolv.conf created by ipppd. The previous
-                  file has been saved as <see "Backup: field above>. It will be
-                  restored when ippp disconnects.
+                  This is a temporary resolv.conf created by pppd. The previous
+                  file has been saved as <see Backup: field above>. It will be
+                  restored when pppd disconnects.
 
-                  If you don't like ipppd to change your nameserver settings
-                  then set MODIFY_RESOLV_CONF_DYNAMICALLY=no in /etc/rc.config
-                  or remove the option ms-get-dns from /etc/ppp/options.ippp*.
+                  If you do not like pppd to change your nameserver settings
+                  then set MODIFY_RESOLV_CONF_DYNAMICALLY=no in /etc/rc.config.
 EOT
 	fi
 
