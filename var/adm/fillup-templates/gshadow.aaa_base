@@ -1,6 +1,7 @@
 root:*:root:root
 bin:*:root:root
 daemon:*:root:root
+sys:*:root:root
 tty:*:root:root
 disk:*:root:root
 lp:*:root:root
@@ -12,6 +13,7 @@ news:*:root:root
 uucp:*:root:root
 shadow:*:root:root
 dialout:*:root:root
+audio:*:root:root
 at:*:root:root
 lnx:*:root:root
 mdom:*:root:root

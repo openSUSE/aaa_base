@@ -1,5 +1,6 @@
 #!/bin/sh
 
+. /etc/profile
 . /etc/rc.config
 
 do_gzip() {
@@ -20,8 +21,16 @@ do_gzip() {
 	return
 }
 
-DIRS="/usr/info /usr/man /usr/X11R6/man /usr/openwin/man \
-      /usr/X11R6/lib/X11/fonts/*"
+DIRS="/usr/info /usr/X11R6/lib/X11/fonts/*"
+
+OLD_IFS="$IFS"
+IFS="$IFS:"
+
+for MANDIR in $MANPATH $manpath ; do
+    DIRS="$DIRS $MANDIR"
+done
+
+IFS="$OLD_IFS"
 
 if test -n "$RPM_BUILD_ROOT" ; then
     TDIRS=""
@@ -42,7 +51,9 @@ for DIR in $DIRS ; do
         \! -name dir \! -name dir.old \! -name localdir \
         \! -name whatis \! -name fonts.alias \! -name fonts.dir \
         \! -name fonts.scale \! -name "*.spd" \! -name "*.pfa" \
-        \! -name "*.pfb" \! -name "*.phont" \! -type d | do_gzip
+        \! -name "*.pfb" \! -name "*.phont" \! -name ".*.gz" \
+        \! -name ".*.Z" \! -name ".*.spd" \! -name ".*.pfa" \
+        \! -name ".*.pfb" \! -name ".*.phont" \! -type d | do_gzip
 done
 
 
