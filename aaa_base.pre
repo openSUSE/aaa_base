@@ -39,9 +39,9 @@ daemon:x:2:2:daemon:/sbin:/bin/bash
 lp:x:4:7:lp daemon:/var/spool/lpd:/bin/bash
 news:x:9:13:News system:/etc/news:/bin/bash
 uucp:x:10:14:Unix-to-Unix CoPy system:/etc/uucp:/bin/bash
-games:x:12:100::/var/games:/bin/bash
-man:x:13:2::/var/cache/man:/bin/bash
-at:x:25:25::/var/spool/atjobs:/bin/bash
+games:x:12:100:Unified Games:/var/games:/bin/bash
+man:x:13:2:Man Page Viewer:/var/cache/man:/bin/bash
+at:x:25:25:Batch Jobs:/var/spool/atjobs:/bin/bash
 postgres:x:26:2:Postgres Database Admin:/var/lib/pgsql:/bin/bash
 mdom:x:28:28:Mailing list agent:/usr/lib/majordomo:/bin/bash
 wwwrun:x:30:65534:Daemon user for apache:/var/lib/wwwrun:/bin/bash
@@ -68,7 +68,7 @@ wnn:x:66:100:Wnn System Account:/var/lib/wnn:/bin/false
 pop:x:67:100:pop admin:/var/lib/pop:/bin/false
 perforce:x:68:60:perfoce admin:/var/lib/perforce:/bin/false
 sapdb:x:69:61:SAPDB demo user:/var/opt/sapdb:/bin/bash
-db4web:x:2103:100:DB4Web user:/opt/db4web:/bin/false
+db4web:x:70:100:DB4Web user:/opt/db4web:/bin/false
 nobody:x:65534:65534:nobody:/var/lib/nobody:/bin/bash" > var/adm/fillup-templates/passwd.aaa_base
 echo "root:x:0:root
 bin:x:1:root,bin,daemon
