@@ -368,6 +368,7 @@
 /usr/X11R6/bin/XSuSE_NVidia            root.root         755
 /usr/X11R6/bin/XSuSE_Tseng             root.root         755
 /usr/X11R6/bin/seyon                   root.uucp         755
+/usr/X11R6/bin/xcpustate               root.root         755
 /usr/X11R6/bin/xload                   root.root         755
 /usr/X11R6/bin/xosview.bin             root.root         755
 /usr/bin/cu                            root.root         755
