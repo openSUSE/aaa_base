@@ -172,13 +172,12 @@ function write_header()
 # the kernel images to use; must be in $boot_dir
 kernels_default="vmlinuz vmlinuz.suse"
 arch=`uname -m`
-[ "$arch" = ia64 ] && kernels_default="vmlinuz vmlinuz.suse"
-[ "$arch" = ppc ] && kernels_default="vmlinux vmlinux.suse"
+[ "$arch" = ppc ] && kernels_default="vmlinux"
 [ "$arch" = alpha ] && kernels_default="vmlinux.gz vmlinux.suse.gz"
 
 # initial ram disks (corresponding to $kernels); dto. in $boot_dir
 initrds_default="initrd initrd.suse"
-[ "$arch" = ia64 -o "$arch" = ppc -o "$arch" = alpha ] && initrds_default="initrd initrd.suse"
+[ "$arch" = ppc ] && initrds_default="initrd"
 
 kernels=""
 initrds=""
@@ -277,6 +276,11 @@ fi
 
 # *full* paths
 [ -z "$boot_dir" ] && boot_dir=/boot
+
+# ppc magic: kernel can be either vmlinux or vmlinuz
+if [ "$arch" = ppc -a "$kernels_default" = vmlinux ] ; then
+  [ ! -f "$boot_dir/vmlinux" ] && kernels_default="vmlinuz"
+fi
 
 static_shell=/bin/ash.static
 static_insmod=/sbin/insmod.static
