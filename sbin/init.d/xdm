@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
@@ -12,41 +12,63 @@
 . /etc/rc.config
 
 case "$DISPLAYMANAGER" in
-    kdm|kde|KDM|KDE)
-	DISPLAYMANAGER=/opt/kde/bin/kdm
-    ;;
-    *)
-	DISPLAYMANAGER=/usr/X11R6/bin/xdm
-    ;;
+    kdm|kde|KDM|KDE) DISPLAYMANAGER=/opt/kde/bin/kdm    ;;
+    *)               DISPLAYMANAGER=/usr/X11R6/bin/xdm  ;;
 esac
-if [ ! -x "$DISPLAYMANAGER" ]; then
-    DISPLAYMANAGER=/usr/X11R6/bin/xdm
-fi
+test ! -x "$DISPLAYMANAGER" && DISPLAYMANAGER=/usr/X11R6/bin/xdm
 
-DM=`basename $DISPLAYMANAGER`
+DM=${DISPLAYMANAGER##*/}
+PF=/var/lib/xdm/xdm-pid
+xdmpid=0
+
+xdmrun ()
+{
+    test  -s $PF && xdmpid="`cat $PF`"
+    pidof -s $DISPLAYMANAGER >/dev/null && return 0
+    return 1
+}
 
 case "$1" in
 
     start)
-	test -z "$RE" && echo -n "Starting $DM... "
-	$DISPLAYMANAGER
-	test -z "$RE" && echo "Done."
+	if xdmrun ; then
+	    echo "Warning: $DM is already running"
+	    ps cux$xdmpid
+	else
+	    # After a crash or a kill signal we may have
+	    # a wrong owner ship of /dev/console
+	    chown root:tty /dev/console /dev/tty0
+	    chmod 622      /dev/console /dev/tty0
+	    #
+	    test -z "$RE" && echo -n "Starting $DM... "
+	    $DISPLAYMANAGER
+	    test -z "$RE" && echo "Done."
+	fi
 	;;
-
     stop)
-	killproc /usr/X11R6/bin/xconsole &> /dev/null
-	test -z "$RE" && echo -n "Shutting down $DM... "
-	kill -TERM `cat /var/lib/xdm/xdm-pid` 
-	test -z "$RE" && echo "Done."
+	if xdmrun ; then
+	    killproc /usr/X11R6/bin/xconsole &> /dev/null
+	    test -z "$RE" && echo -n "Shutting down $DM... "
+	    kill -TERM $xdmpid 
+	    test -z "$RE" && echo "Done."
+	fi
 	;;
-
-    restart)
+    restart|reload)
 	export RE=yes
 	echo -n "Restarting $DM... "
-	/sbin/init.d/xdm stop
+	$0 stop
 	sleep 1
-	/sbin/init.d/xdm start
+	$0 start
 	echo "Done."
+	;;
+    check)
+	echo -n "Checking $DM ... "
+	if xdmrun ; then
+	    echo "is running"
+	    ps cux$xdmpid
+	else
+	    echo "is NOT running"
+	fi
 	;;
     *)
 	echo "Usage: $0 {start|stop|restart}"

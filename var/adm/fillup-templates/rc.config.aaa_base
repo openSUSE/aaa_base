@@ -135,6 +135,14 @@ IP_DYNIP=no
 #
 CHECK_ETC_HOSTS=yes
 
+#
+# If CHECK_ETC_HOSTS is set to yes, you can let SuSEconfig sort your
+# /etc/hosts.  But in some cases this may be unwanted.  So here is a
+# flag, where you can configure if /etc/hosts should be "beautified".
+# (yes/no)
+#
+BEAUTIFY_ETC_HOSTS=yes
+
 
 #
 # hostname of the system (full name)
@@ -240,11 +248,6 @@ GOPHER_PROXY=""
 # Example: NO_PROXY="www.me.de, do.main, localhost"
 #
 NO_PROXY=""
-
-#
-# Example: HTTP_PROXY="http://proxy.provider.de:3128/"
-#
-HTTP_PROXY=""
 
 
 #

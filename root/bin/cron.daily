@@ -128,7 +128,8 @@ if [ -n "$MAX_DAYS_FOR_LOG_FILES" -a "$MAX_DAYS_FOR_LOG_FILES" -gt 0 ] ; then
     check_log_file /var/log/mail              +4096k 640 root.root
     check_log_file /var/log/maillog           +1024k 640 root.root
     check_log_file /var/log/messages          +4096k 640 root.root
-    check_log_file /var/log/news              +4096k 640 root.root
+    check_log_file /var/log/news              +4096k 640 root.news
+    check_log_file /var/log/ntp               +2048k 640 root.root
     check_log_file /var/log/pop3svr.log       +1024k 640 root.root
     check_log_file /var/log/pvf.log           +1024k 640 root.root
     check_log_file /var/log/setup_autobuild   +4096k 644 root.root
@@ -322,8 +323,7 @@ if test "$REINIT_MANDB" = yes ; then
     #
     if [ -x /usr/sbin/makewhatis -a -w /usr/man ] ; then
         manpath=/usr/man:/usr/X11R6/man:/usr/local/man
-        for DIR in /usr/openwin/man /usr/man/allman /usr/man/de \
-                   /usr/man/allman/de ; do
+        for DIR in /usr/openwin/man /usr/man/allman /usr/man/de ; do
             test -d $DIR && manpath=$manpath:$DIR
         done
         export manpath

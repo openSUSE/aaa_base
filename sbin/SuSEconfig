@@ -217,11 +217,13 @@ if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
     #
     # now beautify /etc/hosts
     #
-    grep "^#" $r/etc/hosts > $r/etc/hosts.wrzl
-    echo >> $r/etc/hosts.wrzl
-    echo >> $r/etc/hosts.wrzl
-    grep -v "^#" $r/etc/hosts | grep -v "^\$" | sort >> $r/etc/hosts.wrzl
-    mv $r/etc/hosts.wrzl $r/etc/hosts
+    if test "$BEAUTIFY_ETC_HOSTS" = yes ; then
+        grep "^#" $r/etc/hosts > $r/etc/hosts.wrzl
+        echo >> $r/etc/hosts.wrzl
+        echo >> $r/etc/hosts.wrzl
+        grep -v "^#" $r/etc/hosts | grep -v "^\$" | sort >> $r/etc/hosts.wrzl
+        mv $r/etc/hosts.wrzl $r/etc/hosts
+    fi
 fi
 
 

@@ -3,7 +3,7 @@
 # Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
-#	  Werner Fink <werner@suse.de>, 1996
+#         Werner Fink <werner@suse.de>, 1996
 #         Burchard Steinbild <bs@suse.de>, 1996
 #
 # /sin/init.d/boot
@@ -31,7 +31,14 @@ fi
 #
 if test -f /etc/mdtab -a -x /sbin/mdadd ; then
     echo "Initializing Multiple Devices..."
-       /sbin/mdadd -ar
+    /sbin/mdadd -ar
+    if test $? != 0 -a -x /sbin/ckraid ; then
+        echo "Initializing Multiple Devices failed.  Trying to recover it..."
+        for i in /etc/raid?.conf ; do
+            /sbin/ckraid --fix $i
+        done
+        /sbin/mdadd -ar
+    fi
 fi
 
 #
@@ -56,29 +63,29 @@ if test ! -f /fastboot; then
     # this seems to be ugly, but should not really be a problem.
     mount -n -o remount,ro / 2> /dev/null
     if test $? = 0; then
-	echo "Checking file systems..."
+        echo "Checking file systems..."
         fsck -A -a
-	# A return code of 1 indicates that file system errors
-	# were corrected, but that the boot may proceed.
-	# A return code of 2 or larger indicates failure.
-	if test $? -gt 1; then
+        # A return code of 1 indicates that file system errors
+        # were corrected, but that the boot may proceed.
+        # A return code of 2 or larger indicates failure.
+        if test $? -gt 1; then
             if test -f /etc/default.keytab -a -x /bin/loadkeys; then
                 /bin/loadkeys /etc/default.keytab
             fi
-	    echo
-	    echo "fsck failed.  Please repair manually and reboot. The root"
-	    echo "file system is currently mounted read-only. To remount it"
-	    echo "read-write do:"
-	    echo
-	    echo "   bash# mount -n -o remount,rw /"
-	    echo
-	    echo "Attention: Only CONTROL-D will reboot the system in this"
+            echo
+            echo "fsck failed.  Please repair manually and reboot. The root"
+            echo "file system is currently mounted read-only. To remount it"
+            echo "read-write do:"
+            echo
+            echo "   bash# mount -n -o remount,rw /"
+            echo
+            echo "Attention: Only CONTROL-D will reboot the system in this"
             echo "maintanance mode. shutdown or reboot will not work."
-	    echo
-	    PS1="(repair filesystem) # "
-	    export PS1
-	    # XXX /sbin/sulogin /dev/console
-	    /sbin/sulogin /dev/tty1
+            echo
+            PS1="(repair filesystem) # "
+            export PS1
+            # XXX /sbin/sulogin /dev/console
+            /sbin/sulogin /dev/tty1
 
             # if the user has mounted something rw, this should be umounted
             echo "Unmounting file systems (ignore error messages)"
@@ -88,17 +95,25 @@ if test ! -f /fastboot; then
             # errors to /dev/null
             mount -no remount,ro / 2> /dev/null
 
-	    sync
-	    reboot
-	fi
-	sync
+            sync
+            reboot
+        elif test $? -gt 0 -a -n "$START_QUOTA" -a "$START_QUOTA"="yes" then
+              # Check quota and then turn quota on.
+              if test -x /usr/sbin/quotacheck ; then
+                  echo "Checking quotas. This may take some time."
+                  /usr/sbin/quotacheck -avug
+                  echo " Done."
+              fi
+        fi
+
+        sync
         mount -n -o remount,rw /
     else
-	if test ! -d /DOS ; then # this is a hack - we need a better
+        if test ! -d /DOS ; then # this is a hack - we need a better
                                  # recognization of umsdos root fs
-	    echo
-	    echo "*** ERROR!  Cannot fsck because root is not read-only!"
-	    echo
+            echo
+            echo "*** ERROR!  Cannot fsck because root is not read-only!"
+            echo
         fi
     fi
 else
@@ -142,17 +157,17 @@ test -x /sbin/ldconfig && /sbin/ldconfig -X 2>/dev/null
 # initialize loopback device
 #
 if test "$START_LOOPBACK" = yes; then
-	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
-	route add -net 127.0.0.0 netmask 255.0.0.0 dev lo
+        ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
+        route add -net 127.0.0.0 netmask 255.0.0.0 dev lo
 fi
 
 #
 # start bootup client scripts.
 #
 if test -d /sbin/init.d/boot.d; then
-	for i in /sbin/init.d/boot.d/S*; do
-		test -f "$i" && /bin/sh $i b
-	done
+        for i in /sbin/init.d/boot.d/S*; do
+                test -f "$i" && /bin/sh $i b
+        done
 fi
 
 #
@@ -181,20 +196,20 @@ rm -f /var/lock/* /var/lock/*/* /tmp/.X*lock \
 # The following script is executed at boot-up and also from a cron-entry
 # in the early morning. So your system should be checked often enough.
 #if test -x /root/bin/cron.daily; then
-#	/root/bin/cron.daily
+#        /root/bin/cron.daily
 #fi
 
 #
 # start user defined bootup script.
 #
 if test -f /sbin/init.d/boot.local ; then
-	/bin/sh /sbin/init.d/boot.local
+        /bin/sh /sbin/init.d/boot.local
 fi
 
 # Read all kernel messages generated until now and put them in one file.
 if test -x /usr/sbin/klogd ; then
-	/usr/sbin/klogd -f /var/log/boot.msg -o
-	/bin/sleep 1
+        /usr/sbin/klogd -f /var/log/boot.msg -o
+        /bin/sleep 1
 fi
 
 #
