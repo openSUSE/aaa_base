@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Copyright (c) 2002 SuSE Linux AG, Nuernberg, Germany.   
+#
+# please send bugfixes or comments to feedback@suse.de.
+#
+
+#
+# paranoia settings
+#
+umask 022
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+
+# Delete too old nvi-saved files.
+if test -d /var/tmp/vi.recover; then
+    find /var/tmp/vi.recover -type f -mtime +7 -exec rm -f -- {} \;
+fi
+
+# Recover nvi-saved files.
+if test -x /usr/sbin/recover.nvi; then
+    /usr/sbin/recover.nvi
+fi
+
+exit 0

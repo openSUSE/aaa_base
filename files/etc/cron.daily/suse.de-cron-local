@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+#
+# Copyright (c) 2002 SuSE Linux AG, Nuernberg, Germany.   
+#
+# please send bugfixes or comments to feedback@suse.de.
+#
+
+
+#
+# paranoia settings
+#
+umask 022
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+
+#
+# get information from /etc/rc.config
+#
+if [ -f /etc/rc.config ] ; then
+    . /etc/rc.config
+fi
+
+# now start the local cron.daily file, if it exists.
+
+if [ -f /root/bin/cron.daily.local ] ; then
+    . /root/bin/cron.daily.local
+fi
+
+exit 0

@@ -26,7 +26,7 @@ check_srv() {
 	RLVL=`/sbin/runlevel | sed 's/. //'`
 	test -L /etc/init.d/rc${RLVL}.d/S??$1 && return 0
 	return 1
-}	
+}
 
 start_firewall() {
 	case `uname -r` in
@@ -39,7 +39,7 @@ start_firewall() {
 		  fi
 		fi
 		;;
-	    *)  
+	    *)
 		if check_srv SuSEfirewall_setup; then
 		    /sbin/SuSEfirewall start
 		fi
@@ -70,26 +70,21 @@ ippp*)
 
     case "$BASENAME" in
     ip-up)
+	#
 	# Get the nameservers (works with ipppd option ms-get-dns):
-
-	if [ -n "$MS_DNS1" -a "$START_NAMED" != "yes" ]; then
-                /sbin/modify_resolvconf modify -s ipppd -e "$INTERFACE" \
-                  -p ipppd -f /etc/ppp/ip-up -n "$MS_DNS1 $MS_DNS2" -t - << EOT
-                  This is a temporary resolv.conf created by ipppd. The previous
-                  file has been saved as <see "Backup: field above>. It will be
-                  restored when ippp disconnects.
-
-                  If you don't like ipppd to change your nameserver settings
-                  then set MODIFY_RESOLV_CONF_DYNAMICALLY=no in /etc/rc.config
-                  or remove the option ms-get-dns from /etc/ppp/options.ippp*.
+	#
+	if [ -n "$MS_DNS1" ]; then
+		/sbin/modify_resolvconf modify -s ipppd -e "$INTERFACE" \
+		    -p ipppd -f /etc/ppp/ip-up -n "$MS_DNS1 $MS_DNS2" -t - << EOT
+		    If you do not like the ipppd to change your nameserver
+		    settings remove the option ms-get-dns from
+		    /etc/ppp/options.ippp*.
 EOT
 	fi
 
 	#
-	# SuSE Firewall script: If you installed the package firewals
-	# and configured your firewall in /etc/sysconfig/firewall
-	# then set START_FW in /etc/rc.config to yes and it will be
-	# started here:
+	# SuSE Firewall script: If you installed and configured your firewall
+	# in /etc/sysconfig/firewall it will be started here:
 	#
 	start_firewall
 
@@ -112,7 +107,7 @@ EOT
 	# As an alternative to the commands above, you can use a seperate script,
 	# /etc/ppp/poll.tcpip. The default scripts as shipped is able to set the
 	# system clock using ntpdate (see the XNTPD_INITIAL_NTPDATE setting in
-	# /etc/rc.config). It supports fetchmail with a system-wide
+	# /etc/sysconfig/xntp). It supports fetchmail with a system-wide
 	# /etc/fetchmailrc and can use UUCP to fetch mail over TCP/IP, provided
 	# that UUCP is configured properly. Last not least it also calls sendmail
 	# to send any queued mail. Uncomment the line below.
@@ -122,22 +117,21 @@ EOT
 	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local "$@"
 	;;
     ip-down)
-
+	#
 	# Restore the nameservers (got with ipppd option ms-get-dns):
-
-	if [ -n "$MS_DNS1" -a "$START_NAMED" != "yes" ]; then
-                /sbin/modify_resolvconf restore -s ipppd -e "$INTERFACE"
+	#
+	if [ -n "$MS_DNS1" ]; then
+		/sbin/modify_resolvconf restore -s ipppd -e "$INTERFACE"
 	fi
 
 	# restart interface
 	/sbin/ifconfig $INTERFACE $IFCONFIG
-	# set routes from /etc/route.conf 
+	# set routes from /etc/route.conf
 	/etc/init.d/route start $INTERFACE
+
 	#
-	# SuSE Firewall script: If you installed the package firewals
-	# and configured your firewall in /etc/sysconfig/firewall
-	# then set START_FW in /etc/rc.config to yes and it will be
-	# started here:
+	# SuSE Firewall script: If you installed and configured your firewall
+	# in /etc/sysconfig/firewall it will be started here:
 	#
 	start_firewall
 
@@ -159,31 +153,46 @@ ppp*)
 	# option. Original resolv.conf is restored when ip-down is called
 	# by pppd when the link goes down.
 	#
-	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf -a "$START_NAMED" != "yes" ]; then
+	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf ]; then
 		/sbin/modify_resolvconf modify -s pppd -p pppd -e "$INTERFACE" \
-                  -f /etc/ppp/ip-up -n "$DNS1 $DNS2" -t - << EOT
-                  This is a temporary resolv.conf created by pppd. The previous
-                  file has been saved as <see Backup: field above>. It will be
-                  restored when pppd disconnects.
-
-                  If you do not like pppd to change your nameserver settings
-                  then set MODIFY_RESOLV_CONF_DYNAMICALLY=no in /etc/rc.config.
+		    -f /etc/ppp/ip-up -n "$DNS1 $DNS2" -t - << EOT
+		    If you do not want the pppd to change your nameserver settings
+		    set AUTODNS=no in the config file for this provider in
+		    /etc/sysconfig/network/providers/ and ensure that the option
+		    usepeerdns is not set in /etc/ppp/options.
 EOT
 	fi
 
 	#
-	# SuSE Firewall script: If you installed the package firewals
-	# and configured your firewall in /etc/sysconfig/firewall
-	# then set START_FW in /etc/rc.config to yes and it will be
-	# started here:
+	# SuSE Firewall script: If you installed and configured your firewall
+	# in /etc/sysconfig/firewall it will be started here:
 	#
 	start_firewall
-	
+
 	#
 	# You may choose to use a default firewall script, configured for
 	# the standard dialup user(install package ipchains):
 	#
 	#test -x /etc/ppp/inet_chains.local && /etc/ppp/inet_chains.local "$@"
+
+	# maybe you want to start mail services:
+	# set follow variables in /etc/sysconfig/sendmail
+	#    SENDMAIL_TYPE="yes"
+	#    SENDMAIL_SMARTHOST="<ISP-mailserver>"
+	#    SENDMAIL_ARGS="-bd -om"
+	#    SENDMAIL_EXPENSIVE="yes"
+	#    SENDMAIL_NOCANONIFY="yes"
+	#/usr/bin/fetchmail -a -v >>/var/log/fetchmail 2>&1 &
+	#/usr/sbin/sendmail -q &
+
+	# As an alternative to the commands above, you can use a seperate script,
+	# /etc/ppp/poll.tcpip. The default scripts as shipped is able to set the
+	# system clock using ntpdate (see the XNTPD_INITIAL_NTPDATE setting in
+	# /etc/sysconfig/xntp). It supports fetchmail with a system-wide
+	# /etc/fetchmailrc and can use UUCP to fetch mail over TCP/IP, provided
+	# that UUCP is configured properly. Last not least it also calls sendmail
+	# to send any queued mail. Uncomment the line below.
+	# /etc/ppp/poll.tcpip
 
 	# call ip-up.local if it exists and is executable:
 	test -x /etc/ppp/ip-up.local && /etc/ppp/ip-up.local "$@"
@@ -194,15 +203,13 @@ EOT
 	# was called by the pppd which uses the `usepeerdns' option and
 	# resolv.conf was modified for the supplied dns server adresses.
 	#
-	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf -a "$START_NAMED" != "yes" ]; then
-                /sbin/modify_resolvconf restore -s pppd -e "$INTERFACE"
+	if [ -n "$USEPEERDNS" -a -f /etc/ppp/resolv.conf ]; then
+		/sbin/modify_resolvconf restore -s pppd -e "$INTERFACE"
 	fi
 
 	#
-	# SuSE Firewall script: If you installed the package firewals
-	# and configured your firewall in /etc/sysconfig/firewall
-	# then set START_FW in /etc/rc.config to yes and it will be
-	# started here:
+	# SuSE Firewall script: If you installed and configured your firewall
+	# in /etc/sysconfig/firewall it will be started here:
 	#
 	start_firewall
 
