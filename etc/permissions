@@ -385,6 +385,7 @@
 /usr/sbin/atrun                        root.root         755
 /usr/bin/mh/inc                        root.root         755
 /usr/bin/mh/msgchk                     root.root         755
+/opt/kde/bin/apm_proxy                 root.root         755
 /var/spool/mqueue                      root.root         755
 
 

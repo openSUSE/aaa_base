@@ -57,7 +57,7 @@
 /usr/local/bin/spic                    root.root        4755
 /usr/sbin/amcheck                      root.root        4755
 /usr/sbin/suexec                       root.root        4755
-
+/opt/kde/bin/apm_proxy                 root.root        4755
 
 #
 # sgid video

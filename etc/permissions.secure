@@ -91,6 +91,7 @@
 /opt/kde/bin/kswarm.kss                root.root         755
 /opt/kde/bin/kppp                      root.root         755
 /opt/kde/bin/kbat.kss                  root.root         755
+/opt/kde/bin/apm_proxy                 root.root         755
 
 
 
