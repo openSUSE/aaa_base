@@ -71,7 +71,22 @@ case "$1" in
 	# do fsck and start sulogin, if it fails.
 	#
 	FSCK_RETURN=0
-	if test ! -f /fastboot -a -z "$fastboot" -a "$rootfstype" != "-t nfs" ; then
+	# on first startup of a system with a lvm root device lvm /dev entries
+	# may not exist at this time, so skip fsck in this case
+	DES_OK=0
+	case "$des" in
+	    LABEL=*)
+		DES_OK=1
+		;;
+	    UUID=*)
+		DES_OK=1
+		;;
+	    *)
+		test ! -b $des
+		DES_OK=$?
+		;;
+	esac
+	if test ! -f /fastboot -a -z "$fastboot" -a "$rootfstype" != "-t nfs" -a $DES_OK -eq 1 ; then
 	    FSCK_FORCE=""
 	    test -f /forcefsck && FSCK_FORCE="-f"
 

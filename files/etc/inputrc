@@ -55,6 +55,10 @@ $if term=xterm
 "\e[1;2D":	backward-word
 "\e[1;2A":	history-search-backward
 "\e[1;2B":	history-search-forward
+"\e[1;3C":	forward-word
+"\e[1;3D":	backward-word
+"\e[1;3A":	history-search-backward
+"\e[1;3B":	history-search-forward
 "\e[5C":	forward-word
 "\e[5D":	backward-word
 "\e[5A":	history-search-backward

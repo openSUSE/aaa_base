@@ -66,7 +66,7 @@ case "$1" in
 	#
 	rm -f /var/lib/rpm/__db*
 	rm -rf /tmp/screens /tmp/uscreens /var/run/screens /var/run/uscreens 2>/dev/null
-	rm -f /var/lock/* /var/lock/subsys/* \
+	rm -f /var/lock/* /var/lock/subsys/* /var/lock/lvm/* \
 	      /tmp/.X*lock /tmp/ssh-*/*agent* \
 	      /var/spool/uucp/LCK* /fsck_corrected_errors 2>/dev/null
 	if test -x /usr/bin/find -a -x /usr/bin/xargs ; then
