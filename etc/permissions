@@ -86,7 +86,7 @@
 /usr/lib/majordomo/wrapper             root.root        4755
 /usr/sbin/traceroute                   root.root        4755
 /usr/sbin/dip                          root.dialout     4754
-/usr/sbin/pppd                         root.dialout     4754
+/usr/sbin/pppd                         root.dialout     6754
 
 
 
