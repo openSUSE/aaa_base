@@ -203,6 +203,7 @@ image_inodes=2000
 # should be nothing to change below...
 
 tmp_mnt=/tmp/mnt$$
+tmp_mnt_small=${tmp_mnt}_small
 tmp_msg=/tmp/msg$$
 lx_rc=$tmp_mnt/linuxrc
 is_mounted=
@@ -234,6 +235,7 @@ oops () {
 [ "$root_dir" ] || root_dir=/
 
 tmp_initrd=$root_dir/tmp/initrd$$
+tmp_initrd_small=${tmp_initrd}_small
 
 x1=`mount 2>/dev/null | grep "on $root_dir " | tail -1`
 x2=`echo \`echo "$x1" | wc -l\``
@@ -409,9 +411,7 @@ for k in $kernels ; do
     # now create a second initrd with minimal size
     
     img_size=`expr \`df -k $tmp_mnt | sed '1d' | awk '{print $3}'\` + 1000`
-    tmp_mnt_small=${tmp_mnt}_small
     mkdir $tmp_mnt_small
-    tmp_initrd_small=${tmp_initrd}_small
     
     dd if=/dev/zero of=$tmp_initrd_small bs=1k count=$img_size 2>/dev/null
     mke2fs -q -F -b 1024 -m 0 -N $image_inodes $tmp_initrd_small 2>/dev/null
