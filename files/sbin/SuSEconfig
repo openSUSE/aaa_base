@@ -17,7 +17,7 @@
 # Move PAM configuration into SuSEconfig.pam
 # Thorsten Kukuk <kukuk@suse.de>, 2000
 #
-# For feedback, please use http:/www.suse.de/feedback
+# For feedback, please use http://www.suse.de/feedback
 
 echo "Starting SuSEconfig, the SuSE Configuration Tool..."
 umask 022

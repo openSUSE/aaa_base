@@ -4,7 +4,7 @@
 #
 # Author: Burchard Steinbild, 1996-97
 #         Florian La Roche, 1996
-# Please send feedback to http:/www.suse.de/feedback
+# Please send feedback to http://www.suse.de/feedback
 #
 
 test -z "$MD5DIR" && {

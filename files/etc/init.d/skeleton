@@ -1,10 +1,9 @@
 #! /bin/sh
-# Copyright (c) 1995-2002 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 1995-2003 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
 # Author: Kurt Garloff
-#
-# Please send feedback to http:/www.suse.de/feedback
+# Please send feedback to http://www.suse.de/feedback/
 #
 # /etc/init.d/FOO
 #   and its symbolic link
@@ -46,7 +45,7 @@
 # (a) Hard dependencies: This is used by the runlevel editor to determine
 #     which services absolutely need to be started to make the start of
 #     this service make sense. Example: nfsserver should have
-#     Required-Start: portmap
+#     Required-Start: $portmap
 #     Also, required services are started before the dependent ones.
 #     The runlevel editor will warn about such missing hard dependencies
 #     and suggest enabling. During system startup, you may expect an error,
@@ -83,14 +82,21 @@
 #   specify which services need to be still running when this service
 #   is shut down. Often the entries there are just copies or a subset 
 #   from the respective start tag.
+# * X-UnitedLinux-Should-Start/Stop are not part of LSB (as of 1.3)
+#   but official Should-Start/Stop tags are in discussion (1.9).
+#   insserv does support these as well.
+# * X-UnitedLinux-Default-Enabled: yes/no is used at installation time
+#   (%fillup_and_insserv macro in %post of many RPMs) to specify whether
+#   a startup script should default to be enabled after installation.
+#   It's not used by insserv.
 #
-# Note on runlevels: 
+# Note on runlevels:
 # 0 - halt/poweroff 			6 - reboot
 # 1 - single user			2 - multiuser without network exported
 # 3 - multiuser w/ network (text mode)  5 - multiuser w/ network and X11 (xdm)
 # 
 # Note on script names:
-# http://www.linuxbase.org/spec/refspecs/LSB_1.2.0/gLSB/scrptnames.html
+# http://www.linuxbase.org/spec/refspecs/LSB_1.3.0/gLSB/gLSB/scrptnames.html
 # A registry has been set up to manage the init script namespace.
 # http://www.lanana.org/
 # Please use the names already registered or register one or use a
@@ -168,10 +174,13 @@ case "$1" in
 	# Remember status and be verbose
 	rc_status -v
 	;;
-    try-restart)
+    try-restart|condrestart)
 	## Do a restart only if the service was active before.
 	## Note: try-restart is now part of LSB (as of 1.9).
 	## RH has a similar command named condrestart.
+	if test "$1" = "condrestart"; then
+		echo "${attn} Use try-restart ${done}(LSB)${attn} rather than condrestart ${warn}(RH)${norm}"
+	fi
 	$0 status
 	if test $? = 0; then
 		$0 restart
@@ -241,7 +250,7 @@ case "$1" in
     probe)
 	## Optional: Probe for the necessity of a reload, print out the
 	## argument to this init script which is required for a reload.
-	## Note: probe is not (yet) part of LSB (as of 1.2)
+	## Note: probe is not (yet) part of LSB (as of 1.9)
 
 	test /etc/FOO/FOO.conf -nt /var/run/FOO.pid && echo reload
 	;;

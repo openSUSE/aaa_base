@@ -1,7 +1,7 @@
 #                                                                               
 #    /etc/profile.d/alljava.sh                                                    
 #                                                                               
-# send feedback to http:/www.suse.de/feedback
+# send feedback to http://www.suse.de/feedback
 
 #
 # This script sets some environment variables for default java.
