@@ -76,7 +76,6 @@
 /usr/bin/ncpumount                     root.root        4755
 /usr/bin/newgrp                        root.root        4755
 /usr/bin/passwd                        root.shadow      4755
-/usr/bin/quota                         root.root        4755
 /usr/bin/rcp                           root.root        4755
 /usr/bin/rlogin                        root.root        4755
 /usr/bin/rsh                           root.root        4755

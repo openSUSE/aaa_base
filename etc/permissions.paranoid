@@ -208,7 +208,6 @@
 # This one we keep.
 /usr/bin/passwd                        root.shadow      4755
 # I hate the following group.
-/usr/bin/quota                         root.root        4755
 /usr/bin/rcp                           root.root        4755
 /usr/bin/rlogin                        root.root        4755
 /usr/bin/rsh                           root.root        4755
