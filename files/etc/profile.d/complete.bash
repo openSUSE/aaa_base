@@ -9,6 +9,18 @@
 
 shopt -s extglob
 
+declare -i _tmp=${BASH_VERSINFO[1]%[a-z]*}
+if test $_tmp '>' 4 ; then
+    _def="-o default"
+    _dir="-o dirnames"
+    _file="-o filenames"
+fi
+if test $_tmp '>' 5 ; then
+    _nosp="-o nospace"
+fi
+unset _tmp
+
+# Expanding shell function for directories
 function _cd_ ()
 {
     local c=${COMP_WORDS[COMP_CWORD]}
@@ -28,15 +40,16 @@ function _cd_ ()
     IFS="$o"
 }
 
-complete -A directory -F _cd_		cd rmdir pushd chroot chrootx
-complete -A directory -A file -F _cd_	mkdir
+complete -d -F _cd_ ${_dir}		cd rmdir pushd chroot chrootx
+complete -d -F _cd_ ${_file}		mkdir
 
-_file_ ()
+# General expanding shell function
+_exp_ ()
 {
     # bash `complete' is broken because you can not combine
     # -d, -f, and -X pattern without missing directories.
     local c=${COMP_WORDS[COMP_CWORD]}
-    local a="${COMP_WORDS[@]}"
+    local a="${COMP_LINE}"
     local o="$IFS"
     local e s g=0
 
@@ -74,7 +87,7 @@ _file_ ()
     xdvi)		e='!*.+(dvi|dvi.gz|DVI|DVI.gz)'		;;
     tex|latex)		e='!*.+(tex|TEX|texi|latex)'		;;
     export)
-	case "$c" in
+	case "$a" in
 	*=*)		c=${c#*=}				;;
 	*)		COMPREPLY=($(compgen -v -- ${c}))
 			return					;;
@@ -115,7 +128,8 @@ _file_ ()
     test $g -eq 0 && shopt -u extglob
 }
 
-complete -d -X '.[^./]*' -F _file_	compress \
+complete -d -X '.[^./]*' -F _exp_ ${_def} \
+				 	compress \
 					bzip2 \
 					bunzip2 \
 					gzip \
@@ -127,15 +141,15 @@ complete -d -X '.[^./]*' -F _file_	compress \
 					acroread xpdf \
 					dvips xdvi \
 					tex latex
-#complete -A directory -F _file_	chown chgrp chmod chattr ln
-#complete -A directory -F _file_	more cat less strip grep vi ed
+complete -d -F _exp_ ${_def}		chown chgrp chmod chattr ln
+complete -d -F _exp_ ${_def}		more cat less strip grep vi ed
 
-complete -A function -A alias -A command -A builtin type
-
+complete -A function -A alias -A command -A builtin \
+					type
 complete -A function			function
 complete -A alias			alias unalias
 complete -A variable			unset local readonly
-complete -A variable -d -F _file_	export
+complete -F _exp_ ${_def}		export
 complete -A variable -A export		unset
 complete -A shopt			shopt
 complete -A setopt			set
@@ -143,16 +157,18 @@ complete -A helptopic			help
 complete -A user			talk su login sux
 complete -A builtin			builtin
 complete -A export			printenv
-complete -A command			command which nohup exec nice eval 
-complete -A command 			ltrace strace gdb
+complete -A command ${_def}		command which nohup exec nice eval 
+complete -A command ${_def}		ltrace strace gdb
 HOSTFILE=""
 test -s $HOME/.hosts && HOSTFILE=$HOME/.hosts
 complete -A hostname			ping telnet slogin rlogin \
 					traceroute nslookup
-complete -A hostname -A directory -A file rsh ssh scp
+complete -A hostname -A directory -A file \
+					rsh ssh scp
 complete -A stopped -P '%'		bg
 complete -A job -P '%'			fg jobs disown
 
+# Expanding shell function for manual pager
 _man_ ()
 {
     local c=${COMP_WORDS[COMP_CWORD]}
@@ -199,7 +215,9 @@ _man_ ()
     esac
 }
 
-complete -F _man_			man
+complete -F _man_ ${_file}		man
+
+unset _def _dir _file _nosp
 
 #
 # End of /etc/profile.d/complete.bash
