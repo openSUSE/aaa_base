@@ -63,6 +63,10 @@ while test $# -gt 0; do
     *-norestarts)
       DO_RESTARTS=false
     ;;
+    *-nomodule)
+      ONLY_MODULE="none"
+      shift
+    ;;
     *-module)
       FASTRUN=true
       ONLY_MODULE=$2
@@ -177,7 +181,10 @@ trap "rm -f $IS_RUNNING ; exit 1" 1 2 15
 
 if test -z "$r" -o "$FASTRUN" = "true" ; then
     SUB_SCRIPTS=""
-    if test -n "$ONLY_MODULE" ; then
+    if test "$ONLY_MODULE" = "none" ; then
+       echo skipping modules
+       # do nothing, only keep FASTRUN off
+    elif test -n "$ONLY_MODULE" ; then
         if test -f /sbin/conf.d/SuSEconfig.$ONLY_MODULE ; then
             SUB_SCRIPTS=/sbin/conf.d/SuSEconfig.$ONLY_MODULE
         else
