@@ -367,7 +367,6 @@ alias char-major-20       cyclades
 alias char-major-21       sg
 alias char-major-27       ftape
 alias char-major-29       off # fb
-alias char-major-30       iBCS
 alias char-major-36	  netlink_dev
 # alias char-major-43       hisax
 # alias char-major-44       hisax
@@ -424,9 +423,17 @@ alias char-major-195      NVdriver
 alias char-major-206      osst
 alias char-major-240	  usb-serial
 
+if `kernelversion` == "2.2"
+alias char-major-30       iBCS
 alias binfmt-332          iBCS
 alias binfmt-518          iBCS
 alias binfmt-002c         iBCS
+else
+alias char-major-30       abi-ibcs
+alias binfmt-332          abi-ibcs
+alias binfmt-518          abi-ibcs
+alias binfmt-002c         abi-ibcs
+endif
 
 alias binfmt-204          binfmt_aout
 alias binfmt-263          binfmt_aout
