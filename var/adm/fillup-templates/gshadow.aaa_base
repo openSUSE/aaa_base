@@ -22,7 +22,6 @@ dosemu:*:root:root
 firewall:*:root:root
 public:*:root:root
 video:*:root:root
-informix:*:root:root,informix
 game:*:root:root
 xok:*:root:root
 trusted:*:root:root
@@ -31,7 +30,7 @@ named:*:root:root
 users:*:root:root
 postfix:*:root:root
 dbmaker:*:root:root
-fix:*:root:root,informix
+fix:*:root:root
 oinstall:*:root:root
 dba:*:root:root
 localham:*:root:root,dpbox

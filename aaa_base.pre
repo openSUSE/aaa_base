@@ -56,7 +56,6 @@ ixess:x:38:29:IXware Admin:/usr/lib/ixware:/bin/bash
 irc:x:39:65534:IRC Daemon:/usr/lib/ircd:/bin/bash
 ftp:x:40:2:ftp account:/usr/local/ftp:/bin/bash
 firewall:x:41:31:firewall account:/var/lib/firewall:/bin/false
-informix:x:43:34:Informix Database Admin:/usr/lib/informix:/bin/bash
 named:x:44:44:Nameserver Daemon:/var/named:/bin/bash
 virtuoso:x:45:100:Virtuoso Admin:/opt/virtuoso-lite:/bin/bash
 fnet:x:49:14:FidoNet:/var/spool/fnet:/bin/bash
@@ -105,7 +104,6 @@ dosemu:x:30:
 firewall:x:31:
 public:x:32:
 video:x:33:
-informix:x:34:informix
 game:x:40:
 xok:x:41:
 trusted:x:42:
@@ -113,7 +111,7 @@ modem:x:43:
 named:x:44:named
 postfix:x:51:postfix
 dbmaker:x:52:
-fix:x:53:informix
+fix:x:53:
 oinstall:x:54:
 dba:x:55:oracle
 localham:x:56:dpbox
