@@ -35,40 +35,40 @@ touch etc/mtab
 mkdir -p var/adm/fillup-templates
 echo "root:x:0:0:root:/root:/bin/bash
 bin:x:1:1:bin:/bin:/bin/bash
-daemon:x:2:2:daemon:/sbin:/bin/bash
-lp:x:4:7:lp daemon:/var/spool/lpd:/bin/bash
+daemon:x:2:2:Daemon:/sbin:/bin/bash
+lp:x:4:7:Printing daemon:/var/spool/lpd:/bin/bash
 news:x:9:13:News system:/etc/news:/bin/bash
 uucp:x:10:14:Unix-to-Unix CoPy system:/etc/uucp:/bin/bash
-games:x:12:100:Unified Games:/var/games:/bin/bash
-man:x:13:2:Man Page Viewer:/var/cache/man:/bin/bash
-at:x:25:25:Batch Jobs:/var/spool/atjobs:/bin/bash
-postgres:x:26:2:Postgres Database Admin:/var/lib/pgsql:/bin/bash
+games:x:12:100:Games account:/var/games:/bin/bash
+man:x:13:2:Manual pages viewer:/var/cache/man:/bin/bash
+at:x:25:25:Batch jobs daemon:/var/spool/atjobs:/bin/bash
+postgres:x:26:2:Postgres database admin:/var/lib/pgsql:/bin/bash
 mdom:x:28:28:Mailing list agent:/usr/lib/majordomo:/bin/bash
-wwwrun:x:30:65534:Daemon user for apache:/var/lib/wwwrun:/bin/bash
+wwwrun:x:30:65534:WWW daemon apache:/var/lib/wwwrun:/bin/bash
 squid:x:31:65534:WWW proxy squid:/var/squid:/bin/bash
-fax:x:33:14:Facsimile Agent:/var/spool/fax:/bin/bash
-gnats:x:34:65534:Gnats Gnu Backtracking System:/usr/lib/gnats:/bin/bash
-adabas:x:36:100:Adabas-D Database Admin:/usr/lib/adabas:/bin/bash
-amanda:x:37:6:Amanda Admin:/var/lib/amanda:/bin/bash
-irc:x:39:65534:IRC Daemon:/usr/lib/ircd:/bin/bash
-ftp:x:40:2:ftp account:/usr/local/ftp:/bin/bash
-firewall:x:41:31:firewall account:/var/lib/firewall:/bin/false
-named:x:44:44:Nameserver Daemon:/var/named:/bin/bash
-fnet:x:49:14:FidoNet:/var/spool/fnet:/bin/bash
-gdm:x:50:15:Gnome Display Manager:/var/lib/gdm:/bin/bash
-postfix:x:51:51:Postfix:/var/spool/postfix:/bin/false
-cyrus:x:96:12:User for Imapd:/usr/cyrus:/bin/bash
-oracle:x:59:54:Oracle User:/opt/oracle:/bin/bash
-mysql:x:60:2:MySQL Database User:/var/lib/mysql:/bin/false
-dpbox:x:61:56:DpBox User:/var/spool/dpbox:/bin/false
-ingres:x:62:3:Ingres DataBase administrator:/opt/tngfw/ingres:/bin/bash
-zope:x:64:2:Zope Server:/var/lib/zope:/bin/false
-vscan:x:65:65534:vscan user:/var/spool/vscan:/bin/false
-wnn:x:66:100:Wnn System Account:/var/lib/wnn:/bin/false
-pop:x:67:100:pop admin:/var/lib/pop:/bin/false
-perforce:x:68:60:perfoce admin:/var/lib/perforce:/bin/false
-sapdb:x:69:61:SAPDB demo user:/var/opt/sapdb:/bin/bash
-db4web:x:70:100:DB4Web user:/opt/db4web:/bin/false
+fax:x:33:14:Facsimile agent:/var/spool/fax:/bin/bash
+gnats:x:34:65534:Gnats GNU backtracking system:/usr/lib/gnats:/bin/bash
+adabas:x:36:100:Adabas-D database admin:/usr/lib/adabas:/bin/bash
+amanda:x:37:6:Amanda admin:/var/lib/amanda:/bin/bash
+irc:x:39:65534:IRC daemon:/usr/lib/ircd:/bin/bash
+ftp:x:40:2:FTP account:/usr/local/ftp:/bin/bash
+firewall:x:41:31:Firewall account:/var/lib/firewall:/bin/false
+named:x:44:44:Nameserver daemon:/var/named:/bin/bash
+fnet:x:49:14:FidoNet account:/var/spool/fnet:/bin/bash
+gdm:x:50:15:Gnome Display Manager daemon:/var/lib/gdm:/bin/bash
+postfix:x:51:51:Postfix daemon:/var/spool/postfix:/bin/false
+cyrus:x:96:12:IMAP daemon:/usr/cyrus:/bin/bash
+oracle:x:59:54:Oracle database admin:/opt/oracle:/bin/bash
+mysql:x:60:2:MySQL database admin:/var/lib/mysql:/bin/false
+dpbox:x:61:56:DpBox account:/var/spool/dpbox:/bin/false
+ingres:x:62:3:Ingres database admin:/opt/tngfw/ingres:/bin/bash
+zope:x:64:2:Zope daemon:/var/lib/zope:/bin/false
+vscan:x:65:65534:Vscan account:/var/spool/vscan:/bin/false
+wnn:x:66:100:Wnn system account:/var/lib/wnn:/bin/false
+pop:x:67:100:POP admin:/var/lib/pop:/bin/false
+perforce:x:68:60:Perfoce admin:/var/lib/perforce:/bin/false
+sapdb:x:69:61:SAPDB demo account:/var/opt/sapdb:/bin/bash
+db4web:x:70:100:DB4Web account:/opt/db4web:/bin/false
 nobody:x:65534:65534:nobody:/var/lib/nobody:/bin/bash" > var/adm/fillup-templates/passwd.aaa_base
 echo "root:x:0:root
 bin:x:1:root,bin,daemon
