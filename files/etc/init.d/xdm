@@ -52,7 +52,7 @@ case "$DISPLAYMANAGER" in
 			 DISPLAYMANAGER=/opt/kde2/bin/kdm 
 			 test -x /opt/kde3/bin/kdm && \
 			 DISPLAYMANAGER=/opt/kde3/bin/kdm ;;
-    gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/bin/gdm ;;
+    gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome2/bin/gdm ;;
     wdm|WDM)		 DISPLAYMANAGER=/usr/X11R6/bin/wdm ;;
     console) exit 0 ;;
     *)			 DISPLAYMANAGER=/usr/X11R6/bin/xdm ;;

@@ -46,10 +46,11 @@ read -t 2 check < /proc/cmdline 2> /dev/null
 case "$check" in
     *confirm*) DO_CONFIRM=yes ;;
 esac
+test -z "$CONFIRM_PROMPT_TIMEOUT" && CONFIRM_PROMPT_TIMEOUT=5
 if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
     echo -en "${extd}Enter Interactive startup mode?${norm}"
-    rc_timer_on 15 37
-    read -t 15 -n 1 -p " ${extd}y${norm}/[${extd}n${norm}](15s) " answer
+    rc_timer_on "$CONFIRM_PROMPT_TIMEOUT" 37
+    read -t "$CONFIRM_PROMPT_TIMEOUT" -n 1 -p " ${extd}y${norm}/[${extd}n${norm}]("${CONFIRM_PROMPT_TIMEOUT}s") " answer
     rc_timer_off
     case "$answer" in
     [yYiI]) DO_CONFIRM=yes ;;
