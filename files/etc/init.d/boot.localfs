@@ -8,7 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.localfs
 # Required-Start:    boot.proc
-# X-UnitedLinux-Should-Start: boot.ibmsis boot.md boot.lvm
+# X-UnitedLinux-Should-Start: boot.ibmsis boot.md boot.lvm dasd_devfs_compat
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
