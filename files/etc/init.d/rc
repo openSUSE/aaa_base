@@ -63,9 +63,9 @@ if test "$PREVLEVEL" != "N" ; then
     export kscripts
 fi
 
-if test "$PREVLEVEL" == "N" -a "$RUNLEVEL" == "5" ; then
-    export progress=16
-    sscripts=$(( $sscripts+15 ))
+if test "$PREVLEVEL" == "N" -a "$RUNLEVEL" == "5" -o "$RUNLEVEL" == "3"; then
+    export progress=20
+    sscripts=$(( $sscripts+$progress-1 ))
 else
     export progress=0
 fi
