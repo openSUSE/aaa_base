@@ -652,7 +652,12 @@ fi
 if test -f /var/lib/YaST2/runme_at_boot ; then
     exec 0<> $REDIRECT 1>&0 2>&0
     touch /var/lib/YaST2/run_suseconfig
-    test -x /usr/lib/YaST2/bin/YaST2.firstboot && /usr/lib/YaST2/bin/YaST2.firstboot
+    if test -x /usr/lib/YaST2/bin/YaST2.firstboot; then
+	/usr/lib/YaST2/bin/YaST2.firstboot
+    else
+	# oops, yast2 not installed
+	rm -f /var/lib/YaST2/runme_at_boot
+    fi
     # if yast2 failed, this ensures proper system setup
     if test -f /var/lib/YaST2/run_suseconfig ; then
 	/sbin/SuSEconfig

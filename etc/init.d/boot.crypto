@@ -35,6 +35,13 @@ test "$START_CRYPTO_FILESYSTEMS" = "yes" || exit 0
 test -s $CRYPTOTAB || exit 0
 type -p losetup &> /dev/null || exit 0
 
+otty=$(stty -g)
+stty $otty < $REDIRECT
+stty -nl -ixon ignbrk -brkint < $REDIRECT
+if test -x /etc/init.d/kbd ; then
+    /etc/init.d/kbd start < $REDIRECT > $REDIRECT 2>&1
+fi
+
 rc_reset
 main_status=0
 case "$1" in
@@ -97,6 +104,20 @@ case "$1" in
 		break
 	    done
 	    #
+	    # Check for valid super blocks
+	    #
+	    case "$filesys" in
+		ext2)	  tune2fs -l $loopdev	 &> /dev/null ;;
+		reiserfs) debugreiserfs $loopdev &> /dev/null ;;
+		*)	  true ;;
+	    esac
+	    rc_status
+	    if test $? -gt 0 ; then
+		losetup -d $loopdev &> /dev/null
+		continue
+	    fi
+
+	    #
 	    # Checking the structure on the loop device
 	    #
 	    fsck -a -t $filesys $loopdev
@@ -105,6 +126,7 @@ case "$1" in
 	    rc_status
 	    if test $FSCK_RETURN -gt 1; then
 		echo "fsck of $loopdev failed.  Please repair manually."
+		echo "${warn}Warning: do never try to repair if you have entered the wrong passphrase.${norm}"
 		PS1="(repair filesystem) # "
 		/sbin/sulogin $REDIRECT < $REDIRECT > $REDIRECT 2>&1
 		sync
@@ -118,6 +140,7 @@ case "$1" in
 	    esac
 	    mount -t $filesys $mopt $loopdev $access
 	    rc_status
+	    test $? -gt 0 && losetup -d $loopdev &> /dev/null
 	done < $CRYPTOTAB
 	test $main_status -gt 0 && rc_failed 1 || true
 	rc_status -v1
@@ -139,7 +162,6 @@ case "$1" in
 	    #
 	    umount $access
 	    rc_status
-	    test $? -ne 0 && continue
 	    #
 	    # Remove loop device
 	    #
@@ -154,4 +176,5 @@ case "$1" in
 	exit 1
 	;;
 esac
+stty $otty < $REDIRECT
 rc_exit
