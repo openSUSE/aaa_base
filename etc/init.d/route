@@ -43,7 +43,7 @@ reverse ()
 run_route ()
 {
     local command="/sbin/route $@"
-    retvalue="`$command 2>&1`"
+    retvalue="$($command 2>&1)"
     if test $? -ne 0 ; then
 	case "$retvalue" in
 	    SIOCADDRT:*File*exists) return ;;
@@ -54,6 +54,17 @@ run_route ()
 	echo    "    ${retvalue%%Usage:*}"
 	rc_failed
     fi
+}
+
+list_route () {
+    n=0
+    local des what mask f m r u iface rest
+    while read des what mask f m r u iface rest ; do
+	test $((n = n + 1)) -gt 2 || continue
+	test "${iface}" = "lo"	    && continue
+	test "${des}"	= "0.0.0.0" && des="default"
+	echo -e "$des\t$what\t$mask\t$iface"
+    done < <(exec /sbin/route -n)
 }
 
 wrong_entry ()
@@ -81,7 +92,7 @@ case "$todo" in
 	while read proc ; do
 	    test $((n = n + 1)) -gt 2 || continue
 	    d=${proc%:*}
-	    case "`ifconfig ${d}`" in
+	    case "$(ifconfig ${d})" in
 		${d}*UP*) ;;
 		${d}*) continue
 	    esac
@@ -96,11 +107,14 @@ case "$todo" in
 	    echo "No interface $sdev found"
 	    rc_failed
 	fi
-	n=0 # declared as integer
-	while read  des what mask iface  ; do
-	    test $((n = n + 1)) -gt 2 || continue
-	    control="$control ${des}:${mask}"
-	done < <(route -n)
+
+	if test "$todo" = reload ; then
+	    n=0 # declared as integer
+	    while read  des what mask iface  ; do
+		control="$control ${des}:${mask}"
+	    done < <(list_route)
+	fi
+
 	#
 	# Read /etc/route.conf and add routings
 	#
@@ -131,13 +145,13 @@ case "$todo" in
 		    rc_failed
 		fi
 		;;
-	    *)
-		for ctr in $control ; do
+    	    *)
+		if test "$todo" = reload ; then
 		    # Skip configured destinations with same genmask
-		    test "$ctr" = "${des}:${mask}"	&& continue 2
-		    test "$ctr" = "0.0.0.0:0.0.0.0" -a \
-			 "${des}" = "default"		&& continue 2
-		done
+		    for ctr in $control ; do
+			test "$ctr" = "${des}:${mask}" && continue 2
+		    done
+		fi
 
 		card=""
 		test -n "$iface"         && card="dev $iface"
@@ -227,7 +241,7 @@ case "$todo" in
 	while read proc ; do
 	    test $((n = n + 1)) -gt 2 || continue
 	    d="${proc%:*}"
-	    case "`ifconfig ${d}`" in
+	    case "$(ifconfig ${d})" in
 		${d}*UP*) ;;
 		${d}*) continue
 	    esac
@@ -313,7 +327,16 @@ case "$todo" in
 		    esac
 		esac
 	    esac
-	done < <(reverse < $ROUTECONF)
+	done < <(   dynamic="$(type -p routed)"
+		    if   test -s ${ROUTECONF}.old ; then
+			reverse < ${ROUTECONF}.old
+			rm -f ${ROUTECONF}.old
+		    elif test -n "$dynamic" && checkproc $dynamic ; then
+			reverse < $ROUTECONF
+		    else
+			list_route | reverse
+		    fi
+		)
 	rc_status || echo -n "Shutting down routing"
 	rc_status -v
 	;;
@@ -326,14 +349,28 @@ case "$todo" in
 	rc_status
 	;;
     status)
-	n=0 # declared as integer
-	route -n | while read des what mask f m r u iface rest ; do
-	    test $((n = n + 1)) -gt 2 || continue
-	    test "${des}"  = "0.0.0.0" && des="default "
-	    test "${what}" = "0.0.0.0" && what="0.0.0.0 "
-	    test "${mask}" = "0.0.0.0" && mask="0.0.0.0 "
-	    echo -e "${des}\t${what}\t${mask}\t${iface}"
-	done 
+	while read  des what mask iface ; do
+	    n=$((n + 1))
+	    control="$control ${des}:${what}${mask}:${iface}"
+	done < <(list_route)
+
+	declare -i m
+	m=0
+	while read  des what mask iface rest ; do
+	    test "$what"  = "-" &&  what=""
+	    test "$mask"  = "-" &&  mask=""
+	    test "$iface" = "-" && iface=""
+	    for ctr in $control ; do
+		if test "$ctr" = "${des}:${what}${mask}:${iface}" ; then
+		    m=$((m + 1))
+		    test "${des}"  = "default" && des="default "
+		    test "${what}" = "0.0.0.0" && what="0.0.0.0 "
+		    test "${mask}" = "0.0.0.0" && mask="0.0.0.0 "
+		    echo -e "${des}\t${what}\t${mask}\t${iface}"
+		fi
+	    done
+	done < $ROUTECONF
+	test $n -ne $m && rc_failed 3
 	;;
     *)
 	echo "Usage: $0 {start|stop|reload|restart}"

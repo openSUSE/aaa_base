@@ -39,14 +39,14 @@
 /var/log/news.all              +4096k   640      root.news
 /var/log/warn                  +1024k   640      root.root
 # apache
-/var/log/httpd/access_log      +4096k   644      root.root     apache
-/var/log/httpd/error_log       +1024k   644      root.root     apache
-/var/log/httpd/jserv.log       +4096k   644      wwwrun.root   apache
-/var/log/httpd/mod_jserv.log   +4096k   644      wwwrun.root   apache
+/var/log/httpd/access_log      +4096k   644      root.root	apache
+/var/log/httpd/error_log       +1024k   644      root.root	apache
+/var/log/httpd/jserv.log       +4096k   644      wwwrun.root	apache
+/var/log/httpd/mod_jserv.log   +4096k   644      wwwrun.root	apache
 # SQUID
-/var/squid/logs/cache.log      +1024k   640      squid.root
-/var/squid/logs/access.log     +4096k   640      squid.root
-/var/squid/logs/store.log      +4096k   640      squid.root
+/var/squid/logs/cache.log      +1024k   640      squid.root	squid
+/var/squid/logs/access.log     +4096k   640      squid.root	squid
+/var/squid/logs/store.log      +4096k   640      squid.root	squid
 # pacct
 /var/account/pacct             +4096k   640      root.root	acct
 # firewals package

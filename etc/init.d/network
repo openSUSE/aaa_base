@@ -73,6 +73,11 @@ case "$1" in
 		    ;;
 	    esac
 	done
+	if test $link = $base ; then
+	   echo -en "${warn}Please run${norm} "
+	   echo  -n "\`rcroute start' "
+	   echo -e  "${warn}to restore the routings.${norm}"
+	fi
 	;;
     stop)
 	if test -x /usr/bin/wall -a -z "$2" ; then
