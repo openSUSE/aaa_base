@@ -1,11 +1,11 @@
 #!/bin/sh
 # /sbin/chkconfig is for RedHat based systems only. The method is
-# not compatible with SuSE Linux, since we use LSB conform init
-# scripts. There is no way to convert chkconfig based init scripts
-# to LSB conform one. You have to do it yourself (look at
-# /etc/init.d/skeleton for a good documented example).
-#
-# This file here is only to make RPM happy and to give user the
-# chance to install RPMs which requieres /sbin/chkconfig.
+# not compatible with SuSE Linux, since we use LSB-conform
+# init scripts. There is no way to convert chkconfig-based
+# init scripts to an LSB-conform one. You have to do it
+# yourself (look at /etc/init.d/skeleton for a well-documented
+# example). The only purpose of this file is to make RPM
+# happy and to give the user the chance to install RPMs which
+# require /sbin/chkconfig.
 exit 0
 
