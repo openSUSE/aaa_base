@@ -32,6 +32,9 @@
 #
 # ChangeLog:
 #
+# 24/9/2002:    v1.35
+# - remove explicit inclusion of module dasd.o, which gives the freedom to
+#   rename it to dasd_mod.o some day (soon).
 # 13/9/2002:    v1.34
 # - fix module dependency handling
 # - fix zfcp handling
@@ -519,7 +522,7 @@ for i in $modules ; do
     raid5) do_raid=1 do_raid5=1 ;;
     zfcp) do_zfcp=1 ; has_zfcp=1;;
     sd_mod) has_sd_mod=1;;
-    dasd) do_dasd=1 ; has_dasd=1;;
+    dasd) do_dasd=1 ;;
     xor) has_xor=1 ;;
     jfs) has_jfs=1 ;;
     dasd_fba_mod) has_dasd_fba=1 ;;
@@ -550,13 +553,12 @@ test "$do_dasd" && {
 note: required dasd module support can not be guessed from currently
 running system.  loading all dasd modules.  this means the system uses
 somewhat more memory than it probably has to."
-	modules="dasd dasd_eckd_mod dasd_fba_mod dasd_diag_mod $modules"
+	modules="dasd_eckd_mod dasd_fba_mod dasd_diag_mod $modules"
     }
 }
 
 # add dasd modules
 test "$do_dasd" && {
-    test "$has_dasd" || modules="dasd $modules"
     test "$has_dasd_eckd" || modules="$modules dasd_eckd_mod"
     test "$has_dasd_fba"  || modules="$modules dasd_fba_mod"
     test "$has_dasd_diag" || modules="$modules dasd_diag_mod"
