@@ -35,23 +35,38 @@ function idedma_main() {
 
     echo "Setting up IDE DMA mode"
 
-	for dev in $DEVICES_FORCE_IDE_DMA ; do
-	    echo $dev |
-	    (
-		IFS=":"
-		# get device and DMA mode
-		while read DEVICE MODE ; do
-		    # set DMA mode by hdparm utility
-		    if [ $MODE == "off" ] ; then
-			$HDPARM -d 0 $DEVICE || rc_failed
-		    elif [ $MODE == "on" ] ; then
-			$HDPARM -d 1 $DEVICE || rc_failed
-		    else
-			$HDPARM -d 1 -X $MODE $DEVICE || rc_failed
-		    fi
-		done
-	    )
+    OLDIFS=$IFS
+    for dev in $DEVICES_FORCE_IDE_DMA ; do
+	IFS=":"
+	# get device and DMA mode
+
+	MODE=""
+	DEVICE=""
+	LASTPART=""
+	FIRST="yes"
+
+	for d in $dev; do
+	    if [ $FIRST == "yes" ] ; then
+		DEVICE=$d
+		FIRST="no"
+	    else
+		DEVICE="$DEVICE$LASTPART"
+		LASTPART=":$d"
+		MODE=$d
+	    fi
 	done
+
+	# set DMA mode by hdparm utility
+	if [ $MODE == "off" ] ; then
+	    $HDPARM -d 0 "$DEVICE" || rc_failed
+	elif [ $MODE == "on" ] ; then
+	    $HDPARM -d 1 "$DEVICE" || rc_failed
+	else
+	    $HDPARM -d 1 -X "$MODE" "$DEVICE" || rc_failed
+	fi
+    done
+
+    IFS=$OLDIFS
 
     rc_status -v
 }
@@ -86,14 +101,10 @@ case "$1" in
     status)
 	echo "IDE DMA mode status: "
 
-	allide=""
-
 	for dev in /proc/ide/hd[a-l]; do
 	    device=`basename $dev`
-	    allide="$allide /dev/$device"
+	    $HDPARM -d /dev/$device 2> /dev/null
         done
-
-	$HDPARM -d $allide 2> /dev/null
 
 	# service is not running
 	rc_failed 3
