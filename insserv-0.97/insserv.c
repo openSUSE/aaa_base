@@ -909,8 +909,9 @@ int main (int argc, char *argv[])
 		 * the defaults of the current script.
 		 */
 		if ((deflvls != service->lvls) && !defaults) {
-		    warn("Warning, current runlevel(s) of script `%s' overwrites defaults.\n",
-			 d->d_name);
+		    if (!del && chkfor(d->d_name, argv, argc) && !(argr[curr_argc]))
+			warn("Warning, current runlevel(s) of script `%s' overwrites defaults.\n",
+			     d->d_name);
 		    xreset(script_inf.default_start);
 		    script_inf.default_start = lvl2str(service->lvls);
 		}
