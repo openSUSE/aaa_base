@@ -29,7 +29,7 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 unset CUPS_SERVER
 #
 for i in $r/etc/sysconfig/language $r/etc/sysconfig/windowmanager $r/etc/sysconfig/suseconfig \
-	 $r/etc/sysconfig/mail $r/etc/sysconfig/printer $r/etc/sysconfig/proxy ; do
+	 $r/etc/sysconfig/mail $r/etc/sysconfig/proxy ; do
   test -f $i || {
     echo "No $i found."
     exit 1
@@ -276,16 +276,6 @@ if test "$PROXY_ENABLED" != "no"; then
 	echo "export no_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
 	echo "setenv no_proxy '$NO_PROXY'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
     fi
-fi
-if test -n "$CUPS_SERVER" ; then
-    echo "CUPS_SERVER='$CUPS_SERVER'" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export CUPS_SERVER" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv CUPS_SERVER '$CUPS_SERVER'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -n "$DEFAULT_PRINTER" ; then
-    echo "PRINTER='$DEFAULT_PRINTER'" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export PRINTER" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv PRINTER '$DEFAULT_PRINTER'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 
 SAVEPATH=$PATH
