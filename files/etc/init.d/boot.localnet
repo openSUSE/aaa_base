@@ -34,11 +34,16 @@ test -n "$XHOSTNAME" && {
     rc_status -v -r
 }
 
+XDOMAINNAME=""
 test -f /etc/defaultdomain && {
-    echo -n Setting up domainname
-    domainname `cat /etc/defaultdomain`
-    rc_status -v -r
-} || domainname ""
+    XDOMAINNAME=`cat /etc/defaultdomain`
+}
+echo -n Setting up domainname
+domainname "$XDOMAINNAME"
+rc_status -v -r
+
+unset XHOSTNAME
+unset XDOMAINNAME
 
 #
 # clean up
