@@ -26,14 +26,14 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     echo_welcome_g () {
     echo "------------------------------------------------------------------------------"
     echo " "
-    echo "                      Willkommen zu S.u.S.E. Linux 5.2"
+    echo "                        Willkommen zu S.u.S.E. Linux"
     echo " "
     }
 
     echo_welcome_e () {
     echo "------------------------------------------------------------------------------"
     echo " "
-    echo "                      Welcome to S.u.S.E. Linux 5.2"
+    echo "                        Welcome to S.u.S.E. Linux"
     echo " "
     }
 
