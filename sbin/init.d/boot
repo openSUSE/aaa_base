@@ -397,7 +397,8 @@ if test -e /var/adm/setup/setup.newinst -o -e /usr/lib/YaST/.configured2 ; then
         # setserial.  Since it is started again, when entering into
         # runlevel 2, we can kill it here.
         #
-        killproc -TERM /usr/bin/gpm > /dev/null 2> /dev/null
+	test -x /usr/sbin/gpm && \
+            killproc -TERM /usr/sbin/gpm > /dev/null 2> /dev/null
     fi
 fi
 

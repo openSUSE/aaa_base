@@ -121,8 +121,7 @@ Diff(){
 	cd $inp || ErrorExit "Cd failed on $inp."
 	find . \( -name '*,v' -o -name '.*,v' \) \
                 | sed 's/,v$//' | sed 's:^./::' | sort | \
-		xargs -r -ihugo rcsdiff -ko -q -u -L hugo hugo | \
-                grep -v '^\\ No newline at end of file' > ../$inp.dif
+		xargs -r -ihugo rcsdiff -ko -q -u -L hugo hugo > ../$inp.dif
 	cd ..
    done
 }
