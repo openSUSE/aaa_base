@@ -75,6 +75,10 @@ case "$1" in
 		"$DISPLAYMANAGER_REMOTE_ACCESS" == "no" ]; then 
 			rc_status -u 
 			rc_exit 
+	fi
+	if [ "$DISPLAYMANAGER" == "/usr/X11R6/bin/xdm" ]; then
+		ln -snf $PIDFILE /etc/X11/xdm/xdm-pid
+		ln -snf /var/log/xdm.errors /etc/X11/xdm/xdm-errors
 	fi 
 	startproc $PIDFILE $DISPLAYMANAGER || rc_failed
 	# After a crash or a kill signal we may have
@@ -95,6 +99,10 @@ case "$1" in
 	# killproc(8) sleep upto five seconds and sends
 	# SIGKILL if xdm does not terminate within
 	#
+	if [ "$DISPLAYMANAGER" == "/usr/X11R6/bin/xdm" ]; then
+		rm -f /etc/X11/xdm/xdm-pid
+		rm -f /etc/X11/xdm/xdm-errors
+	fi
 	killproc $PIDFILE -TERM $DISPLAYMANAGER
 	rc_status -v
 	;;
@@ -115,8 +123,8 @@ case "$1" in
 	;;
     probe)
 	XDMDIR=/usr/X11R6/lib/X11/xdm
-	if test $XDMDIR/xdm-config -nt /var/run/xdm.pid -o \
-	        $XDMDIR/Xservers   -nt /var/run/xdm.pid
+	if test $XDMDIR/xdm-config -nt $PIDFILE -o \
+	        $XDMDIR/Xservers   -nt $PIDFILE
 	then
 	    echo reload
 	fi
