@@ -179,7 +179,7 @@ if test "$USE_MAKE" = "yes" ; then
     make -kirR $J $L -f /etc/init.d/Makefile MODE=boot
     unset J L
 
-else if test -d ${bootrc}/ ; then
+elif test -d ${bootrc}/ ; then
     for i in ${bootrc}/S*; do
 	test -f $i || continue
 
@@ -230,7 +230,6 @@ else if test -d ${bootrc}/ ; then
 	    eval $B="\${cur:+$i }\${cur:-$i}"
 	fi
     done
-  fi
 fi
 
 #

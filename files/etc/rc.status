@@ -32,7 +32,7 @@
 #
 
 if test -z "$LINES" -o -z "$COLUMNS" ; then
-    eval `stty size 2>/dev/null | (read L C; \
+    eval `exec 3<&1; stty size <&3 2>/dev/null | (read L C; \
 	  echo LINES=${L:-24} COLUMNS=${C:-80})`
 fi
 test $LINES   -eq 0 && LINES=24
@@ -48,7 +48,7 @@ case $PATH in
 		;;
 esac
 
-if test -t 1 -a "$TERM" != "raw" -a "$TERM" != "dumb" && stty size > /dev/null 2>&1 ; then
+if test -t 1 -a "$TERM" != "raw" -a "$TERM" != "dumb" && stty size <&1 > /dev/null 2>&1 ; then
 	 esc=`echo -en "\033"`
         extd="${esc}[1m"
         warn="${esc}[1;31m"
