@@ -64,7 +64,7 @@ case "$1" in
 	#
 	# clean up
 	#
-	rm -rf /tmp/screens /tmp/uscreens 2>/dev/null
+	rm -rf /tmp/screens /tmp/uscreens /var/run/screens /var/run/uscreens 2>/dev/null
 	rm -f /var/lock/* /var/lock/*/* \
 	      /tmp/.X*lock /tmp/ssh-*/*agent* \
 	      /var/spool/uucp/LCK* /fsck_corrected_errors 2>/dev/null
@@ -95,11 +95,17 @@ case "$1" in
 	  rc_status -v -r
 	fi
 	for CURDIR in /tmp /tmp/.X11-unix /tmp/.ICE-unix \
-		      /var/tmp /var/tmp/vi.recover ; do
+		      /var/tmp /var/tmp/vi.recover /var/run/uscreens ; do
 	    test -d $CURDIR || \
 		mkdir $CURDIR && \
 		chown root:root $CURDIR && \
 		chmod 1777 $CURDIR
+	done
+	for CURDIR in /var/run/screens ; do
+	    test -d $CURDIR || \
+		mkdir $CURDIR && \
+		chown root:root $CURDIR && \
+		chmod 755 $CURDIR
 	done
 	
 	#
