@@ -1,0 +1,57 @@
+.\" Copyright (C) 2003 SuSE Linux AG
+.\"$Id:$
+.TH SuSEconfig 8
+.SH NAME
+SuSEconfig \- Configure system from variables set in /etc/sysconfig/ files
+.SH SYNOPSIS
+\fBSuSEconfig\fR [\fB-verbose\fR|\fB-quick\fR|\fB-nonewpackage\fR|\fB-force\fR|
+.br
+            \fB-norestarts\fR|\fB-nomodule\fR|\fB-module module\fR]
+.SH DESCRIPTION
+SuSEconfig configures the system according to the variables that are set 
+in the various "/etc/sysconfig/" files.
+It uses the subsystem specific scripts in "/sbin/conf.d/" to configure the
+various subsystems. 
+For example the variables in "/etc/sysconfig/postfix" are evaluated by the
+script "/sbin/conf.d/SuSEconfig.postfix".
+SuSEconfig acts as a backend for YaST2 and activates the configuration changes
+made by YaST2.
+.PP
+These options are available:
+.TP
+.BI "\-verbose "
+Show what is happening.
+.TP
+.BI "\-quick "
+Does not rebuild kernel module dependencies. Is also set by the 
+\fB-module\fR option.
+.TP
+.BI "\-nonewpackage "
+Skips configuration modules that have to be run only when a package is 
+newly installed.
+.TP
+.BI "\-force "
+Not used
+.TP
+.BI "\-norestarts "
+Not used
+.TP
+.BI "\-nomodule "
+Does not execute the subsystem specific modules.
+.TP
+.BI "\-module " modulename
+Runs SuSEconfig with the configuration module for a specific subsystem 
+instead of running all modules.
+.PP
+
+.SH NOTE
+SuSEconfig must be run by the root user.
+.SH FILES
+/etc/conf.d/*,
+/etc/sysconfig/*
+.BR 
+.SH "SEE ALSO"
+.BR 
+.SH AUTHOR
+Burchard Steinbild, Florian La Roche
+.BR 

@@ -1,0 +1,23 @@
+.\" Copyright (C) 2003 SuSE Linux AG
+.\"$Id:$
+.TH safe-rm 8
+.SH NAME
+safe-rm \- delete files a bit more safely
+.SH SYNOPSIS
+\fBsafe-rm\fR /path/to/file
+.SH DESCRIPTION
+\fBsafe-rm\fR deletes files specified with an absolute path 
+        name. Files specified with symbolic links in the 
+        path name will not be erased.
+.SH RETURNS
+\fBsafe-rm\fR returns a non zero return code when it can not erase the file
+safely. 
+.BR 
+.SH NOTE
+This command is used by the system cleanup cron jobs.
+.BR
+.SH "SEE ALSO"
+.BR \fBrm\fR(1)
+.SH AUTHOR
+SuSE Linux AG
+.BR 
