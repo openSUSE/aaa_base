@@ -9,6 +9,11 @@ DISPLAYMANAGER=""
 DISPLAYMANAGER_REMOTE_ACCESS="no"
 
 #
+# Allow remote access of the user root to your display manager
+#
+DISPLAYMANAGER_ROOT_LOGIN_REMOTE="no"
+
+#
 # let the displaymanager start a local Xserver
 # set to "no" for remote-access only
 #
