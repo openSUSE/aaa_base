@@ -104,12 +104,19 @@
 
 
 # Check for missing binaries (stale symlinks should not happen)
+# Note: Special treatment of stop for LSB conformance
 FOO_BIN=/usr/sbin/FOO
-test -x $FOO_BIN || {echo "$FOO_BIN not installed"; exit 5}
+test -x $FOO_BIN || { echo "$FOO_BIN not installed"; 
+	if [ "$1" = "stop" ]; then exit 0;
+	else exit 5; fi; }
 
 # Check for existence of needed config file and read it
 FOO_CONFIG=/etc/sysconfig/FOO
-test -r $FOO_CONFIG || {echo "$FOO_CONFIG not existing"; exit 6}
+test -r $FOO_CONFIG || {echo "$FOO_CONFIG not existing";
+	if [ "$1" = "stop" ]; then exit 0;
+	else exit 6; fi; }
+
+# Read config	
 . $FOO_CONFIG
 
 # Source LSB init functions
