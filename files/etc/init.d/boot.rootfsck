@@ -163,7 +163,10 @@ case "$1" in
 	    fi
 	fi
 	# unmount devfs passed from initrd
-	umount /lib/klibc/dev || true
+        if test -d /lib/klibc/dev/.udevdb ; then
+	    umount /lib/klibc/dev >/dev/null 2>/dev/null
+        fi
+        # start with a clean mtab and enter root fs entry
 	rm -f /etc/mtab*
 	mount -f /
 	;;
