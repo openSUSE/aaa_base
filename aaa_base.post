@@ -98,8 +98,11 @@ for i in passwd group shadow gshadow ; do
     echo -n "Updating etc/$i..."
     touch etc/$i
     cp etc/$i etc/$i.tmp
+    rm -f etc/$i.add
     sort +0 -1 -t: -u etc/$i var/adm/fillup-templates/$i.aaa_base \
-    | sort +0 -1 -t: etc/$i - | uniq -u >> etc/$i
+    | sort +0 -1 -t: etc/$i - | uniq -u > etc/$i.add
+    cat etc/$i.add >> etc/$i
+    rm -f etc/$i.add
     if cmp -s etc/$i etc/$i.tmp ; then
 	echo "unchanged"
     else
