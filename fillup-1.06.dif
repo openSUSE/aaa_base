@@ -1,5 +1,5 @@
 --- SRC/parser.c
-+++ SRC/parser.c	2002/01/29 15:45:38
++++ SRC/parser.c	2002/01/31 11:50:13
 @@ -388,8 +388,10 @@
      {
          Counter = 1;
@@ -53,7 +53,7 @@
  /*------------------ writeOutput -------------------*/
  
  static
-@@ -1375,7 +1410,23 @@
+@@ -1375,7 +1410,27 @@
          &&  ( FileOpened == openFileForWriting( newBaseFileName, &filePointer ) ) )
          {
              listPointer = baseFileBlock;
@@ -69,6 +69,10 @@
 +                    break;
 +
 +                default: 
++                    /* new functionality for fillup-1.10:           */
++                    /* only if basefile variables should be removed */
++                    /* and the first variable includes a header     */
++                    /* this header is preserved within basefile.new.*/
 +                    writeBaseFileHeader( filePointer );
 +                    break;
 +            }
@@ -78,29 +82,3 @@
              {
                  evaluationClass = getVEvaluationClass( listPointer );
                  switch( evaluationClass )
-@@ -1400,7 +1451,24 @@
-     if( FileOpened == openFileForWriting( outputFileName, &filePointer ) )
-     {
-         listPointer = baseFileBlock;
--        for( index = 0; index < numberOfUsedBaseBlocks; index++ )
-+        evaluationClass = getVEvaluationClass( listPointer );
-+        switch( evaluationClass )
-+        {
-+            case Output:
-+            case OutputButRemoved:
-+                displayVerbose( "base", listPointer );
-+                getVBeginOfBlock( listPointer, &variableBlock );
-+                writeVariableBlock( variableBlock, getVLength( listPointer ), 
-+                    filePointer );
-+                break;
-+
-+            default:
-+                writeBaseFileHeader( filePointer );
-+                break;
-+        }
-+
-+        listPointer++;
-+        for( index = 1; index < numberOfUsedBaseBlocks; index++ )
-         {
-             evaluationClass = getVEvaluationClass( listPointer );
-             switch( evaluationClass )

@@ -17,68 +17,88 @@
 . /etc/rc.config
 . /etc/sysconfig/cron_daily
 
-rc_splash "bootnetwork start"
+rc_reset
 
-# clean up old yp bindings
-rm -f /var/yp/binding/*.[12]
+case "$1" in
+  start)
+	rc_splash "bootnetwork start"
 
-#
-# set hostname and domainname
-#
-XHOSTNAME=""
-test -f /etc/HOSTNAME && {
-    XHOSTNAME=`cat /etc/HOSTNAME`
-}
-test -n "$XHOSTNAME" && {
-    echo -n Setting up hostname
-    hostname ${XHOSTNAME%%.*}
-    rc_status -v -r
-}
+	# clean up old yp bindings
+	rm -f /var/yp/binding/*.[12]
+	
+	#
+	# set hostname and domainname
+	#
+	XHOSTNAME=""
+	test -f /etc/HOSTNAME && {
+	    XHOSTNAME=`cat /etc/HOSTNAME`
+	}
+	test -n "$XHOSTNAME" && {
+	    echo -n Setting up hostname
+	    hostname ${XHOSTNAME%%.*}
+	    rc_status -v -r
+	}
+	
+	XDOMAINNAME=""
+	test -f /etc/defaultdomain && {
+	    XDOMAINNAME=`cat /etc/defaultdomain`
+	}
+	echo -n Setting up domainname
+	domainname "$XDOMAINNAME"
+	rc_status -v -r
+	
+	unset XHOSTNAME
+	unset XDOMAINNAME
+	
+	#
+	# clean up
+	#
+	rm -rf /tmp/screens 2>/dev/null
+	rm -f /var/lock/* /var/lock/*/* /tmp/.X*lock \
+	      /var/run/*  /var/run/*/*  /var/spool/uucp/LCK* \
+	      /var/run/utmp /fsck_corrected_errors 2>/dev/null
+	echo -n > /var/run/utmp
+	chmod 664 /var/run/utmp
+	chown root.tty /var/run/utmp
+	# Restore a possibly dynamically modified /etc/resolv.conf
+	if ls /etc/resolv.conf.saved.by.* &>/dev/null ; then
+	    echo "/sbin/modify_resolvconf:"
+	    /sbin/modify_resolvconf cleanup
+	    echo -e "$rc_done_up"
+	fi
+	
+	if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
+	  echo -n "Cleaning temporary directories $TMP_DIRS_TO_CLEAR"
+	  for CURDIR in $TMP_DIRS_TO_CLEAR ; do
+	    find $CURDIR -printf '%P\0' | ( cd $CURDIR ; xargs -0 rm -rf )
+	  done
+	  for CURDIR in /tmp /tmp/.X11-unix /var/tmp /var/tmp/vi.recover ; do
+		test -d $CURDIR || mkdir -p $CURDIR
+		chown root.root $CURDIR
+		chmod 1777 $CURDIR
+	  done
+	  rc_status -v -r
+	fi
+	
+	#
+	# there could be a new kernel version.  reinit /etc/psdevtab, to be sure.
+	#
+	rm -f /etc/psdevtab
+	test -x /bin/ps && /bin/ps > /dev/null 2> /dev/null
+	;;
+    stop)
+	rc_failed 3
+	rc_status -v
+	;;
+    status)
+	rc_failed 4
+	rc_status -v
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status}"
+	exit 1
+	;;
+esac
 
-XDOMAINNAME=""
-test -f /etc/defaultdomain && {
-    XDOMAINNAME=`cat /etc/defaultdomain`
-}
-echo -n Setting up domainname
-domainname "$XDOMAINNAME"
-rc_status -v -r
-
-unset XHOSTNAME
-unset XDOMAINNAME
-
-#
-# clean up
-#
-rm -rf /tmp/screens 2>/dev/null
-rm -f /var/lock/* /var/lock/*/* /tmp/.X*lock \
-      /var/run/*  /var/run/*/*  /var/spool/uucp/LCK* \
-      /var/run/utmp /fsck_corrected_errors 2>/dev/null
-echo -n > /var/run/utmp
-chmod 664 /var/run/utmp
-chown root.tty /var/run/utmp
-# Restore a possibly dynamically modified /etc/resolv.conf
-if ls /etc/resolv.conf.saved.by.* &>/dev/null ; then
-    echo "/sbin/modify_resolvconf:"
-    /sbin/modify_resolvconf cleanup
-    echo -e "$rc_done_up"
-fi
-
-if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
-  echo -n "Cleaning temporary directories $TMP_DIRS_TO_CLEAR"
-  for CURDIR in $TMP_DIRS_TO_CLEAR ; do
-    find $CURDIR -printf '%P\0' | ( cd $CURDIR ; xargs -0 rm -rf )
-  done
-  for CURDIR in /tmp /tmp/.X11-unix /var/tmp /var/tmp/vi.recover ; do
-	test -d $CURDIR || mkdir -p $CURDIR
-	chown root.root $CURDIR
-	chmod 1777 $CURDIR
-  done
-  rc_status -v -r
-fi
-
-#
-# there could be a new kernel version.  reinit /etc/psdevtab, to be sure.
-#
-rm -f /etc/psdevtab
-test -x /bin/ps && /bin/ps > /dev/null 2> /dev/null
-
+rc_exit
+	

@@ -164,8 +164,12 @@ case "$1" in
 	test $main_status -gt 0 && rc_failed 1 || true
 	rc_status -v1
 	;;
+    status)
+	rc_failed 4
+	rc_status -v
+	;;
     *)
-	echo "Usage: $0 {start|stop}"
+	echo "Usage: $0 {start|stop|status}"
 	exit 1
 	;;
 esac

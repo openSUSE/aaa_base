@@ -13,17 +13,50 @@
 # Description:       update firmware and devices for ibmsis controllers
 ### END INIT INFO
 
-#
-# iSeries: native I/O SCSI disks
-#
-if test -d /proc/scsi/ibmsis; then
+
+. /etc/rc.status
+rc_reset
+
+case "$1" in
+  start)
+    #
+    # iSeries: native I/O SCSI disks
+    #
+    if test -d /proc/scsi/ibmsis; then
 	# we need write access (sisupdate: /dev/ibmsisX, scsidev: /dev/sdX)
 	echo "Remounting root file system (/) read/write for scsidev..."
 	mount -n -o remount,rw /
 	# update firmware
-	if [ -x /sbin/sisupdate ]; then echo Running sisupdate...; /sbin/sisupdate; else echo /sbin/sisupdate not found; fi
+	if [ -x /sbin/sisupdate ]; then
+		echo Running sisupdate...
+		/sbin/sisupdate
+	else
+		echo /sbin/sisupdate not found
+	fi
 	# register devices
-	if [ -x /bin/scsidev    ]; then echo Running scsidev...;   /bin/scsidev;    else echo /bin/scsidev not found; fi
+	if [ -x /bin/scsidev ]; then
+		echo Running scsidev...
+		/bin/scsidev
+	else
+		echo /bin/scsidev not found
+	fi
 	mount -n -o remount,ro /
-fi
+    fi
+    ;;
+  stop)
+    rc_failed 3
+    rc_status -v
+    ;;
+  status)
+    rc_failed 4
+    rc_status -v
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|status}"
+    exit 1
+    ;;
+esac
+
+rc_exit
+
 

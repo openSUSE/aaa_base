@@ -32,11 +32,11 @@ test -n "$ORGANIZATION" && {
     check_md5_and_move /etc/organization
 }
 
-if test -n "$TIMEZONE" -a "$TIMEZONE" != "YAST_ASK" -a -x /usr/sbin/zic ; then
+if test -n "$TIMEZONE" -a -x /usr/sbin/zic ; then
     /usr/sbin/zic -l $TIMEZONE
 fi
 
-if test -n "$MOUSE" -a "$MOUSE" != "YAST_ASK" ; then
+if test -n "$MOUSE" ; then
     rm -f /dev/mouse
     ln -sf $MOUSE /dev/mouse
 fi

@@ -242,7 +242,6 @@ fi
 # now look for reports and mail them
 #
 if test -z "$r" -a -n "$SENDMAIL_TYPE" \
-    -a "$SENDMAIL_TYPE" != "YAST_ASK" \
     -a -x /usr/bin/mail -a -x /usr/sbin/sendmail \
     -a -n "$MAIL_REPORTS_TO" -a "$FASTRUN" != "true" ; then
     if test "$MAIL_LEVEL" = all ; then

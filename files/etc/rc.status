@@ -59,6 +59,7 @@ if test "$TERM" != "raw" && stty size > /dev/null 2>&1 ; then
   rc_skipped="${stat}${attn}skipped${norm}"
      rc_dead="${stat}${warn}dead${norm}"
    rc_unused="${stat}${extd}unused${norm}"
+  rc_unknown="${stat}${attn}unknown${norm}"
   rc_done_up="${esc}[1A${rc_done}"
 rc_failed_up="${esc}[1A${rc_failed}"
     rc_reset="${norm}"
@@ -81,6 +82,7 @@ else
   rc_skipped="..skipped"
      rc_dead="..dead"
    rc_unused="..unused"
+  rc_unknown="..unknown"
   rc_done_up="${rc_done}"
 rc_failed_up="${rc_failed}"
     rc_reset=""
@@ -118,9 +120,10 @@ function rc_status ()
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    case "$_rc_status" in
 	    0)	echo -en "$rc_running"	 ;; # service running
-	    1)	echo -en "$rc_dead" 1>&2 ;; # service dead (no pid file)
-	    2)	echo -en "$rc_dead" 1>&2 ;; # service dead (no lock if any)
+	    1)	echo -en "$rc_dead" 1>&2 ;; # service dead (but has pid file)
+	    2)	echo -en "$rc_dead" 1>&2 ;; # service dead (but has lock file)
 	    3)	echo -en "$rc_unused"	 ;; # service not running
+	    4)	echo -en "$rc_unknown"	 ;; # status is unknown
 	    esac
 	    echo -en "$rc_restore"
 	    test -z "${i#-v}" && echo ;;

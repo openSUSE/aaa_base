@@ -16,10 +16,15 @@
 . /etc/rc.status
 . /etc/rc.config
 . /etc/sysconfig/sysctl
-#
-# Enable "dynamic IP patch"
-#
-if test -n "$IP_DYNIP" -a "$IP_DYNIP" != no -a \
+
+rc_reset
+
+case "$1" in
+  start)
+   #
+   # Enable "dynamic IP patch"
+   #
+   if test -n "$IP_DYNIP" -a "$IP_DYNIP" != no -a \
     -e /proc/sys/net/ipv4/ip_dynaddr ; then
     echo -n "Enabling dynamic IP patch"
     case "$IP_DYNIP" in
@@ -28,12 +33,12 @@ if test -n "$IP_DYNIP" -a "$IP_DYNIP" != no -a \
 	*)      ECHO_RETURN=" invalid IP_DYNIP=$IP_DYNIP $rc_skipped" ;;
     esac > /proc/sys/net/ipv4/ip_dynaddr || ECHO_RETURN=$rc_failed
     echo -e "$ECHO_RETURN"
-fi
+   fi
 
-#
-# Enable syn flood protection
-#
-if test -n "$IP_TCP_SYNCOOKIES" -a "$IP_TCP_SYNCOOKIES" != no -a \
+   #
+   # Enable syn flood protection
+   #
+   if test -n "$IP_TCP_SYNCOOKIES" -a "$IP_TCP_SYNCOOKIES" != no -a \
     -e /proc/sys/net/ipv4/tcp_syncookies ; then
     echo -n "Enabling syn flood protection"
     case "$IP_TCP_SYNCOOKIES" in
@@ -41,13 +46,13 @@ if test -n "$IP_TCP_SYNCOOKIES" -a "$IP_TCP_SYNCOOKIES" != no -a \
         *)      ECHO_RETURN=" invalid IP_TCP_SYNCOOKIES=$IP_TCP_SYNCOOKIES $rc_skipped" ;;
     esac > /proc/sys/net/ipv4/tcp_syncookies || ECHO_RETURN=$rc_failed
     echo -e "$ECHO_RETURN"
-fi
+   fi
 
 
-#
-# Enable IP forwarding ?
-#
-if test -e /proc/sys/net/ipv4/ip_forward -a -n "$IP_FORWARD" ; then
+   #
+   # Enable IP forwarding ?
+   #
+   if test -e /proc/sys/net/ipv4/ip_forward -a -n "$IP_FORWARD" ; then
     case $IP_FORWARD in
       yes)
         echo -n "Enabling IP forwarding"
@@ -59,5 +64,21 @@ if test -e /proc/sys/net/ipv4/ip_forward -a -n "$IP_FORWARD" ; then
       ;;
     esac
     rc_status -v -r
-fi
+   fi
+   ;;
+  stop)
+    rc_failed 3
+    rc_status -v
+    ;;
+  status)
+    rc_failed 4
+    rc_status -v
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|status}"
+    exit 1
+    ;;
+esac
+
+rc_exit
 

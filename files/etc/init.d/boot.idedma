@@ -85,6 +85,8 @@ case "$1" in
 	rc_status -v
 	;;
     stop)
+	rc_failed 3
+	rc_status -v
 	;;
     try-restart)
 	## Stop the service and if this succeeds (i.e. the 

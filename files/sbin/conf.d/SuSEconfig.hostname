@@ -98,7 +98,6 @@ if test -n "$XHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
 
     # to get plp to work, we have to add hostname to localhost.
     if test "$NET_DEVICE_FOUND" = false ; then
-        # FIXME: skip if completely unconfigured (old YAST_ASK value)
         grep -vw $XHOSTNAME $r/etc/hosts > $r/etc/hosts.tmp
         echo "127.0.0.2      	$XHOSTNAME 	$NICKNAME" >> $r/etc/hosts.tmp
         cp -p $r/etc/hosts.tmp $r/etc/hosts

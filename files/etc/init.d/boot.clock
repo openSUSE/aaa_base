@@ -15,9 +15,12 @@
 
 . /etc/rc.status
 . /etc/sysconfig/clock
-#
-# set and adjust the CMOS clock
-if test "$HOSTTYPE" = "s390" ; then
+rc_reset
+
+case "$1" in
+  start)
+   # set and adjust the CMOS clock
+   if test "$HOSTTYPE" = "s390" ; then
     echo -n Setting up the system clock
     # On s390 the hwclock is set outside Linux currently.  The kernel
     # always assumes it to be set to UTC.  So if it is set to local
@@ -42,15 +45,30 @@ if test "$HOSTTYPE" = "s390" ; then
        rc_status
     fi
     rc_status -v -r
-else
+   else
     echo -n Setting up the CMOS clock
     test -f /etc/adjtime || echo "0.0 0 0.0" > /etc/adjtime
-    if test "$GMT" != "YAST_ASK" ; then
-	/sbin/hwclock_wrapper --adjust $GMT
-	rc_status
-	/sbin/hwclock_wrapper --hctosys $GMT
-	rc_status
-    fi
+    /sbin/hwclock_wrapper --adjust $GMT
+    rc_status
+    /sbin/hwclock_wrapper --hctosys $GMT
+    rc_status
     rc_status -v -r
-fi
+   fi
+   ;;
+  stop)
+    rc_failed 3
+    rc_status -v
+    ;;
+  status)
+    rc_failed 4
+    rc_status -v
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|status}"
+    exit 1
+    ;;
+esac
+
+rc_exit
+
 

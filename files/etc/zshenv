@@ -1,8 +1,0 @@
-#
-# Source the /etc/profile - done here since we want it to be done as the first
-# thing the zsh does.
-#
-setopt nonomatch
-source /etc/profile
-unsetopt nonomatch
-

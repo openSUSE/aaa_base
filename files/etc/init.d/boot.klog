@@ -15,28 +15,51 @@
 
 . /etc/rc.status
 . /etc/rc.config
-# Read all kernel messages generated until now and put them in one file.
-test -s /var/log/boot.msg && mv -f /var/log/boot.msg /var/log/boot.omsg
-if test -x /sbin/klogd ; then
+
+rc_reset
+
+case "$1" in
+  start)
+    # Read all kernel messages generated until now and put them in one file.
+    test -s /var/log/boot.msg && mv -f /var/log/boot.msg /var/log/boot.omsg
+    if test -x /sbin/klogd ; then
 	echo Creating /var/log/boot.msg
 	/sbin/klogd -s -o -n -f /var/log/boot.msg
 	/bin/sleep 1
 	test -s /var/log/boot.msg
 	rc_status -v1 -r
-elif test -x /bin/dmesg ; then
+    elif test -x /bin/dmesg ; then
 	echo Creating /var/log/boot.msg
 	/bin/dmesg -s16384 > /var/log/boot.msg
 	/bin/sleep 1
 	test -s /var/log/boot.msg
 	rc_status -v1 -r
-fi
-if test -x /usr/sbin/klogconsole ; then
-   if test -x /sbin/showconsole -a `/sbin/showconsole` = "/dev/tty1" ; then
-	( test -c /dev/tty10 && > /dev/tty10 ) > /dev/null 2>&1 && /usr/sbin/klogconsole -r10 
-   else
-	/usr/sbin/klogconsole -l 7 -r 0
-   fi
-fi
+    fi
+    if test -x /usr/sbin/klogconsole ; then
+	if test -x /sbin/showconsole -a `/sbin/showconsole` = "/dev/tty1" ; then
+	    ( test -c /dev/tty10 && > /dev/tty10 ) > /dev/null 2>&1 \
+		&& /usr/sbin/klogconsole -r10 
+	else
+	    /usr/sbin/klogconsole -l 7 -r 0
+	fi
+    fi
+   ;;
+  stop)
+    rc_failed 3
+    rc_status -v
+    ;;
+  status)
+    rc_failed 4
+    rc_status -v
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|status}"
+    exit 1
+    ;;
+esac
+
+rc_exit
+
 
 #
 # Say blogd that I/O is possible now
