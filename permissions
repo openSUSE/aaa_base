@@ -1,0 +1,127 @@
+# /etc/permissions
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Roman Drahtmueller <draht@suse.de>, 2001
+#
+# This file is used by SuSEconfig and chkstat to check or set the modes
+# and ownerships of files and directories in the installation.
+#
+# There is a set of files with similar meaning in a SuSE installation:
+# /etc/permissions  (This file)
+# /etc/permissions.easy
+# /etc/permissions.secure
+# /etc/permissions.paranoid
+# /etc/permissions.local
+# Please see the respective files for their meaning.
+#
+#
+# Format: 
+# <file> <owner>.<group> <permission> 
+#
+# How it works:
+# Change the entries as you like, then call
+# `chkstat -set /etc/permissions´ or /etc/permissions.{easy,secure,paranoid}
+# respectively, or call `SuSEconfig´ as yast and yast2 do after they think
+# that files have been modified in the system.
+#
+# SuSEconfig will use the files /etc/permissions and the ones ending in
+# what the variable $PERMISSION_SECURITY from /etc/rc.config contains.
+# By default, these are the files /etc/permissions, /etc/permissions.easy
+# and /etc/permissions.local for local changes by the admin. In addition,
+# the directory /etc/permissions.d/ can contain permission files that 
+# belong to the packages they modify file modes for. These permission files
+# are to switch between conflicting file modes of the same file paths in
+# different packages (popular example: sendmail and postfix, path
+# /usr/sbin/sendmail).
+#
+# SuSEconfig's usage of the chkstat program can be turned off completely
+# by setting CHECK_PERMISSIONS to "warn" in /etc/rc.config.
+#
+# /etc/permissions is kept to the bare minimum. File modes that differ
+# from the settings in this file should be considered broken.
+#
+# Please see the headers of the files
+#   /etc/permissions.easy
+#   /etc/permissions.secure
+#   /etc/permissions.paranoid
+# as well as
+#   /etc/permissions.local
+# for more information about their particular meaning and their setup.
+
+#
+# root directories:
+#
+
+/                                       root.root        755
+/root                                   root.root        700
+/tmp                                    root.root       1777
+/tmp/.X11-unix                          root.root       1777
+/dev                                    root.root        755
+/bin                                    root.root        755
+/sbin                                   root.root        755
+/lib                                    root.root        755
+/etc                                    root.root        755
+/home                                   root.root        755
+/boot                                   root.root        755
+/opt                                    root.root        755
+/usr                                    root.root        755
+
+#
+# /var:
+#
+
+/var/tmp                                root.root       1777
+#/var/tmp/vi.recover                     root.root       1777
+/var/iptraf                             root.root        700
+/var/lock/subsys                        root.uucp        775
+/var/log                                root.root        755
+/var/run                                root.uucp        755
+/var/spool                              root.root        755
+/var/spool/atjobs                         at.at          700
+/var/spool/atspool                        at.at          700
+/var/spool/cron                         root.root        700
+/var/spool/mqueue                       root.root        700
+/var/spool/news                         news.news        775
+/var/spool/rwho                         root.root        755
+/var/spool/uucp                         uucp.uucp        755
+/var/spool/voice                        root.root        755
+/var/spool/mail                         root.root       1777
+/var/adm                                root.root        755
+/var/adm/backup                         root.root        700
+/var/adm/tripwire                       root.root        700
+/var/cache                              root.root        755
+/var/cache/man                           man.root        755
+/var/saint                              root.root        750
+/var/yp                                 root.root        755
+
+
+#
+# some device files
+#
+
+/dev/zero                               root.root        666
+/dev/null                               root.root        666
+/dev/full                               root.root        622
+/dev/ip                                 root.root        660
+/dev/initrd                             root.disk        660
+/dev/kmem                               root.kmem        640
+
+
+#
+# mixed
+#
+/var/spool/atspool                     at.at             700
+/var/spool/atjobs/.SEQ                 at.at             600
+/var/spool/atjobs/.lockfile            at.at             600
+/var/spool/atjobs                      at.at             700
+/var/run/sudo                          root.root         700
+
+#
+# /etc
+#
+/etc/lilo.conf                         root.root         600
+/etc/passwd                            root.root         644
+/etc/passwd-                           root.root         644
+/etc/shadow                            root.shadow       640
+/etc/shadow-                           root.shadow       640

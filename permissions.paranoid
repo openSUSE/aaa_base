@@ -1,0 +1,690 @@
+# /etc/permissions.paranoid
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Roman Drahtmueller <draht@suse.de>, 2001
+#
+# 
+# See /etc/permissions for general hints on how to use this file.
+#
+# /etc/permissions.paranoid is NOT designed to be used in a single-user as
+# well as a multi-user installation, be it networked or not.
+# Derived from /etc/permissions.secure, it has _all_ sgid and suid bits
+# cleared - therefore, the system might be useable for non-privileged users
+# except for simple tasks like changing passwords and such. In addition, 
+# some of the configuration files are not readable for world any more.
+#
+# Feel free to use this file as a basis of a system configuration that meets
+# your understanding of "secure", for the case that you're a bit paranoid.
+# Since there is no such thing as "it works" with this configuration, please
+# use these settings with care. Some experience on behalf of the administrator
+# is needed to have a system running flawlessly when users are present.
+# In particular, all terminal emulators will not be able to write to utmp
+# and wtmp any more, which renders who(1) and finger(1) useless.
+#
+# Please always keep in mind that your system listens on network sockets
+# in the default configuration. Change this by disabling the services that 
+# you do not need or by restricting access to them using packet filters
+# or tcp wrappers (see hosts_access(5)) to gain a higher level of security
+# in your system.
+
+#
+# Directories
+#
+# closed:
+/var/spool/uucppublic                  root.uucp        1770
+/usr/postgres/data/base                postgres.daemon   700
+/usr/postgres/data/files               postgres.daemon   750
+/usr/lib/ircd                          irc.root          700
+# No games:
+/var/X11R6/scores                      root.root        0750
+/var/catman                            man.root          755
+/var/cron                              root.root         700
+/var/spool/cron                        root.root         700
+/var/cron/tabs                         root.root         700
+/var/spool/cron/tabs                   root.root         700
+/var/lib/xdm/authdir                   root.root         700
+/var/lib/xdm/authdir/authfiles         root.root         700
+/var/lock                              root.uucp         775
+# closed; see "easy"
+/var/man2html                          root.root        0755
+# restrictive, only for "trusted" group users:
+/var/spool/fax/outgoing                root.trusted     1770
+/var/spool/uucp                        uucp.uucp         755
+# no lock files for emacs:
+/var/state/emacs/lock                  root.trusted     1775
+/var/state/xemacs/lock                 root.trusted     1775
+/var/squid                             squid.root        755
+/var/squid/cache                       squid.root        755
+/var/squid/logs                        squid.root        755
+
+
+#
+# /etc
+#
+/etc/exports                           root.root         600
+/etc/fstab                             root.root         600
+/etc/ftpaccess                         root.root         600
+/etc/ftpconversions                    root.root         600
+/etc/ftpusers                          root.root         600
+/etc/HOSTNAME                          root.root         600
+/etc/hosts                             root.root         644
+# Changing the hosts_access(5) files causes trouble with services
+# that do not run as root!
+/etc/hosts.allow                       root.root         600
+/etc/hosts.deny                        root.root         600
+/etc/hosts.equiv                       root.root         600
+/etc/hosts.lpd                         root.root         600
+/etc/inetd.conf                        root.root         600
+/etc/inittab                           root.root         600
+/etc/issue                             root.root         600
+/etc/issue.net                         root.root         600
+/etc/ld.so.conf                        root.root         644
+/etc/ld.so.cache                       root.root         644
+/etc/login.defs                        root.root         600
+/etc/motd                              root.root         644
+/etc/mtab                              root.root         600
+/etc/rmtab                             root.root         600
+/etc/ppp                               root.dialout      750
+/etc/ppp/chap-secrets                  root.root         600
+/etc/ppp/pap-secrets                   root.root         600
+/etc/pppoed.conf                       root.root         600
+/etc/services                          root.root         644
+# changing the global ssh client configuration makes it unreadable
+# and therefore useless. Keep in mind that users can bring their own client!
+/etc/ssh_config                        root.root         644
+/etc/sshd_config                       root.root         640
+/etc/ssh_host_key.pub                  root.root         644
+/etc/ssh_host_key                      root.root         600
+/etc/ssh_random_seed                   root.root         600
+/etc/ssh_known_hosts                   root.root         644
+/etc/ssh/ssh_host_key                  root.root         600
+/etc/ssh/ssh_host_key.pub              root.root         644
+/etc/ssh/ssh_random_seed               root.root         600
+/etc/ssh/ssh_config                    root.root         644
+/etc/ssh/sshd_config                   root.root         640
+/etc/syslog.conf                       root.root         600
+/etc/termcap                           root.root         644
+
+
+#
+# suid system programs that need the suid bit to work:
+#
+/bin/su                                root.root        0755
+/usr/bin/su1                           root.root        0711
+# disable at and cron for users that do not belnong to the group "trusted"
+/usr/bin/at                            root.trusted     0755
+/usr/bin/crontab                       root.trusted     0755
+/usr/bin/gpasswd                       root.trusted     0755
+/usr/bin/newgrp                        root.root        0755
+/usr/bin/passwd                        root.shadow      0755
+# NIS+: "trusted" only.
+/usr/bin/chkey                         root.trusted     0755
+# the default configuration of the sudo package in SuSE distribution is to
+# intimidate users.
+/usr/bin/sudo                          root.root        0755
+# "user" entries in /etc/fstab make mount work for non-root users:
+/usr/bin/ncpmount                      root.trusted     0755
+/usr/bin/ncpumount                     root.trusted     0755
+# mount/umount have had their problems already:
+/bin/mount                             root.root        0755
+/bin/umount                            root.root        0755
+/usr/bin/ziptool                       root.trusted     0755
+/bin/eject                             root.audio       0755
+# sendmail calls the wrapper as daemon.daemon:
+/usr/lib/majordomo/wrapper             root.daemon      0755
+/usr/lib/pt_chown                      root.root        0755
+/sbin/pwdb_chkpwd                      root.shadow      0755
+/sbin/unix_chkpwd                      root.shadow      0755
+
+
+#
+# mixed section: most of it is disabled in this permissions.secure:
+#
+#########################################################################
+/opt/score/deploy/bin.linux-suse/scremote.exe   root.root 0755
+/opt/score/bin/bin.linux-suse/scrun.exe root.root       0755
+# mostly from series beo:
+# see customs(8), export(1) and pmake(1)
+/usr/bin/pmake                          root.root       0755
+/usr/bin/export                         root.root       0755
+/usr/bin/make                           root.root       0755
+# Portable Batch System (PBS) (beo)
+/usr/sbin/pbs_rcp                       root.root       0755
+/usr/sbin/pbs_iff                       root.root       0755
+# queue (beo)
+/usr/bin/queue                          root.root       0755
+# clusterit (beo)
+/usr/bin/dsh                            root.root       0755
+# dqs:
+/usr/bin/qmod                           root.root       0755
+/usr/bin/dqs_options                    root.root       0755
+/usr/bin/qconf                          root.root       0755
+# wants root for realtime scheduling policy class
+# we better let it complain - on an idle machine it has no effect anyway.
+/opt/rtsynth/RTSynth                    root.root       0755
+# same here: package muse
+/usr/bin/muse                           root.root       0755
+# AX.25, NETROM, ROSE and TCP node frontend
+/usr/sbin/node                          root.root       0755
+#########################################################################
+# executor, Mac-simulator:
+/opt/executor/bin/executor-demo-svga    root.root       0755
+# Amiga-emulator
+/usr/bin/suae                           root.root       0755
+# stonx: atari emulator, svgalib:
+/usr/bin/sstonx                         root.root       0755
+# atari800 emulator
+/usr/bin/atari800                       root.root       0755
+# z81 emulator
+/usr/bin/z81txt                         root.root       0511
+# package adamem (Z80 based ColecoVision and ColecoADAM emulator)
+/usr/X11R6/lib/adamem/cvem              root.root       0755
+/usr/X11R6/lib/adamem/adamem            root.root       0755
+/usr/X11R6/bin/v4l-conf                 root.video      0755
+# vmware
+/usr/bin/vmware                         root.trusted    0755
+# iBCS2 binary emulator
+/shlib/protlib_s.emu                    root.root        755
+/shlib/protlib_s.debug                  root.root        755
+/shlib/libnsl_s.emu                     root.root        755
+/shlib/libnsl_s.debug                   root.root        755
+#########################################################################
+# netatalk printer daemon:
+/usr/sbin/papd                          root.lp         0755
+# package cysched:
+/opt/synchronize/linux/bin/synchrod     root.root       0755
+/opt/synchronize/linux/bin/websyncd     root.root       0755
+# scotty:
+/usr/bin/ntping                         root.trusted    0755
+/usr/bin/straps                         root.trusted    0755
+/sbin/cardctl                           root.trusted    0755
+# use it as root if you must:
+/usr/X11R6/bin/dga                      root.root       0755
+/usr/X11R6/bin/xlock                    root.shadow     0755
+# don't link sgid shadow program against complex G/X libs.
+# xlock must not crash. Disabled xlock-mesa.
+/usr/X11R6/bin/xlock-mesa               root.shadow     0755
+/usr/X11R6/bin/xscreensaver             root.shadow     0755
+# This is not extensively tested.
+/usr/bin/vlock                          root.shadow     0755
+/usr/X11R6/bin/XFree86                  root.root       0711
+/usr/X11R6/bin/Xwrapper                 root.root       0755
+/usr/X11R6/bin/xemacs                   root.root       0755
+/usr/bin/emacs                          root.root       0755
+/usr/bin/man                           man.root         0755
+# turned off write and wall by disabling sgid tty:
+/usr/bin/wall                          root.tty         0755
+/usr/bin/write                         root.tty         0755
+# linked against libncurses. Shouldn't be suid root.
+# in this case: better suid root than sgid disk because
+# gid disk privileges can't be dispensed without root.
+/usr/X11R6/lib/X11/xmcd/bin-Linux-i386/cda  root.root   0755
+/usr/X11R6/lib/X11/xmcd/bin-Linux-i386/xmcd root.root   0755
+# linked against svgalib. Make it suid root if you want users to be
+# able to use xaos on the console or keep it safe as this:
+/usr/bin/xaos                          root.root        0755
+# needs suid root for console font switches:
+/usr/bin/kon.bin                        root.trusted    0755
+# thttpd: sgid + executeable only for group wwwadmin. Useless...
+/usr/bin/makeweb                        root.wwwadmin   2750
+# i4l package:
+/usr/sbin/isdnbutton                    root.trusted    0755
+/usr/bin/vboxbeep                       root.trusted    0755
+# ham series, package wampes: Disabled suid root
+/usr/bin/bbs                            root.root       0755
+# ham series, package dpbox
+/usr/bin/dpgate                         dpbox.localham  0755
+# sane package: disabled suid root.
+/usr/bin/as6edriver                     root.root       0755
+# yaps, pager software, accesses /dev/ttyS? . Disabled sgid uucp.
+/usr/bin/yaps                           root.uucp       0755
+# ncpfs tool: trusted only
+/usr/bin/nwsfind                        root.trusted    0755
+# dvisvga package: disabled suid root (for libvga)
+/usr/bin/dvisvga                        root.root       0755
+# maildrop package: change the permissions to the default from the
+# rpm package (0755) if you have to use it. Default to deliver mails
+# on a SuSE system is procmail.
+/usr/bin/maildrop                       root.mail       0755
+/usr/bin/dotlock                        root.mail       0755
+# video editor. package mainactr, series pay
+/opt/MainActor/MainActor                root.root       0755
+/opt/MainActor/MainView                 root.root       0755
+# override package modes: lpc does not need to be suid root
+# for users:
+/usr/bin/lpc                            root.root        755
+
+#
+# networking (need root for the privileged socket)
+#
+/bin/ping                               root.root       0755
+/bin/ping6                              root.root       0755
+/usr/bin/bing                           root.trusted    0755
+/usr/sbin/traceroute                    root.root       0755
+/usr/bin/rcp                            root.root       0755
+/usr/bin/rlogin                         root.root       0755
+/usr/bin/rsh                            root.root       0755
+# ssh is not suid here any more. If a user needs the rsh fallback feature,
+# she should use /usr/bin/rsh.
+/usr/bin/ssh                            root.root       0755
+
+#
+# dialup networking programs
+#
+/usr/sbin/dip                          root.dialout     0755
+/usr/sbin/pppd                         root.dialout     0750
+/usr/sbin/pppoedsp                     root.dialout     0750
+# access to ttyS?: make it sgid uucp.
+/opt/kde/bin/kppp                      root.uucp        0755
+
+
+#
+# linux text console utilities
+#
+/usr/bin/seejpeg                        root.root       0755
+/usr/bin/dumpreg                        root.root       0755
+/usr/bin/fix132x43                      root.root       0755
+/usr/bin/restorefont                    root.root       0755
+/usr/bin/restorepalette                 root.root       0755
+/usr/bin/restoretextmode                root.root       0755
+
+
+
+
+#
+# terminal emulators
+#
+# Administrators shouldn't trust wtmp and utmp. However, if you disable
+# the sgid tty bits here, you won't have any entries at all.
+/opt/kde/bin/konsole                    root.tty        0755
+/opt/kde2/bin/konsole                   root.tty        0755
+/opt/kde/bin/kvt                        root.tty        0755
+/usr/X11R6/bin/xterm                    root.tty        0755
+# screen. multi-user mode needs suid root. discouraged and
+# disabled in "secure".
+/usr/bin/screen                         root.root       0755
+/usr/bin/screen-3.9.8                   root.root       0755
+# spare entries for the future...
+/usr/bin/screen-3.9.9                   root.root       0755
+/usr/bin/screen-4.0.0                   root.root       0755
+/usr/X11R6/bin/hanterm                  root.tty        0755
+/usr/X11R6/bin/kterm                    root.tty        0755
+/usr/X11R6/bin/rxvt                     root.tty        0755
+/usr/X11R6/bin/rxvt.xpm                 root.tty        0755
+/usr/X11R6/bin/wterm                    root.tty        0755
+# this still uses the old /dev/ttypX terminal files. Needs
+# suid root to chown the tty. Should do without, too.
+/usr/X11R6/bin/xwawi                    root.tty        0755
+# same here:
+/usr/X11R6/bin/c16term                  root.tty        0755
+# framebuffer terminal emulator (japanese). Most scary... Compare modes
+# in "easy".
+/usr/bin/jfbterm                        root.tty        0755
+/usr/bin/newvc                          root.root       0755
+/usr/bin/fld                            root.root       0755
+
+#
+# former suid programs
+#
+/usr/X11R6/bin/seyon                    root.uucp       0755
+/usr/X11R6/bin/SuperProbe               root.root        755
+/usr/X11R6/bin/XBF_NeoMagic             root.root        755
+/usr/X11R6/bin/XF86_8514                root.root        755
+/usr/X11R6/bin/XF86_AGX                 root.root        755
+/usr/X11R6/bin/XF86_I128                root.root        755
+/usr/X11R6/bin/XF86_Mach32              root.root        755
+/usr/X11R6/bin/XF86_Mach64              root.root        755
+/usr/X11R6/bin/XF86_Mach8               root.root        755
+/usr/X11R6/bin/XF86_Mono                root.root        755
+/usr/X11R6/bin/XF86_P9000               root.root        755
+/usr/X11R6/bin/XF86_S3                  root.root        755
+/usr/X11R6/bin/XF86_S3V                 root.root        755
+/usr/X11R6/bin/XF86_SVGA                root.root        755
+/usr/X11R6/bin/XF86_VGA16               root.root        755
+/usr/X11R6/bin/XF86_W32                 root.root        755
+/usr/X11R6/bin/XFCom_3DLabs             root.root        755
+/usr/X11R6/bin/XFCom_Cyrix              root.root        755
+/usr/X11R6/bin/XFCom_Rendition          root.root        755
+/usr/X11R6/bin/XFCom_SiS                root.root        755
+/usr/X11R6/bin/XSuSE_AT3D               root.root        755
+/usr/X11R6/bin/XSuSE_Elsa_GLoria        root.root        755
+/usr/X11R6/bin/XSuSE_Matrox             root.root        755
+/usr/X11R6/bin/XSuSE_NVidia             root.root        755
+/usr/X11R6/bin/XSuSE_Tseng              root.root        755
+/usr/X11R6/bin/xcpustate                root.root        755
+/usr/X11R6/bin/xload                    root.root        755
+/usr/X11R6/bin/xosview.bin              root.root        755
+/usr/X11R6/bin/xosview                  root.root        755
+/usr/bin/cu                             root.root        755
+/usr/bin/elm                            root.root        755
+/usr/bin/filter                         root.root        755
+/usr/bin/deliver                        root.root        755
+/usr/bin/lockfile                       root.root        755
+/usr/bin/minicom                        root.uucp        755
+/usr/bin/mutt                           root.root        755
+/usr/bin/procmail                       root.root        755
+/usr/sbin/atrun                         root.root        755
+/usr/bin/mh/inc                         root.root        755
+/usr/bin/mh/msgchk                      root.root        755
+
+
+#
+# kde+kde2
+# (all of them are disabled in permissions.secure except for 
+# the helper programs)
+#
+# Some have more libraries linked than my terminal has lines.
+/opt/kde/bin/ktvision                   root.video      0755
+/opt/kde/bin/ktuner                     root.video      0755
+/opt/kde/bin/konsole_grantpty           root.root       0755
+/opt/kde/bin/kreatecd                   root.root       0755
+/opt/kde/bin/apm_proxy                  root.root       0755
+/opt/kde/bin/kradio                     root.video      0755
+/opt/kde/bin/kwintv                     root.video      0755
+# getting group id disk means root. See modes of disk device files!
+/opt/kde/bin/kscd                       root.disk       0755
+# This has a meaning:
+/opt/kde/bin/kdesud                     root.nogroup    0755
+/opt/kde/bin/kv4lsetup                  root.video      0755
+/usr/bin/kv4lsetup                      root.video      0755
+/opt/kde2/bin/kv4lsetup                 root.video      0755
+/opt/kde2/bin/kdesud                    root.nogroup    0755
+/opt/kde2/bin/konsole_grantpty          root.root       0755
+/opt/kde2/bin/kcheckpass                root.shadow     0755
+
+
+
+#
+# SVGA demos. Need suid to root to initialize console graphics.
+#
+/usr/lib/vga/demos/printftest           root.root       0755
+/usr/lib/vga/demos/linearspeed          root.root       0755
+/usr/lib/vga/demos/bankspeed            root.root       0755
+/usr/lib/vga/demos/addmodetest          root.root       0755
+/usr/lib/vga/demos/mousetest            root.root       0755
+/usr/lib/vga/demos/speedtest            root.root       0755
+/usr/lib/vga/demos/testaccel            root.root       0755
+/usr/lib/vga/demos/plane                root.root       0755
+/usr/lib/vga/demos/testlinear           root.root       0755
+/usr/lib/vga/demos/keytest              root.root       0755
+/usr/lib/vga/demos/fun                  root.root       0755
+/usr/lib/vga/demos/forktest             root.root       0755
+/usr/lib/vga/demos/mjoytest             root.root       0755
+/usr/lib/vga/demos/bg_test              root.root       0755
+/usr/lib/vga/demos/spin                 root.root       0755
+/usr/lib/vga/demos/linearfork           root.root       0755
+/usr/lib/vga/demos/eventtest            root.root       0755
+/usr/lib/vga/demos/joytest              root.root       0755
+/usr/lib/vga/demos/scrolltest           root.root       0755
+/usr/lib/vga/demos/wrapdemo             root.root       0755
+/usr/lib/vga/demos/svidtune             root.root       0755
+/usr/lib/vga/demos/testgl               root.root       0755
+/usr/lib/vga/demos/accel                root.root       0755
+/usr/lib/vga/demos/vgatest              root.root       0755
+/usr/lib/vga/demos/lineart              root.root       0755
+
+
+
+#
+# amanda
+#
+# Well, if you are gid disk already, you don't need these amanda binaries
+# to get root.
+# Anyway, we don't keep the suid bits.
+/usr/sbin/amcheck                       root.disk       0750
+/usr/lib/amanda/calcsize                root.disk       0750
+/usr/lib/amanda/rundump                 root.disk       0750
+/usr/lib/amanda/planner                 root.disk       0750
+/usr/lib/amanda/runtar                  root.disk       0750
+/usr/lib/amanda/dumper                  root.disk       0750
+/usr/lib/amanda/killpgrp                root.disk       0750
+
+
+#
+# ingres
+# all suid and sgid bits cleared.
+/usr/ingres/bin                         root.root       0755
+/usr/ingres/bin/creatdb                 root.root       0751
+/usr/ingres/bin/destroydb               root.root       0751
+/usr/ingres/bin/helpr                   root.root       0751
+/usr/ingres/bin/ingconv                 root.root       0751
+/usr/ingres/bin/ingres                  root.root       0751
+/usr/ingres/bin/printadmin              root.root       0751
+/usr/ingres/bin/printr                  root.root       0751
+/usr/ingres/bin/purge                   root.root       0751
+/usr/ingres/bin/restore                 root.root       0751
+/usr/ingres/bin/sysdump                 root.root       0751
+/usr/ingres/bin/sysmod                  root.root       0751
+/usr/ingres/bin/sysmodfunc              root.root       0751
+/usr/ingres/bin/univingres              root.root       0751
+#   :-)
+/usr/ingres/bin/usersetup               root.root       0700
+/opt/tngfw/ingres/utility/csreport      ingres.sys      0755
+/opt/tngfw/ingres/files/iipwd/ingvalidpw.dis ingres.sys 0755
+/opt/tngfw/secu/bin/cadatefmt           root.root       0755
+/opt/tngfw/cadb/system/cadb_sut         root.root       0755
+/opt/tngfw/cadb/system/dbserver         root.sys        0755
+/opt/tngfw/wv/bin/create_repository     root.root       0755
+/opt/tngfw/wv/bin/fwrpt                 root.root       0755
+/opt/tngfw/wv/bin/dscvrbe               root.root       0755
+/opt/tngfw/wv/bin/carxwvdg              root.root       0755
+/opt/tngfw/wv/bin/discwiz               root.root       0755
+/opt/tngfw/wv/bin/tools_scripts         root.root       0755
+/opt/tngfw/wv/bin/emrport               root.root       0755
+/opt/tngfw/wv/bin/emrpt                 root.root       0755
+/opt/tngfw/wv/bin/logonserver.exe       root.root       0755
+/opt/tngfw/wv/bin/dscvrone              root.root       0755
+/opt/tngfw/wv/bin/dscvrbe_stop          root.root       0755
+/opt/tngfw/cal                          root.root        755
+
+#
+# yard
+# all suid and sgid bits cleared.
+/usr/lib/YARD/bin/yardarch              root.yard       0750
+/usr/lib/YARD/bin/yardck                root.yard       0750
+/usr/lib/YARD/bin/yardd                 root.yard       0750
+/usr/lib/YARD/bin/yardflush             root.yard       0750
+/usr/lib/YARD/bin/yardinit              root.yard       0750
+/usr/lib/YARD/bin/yardlog               root.yard       0750
+/usr/lib/YARD/bin/yardsrv               root.yard       0755
+/usr/lib/YARD/bin/yardstat              root.yard       0755
+/usr/lib/YARD/bin/yarduser              root.yard       0555
+
+
+#
+# gnats
+#
+/usr/lib/gnats/gen-index                gnats.root      4555
+/usr/lib/gnats/pr-edit                  gnats.root      4555
+/usr/lib/gnats/queue-pr                 gnats.root      4555
+
+
+#
+# news (inn)
+#
+# suid root bits cleared.
+/usr/lib/news/bin/rnews                 news.uucp       0755
+/usr/lib/news/bin/startinnfeed          root.news       0755
+/usr/lib/news/bin/inndstart             root.news       0755
+/usr/lib/news/bin/inews                 news.news       0755
+
+
+
+#
+# games of all kinds, toys
+# all suid and sgid bits cleared.
+#
+# directories:
+/var/games                              games.game      0775
+/var/games/sasteroids                   games.game      0775
+/var/games/xbl                          games.game      0775
+/var/games/sail                         games.game      0775
+/var/games/phantasia                    games.game      0775
+/var/games/kugel-scorefile              games.game      0664
+/var/games/kjewelscore                  games.game      0664
+/var/games/xgalaga/scores               games.game      0664
+/var/games/xsok                         games.game      0775
+/var/games/xsok/Cyberbox.score          games.game      0664
+/var/games/xsok/Sokoban.score           games.game      0664
+/var/games/xsok/Xsok.score              games.game      0664
+/var/games/xbill/scores                 games.game      0664
+
+# svgalib:
+/usr/games/abuse.console                root.root       0755
+# SpaceBoom: not in SuSE-7.1 any more:
+/usr/games/SpaceBoom/SpaceBoom          root.root       0755
+/usr/games/bin/synaesthesia             root.root       0755
+/usr/games/sasteroids                   root.game       0755
+/usr/games/snake                        games.game      0755
+/usr/games/wtf                          games.game      0755
+/usr/games/trek                         games.game      0755
+/usr/games/cribbage                     games.game      0755
+/usr/games/arithmetic                   games.game      0755
+/usr/games/quiz                         games.game      0755
+/usr/games/backgammon                   games.game      0755
+/usr/games/banner                       games.game      0755
+/usr/games/canfield                     games.game      0755
+/usr/games/wargames                     games.game      0755
+/usr/games/fish                         games.game      0755
+/usr/games/tetris-bsd                   games.game      0755
+/usr/games/apxserver                    games.game      0755
+/usr/games/huntd                        games.game      0755
+/usr/games/hunt                         games.game      0755
+/usr/games/rot13                        games.game      0755
+/usr/games/boggle                       games.game      0755
+/usr/games/pig                          games.game      0755
+/usr/games/worms                        games.game      0755
+/usr/games/robots                       games.game      0755
+/usr/games/yahtzee                      games.game      0755
+/usr/games/Maelstrom                    games.game      0755
+/usr/games/monop                        games.game      0755
+/usr/games/random                       games.game      0755
+/usr/games/cfscores                     games.game      0755
+/usr/games/number                       games.game      0755
+/usr/games/mille                        games.game      0755
+/usr/games/ppt                          games.game      0755
+/usr/games/adventure                    games.game      0755
+/usr/games/morse                        games.game      0755
+/usr/games/battlestar                   games.game      0755
+/usr/games/sail                         games.game      0755
+/usr/games/rain                         games.game      0755
+/usr/games/countmail                    games.game      0755
+/usr/games/factor                       games.game      0755
+/usr/games/caesar                       games.game      0755
+/usr/games/wump                         games.game      0755
+/usr/games/snscore                      games.game      0755
+/usr/games/gomoku                       games.game      0755
+/usr/games/pom                          games.game      0755
+/usr/games/bin/cfsndserv                games.game      0755
+/usr/games/bin/cfclient                 games.game      0755
+/usr/games/bin/gcfclient                games.game      0755
+/usr/games/bin/crossfire                games.game      0755
+/usr/games/hangman                      games.game      0755
+/usr/games/dm                           games.game      0755
+/usr/games/atc                          games.game      0755
+/usr/games/nethackdir/nethack.qt        games.game      0755
+/usr/games/nethackdir/nethack.tty       games.game      0755
+/usr/games/primes                       games.game      0755
+/usr/games/phantasia                    games.game      0755
+/usr/games/bcd                          games.game      0755
+/usr/games/worm                         games.game      0755
+/usr/games/teachgammon                  games.game      0755
+/usr/bin/ltris                          games.game      0755
+/usr/bin/xlogical                       games.game      0755
+/usr/bin/lbreakout                      games.game      0755
+/usr/X11R6/bin/mirrormagic              games.game      0755
+/usr/X11R6/bin/xboing                   games.game      0755
+/usr/X11R6/bin/xboingrp                 games.game      0755
+/usr/X11R6/bin/xbombs                   games.game      0755
+/usr/X11R6/bin/tophextris               games.game      0755
+/usr/X11R6/bin/xtetris                  games.game      0755
+/usr/X11R6/bin/xhextris                 games.game      0755
+/usr/X11R6/bin/cxhextris                games.game      0755
+/usr/X11R6/bin/xdigger                  games.game      0755
+/usr/X11R6/bin/xkobo                    games.game      0755
+/usr/X11R6/bin/xmris                    games.game      0755
+/usr/X11R6/bin/xbl                      games.game      0755
+/usr/X11R6/bin/battalion                games.game      0755
+/usr/X11R6/bin/rocksndiamonds           games.game      0755
+# gnome-games
+/opt/gnome/bin/gtali                    games.games     0755
+/opt/gnome/bin/gnotski                  games.games     0755
+/opt/gnome/bin/gnome-stones             games.games     0755
+/opt/gnome/bin/glines                   games.games     0755
+/opt/gnome/bin/gnibbles                 games.games     0755
+/opt/gnome/bin/iagno                    games.games     0755
+/opt/gnome/bin/gnotravex                games.games     0755
+/opt/gnome/bin/sol                      games.games     0755
+/opt/gnome/bin/gturing                  games.games     0755
+/opt/gnome/bin/gnome-xbill              games.games     0755
+/opt/gnome/bin/mahjongg                 games.games     0755
+/opt/gnome/bin/gnometris                games.games     0755
+/opt/gnome/bin/ctali                    games.games     0755
+/opt/gnome/bin/gnobots2                 games.games     0755
+/opt/gnome/bin/gnomine                  games.games     0755
+/opt/gnome/bin/same-gnome               games.games     0755
+/opt/gnome/bin/freecell                 games.games     0755
+/opt/gnome/bin/GnomeScott               games.games     0755
+/opt/gnome/bin/gataxx                   games.games     0755
+/opt/gnome/bin/soundtracker             root.root       755
+
+
+
+
+#
+# permission last-minute bugfixes:
+#
+/usr/lib/cmclient/lib                   root.root       755
+/usr/lib/cmclient/lib/swingall.jar      root.root       644
+/usr/lib/cmclient/lib/callman.jar       root.root       644
+/usr/share/doc/packages/pads/README     root.root       644
+/usr/share/doc/packages/susebuch/COPYING root.root      644
+/usr/share/doc/packages/ixware/suinstall.cgi root.root  755
+# pmb
+/usr/lib/pmb/PMB-MPI1                   root.root       755   
+# maxwell
+/usr/lib/maxwell/fonts/Type1            root.root       755
+/usr/lib/maxwell/template               root.root       755
+# ica client:
+/usr/lib/ICAClient/cache                root.root       755
+/usr/knox/log/nlpc.lg1                  root.root       640
+/usr/knox/log/nlpc.lck                  root.root       640
+/usr/include/licq                       root.root       755
+/usr/lib/licq                           root.root       755
+/usr/share/doc/packages/licq            root.root       755
+/usr/share/licq                         root.root       755
+/usr/share/licq/qt-gui                  root.root       755
+/usr/share/licq/qt-gui/dock.console     root.root       755
+/usr/share/licq/qt-gui/dock.flower      root.root       755
+/usr/share/licq/qt-gui/dock.flower-ns   root.root       755
+/usr/share/licq/qt-gui/dock.glicq       root.root       755
+/usr/share/licq/qt-gui/dock.pli         root.root       755
+/usr/share/licq/qt-gui/icons.computer   root.root       755
+/usr/share/licq/qt-gui/icons.icq        root.root       755
+/usr/share/licq/qt-gui/icons.icq2       root.root       755
+/usr/share/licq/qt-gui/icons.mark       root.root       755
+/usr/share/licq/qt-gui/locale           root.root       755
+/usr/share/licq/qt-gui/skin.basic       root.root       755
+/usr/share/licq/qt-gui/skin.basic-ncb   root.root       755
+/usr/share/licq/qt-gui/skin.bheart      root.root       755
+/usr/share/licq/qt-gui/skin.compact     root.root       755
+/usr/share/licq/qt-gui/skin.dim         root.root       755
+/usr/share/licq/qt-gui/skin.e           root.root       755
+/usr/share/licq/qt-gui/skin.gradient    root.root       755
+/usr/share/licq/qt-gui/skin.icq         root.root       755
+/usr/share/licq/qt-gui/skin.icq-ncb     root.root       755
+/usr/share/licq/qt-gui/skin.pli         root.root       755
+/usr/share/licq/qt-gui/skin.shale       root.root       755
+/usr/share/licq/sounds                  root.root       755
+/usr/share/licq/sounds/fun              root.root       755
+/usr/share/licq/sounds/icq              root.root       755
+/usr/share/licq/translations            root.root       755
+/usr/share/licq/utilities               root.root       755
+/var/log/schemeswitch.jrnl              root.root       640
+/var/lib/support                        root.root       700
+/opt/graffy/tmp                         root.root       755
+/opt/XQuick/datadt.inf                  root.root       644
+/opt/XQuick/dataengl.inf                root.root       644
+/etc/icalicense                         root.root       755
+/opt/FrontBase/Databases                root.root       755
