@@ -316,6 +316,8 @@ alias char-major-107      3dfx
 alias char-major-161	  ircomm-tty
 # USB
 alias char-major-166	  acm
+#alias char-major-180	  usbcore
+alias char-major-240	  usb-serial
 
 alias binfmt-332          iBCS
 alias binfmt-518          iBCS
