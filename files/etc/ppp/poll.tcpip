@@ -46,7 +46,8 @@ sleep 5
 # and no running xntp.
 #
 while true ; do
-    test     "$START_XNTPD" = "yes"        && break
+    set -- $(runlevel)
+    test -e /sbin/init.d/rc${2}.d/S*xntpd  && break
     test -x   /usr/sbin/ntpdate            || break
     checkproc /usr/sbin/xntpd &> /dev/null && break
     test -n  "$XNTPD_INITIAL_NTPDATE"      || break

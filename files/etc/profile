@@ -29,7 +29,7 @@ test $? -ne 0 && tty=""
 if test -O "$tty" -a -n "$PS1"; then
     test -z "${TERM}"		&& { TERM=linux; export TERM; }
     test "${TERM}" = "unknown"	&& { TERM=linux; export TERM; }
-    test -x /bin/stty	  && /bin/stty sane cr0 pass8 dec 0>&1
+    test -x /bin/stty	  && /bin/stty sane cr0 pass8 dec
     test -x /usr/bin/tset && /usr/bin/tset -I -Q
     # on iSeries virtual console, detect screen size and terminal
     if test -d /proc/iSeries -a "$tty" = "/dev/tty1" ; then
