@@ -392,9 +392,17 @@ alias char-major-108      ppp_async
 alias char-major-109      lvm
 
 # ppp over ethernet
+# the kernel 2.2 uses pppox
+# the kernel 2.4 uses pppoe
+if `uname -r | cut -f -2 -d .` = 2.2
 alias char-major-144      pppox
 post-install pppox insmod mssclampfw
 pre-remove   pppox rmmod  mssclampfw
+else
+alias char-major-144      pppoe
+post-install pppoe insmod mssclampfw
+pre-remove   pppoe rmmod  mssclampfw
+endif
 
 # IrDA
 alias char-major-161	  ircomm-tty
