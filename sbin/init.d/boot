@@ -438,5 +438,11 @@ if test -e /var/adm/setup/setup.newinst -o -e /usr/lib/YaST/.configured2 ; then
     fi
 fi
 
+#
+# Let YaST2 finish its installation, if you installed with YaST2
+#
+if -f /var/lib/YaST2/runme_at_boot ; then
+    /lib/YaST2/bin/YaST2.firstboot
+fi
 
 exit 0
