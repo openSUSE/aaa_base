@@ -7,16 +7,18 @@
 # REQUIRES bash 2.0 and higher
 #
 
-shopt -s extglob
-
 _def=; _dir=; _file=; _nosp=
 if complete -o default _nullcommand &> /dev/null ; then
     _def="-o default"
     _dir="-o dirnames"
     _file="-o filenames"
 fi
+_minusdd="-d ${_dir}"
+_minusdf="-d ${_file}"
 if complete -o nospace _nullcommand &> /dev/null ; then
     _nosp="-o nospace"
+    _minusdd="${_nosp} ${_dir}"
+    _minusdf="${_nosp} ${_dir}"
 fi
 complete -r _nullcommand &> /dev/null
 
@@ -24,29 +26,45 @@ complete -r _nullcommand &> /dev/null
 function _cd_ ()
 {
     local c=${COMP_WORDS[COMP_CWORD]}
-    local o="$IFS" x
-    IFS='
+    local s g=0
+    local IFS='
 '
-    case "$c" in
-    \~*) COMPREPLY=($(compgen -u -- "$c")) ;;
-    *)	 COMPREPLY=($(compgen -d -- "$c"))
-	 case "$1" in
-	 mkdir)
-	    if test "$c" != "." -a "$c" != ".." ; then
-		for x in $(compgen -f -S .d -- "${c%.}") ; do
-		    if test -d "${x}" -o -d "${x%.d}" ; then
-			continue
-		    fi
-		    COMPREPLY=(${COMPREPLY[@]} ${x})
-		done
-	    fi
-	 esac
+    shopt -q extglob && g=1
+    test $g -eq 0 && shopt -s extglob
+
+    case "$(complete -p $1)" in
+	mkdir) ;;
+	*) s="-S/"  
     esac
-    test -z "$o" && unset IFS || IFS="$o"
+
+    case "$c" in
+    \$\(*\))	eval COMPREPLY=(${c}) ;;
+    \$\(*)	COMPREPLY=($(compgen -c -P '$(' -S ')'	-- ${c#??}))	;;
+    \`*\`)	eval COMPREPLY=(${c}) ;;
+    \`*)	COMPREPLY=($(compgen -c -P '\`' -S '\`' -- ${c#?}))	;;
+    \$\{*\})	eval COMPREPLY=(${c}) ;;
+    \$\{*)	COMPREPLY=($(compgen -v -P '${' -S '}'	-- ${c#??}))	;;
+    \$*)	COMPREPLY=($(compgen -v -P '$' $s	-- ${c#?}))	;;
+    ~*/*)	COMPREPLY=($(compgen -d $s		-- "${c}"))	;;
+    ~*)		COMPREPLY=($(compgen -u $s		-- "${c}"))	;;
+    *)		COMPREPLY=($(compgen -d $s		-- "${c}"))
+    esac
+    case "$1" in
+    mkdir)
+	if test "$c" != "." -a "$c" != ".." ; then
+	    for x in $(compgen -f -S .d -- "${c%.}") ; do
+		if test -d "${x}" -o -d "${x%.d}" ; then
+		    continue
+		fi
+		COMPREPLY=(${COMPREPLY[@]} ${x})
+	    done
+	fi
+    esac
+    test $g -eq 0 && shopt -u extglob
 }
 
-complete -d -F _cd_ ${_dir}		cd rmdir pushd chroot chrootx
-complete -d -F _cd_ ${_file}		mkdir
+complete ${_minusdd} -F _cd_		cd rmdir pushd chroot chrootx
+complete ${_minusdf} -F _cd_		mkdir
 
 # General expanding shell function
 _exp_ ()
@@ -55,8 +73,8 @@ _exp_ ()
     # -d, -f, and -X pattern without missing directories.
     local c=${COMP_WORDS[COMP_CWORD]}
     local a="${COMP_LINE}"
-    local o="$IFS"
     local e s g=0
+    local IFS
 
     shopt -q extglob && g=1
     test $g -eq 0 && shopt -s extglob
@@ -73,7 +91,7 @@ _exp_ ()
 			return					;;
 	esac
 	case "$a" in
-	*-?(c)d*)	e='!*.bz2'				;;
+	*-?\(c\)d*)	e='!*.bz2'				;;
 	*)		e='*.bz2'				;;
 	esac							;;
     bunzip2)		e='!*.bz2'				;;
@@ -87,7 +105,7 @@ _exp_ ()
 			return					;;
 	esac
 	case "$a" in
-	*-?(c)d*)	e='!*.+(gz|tgz|z|Z)'			;;
+	*-?\(c\)d*)	e='!*.+(gz|tgz|z|Z)'			;;
 	*)		e='*.+(gz|tgz|z|Z)'			;;
 	esac							;;
     gunzip)		e='!*.+(gz|tgz|z|Z)'			;;
@@ -112,27 +130,26 @@ _exp_ ()
 
     case "$(complete -p $1)" in
 	*-d*) ;;
-	*) s="/"  
+	*) s="-S/"  
     esac
 
     IFS='
 '
     case "$c" in
-    \$\(*\))		COMPREPLY=(${c}) ;;
+    \$\(*\))	   eval COMPREPLY=(${c}) ;;
     \$\(*)		COMPREPLY=($(compgen -c -P '$(' -S ')'  -- ${c#??}))	;;
-    \`*\`)		COMPREPLY=(${c}) ;;
+    \`*\`)	   eval COMPREPLY=(${c}) ;;
     \`*)		COMPREPLY=($(compgen -c -P '\`' -S '\`' -- ${c#?}))	;;
-    \$\{*\})		COMPREPLY=(${c}) ;;
+    \$\{*\})	   eval COMPREPLY=(${c}) ;;
     \$\{*)		COMPREPLY=($(compgen -v -P '${' -S '}'  -- ${c#??}))	;;
     \$*)		COMPREPLY=($(compgen -v -P '$'          -- ${c#?}))	;;
     ~*/*)		COMPREPLY=($(compgen -f -X "$e"         -- ${c}))	;;
-    ~*)			COMPREPLY=($(compgen -u ${s:+-S$s} 	-- ${c}))	;;
+    ~*)			COMPREPLY=($(compgen -u ${s}	 	-- ${c}))	;;
     *@*)		COMPREPLY=($(compgen -A hostname -P '@' -S ':' -- ${c#*@})) ;;
     *[*?[]*)		COMPREPLY=($(compgen -G "${c}"))			;;
     *[?*+\!@]\(*\)*)
 	if test $g -eq 0 ; then
 			COMPREPLY=($(compgen -f -X "$e" -- $c))
-			test -z "$o" && unset IFS || IFS="$o"
 			test $g -eq 0 && shopt -u extglob
 			return
 	fi
@@ -150,7 +167,6 @@ _exp_ ()
 			done
 	fi									;;
     esac
-    test -z "$o" && unset IFS || IFS="$o"
     test $g -eq 0 && shopt -u extglob
 }
 
@@ -245,7 +261,7 @@ _man_ ()
 
 complete -F _man_ ${_file}		man
 
-unset _def _dir _file _nosp
+unset _def _dir _file _nosp _minusdd _minusdf
 
 #
 # End of /etc/profile.d/complete.bash
