@@ -1,15 +1,34 @@
+# This file controls what Internet media types are sent to the client for
+# given file extension(s).  Sending the correct media type to the client
+# is important so they know how to handle the content of the file.
+# For more information about Internet media types, please read 
+# RFC 2045, 2046, 2047, 2048, and 2077.  The Internet media type
+# registry is at <ftp://ftp.iana.org/in-notes/iana/assignments/media-types/>.
+
+# MIME type			Extension
+application/EDI-Consent
+application/EDI-X12
+application/EDIFACT
 application/activemessage
 application/andrew-inset	ez
 application/applefile
 application/atomicmail
+application/cals-1840
+application/commonground
+application/cybercash
 application/cu-seeme		csm cu
 application/dca-rft
 application/dec-dx
+application/eshop
 application/excel		xls
-application/ghostview		
+application/ghostview
+application/hyperstudio
+application/iges
 application/mac-binhex40	hqx
 application/mac-compactpro	cpt
 application/macwriteii
+application/marc
+application/mathematica
 application/msword		doc dot wrd
 application/news-message-id
 application/news-transmission
@@ -17,17 +36,21 @@ application/octet-stream	bin dms lha lzh exe class
 application/oda			oda
 application/pdf			pdf
 application/pgp			pgp
+application/pgp-encrypted
+application/pgp-keys
 application/pgp-signature	pgp
 application/postscript		ai eps ps
 application/powerpoint		ppt
 application/remote-printing
 application/rtf			rtf
 application/slate
+application/smil		smi smil
 application/wita
 application/wordperfect5.1	wp5
 application/x-123		wk
 application/x-Wingz		wz
 application/x-bcpio		bcpio
+application/x-bzip2		bz2
 application/x-cdlink		vcd
 application/x-chess-pgn		pgn
 application/x-compress		z Z
@@ -42,6 +65,10 @@ application/x-gzip		gz
 application/x-hdf		hdf
 application/x-httpd-php		phtml pht php
 application/x-javascript	js
+application/x-kword		kwd kwt
+application/x-kspread		ksp
+application/x-kpresenter	kpr kpt
+application/x-kchart		chrt
 application/x-koan		skp skd skt skm
 application/x-latex		latex
 application/x-maker		frm maker frame fm fb book fbdoc
@@ -51,8 +78,11 @@ application/x-netcdf		nc cdf
 application/x-ns-proxy-autoconfig	pac
 application/x-perl		pl pm
 application/x-rad		rad
+# The standard is that rpm is audio/x-pn-realaudio-plugin... oh well...
+application/x-rpm		rpm spm
 application/x-sh		sh
 application/x-shar		shar
+application/x-shockwave-flash	swf
 application/x-stuffit		sit
 application/x-sv4cpio		sv4cpio
 application/x-sv4crc		sv4crc
@@ -106,9 +136,10 @@ text/css			css
 text/html			html htm
 text/plain			asc txt c cc h hh cpp hpp
 text/richtext			rtx
+text/rtf			rtf
+text/sgml			sgml sgm
 text/tab-separated-values	tsv
 text/x-setext			etx
-text/x-sgml			sgml sgm
 text/x-vCalendar		vcs
 text/x-vCard			vcf
 text/xml			xml dtd
