@@ -63,7 +63,7 @@ gdm:x:50:15:Gnome Display Manager:/var/lib/gdm:/bin/bash
 postfix:x:51:51:Postfix:/var/spool/postfix:/bin/false
 cyrus:x:96:12:User for Imapd:/usr/cyrus:/bin/bash
 nps:x:53:100:NPS admin:/opt/nps:/bin/bash
-skyrix:x:54:100:SKYRIX admin:/opt/skyrix/skyrix36:/bin/bash
+skyrix:x:54:100:SKYRIX admin:/opt/skyrix:/bin/bash
 dbmaker:x:55:52:Dbmaker Database Admin:/usr/lib/dbmaker:/bin/bash
 fixadm:x:56:53:Linux Fincancial Suite Admin:/opt/fsuite/home/fixadm:/bin/ksh
 fib:x:57:53:Linux Fincancial Suite fib:/opt/fsuite/home/fib:/bin/ksh
