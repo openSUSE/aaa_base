@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.30
+# Version 1.31
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 #         Susanne Oberhauser  <froh@suse.de>
@@ -32,6 +32,12 @@
 #
 # ChangeLog:
 #
+# 27/8/2002:    v1.31
+# - use hwinfo to get unknown vga mode sizes
+# - create missing devices in pivot_root case
+# - fix jfs fsck
+# - resolve module dependencies
+# - match full module name when searching for module parameters
 # 21/8/2002:    v1.30
 # - uuid/label: detect real device with fsck hack
 # - pivot_root: almost completely rewritten, now honors root= kernel
@@ -164,7 +170,6 @@ If the zfcp module is configured in root_dir/etc/zfcp.conf, mk_initrd
 will add zfcp support to the initrd as well.
 
 EOF
-# TODO: The root_device may be specified as /dev/*, LABEL=, UUID=.
 		;;
 	esac
 	exit
@@ -262,7 +267,7 @@ if [ "x$splash" = xauto ] ; then
     vgascan=/dev/null
     test -f $root_dir/etc/lilo.conf && vgascan="$vgascan $root_dir/etc/lilo.conf"
     test -f $root_dir/boot/grub/menu.lst && vgascan="$vgascan $root_dir/boot/grub/menu.lst"
-    for vga in `cat $vgascan | sed -n -e '/^[ 	]*#/d' -e 's/^.*[ 	]*vga[ 	]*=[ 	]*\([0-9x]*\).*$/\1/p'` ; do
+    for vga in `cat $vgascan | sed -n -e '/^[ 	]*#/d' -e 's/^.*[ 	]*vga[ 	]*=[ 	]*\([0-9a-fA-FxX]*\).*$/\1/p'` ; do
 	splashsize=
 	case $vga in
 	    785|786|0x311|0x312) splashsize=640x480   ;;
@@ -270,9 +275,10 @@ if [ "x$splash" = xauto ] ; then
 	    791|792|0x317|0x318) splashsize=1024x768  ;;
 	    794|0x31a|0x31A)     splashsize=1280x1024 ;;
 	    795|0x31b|0x31B)     splashsize=1280x1024 ;;
-            882|0x372)           splashsize=1600x1200 ;;
-	    883|884|0x373|0x374) splashsize=1600x1200 ;;
-            
+	    *)
+		vgahex=`printf 0x%04x "$vga"`
+		splashsize=`hwinfo debug=0 -all +bios.vbe | sed -ne 's/^.*Mode '$vgahex': \([^ ][^ ]*\) .*$/\1/p' 2>/dev/null`
+		;;
 	esac
 	test -n "$splashsize" && test "x${splash/$splashsize/}" = "x$splash" && splash="$splash,$splashsize"
     done
@@ -538,6 +544,19 @@ test "$do_zfcp" && {
     test "$has_zfcp" || modules="zfcp $modules"
 }
 
+# resolve module dependencies
+mods2=
+modprobe=/sbin/modprobe
+[ "$root_dir" != / ] && modprobe="/usr/bin/chroot $root_dir /sbin/modprobe"
+for mod in $modules ; do
+  modlist=`$modprobe -v -n $mod 2>/dev/null | sed -ne 's#^/sbin/insmod.*/\(.*\)\.o.*#\1#p'`
+  [ "$modlist" ] || modlist=$mod
+  for i in $modlist ; do
+    [ "$mods2" = "${mods2/ $i / }" ] && mods2="$mods2 $i "
+  done
+done
+modules=`echo $mods2`
+
 ###################################################################
 # more sanity checks after all variables and $modules are synchronized:
 
@@ -646,14 +665,18 @@ for k in $kernels ; do
 
     if [ "$need_libc" ] ; then
       mkdir -p $tmp_mnt/{lib,etc,proc,mnt}
-      touch $tmp_mnt/etc/fstab
+      echo 'none /proc proc defaults 0 0' > $tmp_mnt/etc/fstab
       cp -a $root_dir/dev/[ehs]d? $root_dir/dev/[ehs]d?[0-9]* $tmp_mnt/dev
       cp -a $root_dir/dev/dasd* $tmp_mnt/dev 2>/dev/null
       cp -a $root_dir/dev/{i2o,ida,cciss,rd} $tmp_mnt/dev
       cp -a $root_dir/lib/ld-*so* $tmp_mnt/lib
       cp -a $root_dir/lib/libc.so.6 $tmp_mnt/lib
       cp -a $root_dir/lib/libz.so.1* $tmp_mnt/lib
-      cp -a $root_dir/bin/{sleep,rm,mount,umount} $tmp_mnt/bin
+      cp -a $root_dir/bin/{mount,umount} $tmp_mnt/bin
+      if [ -z "$use_pivot_root" -a -b "$root_dir/$rootdev" ] ; then
+	mkdir -p $tmp_mnt/${rootdev%/*}
+	cp -a $root_dir/$rootdev $tmp_mnt/${rootdev%/*}
+      fi
     fi
 
     if [ $root_lvm -eq 1 ] ; then
@@ -673,7 +696,7 @@ for k in $kernels ; do
     if [ "$use_pivot_root" ] ; then
       echo " - pivot root support"
       cp -a $root_dir/sbin/pivot_root $tmp_mnt/bin
-      cp -a $root_dir/bin/cat $tmp_mnt/bin
+      cp -a $root_dir/bin/{cat,mknod,mkdir,rmdir} $tmp_mnt/bin
       mkdir -p $tmp_mnt/mnt
     fi
 
@@ -681,7 +704,7 @@ for k in $kernels ; do
       echo " - JFS recovery support"
       cp -a $root_dir/sbin/fsck $tmp_mnt/bin
       cp -a $root_dir/sbin/fsck.jfs $tmp_mnt/bin
-      cp -a $root_dir/lib/libpthread.so.* $tmp_mnt/lib
+      cp -a $root_dir/lib/libuuid.so.* $tmp_mnt/lib
       cp -a $root_dir/lib/libext2fs.so.* $tmp_mnt/lib
       cp -a $root_dir/lib/libcom_err.so.* $tmp_mnt/lib
     fi
@@ -713,7 +736,7 @@ for k in $kernels ; do
           oops 6 "initrd too small"
           continue 2
         fi
-        modparms=`grep "^[	]*options $i" "$root_dir"/etc/modules.conf`
+        modparms=`grep "^[	]*options \<$i\>" "$root_dir"/etc/modules.conf`
         modparms="${modparms#* * }"
 	test -n "$modparms" && modparms=" $modparms"
         echo "echo \"Loading module $i$modparms ...\"" >>$lx_rc
@@ -733,6 +756,7 @@ for k in $kernels ; do
       echo "echo \"zfcp ...\" " >>$lx_rc
       echo "cat /etc/zfcp.conf > /proc/scsi/zfcp/add_map" >>$lx_rc
       echo "echo \"done ...\" " >>$lx_rc
+      echo >>$lx_rc
     fi
 
     if [ "$do_raid" ] ; then
@@ -744,21 +768,59 @@ for k in $kernels ; do
     fi
 
     if [ $root_lvm -eq 1 ] ; then
-      echo "mount -tproc none /proc" >> $lx_rc
-      echo "vgscan" >> $lx_rc
-      echo "vgchange -a y" >> $lx_rc
-      echo "umount /proc" >> $lx_rc
+	# need dummy entry so fsck doesn't complain
+	cat >>$lx_rc <<EOF
+# scan for lvm devices
+mount -n -tproc none /proc
+vgscan
+vgchange -a y
+umount -n /proc
+
+EOF
     fi
 
     [ -n "$oem" ] && cat $oem >> $lx_rc
 
+    if [ "$use_pivot_root" ] ; then
+	cat >>$lx_rc <<EOF
+# create all missing devices
+mount -n -tproc none /proc
+cat /proc/partitions > /.partitions
+(
+  umask 77
+  while read major minor blocks name rest; do
+    case \$name in
+      */*[0-9]) 
+	if ! test -b /dev/\$name ; then
+	  mkdir -p /dev/\$name 2>/dev/null
+	  rmdir /dev/\$name 2>/dev/null
+          mknod /dev/\$name b \$major \$minor
+	fi
+	;;
+      *[0-9]) 
+        test -b /dev/\$name || mknod /dev/\$name b \$major \$minor
+        ;;
+    esac    
+  done < /.partitions
+)
+umount -n /proc
+
+EOF
+    fi
+
     if [ "$has_jfs" ] ; then
-	echo "fsck $rootdev" >>$lx_rc
+	cat >>$lx_rc <<EOF
+# check filesystem if it is of type jfs
+mount -n -tproc none /proc
+fsck -t jfs "$rootdev"
+umount -n /proc
+
+EOF
     fi
 
     if [ "$use_pivot_root" ] ; then
 	cat >>$lx_rc <<EOF
-# mount proc for /proc/sys/kernel/real-root-dev and /proc/partitions
+# mount root with pivot_root call
 opt="-oro"
 rootdev="$rootdev"
 root=
@@ -798,10 +860,14 @@ cd /mnt
 exec <dev/console >dev/console 2>&1
 if test -d initrd ; then
    exec pivot_root . initrd
+elif test -d mnt ; then
+   pivot_root . mnt
+   exec bin/umount -n /mnt
 else
    pivot_root . tmp
    exec bin/umount -n /tmp
 fi
+
 EOF
     fi
 

@@ -6,6 +6,9 @@
 #
 # MAKEDIR.perl  --- Version 0.51
 #
+
+use bytes;
+
 if ( $#ARGV > 0 ) {
     printf(STDERR "%s: Usage:\n", $0);
     printf(STDERR "  %s [info_dir_file]\n", $0); exit(1);
@@ -157,6 +160,7 @@ sub path {
 }
 
 open(DIR, "$filehandle") or die "Cannot open $filehandle\n";
+binmode DIR;
 
 ##
 ## define top format

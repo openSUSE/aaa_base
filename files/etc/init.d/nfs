@@ -35,8 +35,8 @@ done < /etc/fstab
 rc_reset
 case "$1" in
     start|reload)
-	if test "$nfs" = yes ; then
 	echo -n "Importing Net File System (NFS)"
+	if test "$nfs" = yes ; then
 	# Mount all auto NFS devices (-> nfs(5) and mount(8) )
 	#  NFS-Server sometime not reachable during boot phase.
 	#  It's sometime usefull to mount NFS devices in
@@ -56,18 +56,22 @@ case "$1" in
     	# generate new list of available shared libraries
 	#
 	  ldconfig -X 2>/dev/null
+	  rc_status -v
+	else
+	  rc_status -u
 	fi
-	rc_status -v
 	;;
     stop)
+	echo -n "Remove Net File System (NFS)"
 	if test "$nfs" = "yes" ; then
-	  echo -n "Remove Net File System (NFS)"
 	  #
 	  # Unmount in background because during long timeouts
 	  #
 	  umount -at nfs &
 	  sleep 2
 	  rc_status -v
+	else
+	  rc_status -u
 	fi
 	;;
     restart|force-reload)

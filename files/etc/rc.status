@@ -71,7 +71,8 @@ rc_failed_up="${esc}[1A${rc_failed}"
 	# Two arguments: timeout in seconds and offset
 	local n=$1
 	local c=$2
-	(while test $((n--)) -gt 0; do
+	(trap "exit 0" SIGTERM
+	 while test $((n--)) -gt 0; do
 	    sleep 1;
 	    if test $n -gt 9 ; then
 		echo -en "\015${esc}[${c}C(${n}s) "
@@ -82,7 +83,7 @@ rc_failed_up="${esc}[1A${rc_failed}"
     }
     function rc_timer_off () {
 	if test -n "$_rc_timer_pid" ; then
-	    kill -15 $_rc_timer_pid > /dev/null 2>&1
+	    kill -SIGTERM $_rc_timer_pid > /dev/null 2>&1
 	fi
 	unset _rc_timer_pid
     }
