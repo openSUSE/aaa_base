@@ -513,10 +513,6 @@ alias tap13               ethertap
 alias tap14               ethertap
 alias tap15               ethertap
 
-pre-install mga  modprobe "-k" "agpgart"
-pre-install r128 modprobe "-k" "agpgart"
-options agpgart agp_try_unsupported=1
-
 # don't try to reset isa-pnp cards on startup
 options isa-pnp isapnp_reset=0
 

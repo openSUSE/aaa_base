@@ -32,5 +32,9 @@ alias parport_lowlevel    parport_pc
 # alias sound-service-0-0 pmacsound
 # alias sound-service-0-3 pmacsound
 
+# firewire modules, spb2 is for FW drives and CD
+pre-install ohci1394 modprobe ieee1394
+pre-install sbp2 modprobe ohci1394
+
 # begin of ppc part for modules.conf
 

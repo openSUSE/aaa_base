@@ -17,4 +17,10 @@ alias char-major-10-219 mwavedd
 alias char-major-10-170 thinkpad
 # options thinkpad enable_smapi=0
 
+# agpgart is i386 only right now
+pre-install mga  modprobe "-k" "agpgart"
+pre-install r128 modprobe "-k" "agpgart"
+options agpgart agp_try_unsupported=1
+
+
 # end of i386 part for modules.conf
