@@ -100,7 +100,7 @@ if test "$SPLASH" = yes ; then
 fi
 
 function splashtrigger () {
-    test "$SPLASH" = yes || return
+    test "$SPLASH" = yes -a -w /proc/splash || return
     # use nosetsid option if going down otherwise killall5 will kill us
     if test "$RUNLEVEL" = 0 -o "$RUNLEVEL" = 6 ; then
 	/sbin/splash -S -p $SPLASHSTART -t "$1" "$SPLASHCFG"
@@ -110,7 +110,7 @@ function splashtrigger () {
 }
 
 function splashprogress() {
-    test "$SPLASH" = yes || return
+    test "$SPLASH" = yes -a -w /proc/splash || return
     test "$SPLASHNUM" -ge 1 || SPLASHNUM=1
     SPLASHDIFF=$(( ( $SPLASHEND - $SPLASHSTART ) / $SPLASHNUM ))
     /sbin/splash -p "$SPLASHSTART:$SPLASHDIFF" -t "$1" "$SPLASHCFG"

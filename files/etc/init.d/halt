@@ -114,7 +114,7 @@ sync
 # show "the system is down" message
 if test "$SPLASH" = yes ; then
     mount -nt proc proc /proc
-    /sbin/splash -q -t "isdown"
+    /sbin/splash -q -p 65535 -t "isdown"
     umount -n /proc
 fi
 
