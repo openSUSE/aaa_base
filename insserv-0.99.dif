@@ -1,5 +1,16 @@
+--- insserv.c
++++ insserv.c	2002/06/13 15:22:44
+@@ -228,7 +228,7 @@
+     list_t * ptr;
+ 
+     if (cur->serv)
+-	link(name, cur->serv);
++	ln_sf(name, cur->serv);
+ 
+     for (ptr = req_start->next; ptr != req_start; ptr = ptr->next) {
+ 	char * needed = getreq(ptr)->serv;
 --- insserv.conf
-+++ insserv.conf	2002/06/03 21:38:42
++++ insserv.conf	2002/06/13 15:19:09
 @@ -1,7 +1,7 @@
  #
  # All local filesystems are mounted (done during boot phase)
@@ -9,3 +20,24 @@
  
  #
  # Low level networking (ethernet card)
+--- listing.c
++++ listing.c	2002/06/13 15:27:00
+@@ -128,7 +128,7 @@
+  * Link a provided service into a required service.
+  * If the services do not exist, they will be created.
+  */
+-static void ln_sf(const char * isprovided, const char * itrequires)
++void ln_sf(const char * isprovided, const char * itrequires)
+ {
+     dir_t * target = providedir(isprovided);
+     dir_t * dir    = providedir(itrequires);
+--- listing.h
++++ listing.h	2002/06/13 15:25:53
+@@ -84,6 +84,7 @@
+ extern void show_all();
+ extern void requiresl(const char * this, ...);
+ extern void requiresv(const char * this, const char * requires);
++extern void ln_sf(const char * isprovided, const char * itrequires);
+ extern void runlevels(const char * this, const char * lvl);
+ extern unsigned int str2lvl(const char * lvl);
+ extern char * lvl2str(const unsigned int lvl);

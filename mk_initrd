@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.26
+# Version 1.27
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999-2002 SuSE Linux AG
@@ -29,6 +29,11 @@
 # (c) 2000 Karsten Keil   option and kernel 2.4 support
 #
 # ChangeLog:
+#
+# 13/6/2002:	v1.26
+#  - nicer output
+#  - don't do pivot_root for ext3, too dangerous with newer kernels
+#    (and obsoleted by andrea's ext3 reordering patch)
 #
 # 25/3/2002:	v1.26
 #  - handle splash properly if using a different root dir
@@ -336,7 +341,7 @@ fi
 x1=`cat /etc/fstab /proc/mounts 2>/dev/null | grep -E "$rootdev[[:space:]]" | tail -1`
 rootfstype=`echo $x1 | cut -f 3 -d " "`
 
-[ "$rootfstype" = ext3 ] && use_pivot_root=1
+# [ "$rootfstype" = ext3 ] && use_pivot_root=1
 
 echo "using \"$rootdev\" as root device (mounted on \"$root_dir\" as \"$rootfstype\")"
 
@@ -392,12 +397,14 @@ kernel_idx=0
 for k in $kernels ; do
 
   kk="$root_dir$boot_dir/$k"
+  kk="${kk/#\/\///}"
 
   if [ -f "$kk" ] ; then
 
     vv=`/sbin/get_kernel_version $kk`
 
     ii="$root_dir$boot_dir/${initrd_a[$kernel_idx]}"
+    ii="${ii/#\/\///}"
 
     echo
     echo "creating initrd \"$ii\" for kernel \"$kk\" ($vv)"
@@ -444,14 +451,14 @@ for k in $kernels ; do
     fi
 
     if [ $root_lvm -eq 1 ] ; then
-      echo "Adding LVM support"
+      echo " - LVM support"
       cp -a $root_dir/dev/lvm  $tmp_mnt/dev
       cp -a $root_dir/lib/liblvm*.so* $tmp_mnt/lib
       cp -a $root_dir/sbin/{vgscan,vgchange} $tmp_mnt/bin
     fi
 
     if [ -n "$oem" ] ; then
-      echo "Adding OEM resize support"
+      echo " - OEM resize support"
       cp -a $root_dir/sbin/{sfdisk,resize_reiserfs} $tmp_mnt/bin
       cp -a $root_dir/bin/{cp,cat,sed} $tmp_mnt/bin
       cp -a $root_dir/usr/bin/expr  $tmp_mnt/bin
@@ -463,7 +470,7 @@ for k in $kernels ; do
     fi
 
     if [ "$has_jfs" ] ; then
-      echo "Adding JFS recovery support"
+      echo " - JFS recovery support"
       cp -a $root_dir/sbin/fsck.jfs $tmp_mnt/bin
       cp -a $root_dir/lib/libpthread.so.* $tmp_mnt/lib
     fi
@@ -482,40 +489,39 @@ for k in $kernels ; do
       # in this case it doesn't really matter which one we use.
       x=`cd $root_dir ; find lib/modules/$vv/ -name $i.o | head -1`
       if [ "$x" ] ; then
-        echo "module $i is \"/$x\""
         tar -C $root_dir -cf - $x 2>/dev/null | tar -C $tmp_mnt -xpf - 2>/dev/null
         if [ $? != 0 ] ; then
-          echo "failed to add module \"/$x\""
+          echo "$i: failed to add module \"/$x\""
           oops 6 "initrd too small"
           continue 2
         fi
         modparms=`grep "^[ 	]*options $i" "$root_dir"/etc/modules.conf`
         modparms="${modparms#* * }"
-        echo "echo \"Loading module $i $modparms ...\"" >>$lx_rc
-        echo "-> insmod $i $modparms"
-        echo "insmod $i $modparms" >>$lx_rc
+	test -n "$modparms" && modparms=" $modparms"
+        echo "echo \"Loading module $i$modparms ...\"" >>$lx_rc
+        echo " - insmod $i$modparms ($x)"
+        echo "insmod $i$modparms" >>$lx_rc
         echo >>$lx_rc
       else
-        echo "no such module: $i"
+        echo "$i: no such module"
         exit_code=9
 #        oops 7 "no such module: $i"
 #        continue 2
       fi
     done
     if [ "$do_raid" ] ; then
-      echo "-> raidautorun"
+      echo " - raidautorun"
       echo "echo \"raidautorun ...\" " >>$lx_rc
       echo "raidautorun" >>$lx_rc
       echo "echo \"done ...\" " >>$lx_rc
       echo >>$lx_rc
     fi
 
-    if [ $root_lvm -eq 1 ]
-    then
-	echo "mount -tproc none /proc" >> $lx_rc
-	echo "vgscan" >> $lx_rc
-	echo "vgchange -a y" >> $lx_rc
-	echo "umount /proc" >> $lx_rc
+    if [ $root_lvm -eq 1 ] ; then
+      echo "mount -tproc none /proc" >> $lx_rc
+      echo "vgscan" >> $lx_rc
+      echo "vgchange -a y" >> $lx_rc
+      echo "umount /proc" >> $lx_rc
     fi
 
     [ -n "$oem" ] && cat $oem >> $lx_rc
@@ -567,25 +573,19 @@ xxx
       continue
     }
 
-    if [ -n "$splash" -a -x /bin/splash ]
-    then
-	for size in ${splash//,/ }; do
-	    bootsplash_picture="$bootsplash_picture_dir/bootsplash-$size.jpg"
-	    cfgname=`echo $bootsplash_picture|sed s/\.jpg/\.cfg/g`
-	    echo -n "Concatenating splash picture size $size to initrd... "
-	    if [ ! -r $cfgname ]
-	    then
-		echo "No config file present ($cfgname)."
-		continue
-	    fi
-	    if [ ! -r $bootsplash_picture ]
-	    then
-		echo "picture not present ($bootsplash_picture)."
-		continue
-	    fi
-            /bin/splash -s -f $cfgname >> $ii
-	    echo "done."
-	done
+    if [ -n "$splash" -a -x /bin/splash ] ; then
+      for size in ${splash//,/ }; do
+	bootsplash_picture="$bootsplash_picture_dir/bootsplash-$size.jpg"
+	cfgname=`echo $bootsplash_picture|sed s/\.jpg/\.cfg/g`
+	echo " - splash picture ($size)"
+	if [ ! -r $cfgname ] ; then
+	  echo "config file missing ($cfgname)."
+	elif [ ! -r $bootsplash_picture ] ; then
+	  echo "picture missing ($bootsplash_picture)."
+	else
+	  /bin/splash -s -f $cfgname >> $ii
+	fi
+      done
     fi
     
     clean_up
@@ -602,7 +602,7 @@ done
 
 if [ "$exit_code" = 0 -a -f "$root_dir/etc/lilo.conf" ] ; then
   if grep -q initrd "$root_dir/etc/lilo.conf" ; then
-    echo -e "\n\nIf you're using lilo as bootmanager, you may want to run 'lilo' now.\n"
+    echo -e "\nIf you're using lilo as bootmanager, you may want to run 'lilo' now.\n"
   fi
 fi
 
