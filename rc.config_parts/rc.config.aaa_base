@@ -142,17 +142,6 @@ ORGANIZATION=""
 NNTPSERVER="news"
 
 #
-# Have mail daemon on SMTP port? (yes/no)
-# This is needed, if you receive email from other hosts via tcp/ip.
-# It is NOT needed, if you have a uucp-only host or only out-going email.
-#
-# If set to "yes", sendmail will be started as daemon. As uucp site, you
-# can get along with "SMTP=no", if you make a "sendmail -q" call after
-# each poll. (As rmail is only queuing the mail, but not delivering it...)
-#
-SMTP="no"
-
-#
 # From:-Line in email and News postings
 # (otherwise the FQDN is used)
 #
