@@ -39,4 +39,5 @@ oinstall:*:root:root
 dba:*:root:root
 localham:*:root:root
 logmastr:*:root:root
+codine:*:root:root
 nogroup:*:root:root
