@@ -45,8 +45,8 @@ function _cd_ ()
     \$\{*\})	eval COMPREPLY=(${c}) ;;
     \$\{*)	COMPREPLY=($(compgen -v -P '${' -S '}'	-- ${c#??}))	;;
     \$*)	COMPREPLY=($(compgen -v -P '$' $s	-- ${c#?}))	;;
-    ~*/*)	COMPREPLY=($(compgen -d $s		-- "${c}"))	;;
-    ~*)		COMPREPLY=($(compgen -u $s		-- "${c}"))	;;
+    \~*/*)	COMPREPLY=($(compgen -d $s		-- "${c}"))	;;
+    \~*)	COMPREPLY=($(compgen -u $s		-- "${c}"))	;;
     esac
 
     # Replace spaces in path names with `\ '
@@ -141,8 +141,8 @@ _exp_ ()
     \$\{*\})	   eval COMPREPLY=(${c}) ;;
     \$\{*)		COMPREPLY=($(compgen -v -P '${' -S '}'  -- ${c#??}))	;;
     \$*)		COMPREPLY=($(compgen -v -P '$'          -- ${c#?}))	;;
-    ~*/*)		COMPREPLY=($(compgen -f -X "$e"         -- ${c}))	;;
-    ~*)			COMPREPLY=($(compgen -u ${s}	 	-- ${c}))	;;
+    \~*/*)		COMPREPLY=($(compgen -f -X "$e"         -- ${c}))	;;
+    \~*)		COMPREPLY=($(compgen -u ${s}	 	-- ${c}))	;;
     *@*)		COMPREPLY=($(compgen -A hostname -P '@' -S ':' -- ${c#*@})) ;;
     *[*?[]*)		COMPREPLY=($(compgen -G "${c}"))			;;
     *[?*+\!@]\(*\)*)

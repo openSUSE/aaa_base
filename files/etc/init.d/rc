@@ -197,6 +197,18 @@ echo -e "switching to runlevel: ${stat}${extd}${RUNLEVEL}${norm}"
 
 splashtrigger "rlchange $RUNLEVEL"
 
+#
+# Start the user defined resource control script which
+# should be executed _before_ runlevel is entered.
+#
+if test -f /etc/init.d/before.local ; then
+    echo -n "Master Resource Control: "
+    echo "Running /etc/init.d/before.local"
+    /bin/sh /etc/init.d/before.local
+    rc_status -v1 -r
+    splashtrigger "before.local"
+fi
+
 rex="[0-9][0-9]"
 failed=""
 skipped=""
@@ -390,6 +402,18 @@ fi
 #    FAIL : 7 - program is not running (doing "start")
 #    OK   : 7 - program is not running (doing "stop")
 #
+
+#
+# Start the user defined resource control script which
+# should be executed _after_ runlevel is reached.
+#
+if test -f /etc/init.d/after.local ; then
+    echo -n "Master Resource Control: "
+    echo "Running /etc/init.d/after.local"
+    /bin/sh /etc/init.d/after.local
+    rc_status -v1 -r
+    splashtrigger "after.local"
+fi
 
 splashtrigger "rlreached $RUNLEVEL"
 
