@@ -400,7 +400,7 @@ NFS_SERVER="YAST_ASK"
 #
 # should the kernel based NFS server be started on this host
 # (instead of the user space version) ? ("yes" or "no")
-# THIS NEEDS A 2.1 KERNEL WITH NFSD SUPPORT
+# This needs a kernel >= 2.1.120 with nfsd support
 #
 USE_KERNEL_NFSD="no"
 
