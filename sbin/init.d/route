@@ -2,10 +2,10 @@
 # Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Burchard Steinbild <bs@suse.de>, 1996
-#         Werner Fink <werner@suse.de>, 1996-98
+#         Werner Fink <werner@suse.de>, 1996-2000
 #      
 #
-# /sbin/init.d/route		Version 0.3
+# /sbin/init.d/route		Version 0.4
 #
 
 . /etc/rc.config
@@ -78,10 +78,9 @@ case "$todo" in
 	#
 	# Read possible devices out of /proc/net/dev
 	#
-	n=0
+	n=0 # declared as integer
 	while read proc ; do
-	    n=$((n + 1))
-	    test $n -gt 2 || continue
+	    test $((n = n + 1)) -gt 2 || continue
 	    d=${proc%:*}
 	    case "`ifconfig ${d}`" in
 		${d}*UP*) ;;
@@ -98,9 +97,11 @@ case "$todo" in
 	    echo "No interface $sdev found"
 	    ret=$rc_failed
 	fi
-	dests=$(route -n | while read dest rest ; do
-	    test $(( i = $i + 1 )) -gt 2 && echo "$dest"
-	done)
+	n=0 # declared as integer
+	while read  des what mask iface  ; do
+	    test $((n = n + 1)) -gt 2 || continue
+	    control="$control ${des}:${mask}"
+	done < <(route -n)
 	#
 	# Read /etc/route.conf and add routings
 	#
@@ -128,10 +129,12 @@ case "$todo" in
 		fi
 		;;
 	    *)
-		for dest in $dests ; do
-		    test "$dest" = "$des" && break;
+		for ctr in $control ; do
+		    # Skip configured destinations with same genmask
+		    test "$ctr" = "${des}:${mask}"	&& continue 2
+		    test "$ctr" = "0.0.0.0:0.0.0.0" -a \
+			 "${des}" = "default"		&& continue 2
 		done
-		test "$dest" = "$des" && continue;
 		card=""
 		test -n "$iface" && card="dev $iface"
 		case "$what" in
@@ -187,13 +190,12 @@ case "$todo" in
 	    #
 	    # Close all net connection with SIGTERM
 	    #
-	    n=0
+	    n=0 # declared as integer
 	    tports=""
 	    uports=""
 	    dosleep=no
 	    while read prot resv send loc rest ; do
-		n=$((n + 1))
-		if test $n -gt 2 ; then
+		if test $((n = n + 1)) -gt 2 ; then
 		    test "$prot" = "tcp" && tports="${tports} ${loc#*:}"
 		    test "$prot" = "udp" && uports="${uports} ${loc#*:}"
 		fi
@@ -218,10 +220,9 @@ case "$todo" in
 	#
 	# Read possible devices out of /proc/net/dev
 	#
-	n=0
+	n=0 # declared as integer
 	while read proc ; do
-	    n=$((n + 1))
-	    test $n -gt 2 || continue
+	    test $((n = n + 1)) -gt 2 || continue
 	    d="${proc%:*}"
 	    case "`ifconfig ${d}`" in
 		${d}*UP*) ;;
@@ -314,10 +315,9 @@ case "$todo" in
 	$0 stop ${2+"$sdev"} && $0 start ${2+"$sdev"} || ret=$rc_failed
 	;;
     status)
-	n=0
+	n=0 # declared as integer
 	route -n | while read des what mask f m r u iface rest ; do
-	    n=$((n + 1))
-	    test $n -gt 2 || continue
+	    test $((n = n + 1)) -gt 2 || continue
 	    test "${des}"  = "0.0.0.0" && des="default "
 	    test "${what}" = "0.0.0.0" && what="0.0.0.0 "
 	    test "${mask}" = "0.0.0.0" && mask="0.0.0.0 "

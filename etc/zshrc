@@ -17,18 +17,24 @@ else
     bindkey    "^[ "	magic-space
     bindkey    "^[!"	expand-history
 fi
-# environment
+#
+# Environment
+#
 HISTSIZE=500
 HISTFILE=${HOME}/.zsh_history
 SAVEHIST=200
+#
 # Set/unset  shell options
+#
 setopt   globdots correct pushdtohome cdablevars autolist
 setopt   correctall autocd recexact longlistjobs autoresume
 setopt   histignoredups pushdsilent appendhistory histexpiredupsfirst
 setopt   autopushd pushdminus extendedglob rcquotes mailwarning
 unsetopt bgnice autoparamslash
+#
 # Setup some basic programmable completions.  To see more examples
-# of these, check Misc/compctl-examples in the zsh distribution.
+# of these, check out /usr/doc/packages/zsh/compctl-examples.
+#
 compctl -g '*(-/)' cd pushd
 compctl -g '*(/)' rmdir dircmp
 compctl -j -P % -x 's[-] p[1]' -k signals -- kill
@@ -40,6 +46,18 @@ compctl -a unalias
 compctl -v unset typeset declare vared readonly export integer
 compctl -e disable
 compctl -d enable
+#
+# An alternate way is the usage of the new completer
+# (compstyle is a shell function which calls zstyle)
+#
+#autoload -U compinit
+#compinit
+#compstyle '*' completer _complete _correct _approximate
+#
+# Online help
+#
+unalias  run-help
+autoload run-help
 #
 # Common standard keypad and cursor
 #
