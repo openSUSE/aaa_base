@@ -1,23 +1,31 @@
---- etc/inittab	2002/04/25 10:49:58	1.1
-+++ etc/inittab	2002/04/25 11:01:23
-@@ -41,14 +41,10 @@
- 
- # what to do in single-user mode
+--- etc/inittab	2004/04/28 17:34:30	1.1
++++ etc/inittab	2004/04/28 17:41:29
+@@ -44,54 +44,21 @@
  ls:S:wait:/etc/init.d/rc S
--~~:S:respawn:/sbin/sulogin
+ ~~:S:respawn:/sbin/sulogin
  
++# Default HMC/3215/3270 console:
++1:2345:respawn:/sbin/mingetty --noclear /dev/ttyS0 dumb
++# VT220(Linux) console:
++#2:2345:respawn:/sbin/mingetty --noclear /dev/ttyS0 linux
++# additional 3270 terminals:
++#3:2345:respawn:/sbin/mingetty --noclear /dev/ttyS1 dumb
++
  # what to do when CTRL-ALT-DEL is pressed
  ca::ctrlaltdel:/sbin/shutdown -r -t 4 now
--
+ 
 -# special keyboard request (Alt-UpArrow)
 -# look into the kbd-0.90 docs for this
 -kb::kbrequest:/bin/echo "Keyboard Request -- edit /etc/inittab to let this work."
-+~~:S:respawn:/sbin/sulogin /dev/ttyS0
- 
- # what to do when power fails/returns
+-
+-# what to do when power fails/returns
++# not used for now:
  pf::powerwait:/etc/init.d/powerfail start
-@@ -59,29 +55,9 @@
- # for ARGO UPS
+ pn::powerfailnow:/etc/init.d/powerfail now
+ #pn::powerfail:/etc/init.d/powerfail now
+ po::powerokwait:/etc/init.d/powerfail stop
+-
+-# for ARGO UPS
  sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
  
 -# getty-programs for the normal runlevels
@@ -43,9 +51,15 @@
 -#  from the following line:
 -#7:3:respawn:+/etc/init.d/rx tty7
 -
-+# on S/390 enable console login in all runlevels
-+1:012356:respawn:/sbin/sulogin /dev/ttyS0
-+#2:012356:respawn:/sbin/sulogin /dev/ttyS1
- 
- # modem getty.
- # mo:235:respawn:/usr/sbin/mgetty -s 38400 modem
+-
+-# modem getty.
+-# mo:235:respawn:/usr/sbin/mgetty -s 38400 modem
+-
+-# fax getty (hylafax)
+-# mo:35:respawn:/usr/lib/fax/faxgetty /dev/modem
+-
+-# vbox (voice box) getty
+-# I6:35:respawn:/usr/sbin/vboxgetty -d /dev/ttyI6
+-# I7:35:respawn:/usr/sbin/vboxgetty -d /dev/ttyI7
+-
+ # end of /etc/inittab

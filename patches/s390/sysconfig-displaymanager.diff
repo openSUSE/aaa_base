@@ -1,0 +1,8 @@
+--- var/adm/fillup-templates/sysconfig.displaymanager
++++ var/adm/fillup-templates/sysconfig.displaymanager
+@@ -18,1 +18,1 @@
+-DISPLAYMANAGER_REMOTE_ACCESS="no"
++DISPLAYMANAGER_REMOTE_ACCESS="yes"
+@@ -34,1 +34,1 @@
+-DISPLAYMANAGER_STARTS_XSERVER="yes"
++DISPLAYMANAGER_STARTS_XSERVER="no"
