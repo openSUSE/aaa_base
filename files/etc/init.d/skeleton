@@ -97,11 +97,11 @@
 
 # Check for missing binaries (stale symlinks should not happen)
 FOO_BIN=/usr/sbin/FOO
-test -x $FOO_BIN || exit 5
+test -x $FOO_BIN || {echo "$FOO_BIN not installed"; exit 5}
 
 # Check for existence of needed config file and read it
 FOO_CONFIG=/etc/sysconfig/FOO
-test -r $FOO_CONFIG || exit 6
+test -r $FOO_CONFIG || {echo "$FOO_CONFIG not existing"; exit 6}
 . $FOO_CONFIG
 
 # Source LSB init functions
@@ -200,7 +200,7 @@ case "$1" in
 	rc_status -v
 
 	## Otherwise:
-	#$0 stop  &&  $0 start
+	#$0 try-restart
 	#rc_status
 	;;
     reload)

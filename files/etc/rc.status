@@ -39,6 +39,15 @@ test $LINES   -eq 0 && LINES=24
 test $COLUMNS -eq 0 && COLUMNS=80
 export LINES COLUMNS
 
+# Make sure we have /sbin and /usr/sbin in PATH
+case $PATH in 
+	*sbin*)
+		;;
+	*)
+		export PATH=/sbin:/usr/sbin:$PATH
+		;;
+esac
+
 if test -t 1 -a "$TERM" != "raw" -a "$TERM" != "dumb" && stty size > /dev/null 2>&1 ; then
 	 esc=`echo -en "\033"`
         extd="${esc}[1m"
