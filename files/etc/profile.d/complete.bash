@@ -72,11 +72,14 @@ _exp_ ()
     # -d, -f, and -X pattern without missing directories.
     local c=${COMP_WORDS[COMP_CWORD]}
     local a="${COMP_LINE}"
-    local e s g=0
+    local e s g=0 cd dc
     local IFS
 
     shopt -q extglob && g=1
     test $g -eq 0 && shopt -s extglob
+    # Don't be fooled by the bash parser if extglob is off by default
+    cd='*-?(c)d*'
+    dc='*-d?(c)*'
 
     case "$1" in
     compress)		e='*.Z'					;;
@@ -90,7 +93,7 @@ _exp_ ()
 			return					;;
 	esac
 	case "$a" in
-	*-?\(c\)d*)	e='!*.bz2'				;;
+	$cd|$dc)	e='!*.bz2'				;;
 	*)		e='*.bz2'				;;
 	esac							;;
     bunzip2)		e='!*.bz2'				;;
@@ -104,7 +107,7 @@ _exp_ ()
 			return					;;
 	esac
 	case "$a" in
-	*-?\(c\)d*)	e='!*.+(gz|tgz|z|Z)'			;;
+	$cd|$dc)	e='!*.+(gz|tgz|z|Z)'			;;
 	*)		e='*.+(gz|tgz|z|Z)'			;;
 	esac							;;
     gunzip)		e='!*.+(gz|tgz|z|Z)'			;;
