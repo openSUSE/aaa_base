@@ -84,7 +84,7 @@ static dir_t * providedir(const char * name)
 	l_start->next = l_start;
 	l_start->prev = l_start;
 	this->link.target = NULL;
-	this->name  = xstrdup(name);
+	this->name   = xstrdup(name);
 	this->script = NULL;
 	this->order  = 0;
 	this->lvl    = 0;

@@ -128,8 +128,8 @@ out:
  */
 typedef struct serv_struct {
     list_t	   id;
-    char	*name;
     char	order;
+    char       * name;
     unsigned int lvls;
 #ifndef SUSE
     unsigned int lvlk;
@@ -473,6 +473,7 @@ static void scan_script_locations(const char * path)
 	char * rcd = NULL;
 	DIR  * rcdir;
 	struct dirent *d;
+	char * token;
 
 	switch (runlevel) {
 	    case 0: rcd = "rc0.d/";  break;
@@ -503,7 +504,17 @@ static void scan_script_locations(const char * path)
 	    order = atoi(ptr);
 	    ptr += 2;
 
-	    current_structure(ptr, order, runlevel);
+	    scan_script_defaults(d->d_name);
+	    if (!script_inf.provides || script_inf.provides == empty)
+		script_inf.provides = xstrdup(ptr);
+
+	    while ((token = strsep(&script_inf.provides, delimeter)) && *token) {
+		if (*token == '$') {
+		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
+		    continue;
+		}
+		current_structure(token, order, runlevel);
+	    }
 	}
 	popd();
 	closedir(rcdir);
@@ -743,6 +754,7 @@ int main (int argc, char *argv[])
     while ((d = readdir(initdir)) != NULL) {
 	serv_t * service = NULL;
 	char * end;
+	char * token;
 	errno = 0;
 
 	/* d_type seems not to work, therefore use stat(2) */
@@ -829,11 +841,12 @@ int main (int argc, char *argv[])
 	    /* Oops, no comment found, guess one */
 	    script_inf.provides = xstrdup(d->d_name);
 
-	   /*
-	    * Use guessed service to find it within the the runlevels
-	    * (by using the list from the first scan for script locations).
-	    */
+	    /*
+	     * Use guessed service to find it within the the runlevels
+	     * (by using the list from the first scan for script locations).
+	     */
 	    service = findserv(script_inf.provides);
+
 	    if (service) {
 		if (!script_inf.required_start || script_inf.required_start == empty) {
 		    list_t * ptr = NULL;
@@ -851,8 +864,22 @@ int main (int argc, char *argv[])
 	 * Use guessed service to find it within the the runlevels
 	 * (by using the list from the first scan for script locations).
 	 */
-	if (!service)
-	    service = findserv(script_inf.provides);
+	if (!service) {
+	    char * provides = xstrdup(script_inf.provides);
+	    while ((token = strsep(&provides, delimeter)) && *token) {
+		if (*token == '$') {
+		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
+		    continue;
+		}
+		/*
+		 * First serve, first win: we need only one provide name to
+		 * identify a service script because next we handle scripts.
+		 */
+		if ((service = findserv(token)))
+			break;
+	    }
+	    free(provides);
+	}
 
 	if (service) {
 	    if (script_inf.default_start && script_inf.default_start != empty) {
@@ -860,11 +887,11 @@ int main (int argc, char *argv[])
 
 		/*
 		 * Compare all bits, which means `==' and not `&' and overwrite
-		 * the defaults.
+		 * the defaults of the current script.
 		 */
 		if ((deflvls != service->lvls) && !defaults) {
-		    warn("Warning, current runlevel(s) of service `%s' overwrites defaults.\n",
-			 service->name);
+		    warn("Warning, current runlevel(s) of script `%s' overwrites defaults.\n",
+			 d->d_name);
 		    xreset(script_inf.default_start);
 		    script_inf.default_start = lvl2str(service->lvls);
 		}
@@ -876,64 +903,60 @@ int main (int argc, char *argv[])
 	     */
 	}
 
-	if (script_inf.provides) {
-	    char * token;
+	if (chkfor(d->d_name, argv, argc)) {
+	    if (argr[curr_argc]) {
+		char * ptr = argr[curr_argc];
+		struct _mark {
+		    const char * wrd;
+		    char * order;
+		    char ** str;
+		} mark[] = {
+		    {"start=", NULL, &script_inf.default_start},
+		    {"stop=",  NULL, &script_inf.default_stop },
+		    {NULL, NULL, NULL}
+		};
 
-	    if (chkfor(script_inf.provides, argv, argc)) {
-		if (argr[curr_argc]) {
-		    char * ptr = argr[curr_argc];
-		    struct _mark {
-			const char * wrd;
-			char * order;
-			char ** str;
-		    } mark[] = {
-			{"start=", NULL, &script_inf.default_start},
-			{"stop=",  NULL, &script_inf.default_stop },
-			{NULL, NULL, NULL}
-		    };
+		for (c = 0; mark[c].wrd; c++) {
+		    char * order = strstr(ptr, mark[c].wrd);
+		    if (order)
+			mark[c].order = order;
+		}
 
-		    for (c = 0; mark[c].wrd; c++) {
-			char * order = strstr(ptr, mark[c].wrd);
-			if (order)
-			    mark[c].order = order;
+		for (c = 0; mark[c].wrd; c++)
+		    if (mark[c].order) {
+			*(mark[c].order) = '\0';
+			mark[c].order += strlen(mark[c].wrd);
 		    }
 
-		    for (c = 0; mark[c].wrd; c++)
-			if (mark[c].order) {
-			    *(mark[c].order) = '\0';
-			    mark[c].order += strlen(mark[c].wrd);
-			}
-
-
-		    for (c = 0; mark[c].wrd; c++)
-			if (mark[c].order) {
-			    xreset(*(mark[c].str));
-			    *(mark[c].str) = xstrdup(mark[c].order);
-			}
-		}
+		for (c = 0; mark[c].wrd; c++)
+		    if (mark[c].order) {
+			xreset(*(mark[c].str));
+			*(mark[c].str) = xstrdup(mark[c].order);
+		    }
 	    }
+	}
 
-	    while ((token = strsep(&script_inf.provides, delimeter))) {
-		if (*token == '$') {
-		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
-		    continue;
-		}
-		if (makeprov(token, d->d_name) < 0) {
-		    warn("script %s: service %s already provided!\n", d->d_name, token);
-		    continue;
-		}
-		if (script_inf.required_start && script_inf.required_start != empty)
-		    requiresv(token, script_inf.required_start);
-
-		/* Ahh ... set default multiuser with network */
-		if (!script_inf.default_start)
-		    script_inf.default_start = xstrdup("3 5");
-		runlevels(token, script_inf.default_start);
-
-		/*
-		 * required_stop and default_stop arn't used in SuSE Linux.
-		 */
+	while ((token = strsep(&script_inf.provides, delimeter)) && *token) {
+	    if (*token == '$') {
+		warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
+		continue;
 	    }
+	    if (makeprov(token, d->d_name) < 0) {
+		warn("script %s: service %s already provided!\n", d->d_name, token);
+		continue;
+	    }
+	    if (script_inf.required_start && script_inf.required_start != empty)
+		requiresv(token, script_inf.required_start);
+
+	    /* Ahh ... set default multiuser with network */
+	    if (!script_inf.default_start)
+		script_inf.default_start = xstrdup("3 5");
+
+	    runlevels(token, script_inf.default_start);
+
+	    /*
+	     * required_stop and default_stop arn't used in SuSE Linux.
+	     */
 	}
     }
     /* Reset remaining pointers */
