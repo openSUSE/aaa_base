@@ -221,13 +221,13 @@ skipped=""
 callord=""
 
 #
-# Check if we are able to use make for booting
+# Check if we are able to use make like booting
 #
 test -s /etc/init.d/.depend.start || USE_MAKE="no"
 test -s /etc/init.d/.depend.stop  || USE_MAKE="no"
-test -s /etc/init.d/Makefile	  || USE_MAKE="no"
-type -p make &> /dev/null	  || USE_MAKE="no"
 test "$DO_CONFIRM"   = "yes"	  && USE_MAKE="no"
+test "$RUN_PARALLEL" = "yes"	  || USE_MAKE="no"
+startpar -v &> /dev/null	  || USE_MAKE="no"
 
 #
 # Do we stop/start services in parallel?
@@ -235,22 +235,25 @@ test "$DO_CONFIRM"   = "yes"	  && USE_MAKE="no"
 startpar=$(type -p startpar)
 test "$RUN_PARALLEL" = "yes" || startpar=""
 test "$DO_CONFIRM"   = "yes" && startpar=""
-test "$USE_MAKE"     = "yes" && startpar=""
 
 #
-# Stop/Start services with make
+# Stop/Start services with make like feature of startpar
 #
-if test "$USE_MAKE" = "yes" ; then
+if test "$USE_MAKE" = "yes" -a -n "$startpar" ; then
 
-    test "$RUN_PARALLEL" = "yes" && J=-j
-    case `uname -r` in
-    *-smp) L='-l 8' ;;
-    *)	   L='-l 4' ;;
-    esac
-    make -kirR $J $L -f /etc/init.d/Makefile MODE=stop
-    make -kirR $J $L -f /etc/init.d/Makefile MODE=start
-    unset J L
+    startopt="-p4 -t 20 -T 3"
+    test -x /sbin/splash -a "$SPLASH" != "no" && startopt="$startopt -S"
 
+    eval $($startpar $startopt -M stop  -P $PREVLEVEL -R $RUNLEVEL)
+    failed="${failed:+$failed }$failed_service"
+    skipped="${skipped:+$skipped }$skipped_service"
+
+    eval $($startpar $startopt -M start -P $PREVLEVEL -R $RUNLEVEL)
+    failed="${failed:+$failed }$failed_service"
+    skipped="${skipped:+$skipped }$skipped_service"
+
+    unset failed_service skipped_service
+    unset startopt startpar
 else
 #
 # First check and test services of previous and current (new) runlevel.

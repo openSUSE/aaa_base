@@ -31,9 +31,9 @@ RUN_PARALLEL=yes
 #
 # Run all scripts or rather start/stop all services
 # by using the make command and if RUN_PARALLEL is
-# set to "yes" just use the -j option of make
+# set to "yes" just use a make like boot behaviour
 #
-USE_MAKE=yes
+USE_MAKE=no
 
 ## Type:	yesno
 ## Default:	no
