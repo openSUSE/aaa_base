@@ -43,13 +43,6 @@ if [ -f /etc/rc.config ] ; then
     . /etc/rc.config
 fi
 
-if [ -f /usr/lib/teTeX/texmf.cnf ] ; then
-    TETEXDIR=/usr/lib/teTeX
-    PATH=$PATH:/usr/bin/TeX
-    export TETEXDIR PATH
-fi
-
-
 test "$MAX_DAYS_FOR_LOG_FILES" -gt 0 2> /dev/null || MAX_DAYS_FOR_LOG_FILES=0
 export MAX_DAYS_FOR_LOG_FILES
 
@@ -218,16 +211,6 @@ if test -n "$RPMDB_BACKUP_DIR" -a -e /var/lib/rpm/packages.rpm ; then
             rm -f $NEWNAME $NEWNAME.gz
         fi
     fi
-fi
-# 
-# update database for tetex
-#
-if [ -x /usr/bin/TeX/texhash ] ; then
-    # maybe /var/texfonts is mounted via nfs with root_squash. This could
-    # lead into trouble, so omit nfs directories.
-    for DUMMY in `find /var/texfonts -prune -type d ! -fstype nfs 2> /dev/null` ; do
-        /usr/bin/TeX/texhash 2> /dev/null
-    done
 fi
 
 

@@ -41,6 +41,7 @@
 /usr/bin/chsh                          root.shadow       755
 /usr/bin/dos                           root.root         755
 /usr/bin/expiry                        root.root         755
+/usr/bin/gnuplot                       root.root         755
 /usr/bin/suidperl                      root.root         755
 /usr/bin/zgv                           root.root         755
 /usr/games/abuse-1.10/keydrv           root.root         755
@@ -63,7 +64,7 @@
 # sgid video
 #
 /opt/kde/bin/kradio                    root.video        755
-/usr/X11R6/bin/xawt                    root.video        755
+/usr/X11R6/bin/xawtv                   root.video        755
 /usr/bin/radio                         root.video        755
 
 
@@ -89,7 +90,6 @@
 /opt/kde/bin/kswarm.kss                root.root         755
 /opt/kde/bin/kppp                      root.root         755
 /opt/kde/bin/kbat.kss                  root.root         755
-/opt/kde/bin/kvt                       root.tty          755
 
 
 

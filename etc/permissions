@@ -61,6 +61,7 @@
 /bin/ping                              root.root        4755
 /bin/su                                root.root        4755
 /bin/umount                            root.root        4755
+/opt/kde/bin/kvt                       root.tty         4755
 /sbin/cardctl                          root.root        4755
 /sbin/isdnbutton                       root.root        4755
 /usr/X11R6/bin/Xwrapper                root.root        4755
@@ -374,7 +375,6 @@
 /usr/bin/elm                           root.root         755
 /usr/bin/filter                        root.root         755
 /usr/bin/deliver                       root.root         755
-/usr/bin/gnuplot                       root.root         755
 /usr/bin/lockfile                      root.root         755
 /usr/bin/minicom                       root.uucp         755
 /usr/bin/mutt                          root.root         755

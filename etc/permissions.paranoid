@@ -75,7 +75,6 @@
 /opt/kde/bin/kswarm.kss                root.root         755
 /opt/kde/bin/kppp                      root.root         755
 /opt/kde/bin/kbat.kss                  root.root         755
-/opt/kde/bin/kvt                       root.tty          755
 /opt/kde/bin/kscd                      root.disk         755
 
 
@@ -84,7 +83,7 @@
 # sgid video
 #
 /opt/kde/bin/kradio                    root.video        755
-/usr/X11R6/bin/xawt                    root.video        755
+/usr/X11R6/bin/xawtv                   root.video        755
 /usr/bin/radio                         root.video        755
 
 
@@ -200,7 +199,7 @@
 # We do not really need it. Else, we could make it executable
 # only through a 750 directory root.trusted.
 /usr/bin/gpasswd                       root.shadow      4750
-# WHY ON HELL was gnuplot suid root !!!!!
+# WHY ON HELL was gnuplot suid root !!!!!  because it uses svgalib
 /usr/bin/gnuplot                       root.root        755
 /usr/bin/ncpmount                      root.trusted     4750
 /usr/bin/ncpumount                     root.trusted     4750

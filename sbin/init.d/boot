@@ -154,9 +154,17 @@ rm -f /etc/mtab* /etc/nologin /nologin /fastboot
 MODULES_DIR=/lib/modules/`uname -r` 
 if test -x /sbin/depmod -a -d $MODULES_DIR ; then
     ECHO_RETURN=$rc_done
-    echo -n Setting up $MODULES_DIR
-    /sbin/depmod -a 2> /dev/null > /dev/null || ECHO_RETURN=$rc_failed
-    echo -e "$ECHO_RETURN"
+    for i in $MODULES_DIR/* $MODULES_DIR/*/* ; do
+        if test $i -nt $MODULES_DIR/modules.dep ; then
+            rm -f $MODULES_DIR/modules.dep
+            break
+        fi
+    done
+    if test ! -e $MODULES_DIR/modules.dep ; then
+        echo -n Setting up $MODULES_DIR
+        /sbin/depmod -a 2> /dev/null > /dev/null || ECHO_RETURN=$rc_failed
+        echo -e "$ECHO_RETURN"
+    fi
 fi
 
 #

@@ -29,11 +29,11 @@
 # 'normal' suid root programs
 #
 /usr/X11R6/bin/cardinfo                root.root        4755
-/usr/X11R6/bin/v4l-conf                root.video       4755
+/usr/X11R6/bin/v4l-conf                root.video       4750
 /usr/X11R6/bin/rxvt                    root.tty         4755
-/usr/X11R6/bin/xtvscreen.SuSE-dynamic  root.video       4755
-/usr/X11R6/bin/xtvscreen.SuSE-static   root.video       4755
-/usr/bin/bttvgrab                      root.video       4755
+/usr/X11R6/bin/xtvscreen.SuSE-dynamic  root.video       4750
+/usr/X11R6/bin/xtvscreen.SuSE-static   root.video       4750
+/usr/bin/bttvgrab                      root.video       4750
 /usr/bin/chage                         root.shadow      4755
 /usr/bin/chfn                          root.shadow      4755
 /usr/bin/chsh                          root.shadow      4755
@@ -63,7 +63,7 @@
 # sgid video
 #
 /opt/kde/bin/kradio                    root.video       2755
-/usr/X11R6/bin/xawt                    root.video       2755
+/usr/X11R6/bin/xawtv                   root.video       2755
 /usr/bin/radio                         root.video       2755
 
 
@@ -89,7 +89,6 @@
 /opt/kde/bin/kswarm.kss                root.shadow      2755
 /opt/kde/bin/kppp                      root.root        4755
 /opt/kde/bin/kbat.kss                  root.shadow      2755
-/opt/kde/bin/kvt                       root.tty         4755
 
 
 #
