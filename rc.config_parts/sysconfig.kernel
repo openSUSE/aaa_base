@@ -5,3 +5,10 @@
 #
 INITRD_MODULES=""
 
+#
+# Size parameter for mounting the shmfs filesystem. The kernel defaults
+# to 50% of the available RAM size, but this might not be enough for
+# some special setups.
+#
+SHMFS_SIZE=""
+
