@@ -3,7 +3,7 @@
 @@ -38,14 +38,7 @@
  
  # what to do in single-user mode
- ls:S:wait:/sbin/init.d/rc S
+ ls:S:wait:/etc/init.d/rc S
 -~~:S:respawn:/sbin/sulogin
 -
 -# what to do when CTRL-ALT-DEL is pressed
@@ -15,10 +15,10 @@
 +~~:S:respawn:/sbin/sulogin /dev/console
  
  # what to do when power fails/returns
- pf::powerwait:/sbin/init.d/powerfail    start
+ pf::powerwait:/etc/init.d/powerfail    start
 @@ -53,42 +46,9 @@
- #pn::powerfail:/sbin/init.d/powerfail now
- po::powerokwait:/sbin/init.d/powerfail  stop
+ #pn::powerfail:/etc/init.d/powerfail now
+ po::powerokwait:/etc/init.d/powerfail  stop
  
 -# for ARGO UPS
 -sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
@@ -44,7 +44,7 @@
 -#  This is for the package xdmsc, after installing and
 -#  and configuration you should remove the comment character
 -#  from the following line:
--#7:2:respawn:+/sbin/init.d/rx tty7
+-#7:2:respawn:+/etc/init.d/rx tty7
 -
 -
 -

@@ -1,0 +1,147 @@
+#! /bin/bash
+#
+# Copyright (c) 1996-2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Florian La Roche <florian@suse.de> 1996
+#	  Werner Fink <werner@suse.de> 1994-99,2000
+#
+# /etc/init.d/rc   --    The Master Resource Control Script
+#
+# This file is responsible  for  starting/stopping  services
+# when the runlevel changes.  If the action for a particular
+# feature in the new run-level is the same as  the action in
+# the previous run-level, this script will neither start nor
+# stop that feature.
+#
+
+#
+# On previous runlevel identical with current runlevel do not
+# re-examine current runlevel.
+#
+test "$PREVLEVEL" = "$RUNLEVEL" && exit 0
+
+#
+# Avoid being interrupted by child or keyboard
+#
+trap "echo" SIGINT SIGSEGV SIGTERM
+set +e
+
+#
+# Get terminal size of standard input of the system console
+#
+test -z "$CONSOLE" && CONSOLE=/dev/console
+set -- $(stty size < $CONSOLE)
+  LINES=$1
+COLUMNS=$2
+export LINES COLUMNS CONSOLE
+
+#
+# This redirects all rc messages during reboot and halt
+# to tty1 if the system console is bound on VGA (tty0).
+#
+if test $COLUMNS -gt 0 ; then
+    # VGA
+    if test "$RUNLEVEL" = "0" -o "$RUNLEVEL" = "6" ; then
+	CONSOLE=/dev/tty1
+	test -x /usr/bin/chvt && /usr/bin/chvt 1
+    fi
+else
+    # Serial: columns and lines are not defined
+      LINES=24
+    COLUMNS=80
+fi
+
+#
+# Configuration and coloring of the boot messages
+#
+
+. /etc/rc.status
+. /etc/rc.config
+
+#
+# Redirect I/O of this script and its childs
+#
+exec 0<> $CONSOLE 1>&0 2>&0
+
+#
+# Save old terminal settings and set -nl to avoid staircase
+# effect, do not lock scrolling, and avoid break characters.
+#
+otty=$(stty -g)
+stty -nl -ixon ignbrk -brkint 0>&1
+
+echo -n "Master Resource Control: "
+echo -n "previous runlevel: $PREVLEVEL, "
+echo -e "switching to runlevel: ${stat}${extd}${RUNLEVEL}${norm}"
+
+runrc=/etc/init.d/rc${RUNLEVEL}.d
+prerc=/etc/init.d/rc${PREVLEVEL}.d
+rex="[0-9][0-9]"
+failed=""
+
+#
+# First check and test services of previous and current (new) runlevel.
+#
+for i in $prerc/K${rex}*; do
+    test -x "$i" || continue
+
+    #
+    # Don't stop service if the new runlevel requires the service.
+    #
+    service=${i#*/K$rex}
+    set -- $runrc/S$rex$service
+    test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
+    test -x "$1"  && continue
+
+    # Stop the services of the previous runlevel if they are missed
+    # within the current (new) runlevel.
+    #
+    $i stop || failed="${failed} ${service}"
+    echo -n -e "$rc_reset"
+done
+
+for i in $runrc/S${rex}*; do
+    test -x "$i" || continue
+
+    #
+    # Don't start service if previous runlevel includes the service.
+    #
+    service=${i#*/S$rex}
+    set -- $prerc/K$rex$service
+    test $# -gt 1 && echo -e "$attn$prerc/: more than one link for service $service$norm"
+    test -x "$1"  && continue
+
+    #
+    # Start the services of the current (new) runlevel if they are missed
+    # within the previous runlevel.
+    #
+    $i start || failed="${failed} ${service}"
+    echo -n -e "$rc_reset"
+done
+
+#
+# Inform the users
+#
+echo -n "Master Resource Control: "
+echo -e "runlevel ${RUNLEVEL} has been ${stat}${extd}reached${norm}"
+if test -n "$failed" ; then
+    n=$((${#failed} + 2))
+    echo -n  "Failed services in runlevel ${RUNLEVEL}: "
+    test $n -lt 41 && echo -en "\033[${COLUMNS}C\033[${n}D"
+    echo -e  "${warn}${failed}${norm}"
+fi
+
+#
+# Restore old terminal settings
+#
+stty $otty 0>&1
+
+#
+# For the first logon on a virtual console.
+#
+test -e /etc/issue-SuSE-first-run && {
+    cat /etc/issue-SuSE-first-run
+    rm -f /etc/issue-SuSE-first-run 2>/dev/null
+}
+
+exit 0

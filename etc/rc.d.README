@@ -3,13 +3,13 @@ Hi,
 
 some people do expect here the scripts for booting up the machine.
 We skipped this structure. You can find the equivalent files under
-/sbin/init.d ('binary' scripts) and /etc/rc.config (configuration).
+/etc/init.d ('binary' scripts) and /etc/rc.config (configuration).
 
 For detailed information please look into the manual for SuSE Linux.
 If you don't have a printed manual, you can find it machine readable
 under /docu on the first CD or in the package books.
 
-Read /sbin/init.d/README for more information also.
+Read /etc/init.d/README for more information also.
 
 Have a lot of fun
 

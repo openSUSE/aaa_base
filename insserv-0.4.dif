@@ -1,0 +1,53 @@
+--- README
++++ README	2000/11/27 10:58:04
+@@ -15,9 +15,9 @@
+ 
+    insserv
+ 
+-   insserv sbin/init.d
++   insserv etc/init.d
+ 
+-   insserv sbin/init.d/myscript
++   insserv etc/init.d/myscript
+ 
+ See manual page for more information.
+ 
+--- insserv.8
++++ insserv.8	2000/11/27 10:59:29
+@@ -58,7 +58,7 @@
+ .RI [ / ] path/to/init.d/
+ Relative or absolute path to the init base directory.
+ This defaults to
+-.I /sbin/init.d/
++.I /etc/init.d/
+ the path of the SuSE boot concept (SystemV conform).
+ Note that if a relative path is used
+ .B insserv
+@@ -73,13 +73,10 @@
+ Boot script sometimes misses comments.
+ .SH FILES
+ .TP
+-.I /sbin/init.d/
+-path to the SuSE boot concept script base directory.
++.I /etc/init.d/
++path to the SuSE boot concept script base directory as
++required by the Linux Standard Base Specification (LSB).
+ .TP
+-.I /etc/init.d
+-symbolic link to
+-.IR /sbin/init.d/ .
+-This is required by the Linux Standard Base Specification (LSB).
+ .\"
+ .SH SEE ALSO
+ .BR init.d (7),
+--- insserv.c
++++ insserv.c	2000/11/27 11:00:00
+@@ -15,7 +15,7 @@
+ #include "listing.h"
+ 
+ #ifndef  INITDIR
+-# define INITDIR	"/sbin/init.d"
++# define INITDIR	"/etc/init.d"
+ #endif
+ 
+ 

@@ -16,14 +16,14 @@
 # Directories
 /usr/X11R6/bin                         root.xok          750
 /usr/lib/vga/demos                     root.xok          750
-/sbin/init.d                           root.root         750
-/sbin/init.d/boot.d                    root.root         750
-/sbin/init.d/rc0.d                     root.root         750
-/sbin/init.d/rc1.d                     root.root         750
-/sbin/init.d/rc2.d                     root.root         750
-/sbin/init.d/rc3.d                     root.root         750
-/sbin/init.d/rc6.d                     root.root         750
-/sbin/init.d/rcS.d                     root.root         750
+/etc/init.d                            root.root         750
+/etc/init.d/boot.d                     root.root         750
+/etc/init.d/rc0.d                      root.root         750
+/etc/init.d/rc1.d                      root.root         750
+/etc/init.d/rc2.d                      root.root         750
+/etc/init.d/rc3.d                      root.root         750
+/etc/init.d/rc6.d                      root.root         750
+/etc/init.d/rcS.d                      root.root         750
 /var/spool/uucppublic                  root.root         755
 
 #

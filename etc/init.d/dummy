@@ -1,0 +1,91 @@
+#! /bin/sh
+# Copyright (c) 1996-98 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996
+#
+# /etc/init.d/dummy
+#
+### BEGIN INIT INFO
+# Provides:       dummy
+# Required-Start:
+# Required-Stop:
+# Default-Start:  2 3 5
+# Default-Stop:
+# Description:    Configures dummy network interface
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/rc.config
+
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
+
+test $link = $base && SETUPDUMMYDEV=yes
+test "$NETCONFIG" != "YAST_ASK" -a "$SETUPDUMMYDEV" = "yes" || exit 0
+
+dummy=dummy0; 
+while read  i j ; 
+    do test $i = "dummy:" && dummy=dummy;
+done < /proc/net/dev
+ethdev=""
+defdev=""
+ipdef=""
+ipaddr=""
+for dev in $NETCONFIG; do
+    eval ndev=\$NETDEV$dev
+    if test -z "$defdev" ; then
+        eval defdev=\$IPADDR$dev
+        ipdef=$defdev
+    fi
+    case "$ndev" in
+        eth*|tr*)
+            if test -z "$ethdev" ; then
+                eval ethdev=\$IFCONFIG$dev
+                eval ipeth=\$IPADDR$dev
+            fi
+            ;;
+    esac
+done
+if test -n "$ethdev" ; then
+    dev=$ethdev
+    ipaddr=$ipeth
+else
+    dev=$defdev
+    ipaddr=$ipdef
+fi
+
+test -n "$dev" || exit 0
+test "$dev" = "dhcpclient" && exit 0
+
+rc_reset
+case "$1" in
+    start)
+	echo -n "Setting up $dummy device"
+	ifconfig $dummy $ipaddr netmask 255.255.255.255 up  && \
+	route add -host $ipaddr metric 1 dev $dummy
+	rc_status -v
+	;;
+    stop)
+	echo -n "Removing $dummy device"
+	ifconfig $dummy down
+	rc_status -v
+	;;
+    reload|restart)
+	$0 stop && $0 start
+	rc_status
+	;;
+    status)
+	ifconfig $dummy
+	;;
+    probe)
+	probe="`ifconfig $dummy 2>&1`"
+	case "$probe" in
+	    ${dummy}:*unknown*interface*) echo start ;;
+	    ${dummy}*) ;;
+	esac
+	;;
+    *)
+    echo "Usage: $0 {start|stop|restart|reload|status|probe}"
+    exit 1
+esac
+rc_exit

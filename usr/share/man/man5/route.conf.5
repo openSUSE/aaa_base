@@ -1,0 +1,183 @@
+.\"
+.\" SuSE man page route.conf
+.\" Copyright (c) 1997,2000 SuSE GmbH Nuernberg, Germany.   
+.\" please send bugfixes or comments to feedback@suse.de.
+.\"
+.\" Author: Werner Fink        <werner@suse.de>
+.\"
+.\"
+.TH ROUTE.CONF 5 "January 28, 2000" "Version 0.3" "Configuration for routing table"
+.\"
+.UC 5
+.SH NAME
+.\"
+route.conf \- Configuration for routing table
+.SH SYNOPSIS
+.\"
+.B /etc/route.conf
+.\"
+.SH DESCRIPTION
+The file
+.I /etc/route.conf
+is parsed by the run level script
+.I /etc/init.d/route
+which is linked in as service into a run level
+with network. The default run levels are
+.BR 2\  and\  3 .
+The syntax is similar to the output of the command
+.PP
+.RS
+.B /sbin/route\ -n
+.RE
+.PP
+which will give the fully routing table set before.
+.PP
+Lines beginning with
+.B #
+are ignored.  Empty lines are ignored as well.
+.PP
+The first column of the
+.I /etc/route.conf
+gives the destination, written as the IP-address of
+a host or a network. The headword
+.B default
+marks line of the default gateway. Do
+.BR not\  use\  0.0.0.0
+for this purpose.
+.PP
+The second column contains either the dummy address
+.B 0.0.0.0
+or the regular IP-adress of a host. This host can be
+the default gateway or another gateway to a remote
+host or remote net.
+.PP
+The third column gives the netmask for a remote
+host or remote network behind a gateway.
+For a host behind a gateway this reads
+.BR 255.255.255.255 .
+.PP
+The fourth column gives the name of the device interface
+of the local networks (i.e. lo, eth0, eth0:1, eth1,
+sdn0, ppp0, dummy0, ...) or the special name
+.B reject
+for routes which should been rejected by the kernel.
+.PP
+Any remaining columns, if given, are appended to the route command.  This
+makes it possible to pass special options for this route. Columns
+which are not needed should contain a minus sign (
+.B -
+) to be sure that the parser works.
+.\"
+.SH EXAMPLES
+.PP
+An example with common network interfaces and some static routes:
+.sp
+.nf
+.ne 20
+#
+# Destination     Dummy/Gateway     Netmask            Device
+#
+# Net devices
+#
+127.0.0.0         0.0.0.0           255.255.255.0      lo
+204.127.235.0     0.0.0.0           255.255.255.0      eth0
+#
+# Default gateway
+#
+default             204.127.235.41
+#
+# Host behind a gateway
+#
+207.68.156.51     207.68.145.45     255.255.255.255
+#
+# Net behind a gateway
+#
+192.168.0.0       207.68.156.51     255.255.0.0
+#
+# Do not accept this route (gateway is a dummy)
+#
+10.0.0.0          0.0.0.0           255.0.0.0          reject
+
+.fi
+.PP
+An example for routing entres for synchronous ppp over a
+.B ISDN
+connection.
+.sp
+.nf
+.ne 9
+#
+# syncPPP with dynamical IP-Adress: first the host route to
+# the gateway 193.102.150.13 will be set as well the default
+# route through the gateway.
+#
+127.0.0.0         0.0.0.0           255.255.255.0      lo
+193.102.150.13    0.0.0.0           255.255.255.255    ippp0
+default           193.102.150.13
+
+.fi
+.PP
+.\"
+.SH START and STOP
+.PP
+The routing table given by
+.I /etc/route.conf
+can be set by the command:
+.PP
+.RS
+.B /etc/init.d/route start
+.RE
+.PP
+and cleared by:
+.PP
+.RS
+.B /etc/init.d/route stop
+.RE
+.PP
+An other way is to change the run level with:
+.PP
+.RS
+.B init 1
+.RE
+.PP
+to level
+.B 1
+(without network)
+and shwitch back with
+.PP
+.RS
+.B init 2
+.RE
+.PP
+to the run level with network or with
+.PP
+.RS
+.B init 3
+.RE
+.PP
+to the run level with network and
+.BR xdm (1)
+(requires a configured
+.IR X\ Window\ System )
+.\"
+.SH FILES
+.I /etc/init.d/route
+.br
+.I /etc/init.d/rc2.d/{K,S}[0-9][0-9]route
+.br
+.I /etc/init.d/rc3.d/{K,S}[0-9][0-9]route
+.br
+.\"
+.SH SEE ALSO
+.BR rctab (8),
+.BR init.d (7),
+.BR init (8),
+.BR inittab (5),
+and the
+.I SuSE Linux
+handbook, chapter
+.IR The\ SuSE\ boot\ concept .
+.SH COPYRIGHT
+1997,2000 SuSE GmbH Nuernberg, Germany. 
+.SH AUTHOR
+Werner Fink  <werner@suse.de>

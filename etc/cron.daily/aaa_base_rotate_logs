@@ -56,8 +56,8 @@ check_log_file () {
 
     if test -f "$1".o; then
         if test -n "$5" ; then
-          if test -x /sbin/init.d/$5 ; then
-            /sbin/init.d/$5 reload
+          if test -x /etc/init.d/$5 ; then
+            /etc/init.d/$5 reload
           fi
         fi
         echo -n "Saving file "

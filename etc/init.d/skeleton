@@ -1,0 +1,108 @@
+#! /bin/sh
+# Copyright (c) 1995-2000 SuSE GmbH Nuernberg, Germany.
+#
+# Author: 
+#
+# /etc/init.d/<skeleton>
+#
+#   and symbolic its link
+#
+# /usr/sbin/rc<skeleton>
+#
+### BEGIN INIT INFO
+# Provides:
+# Required-Start:
+# Required-Stop:
+# Default-Start:
+# Default-Stop:
+# Description:
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/rc.config
+
+# Determine the base and follow a runlevel link name.
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
+
+# Force execution if not called by a runlevel directory.
+test $link = $base && START_FOO=yes
+test "$START_FOO" = yes || exit 0
+
+# Shell functions sourced from /etc/rc.status:
+#      rc_check         check and set local and overall rc status
+#      rc_status        check and set local and overall rc status
+#      rc_status -v     ditto but be verbose in local rc status
+#      rc_status -v -r  ditto and clear the local rc status
+#      rc_failed        set local and overall rc status to failed
+#      rc_reset         clear local rc status (overall remains)
+#      rc_exit          exit appropriate to overall rc status
+
+# First reset status of this service
+rc_reset
+case "$1" in
+    start)
+	echo -n "Starting service foo"
+	## Start daemon with startproc(8). If this fails
+	## the echo return value is set appropriate.
+
+	#startproc /usr/sbin/foo
+
+	# Remember status and be verbose
+	rc_status -v
+	;;
+    stop)
+	echo -n "Shutting down service foo"
+	## Stop daemon with killproc(8) and if this fails
+	## set echo the echo return value.
+
+	#killproc -TERM /usr/sbin/foo
+
+	# Remember status and be verbose
+	rc_status -v
+	;;
+    restart)
+	## If first returns OK call the second, if first or
+	## second command fails, set echo return value.
+	$0 stop  &&  $0 start
+
+	# Remember status and be quiet
+	rc_status
+	;;
+    reload)
+	## Choose ONE of the following two cases:
+
+	## First possibility: A few services accepts a signal
+	## to reread the (changed) configuration.
+
+	#echo -n "Reload service foo"
+	#killproc -HUP /usr/sbin/foo
+	#rc_status -v
+
+	## Exclusive possibility: Some services must be stopped
+	## and started to force a new load of the configuration.
+
+	#$0 stop  &&  $0 start
+
+	# Remember status and be verbose
+	#rc_status -v
+	;;
+    status)
+	echo -n "Checking for service foo: "
+	## Check status with checkproc(8), if process is running
+	## checkproc will return with exit status 0.
+
+	#checkproc /usr/sbin/foo && echo OK || echo No process
+	;;
+    probe)
+	## Optional: Probe for the necessity of a reload,
+	## give out the argument which is required for a reload.
+
+	#test /etc/foo.conf -nt /var/run/foo.pid && echo reload
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status|restart|reload[|probe]}"
+	exit 1
+	;;
+esac
+rc_exit

@@ -6,7 +6,7 @@ fi
 
 if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
 
-    test -x /sbin/init.d/syslog && /sbin/init.d/syslog start
+    test -x /etc/init.d/syslog && /etc/init.d/syslog start
 
     touch /usr/lib/YaST/.configured2
 
@@ -237,7 +237,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     # bootup.
     #               hm, 11.06.1997
 
-    test -x /sbin/init.d/pcmcia && /sbin/init.d/pcmcia start
+    test -x /etc/init.d/pcmcia && /etc/init.d/pcmcia start
 
     sleep 1
     /sbin/portmap
@@ -255,7 +255,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
                ;;
     esac
 
-    test -x /sbin/init.d/pcmcia && /sbin/init.d/pcmcia stop
+    test -x /etc/init.d/pcmcia && /etc/init.d/pcmcia stop
 
     echo " "
     echo " "

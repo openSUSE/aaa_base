@@ -1,0 +1,262 @@
+.\"
+.\" SuSE man page for SuSE boot concept
+.\" Copyright (c) 1997 SuSE GmbH Fuerth, Germany.   
+.\" please send bugfixes or comments to feedback@suse.de.
+.\"
+.\" Author: Werner Fink        <werner@suse.de>
+.\"
+.TH INIT.D 7 "Nov 15, 2000" "Version 0.4" "The SuSE boot concept"
+.\"
+.UC 7
+.OS SuSE Linux
+.\"
+.SH NAME
+.\"
+INIT.D \- The SuSE boot concept
+.SH SYNOPSIS
+.\"
+.B /etc/init.d/*
+.PP
+.B /etc/rc.config
+.\"
+.SH DESCRIPTION
+The scripts for controlling the system are placed in
+.IR /etc/init.d/ .
+These scripts are executed directly or indirectly by
+.BR /sbin/init ,
+the father of all processes. The configuration of
+.B /sbin/init
+is given by the file
+.BR /etc/inittab " (see "  inittab (5)).
+.PP
+At boot time, the boot level master script
+.I /etc/init.d/boot
+is called to initialise the system (e.g. file system check, ...).
+It also executes some hardware init scripts linked into
+.IR /etc/init.d/boot.d/ .
+Then it calls
+.IR /etc/init.d/boot.local ,
+which executes the local commands.
+.PP
+After system startup,
+.B /sbin/init
+will normally switch on the default run level given in
+.BR /etc/inittab .
+It calls the run level master script
+.I /etc/init.d/rc
+to start or stop services provided by the other scripts under
+.IR /etc/init.d/ .
+.PP
+To control the services of a run level, the corresponding scripts
+are linked into run level directories
+.IR /etc/init.d/rc<X>.d/ ,
+where
+.BR <X>=0 , 1 , 2 , 3 , 4 , 5 , 6 , S
+is the run level number.
+.PP
+There are two kinds of
+.B symbolic
+link: start links, which are called when entering a run level, and
+stop links, which are called when leaving a run level.
+Note that each service in the run levels 2, 3, 4, and 5 consists of
+a start
+.B and
+a stop link.  Within SuSE boot concept a
+.I differential
+link scheme is used to be able to
+.B change
+a runlevel in comparision with the former level.
+.PP
+To avoid redundant starts when changing run levels only those
+services are started, which have no start link in the previous run
+level.  And to avoid redundant stops when changing run levels, only
+those services are stopped which have no start link in the current
+level. To control this behaviour, the names of the scripts are added on
+the names of the start and stop links.
+.PP
+To control the order of service starts and stops, the start
+and stop links include a number in their link name.
+.PP
+The system configuration file
+.IR /etc/rc.config
+contains most of the variables used to configure the installed
+services.
+These variables can easily be changed by
+.B YaST
+or by using an editor. After using an editor, the script
+.I /sbin/SuSEconfig
+must be called to distribute the settings into the system.
+.\"
+.\"
+.\"
+.SS Some details
+The script
+.I /etc/init.d/lpd
+starts or stops the line printer daemon for the printing service,
+according to the flag used:
+.PP
+.RS
+.B /etc/init.d/lpd start
+.RE
+and
+.PP
+.RS
+.B /etc/init.d/lpd stop
+.RE
+.PP
+To do this automatically in run level
+.BR 3 ,
+this script is linked into
+.I /etc/init.d/rc3.d/
+with these two symbolic links
+.PP
+.RS
+.B  /etc/init.d/rc3.d/S20lpd -> ../lpd
+.RE
+and 
+.PP 
+.RS
+.B /etc/init.d/rc3.d/K20lpd -> ../lpd
+.RE 
+.PP
+The corresponding link with the letter
+.B S
+is used to start a service. For the printing service the number
+between the letter
+.B S
+and the name should be greater than the number of the start link of
+the network service.  The corresponding link with the letter
+.B K
+is used to stop a service. The number of the stop link for the
+printing service should be less than that of the stop link for
+the network service so that the printer daemon is stopped before
+shutting down the network service.
+.\"
+.\"
+.\"
+.SS Run levels and their services
+.sp
+.TP
+.B 0
+This level is used for halting the system. The only valid service for
+this level is the script
+.BR halt ,
+which is linked into
+.IR /etc/init.d/rc0.d/ .
+The script
+.B halt
+executes
+.IR /etc/init.d/halt.local .
+Specials system issues for halt or reboot should be added there.
+.TP
+.B 6
+This level is used for rebooting the system. The only valid service for
+this level is the script
+.BR reboot ,
+which is linked into
+.IR /etc/init.d/rc6.d/ .
+The script
+.B reboot
+executes
+.IR /etc/init.d/halt.local .
+Specials system issues for halt or reboot should be added there.
+.TP
+.B S
+This mode is used to switch from boot phase into single user mode.
+The last valid service for this mode is the script
+.BR single ,
+which is linked into
+.IR /etc/init.d/rcS.d/ .
+In this mode you have only
+.B one
+console.
+.TP
+.B 1
+Accordingly to the Linux Standard Base (LSB) specification
+this runlevel is used to switch from normal runlevel into
+single user mode.
+.B This is different from former SuSE Linux versions!
+.TP
+.B 2
+The run level 2 is without network. Note that on some other systems
+this is identical with the single user mode. This run level
+can have more than one virtual console.
+.TP
+.B 3
+The run level 3 is with network. This run level is for
+.B server stations
+not automatically running
+.IR X .
+.TP
+.B 5
+The level 5 is with network and
+.BR xdm (1).
+You should have a configured and perfectly running
+.I X Window System
+for this
+.B work station
+run level.
+.TP
+.BR 4
+The run level 4 is not (yet) used.
+.TP
+.B /etc/init.d/skeleton
+This script is a model for writing your own.  You can use
+.BR insserv (8)
+to include your own script into a run level.
+.PP
+.SH FILES
+.I /etc/init.d/*
+.br
+.I /etc/init.d/boot
+.br
+.I /etc/init.d/boot.local
+.br
+.I /etc/init.d/halt
+.br
+.I /etc/init.d/halt.local
+.br
+.I /etc/init.d/rc
+.br
+.I /etc/init.d/reboot
+.br
+.I /etc/init.d/skeleton
+.br
+.I /etc/init.d/single
+.br
+.I /etc/init.d/boot.d/S[0-9][0-9]*
+.br
+.I /etc/init.d/rc0.d/{K,S}[0-9][0-9]*
+.br
+.I /etc/init.d/rc1.d/{K,S}[0-9][0-9]*
+.br
+.I /etc/init.d/rc2.d/{K,S}[0-9][0-9]*
+.br
+.I /etc/init.d/rc3.d/{K,S}[0-9][0-9]*
+.br
+.I /etc/init.d/rc4.d/{K,S}[0-9][0-9]*
+.br
+.I /etc/init.d/rc5.d/{K,S}[0-9][0-9]*
+.br
+.I /etc/init.d/rc6.d/{K,S}[0-9][0-9]*
+.br
+.I /etc/init.d/rcS.d/{K,S}[0-9][0-9]*
+.br
+.I /etc/inittab
+.br
+.I /etc/rc.config
+.\"
+.SH SEE ALSO
+.BR insserv (8),
+.BR init (8),
+.BR inittab (5),
+and the
+.I SuSE Linux
+handbook, chapter
+.IR "The SuSE boot concept" .
+.SH COPYRIGHT
+1996-2000 SuSE GmbH Fuerth, Germany.
+.SH AUTHORS
+Florian La Roche <florian@suse.de>,
+Werner Fink <werner@suse.de>,
+Burchard Steinbild <bs@suse.de>.

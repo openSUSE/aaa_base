@@ -15,14 +15,14 @@
 #
 
 # Directories
-/sbin/init.d                           root.root         755
-/sbin/init.d/boot.d                    root.root         755
-/sbin/init.d/rc0.d                     root.root         755
-/sbin/init.d/rc1.d                     root.root         755
-/sbin/init.d/rc2.d                     root.root         755
-/sbin/init.d/rc3.d                     root.root         755
-/sbin/init.d/rc6.d                     root.root         755
-/sbin/init.d/rcS.d                     root.root         755
+/etc/init.d                            root.root         755
+/etc/init.d/boot.d                     root.root         755
+/etc/init.d/rc0.d                      root.root         755
+/etc/init.d/rc1.d                      root.root         755
+/etc/init.d/rc2.d                      root.root         755
+/etc/init.d/rc3.d                      root.root         755
+/etc/init.d/rc6.d                      root.root         755
+/etc/init.d/rcS.d                      root.root         755
 /var/spool/uucppublic                  root.root        1777
 
 #

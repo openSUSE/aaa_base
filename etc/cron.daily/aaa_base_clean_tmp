@@ -38,7 +38,7 @@ done
 
 for TMP_DIR in $TMP_DIRS_TO_CLEAR ; do
   test -x /usr/bin/safe-rm && {
-  find $TMP_DIR/. $OMIT ! -type d \
+  find $TMP_DIR/. $OMIT ! -type d ! -type s \
     -atime +$MAX_DAYS_IN_TMP -exec /usr/bin/safe-rm {} \;
   } || echo "Error: Can not find /usr/bin/safe-rm"
   find $TMP_DIR/. $OMIT -depth -type d -empty -mindepth 1 \

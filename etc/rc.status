@@ -1,13 +1,13 @@
 #
 # Formating the boot script messages:
 #   The boot scripts should use the variables rc_done and rc_fail to
-#   symbolize their success.  See /sbin/init.d/skeleton for an example
+#   symbolize their success.  See /etc/init.d/skeleton for an example
 #   how to use the shell function rc_status and rc_reset.
 #   Internally these function uses the variables rc_done and rc_failed.
 #   rc_done_up and rc_failed_up do the same as rc_done and rc_failed
 #   but one line above (usefull for starting daemons who talk to user).
 #   The variable rc_reset is used by the master resource control script
-#   /sbin/init.d/rc to turn off all attributes and switch on the standard
+#   /etc/init.d/rc to turn off all attributes and switch on the standard
 #   character set.
 #
 #    \033          ascii ESCape

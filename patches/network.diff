@@ -1,5 +1,5 @@
---- sbin/init.d/network	Thu Sep  7 14:20:32 2000
-+++ sbin/init.d/network	Thu Sep  7 14:20:35 2000
+--- etc/init.d/network	Thu Sep  7 14:20:32 2000
++++ etc/init.d/network	Thu Sep  7 14:20:35 2000
 @@ -60,7 +60,7 @@
  		    ;;
  		*)

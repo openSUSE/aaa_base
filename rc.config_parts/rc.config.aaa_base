@@ -300,7 +300,7 @@ CRON="yes"
 
 #
 # when shutting down routing, all net connection can be closed (not useful
-# in all cases).  If CLOSE_CONNECTIONS is set to "true" /sbin/init.d/route
+# in all cases).  If CLOSE_CONNECTIONS is set to "true" /etc/init.d/route
 # scans /proc to search for network connections and sends a term signal
 # to the processes.
 #
@@ -498,7 +498,7 @@ umask 022
 
 #
 # Attention! This variable PATH is NOT setting the PATH for user or root
-# shells. It is only used internally for /sbin/init.d/*, SuSEconfig and 
+# shells. It is only used internally for /etc/init.d/*, SuSEconfig and 
 # cron.daily. Please do NOT change PATH here.
 #
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
