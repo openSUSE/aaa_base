@@ -42,6 +42,10 @@ fi
 #
 # check CMOS Battery
 #
+test -r /proc/driver/rtc && {
+    test $(awk '$1 == "batt_status" { print $3 }' /proc/driver/rtc) != "okay" && \
+        echo "CMOS battery empty -- expect problems"
+}
 test -r /proc/rtc && {
     test $(awk '$1 == "batt_status" { print $3 }' /proc/rtc) != "okay" && \
         echo "CMOS battery empty -- expect problems"

@@ -74,7 +74,7 @@ EOT
 	#test -x /etc/ppp/inet_chains.local && /etc/ppp/inet_chains.local "$@"
 
 	# maybe you want to start mail services:
-	# set follow variables in /etc/rc.config 
+	# set follow variables in /etc/rc.config.d/sendmail.rc.config
 	#    SENDMAIL_TYPE="yes"
 	#    SENDMAIL_SMARTHOST="<ISP-mailserver>"
 	#    SENDMAIL_ARGS="-bd -om"
