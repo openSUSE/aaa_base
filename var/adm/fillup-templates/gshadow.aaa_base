@@ -19,6 +19,7 @@ yard:*:root:root
 dosemu:*:root:root
 firewall:*:root:root
 public:*:root:root
+video:*:root:root
 game:*:root:root
 users:*:root:root
 nogroup:*:root:root
