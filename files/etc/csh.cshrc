@@ -176,7 +176,7 @@ if ($?EMACS) then
   setenv LS_OPTIONS '-N --color=none -T 0';
   tset -I -Q
   stty cooked pass8 dec nl -echo
-  if ($?tcsh) unset edit
+# if ($?tcsh) unset edit
 endif
 unset noglob
 
