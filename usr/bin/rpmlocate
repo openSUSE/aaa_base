@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Copyright (c) 1999 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+
+for i in $* ; do
+    echo Searching for "$i" in rpm db...
+    rpm -qal --qf "%{NAME}-%{VERSION}-%{RELEASE}:\n" | \
+        grep "\(^[^/]\)\|\($i\)" | \
+        awk '/^[^/]/ { pkg=$0; next } { if ( pkg ) { print "\n"pkg; pkg="" } print }'
+done
+

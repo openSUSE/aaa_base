@@ -147,6 +147,6 @@ alias net-pf-3            off
 alias net-pf-4            off
 # alias net-pf-5            appletalk
 alias net-pf-5            off
-alias net-pf-17           af_package
+alias net-pf-17           af_packet
 
 alias parport_lowlevel    parport_pc

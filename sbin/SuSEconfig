@@ -525,15 +525,15 @@ test "$CHECK_INITTAB" = yes && {
 
     case "$CONSOLE_SHUTDOWN" in
         ignore)
-          CA_SEARCH=".*ca::ctrlaltdel.*"
+          CA_SEARCH="^ca::ctrlaltdel.*"
           CA_LINE="#ca::ctrlaltdel:/sbin/shutdown -h -t 4 now"
         ;;
         halt)
-          CA_SEARCH=".*ca::ctrlaltdel.*"
+          CA_SEARCH="^ca::ctrlaltdel.*"
           CA_LINE="ca::ctrlaltdel:/sbin/shutdown -h -t 4 now"
         ;;
         reboot)
-          CA_SEARCH=".*ca::ctrlaltdel.*"
+          CA_SEARCH="^ca::ctrlaltdel.*"
           CA_LINE="ca::ctrlaltdel:/sbin/shutdown -r -t 4 now"
         ;;
         *)
@@ -550,7 +550,7 @@ test "$CHECK_INITTAB" = yes && {
 
     cat $r/etc/inittab | \
         sed -e "s%^id:[0-9sSa-cA-C]*:initdefault:%id:$INITRL:initdefault:%" -e \
-               "s%.*$CA_SEARCH%$CA_LINE%" \
+               "s%$CA_SEARCH%$CA_LINE%" \
         > $r/etc/inittab.SuSEconfig
 
     test -s $r/etc/inittab.SuSEconfig || {
@@ -602,7 +602,7 @@ if test -z "$r" ; then
     for SKRIPT in $SUB_SCRIPTS ; do
         test -f $SKRIPT || continue
         case "$SKRIPT" in
-          *~|*.swp|*.bak|*.sav|*.save)
+          *~|*.swp|*.bak|*.sav|*.save|*.rpmsave|*.rpmorig|*.rpmnew)
             continue
             ;;
           *)
