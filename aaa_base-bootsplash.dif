@@ -82,7 +82,7 @@ diff -urN aaa_base.orig/etc/rc.status aaa_base/etc/rc.status
  function rc_splash()
  {
 -    test "$BOOT_SPLASH" != "no" && test "$_rc_splash" -eq 1 && /bin/splash "$1"
-+    test "$BOOT_SPLASH" != "no" && test "$_rc_splash" -eq 1 && /bin/splash.sh "$1"
++    test "$BOOT_SPLASH" != "no" && test "$_rc_splash" -eq 1 && /sbin/splash.sh "$1"
 +    progress=$(( $progress + 1 ))
  }
  
