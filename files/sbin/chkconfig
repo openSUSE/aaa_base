@@ -148,20 +148,22 @@ sub initlinks_rc {
 sub set_rc {
   my $s = shift;
   my $want = shift;
+  my $ret = 1;
 
   if (!$known_rc{$s}) {
     print STDERR "$s: not a runlevel service\n";
     return;
   }
   if ($want eq '') {
-    insserv('-r', '-d', "$initdir/$s");
+    $ret = insserv('-r', '-d', "$initdir/$s");
   } elsif ($want eq getdef_rc($s)) {
-    insserv('-d', "$initdir/$s");
+    $ret = insserv('-d', "$initdir/$s");
   } else {
-    insserv('-r', '-d', "$initdir/$s");
-    insserv("$initdir/$s,start=".join(',', split('', $want)));
+    $ret = insserv('-r', '-d', "$initdir/$s");
+    $ret = undef unless insserv("$initdir/$s,start=".join(',', split('', $want)));
   }
   $links_unknown{$s} = 1;	# check again for this service
+  return $ret;
 }
 
 my $force;
@@ -175,9 +177,12 @@ sub insserv {
   my $r = system(@i, @_);
   if ($r == -1) {
     printf STDERR "/sbin/insserv: $!\n";
+    return undef;
   } elsif ($r) {
     printf STDERR "/sbin/insserv failed, exit code %d\n", $? >> 8;
+    return undef;
   }
+  return 1;
 }
 
 
@@ -415,6 +420,8 @@ sub findknown {
 #
 # normalize runlevel
 #
+my $level;	# overwrite on with $level
+
 sub normalize {
   my $s = shift;
   my $rl = shift;
@@ -427,6 +434,7 @@ sub normalize {
   $def = getdef_rc($s) if $known_rc{$s};
   return undef unless defined $def;
   $rl = ",$rl,";
+  $rl =~ s/,on,/,$level,/g if defined $level;
   $rl =~ s/,on,/,$def,/g;
   $rl =~ s/,xinetd,/,X,/g;
   $rl =~ s/,inetd,/,T,/g;
@@ -502,6 +510,7 @@ if (!GetOptions('list|l'   => \&addmode,
                 'help|h'   => \&addmode,
                 'set|s'    => \&addmode,
                 'check|c'  => \&addmode,
+                'level=s'  => \$level,
                 'force|f'  => \$force,
                 'deps'     => \$printdeps
    )) {
@@ -584,6 +593,7 @@ if ($mode eq 'e' || $mode eq 't') {
 }
 
 if ($mode eq 's') {
+  my $status = 0;
   my $usestdin = !@services;
   my $ln = 0;
   $force = 1 if @services != 2;		# stupid hack
@@ -597,6 +607,7 @@ if ($mode eq 's') {
 	my @line = split(' ', $_);
 	if (@line != 2) {
 	  print STDERR "parse error line $ln: $_\n";
+	  $status = 1;
 	  next;
 	}
 	@services = @line;
@@ -612,28 +623,29 @@ if ($mode eq 's') {
       $s = shift @services;
       my $want = shift @services;
       $want = normalize($s, $want);
-      next unless defined $want;
+      $status = 1, next unless defined $want;
       $current{$s} = getcurrent($s) unless defined $current{$s};
-      next unless defined $current{$s};
+      $status = 1, next unless defined $current{$s};
       my $current = $current{$s};
       next if $want eq $current;
       delete $current{$s};
       if (($want =~ /T/) && ($current !~ /T/)) {
-        set_inetd($s, 1);
+        $status = 1 unless set_inetd($s, 1);
       } elsif (($want !~ /T/) && ($current =~ /T/)) {
-        set_inetd($s, 0);
+        $status = 1 unless set_inetd($s, 0);
       }
       if (($want =~ /X/) && ($current !~ /X/)) {
-        set_xinetd($s, 1);
+        $status = 1 unless set_xinetd($s, 1);
       } elsif (($want !~ /X/) && ($current =~ /X/)) {
-        set_xinetd($s, 0);
+        $status = 1 unless set_xinetd($s, 0);
       }
       $want =~ s/[TX]//g;
       $current =~ s/[TX]//g;
-      set_rc($s, $want) unless $want eq $current;
+      next if $want eq $current;
+      $status = 1 unless set_rc($s, $want);
     }
   } while ($usestdin);
-  exit 0;
+  exit $status;
 }
 
 #
@@ -665,13 +677,13 @@ if ($mode eq 'l') {
       print STDERR "$s: unknown service\n" unless $known_all{$s};
       next;
     }
-    printf "%-25s ", $s;
+    printf "%-24s", $s;
     my $l;
     for $l (0, 1, 2, 3, 4, 5, 6) {
       if ($usecolor) {
-	print $links{$l}->{$s} ? "\e[0;1;32m$l:on    \e[m" : "$l:off   ";
+	print $links{$l}->{$s} ? "  \e[0;1;32m$l:on\e[m " : "  $l:off";
       } else {
-	print $links{$l}->{$s} ? "$l:on    " : "$l:off   ";
+	print $links{$l}->{$s} ? "  $l:on " : "  $l:off";
       }
     }
     print getdeps_rc($s) if $printdeps;
