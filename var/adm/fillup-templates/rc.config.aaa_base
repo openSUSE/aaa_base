@@ -151,6 +151,12 @@ SETUPDUMMYDEV=yes
 IP_DYNIP=no
 
 #
+# Enable syn flood protection (see /usr/src/linux/Documentation/Configure.help)
+# (yes/no)
+#
+IP_TCP_SYNCOOKIES=yes
+
+#
 # 2 you can configure at runtime, if the host may forward
 # IP packages or not.  Is this host a router? (yes/no)
 #
