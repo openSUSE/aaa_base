@@ -282,6 +282,7 @@ alias binfmt-204          binfmt_aout
 alias binfmt-263          binfmt_aout
 alias binfmt-264          binfmt_aout
 alias binfmt-267          binfmt_aout
+alias binfmt-0064         binfmt_aout
 
 alias iso9660             isofs
 alias tty-ldisc-1         slip
@@ -292,6 +293,9 @@ alias ppp0                ppp
 alias ppp1                ppp
 alias plip0               plip
 alias plip1               plip
+
+alias ppp-compress-21          bsd_comp
+alias ppp-compress-26          ppp_deflate
 
 alias net-pf-3            off
 # alias net-pf-4            ipx
