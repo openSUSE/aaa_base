@@ -79,7 +79,7 @@ fi
 # If we use a serial console, don't use the fsck progress bar
 # For S390, don't use it either.
 #
-if [ -z "$SERIAL_CONSOLE" -a "$(uname -m)" != "s390" ]; then
+if test -z "$SERIAL_CONSOLE" -a "$(uname -m)" != "s390" ; then
    FSCK_PROGRESSBAR="-C"
 else
    FSCK_PROGRESSBAR=""
@@ -455,7 +455,7 @@ elif test -x /bin/dmesg ; then
 	test -s /var/log/boot.msg
 	rc_status -v1 -r
 fi
-if test -x /usr/sbin/klogconsole ; then
+if test -z "$SERIAL_CONSOLE" -a -x /usr/sbin/klogconsole ; then
 	( test -c /dev/tty10 && > /dev/tty10 ) > /dev/null 2>&1 && /usr/sbin/klogconsole -r10 
 fi
 

@@ -30,8 +30,7 @@ case $1 in
     cd /dev
 
     SETSERIAL="/sbin/setserial -b"
-    PORTS=`echo ttyS?`
-    PORTS="$PORTS `ls ttyS?? 2>/dev/null`"
+    PORTS=`for p in ttyS? ttyS??; do test -e $p && echo $p; done`
 
     run_setserial ()
     {
