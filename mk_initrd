@@ -618,7 +618,6 @@ fi
 
 lib=lib
 case `uname -m` in
-  ppc64)  lib=lib64 ;;
   s390x)  lib=lib64 ;;
   x86_64) lib=lib64 ;;
 esac
