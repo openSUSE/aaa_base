@@ -60,8 +60,6 @@ else
   TEXINPUTS=":~/.TeX:/usr/doc/.TeX"
 fi
 export TEXINPUTS
-PRINTER='lp'
-export PRINTER
 
 
 LESSCHARSET=latin1

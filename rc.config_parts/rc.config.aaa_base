@@ -118,6 +118,11 @@ TIMEZONE="YAST_ASK"
 START_LOOPBACK="yes"
 
 #
+# name of the printer queue used when 'lpr' is invoked with no '-P'
+#
+DEFAULT_PRINTER="lp"
+
+#
 # networking
 #
 # number of network cards: "_0" for one, "_0 _1 _2 _3" for four cards

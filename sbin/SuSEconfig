@@ -610,6 +610,11 @@ if test -n "$NO_PROXY" ; then
     echo "export no_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv no_proxy '$NO_PROXY'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
+if test -n "$DEFAULT_PRINTER" ; then
+    echo "PRINTER='$DEFAULT_PRINTER'" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export PRINTER" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv PRINTER '$DEFAULT_PRINTER'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
 
 SAVEPATH=$PATH
 if test "$r" != ""; then
