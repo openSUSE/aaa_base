@@ -4,8 +4,131 @@
 # init scripts. There is no way to convert chkconfig-based
 # init scripts to an LSB-conform one. You have to do it
 # yourself (look at /etc/init.d/skeleton for a well-documented
-# example). The only purpose of this file is to make RPM
-# happy and to give the user the chance to install RPMs which
-# require /sbin/chkconfig.
-exit 0
+# example). 
 
+# This wrapper tries to behave a bit like chkconfig for your convenience.
+# The other purpose of this file is to make RPM happy and to give the user the
+# chance to install RPMs which require /sbin/chkconfig.
+
+
+IAM=`basename $0`
+
+function usage
+{
+	cat <<-EOF
+	$IAM is a wrapper to insserv, resembling Redhat's chkconfig. 
+	Actually, you can just use vi and insserv instead. See man 8 insserv 
+	for more information. 
+	The --level switch is not supported, since we want to honour the 
+	script interdependencies.
+
+	usage:
+	        $IAM -l|--list [--deps] [<name>]	(shows the links)
+	        $IAM -a|--add  <name>		(runs insserv)
+	        $IAM -d|--del  <name>		(runs insserv -r)
+	        $IAM -e|--edit <name>		(runs vi, insserv -r, and insserv)
+
+	EOF
+}
+
+test -t 1 && { BRIGHT='[01m'; RED='[31m'; GREEN='[32m'; NORMAL='[00m'; }
+function myecho { echo $BRIGHT$@$NORMAL; }
+function error { echo $RED$@$NORMAL; }
+function myexit { error something ugly seems to have happened in line $1...; exit $2; }
+
+on="${BRIGHT}${GREEN}on    $NORMAL"
+off="off   "
+
+while true; do
+	case "$1" in
+		-l|--list) 
+			shift
+			case "$1" in
+			    --dep*)	shift; deps=yes;;
+			    -x)		shift; set -x;;
+			esac
+			if test -z "$1"; then
+				services=`cd /etc/init.d; ls -1`
+			else
+				services=$*
+			fi
+			ACTION=list
+			break
+			;;
+		-d|--del) 
+			shift; service=$1; shift; ACTION=del; break;;
+		-a|--add) 
+			shift; service=$1; shift; ACTION=add; break;;
+		-e|--edit) 
+			shift; service=$1; shift; ACTION=edit; break;;
+		--level) 
+			exit 0;;
+		--dep*)
+			shift; deps=yes;;
+		-x) 
+			shift; PS4=\$LINENO\ +; set -x;;
+		-h|--help)
+			usage; exit 0;;
+		*) echo unrecognized option: $1; usage; exit 2;;
+	esac
+done
+
+case $ACTION in
+    add|del|edit) test -f /etc/init.d/$service || { echo service /etc/init.d/$service does not exist >&2; exit 1; };;
+esac
+
+case $ACTION in
+    list)
+	if [ "$deps" = yes ]; then 
+		echo "Service                   Runlevels                                               Required-Start"
+		echo "------------------------- ------------------------------------------------------- --------------"
+	fi
+	for service in $services; do
+
+		test -d /etc/init.d/$service && continue; 
+		case $service in 
+			README|*.rpm*|*.swap|*.bak|*.orig|\#*|*~)	continue ;;
+		esac
+
+		test -f /etc/init.d/$service || { echo service /etc/init.d/$service does not exist >&2; continue; }
+
+		printf "%-25s " $service 
+		for i in 0 1 2 3 4 5 6; do 
+			test -f /etc/init.d/rc$i.d/S[0-9][0-9]$service && echo -n "$BRIGHT${GREEN}$i:$on" || echo -n "$i:$off"
+		done 
+
+		if [ "$deps" != yes ]; then 
+			echo
+		else
+			while read line; do 
+				case $line in 
+				    *Required-Start*) 
+					line=${line/*Required-Start*:/}
+					required_start=$line
+					break
+					;; 
+				    *)
+					;;
+				esac 
+			done < /etc/init.d/$service
+			echo $required_start
+		fi
+	done
+	;;
+    add)
+	insserv /etc/init.d/$service
+	;;
+    del)
+	insserv -r /etc/init.d/$service
+	;;
+    edit)
+	editor=${VISUAL:-vim}
+	$editor /etc/init.d/$service -c "/Default-Start" && { insserv -r /etc/init.d/$service; insserv /etc/init.d/$service; }
+	;;
+esac
+
+case $ACTION in
+    add|del|edit) exec $0 --list $service;;
+esac
+
+exit 0
