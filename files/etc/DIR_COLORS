@@ -38,6 +38,7 @@ TERM vt100
 TERM vt102
 TERM xterm
 TERM xterm-debian
+TERM iterm
 
 # EIGHTBIT, followed by '1' for on, '0' for off. (8-bit output)
 EIGHTBIT 1
