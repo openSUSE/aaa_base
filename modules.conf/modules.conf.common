@@ -359,6 +359,7 @@ alias char-major-9        st
 alias char-major-10-130   softdog
 alias char-major-10-135   off
 alias char-major-10-175   agpgart
+alias char-major-10-181   toshiba
 alias char-major-10-240   agpgarti810
 alias char-major-15       off
 alias char-major-19       cyclades
