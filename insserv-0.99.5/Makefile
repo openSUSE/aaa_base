@@ -11,7 +11,7 @@ DEBUG	 =	-DDEBUG=1
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.99.3
+VERSION	 =	0.99.5
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #

@@ -127,6 +127,7 @@ static void popd(void)
     delete(tail);
     free(dir);
 out:
+    return;
 }
 
 /*
@@ -268,16 +269,31 @@ static void rememberreq(serv_t *serv, req_t * cur, char * required)
 
 	    if (!cur->serv) {
 		this = cur;
+		this->serv = xstrdup(token);
 	    } else {
 		list_t * req_start = &(cur->list);
+		boolean found = false;
 
-		this = (req_t *)malloc(sizeof(req_t)); 
-		if (!this) 
-		    error("%s", strerror(errno));
-		insert(&(this->list), req_start->prev);
-		this->serv = NULL;
+		/* Do not link in if already done */
+		if (!strcmp(cur->serv, token)) {
+		    found = true;
+		} else {
+		    for (ptr = req_start->next; ptr != req_start; ptr = ptr->next) {
+			if (!strcmp(getreq(ptr)->serv, token)) {
+			    found = true;
+			    break;
+			}
+		    }
+		}
+
+		if (!found) {
+		    this = (req_t *)malloc(sizeof(req_t)); 
+		    if (!this) 
+			error("%s", strerror(errno));
+		    insert(&(this->list), req_start->prev);
+		    this->serv = xstrdup(token);
+		}
 	    }
-	    this->serv = xstrdup(token);
 
 	    continue;			/* Below we handle `$' token */
 	}
@@ -289,7 +305,6 @@ dollar:
 		break;
 	    }
 	}
-
     }
     /* At last: expand requested services for sorting */
     expandreq(serv->name, old);
@@ -302,6 +317,7 @@ static boolean chkrequired(const char * name)
 {
     serv_t * serv = findserv(name);
     list_t * req_start, * ptr;
+    serv_t * required;
     boolean ret = true;
 
     if (serv && serv->req.serv)
@@ -312,13 +328,13 @@ static boolean chkrequired(const char * name)
     /*
      * If the first required service is misssed we run on an error.
      */
-    if (!findserv(serv->req.serv)) {
+    if (!(required = findserv(serv->req.serv)) || !(required->lvls)) {
 	warn("Service %s has to be enabled for service %s\n", serv->req.serv, name);
 	ret = false;
     }
 
     for (ptr = req_start->next; ptr != req_start; ptr = ptr->next)
-	if (!findserv(getreq(ptr)->serv)) {
+	if (!(required = findserv(getreq(ptr)->serv)) || !(required->lvls)) {
 	    warn("Service %s has to be enabled for service %s\n", getreq(ptr)->serv, name);
 	    ret = false;
 	}
@@ -338,10 +354,13 @@ static boolean chkdependencies(const char * name)
 	serv_t * cur = getserv(srv);
 	list_t * req_start, * req;
 
-	if (cur && cur->req.serv)
-	    req_start = &(cur->req.list);
-	else
+	if (!cur || !cur->req.serv)
 	    continue;
+
+	if (!cur->lvls)
+	    continue;
+
+	req_start = &(cur->req.list);
 
 	if (!strcmp(cur->req.serv, name)) {
 	    warn("Service %s has to be enabled for service %s\n", name, cur->name);
@@ -359,71 +378,9 @@ static boolean chkdependencies(const char * name)
 }
 
 /*
- * Useful for quick sort: swap two services
- */
-static void swapserv(list_t * this, list_t * that)
-{
-    serv_t * cont1 = getserv(this);
-    serv_t * cont2 = getserv(that);
-    char        *name = cont1->name;
-    char        order = cont1->order;
-    unsigned int lvls = cont1->lvls;
-#ifndef SUSE
-    unsigned int lvlk = cont1->lvlk;
-#endif
-
-    cont1->name  = cont2->name;
-    cont1->order = cont2->order;
-    cont1->lvls  = cont2->lvls;
-#ifndef SUSE
-    cont1->lvlk  = cont2->lvlk;
-#endif
-
-    cont2->name  = name;
-    cont2->order = order;
-    cont2->lvls  = lvls;
-#ifndef SUSE
-    cont2->lvlk  = lvlk;
-#endif
-}
-
-/*
- * The name says it all
- */
-static void qsortserv(list_t * left, list_t * right)
-{
-    list_t * start = left->next;
-    list_t * stop  = right->prev;
-    list_t * ptr;
-
-    if (start == stop)
-	goto out;
-
-    ptr = start;
-    do {
-	ptr = ptr->next;
-
-	if (getserv(start)->order < getserv(ptr)->order)
-	    swapserv(start, ptr);
-
-    } while (ptr != stop);
-
-    swapserv(start, ptr);
-
-    if (ptr->prev != serv_start)
-	if (left != ptr->prev && ptr != start)
-	    qsortserv(left, ptr); 
-
-    if (ptr->next != serv_start)
-	if (ptr != stop && right != ptr->next)
-	    qsortserv(ptr, right);
- out:
-}
-
-/*
  * This helps us to work out the current symbolic link structure
  */
-static void current_structure(const char * this, const char order, const int runlvl)
+static serv_t * current_structure(const char * this, const char order, const int runlvl)
 {
     serv_t * serv = addserv(this);
 
@@ -443,7 +400,7 @@ static void current_structure(const char * this, const char order, const int run
 	default: break;
     }
 
-    return;
+    return serv;
 }
 
 
@@ -726,11 +683,20 @@ static void scan_script_locations(const char * path)
 
 	    begin = script_inf.provides;
 	    while ((token = strsep(&script_inf.provides, delimeter)) && *token) {
+		serv_t * service = NULL;
 		if (*token == '$') {
 		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
 		    continue;
 		}
-		current_structure(token, order, runlevel);
+		service = current_structure(token, order, runlevel);
+		if (!service->req.serv && script_inf.required_start && script_inf.required_start != empty) {
+		    rememberreq(service, &service->req, script_inf.required_start);
+		    requiresv(token, script_inf.required_start);
+		}
+		if (!service->shd.serv && script_inf.should_start && script_inf.should_start != empty) {
+		    rememberreq(service, &service->shd, script_inf.should_start);
+		    requiresv(token, script_inf.should_start);
+		}
 	    }
 	    script_inf.provides = begin;
 
@@ -747,8 +713,6 @@ static void scan_script_locations(const char * path)
 	closedir(rcdir);
     }
     popd();
-    qsortserv(serv_start, serv_start);
-
     return;
 }
 
@@ -795,11 +759,12 @@ static void scan_conf(void)
 	    if (virt) {
 		list_t * ptr;
 		boolean found = false;
-		for (ptr = sysfaci_start->next; ptr != sysfaci_start; ptr = ptr->next)
+		for (ptr = sysfaci_start->next; ptr != sysfaci_start; ptr = ptr->next) {
 		    if (!strcmp(getfaci(ptr)->name, virt)) {
 			found = true;
 			break;
 		    }
+		}
 		if (!found) {
 		    faci_t * this = (faci_t *)malloc(sizeof(faci_t));
 		    if (!this)
@@ -954,9 +919,11 @@ int main (int argc, char *argv[])
 	    *argr = ++token;
 	}
 
-	if (stat(*argv, &st_script) < 0) {
-	    if (errno != ENOENT)
+	/* Catch `/path/script', `./script', and `path/script' */
+	if (strchr(*argv, '/')) {
+	    if ( stat(*argv, &st_script) < 0)
 		error("%s: %s\n", *argv, strerror(errno));
+	} else {
 	    pushd(path);
 	    if (stat(*argv, &st_script) < 0)
 		error("%s: %s\n", *argv, strerror(errno));
@@ -1119,34 +1086,69 @@ int main (int argc, char *argv[])
 	    continue;
 	}
 
+	/*
+	 * Oops, no comment found, guess one
+	 */
 	if (!script_inf.provides || script_inf.provides == empty) {
-	    /* Oops, no comment found, guess one */
+	    serv_t *guess;
 	    script_inf.provides = xstrdup(d->d_name);
 
 	    /*
 	     * Use guessed service to find it within the the runlevels
 	     * (by using the list from the first scan for script locations).
 	     */
-	    service = findserv(script_inf.provides);
-
-	    if (service) {
+	    if ((guess = findserv(script_inf.provides))) {
 		/*
 		 * Try to guess required services out from current scheme.
 		 * Note, this means that all services are required.
 		 */
 		if (!script_inf.required_start || script_inf.required_start == empty) {
 		    list_t * ptr = NULL;
-		    for (ptr = (&(service->id))->prev; ptr != serv_start; ptr = ptr->prev) {
-			if (getserv(ptr)->order >= service->order)
+		    for (ptr = (&(guess->id))->prev; ptr != serv_start; ptr = ptr->prev) {
+			if (getserv(ptr)->order >= guess->order)
 			    continue;
-			if (getserv(ptr)->lvls & service->lvls) {
+			if (getserv(ptr)->lvls & guess->lvls) {
 			    script_inf.required_start = xstrdup(getserv(ptr)->name);
-			    rememberreq(service, &service->req, script_inf.required_start);
 			    break;
 			}
 		    }
 		}
-	    }
+		if (!script_inf.default_start || script_inf.default_start == empty) {
+		    if (guess->lvls)
+			script_inf.default_start = xstrdup(lvl2str(guess->lvls));
+		}
+	    } else {
+		/*
+		 * Find out which levels this service may have out from current scheme.
+		 * Note, this means that the first requiring service wins.
+		 */
+		if (!script_inf.default_start || script_inf.default_start == empty) {
+		    list_t * ptr = NULL;
+		    for (ptr = serv_start->next; ptr != serv_start; ptr = ptr->next) {
+			serv_t * cur = getserv(ptr);
+			list_t * req_start, * req;
+
+			if (script_inf.default_start && script_inf.default_start != empty)
+			   break;
+
+			if (!cur || !cur->req.serv || !cur->lvls)
+			    continue;
+
+			if (!strcmp(cur->req.serv, script_inf.provides)) {
+			    script_inf.default_start = xstrdup(lvl2str(getserv(ptr)->lvls));
+			    break;
+			}
+
+			req_start = &(cur->req.list);
+			for (req = req_start->next; req != req_start; req = req->next) {
+			    if (!strcmp(getreq(req)->serv, script_inf.provides)) {
+				script_inf.default_start = xstrdup(lvl2str(getserv(ptr)->lvls));
+				break;
+			    }
+			}
+		    }
+		}
+	    } /* !(guess = findserv(script_inf.provides)) */
 	}
 
 	/*
@@ -1173,12 +1175,12 @@ int main (int argc, char *argv[])
 
 		if ((service = findserv(token))) {
 
-		    if (script_inf.required_start && script_inf.required_start != empty) {
+		    if (!service->req.serv && script_inf.required_start && script_inf.required_start != empty) {
 			rememberreq(service, &service->req, script_inf.required_start);
 			requiresv(token, script_inf.required_start);
 		    }
 
-		    if (script_inf.should_start && script_inf.should_start != empty) {
+		    if (!service->shd.serv && script_inf.should_start && script_inf.should_start != empty) {
 			rememberreq(service, &service->shd, script_inf.should_start);
 			requiresv(token, script_inf.should_start);
 		    }
@@ -1190,9 +1192,9 @@ int main (int argc, char *argv[])
 		    if (chkfor(d->d_name, argv, argc) && !ignore) {
 			boolean ok = true;
 			if (del)
-			    ok = chkdependencies(d->d_name);
+			    ok = chkdependencies(token);
 			else
-			    ok = chkrequired(d->d_name);
+			    ok = chkrequired(token);
 			if (!ok)
 			    error("exiting now!\n");
 		    }
@@ -1262,7 +1264,10 @@ int main (int argc, char *argv[])
 	    if (*token == '$')
 		continue;
 
-	    runlevels(token, script_inf.default_start);
+	    if (service && del)
+		runlevels(token, lvl2str(service->lvls));
+	    else
+		runlevels(token, script_inf.default_start);
 
 	    /*
 	     * required_stop, should_stop, and default_stop arn't used in SuSE Linux.

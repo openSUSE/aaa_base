@@ -15,8 +15,8 @@
 #
 ### BEGIN INIT INFO
 # Provides: nscd
-# Required-Start: $remote_fs $time $named
-# X-UnitedLinux-Should-Start: $syslog
+# Required-Start: $remote_fs $time
+# X-UnitedLinux-Should-Start: $syslog $named
 # Required-Stop:
 # Default-Start:  3 5
 # Default-Stop:   0 1 2 6

@@ -81,7 +81,7 @@ fi
 # Initialize runlevel links
 #
 # etc/init.d/nfs removed from list (no longer on by default)
-%{fillup_and_insserv -py nscd halt random reboot single xdm boot.clock boot.ipconfig boot.klog boot.ldconfig boot.localfs boot.localnet boot.proc boot.swap boot.idedma}
+%{fillup_and_insserv -py boot.proc boot.localfs boot.proc boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.idedma boot.localnet nscd halt random reboot single xdm}
 %{fillup_and_insserv -psy boot.crypto START_CRYPTO_FILESYSTEMS}
 ## powerfail probably needs empty header ...
 
@@ -113,7 +113,7 @@ done
 for i in passwd group shadow gshadow ; do
     test -e var/adm/fillup-templates/$i.aaa_base || continue
     echo -n "Updating etc/$i..."
-  if test -f etc/$i ; then  
+  if test -f etc/$i ; then
     cp etc/$i etc/$i.tmp
     rm -f etc/$i.add
     sort -k 1,1 -t: -u etc/$i var/adm/fillup-templates/$i.aaa_base \
@@ -477,4 +477,3 @@ EOT
 fi
 
 exit 0
-

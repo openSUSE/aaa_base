@@ -24,7 +24,10 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
     exit 1
 }
 . $r/lib/YaST/SuSEconfig.functions
-
+# this variable might be set in the environment but cleared
+# in the config recently
+unset CUPS_SERVER
+#
 for i in $r/etc/sysconfig/language $r/etc/sysconfig/windowmanager $r/etc/sysconfig/suseconfig \
 	 $r/etc/sysconfig/mail $r/etc/sysconfig/printer $r/etc/sysconfig/proxy ; do
   test -f $i || {

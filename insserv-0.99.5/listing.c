@@ -138,9 +138,17 @@ static void ln_sf(const char * isprovided, const char * itrequires)
     if (target == dir)
 	goto out;
 
+    /* Do not link in if already done */
     if (!dir->link.target) {
 	dir->link.target = target;
 	goto out;
+    } else {
+	list_t * dent;
+	for (dent = l_start->next; dent != l_start; dent = dent->next) {
+	    dir_t * target = getlink(dent)->target;
+	    if (!strcmp(target->name, isprovided))
+		goto out;
+	}
     }
 
     this = (link_t *)malloc(sizeof(link_t));
@@ -151,6 +159,7 @@ static void ln_sf(const char * isprovided, const char * itrequires)
     }
     error("%s", strerror(errno));
 out:
+    return;
 }
 
 /*
@@ -298,6 +307,7 @@ static void guess_order(dir_t * dir)
     }
 
 out:
+    return;
 }
 
 /*
@@ -587,6 +597,7 @@ void setorder(const char * script, const int order)
     }
 
 out:
+    return;
 }
 
 /*
