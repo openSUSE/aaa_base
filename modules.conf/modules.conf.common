@@ -277,6 +277,7 @@ alias binfmt-0008         binfmt_aout
 
 alias iso9660             isofs
 alias tty-ldisc-1         slip
+alias tty-ldisc-2         serio
 alias tty-ldisc-5         mkiss
 
 # alias tty-ldisc-7       6pack
