@@ -327,6 +327,8 @@ if test -f root/.gnupg/pubring.gpg ; then
 else
    cp root/.gnupg/suse_build_key root/.gnupg/pubring.gpg
 fi
+chmod 600 root/.gnupg/suse_build_key root/.gnupg/pubring.gpg
+
 if test "$GPG_IMPORT_FAIL" = "true" ; then
     mkdir -p var/adm/notify/messages
     cat << EOT > var/adm/notify/messages/add_build_gpg_key
