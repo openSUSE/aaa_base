@@ -32,7 +32,6 @@
 # Directories
 #
 # closed:
-/var/spool/uucppublic                  root.uucp        1770
 /usr/postgres/data/base                postgres.daemon   700
 /usr/postgres/data/files               postgres.daemon   750
 /usr/lib/ircd                          irc.root          700
@@ -43,14 +42,12 @@
 /var/spool/cron                        root.root         700
 /var/cron/tabs                         root.root         700
 /var/spool/cron/tabs                   root.root         700
+/var/lib/gdm                           gdm.shadow        750
 /var/lib/xdm/authdir                   root.root         700
 /var/lib/xdm/authdir/authfiles         root.root         700
 /var/lock                              root.uucp         775
 # closed; see "easy"
 /var/man2html                          root.root        0755
-# restrictive, only for "trusted" group users:
-/var/spool/fax/outgoing                root.trusted     1770
-/var/spool/uucp                        uucp.uucp         755
 # no lock files for emacs:
 /var/state/emacs/lock                  root.trusted     1775
 /var/state/xemacs/lock                 root.trusted     1775
@@ -118,11 +115,16 @@
 /usr/bin/gpasswd                       root.trusted     0755
 /usr/bin/newgrp                        root.root        0755
 /usr/bin/passwd                        root.shadow      0755
+/usr/bin/chfn                          root.shadow      0755
+/usr/bin/chage                         root.shadow      0755
+/usr/bin/chsh                          root.shadow      0755
+/usr/bin/expiry                        root.shadow      0755
 # NIS+: "trusted" only.
 /usr/bin/chkey                         root.trusted     0755
 # the default configuration of the sudo package in SuSE distribution is to
 # intimidate users.
 /usr/bin/sudo                          root.root        0755
+/usr/sbin/suexec                       root.root        0755
 # "user" entries in /etc/fstab make mount work for non-root users:
 /usr/bin/ncpmount                      root.trusted     0755
 /usr/bin/ncpumount                     root.trusted     0755
@@ -136,6 +138,13 @@
 /usr/lib/pt_chown                      root.root        0755
 /sbin/pwdb_chkpwd                      root.shadow      0755
 /sbin/unix_chkpwd                      root.shadow      0755
+
+
+#
+# log files that do not grow remarkably
+#
+/var/log/faillog                       root.root         600
+/var/log/lastlog                       root.tty          644
 
 
 #
@@ -254,6 +263,13 @@
 # override package modes: lpc does not need to be suid root
 # for users:
 /usr/bin/lpc                            root.root        755
+# disabled by default in SuSE distributions: make it 4755 if you need it.
+/usr/bin/suidperl                       root.root       0755
+# also disabled (libforms, libX11) reenable it by setting it 4755:
+/usr/X11R6/bin/cardinfo                 root.root       0755
+# if smail is installed:
+/usr/sbin/smail                         root.root       6555
+
 
 #
 # networking (need root for the privileged socket)
@@ -277,6 +293,7 @@
 /usr/sbin/pppoedsp                     root.dialout     0750
 # access to ttyS?: make it sgid uucp.
 /opt/kde/bin/kppp                      root.uucp        0755
+/usr/sbin/isdnctrl                     root.uucp        0750
 
 
 #
@@ -288,8 +305,7 @@
 /usr/bin/restorefont                    root.root       0755
 /usr/bin/restorepalette                 root.root       0755
 /usr/bin/restoretextmode                root.root       0755
-
-
+/usr/lib/mc/bin/cons.saver              root.root       4755
 
 
 #
@@ -300,6 +316,7 @@
 /opt/kde/bin/konsole                    root.tty        0755
 /opt/kde2/bin/konsole                   root.tty        0755
 /opt/kde/bin/kvt                        root.tty        0755
+/opt/gnome/sbin/gnome-pty-helper        root.tty        2755
 /usr/X11R6/bin/xterm                    root.tty        0755
 # screen. multi-user mode needs suid root. discouraged and
 # disabled in "secure".
@@ -387,6 +404,7 @@
 # This has a meaning:
 /opt/kde/bin/kdesud                     root.nogroup    0755
 /opt/kde/bin/kv4lsetup                  root.video      0755
+/opt/kde/bin/kcheckpass                 root.shadow     2755
 /usr/bin/kv4lsetup                      root.video      0755
 /opt/kde2/bin/kv4lsetup                 root.video      0755
 /opt/kde2/bin/kdesud                    root.nogroup    0755
@@ -508,7 +526,54 @@
 /usr/lib/news/bin/startinnfeed          root.news       0755
 /usr/lib/news/bin/inndstart             root.news       0755
 /usr/lib/news/bin/inews                 news.news       0755
+/usr/lib/news/bin/input/newsspool       news.news       6555
 
+
+#
+# fax
+#
+# restrictive, only for "trusted" group users:
+/var/spool/fax/outgoing                root.trusted     1770
+/var/spool/fax/archive                  uucp.uucp        700
+/var/spool/fax/bin                      uucp.uucp        755
+/var/spool/fax/client                   uucp.uucp        755
+/var/spool/fax/config                   uucp.uucp        755
+/var/spool/fax/dev                      uucp.uucp        755
+/var/spool/fax/docq                     uucp.uucp        700
+/var/spool/fax/doneq                    uucp.uucp        700
+/var/spool/fax/etc                      uucp.uucp        755
+/var/spool/fax/info                     uucp.uucp        755
+/var/spool/fax/log                      uucp.uucp        755
+/var/spool/fax/pollq                    uucp.uucp        700
+/var/spool/fax/recvq                    uucp.uucp        755
+/var/spool/fax/sendq                    uucp.uucp        700
+/var/spool/fax/status                   uucp.uucp        755
+/var/spool/fax/tmp                      uucp.uucp        700
+
+
+#
+# tex
+#
+/var/texfonts/pk/deskjet                root.root       0775
+/var/texfonts/pk/gsftopk                root.root       0775
+/var/texfonts/pk                        root.root       0775
+/var/texfonts                           root.root       0775
+
+
+#
+# uucp
+#
+/var/spool/uucppublic                   root.uucp       1770
+/var/spool/uucp                         uucp.uucp        755
+/usr/bin/uucp                           uucp.uucp       0555
+/usr/bin/uuname                         uucp.uucp       0555
+/usr/bin/uustat                         uucp.uucp       0555
+/usr/bin/uux                            uucp.uucp       0555
+/usr/lib/uucp/uucico                    uucp.uucp       0555
+/usr/lib/uucp/uuxqt                     uucp.uucp       0555
+/var/lib/uucp/taylor_config/call        uucp.uucp        440
+/var/lib/uucp/taylor_config/passwd      uucp.uucp        440
+/var/log/uucp                           uucp.uucp        755
 
 
 #

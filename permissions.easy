@@ -18,7 +18,6 @@
 # Directories
 #
 
-/var/spool/uucppublic                  root.root        1777
 /usr/postgres/data/base                postgres.daemon   700
 /usr/postgres/data/files               postgres.daemon   755
 /usr/lib/ircd                          irc.root          700
@@ -28,12 +27,11 @@
 /var/spool/cron                        root.root         700
 /var/cron/tabs                         root.root         700
 /var/spool/cron/tabs                   root.root         700
+/var/lib/gdm                           gdm.shadow        750
 /var/lib/xdm/authdir                   root.root         700
 /var/lib/xdm/authdir/authfiles         root.root         700
 /var/lock                              root.uucp         775
 /var/man2html                          root.root        1777
-/var/spool/fax/outgoing                root.root        1777
-/var/spool/uucp                        uucp.uucp         755
 /var/state/emacs/lock                  root.root        1777
 /var/state/xemacs/lock                 root.root        1777
 /var/squid                             squid.root        755
@@ -96,8 +94,13 @@
 /usr/bin/gpasswd                       root.shadow      4755
 /usr/bin/newgrp                        root.root        4755
 /usr/bin/passwd                        root.shadow      4755
+/usr/bin/chfn                          root.shadow      4755
+/usr/bin/chage                         root.shadow      4755
+/usr/bin/chsh                          root.shadow      4755
+/usr/bin/expiry                        root.shadow      4755
 /usr/bin/chkey                         root.root        4755
 /usr/bin/sudo                          root.root        4755
+/usr/sbin/suexec                       root.root        4755
 # "user" entries in /etc/fstab make mount work for non-root users:
 /usr/bin/ncpmount                      root.root        4755
 /usr/bin/ncpumount                     root.root        4755
@@ -109,6 +112,12 @@
 /usr/lib/pt_chown                      root.root        4755
 /sbin/pwdb_chkpwd                      root.shadow      2755
 /sbin/unix_chkpwd                      root.shadow      2755
+
+#
+# log files that do not grow remarkably
+#
+/var/log/faillog                       root.root         600
+/var/log/lastlog                       root.tty          644
 
 
 #
@@ -221,6 +230,14 @@
 # override package modes: lpc does not need to be suid root
 # for users:
 /usr/bin/lpc                            root.root        755
+# disabled by default in SuSE distributions: make it 4755 if you need it.
+/usr/bin/suidperl                       root.root       0755
+# also disabled (libforms, libX11) reenable it by setting it 4755:
+/usr/X11R6/bin/cardinfo                 root.root       4755
+# if smail is installed:
+/usr/sbin/smail                         root.root       6555 
+
+
 
 #
 # networking (need root for the privileged socket)
@@ -242,6 +259,7 @@
 /usr/sbin/pppoedsp                     root.dialout     6754
 # access to ttyS?:
 /opt/kde/bin/kppp                      root.uucp        2755
+/usr/sbin/isdnctrl                     root.uucp        4750
 
 
 #
@@ -253,8 +271,7 @@
 /usr/bin/restorefont                    root.root       4755
 /usr/bin/restorepalette                 root.root       4755
 /usr/bin/restoretextmode                root.root       4755
-
-
+/usr/lib/mc/bin/cons.saver              root.root       4755
 
 
 #
@@ -263,6 +280,7 @@
 /opt/kde/bin/konsole                    root.tty        2755
 /opt/kde2/bin/konsole                   root.tty        2755
 /opt/kde/bin/kvt                        root.tty        2755
+/opt/gnome/sbin/gnome-pty-helper        root.tty        2755
 /usr/X11R6/bin/xterm                    root.tty        2755
 # screen. multi-user mode needs suid root. discouraged...
 /usr/bin/screen                         root.root       4755
@@ -345,6 +363,7 @@
 /opt/kde/bin/kscd                       root.disk       2755
 /opt/kde/bin/kdesud                     root.nogroup    2755
 /opt/kde/bin/kv4lsetup                  root.video      4755
+/opt/kde/bin/kcheckpass                 root.shadow     2755
 /usr/bin/kv4lsetup                      root.video      4755
 /opt/kde2/bin/kv4lsetup                 root.video      4755
 /opt/kde2/bin/kdesud                    root.nogroup    2755
@@ -462,7 +481,54 @@
 /usr/lib/news/bin/startinnfeed          root.news       4755
 /usr/lib/news/bin/inndstart             root.news       4755
 /usr/lib/news/bin/inews                 news.news       6755
+/usr/lib/news/bin/input/newsspool       news.news       6555
 
+
+#
+# fax
+#
+/var/spool/fax/outgoing                 root.root       1777
+/var/spool/fax/archive                  uucp.uucp        700
+/var/spool/fax/bin                      uucp.uucp        755
+/var/spool/fax/client                   uucp.uucp        755
+/var/spool/fax/config                   uucp.uucp        755
+/var/spool/fax/dev                      uucp.uucp        755
+/var/spool/fax/docq                     uucp.uucp        700
+/var/spool/fax/doneq                    uucp.uucp        700
+/var/spool/fax/etc                      uucp.uucp        755
+/var/spool/fax/info                     uucp.uucp        755
+/var/spool/fax/log                      uucp.uucp        755
+/var/spool/fax/pollq                    uucp.uucp        700
+/var/spool/fax/recvq                    uucp.uucp        755
+/var/spool/fax/sendq                    uucp.uucp        700
+/var/spool/fax/status                   uucp.uucp        755
+/var/spool/fax/tmp                      uucp.uucp        700
+
+
+#
+# tex
+#
+/var/texfonts/pk/deskjet                root.root       1777
+/var/texfonts/pk/gsftopk                root.root       1777
+/var/texfonts/pk                        root.root       1777
+/var/texfonts                           root.root       1777
+
+
+
+#
+# uucp
+#
+/var/spool/uucppublic                   root.root        1777
+/var/spool/uucp                         uucp.uucp        755
+/usr/bin/uucp                           uucp.uucp       6555
+/usr/bin/uuname                         uucp.uucp       6555
+/usr/bin/uustat                         uucp.uucp       6555
+/usr/bin/uux                            uucp.uucp       6555
+/usr/lib/uucp/uucico                    uucp.uucp       6555
+/usr/lib/uucp/uuxqt                     uucp.uucp       6555
+/var/lib/uucp/taylor_config/call        uucp.uucp        440
+/var/lib/uucp/taylor_config/passwd      uucp.uucp        440
+/var/log/uucp                           uucp.uucp        755
 
 
 #

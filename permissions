@@ -72,7 +72,7 @@
 #
 
 /var/tmp                                root.root       1777
-#/var/tmp/vi.recover                     root.root       1777
+/var/tmp/vi.recover                     root.root       1777
 /var/iptraf                             root.root        700
 /var/lock/subsys                        root.uucp        775
 /var/log                                root.root        755
