@@ -189,9 +189,11 @@ if ( -o /dev/$tty ) then
   if ( -x /usr/bin/biff ) /usr/bin/biff y
   # If we're running under X11
   if ( ${?DISPLAY} ) then
-    if ( ${?TERM} && ${TERM} == "xterm" && ${?EMACS} == 0 ) then
-      alias cwdcmd '(echo -n "\033]2;$USER on ${HOST}: $cwd\007\033]1;$HOST\007" > /dev/$tty)'
-      cd .
+    if ( ${?TERM} && ${?EMACS} == 0 ) then
+      if ( ${TERM} == "xterm" ) then
+        alias cwdcmd '(echo -n "\033]2;$USER on ${HOST}: $cwd\007\033]1;$HOST\007" > /dev/$tty)'
+        cd .
+      endif
     endif
     if ( -x /usr/bin/biff ) /usr/bin/biff n
     set prompt="%C2%# "

@@ -40,8 +40,10 @@ foreach _d (~/bin/$MACHTYPE ~/bin \
     if ( -d $_d ) set _tpath=( $_d $_tpath)
 end
 
-if ( ${?OPENWINHOME} && -d $OPENWINHOME/bin ) then
-    set _xpath=( $OPENWINHOME/bin )
+if ( ${?OPENWINHOME} ) then
+    if ( -d $OPENWINHOME/bin ) then
+	set _xpath=( $OPENWINHOME/bin )
+    endif
 endif
 if ( -d /usr/bin/X11 ) then
     set _xpath=( /usr/bin/X11   $_xpath )
@@ -84,14 +86,16 @@ endif
 cd
 #
 # An x session
-if (${?TERM} && ${TERM} == "xterm") then
-    if ( -f /etc/motd ) cat /etc/motd
-    echo "Directory: $cwd"
-    #
-    # shadow passwd
-    # Note: on normal console this will be done
-    #       by /bin/login
-    if ( -x "`which faillog`" && -r /var/log/faillog ) faillog -p
+if (${?TERM}) then
+    if (${TERM} == "xterm") then
+	if ( -f /etc/motd ) cat /etc/motd
+	echo "Directory: $cwd"
+	#
+	# shadow passwd
+	# Note: on normal console this will be done
+	#       by /bin/login
+	if ( -x "`which faillog`" && -r /var/log/faillog ) faillog -p
+    endif
 endif
 #
 # Do you really like this?
