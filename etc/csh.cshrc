@@ -46,13 +46,20 @@ if ( -s /etc/nntpserver ) then
 else
    setenv NNTPSERVER news
 endif
-if (! ${?XUSERFILESEARCHPATH}) then
-   setenv XUSERFILESEARCHPATH    /var/X11R6/app-defaults/:/usr/X11R6/lib/X11/app-defaults/
+#
+set XLIBDIR=/usr/X11R6/lib/X11/
+if ( -d /usr/lib/X11/app-defaults/ ) then
+    set XLIBDIR=/usr/lib/X11/
 endif
-if (${?XAPPLRESDIR}) then
-   setenv XUSERFILESEARCHPATH ${XAPPLRESDIR}/:${XUSERFILESEARCHPATH}
+set path_xr5=${XLIBDIR}%L/%T/%N%C:${XLIBDIR}%l/%T/%N%C:${XLIBDIR}%T/%N%C
+set path_xr6=${XLIBDIR}%L/%T/%N:${XLIBDIR}%l/%T/%N:${XLIBDIR}%T/%N
+set path_var=/var/X11R6/%T/%N%C:/var/X11R6/%T/%N
+setenv XFILESEARCHPATH "${path_xr5}:${path_xr6}:${path_var}"
+if ( -d ${HOME}/.app-defaults/ ) then
+    setenv XAPPLRESDIR  ${HOME}/.app-defaults/
 endif
-setenv XAPPLRESDIR        /usr/X11R6/lib/X11/app-defaults/
+unset XLIBDIR path_xr5 path_xr6 path_var
+#
 if ( -f /usr/lib/teTeX/texmf.cnf ) then
    setenv TETEXDIR /usr/lib/teTeX
    if ( -d /usr/bin/TeX ) set path=( /usr/bin/TeX $path )

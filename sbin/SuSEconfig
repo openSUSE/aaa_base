@@ -402,6 +402,51 @@ if test -n "$DOC_HOST" ; then
     echo "export SUSE_DOC_HOST" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv SUSE_DOC_HOST $DOC_HOST" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
+if test -d $r/opt/kde ; then
+    echo "KDEDIR=/opt/kde" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export KDEDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv KDEDIR /opt/kde" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/X11R6/lib/qt ; then
+    echo "QTDIR=/usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv QTDIR /usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/opt/gnome ; then
+    echo "GNOMEDIR=/opt/gnome" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export GNOMEDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv GNOMEDIR /opt/gnome" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/X11R6/lib/xad ; then
+    echo "XADIDIR=/usr/X11R6/lib/xad" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export XADIDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv XADIDIR /usr/X11R6/lib/xad" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/dvgt_help ; then
+    echo "DV_IMMED_HELP=/usr/lib/dvgt_help" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export DV_IMMED_HELP" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv DV_IMMED_HELP /usr/lib/dvgt_help" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/maple ; then
+    echo "MAPLE=/usr/lib/maple" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export MAPLE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv MAPLE /usr/lib/maple" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/rasmol ; then
+    echo "RASMOLPATH=/usr/lib/rasmol" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export RASMOLPATH" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv RASMOLPATH /usr/lib/rasmol" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/mars_e ; then
+    echo "DMARSCONF=/usr/lib/mars_e" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export DMARSCONF" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv DMARSCONF /usr/lib/mars_e" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
+if test -d $r/usr/lib/crisp/macros ; then
+    echo "CRPATH=/usr/lib/crisp/macros" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export CRPATH" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv CRPATH /usr/lib/crisp/macros" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+fi
 if test -d $r/usr/lib/maxwell ; then
     echo "MAXHOME=/usr/lib/maxwell" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export MAXHOME" >> $r/etc/SuSEconfig/profile.SuSEconfig

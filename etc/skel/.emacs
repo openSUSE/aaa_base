@@ -3,7 +3,7 @@
 ;;; ---------------------
 ;;;
 ;;; Note: This file switches between two Emacs versions:
-;;;            GNU-Emacs (19.34) and X-Emacs (19.14/20.X).
+;;;            GNU-Emacs (19.34/20.X) and X-Emacs (19.14/20.X).
 ;;;       Please to not mix both versions: GNU-Emacs and X-Emacs
 ;;;       are incompatible. They use differnet binary code for
 ;;;       compiled lisp files and they have different builtin
@@ -16,7 +16,7 @@
 ;;;
 ;;; Copyright (c) 1997 S.u.S.E. Gmbh Fuerth, Germany.  All rights reserved.
 ;;;
-;;; Author: Werner Fink, <werner@suse.de> 1997
+;;; Author: Werner Fink, <werner@suse.de> 1997,98
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Test of Emacs derivates
@@ -64,7 +64,7 @@
   ;;; ---------
   ;;; load ~/.gnu-emacs or, if not exists /etc/skel/.gnu-emacs
   ;;; For a description and the settings see /etc/skel/.gnu-emacs
-  ;;;   ... for your private ~/.gnu-emacs your are at your one.
+  ;;;   ... for your private ~/.gnu-emacs your are on your one.
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (if (file-readable-p "~/.gnu-emacs")
       (load "~/.gnu-emacs" nil t)

@@ -32,6 +32,7 @@ for DIR in /usr/openwin/bin \
            /var/lib/dosemu \
            /usr/games/bin \
            /usr/games \
+           /opt/gnome/bin \
            /opt/kde/bin ; do
     test -d $DIR && PATH=$PATH:$DIR
 done
@@ -51,27 +52,10 @@ fi
 POVRAYOPT=-l/usr/lib/povray/include
 export POVRAYOPT
 test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/fvwm2
-export WINDOWMANAGER
-KDEDIR=/opt/kde
-export KDEDIR
 TEXINPUTS="$TEXINPUTS:~/.TeX:/usr/doc/.TeX"
 export TEXINPUTS
-XADIDIR="/usr/X11R6/lib/xad"
-export XADIDIR
-DV_IMMED_HELP=/usr/lib/dvgt_help
-export DV_IMMED_HELP
-MAPLE=/usr/lib/maple
-export MAPLE
-RASMOLPATH="/usr/lib/rasmol"
-export RASMOLPATH
-DMARSCONF=/usr/lib/mars_e
-export DMARSCONF
-CRPATH=/usr/lib/crisp/macros
-export CRPATH
 PRINTER='lp'
 export PRINTER
-QTDIR=/usr/X11R6/lib/qt
-export QTDIR  
 
 
 

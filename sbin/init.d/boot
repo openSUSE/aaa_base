@@ -200,6 +200,14 @@ rm -f /var/lock/* /var/lock/*/* /tmp/.X*lock \
 #fi
 
 #
+# setup PNP if config file is present
+#
+if test -r /etc/isapnp.conf -a -x /sbin/isapnp -a "$START_ISAPNP" = yes ; then
+    echo "Initializing PnP devices."
+    /sbin/isapnp /etc/isapnp.conf
+fi
+
+#
 # start user defined bootup script.
 #
 if test -f /sbin/init.d/boot.local ; then
@@ -210,14 +218,6 @@ fi
 if test -x /usr/sbin/klogd ; then
         /usr/sbin/klogd -f /var/log/boot.msg -o
         /bin/sleep 1
-fi
-
-#
-# setup PNP if config file is present
-#
-if test -r /etc/isapnp.conf -a -x /sbin/isapnp ; then
-    echo "Initializing PnP devices."
-    /sbin/isapnp /etc/isapnp.conf
 fi
 
 #

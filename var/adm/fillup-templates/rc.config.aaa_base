@@ -519,6 +519,11 @@ DISPLAYMANAGER=console
 CONSOLE_SHUTDOWN=reboot
 
 #
+# Should isapnp be used to initialize your PNP at bootup?  (yes/no)
+#
+START_ISAPNP=yes
+
+#
 # possibly a script in /sbin/init.d or cron.daily sends mails. 
 # So please let MM_RUNASROOT be set to "true".
 #
