@@ -36,9 +36,6 @@
 /var/spool/smail/log/paniclog   +128k   644      root.root
 /var/spool/uucp/Log            +2048k   644      uucp.uucp
 /var/spool/uucp/Stats          +1024k   644      uucp.uucp
-/var/squid/logs/access.log     +4096k   644      squid.nogroup
-/var/squid/logs/store.log      +4096k   644      squid.nogroup
-/var/squid/logs/cache.log      +4096k   644      squid.nogroup
 /local/www/logs/access_log     +4096k   644      root.root
 /local/www/logs/error_log      +1024k   644      root.root
 # SQUID

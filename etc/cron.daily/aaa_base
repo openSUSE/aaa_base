@@ -62,7 +62,7 @@ check_log_file () {
     find "$1" -size $2 \
         -exec echo "$1 was $2" \; \
         -exec rm -f "$1".o \; \
-        -exec mv "$1" "$1".o \; \
+        -exec cp "$1" "$1".o \; \
         -exec cp /dev/null "$1" \; \
         -exec chmod $3 "$1" "$1.o" \; \
         -exec chown $4 "$1" "$1.o" \; 
