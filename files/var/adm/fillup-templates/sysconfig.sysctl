@@ -42,6 +42,12 @@ IPV6_FORWARD="no"
 #
 IPV6_PRIVACY=no
 
+#
+# Runtime-configurable parameter: send MLD announcements of this
+# version.
+#
+IPV6_MLD_VERSION=""
+
 ## Path:	Network/General
 ## Description:	activate ECN network configuration at bootup
 ## Type:	yesno

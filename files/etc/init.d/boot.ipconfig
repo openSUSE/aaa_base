@@ -76,6 +76,7 @@ case "$1" in
    case $IPV6_PRIVACY in
       yes) LOAD_IPV6="yes" ;;
    esac
+   test -n "$IPV6_MLD_VERSION" && LOAD_IPV6="yes"
    test "$LOAD_IPV6" = "yes" && /sbin/modprobe ipv6 >/dev/null 2>&1
    #
    if test -e /proc/sys/net/ipv6/conf/all/forwarding -a -n "$IPV6_FORWARD" ; then
@@ -106,7 +107,15 @@ case "$1" in
        ;;
     esac
     rc_status -v -r
-   fi
+    fi
+    #
+    # Set MLD version?
+    #
+    if test -e /proc/sys/net/ipv6/conf/all/force_mld_version -a -n "$IPV6_MLD_VERSION"; then
+	echo -n "Setting MLD version to $IPV6_MLD_VERSION"
+	echo "$IPV6_MLD_VERSION" > /proc/sys/net/ipv6/conf/all/force_mld_version
+    fi
+    rc_status -v -r
    ;;
   stop)
     # skip / nothing to do
