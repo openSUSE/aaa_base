@@ -148,6 +148,8 @@ if test -d ${bootrc}/ ; then
 	script=${B#*S$rex}
 	B=${B%$script}
 
+	rc_splash "$script start"
+
 	if test "$DO_CONFIRM" = "yes" ; then
 	    rc_confirm -t 5 "Start bootup script ${script}" < $REDIRECT > $REDIRECT 2>&1
 	    case "$?" in
