@@ -7,8 +7,6 @@ etc/csh.login
 etc/inittab
 etc/inputrc
 etc/insserv.conf
-etc/issue
-etc/issue.net
 etc/ld.so.conf
 etc/logfiles
 etc/mailcap
