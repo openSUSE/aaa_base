@@ -173,7 +173,7 @@ case "$1" in
 	optpts="-o mode=0620,gid=5"
 	mount -fv -t devpts $optpts devpts /dev/pts
 	rc_status
-	mount -av -t nonfs,noproc,nodevpts,nosmbfs
+	mount -av -t nonfs,noproc,nodevpts,nosmbfs -O no_netdev
 	rc_status -v1 -r
 	;;
     stop|restart)
