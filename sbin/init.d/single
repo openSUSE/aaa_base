@@ -12,9 +12,9 @@
 
 case "$1" in
     start)
-        if test -d /usr/lib/kbd/consolefonts ; then
-            if test -n "$CONSOLE_FONT" -a "$CONSOLE_FONT" != "YAST_ASK" -a \
-                -x /usr/bin/setfont ; then
+        if test -d /usr/lib/kbd/consolefonts -a \
+           -n "$CONSOLE_FONT" -a "$CONSOLE_FONT" != "YAST_ASK" ; then
+            if test -x /usr/bin/setfont ; then
                 ECHO_RETURN=$rc_done_up
                 echo Loading console font $CONSOLE_FONT
                 /usr/bin/setfont $CONSOLE_FONT || ECHO_RETURN=$rc_failed_up
@@ -22,10 +22,10 @@ case "$1" in
             fi
             if test -n "$CONSOLE_UNICODEMAP" -a \
                 "$CONSOLE_UNICODEMAP" != "none" -a \
-                -x /usr/bin/loadunimap ; then
+                -x /usr/bin/setfont ; then
                 ECHO_RETURN=$rc_done_up
                 echo Loading unimap $CONSOLE_UNICODEMAP
-                /usr/bin/loadunimap $CONSOLE_UNICODEMAP || ECHO_RETURN=$rc_failed_up
+                /usr/bin/setfont -u $CONSOLE_UNICODEMAP || ECHO_RETURN=$rc_failed_up
                 echo -e "$ECHO_RETURN"
             fi
             if test -n "$CONSOLE_SCREENMAP" -a \

@@ -45,7 +45,7 @@ KEYTABLE="de-latin1-nodeadkeys"
 #
 # what font for console shall be loaded?
 #
-CONSOLE_FONT="YAST_ASK"
+CONSOLE_FONT=""
 
 #
 # does your console font need a screenmap. so add it to CONSOLE_SCREENMAP.
