@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1996,98 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996,98, 99 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Burchard Steinbild <bs@suse.de>, 1996-97
 #         Florian La Roche <florian@suse.de>, 1996
@@ -9,6 +9,9 @@
 #
 # Rewrote i18n support to use RC_LANG and RC_LC_* rc.config variables
 # Bernhard Kaindl <bk@suse.de>, 1999
+#
+# Change ROOT_LOGIN_REMOTE support to edit PAM config files.
+# Thorsten Kukuk <kukuk@suse.de>, 1999
 #
 
 echo "Started the SuSE-Configuration Tool."
@@ -85,8 +88,8 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 echo "Reading $r/etc/rc.config and updating the system..."
 
 if test ! -f $r/etc/rc.config ; then
-    echo "No $r/etc/rc.config found." 
-    exit 1 
+    echo "No $r/etc/rc.config found."
+    exit 1
 fi
 
 . $r/etc/rc.config
@@ -158,7 +161,7 @@ if test -e $IS_RUNNING ; then
         echo
         echo "If You think, there is no other SuSEconfig running, please call"
         echo
-        echo "    rm $IS_RUNNING "  
+        echo "    rm $IS_RUNNING "
         echo
         echo "Then you can start SuSEconfig again."
         echo
@@ -242,7 +245,7 @@ if test -n "$CREATE_RESOLVCONF" -a "$CREATE_RESOLVCONF" = "yes" -a \
         echo_warning /etc/resolv.conf \
              "# Change variables (NAMESERVER + SEARCHLIST) in /etc/rc.config instead." \
             > $r/etc/resolv.conf.SuSEconfig
-    
+
         test -n "$SEARCHLIST" && echo -e "search $SEARCHLIST" >> $r/etc/resolv.conf.SuSEconfig
         for NSIP in $NAMESERVER; do
             echo -e "nameserver $NSIP" >> $r/etc/resolv.conf.SuSEconfig
@@ -395,7 +398,7 @@ if test "$ROOT_USES_LANG" = yes ; then
     for var in $locale_vars
     do
         if eval test "\$RC_$var"; then
-            eval echo "$var=\\\"\$RC_$var\\\""  
+            eval echo "$var=\\\"\$RC_$var\\\""
             echo "export $var"
         else
             echo "unset $var"
@@ -407,7 +410,7 @@ if test "$ROOT_USES_LANG" = yes ; then
     for var in $locale_vars
     do
         if eval test "\$RC_$var"; then
-            eval echo "setenv $var \\\"\$RC_$var\\\""  
+            eval echo "setenv $var \\\"\$RC_$var\\\""
         else
             echo "unsetenv $var"
         fi
@@ -437,7 +440,7 @@ else
     for var in $locale_vars
     do
         if eval test "\$RC_$var"; then
-            eval echo "'    'RC_$var=\\\"\$RC_$var\\\""  
+            eval echo "'    'RC_$var=\\\"\$RC_$var\\\""
             echo "    export RC_$var"
         fi
         echo "    unset $var"
@@ -447,7 +450,7 @@ else
     for var in $locale_vars
     do
         if eval test "\$RC_$var"; then
-            eval echo "'    '$var=\\\"\$RC_$var\\\""  
+            eval echo "'    '$var=\\\"\$RC_$var\\\""
             echo "    export $var"
         else
             echo "    unset $var"
@@ -461,16 +464,16 @@ else
     for var in $locale_vars
     do
         if eval test "\$RC_$var"; then
-            eval echo "'    'setenv RC_$var \\\"\$RC_$var\\\""  
+            eval echo "'    'setenv RC_$var \\\"\$RC_$var\\\""
         fi
-        echo "    unsetenv $var"  
+        echo "    unsetenv $var"
     done                             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
     echo 'else'                      >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
     echo "$user_message"             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
     for var in $locale_vars
     do
         if eval test "\$RC_$var"; then
-            eval echo "'    'setenv $var \\\"\$RC_$var\\\""  
+            eval echo "'    'setenv $var \\\"\$RC_$var\\\""
         else
             echo "    unsetenv $var"
         fi
@@ -618,7 +621,7 @@ if test "$SORT_PASSWD_BY_UID" = yes ; then
             cmp -s $r/etc/$i $r/etc/$i.t || {
                 echo "Sorting /etc/$i. Saving old to /etc/$i.unsorted."
                 mv $r/etc/$i $r/etc/$i.unsorted
-                cp $r/etc/$i.t $r/etc/$i 
+                cp $r/etc/$i.t $r/etc/$i
             }
         }
         rm $r/etc/$i.t
@@ -630,15 +633,22 @@ fi
 #
 if test -n "$ROOT_LOGIN_REMOTE" ; then
     if test "$ROOT_LOGIN_REMOTE" = "yes" ; then
-        cat $r/etc/login.defs | \
-            sed -e"s:^[ 	]*CONSOLE[ 	]:#CONSOLE	:" \
-            > $r/etc/login.defs.SuSEconfig
+	cat $r/etc/pam.d/login | \
+	    sed 's@^[[:space:]]*auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)@#&@' \
+            > $r/etc/pam.d/login.SuSEconfig
+	cat $r/etc/pam.d/rlogin | \
+	    sed 's@^[[:space:]]*auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)@#&@' \
+            > $r/etc/pam.d/rlogin.SuSEconfig
     else
-        cat $r/etc/login.defs | \
-            sed -e"s:^#[ 	]*CONSOLE[ 	]:CONSOLE	:" \
-            > $r/etc/login.defs.SuSEconfig
+        cat $r/etc/pam.d/login | \
+	    sed 's@^[[:space:]]*#[[:space:]]*\(auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)\)@\1@' \
+            > $r/etc/pam.d/login.SuSEconfig
+        cat $r/etc/pam.d/rlogin | \
+	    sed 's@^[[:space:]]*#[[:space:]]*\(auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)\)@\1@' \
+            > $r/etc/pam.d/rlogin.SuSEconfig
     fi
-    check_md5_and_move $r/etc/login.defs
+    check_md5_and_move $r/etc/pam.d/login
+    check_md5_and_move $r/etc/pam.d/rlogin
 fi
 
 #
@@ -823,9 +833,9 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
             FDIR=/usr/X11R6/lib/X11/fonts/$i
             if test -d $FDIR -a -x /usr/X11R6/bin/mkfontdir -a \
                 "$CHECK_NEWPACKAGE" != false ; then
-                if [ ! -f $FDIR/fonts.dir -o $FDIR -nt $FDIR/fonts.dir ] ; then 
-                    echo "Updating X11 font directory $i..." 
-                    /usr/X11R6/bin/mkfontdir $FDIR 
+                if [ ! -f $FDIR/fonts.dir -o $FDIR -nt $FDIR/fonts.dir ] ; then
+                    echo "Updating X11 font directory $i..."
+                    /usr/X11R6/bin/mkfontdir $FDIR
                 fi
             fi
         done
@@ -843,7 +853,7 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
                     ; then
                     my_test_write /usr/info && {
                         echo "Creating /usr/info/dir..."
-                        /usr/bin/mkinfodir 
+                        /usr/bin/mkinfodir
                     }
                 fi
             fi

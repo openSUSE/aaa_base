@@ -234,7 +234,7 @@ test -n "$YP_DOMAINNAME" && {
     echo -n Setting YP up domainname
     domainname $YP_DOMAINNAME || ECHO_RETURN=$rc_failed
     echo -e "$ECHO_RETURN"
-}
+} || domainname ""
 
 
 # set and adjust the CMOS clock
