@@ -53,7 +53,7 @@ case "$1" in
     start|b)
 	redirect
 	echo "Activating crypto devices using $CRYPTOTAB ... "
-	while read loopdev physdev access filesys crypto mopt rest ; do
+	while read loopdev physdev access filesys crypto mopt info rest ; do
 	    case "$loopdev" in
 		\#*|"") continue ;;
 	    esac
@@ -83,7 +83,11 @@ case "$1" in
 		#
 		# Setting up loop device
 		#
-		echo -n "${extd}Please enter passphrase for $physdev. ${norm}"
+		if test -n "$info" ; then
+		    echo -n "${extd}Please enter passphrase for \"$info\" ($physdev). ${norm}"
+		else
+		    echo -n "${extd}Please enter passphrase for $physdev. ${norm}"
+		fi
 		losetup -t $TIMEOUT -e $crypto $loopdev $physdev < $REDIRECT > $REDIRECT 2>&1
 		rc_status
 		test $? -ne 0 && continue 2
