@@ -5,7 +5,7 @@
 #         Werner Fink <werner@suse.de>, 1996-2000
 #      
 #
-# /sbin/init.d/route		Version 0.5
+# /sbin/init.d/route		Version 0.6
 #
 
 . /etc/rc.config
@@ -32,13 +32,13 @@ declare -i n
 
 reverse ()
 {
-    local _R
-    (
-	if read -r _R ; then
-	    reverse
-	    echo -e "$_R"
-	fi
-    )
+    local _line
+    while read -r _line ; do
+        case "$_line" in \#*|"") continue ;; esac
+	reverse
+	echo "$_line"
+	break
+    done
 }
 
 run_route ()
@@ -105,10 +105,14 @@ case "$todo" in
 	#
 	# Read /etc/route.conf and add routings
 	#
-	while read  des what mask iface  ; do
+	while read  des what mask iface opts ; do
 	    if test -n "$sdev" ; then
 		test "$sdev" = "$iface" || continue
 	    fi
+	    test "$what"  = "-" &&  what=""
+	    test "$mask"  = "-" &&  mask=""
+	    test "$iface" = "-" && iface=""
+
 	    case "$des" in
 	    \#*|"") ;;
 	    224.0.0.0)
@@ -117,7 +121,7 @@ case "$todo" in
 		then
 		    test "$ret" = "$rc_done" && echo
 		    echo "Add multicast route 240.0.0.0 for $iface"
-		    run_route add -net 224.0.0.0 netmask 240.0.0.0 dev $iface
+		    run_route add -net 224.0.0.0 netmask 240.0.0.0 dev $iface $opts
 		    test "$ret" = "$rc_done" && echo -n "..."
 		else
 		    test "$ret" = "$rc_done" && echo
@@ -135,48 +139,46 @@ case "$todo" in
 		    test "$ctr" = "0.0.0.0:0.0.0.0" -a \
 			 "${des}" = "default"		&& continue 2
 		done
+
 		card=""
-		if test -n "$iface" ; then
-		    test "$iface" = "reject" && card="reject" || card="dev $iface"
-		fi
+		test -n "$iface"         && card="dev $iface"
+		test "$iface" = "reject" && card="reject"
+
 		case "$what" in
 		"")
-		    wrong_entry "$des $what $mask $iface"
+		    wrong_entry "$des $what $mask $iface $opts"
 		    ;;
 		0.0.0.0|\*)          # Add a local Network
 		    if test -z "$mask" -o -z "$iface" ; then
-			wrong_entry "$des $what $mask $iface"
+			wrong_entry "$des $what $mask $iface $opts"
 		    fi
 		    for dev in reject $given ; do
-			case "$iface" in
-			$dev)
-			    if test "${mask}" = 255.255.255.255 ; then
-				# ISDN/PPP auto dial
-				run_route add -host "${des}" $card
-			    else
-				run_route add -net  "${des}" netmask "${mask}" $card
-			    fi
-			;;
-			esac
+			test "$dev" = "$iface" || continue
+			if test "${mask}" = 255.255.255.255 ; then
+			    # ISDN/PPP auto dial
+			    run_route add -host "${des}" $card $opts
+			else
+			    run_route add -net  "${des}" netmask "${mask}" $card $opts
+			fi
 		     done
 		     ;;
 		*)
 		    case "$mask" in
 		    0.0.0.0|"")      # Add Gateway
-			run_route add "${des}" gw "${what}" $card
+			run_route add "${des}" gw "${what}" $card $opts
 			;;
 		    255.255.255.255) # Add a Host by a Gateway/Route
 			if test "$des" = "$what" ; then
-			    run_route add -host "${des}" $card
+			    run_route add -host "${des}" $card $opts
 			else
-			    run_route add -host "${des}" gw "${what}" $card
+			    run_route add -host "${des}" gw "${what}" $card $opts
 			fi
 			;;
 		    *.*.*.*)         # Add a Network
-			run_route add -net "${des}" netmask "${mask}" gw "$what" $card
+			run_route add -net "${des}" netmask "${mask}" gw "$what" $card $opts
 			;;
 		    *)
-			wrong_entry "$des $what $mask $iface"
+			wrong_entry "$des $what $mask $iface $opts"
 		    esac
 		esac
 	    esac
@@ -244,10 +246,14 @@ case "$todo" in
 	#
 	# Read /etc/route.conf reverse and delete routings
 	#
-	while read  des what mask iface  ; do
+	while read  des what mask iface opts ; do
 	    if test -n "$sdev" ; then
 		test "$sdev" = "$iface" || continue
 	    fi
+	    test "$what"  = "-" &&  what=""
+	    test "$mask"  = "-" &&  mask=""
+	    test "$iface" = "-" && iface=""
+
 	    case "$des" in
 	    \#*|"") ;;
 	    224.0.0.0)
@@ -267,28 +273,25 @@ case "$todo" in
 		;;
 	    *)
 		card=""
-		if test -n "$iface" ; then
-		    test "$iface" = "reject" && card="reject" || card="dev $iface"
-		fi
+		test -n "$iface"         && card="dev $iface"
+		test "$iface" = "reject" && card="reject"
+
 		case "$what" in
 		"")
-		    wrong_entry "$des $what $mask $iface"
+		    wrong_entry "$des $what $mask $iface $opts"
 		    ;;
 		0.0.0.0|\*)          # Delete a local Network
 		    if test -z "$mask" -o -z "$iface" ; then
-			wrong_entry "$des $what $mask $iface"
+			wrong_entry "$des $what $mask $iface $opts"
 		    fi
 		    for dev in reject $given ; do
-			case "$iface" in
-			$dev)
-			    if test "${mask}" = 255.255.255.255 ; then
-				# ISDN/PPP auto dial
-				run_route del -host "${des}" $card
-			    else
-				run_route del -net  "${des}" netmask "${mask}" $card
-			    fi
-			    ;;
-			esac
+			test "$dev" = "$iface" || continue
+			if test "${mask}" = 255.255.255.255 ; then
+			    # ISDN/PPP auto dial
+			    run_route del -host "${des}" $card
+			else
+			    run_route del -net  "${des}" netmask "${mask}" $card
+			fi
 		    done
 		    ;;
 		*)
@@ -307,7 +310,7 @@ case "$todo" in
 			run_route del -net "${des}" netmask "${mask}" gw "$what" $card
 			;;
 		    *)
-			wrong_entry "$des $what $mask $iface"
+			wrong_entry "$des $what $mask $iface $opts"
 		    esac
 		esac
 	    esac
