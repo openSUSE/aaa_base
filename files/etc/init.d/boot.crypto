@@ -29,17 +29,23 @@ set +e
 test -s $CRYPTOTAB || exit 0
 type -p losetup &> /dev/null || exit 0
 
-otty=$(stty -g)
-stty $otty < $REDIRECT
-stty -nl -ixon ignbrk -brkint < $REDIRECT
-if test -x /etc/init.d/kbd -a -n "$RUNLEVEL" ; then
-    /etc/init.d/kbd start < $REDIRECT > $REDIRECT 2>&1
-fi
+redirect ()
+{
+    otty=$(stty -g)
+    stty $otty < $REDIRECT
+    stty -nl -ixon ignbrk -brkint < $REDIRECT
+    if test -x /etc/init.d/kbd -a -n "$RUNLEVEL" ; then
+	/etc/init.d/kbd start < $REDIRECT > $REDIRECT 2>&1
+    fi
+}
+
+restore () { stty $otty < $REDIRECT; }
 
 rc_reset
 main_status=0
 case "$1" in
     start|b)
+	redirect
 	echo "Activating crypto devices using $CRYPTOTAB ... "
 	while read loopdev physdev access filesys crypto mopt rest ; do
 	    case "$loopdev" in
@@ -150,6 +156,7 @@ case "$1" in
 	done < $CRYPTOTAB
 	test $main_status -gt 0 && rc_failed 1 || true
 	rc_status -v1
+	restore
 	;;
     stop)
 	reverse ()
@@ -204,5 +211,4 @@ case "$1" in
 	exit 1
 	;;
 esac
-stty $otty < $REDIRECT
 rc_exit
