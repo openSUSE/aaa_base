@@ -91,7 +91,7 @@ if ( -w $mdir ) {
     $filehandle = ">$mdir" ;
 } else {
     printf(STDERR "%s: Warning, can not write to %s\n", $0, $mdir);
-    printf(STDERR "  ... using STDOUT!\n", $0, $mdir);
+    printf(STDERR "  ... using STDOUT!\n");
     flush(STDERR);
     sleep (2);
     $filehandle = ">-";
@@ -129,13 +129,18 @@ sub read_entry {
     open(_FILE, $source) or warn "can't open $source\n";
     while (<_FILE>) {
 	chomp;
+	if ( /^($|File:)/ ) { last; }
 	s/^\s+//;
 	s/\s+$//;
+	if ( /^INFO-DIR-SECTION/o )  {
+	    s/^INFO-DIR-SECTION\s+//;
+	    push(@buf, join('=', "Sec", $_));
+	    next;
+	}
 	if ( /^$/ ) { next; }
 	if ( /^START-INFO-DIR-ENTRY/o )  { $add = 1; next; }
-	if ( /^END-INFO-DIR-ENTRY/o )    { $add = 0; last; }
+	if ( /^END-INFO-DIR-ENTRY/o )    { $add = 0; next; }
 	if ( $add == 1 ) { push(@buf, $_); $lines++; next; }
-	if ( /^^_$/ ) { last; }
     }
     close(_FILE);
 
@@ -266,7 +271,14 @@ foreach $elem (@allinfo) {
 	if ( $lines > 0 ) {
 
 	    if ( $lines > 1 && $nl == 0 ) { printf(DIR "\n"); }
+	    $sec = "";
 	    foreach $l (@info) {
+
+		if ( $l =~ /^Sec=/ ) {
+		    $sec =~ s/^Sec=//;
+		    next;
+		}
+
 		$first = index($l,"*");
 
 		$l =~ s/\($base\)/\($node\)/g;
