@@ -6,73 +6,146 @@
 # variables, etc ...
 
 #
-# This variable is set to avoid double sourcing of this file
+# Check which shell is reading this file
 #
-PROFILEREAD=true
+case "`ls -l /proc/$$/exe`" in
+    */bash)	is=bash ;;
+    */rbash)	is=bash ;;
+    */ash)	is=ash  ;;
+    */ksh)	is=ksh  ;;
+    */zsh)	is=zsh  ;;
+    */*)	is=sh   ;;
+esac
 
+#
+# Initialize terminal
+#
+if test -t 1 ; then
+    test -z "${TERM}"	       && { TERM=linux; export TERM; }
+    test "${TERM}" = "unknown" && { TERM=linux; export TERM; }
+    test -x /bin/stty	  && /bin/stty sane cr0 pass8 dec
+    test -x /usr/bin/tset && /usr/bin/tset -I -Q
+fi
+unset TERMCAP
+
+#
+# Time until a complete key sequence must have arrived
+#
+#ESCDELAY=2000
+#export ESCDELAY
+
+#
+# The user file-creation mask
+#
 umask 022
 
-# Adjust some size limits (see bash(1))
+#
+# ksh/ash soemtimes do not know
+#
+test -z "$UID"  &&  UID=`id -ur 2> /dev/null`
+test -z "$EUID" && EUID=`id -u  2> /dev/null`
+test -z "$USER" && USER=`id -un 2> /dev/null`
+test -z "$MAIL" && MAIL=/var/spool/mail/$USER
+test -z "$HOST" && HOST=`hostname -s 2> /dev/null`
+test -z "$CPU"  &&  CPU=`uname -m 2> /dev/null`
+test -z "$HOSTNAME" && HOSTNAME=`hostname 2> /dev/null`
+test -z "$LOGNAME"  && LOGNAME=$USER
+case "$CPU" in
+    i?86) HOSTTYPE=i386   ;;
+    *)    HOSTTYPE=${CPU} ;;
+esac
+  OSTYPE=linux
+MACHTYPE=${CPU}-suse-${OSTYPE}
+export UID EUID USER MAIL HOST CPU HOSTNAME LOGNAME HOSTTYPE OSTYPE MACHTYPE
+
+#
+# Adjust some size limits (see bash(1) -> ulimit)
 # Note: You may use /etc/initscript instead to set up ulimits and your PATH.
 #
-#ulimit -c 20000		# only core-files less than 20 MB are written
-#ulimit -d 15000		# max data size of a program is 15 MB
-#ulimit -s 15000		# max stack size of a program is 15 MB
-#ulimit -m 30000		# max resident set size is 30 MB
+if test "$is" != "ash" ; then
+    #ulimit -c 20000		# only core-files less than 20 MB are written
+    #ulimit -d 15000		# max data size of a program is 15 MB
+    #ulimit -s 15000		# max stack size of a program is 15 MB
+    #ulimit -m 30000		# max resident set size is 30 MB
 
-ulimit -Sc 0			# don't create core files
-ulimit -d unlimited
-if [ -z "$KSH_VERSION" ]; then
+    ulimit -Sc 0		# don't create core files
+    ulimit -d unlimited
     # ksh does not support this command.
-    ulimit -s unlimited
+    test "$is" != "ksh" && ulimit -s unlimited
+    ulimit -m unlimited
 fi
-ulimit -m unlimited
-
 
 #
-# make path more comfortable
+# Make path more comfortable
 #
-MACHINE=`test -x /bin/uname && /bin/uname --machine`
-PATH=/usr/local/bin:/usr/bin:/usr/X11R6/bin:/bin
-for DIR in ~/bin/$MACHINE ~/bin ; do
-    test -d $DIR && PATH=$DIR:$PATH
-done
-#test "$UID" = 0 && PATH=/sbin:/usr/sbin:$PATH
-test "$UID" = 0 && PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
-for DIR in /usr/lib/java/bin \
-           /var/lib/dosemu \
-           /usr/games/bin \
-           /usr/games \
-           /opt/bin \
-           /opt/gnome/bin \
-           /opt/kde2/bin \
-           /opt/kde/bin \
-	   /usr/openwin/bin ; do
-    test -d $DIR && PATH=$PATH:$DIR
-done
-test "$UID" = 0 || PATH="$PATH:."
-export PATH
+if test -z "$PROFILEREAD" ; then
+    PATH=/usr/local/bin:/usr/bin:/usr/X11R6/bin:/bin
+    for dir in $HOME/bin/$CPU $HOME/bin ; do
+	test -d $dir && PATH=$dir:$PATH
+    done
+    test "$UID" = 0 && PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
+    for dir in  /usr/lib/java/bin \
+		/var/lib/dosemu \
+		/usr/games/bin \
+		/usr/games \
+		/opt/bin \
+		/opt/gnome/bin \
+		/opt/kde2/bin \
+		/opt/kde/bin \
+		/usr/openwin/bin
+    do
+	test -d $dir && PATH=$PATH:$dir
+    done
+    unset dir
+    test $UID -lt 100 || PATH="$PATH:."
+    export PATH
+fi
 
 #
-# Set some environment variables
+# Many programs using readline library for line editing
+# should know about this (e.g. bash)
+#
+if test -z "$INPUTRC" ; then
+    INPUTRC=/etc/inputrc
+    test -s $HOME/.inputrc && INPUTRC=$HOME/.inputrc
+    export INPUTRC
+fi
+
+#
+# Most bourn shell clones knows about this
+#
+HISTSIZE=1000
+
+#
+# Set some environment variables for TeX/LaTeX
 #
 if test -n "$TEXINPUTS" ; then
-  TEXINPUTS=":$TEXINPUTS:~/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
+    TEXINPUTS=":$TEXINPUTS:$HOME/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
 else
-  TEXINPUTS=":~/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
+    TEXINPUTS=":$HOME/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
 fi
 export TEXINPUTS
 
+#
+# Configure the default pager on SuSE Linux
+#
 LESSCHARSET=latin1
-LESS="-M -S -I"
+LESS="-M"
 LESSKEY=/etc/lesskey.bin
 LESSOPEN="lessopen.sh %s"
 LESSCLOSE="lessclose.sh %s %s"
-export LESSOPEN LESSCLOSE LESSCHARSET LESS LESSKEY
+PAGER=less
+export LESSOPEN LESSCLOSE LESSCHARSET LESS LESSKEY PAGER
 
+#
+# Minicom 
+#
 MINICOM="-c on"
 export MINICOM
 
+#
+# Current manpath
+#
 unset MANPATH
 MANPATH=`test -x /usr/bin/manpath && /usr/bin/manpath -q`
 export MANPATH
@@ -102,96 +175,20 @@ export XKEYSYMDB
 XNLSPATH=/usr/X11R6/lib/X11/nls
 export XNLSPATH
 
+if test -s /etc/nntpserver ; then
+    read NNTPSERVER < /etc/nntpserver
+    export NNTPSERVER
+fi
 
-#HOSTNAME="`hostname`"
-#export HOSTNAME
-NNTPSERVER=`cat /etc/nntpserver 2> /dev/null`
-export NNTPSERVER
-# time until a complete key sequence must have arrived
-# ESCDELAY=2000
-# export ESCDELAY
+if test -s /etc/organization ; then
+    read ORGANIZATION < /etc/organization
+    export ORGANIZATION
+fi
 
-if [ -d /usr/openwin/lib ] ; then
+if test -d /usr/openwin/lib ; then
     OPENWINHOME=/usr/openwin
     export OPENWINHOME
 fi
-
-if [ -x /usr/bin/dircolors ] ; then
-  #
-  # set up the color-ls environment variables:
-  #
-  if test -f ~/.dir_colors ; then
-    eval `dircolors -b ~/.dir_colors`
-  elif test -f /etc/DIR_COLORS ; then
-    eval `dircolors -b /etc/DIR_COLORS`
-  fi
-fi
-
-# do not save dupes in the bash history file
-HISTCONTROL=ignoredups
-export HISTCONTROL
-
-#
-# make sure that teTeX is found.
-#
-if [ -f /usr/lib/teTeX/texmf.cnf ] ; then
-    TETEXDIR=/usr/lib/teTeX
-    PATH=$PATH:/usr/bin/TeX
-    export TETEXDIR PATH
-fi
-
-
-# Further options for the 'ls' command are in /etc/DIR_COLORS.
-unalias ls 2>/dev/null
-if test "$UID" = 0 ; then
-    LS_OPTIONS='-a -N --color=tty -T 0';
-else
-    LS_OPTIONS='-N --color=tty -T 0';
-fi
-export LS_OPTIONS
-if test -n "$ZSH_VERSION" ; then
-    alias ls='eval /bin/ls $LS_OPTIONS'
-else
-    alias ls='ls $LS_OPTIONS'
-fi
-alias dir='ls -l'
-alias ll='ls -l'
-alias la='ls -la'
-alias l='ls -alF'
-alias ls-l='ls -l'
-
-# Handle emacs
-if test "$EMACS" = "t" ; then
-    LS_OPTIONS='-N --color=none -T 0';
-    tset -I -Q
-    stty cooked pass8 dec nl -echo
-fi
-
-#
-# Set some generic aliases
-#
-alias o='less'
-alias ..='cd ..'
-alias ...='cd ../..'
-if [ -z "$KSH_VERSION" ]; then
-    alias -- +='pushd .'
-    alias -- -='popd'
-fi
-alias rd=rmdir
-alias md='mkdir -p'
-alias unix2dos='recode lat1..ibmpc'
-alias dos2unix='recode ibmpc..lat1'
-#alias unzip='unzip -L'
-alias which='type -p'
-alias rehash='hash -r'
-alias beep='echo -en "\x07"'
-alias unmount='echo "Error: Try the command: umount"'
-
-#
-# Some useful functions
-#
-function startx { /usr/X11R6/bin/startx $* 2>&1 | tee ~/.X.err ; }
-function remount { /bin/mount -o remount,$* ; }
 
 #
 # Midnight Commander needs this to run in color mode
@@ -199,100 +196,58 @@ function remount { /bin/mount -o remount,$* ; }
 COLORTERM=1
 export COLORTERM
 
-# for rcs
-# export VERSION_CONTROL=numbered
-
-PAGER=less
-export PAGER
-
-# I had problems using 'eval tset' instead of 'TERM=', but you might want to 
-# try it anyway. I think with the right /etc/termcap it would work great.
-# eval `SHELL=/bin/sh; tset -sQ "$TERM"`
-if [ "$TERM" = "" -o "$TERM" = "unknown" ]; then
- TERM=linux
-fi
-
-if test -f /etc/organization ; then
-    ORGANIZATION="`cat /etc/organization`"
-    export ORGANIZATION
-fi
-
-
-# Practically no serious program needs $TERMCAP, but some 'Slang'-programs can
-# get confused with it. If this happens, you might want to unset TERMCAP here.
-#unset TERMCAP
-
+#
+# For RCS
+#
+#export VERSION_CONTROL=numbered
 
 #
-# Set prompt to something useful
+# Source the files generated by SuSEconfig
 #
-#PS1='`hostname`:`pwd`# '
-if [ "$SHELL" = "/usr/bin/pdksh" -o "$SHELL" = "/usr/bin/ksh" -o "$SHELL" = "/bin/ksh" ]; then
-    PS1="! $ "
-elif [ -n "$ZSH_VERSION" ]; then
-    # setopt chaselinks
-    if test "$UID" = 0; then
-        PS1='%n@%m:%~ # '
-    else
-        PS1='%n@%m:%~ > '
-    fi
-elif [ "$SHELL" = "/usr/bin/ash" -o "$SHELL" = "/bin/ash" ]; then
-    PS1="$ "
-elif [ -n "$BASH_VERSION" ] ; then
-    # set -P
-    set -p
-    if test "$UID" = 0 ; then
-        PS1="\h:\w # "
-    else
-        PS1="\u@\h:\w > "
-    fi
-    # PROMPT_COMMAND='PS1=`if test "$UID" = 0 ; then \
-    #         echo "\h:\`pwd -P\` # " ; \
-    #     else \
-    #         echo "\u@\h:\`pwd -P\` > " ; \
-    #     fi `'
-    # export PROMPT_COMMAND
-else
-    PS1='\h:\w \$ '
-    #PS1='\u \w \$ '
-fi
-PS2='> '
-ignoreeof=0
-export PS1 PS2 ignoreeof
-if [ -n "$KSH_VERSION" ]; then
- if [ -r /etc/ksh.kshrc ]; then
-  . /etc/ksh.kshrc
- fi
- if [ -r $HOME/.kshrc ]; then
-  . $HOME/.kshrc
- fi
-fi
+test -s /etc/SuSEconfig/profile && . /etc/SuSEconfig/profile
 
 #
-# Now source the files generated by SuSEconfig
+# Source profile extensions for certain packages
 #
-test -e /etc/SuSEconfig/profile && . /etc/SuSEconfig/profile
-
-#
-# Now source profile extensions for certain packages
-#
-test -d /etc/profile.d && \
-  {
+if test -d /etc/profile.d ; then
     for s in /etc/profile.d/*.sh ; do
-      test -r $s && . $s
+	test -r $s && . $s
     done
     unset s
-  }
+fi
 
+if test "$is" != "ash" ; then
+    #
+    # Source some aliases which provide help for DOS users
+    #
+    #test -e /etc/profile.dos && . /etc/profile.dos
 
-# Source some aliases which provide help for DOS users
-#test -e /etc/profile.dos && . /etc/profile.dos
+    #
+    # And now let's see if there is a local profile
+    # (for options defined by your sysadmin, not SuSE Linux)
+    #
+    test -s /etc/profile.local && . /etc/profile.local
+fi
 
 #
-# And now let's see if there is a local profile
-# (for options defined by your sysadmin, not SuSE Linux)
+# Avoid overwriting
 #
-test -e /etc/profile.local && . /etc/profile.local
+PROFILEREAD=true
 
-unset DIR
+#
+# BASH specials, maybe also good for other shells
+#
+test -r /etc/bash.bashrc && . /etc/bash.bashrc
+test -r $HOME/.bashrc    && . $HOME/.bashrc
 
+#
+# KSH specials
+#
+if test "$is" = "ksh" ; then
+    test -r /etc/ksh.kshrc && . /etc/ksh.kshrc
+    test -r $HOME/.kshrc   && . $HOME/.kshrc
+fi
+
+#
+# End of /etc/profile
+#
