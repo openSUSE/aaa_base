@@ -11,7 +11,7 @@ INSCONF  =	/etc/insserv.conf
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.5
+VERSION	 =	0.6
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #
@@ -67,22 +67,24 @@ install:	$(TODO)
 	$(MKDIR)   $(SDOCDIR)
 	$(MKDIR)   $(CONFDIR)
 	$(MKDIR)   $(LSBDIR)
-	$(INSTBIN) insserv       $(SBINDIR)/
-	$(INSTDOC) insserv.8     $(SDOCDIR)/
-	$(INSTCON) insserv.conf  $(CONFDIR)/
-	$(LINK)    /sbin/insserv $(LSBDIR)/install_initd
+	$(INSTBIN) insserv        $(SBINDIR)/
+	$(INSTDOC) insserv.8      $(SDOCDIR)/
+	$(INSTCON) insserv.conf   $(CONFDIR)/
+	$(LINK)    /sbin/insserv  $(LSBDIR)/install_initd
+	$(INSTBIN) init-functions $(LSBDIR)/
 
 #
 # Make distribution
 #
-FILES	= README       \
-	  COPYING      \
-	  Makefile     \
-	  listing.c    \
-	  listing.h    \
-	  insserv.8    \
-	  insserv.c    \
-	  insserv.conf \
+FILES	= README         \
+	  COPYING        \
+	  Makefile       \
+	  listing.c      \
+	  listing.h      \
+	  insserv.8      \
+	  insserv.c      \
+	  insserv.conf   \
+	  init-functions \
 	  insserv-$(VERSION).lsm
 
 dest:

@@ -238,11 +238,6 @@ ORGANIZATION=""
 NNTPSERVER="news"
 
 #
-# space separated list of irc servers
-#
-IRCSERVER=""
-
-#
 # have mail daemon on SMTP port? ("yes" or "no")
 # needed, if you receive email from other hosts via tcp/ip
 # not needed, if you have a uucp-only host or only out-going email.

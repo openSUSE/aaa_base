@@ -1,0 +1,32 @@
+#! /bin/sh
+# Copyright (c) 2000 SuSE Gmbh Nuernberg, Germany.  All rights reserved.
+#
+# Author: Ulrich Hecht <uli@suse.de>
+
+# check if we are started as root
+# only one of UID and USER must be set correctly
+
+if test "$UID" != 0 -a "$USER" != root; then
+    echo "You must be root to start $0."
+    exit 1
+fi
+
+test -n "$ROOT" && exit 0
+
+JAVALINKTO=`rpm -q java java2 ibmjava2  IBMJava2-SDK 2>/dev/null | cut -d- -f 1 | head -n 1`
+JRELINKTO=`rpm -q javarunt ibmjre2 IBMJava2-JRE 2>/dev/null | cut -d- -f 1 | head -n 1`
+if ! test -z "$JAVALINKTO" ; then
+   test -L /usr/lib/java && rm /usr/lib/java
+   TARGETDIR=`rpm -ql $JAVALINKTO|grep ^/usr/lib/jdk[^/]|head -n 1|cut -d/ -f 4`
+   ln -sf $TARGETDIR /usr/lib/java
+fi
+if ! test -z "$JRELINKTO" ; then
+   test -L /usr/lib/jre && rm /usr/lib/jre
+   TARGETDIR=`rpm -ql $JRELINKTO|grep ^/usr/lib/jre[^/]|head -n 1|cut -d/ -f 4`
+   if test $JRELINKTO = ibmjre2 ; then
+           ln -sf $TARGETDIR/jre /usr/lib/jre
+   else
+           ln -sf $TARGETDIR /usr/lib/jre
+   fi
+fi
+

@@ -61,7 +61,6 @@
 
 /* The main line buffer if unique */
 static char buf[LINE_MAX];
-static char pwd[NAME_MAX+1];
 
 /* Search results points here */
 static char *provides = NULL;
@@ -70,16 +69,63 @@ static char *required_stop = NULL;
 static char *default_start = NULL;
 static char *default_stop = NULL;
 static char *description = NULL;
+static char empty[1] = "";
 
 /* Delimeters used for spliting results with strsep(3) */
 const char *delimeter = " ,;\t";
 
-/* The programs name */
-char *myname = NULL;
+/* declare */
+void error (const char *fmt, ...);
+
+/*
+ * push and pod directory changes
+ */
+typedef struct pwd_struct {
+    list_t	deep;
+    char	*pwd;
+} pwd_t;
+#define getpwd(list)	list_entry((list), struct pwd_struct, deep)
+
+static list_t pwd = { &(pwd), &(pwd) }, * topd = &(pwd);
+
+static void pushd(const char * path)
+{
+    pwd_t *  dir;
+
+    dir = (pwd_t *)malloc(sizeof(pwd_t));
+    if (dir) {
+	if (!(dir->pwd = getcwd(NULL, 0)))
+	    goto err;
+	insert(&(dir->deep), topd->prev);
+	goto out;
+    }
+err:
+    error("%s", strerror(errno));
+out:
+    if (chdir(path) < 0)
+	    error ("pushd() can not change to directory %s: %s\n", path, strerror(errno));
+}
+
+static void popd(void)
+{
+    list_t * tail = topd->prev;
+    pwd_t *  dir;
+
+    if (tail == topd)
+	goto out;
+    dir = getpwd(tail);
+    if (chdir(dir->pwd) < 0)
+	error ("popd() can not change directory %s: %s\n", dir->pwd, strerror(errno));
+    free(dir->pwd);
+    delete(tail);
+    free(dir);
+out:
+}
 
 /*
  * Internal logger
  */
+char *myname = NULL;
 static void _logger (const char *fmt, va_list ap)
 {
     char buf[strlen(myname)+2+strlen(fmt)+1];
@@ -97,8 +143,7 @@ void error (const char *fmt, ...)
     va_start(ap, fmt);
     _logger(fmt, ap);
     va_end(ap);
-    if (pwd[0])
-	chdir(pwd);
+    popd();
     exit (1);
 }
 
@@ -185,7 +230,8 @@ static void scan_script(const char *path)
 		provides = strdup(pbuf+val->rm_so);
 		if (!provides)
 		    error("%s", strerror(errno));
-	    }
+	    } else
+		provides = empty;
 	}
 	if (!required_start && regexecutor(&reg_req_start, COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
@@ -193,7 +239,8 @@ static void scan_script(const char *path)
 		required_start = strdup(pbuf+val->rm_so);
 		if (!required_start)
 		    error("%s", strerror(errno));
-	    }
+	    } else
+		required_start = empty;
 	}
 	if (!required_stop  && regexecutor(&reg_req_stop,  COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
@@ -201,7 +248,8 @@ static void scan_script(const char *path)
 		required_stop = strdup(pbuf+val->rm_so);
 		if (!required_stop)
 		    error("%s", strerror(errno));
-	    }
+	    } else
+		required_stop = empty;
 	}
 	if (!default_start  && regexecutor(&reg_def_start, COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
@@ -209,7 +257,8 @@ static void scan_script(const char *path)
 		default_start = strdup(pbuf+val->rm_so);
 		if (!default_start)
 		    error("%s", strerror(errno));
-	    }
+	    } else
+		default_start = empty;
 	}
 	if (!default_stop   && regexecutor(&reg_def_stop,  COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
@@ -217,7 +266,8 @@ static void scan_script(const char *path)
 		default_stop = strdup(pbuf+val->rm_so);
 		if (!default_stop)
 		    error("%s", strerror(errno));
-	    }
+	    } else
+		default_stop = empty;
 	}
 	if (!description    && regexecutor(&reg_desc,	   COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
@@ -225,7 +275,8 @@ static void scan_script(const char *path)
 		description = strdup(pbuf+val->rm_so);
 		if (!description)
 		    error("%s", strerror(errno));
-	    }
+	    } else
+		description = empty;
 	}
     }
 #undef COMMON_ARGS
@@ -248,21 +299,22 @@ static void scan_conf(void)
     regex_t reg_conf;
     regmatch_t subloc[SUBCONFNUM], *val = NULL;
     FILE *conf;
-    char *pbuf = buf, * fptr = INSCONF;
+    char *pbuf = buf;
 
     regcompiler(&reg_conf, CONFLINE, REG_EXTENDED|REG_ICASE);
 
-again:
-    conf = fopen(fptr, "r");
-    if (!conf) {
-	if (errno != ENOENT)
-	    goto err;
-	if (*fptr == '/') {	/* Try relativ location */
+    do {
+	char * fptr = INSCONF;
+	if (*fptr == '/')
 	    fptr++;
-	    goto again;
-	}
+	/* Try relativ location first */
+	if ((conf = fopen(fptr, "r")))
+	    break;
+	/* Try absolute location */
+	if ((conf = fopen(INSCONF, "r")))
+	    break;
 	goto err;
-    }
+    } while (1);
 
     while (fgets(buf, sizeof(buf), conf)) {
 	if (*pbuf == '#')
@@ -287,7 +339,7 @@ again:
     fclose(conf);
     return;
 err:
-    warn("fopen(%s): %s\n", fptr, strerror(errno));
+    warn("fopen(%s): %s\n", INSCONF, strerror(errno));
 }
 
 /*
@@ -342,6 +394,22 @@ static char * scan_for(DIR * rcdir, const char * script, char type)
 }
 
 /*
+ *  Check for script in list.
+ */
+static boolean chkfor(const char * script, char **list, const int cnt)
+{
+    boolean isinc = false;
+    register int c = cnt;
+    while (c--) {
+	if (!strcmp(script, list[c])) {
+	    isinc = true;
+	    break;
+	}
+    }
+    return isinc;
+}
+
+/*
  * Do the job.
  */
 int main (int argc, char *argv[])
@@ -351,41 +419,82 @@ int main (int argc, char *argv[])
     struct stat st_script;
     char * end;
     char * path = INITDIR;
-    int runlevel, order;
+    int runlevel, order, c;
+    boolean del = false;
 
     myname = basename(*argv);
-    argv++;
-    argc--;
 
-    if (argc > 1)
-	error("usage: %s [init_script|init_directory]\n", myname);
+    while ((c = getopt(argc, argv, "r")) != -1) {
+	switch (c) {
+	    case 'r':
+		del = true;
+		break;
+	    case '?':
+		error("usage: %s [[-r] init_script|init_directory]\n", myname);
+	    case 'h':
+		warn ("usage: %s [[-r] init_script|init_directory]\n", myname);
+		exit(0);
+	    default:
+		break;
+	}
+    }
+    argv += optind;
+    argc -= optind;
 
-    pwd[0] = '\0';
-    if (!getcwd(pwd, NAME_MAX))
-	error("can not get current directory\n");
+    if (!argc && del)
+	error("usage: %s [[-r] init_script|init_directory]\n", myname);
 
     if (*argv) {
-	if (stat(*argv, &st_script) < 0)
-	    error("%s: %s\n", *argv, strerror(errno));
-
-	if (S_ISDIR(st_script.st_mode))
-	    path = *argv;
-	else {
-	    char * base;
-	    base = strrchr(*argv, '/');
-	    *(++base) = '\0';
-	    path = *argv;
+	if (stat(*argv, &st_script) < 0) {
+	    if (errno != ENOENT)
+		error("%s: %s\n", *argv, strerror(errno));
+	    pushd(path);
+	    if (stat(*argv, &st_script) < 0)
+		error("%s: %s\n", *argv, strerror(errno));
+	    popd();
 	}
-	argv++;
-	argc--;
+
+	if (S_ISDIR(st_script.st_mode)) {
+	    path = *argv;
+	    if (del)
+		error("usage: %s [[-r] init_script|init_directory]\n", myname);
+	    argv++;
+	    argc--;
+	    if (argc)
+		error("usage: %s [[-r] init_script|init_directory]\n", myname);
+	} else {
+	    char * base, * ptr = strdup(*argv);
+	    if (!ptr)
+		error("%s", strerror(errno));
+	    if ((base = strrchr(ptr, '/'))) {
+		*(++base) = '\0';
+		path = ptr;
+	    } else
+		free(ptr);
+	}
+    }
+
+    c = argc;
+    while (c--) {
+	char * base;
+	if (stat(argv[c], &st_script) < 0) {
+	    if (errno != ENOENT)
+		error("%s: %s\n", argv[c], strerror(errno));
+	    pushd(path);
+	    if (stat(argv[c], &st_script) < 0)
+		error("%s: %s\n", *argv, strerror(errno));
+	    popd();
+	}
+	if ((base = strrchr(argv[c], '/'))) {
+	    base++;
+	    argv[c] = base;
+	}
     }
 
     if ((initdir = opendir(path)) == NULL)
 	error("can not opendir(%s): %s\n", path, strerror(errno));
 
-    if (chdir(path) < 0)
-	error("can not change directory: %s\n", strerror(errno));
-
+    pushd(path);
     while ((d = readdir(initdir)) != NULL) {
 	errno = 0;
 	/* d_type seems not to work, therefore use stat(2) */
@@ -472,7 +581,7 @@ int main (int argc, char *argv[])
 	    continue;
 	}
 
-	if (!provides) {
+	if (!provides || provides == empty) {
 	    /* Oops, no comment found, guess one */
 	    provides = d->d_name;
 	}
@@ -488,7 +597,7 @@ int main (int argc, char *argv[])
 		    warn("script %s: service %s already provided!\n", d->d_name, token);
 		    continue;
 		}
-		if (required_start)
+		if (required_start && required_start != empty)
 		    requiresv(token, required_start);
 
 		/* Ahh ... set default multiuser with network */
@@ -506,6 +615,7 @@ int main (int argc, char *argv[])
 	 * reset pointers for the next script
 	 */
     }
+    popd();
     closedir(initdir);
 
     /*
@@ -562,6 +672,7 @@ int main (int argc, char *argv[])
     show_all();
 #else
 
+    pushd(path);
     for (runlevel = 0; runlevel < 9; runlevel++) {
 	char * script;
 	char nlink[PATH_MAX+1], olink[PATH_MAX+1];
@@ -583,12 +694,11 @@ int main (int argc, char *argv[])
 	}
 
 	script = NULL;
-	rcdir = openrcdir(rcd);
-	if (chdir(rcd) < 0) {
-	    warn("can not change directory: %s\n", strerror(errno));
-	    closedir(rcdir);
-	    continue;
-	}
+	rcdir = openrcdir(rcd); /* Creates runlevel directory if necessary */
+	pushd(rcd);
+
+#define xremove(x) if (remove(x) < 0) \
+	warn ("can not remove(%s%s): %s\n", rcd, x, strerror(errno))
 
 	/*
 	 * See if we found scripts which should not be
@@ -606,21 +716,23 @@ int main (int argc, char *argv[])
 	    ptr += 2;
 
 	    if (stat(d->d_name, &st_script) < 0)
-		if (remove(d->d_name) < 0)
-		    warn ("can not remove(%s%s): %s\n", rcd, d->d_name, strerror(errno));
+		xremove(d->d_name);
 
 	    if (notincluded(ptr, runlevel))
-		if (remove(d->d_name) < 0)
-		    warn ("can not remove(%s%s): %s\n", rcd, d->d_name, strerror(errno));
+		xremove(d->d_name);
 	}
 
 	/*
 	 * Seek for scripts which are included, link or
 	 * correct order number if necessary.
 	 */
+
+#define xsymlink(x,y) if (symlink(x, y) < 0) \
+	warn ("can not symlink(%s, %s%s): %s\n", x, rcd, y, strerror(errno))
+
 	while (foreach(&script, &order, runlevel)) {
 	    char * clink;
-	    boolean found;
+	    boolean found, this = chkfor(script, argv, argc);
 
 	    if (*script == '$')		/* Do not link in virtual dependencies */
 		continue;
@@ -631,16 +743,27 @@ int main (int argc, char *argv[])
 	    found = false;
 	    rewinddir(rcdir);
 	    while ((clink = scan_for(rcdir, script, 'S'))) {
+		found = true;
 		if (strcmp(clink, nlink)) {
-		    if (remove(clink) < 0)
-			warn ("can not remove(%s%s): %s\n", rcd, clink, strerror(errno));
-		} else
-		    found = true;
+		    xremove(clink);		/* Wrong order, remove link */
+		    if (!this)
+			xsymlink(olink, nlink);	/* Not ours, but correct order */
+		    if (this && !del)
+			xsymlink(olink, nlink);	/* Restore, with correct order */
+		} else {
+		    if (del && this)
+			xremove(clink);		/* Found it, remove link */
+		}
 	    }
 
-	    if (!found)
-		if (symlink(olink, nlink) < 0)
-		    warn ("can not symlink(%s, %s): %s\n", olink, nlink, strerror(errno));
+	    if (this) {
+		/*
+		 * If we haven't found it and we shouldn't delete it
+		 * we try to add it.
+		 */
+		if (!del && !found)
+		    xsymlink(olink, nlink);
+	    }
 
 	    /* Start link done, now Kill link */
 
@@ -652,11 +775,17 @@ int main (int argc, char *argv[])
 	    found = false;
 	    rewinddir(rcdir);
 	    while ((clink = scan_for(rcdir, script, 'K'))) {
+		found = true;
 		if (strcmp(clink, nlink)) {
-		    if (remove(clink) < 0)
-			warn ("can not remove(%s%s): %s\n", rcd, clink, strerror(errno));
-		} else
-		   found = true;
+		    xremove(clink);		/* Wrong order, remove link */
+		    if (!this)
+			xsymlink(olink, nlink);	/* Not ours, but correct order */
+		    if (this && !del)
+			xsymlink(olink, nlink);	/* Restore, with correct order */
+		} else {
+		    if (del && this)
+			xremove(clink);		/* Found it, remove link */
+		}
 	    }
 
 	    /*
@@ -665,14 +794,19 @@ int main (int argc, char *argv[])
 	     */
 	    if (runlevel < 1 || runlevel == 6 || runlevel > 7) {
 		if (found)
-		    if (remove(nlink) < 0)
-			warn ("can not remove(%s%s): %s\n", rcd, nlink, strerror(errno));
-	    } else
-		if (!found)
-		    if (symlink(olink, nlink) < 0)
-			warn ("can not symlink(%s, %s): %s\n", olink, nlink, strerror(errno));
+		    xremove(nlink);
+	    } else {
+		if (this) {
+		    /*
+		     * If we haven't found it and we shouldn't delete it
+		     * we try to add it.
+		     */
+		    if (!del && !found)
+			xsymlink(olink, nlink);
+		}
+	    }
 	}
-	chdir("..");
+	popd();
 	closedir(rcdir);
     }
 #endif
@@ -680,7 +814,7 @@ int main (int argc, char *argv[])
     /*
      * Back to the root(s)
      */
-    chdir(pwd);
+    popd();
 
     return 0;
 }

@@ -272,15 +272,6 @@ test -n "$FROM_HEADER" && {
     check_md5_and_move $r/etc/inews_mail_gateway
 }
 
-if test -n "$IRCSERVER" ; then
-    if my_test_write $r/usr/lib/irc; then
-        (for i in $IRCSERVER; do
-                echo $i
-        done) > $r/usr/lib/irc/ircII.servers.SuSEconfig
-        check_md5_and_move $r/usr/lib/irc/ircII.servers
-    fi
-fi
-
 if test -n "$TIMEZONE" -a "$TIMEZONE" != "YAST_ASK" -a -x /usr/sbin/zic ; then
     /usr/sbin/zic -l $TIMEZONE
 fi

@@ -3,7 +3,7 @@
  *
  * Copyright 2000 Werner Fink, 2000 SuSE GmbH Nuernberg, Germany.
  *
- * This program is free software; you can redistribute it and/or modify
+ * This source is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
@@ -43,23 +43,7 @@ extern void warn (const char *fmt, ...);
 
 int maxorder = 0;  /* Maximum order of runlevels 0 upto 6 and S */
 
-typedef struct list_struct {
-    struct list_struct * prev, * next;
-} list_t;
-
-inline static void insert (list_t * new, list_t * head)
-{
-    list_t * prev = head;
-    list_t * next = head->next;
-
-    next->prev = new;
-    new->next = next;
-    new->prev = prev;
-    prev->next = new;
-}
-
-#define list_entry(ptr, type, member) \
-	((type *)((char *)(ptr)-(unsigned long)(&((type *)0)->member)))
+/* See listing.c for list_t and list_entry() macro */
 #define getdir(list)  list_entry((list), struct dir_struct, d_list)
 #define getlink(list) list_entry((list), struct link_struct, l_list)
 
