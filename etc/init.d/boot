@@ -441,6 +441,17 @@ if ls /etc/resolv.conf.saved.by.* &>/dev/null ; then
     echo -e "$rc_done_up"
 fi
 
+if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
+  echo -n "Cleaning tmp dirs $TMP_DIRS_TO_CLEAR"
+  for CURDIR in $TMP_DIRS_TO_CLEAR ; do
+    find $CURDIR -printf '%P\n' | ( cd $CURDIR ; xargs rm -rf )
+  done
+  mkdir -p /tmp/.X11-unix
+  chown root.root /tmp /tmp/.X11-unix /var/tmp /var/tmp/vi.recover
+  chmod 1777 /tmp /tmp/.X11-unix /var/tmp /var/tmp/vi.recover
+  rc_status -v -r
+fi
+
 #
 # there could be a new kernel version.  reinit /etc/psdevtab, to be sure.
 #

@@ -429,6 +429,12 @@ MAX_DAYS_IN_TMP=0
 TMP_DIRS_TO_CLEAR="/tmp /var/tmp"
 
 #
+# Set this to "yes" to clear (rm -rf) all directories in TMP_DIRS_TO_CLEAR
+# completely at bootup
+#
+CLEAR_TMP_DIRS_AT_BOOTUP="no"
+
+#
 # In OWNER_TO_KEEP_IN_TMP, you can specify, whoms file shall not be deleted.
 #
 OWNER_TO_KEEP_IN_TMP="root"
