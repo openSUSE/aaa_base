@@ -1,15 +1,15 @@
 
 #
+# Enable Magic SysRq Keys?
 # If you say yes here, you will have some control over the system even
-# if the system crashes for example during kernel debugging.
-# Please consult /usr/src/linux/Documentation/sysrq.txt
-# for further information.
+# if it crashes (e.g. during kernel debugging).
+# For further information see /usr/src/linux/Documentation/sysrq.txt
 #
 ENABLE_SYSRQ=no
 
 # 
 # DISABLE_ECN
-# If you have trouble to connect to some machines in the internet with 
+# If you have trouble connecting to some machines on the internet with 
 # your 2.4 kernel, but there are no problems with 2.2, this may be due
 # to broken firewalls dropping network packets with the ECN (early 
 # congestion notification) flag set.
@@ -28,13 +28,13 @@ MOUSE="YAST_ASK"
 MODEM="YAST_ASK"
 
 #
-# keytable and console font
+# Keytable and console font
 # (e.g. "de-latin1-nodeadkeys" for KEYTABLE, empty for US settings)
 #
 KEYTABLE="de-latin1-nodeadkeys"
 
 #
-# Load this console font upon bootup:
+# Load this console font on bootup:
 #
 CONSOLE_FONT=""
 
@@ -44,8 +44,8 @@ CONSOLE_FONT=""
 CONSOLE_SCREENMAP=""
 
 #
-# some fonts/keymap need a unicode map (TRANSLATION in former releases).
-# add it to CONSOLE_UNICODEMAP.
+# Some fonts/keymap need a unicode map (TRANSLATION in former releases).
+# If so, specify the map here:
 #
 CONSOLE_UNICODEMAP=""
 
@@ -57,8 +57,8 @@ CONSOLE_MAGIC=""
 
 
 #
-# keyboard repeat rate (2.0 - 30.0)
-# keyboard delay time in ms (250, 500, 750, 1000)
+# Keyboard repeat rate (2.0 - 30.0)
+# Keyboard delay time in ms (250, 500, 750, 1000)
 # (If you want "kbdrate" to be executed, you have to set both of them.)
 #
 KBD_RATE=""
@@ -74,21 +74,19 @@ KBD_CAPSLOCK="no"
 
 #
 # tty's for NumLock and CapsLock 
-# example: "tty1 tty2"
+# Example: "tty1 tty2"
 # "" for all tty's
 #
 KBD_TTY="tty1 tty2 tty3 tty4 tty5 tty6"
 
-
 #
-# should gpm be started on this machine? ("yes" or "no")
+# Do you want gpm to be started on this machine? ("yes" or "no")
 #
 START_GPM="YAST_ASK"
 
 #
-# gpm will be started with these parameters
-# it won't be started in runlevel 3 (xdm)
-# (example: "-t msc -m /dev/mouse")
+# gpm will be started with these parameters (example: "-t msc -m /dev/mouse")
+# GPM won't be started in runlevel 5 (xdm)
 #
 GPM_PARAM=""
 
@@ -101,15 +99,15 @@ ROOT_LOGIN_REMOTE="no"
 
 #
 # SuSEconfig can do some modifications to /etc/inittab.  If you don't want
-# this, set CHECK_INITTAB to no.  (yes/no)
+# this, set CHECK_INITTAB to "no".  (yes/no)
 #
 CHECK_INITTAB=yes
 
 #
 # Here you can set the default Display manager (kdm/xdm/gdm/wdm/console).
-# Attention: CHECK_INITTAB has to be set to yes, to activate this feature.
-# If DISPLAYMANAGER is set to console, SuSEconfig will not bother you
-# with a missing XF86Config.
+# Attention: CHECK_INITTAB has to be set to "yes" to activate this feature.
+# If DISPLAYMANAGER is set to "console", SuSEconfig will not bother you
+# with messages about a missing XF86Config.
 #
 DISPLAYMANAGER=""
 
@@ -120,19 +118,19 @@ DEFAULT_WM=kde
 
 #
 # CONSOLE_SHUTDOWN determines how ctrl-alt-del is handled.
-# Attention: CHECK_INITTAB has to be set to yes, to activate this feature.
-# (ignore/reboot/halt)
+# Attention: CHECK_INITTAB has to be set to "yes", to activate this
+# feature. (ignore/reboot/halt)
 #
 CONSOLE_SHUTDOWN=reboot
 
 #
-# SERIAL_CONSOLE is used to add a serial terminal to inittab and securetty
+# SERIAL_CONSOLE is used to add a serial terminal to inittab and securetty.
 # The format is "ttyS0,9600" as used in the kernel commandline.
 #
 SERIAL_CONSOLE=""
 
 ##
-## Formating the boot script messages, see /etc/rc.status.
+## Formatting the boot script messages, see /etc/rc.status.
 ## Source /etc/rc.status if rc_done isn't defined
 ##
 test "$rc_done"= = = -a -e /etc/rc.status && . /etc/rc.status

@@ -1,4 +1,4 @@
-#
+
 #
 # This language is used in YaST. This is also the default
 # for local users, if RC_LANG and RC_LC_ALL are not set. Root
@@ -18,16 +18,16 @@ ENABLE_SUSECONFIG=yes
 #
 # Local users will get RC_LANG as their default language, i.e. the
 # environment variable $LANG . $LANG is the default of all $LC_*-variables,
-# as long as $LC_ALL is not set, which overrules all $LC_-variables.
+# as long as $LC_ALL is not set, which overrides all $LC_-variables.
 # If RC_LANG is empty, $DEFAULT_LANGUAGE will be used.
-# Root uses this variable only if ROOT_USES_LANG is set to "YES"
+# Root uses this variable only if ROOT_USES_LANG is set to "yes".
 #
 RC_LANG=""
 
 #
-# This variable will overrule all LC-variables!!
-# Again, ROOT_USES_LANG has to be set to YES in order
-# to get any effect for the superuser.
+# This variable will override all LC-variables!!
+# Again, ROOT_USES_LANG must be set to "yes", if an effect on the superuser
+# account is desired.
 #
 RC_LC_ALL=""
 
@@ -35,29 +35,25 @@ RC_LC_ALL=""
 # This defines the locale in which messages of programs and
 # libraries with i18n-support should appear if a translated
 # message catalog for the library or the program is installed.
-# It also defines yes/no answers which are defined by the locale.
+# This also provides localized yes/no answers.
 #
 RC_LC_MESSAGES=""
 
 #
 # This defines the locale for character handling and classification.
-# The locale defined here is used by the libc in functions which
-# are used to qualify if this character is an charcater which may
-# be used in an text string, if the character is e.g. lowercase
-# and it defnes upper/lowercase-mapping of foreign characters
+# The libc uses this value in language dependent function calls, such
+# as e.g. uppercase/lowercase mapping of foreign characters.
 #
 RC_LC_CTYPE=""
 
 #
 # This defines the locale for sorting strings and characters.
-# The locale defined here is used by the libc in functions which
-# are used to qualify if a character is befor or beyond an other
-# character in the alphabet. Note: sort(1) doesn't use these
-# functions, but other application such as databases may use it.
+# It is used by the libc to obtain the alphabetical order of characters
+# (e.g. for string comparisons). NOTE: sort(1) does NOT use these
+# function calls, but other applications (e.g. databases) might use it.
 #
-# To keep bash and possibly other apps from misbehavour because
-# of mixed upper/lowercase sorting with locales, you should keep
-# this at POSIX and just set it for the apps that need it:
+# To keep bash and possibly other apps from misbehaviour, you should
+# probably keep this at POSIX and set it only for the apps that need it.
 #
 RC_LC_COLLATE="POSIX"
 
@@ -88,14 +84,14 @@ ROOT_USES_LANG="ctype"
 #
 # SuSEconfig can mail reports (created by YaST or included in packages)
 # to you.  Here you can set the address.  If you don't want reports to
-# be send, then simply set it to "".
+# be sent, then simply set it to "".
 #
 MAIL_REPORTS_TO="root"
 
 #
-# There are two levels of mailing.  If you set MAIL_LEVEL it to "warn"
-# you only get the important mails.  If you set it to "all", you get
-# logs also.
+# There are two levels of mailing. If you set MAIL_LEVEL it to "warn"
+# you will only get the important mails. If you set it to "all", you will
+# also receive the logs.
 #
 MAIL_LEVEL="warn"
 
@@ -111,25 +107,25 @@ GMT="YAST_ASK"
 TIMEZONE="YAST_ASK"
 
 #
-# start loopback networking? ("yes" or "no")
+# Start loopback networking? ("yes" or "no")
 # (this will be needed for all rpc services)
 #
 START_LOOPBACK="yes"
 
 #
-# name of the printer queue used when 'lpr' is invoked with no '-P'
+# Name of the printer queue used when 'lpr' is invoked with no '-P'
 #
 DEFAULT_PRINTER="lp"
 
 #
-# networking
+# Networking
 #
-# number of network cards: "_0" for one, "_0 _1 _2 _3" for four cards
+# Number of network cards: "_0" for one, "_0 _1 _2 _3" for four cards
 #
 NETCONFIG="YAST_ASK"
 
 #
-# contains all indices of active PCMCIA network devices
+# This variable contains all indices of active PCMCIA network devices
 #
 NETCONFIG_PCMCIA=""
 
@@ -142,7 +138,7 @@ IPADDR_2=""
 IPADDR_3=""
 
 #
-# network device names (e.g. "eth0")
+# Network device names (e.g. "eth0")
 #
 NETDEV_0=""
 NETDEV_1=""
@@ -150,9 +146,9 @@ NETDEV_2=""
 NETDEV_3=""
 
 #
-# parameteres for ifconfig, simply enter "bootp" or "dhcpclient" to use the
-# respective service for configuration
-# sample entry for ethernet:
+# Parameters for ifconfig, simply enter "bootp" or "dhcpclient" to use the
+# respective service for configuration.
+# Sample entry for ethernet:
 # IFCONFIG_0="192.168.81.38 broadcast 192.168.81.63 netmask 255.255.255.224"
 #
 IFCONFIG_0=""
@@ -161,7 +157,7 @@ IFCONFIG_2=""
 IFCONFIG_3=""
 
 # 
-# setup dummy network device for IPADDR_0? this is useful for non permanent
+# Setup dummy network device for IPADDR_0? This is useful for non permanent
 # network connections (e.g. SLIP, PPP). Some software needs a connection
 # to FQHOSTNAME (e.g. plp). (yes, no)
 SETUPDUMMYDEV=no
@@ -178,7 +174,7 @@ IP_DYNIP=no
 IP_TCP_SYNCOOKIES=yes
 
 #
-# runtime-configurable parameter: forward IP packets.
+# Runtime-configurable parameter: forward IP packets.
 # Is this host a router? (yes/no)
 #
 IP_FORWARD=no
@@ -186,30 +182,29 @@ IP_FORWARD=no
 
 #
 # SuSEconfig can do some checks and modifications in /etc/hosts. 
-# If this is not wanted, set the following variable to 'no' (yes, no).
+# If this is not wanted, set the following variable to 'no' (yes/no).
 #
 CHECK_ETC_HOSTS=yes
 
 #
-# If CHECK_ETC_HOSTS is set to yes, SuSEconfig sorts your
-# /etc/hosts.  But in some cases this may be unwanted.  So here is a
-# flag, where you can configure if /etc/hosts should be "beautified".
-# (yes/no)
+# If CHECK_ETC_HOSTS is set to yes, SuSEconfig sorts your /etc/hosts.
+# But in some cases this may be unwanted. So here is a flag which tells
+# SuSEconfig to "beautify" your /etc/hosts. (yes/no)
 #
 BEAUTIFY_ETC_HOSTS=no
 
 #
-# if SORT_PASSWD_BY_UID is set to yes, SuSEconfig sorts your /etc/passwd
+# If SORT_PASSWD_BY_UID is set to yes, SuSEconfig sorts your /etc/passwd
 # and /etc/group by uid/gid.
 #
 SORT_PASSWD_BY_UID=no
 
 
 #
-# hostname of the system (full name)
-# if zero, and bootp is used above, bootp will also set the hostname
+# Hostname of the system (full name)
+# If zero, and bootp is used above, bootp will also set the hostname
 # (e.g. "riemann.suse.de" or "hugo.linux.de")
-# don't forget to also edit /etc/hosts for your system
+# Don't forget to edit your /etc/hosts appropriately.
 #
 FQHOSTNAME=""
 
@@ -224,13 +219,13 @@ ORGANIZATION=""
 NNTPSERVER="news"
 
 #
-# have mail daemon on SMTP port? ("yes" or "no")
-# needed, if you receive email from other hosts via tcp/ip
-# not needed, if you have a uucp-only host or only out-going email.
-# If set to "yes", sendmail will be started as daemon.
-# As uucp site, you can get along with "SMTP=no", if you make
-# a "sendmail -q" call after each poll. (As rmail is queuing the mail only
-# and not delivering it...)
+# Have mail daemon on SMTP port? (yes/no)
+# This is needed, if you receive email from other hosts via tcp/ip.
+# It is NOT needed, if you have a uucp-only host or only out-going email.
+#
+# If set to "yes", sendmail will be started as daemon. As uucp site, you
+# can get along with "SMTP=no", if you make a "sendmail -q" call after
+# each poll. (As rmail is only queuing the mail, but not delivering it...)
 #
 SMTP="no"
 
@@ -241,10 +236,10 @@ SMTP="no"
 FROM_HEADER="YAST_ASK"
 
 #
-# some programs (e.g. lynx, arena and wget) support proxies, if set in
-# environment.  SuSEconfig can add this environment variables to
-# /etc/SuSEconfig/* (sourced by /etc/profile etc.) - See
-# http://www.suse.de/Support/sdb_e/lynx_proxy.html for more details.
+# Some programs (e.g. lynx, arena and wget) support proxies, if set in
+# the environment.  SuSEconfig can add these environment variables to
+# /etc/SuSEconfig/* (sourced by /etc/profile etc.) -
+# See http://www.suse.de/Support/sdb_e/lynx_proxy.html for more details.
 # Example: HTTP_PROXY="http://proxy.provider.de:3128/"
 HTTP_PROXY=""
 
@@ -264,83 +259,84 @@ GOPHER_PROXY=""
 NO_PROXY="localhost"
 
 #
-# when shutting down routing, all net connection can be closed (not useful
-# in all cases).  If CLOSE_CONNECTIONS is set to "true" /etc/init.d/route
-# scans /proc to search for network connections and sends a term signal
-# to the processes.
+# When shutting down routing, all net connection can be closed (not useful
+# in all cases). If CLOSE_CONNECTIONS is set to "true", /etc/init.d/route
+# will scan /proc for active network connections and send term signals
+# to the resp. processes.
 #
 CLOSE_CONNECTIONS="false"
 
 #
-# start the named (package bind)? You have to configure the named first,
+# Start the named (package bind)? You have to configure the named first,
 # before you can start it (man named).
 #
 START_NAMED=no
 
 #
-# should updatedb (for locate) be started by cron.daily ("yes" or "no")
+# Should updatedb (for locate) be started by cron.daily ("yes" or "no")
 #
 RUN_UPDATEDB=yes
 
 #
-# should mandb and whatis be recreated by cron.daily ("yes" or "no")
+# Should mandb and whatis be recreated by cron.daily ("yes" or "no")
 #
 REINIT_MANDB=yes
 
 #
-# updatedb has a parameter "--localuser". it runs the find as this user.
-# some people think, its a security hole to run it as root (because you
-# can get information about directories you can not read normally). Some
-# think its useful to hold all files in the database. If you want full
-# information in locate db, set RUN_UPDATEDB_AS=root. If you want security
-# use RUN_UPDATEDB_AS=nobody.
+# updatedb has a parameter "--localuser".
+# It runs the "find" command as this user. Some people think this is a
+# security hole if set to 'root' (because some directory information can
+# be read which is normally protected). Others think it is useful to hold
+# all files in the database.
+# So if you want full information in locate db, set RUN_UPDATEDB_AS=root.
+# If you want security use RUN_UPDATEDB_AS=nobody.
 #
 RUN_UPDATEDB_AS=nobody
 
 #
 # uptdatedb normally only scans local harddisks, but can include net paths
-# in database as well. If you specify directories here, they will be scanned.
+# in the database as well. If you specify directories here, they will be
+# scanned.
 #
 UPDATEDB_NETPATHS=""
 
 #
 # uptdatedb can skip directories for its database. The following parameter
-# says which.
+# says which ones.
 #
 UPDATEDB_PRUNEPATHS="/S.u.S.E. /mnt /cdrom /tmp /usr/tmp /var/tmp /var/spool /proc"
 
 #
-# search net paths as ? (e.g. nobody)
+# Search net paths as ? (e.g. nobody)
 #
 UPDATEDB_NETUSER=""
 
 #
-# old corefiles? should they be deleted ("yes" or "no")
-# if set to no, cron.daily will tell you, if it finds old core files.
-# please note, that this feature needs RUN_UPDATEDB to be set to "yes".
+# Should old corefiles they be deleted? ("yes" or "no")
+# If set to 'no', cron.daily will tell you if it finds old core files.
+# NOTE: This feature requires RUN_UPDATEDB to be set to "yes".
 #
 DELETE_OLD_CORE=no
 
 #
-# how old are 'old' core files? (in days)
+# Maximum age of core files (in days)
 #
 MAX_DAYS_FOR_CORE=7
 
 #
-# should old preformated man pages be deleted (/var/catman)
-# (yes/no)
+# Should old preformatted man pages (in /var/catman) be deleted? (yes/no)
 #
 DELETE_OLD_CATMAN=yes
 
 #
-# How old are OLD preformated man pages for you? (days)
+# How long should old preformatted man pages be kept before deletion? (days)
 #
 CATMAN_ATIME=7
 
 
 #
-# we have a small script to generate usr/info/dir file. This needs perl..
-# ("yes" or "no")
+# We have a small perl script to generate the usr/info/dir file. Do you
+# want this file to be generated? (yes/no)
 #
 CREATE_INFO_DIR="yes"
 
@@ -364,10 +360,10 @@ PERMISSION_SECURITY="easy local"
 
 
 #
-# How long to store old log files. If set to 0, log files will be untouched.
-# The log files below will be checked by cron.daily. The number
-# after the name means the minimum size in k, the file has to have, before
-# it will be backed up (root gets a mail, if it happens).
+# How long to store old log files. If set to 0, log files will remain
+# untouched. The log files below will be checked by cron.daily.
+# The number after the name is the minimum size (in kb) the file has to
+# have, before it will be backed up (root gets a mail when it happens).
 #
 # /tmp/log_mg.* (1024), /var/log/wtmp (400), /var/log/isdn (4096),
 # /var/lib/xdm/xdm-errors (200), /var/spool/uucp/Log (2048),
@@ -379,15 +375,15 @@ PERMISSION_SECURITY="easy local"
 MAX_DAYS_FOR_LOG_FILES=365
 
 #
-# cron.daily can make backup the rpm database. Set the path here, and
-# cron.daily will make backup everytime it is called and the db has
-# changed.  This backups are recommended.  If you don not want this
-# feature, set it to "".
+# If you want cron.daily to backup the rpm database, specify a directory
+# where the backups will be stored. (This is recommended!) The backups
+# will be made every time cron.daily is called and the db has changed.
+# Setting the variable to "" disables this feature.
 #
 RPMDB_BACKUP_DIR=/var/adm/backup/rpmdb
 
 #
-# here you can set the maximum number of backup files for the rpm
+# Here you can set the maximum number of backup files for the rpm
 # database.
 #
 MAX_RPMDB_BACKUPS=5
@@ -400,8 +396,8 @@ MAX_RPMDB_BACKUPS=5
 MAX_DAYS_IN_TMP=0
 
 #
-# You can specify in TMP_DIRS_TO_CLEAR, which directories have to be 
-# searched for old files, to be deleted.
+# This variable contains a list of directories, in which old files are to
+# be searched and deleted.
 #
 TMP_DIRS_TO_CLEAR="/tmp /var/tmp"
 
@@ -437,7 +433,7 @@ PASSWD_USE_CRACKLIB="no"
 HOW_TO_HANDLE_COMMERCIAL_LIBS=link
 
 #
-# run the Name Service Caching Daemon at boot time? (yes/no)
+# Run the Name Service Caching Daemon at boot time? (yes/no)
 #
 START_NSCD=yes
 
@@ -458,12 +454,11 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 CREATE_JAVALINK="yes"
 
 #
-# This variable determines if encrypted filesystems are automatically 
-# activated on bootup. Since this requires the input of the crypto passwort, 
-# this might be unwanted in certain situations where you want to be sure the 
-# machine should boot automatically without any user intervention. If you 
-# set this variable to "no", encrypted filesystems need to be mounted 
-# manually by "/etc/init.d/boot.crypto start".
+# This variable determines if encrypted filesystems are automatically activated
+# on bootup. Since this requires the input of the crypto passwort, this might be
+# unwanted in certain situations where you want to be sure the machine boots
+# without any user intervention. If you set this variable to "no", encrypted
+# filesystems need to be mounted manually by "/etc/init.d/boot.crypto start".
 #
 START_CRYPTO_FILESYSTEMS="yes"
 
@@ -474,7 +469,7 @@ START_CRYPTO_FILESYSTEMS="yes"
 # nameservers. Or pcmcia needs to set the correct nameserver for the choosen
 # configuration scheme. If you don't like these services to change
 # /etc/resolv.conf at all, then set this variable to "no".
-# If unsure, leave it as the default wich is "yes".
+# If unsure, leave it at the default (which is "yes").
 #
 MODIFY_RESOLV_CONF_DYNAMICALLY="yes"
 

@@ -1,6 +1,6 @@
 
 ##
-## Formating the boot script messages:
+## Formatting the boot script messages:
 ##   The boot scripts should use the variables rc_done and rc_fail to
 ##   symbolize their success.  See /etc/init.d/skeleton for an example
 ##   how to use these variables.

@@ -2,7 +2,7 @@
 #
 # If you want to allow root logins from other machines, set ROOT_LOGIN_REMOTE
 # to "yes". (Logging in via ssh is not affected by this variable since SSH
-# is seen as a safe login method).
+# is widely accepted as a safe login method).
 #
 ROOT_LOGIN_REMOTE="yes"
 
@@ -14,9 +14,9 @@ CHECK_INITTAB=no
 
 #
 # Here you can set the default Display manager (kdm/xdm/gdm/wdm/console).
-# Attention: CHECK_INITTAB has to be set to yes, to activate this feature.
-# If DISPLAYMANAGER is set to console, SuSEconfig will not bother you
-# with a missing XF86Config.
+# Attention: CHECK_INITTAB has to be set to "yes", to activate this feature.
+# If DISPLAYMANAGER is set to "console", SuSEconfig will not bother you
+# with messages about a missing XF86Config.
 #
 DISPLAYMANAGER=""
 
@@ -26,7 +26,7 @@ DISPLAYMANAGER=""
 DEFAULT_WM=kde
 
 ##
-## Formating the boot script messages, see /etc/rc.status.
+## Formatting the boot script messages, see /etc/rc.status.
 ## Source /etc/rc.status if rc_done isn't defined
 ##
 test "$rc_done"= = = -a -e /etc/rc.status && . /etc/rc.status
