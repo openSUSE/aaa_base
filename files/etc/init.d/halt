@@ -71,9 +71,6 @@ $command -w
 # Stop blogd before umounting /var
 test -x /sbin/blogd && killproc -QUIT /sbin/blogd
 
-# Redirect our mesages to default console
-test -n "$REDIRECT" && exec 0<> $REDIRECT 1>&0 2>&0
-
 echo "Sending all processes the TERM signal..."
 killall5 -15
 echo -e "$rc_done_up"
@@ -84,6 +81,9 @@ test "$1" = "fast" -o -e /fastboot || sleep 4
 echo "Sending all processes the KILL signal..."
 killall5 -9
 echo -e "$rc_done_up"
+
+# Redirect our mesages to default console
+test -n "$REDIRECT" && exec 0<> $REDIRECT 1>&0 2>&0
 
 #
 # call modules in boot.d via K* symlinks

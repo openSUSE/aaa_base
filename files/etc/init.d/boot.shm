@@ -38,22 +38,14 @@ case "$1" in
 	    ECHO_RETURN=$rc_done
 	    test -d /dev/shm || mkdir /dev/shm
 	    echo -n "Mounting shared memory FS on /dev/shm"
-	    mount -t tmpfs $SHMFS_OPTIONS tmpfs /dev/shm || ECHO_RETURN=$rc_failed
+	    mount -n -t tmpfs $SHMFS_OPTIONS tmpfs /dev/shm || ECHO_RETURN=$rc_failed
 	    echo -e $ECHO_RETURN
 	fi
 	#unset HAVE_SHM
 	;;
     stop)
-	unset HAVE_SHM
-	while read dev type; do
-	    test "$type" = "tmpfs" && HAVE_SHM=1
-	done < /proc/filesystems
-	if test ! -z "$HAVE_SHM"; then
-	    ECHO_RETURN=$rc_done
-	    echo -n "Unmounting shared memory FS from /dev/shm"
-	    umount /dev/shm || ECHO_RETURN=$rc_failed
-	    echo -e $ECHO_RETURN
-	fi
+	# skip / do nothing
+	# boot.localfs already unmounted everything it could
 	;;
     restart)
 	$0 stop
