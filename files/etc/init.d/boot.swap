@@ -51,7 +51,12 @@ case "$1" in
 	# After mounting we may activate swap files in /etc/fstab
 	# .. this should work know with the new swapon behavio(u)r
 	#
-	check_swap_sig
+	# Check for swap signature only if sysfs is not mounted
+	# (then we have no way of knowing if swsuspend is enabled)
+	# or if /sys/power exists (then we are sure it is enabled).
+	if [ ! -d "/sys/devices" ] || [ -d "/sys/power" ]; then
+	    check_swap_sig
+	fi
 	echo "Activating remaining swap-devices in /etc/fstab..."
 	swapon -a &> /dev/null
 	rc_status -v1 -r
