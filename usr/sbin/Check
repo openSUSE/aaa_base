@@ -26,7 +26,7 @@ do_gzip() {
 	return
 }
 
-DIRS="/usr/info /usr/X11R6/lib/X11/fonts/*"
+DIRS="/usr/info /usr/share/info /usr/X11R6/lib/X11/fonts/*"
 
 OLD_IFS="$IFS"
 IFS="$IFS:"

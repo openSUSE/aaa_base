@@ -33,7 +33,7 @@ case "$1" in
 	rm -f /etc/nologin
 
 	# if we're not single user, don't try to restore
-	test $RUNLEVEL != S && exit 0
+	test "$RUNLEVEL" != "S" && exit 0
 
 	# go back to previous runlevel
 	init $PREVLEVEL
