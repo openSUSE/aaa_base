@@ -499,20 +499,13 @@ static void ctty(pid_t pid, int * tty, int * ttypgrp)
 	error("can not sscanf for my tty: %s\n", strerror(errno));
 }
 
-/* Used to hold signal call in place */
-#define mbr() __asm__ __volatile__("": : :"memory")
-
-/* main routine to fetch tty */
-char * fetchtty(const pid_t pid, const pid_t ppid)
+/* fall back routine to fetch tty */
+static int fallback(const pid_t pid, const pid_t ppid)
 {
-    int tty = 0, found = 0;
+    int tty = 0;
     pid_t ttypgrp = -1;
     pid_t  pgrp = getpgid(pid);
     pid_t ppgrp = getpgid(ppid);
-    char * name;
-    DIR * dev;
-    struct dirent * d;
-    struct stat st;
 
     ctty(pid, &tty, &ttypgrp);
 
@@ -577,6 +570,28 @@ char * fetchtty(const pid_t pid, const pid_t ppid)
 	    } break;
 	}
     }
+
+    return tty;
+}
+
+/* main routine to fetch tty */
+char * fetchtty(const pid_t pid, const pid_t ppid)
+{
+    int tty = 0, found = 0;
+    char * name;
+    DIR * dev;
+    struct dirent * d;
+    struct stat st;
+
+#ifdef TIOCGDEV
+    if (ioctl (0, TIOCGDEV, &tty) < 0) {
+#endif
+
+	tty = fallback(pid, ppid);
+
+#ifdef TIOCGDEV
+    }
+#endif
 
     if (!(dev = opendir("/dev")))
 	error("can not opendir(/dev): %s\n", strerror(errno));

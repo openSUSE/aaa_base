@@ -12,7 +12,7 @@ BOOT_LOGFILE	= /var/log/boot.msg
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.5
+VERSION	 =	0.6
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #
@@ -97,6 +97,8 @@ FILES	= README         \
 	  COPYING        \
 	  OTHERS         \
 	  Makefile       \
+	  libblogger.c   \
+	  libblogger.h   \
 	  libconsole.c   \
 	  libconsole.h   \
 	  showconsole.8  \

@@ -21,6 +21,9 @@ int main(void)
 
 	return 0;
 }
+
+This is wrong because we need redirect not kmsg_redirect.
+
 --- drivers/char/console.c~	Wed Dec  1 19:17:51 1999
 +++ drivers/char/console.c	Mon Feb 21 22:22:59 2000
 @@ -2140,6 +2140,8 @@
