@@ -758,6 +758,12 @@ for k in $kernels ; do
     cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 4 "no static shell"
     cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 5 "no static insmod"
 
+    # If exists, copy also insmod.static.old, it is created by modutils for
+    # 2.5.47+ kernels and it is needed by these to work with older kernels.
+    if [ -r ${static_insmod}.old ] ; then
+        cp ${static_insmod}.old $tmp_mnt/bin/insmod.old 2>/dev/null
+    fi
+
     if [ "$need_libc" ] ; then
       mkdir -p $tmp_mnt/{lib,etc,proc,mnt}
       [ "$lib" != lib ] && mkdir -p $tmp_mnt/$lib
