@@ -30,4 +30,5 @@ db2fadm1:*:root:root
 db2iadm1:*:root:root
 db2asgrp:*:root:root
 users:*:root:root
+postfix:*:root:root
 nogroup:*:root:root
