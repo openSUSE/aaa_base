@@ -93,7 +93,9 @@ fi
 if [ ! -f etc/sysconfig/language -a -f etc/rc.config.d/lang.rc.config ] ; then
   mv etc/rc.config.d/lang.rc.config etc/sysconfig/language
 fi
-for i in language backup displaymanager locate mouse kernel suseconfig clock proxy windowmanager sysctl java mail hardware ; do
+for i in language backup displaymanager locate mouse kernel \
+	suseconfig clock proxy windowmanager sysctl java mail \
+	hardware cron_daily ; do
 %{fillup_only -n $i}
 done
 # hack: remove the separator line again

@@ -26,6 +26,9 @@ export PATH
 if [ -f /etc/rc.config ] ; then
     . /etc/rc.config
 fi
+if [ -f /etc/sysconfig/cron_daily ] ; then
+    . /etc/sysconfig/cron_daily
+fi
 
 test "$MAX_DAYS_IN_TMP" -gt 0 2> /dev/null || exit 0
 #

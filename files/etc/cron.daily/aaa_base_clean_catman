@@ -28,6 +28,9 @@ export PATH
 if [ -f /etc/rc.config ] ; then
     . /etc/rc.config
 fi
+if [ -f /etc/sysconfig/cron_daily ] ; then
+    . /etc/sysconfig/cron_daily
+fi
 
 #
 # Delete too old preformatted man-pages.

@@ -23,24 +23,15 @@ umask 022
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 export PATH
-TMPDIR=/var/tmp/cron.daily.$$
-rm -rf $TMPDIR
-mkdir $TMPDIR || {
-    echo
-    echo Security problems detected.
-    echo
-    echo can not create a new directory $TMPDIR - due to security problems 
-    echo it is better to abort.  Good Luck.
-    echo
-    exit 1
-}
-export TMPDIR
 
 #
 # get information from /etc/rc.config
 #
 if [ -f /etc/rc.config ] ; then
     . /etc/rc.config
+fi
+if [ -f /etc/sysconfig/cron_daily ] ; then
+    . /etc/sysconfig/cron_daily
 fi
 
 #
@@ -50,33 +41,11 @@ if [ -z "$MAX_DAYS_FOR_CORE" ] ; then
     MAX_DAYS_FOR_CORE=5
 fi
 
-cat /dev/null > $TMPDIR/cron.daily.$$
-
 if [ -n "$RUN_UPDATEDB" -a "$RUN_UPDATEDB" = "yes" -a \
      -x /usr/bin/updatedb ] ; then
   for DUMMY in `find /var/lib/locatedb -ctime -7 2> /dev/null` ; do
-      for i in `locate '*/core' '*/core.[0-9]*'` ; do
-          if [ -f $i ] ; then
-              echo $i >> $TMPDIR/cron.daily.$$
-          fi
-      done
-  done
-#else
-#  cat /proc/mounts | \
-#  while read device where fstype rest ; do
-#    case $fstype in
-#      nfs|NFS|autofs|proc|devpts|smbfs|ncpfs)
-#        ;;
-#      *)
-#        find $where -mount -type f ! \( -fstype nfs -o -fstype NFS \) \
-#        -name core 2>/dev/null  >> $TMPDIR/cron.daily.$$
-#        ;;
-#    esac
-#  done
-fi
-
-for COREFILE in `cat $TMPDIR/cron.daily.$$`; do
-    for i in `find $COREFILE ! \( -fstype nfs -o -fstype NFS \) \
+    for COREFILE in `locate '*/core' '*/core.[0-9]*' 2> /dev/null` ; do
+      for i in `find $COREFILE ! \( -fstype nfs -o -fstype NFS \) \
         \( -name core -o -name "core.[0-9]*" \) -type f \
         -ctime +$MAX_DAYS_FOR_CORE 2> /dev/null` ; do
         if [ -n "$DELETE_OLD_CORE" -a "$DELETE_OLD_CORE" = "yes" ] ; then
@@ -93,11 +62,9 @@ for COREFILE in `cat $TMPDIR/cron.daily.$$`; do
                 /usr/bin/file $i
             fi
         fi
+      done
     done
-done
-
-rm -f $TMPDIR/cron.daily.$$
-
-rm -rf $TMPDIR
+  done
+fi
 
 exit 0

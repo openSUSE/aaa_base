@@ -15,6 +15,7 @@
 
 . /etc/rc.status
 . /etc/rc.config
+. /etc/sysconfig/cron_daily
 
 rc_splash "bootnetwork start"
 
