@@ -80,7 +80,14 @@ if [ -x /usr/X11R6/bin/xftcache -a $RUN_XFTCACHE = "true" ]; then
 fi
 
 if [ -x /usr/X11R6/bin/xset ]; then
-    /usr/X11R6/bin/xset fp rehash > /dev/null 2>&1
+    case "$DISPLAY" in
+	:[0-9]*)
+	    /usr/X11R6/bin/xset fp rehash > /dev/null 2>&1
+	;;
+	*)
+	    :
+	;;
+    esac
 fi
 
 XFS_BIN=/usr/X11R6/bin/xfs
