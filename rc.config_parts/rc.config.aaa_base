@@ -82,8 +82,9 @@ RC_LC_MONETARY=""
 #
 # This defines if the user "root" should use the locale settings
 # which are defined here.
+# Value "ctype" means that root uses just LC_CTYPE. 
 #
-ROOT_USES_LANG="no"
+ROOT_USES_LANG="ctype"
 
 #
 # SuSEconfig can mail reports (created by YaST or included in packages)
