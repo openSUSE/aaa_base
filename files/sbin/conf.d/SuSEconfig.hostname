@@ -44,7 +44,12 @@ test -e $LIBDIR || mkdir -p $LIBDIR
 # OLDHOSTENTRY must be a file name placed in LIBDIR
 OLDHOSTENTRY=$LIBDIR/oldhostentry
 
-if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
+XHOSTNAME=""
+test -f /etc/HOSTNAME && {
+    XHOSTNAME=`cat /etc/HOSTNAME`
+}
+
+if test -n "$XHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
     #
     # maybe there was another name or IP Adress before. When it has been
     # changed, this could lead into trouble, if it stays in /etc/hosts.
@@ -66,38 +71,38 @@ if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
         echo -e "\n127.0.0.1       localhost" >> $r/etc/hosts
     fi
 
-    echo $FQHOSTNAME >> $OLDHOSTENTRY
-    NICKNAME=`echo $FQHOSTNAME | sed -e"s:\..*::"`
-    echo $NICKNAME > $r/etc/HOSTNAME.SuSEconfig
+    echo $XHOSTNAME >> $OLDHOSTENTRY
+    NICKNAME=${XHOSTNAME%%.*}
+    echo > $r/etc/HOSTNAME.SuSEconfig
     check_md5_and_move $r/etc/HOSTNAME
 
     NET_DEVICE_FOUND=false
 
-    if test -n "$NETCONFIG" -a "$NETCONFIG" != "YAST_ASK" ; then
-        NICKNAME_PRINTED=false
-        for I in $NETCONFIG ; do
-            eval IPADDR=\$IPADDR$I
-            if test -n "$IPADDR" ; then
-                test -x /usr/bin/cut && \
-                    IPADDR=`echo "$IPADDR              " | /usr/bin/cut -c -15`
-                grep -w ${IPADDR} $r/etc/hosts > /dev/null || {
-                    if test "$NICKNAME_PRINTED" = false ; then
-                        echo "$IPADDR	$FQHOSTNAME 	$NICKNAME" >> $r/etc/hosts
-                        NICKNAME_PRINTED=true
-                    else
-                        echo "$IPADDR	$FQHOSTNAME" >> $r/etc/hosts
-                    fi
-                }
-                echo "$IPADDR" >> $OLDHOSTENTRY
-                NET_DEVICE_FOUND=true
-            fi
-        done
-    fi
+    NICKNAME_PRINTED=false
+    for if_conf in /etc/sysconfig/network/ifcfg-* ; do
+        test -f $if_conf || continue
+        . $if_conf
+	if test -n "$IPADDR" ; then
+	    test -x /usr/bin/cut && \
+		IPADDR=`echo "$IPADDR              " | /usr/bin/cut -c -15`
+	    grep -w ${IPADDR} $r/etc/hosts > /dev/null || {
+		if test "$NICKNAME_PRINTED" = false ; then
+		    echo "$IPADDR	$XHOSTNAME 	$NICKNAME" >> $r/etc/hosts
+		    NICKNAME_PRINTED=true
+		else
+		    echo "$IPADDR	$XHOSTNAME" >> $r/etc/hosts
+		fi
+	    }
+	    echo "$IPADDR" >> $OLDHOSTENTRY
+	    NET_DEVICE_FOUND=true
+	fi
+    done
 
     # to get plp to work, we have to add hostname to localhost.
-    if test "$NET_DEVICE_FOUND" = false -a "$NETCONFIG" != "YAST_ASK" ; then
-        grep -vw $FQHOSTNAME $r/etc/hosts > $r/etc/hosts.tmp
-        echo "127.0.0.2      	$FQHOSTNAME 	$NICKNAME" >> $r/etc/hosts.tmp
+    if test "$NET_DEVICE_FOUND" = false ; then
+        # FIXME: skip if completely unconfigured (old YAST_ASK value)
+        grep -vw $XHOSTNAME $r/etc/hosts > $r/etc/hosts.tmp
+        echo "127.0.0.2      	$XHOSTNAME 	$NICKNAME" >> $r/etc/hosts.tmp
         cp -p $r/etc/hosts.tmp $r/etc/hosts
         rm -f $r/etc/hosts.tmp
     fi

@@ -53,15 +53,6 @@ BEAUTIFY_ETC_HOSTS=no
 #
 SORT_PASSWD_BY_UID=no
 
-
-#
-# Hostname of the system (full name)
-# If zero, and bootp is used above, bootp will also set the hostname
-# (e.g. "riemann.suse.de" or "hugo.linux.de")
-# Don't forget to edit your /etc/hosts appropriately.
-#
-FQHOSTNAME=""
-
 #
 # Used for News-Postings.
 #

@@ -45,7 +45,6 @@ export REDIRECT
 ### call boot.clock    (set cmos clock)
 ### call boot.quota    (check quotas if needed)
 ### call boot.ldconfig (run ldconfig if needed)
-### call boot.loopback (start loopback device)
 ### call boot.localnet (setup hostname and yp and do cleanup) 
 ### call serial (from setserial package)
 ### call boot.setup    (setup kbd and kbd leds)

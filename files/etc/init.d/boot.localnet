@@ -6,7 +6,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.localnet
-# Required-Start:    boot.quota boot.ldconfig boot.loopback
+# Required-Start:    boot.quota boot.ldconfig
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
@@ -24,11 +24,16 @@ rm -f /var/yp/binding/*.[12]
 #
 # set hostname and domainname
 #
-test -n "$FQHOSTNAME" && {
+XHOSTNAME=""
+test -f /etc/HOSTNAME && {
+    XHOSTNAME=`cat /etc/HOSTNAME`
+}
+test -n "$XHOSTNAME" && {
     echo -n Setting up hostname
-    hostname ${FQHOSTNAME%%.*}
+    hostname ${XHOSTNAME%%.*}
     rc_status -v -r
 }
+
 test -f /etc/defaultdomain && {
     echo -n Setting up domainname
     domainname `cat /etc/defaultdomain`

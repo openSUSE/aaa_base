@@ -6,7 +6,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.klog
-# Required-Start:    boot.loopback serial boot.setup boot.isapnp
+# Required-Start:    serial boot.setup boot.isapnp
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
