@@ -65,8 +65,12 @@ _exp_ ()
     compress)		e='*.Z'					;;
     bzip2)
 	case "$c" in
-	-)		COMPREPLY=(d c); return			;;
- 	-?|-??)		COMPREPLY=($c) ; return			;;
+	-)		COMPREPLY=(d c)
+			test $g -eq 0 && shopt -u extglob
+			return					;;
+ 	-?|-??)		COMPREPLY=($c)
+			test $g -eq 0 && shopt -u extglob
+			return					;;
 	esac
 	case "$a" in
 	*-?(c)d*)	e='!*.bz2'				;;
@@ -75,8 +79,12 @@ _exp_ ()
     bunzip2)		e='!*.bz2'				;;
     gzip)
 	case "$c" in
-	-)		COMPREPLY=(d c); return			;;
- 	-?|-??)		COMPREPLY=($c) ; return			;;
+	-)		COMPREPLY=(d c)
+			test $g -eq 0 && shopt -u extglob
+			return					;;
+ 	-?|-??)		COMPREPLY=($c)
+			test $g -eq 0 && shopt -u extglob
+			return					;;
 	esac
 	case "$a" in
 	*-?(c)d*)	e='!*.+(gz|tgz|z|Z)'			;;
@@ -95,6 +103,7 @@ _exp_ ()
 	case "$a" in
 	*=*)		c=${c#*=}				;;
 	*)		COMPREPLY=($(compgen -v -- ${c}))
+			test $g -eq 0 && shopt -u extglob
 			return					;;
 	esac
 	;;
@@ -123,6 +132,7 @@ _exp_ ()
     *[?*+\!@]\(*\)*)
 	if test $g -eq 0 ; then
 			COMPREPLY=($(compgen -f -X "$e" -- $c))
+			test $g -eq 0 && shopt -u extglob
 			return
 	fi
 			COMPREPLY=($(compgen -G "${c}"))			;;
@@ -130,7 +140,13 @@ _exp_ ()
 	if test "$c" = ".." ; then
 			COMPREPLY=($(compgen -d -X "$e" -S / ${_nosp} -- $c))
 	else
-			COMPREPLY=($(compgen -f -X "$e" -- $c))
+			for s in $(compgen -f -X "$e" -- $c) ; do
+			    if test -d $s ; then
+				COMPREPLY=(${COMPREPLY[@]} $(compgen -f -X "$e" -S / -- $s))
+			    else
+				COMPREPLY=(${COMPREPLY[@]} $s)
+			    fi
+			done
 	fi									;;
     esac
     IFS="$o"
@@ -161,7 +177,7 @@ complete -A function -A alias -A command -A builtin \
 complete -A function			function
 complete -A alias			alias unalias
 complete -A variable			unset local readonly
-complete -F _exp_ ${_def}		export
+complete -F _exp_ ${_def} ${_nosp}	export
 complete -A variable -A export		unset
 complete -A shopt			shopt
 complete -A setopt			set
