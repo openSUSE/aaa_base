@@ -12,6 +12,9 @@
 # All scripts for runlevel changes are in /etc/init.d/ and the main
 # file for changes is /etc/rc.config.
 #
+# This file may be modified by SuSEconfig unless CHECK_INITTAB
+# in /etc/rc.config is set to "no"
+#
 
 # The default runlevel is defined here
 id:3:initdefault:
@@ -67,6 +70,10 @@ sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
 4:2345:respawn:/sbin/mingetty tty4
 5:2345:respawn:/sbin/mingetty tty5
 6:2345:respawn:/sbin/mingetty tty6
+#
+# warning: the line containing agetty will be overwritten by SuSEconfig
+# unless CHECK_INITTAB in /etc/rc.config is set to "no"
+#
 #S0:12345:respawn:/sbin/agetty -L 9600 ttyS0 vt102
 
 #

@@ -175,7 +175,7 @@ trap "rm -f $IS_RUNNING ; exit 1" 1 2 15
 # first things, that have to be done in 'normal' systems as well as in
 # 'demo mode' system.
 
-if test -z "$r" ; then
+if test -z "$r" -o "$FASTRUN" = "true" ; then
     SUB_SCRIPTS=""
     if test -n "$ONLY_MODULE" ; then
         if test -f /sbin/conf.d/SuSEconfig.$ONLY_MODULE ; then
@@ -184,7 +184,7 @@ if test -z "$r" ; then
             echo Module $ONLY_MODULE does not exist
         fi
     elif test "$FASTRUN" = "true" ; then
-        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.aaa_at_first /sbin/conf.d/SuSEconfig.pam /sbin/conf.d/SuSEconfig.sendmail /sbin/conf.d/SuSEconfig.ypclient"
+        SUB_SCRIPTS="$r/sbin/conf.d/SuSEconfig.aaa_at_first $r/sbin/conf.d/SuSEconfig.hostname $r/sbin/conf.d/SuSEconfig.inittab $r/sbin/conf.d/SuSEconfig.pam $r/sbin/conf.d/SuSEconfig.sendmail $r/sbin/conf.d/SuSEconfig.ypclient"
     else
         SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.*"
     fi
