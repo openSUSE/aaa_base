@@ -17,8 +17,6 @@ alias char-major-10-219 mwave
 #alias sound-slot-1 nvaudio
 #alias usb-interface usb-ohci
 
-alias char-major-254 pvrcore
-
 # IBM thinkpad tpctl
 # see /usr/share/doc/packages/tpctl/
 alias char-major-10-170 thinkpad

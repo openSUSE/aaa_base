@@ -402,6 +402,10 @@ if [ -n "$OLDMODCONF" ] ; then
 		KEEPOPTIONS="$KEEPOPTIONS${KEEPOPTIONS:+|}$target"
 	      fi ;;
 	  esac ;;
+      esac
+    done < $OLDMODCONF
+    while read field orig target ; do
+      case $field in
 	options)
 	  eval 'case $orig in
 	    '"$KEEPOPTIONS"')
@@ -427,6 +431,7 @@ if [ -n "$OLDMODCONF" ] ; then
       rm -f etc/modules.conf.aa.add
     fi
     echo "done"
+    mv $OLDMODCONF $OLDMODCONF.old
 fi
 ### import suse package build key to gpg keyring
 GPG_IMPORT_FAIL=false

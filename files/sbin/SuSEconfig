@@ -238,6 +238,9 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
                     break
                 fi
             done
+	    if test ! -s $MODULES_DIR/modules.dep ; then
+		rm -f $MODULES_DIR/modules.dep
+	    fi
             if test ! -e $MODULES_DIR/modules.dep ; then
                 /sbin/depmod -a > /dev/null 2>&1
             fi

@@ -142,6 +142,9 @@ case "$1" in
 	            break
 	        fi
 	    done
+	    if test ! -s $MODULES_DIR/modules.dep ; then
+		rm -f $MODULES_DIR/modules.dep
+	    fi
 	    if test ! -e $MODULES_DIR/modules.dep ; then
 	        echo -n Setting up $MODULES_DIR
 	        /sbin/depmod -a > /dev/null 2>&1
