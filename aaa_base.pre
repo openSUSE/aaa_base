@@ -58,12 +58,7 @@ fnet:x:49:14:FidoNet account:/var/spool/fnet:/bin/bash
 gdm:x:50:15:Gnome Display Manager daemon:/var/lib/gdm:/bin/bash
 oracle:x:59:54:Oracle database admin:/opt/oracle:/bin/bash
 mysql:x:60:2:MySQL database admin:/var/lib/mysql:/bin/false
-dpbox:x:61:56:DpBox account:/var/spool/dpbox:/bin/false
-vscan:x:65:65534:Vscan account:/var/spool/vscan:/bin/false
-wnn:x:66:100:Wnn system account:/var/lib/wnn:/bin/false
-perforce:x:68:60:Perfoce admin:/var/lib/perforce:/bin/false
 sapdb:x:69:61:SAPDB demo account:/var/opt/sapdb:/bin/bash
-db4web:x:70:100:DB4Web account:/opt/db4web:/bin/bash
 nobody:x:65534:65533:nobody:/var/lib/nobody:/bin/bash" \
  > var/adm/fillup-templates/passwd.aaa_base
 
@@ -84,7 +79,6 @@ shadow:x:15:root,gdm
 dialout:x:16:root
 audio:x:17:root
 mdom:x:28:
-dosemu:x:30:
 firewall:x:31:
 public:x:32:
 video:x:33:
@@ -95,9 +89,7 @@ modem:x:43:
 named:x:44:named
 oinstall:x:54:
 dba:x:55:oracle
-localham:x:56:dpbox
 logmastr:x:57:
-perforce:x:60:perforce
 sapdb:x:61:sapdb
 man:x:62:
 intermezzo:x:63:
