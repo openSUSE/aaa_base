@@ -26,7 +26,7 @@ complete -r _nullcommand &> /dev/null
 function _cd_ ()
 {
     local c=${COMP_WORDS[COMP_CWORD]}
-    local s g=0
+    local s g=0 x C
     local IFS='
 '
     shopt -q extglob && g=1
@@ -48,17 +48,13 @@ function _cd_ ()
     ~*/*)	COMPREPLY=($(compgen -d $s		-- "${c}"))	;;
     ~*)		COMPREPLY=($(compgen -u $s		-- "${c}"))	;;
     esac
-    case "$1" in
-    mkdir)
-	if test "$c" != "." -a "$c" != ".." ; then
-	    for x in $(compgen -f -S .d -- "${c%.}") ; do
-		if test -d "${x}" -o -d "${x%.d}" ; then
-		    continue
-		fi
-		COMPREPLY=(${COMPREPLY[@]} ${x})
-	    done
-	fi
-    esac
+
+    # Replace spaces in path names with `\ '
+    for x in ${COMPREPLY[@]} ; do
+	C=(${C[@]} ${x// /\\ })
+    done
+    COMPREPLY=(${C[@]})
+
     test $g -eq 0 && shopt -u extglob
 }
 
