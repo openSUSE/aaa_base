@@ -74,11 +74,12 @@ exec 0<> $CONSOLE 1>&0 2>&0
 # to tty1 if the system console is bound on VGA (tty0).
 #
 REDIRECT="`showconsole 2>/dev/null`"
+export REDIRECT
 if test $COLUMNS -gt 0 ; then
     # VGA
     if test "$RUNLEVEL" = "0" -o "$RUNLEVEL" = "6" ; then
 	case "$REDIRECT" in /dev/tty[1-9]*)
-	    export REDIRECT=/dev/tty1
+	    REDIRECT=/dev/tty1
 	    setconsole $REDIRECT < $CONSOLE
 	    set -- $(stty size < $REDIRECT)
 	    LINES=$1

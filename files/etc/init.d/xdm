@@ -54,6 +54,7 @@ case "$DISPLAYMANAGER" in
 			 DISPLAYMANAGER=/opt/kde3/bin/kdm ;;
     gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/bin/gdm ;;
     wdm|WDM)		 DISPLAYMANAGER=/usr/X11R6/bin/wdm ;;
+    console) exit 0 ;;
     *)			 DISPLAYMANAGER=/usr/X11R6/bin/xdm ;;
 esac
 test ! -x "$DISPLAYMANAGER" && DISPLAYMANAGER=/usr/X11R6/bin/xdm
