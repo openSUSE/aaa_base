@@ -9,8 +9,8 @@ alias parport_lowlevel    parport_pc
 # options parport_pc io=0x378,0x278  irq=none,none
 
 # Linux ACP modem (Mwave)
-alias char-major-10-219 mwavedd
-# options mwavedd dspirq=10 dspio=0x130 uartirq=3 uartio=0x2f8
+alias char-major-10-219 mwave
+# options mwave dspirq=10 dspio=0x130 uartirq=3 uartio=0x2f8
 
 # IBM thinkpad tpctl
 # see /usr/share/doc/packages/tpctl/
