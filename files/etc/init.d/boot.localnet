@@ -64,8 +64,9 @@ case "$1" in
 	#
 	# clean up
 	#
+	rm -f /var/lib/rpm/__db*
 	rm -rf /tmp/screens /tmp/uscreens /var/run/screens /var/run/uscreens 2>/dev/null
-	rm -f /var/lock/* /var/lock/*/* \
+	rm -f /var/lock/* /var/lock/subsys/* \
 	      /tmp/.X*lock /tmp/ssh-*/*agent* \
 	      /var/spool/uucp/LCK* /fsck_corrected_errors 2>/dev/null
 	if test -x /usr/bin/find -a -x /usr/bin/xargs ; then
