@@ -1,24 +1,14 @@
-#! /bin/bash
+#!/bin/bash
 # Copyright (c) 2000-2002 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
-# Author: Petr Mladek <pmladek@suse.cz>
+# Author: Sonja Krause-Harder <skh@suse.de> 
 
-# will the output be the help?
-SET_JAVA_PL_HELP="no"
-for arg in "$@" ; do
-  if [ "$arg" == "--help" ] ; then
-    SET_JAVA_PL_HELP="yes"
-  fi
-done
+echo -e \
+'################################################################\n'\
+'# setDefaultJava is no longer supported. Please install the    #\n'\
+'# package jpackage-utils and read the documentation in         #\n'\
+'# /usr/share/doc/packages/jpackage-utils for information about #\n'\
+'# the new java packages on SUSE Linux.                         #\n'\
+'################################################################'
 
-if [ "$SET_JAVA_PL_HELP" = "yes" ] ; then
-  # help printed, so print own help prefix
-  echo "This script sets the link /usr/lib/java which defines default java for"
-  echo "your computer. It sets additional links defined by the tag \"alternative\""
-  echo "in configuration files located in /etc/java. It is also able set another";
-  echo "compactibility links in the directory /usr/lib."
-  echo
-fi
-
-exec setJava.pl --encaps setDefaultJava link "$@"

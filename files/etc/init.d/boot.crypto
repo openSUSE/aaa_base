@@ -142,11 +142,17 @@ case "$1" in
 		    echo    "${warn}An error occured.  Maybe the wrong passphrase was"
 		    echo    "entered or the file system on $physdev is corrupted.${norm}"
 		    while true ; do
-			echo -n "${extd}Do you want to retry entering the passphrase ...?${norm}"
-			read -p " ([${extd}yes${norm}]/${extd}no${norm}) " prolo < $REDIRECT
+			echo    "${extd}Do you want to retry entering the passphrase or${norm}"
+			echo -n "${extd}do you want to continue with a file system check?${norm}"
+			read -p " ([${extd}yes${norm}]/${extd}no${norm}/${extd}check${norm}/) " prolo < $REDIRECT
 			case "$prolo" in
-			    [yY][eE][sS]|"")	continue 2 ;;
-			    [nN][oO]) doskip=1; break    2 ;;
+			    [yY][eE][sS]|[yY]|"")
+				continue 2 ;;
+			    [nN][oO]|[nN])
+				doskip=1
+				break    2 ;;
+			    [Cc][hH][eE][Cc][kK]|[Cc])
+				break    2 ;;
 			esac
 		    done
 		fi
