@@ -1,0 +1,22 @@
+--- insserv.8
++++ insserv.8	2001/08/13 12:30:48
+@@ -110,7 +110,7 @@
+ 
+  # All remote filesystems are mounted
+  # (in some cases /usr may be remote).
+- $remote_fs      $local_fs nfs xntpd
++ $remote_fs      $local_fs nfs
+ 
+  # System logger is operational
+  $syslog         syslog
+--- insserv.conf
++++ insserv.conf	2001/08/13 12:30:40
+@@ -18,7 +18,7 @@
+ # be remote. Most applications that care will probably require
+ # both $local_fs and $remote_fs)
+ #
+-$remote_fs	$local_fs nfs xntpd
++$remote_fs	$local_fs nfs
+ 
+ #
+ # System logger is operational
