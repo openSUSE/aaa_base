@@ -7,7 +7,7 @@
 # Configuration file for loadable modules; used by modprobe
 #
 # please add local modifications to modules.conf.local
-include modules.conf.local
+include /etc/modules.conf.local
 #
 ########################################################################
 # Aliases - specify your hardware
