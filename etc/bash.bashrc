@@ -234,7 +234,8 @@ case "$-" in
 
 	    complete -A function		function
 	    complete -A alias			alias unalias
-	    complete -A variable		export unset local readonly
+	    complete -A variable		unset local readonly
+	    complete -A variable -A file	export
 	    complete -A variable -A export	unset
 	    complete -A shopt			shopt
 	    complete -A setopt			set
