@@ -51,7 +51,7 @@ case "$1" in
 	# If we use a serial console, don't use the fsck progress bar
 	#
 	FSCK_PROGRESSBAR="-V"
-        [ -x /sbin/showconsole ] && [ `/sbin/showconsole` = "/dev/tty1" ] && FSCK_PROGRESSBAR="-C"
+        [ -x /sbin/showconsole ] && [ "`/sbin/showconsole`" = "/dev/tty1" ] && FSCK_PROGRESSBAR="-C"
 	#
 	# do fsck and start sulogin, if it fails.
 	#
