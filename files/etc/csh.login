@@ -2,6 +2,10 @@
 # System csh.login for tcsh,
 # (c) Werner Fink '93
 #
+# PLEASE DO NOT CHANGE /etc/csh.login. There are chances that your changes
+# will be lost during system upgrades. Instead use /etc/csh.login.local for
+# your local environment settings.
+#
 if ( -o /dev/$tty && ${?prompt} ) then
     # Console
     if ( ! ${?TERM} )           setenv TERM linux
@@ -67,7 +71,7 @@ endif
 cd
 #
 # An x session
-if (${?WINDOWID}) then
+if (${?TERM} && ${TERM} == "xterm") then
     if ( -f /etc/motd ) cat /etc/motd
     echo "Directory: $cwd"
     #

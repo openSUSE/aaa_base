@@ -1,12 +1,16 @@
 #
 # (c) System csh.cshrc for tcsh, Werner Fink '93
-#                       and  J"org Stadler '94
-# Zusamengetragen, modifiziert, ergaenzt ...
-# u.a. aus den Sourcen der tcsh und der man page und ...
+#                         and  J"org Stadler '94
 #
-# 1999/06/25:	<werner@suse.de>: move completion handling into
-#		 complete.tcsh and key bindings into bindkey.tcsh,
-#		 implement a bypass for experts.
+# This file sources /etc/profile.d/complete.tcsh and
+# /etc/profile.d/bindkey.tcsh used especially by tcsh.
+#
+# PLEASE DO NOT CHANGE /etc/csh.cshrc. There are chances that your changes
+# will be lost during system upgrades. Instead use /etc/csh.cshrc.local for
+# your local settings, favourite global aliases, VISUAL and EDITOR
+# variables, etc ...
+# USERS may write their own $HOME/.csh.expert to skip sourcing of
+# /etc/profile.d/complete.tcsh and most parts oft this file.
 #
 onintr -
 #
@@ -85,12 +89,7 @@ if ( -r /etc/SuSEconfig/csh.cshrc ) then
         source /etc/SuSEconfig/csh.cshrc
     endif
 endif
-#
-# Local configuration
-#
-if ( -r /etc/csh.cshrc.local ) then
-    source /etc/csh.cshrc.local
-endif
+
 #
 # source extensions for special packages
 #
@@ -143,7 +142,7 @@ set nostat=( /afs )
 set rmstar=1
 set savehist=( $history merge )
 set showdots=1
-set symlinks=expand
+set symlinks=ignore
 #
 unset autologout
 unset ignoreeof
@@ -183,17 +182,18 @@ unset noglob
 # Prompting and Xterm title
 #
 set prompt="%B%m%b %C2%# "
-alias cwdcmd '(echo "Directory: $cwd" > /dev/tty)'
-if ( -o /dev/$tty && -x /usr/bin/biff ) /usr/bin/biff y
-#
-if ( ${?WINDOWID} && ${?EMACS} == 0 ) then
-  alias cwdcmd '(echo -n "\033]2;$USER on ${HOST}: $cwd\007\033]1;$HOST\007" > /dev/tty)'
-  cd .
-endif
-#
-if ( -o /dev/$tty && ${?DISPLAY} ) then
-  if ( -x /usr/bin/biff ) /usr/bin/biff n
-  set prompt="%C2%# "
+if ( -o /dev/$tty ) then
+  alias cwdcmd '(echo "Directory: $cwd" > /dev/$tty)'
+  if ( -x /usr/bin/biff ) /usr/bin/biff y
+  # If we're running under X11
+  if ( ${?DISPLAY} ) then
+    if ( ${?TERM} && ${TERM} == "xterm" && ${?EMACS} == 0 ) then
+      alias cwdcmd '(echo -n "\033]2;$USER on ${HOST}: $cwd\007\033]1;$HOST\007" > /dev/$tty)'
+      cd .
+    endif
+    if ( -x /usr/bin/biff ) /usr/bin/biff n
+    set prompt="%C2%# "
+  endif
 endif
 #
 # tcsh help system does search for uncompressed helps file
@@ -235,6 +235,12 @@ endif
 #
 end:
     onintr
+
+#
+# Local configuration
+#
+if ( -r /etc/csh.cshrc.local ) source /etc/csh.cshrc.local
+
 #
 # csh.cshrc end here
 #
