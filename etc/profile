@@ -180,8 +180,8 @@ fi
 alias o='less'
 alias ..='cd ..'
 alias ...='cd ../..'
-alias +='pushd .'
 if [ -z "$KSH_VERSION" ]; then
+    alias -- +='pushd .'
     alias -- -='popd'
 fi
 alias rd=rmdir

@@ -1,7 +1,9 @@
 #
 # Source the /etc/profile
 #
+setopt nonomatch
 source /etc/profile
+unsetopt nonomatch
 #
 # zsh line editing
 #
@@ -15,6 +17,29 @@ else
     bindkey    "^[ "	magic-space
     bindkey    "^[!"	expand-history
 fi
+# environment
+HISTSIZE=500
+HISTFILE=${HOME}/.zsh_history
+SAVEHIST=200
+# Set/unset  shell options
+setopt   globdots correct pushdtohome cdablevars autolist
+setopt   correctall autocd recexact longlistjobs autoresume
+setopt   histignoredups pushdsilent appendhistory histexpiredupsfirst
+setopt   autopushd pushdminus extendedglob rcquotes mailwarning
+unsetopt bgnice autoparamslash
+# Setup some basic programmable completions.  To see more examples
+# of these, check Misc/compctl-examples in the zsh distribution.
+compctl -g '*(-/)' cd pushd
+compctl -g '*(/)' rmdir dircmp
+compctl -j -P % -x 's[-] p[1]' -k signals -- kill
+compctl -j -P % fg bg wait jobs disown
+compctl -A shift
+compctl -caF type whence which
+compctl -F unfunction
+compctl -a unalias
+compctl -v unset typeset declare vared readonly export integer
+compctl -e disable
+compctl -d enable
 #
 # Common standard keypad and cursor
 #
