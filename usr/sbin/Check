@@ -13,7 +13,7 @@ do_gzip() {
 			rm -f $input
 			ln -sf $link.gz $input.gz
 		else
-			gzip -9 $input
+			gzip -f9 $input
 		fi
 		ls -l $input.gz
 	done
