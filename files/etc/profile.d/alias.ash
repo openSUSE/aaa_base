@@ -57,8 +57,6 @@ o    () { less    ${1+"$@"}; }
 -    () { popd; }
 rd   () { rmdir ${1+"$@"}; }
 md   () { mkdir -p ${1+"$@"}; }
-unix2dos () { recode lat1..ibmpc ${1+"$@"}; }
-dos2unix () { recode ibmpc..lat1 ${1+"$@"}; }
 rehash   () { hash -r ${1+"$@"}; }
 beep     () { echo -n ' ' | tr ' ' '\007'; }
 unmount  () { echo "Error: Try the command: umount" 1>&2; return 1; }

@@ -183,8 +183,6 @@ case "$-" in
 	fi
 	alias rd=rmdir
 	alias md='mkdir -p'
-	alias unix2dos='recode lat1..ibmpc'
-	alias dos2unix='recode ibmpc..lat1'
 	alias which='type -p'
 	alias rehash='hash -r'
 	if test "$is" != "ksh" ; then
