@@ -593,7 +593,11 @@ if test -n "$NO_PROXY" ; then
 fi
 
 SAVEPATH=$PATH
+if test "$r" != ""; then
+PATH=$PATH:$r/usr/X11R6/bin:$r/opt/kde/bin:$r/opt/gnome/bin:$r/usr/openwin/bin
+else
 PATH=$PATH:/usr/X11R6/bin:/opt/kde/bin:/opt/gnome/bin:/usr/openwin/bin
+fi
 WINDOWMANAGER=`type -p $DEFAULT_WM`
 PATH=$SAVEPATH
 unset SAVEPATH
