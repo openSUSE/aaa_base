@@ -403,8 +403,10 @@ MAX_DAYS_IN_TMP=0
 TMP_DIRS_TO_CLEAR="/tmp /var/tmp"
 
 #
-# Set this to "yes" to clear (rm -rf) all directories in TMP_DIRS_TO_CLEAR
-# completely at bootup
+# "Set this to "yes" to entirely remove (rm -rf) all  files and subdirectories
+# from the temporary directories defined in TMP_DIRS_TO_CLEAR on bootup.
+# Please note, that this feature ignores OWNER_TO_KEEP_IN_TMP - all files will
+# be removed without exception."
 #
 CLEAR_TMP_DIRS_AT_BOOTUP="no"
 
