@@ -268,7 +268,7 @@ case "$todo" in
 	    *)
 		card=""
 		if test -n "$iface" ; then
-		    test "$iface" = "reject" && card="reject" || && card="dev $iface"
+		    test "$iface" = "reject" && card="reject" || card="dev $iface"
 		fi
 		case "$what" in
 		"")
