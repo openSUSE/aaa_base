@@ -42,3 +42,4 @@ etc/init.d/routed
 etc/init.d/serial
 etc/init.d/single
 etc/init.d/xdm
+sbin/quick_halt
