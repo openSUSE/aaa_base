@@ -3,7 +3,7 @@
 # mk_initrd - create the inital ramdisk images
 # usage: see below usage() or call with -h
 #
-# Copyright (C) 2002 SuSE Linux AG, Nuernberg, Germany
+# Copyright (C) 2003 SuSE Linux AG, Nuernberg, Germany
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -21,18 +21,21 @@
 # USA.
 
 
-# Version 1.42
+# Version 1.43
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 #         Susanne Oberhauser  <froh@suse.de>
 #         Bernhard Kaindl     <bk@suse.de>
 #
-# (c) 1999-2002 SuSE Linux AG
+# (c) 1999-2003 SuSE Linux AG
 # (c) 1999 Heiko Eiﬂfeldt bugfix, add module parameter passing
 # (c) 2000 Karsten Keil   option and kernel 2.4 support
 #
 # ChangeLog:
 #
+# 04/15/2003:   v1.43
+# - use $root_dir for /etc/fstab when getting rootfstype
+# - add -D <interface> option to make initrd use dhcp and nfs-root
 # 02/17/2003:   v1.42
 # - don't pack devices into initrd, ash will create them with
 #   createpartitiondevs
@@ -202,6 +205,7 @@ usage() {
 	  -s size          Add splash animation and bootscreen to initrd.
 	  -o file          Add OEM resize support.
 	  -t tmp_dir       tmp dir, defaults to "/tmp"
+	  -D interface     run dhcp on the specified interface
 
         root_dir:          the directory the root partition is mounted to
                            defaults to "/"
@@ -254,7 +258,7 @@ case $arch in
 	;;
 esac
 
-while getopts :hk:i:m:b:d:o:s:t: a ; do
+while getopts :hk:i:m:b:d:o:s:t:D: a ; do
 	case $a in
 		\:|\?)	case $OPTARG in
 				k)	echo "-k requires kernel list parameter"
@@ -272,6 +276,8 @@ while getopts :hk:i:m:b:d:o:s:t: a ; do
 				o)	echo "-o requires oem grow script"
 					;;
 				t)	echo "-t requires tmp dir parameter"
+					;;
+				D)	echo "-D requires dhcp interface parameter"
 					;;
 				*)  echo "Unknown option: -$OPTARG"
 					echo "Try mk_initrd -h"
@@ -294,6 +300,10 @@ while getopts :hk:i:m:b:d:o:s:t: a ; do
 		s)	splash=$OPTARG
 			;;
 		t)	tmp_dir=$OPTARG
+			;;
+		D)	dhcp_interface=$OPTARG
+			dhcp_interface=${dhcp_interface#/dev/}
+			use_pivot_root=1
 			;;
 		h)	usage
 			;;
@@ -468,11 +478,16 @@ if [ -z "$rootdev" ] ; then
   done < <( sed -e '/^[ 	]*#/d' < $root_dir/etc/fstab)
 else
   # get type from /etc/fstab or /proc/mounts (actually not needed)
-  x1=`cat /etc/fstab /proc/mounts 2>/dev/null | grep -E "$rootdev[[:space:]]" | tail -n 1`
+  x1=`cat $root_dir/etc/fstab /proc/mounts 2>/dev/null | grep -E "$rootdev[[:space:]]" | tail -n 1`
   rootfstype=`echo $x1 | cut -f 3 -d " "`
 fi
 
-test -z "$rootdev" && error 1 "no '/' mountpoint specified in $root_dir/etc/fstab."
+if test -z "$dhcp_interface" ; then
+    test -z "$rootdev" && error 1 "no '/' mountpoint specified in $root_dir/etc/fstab."
+else
+    rootdev=
+    rootfstype=nfs
+fi
 
 realrootdev="$rootdev"
 case "$rootdev" in
@@ -484,12 +499,9 @@ case "$rootdev" in
     ;;
 esac
 
-# no mk_initrd without a root device
-[ "$rootdev" ] || error 1 "usage: mk_initrd [root_dir]"
-
 # check if the root device is an lvm device
 root_lvm=0
-if [ -b "$realrootdev" ] ; then
+if [ -n "$realrootdev" -a -b "$realrootdev" ] ; then
     major=`ls -l "$realrootdev" | sed -e "s/.* \\([0-9]\+\\), *[0-9]\+.*/\\1/"`
     [ "$major" -ne 58 ] || root_lvm=1
 fi
@@ -561,9 +573,10 @@ test "$dasd_modules_conf" && do_dasd=1
 
 ###################################################################
 
-x=
-test "$rootdev" != "$realrootdev" && x=" ($realrootdev)"
-echo "using \"$rootdev\"$x as root device (mounted on \"$root_dir\" as \"$rootfstype\")"
+x="\"$rootdev\""
+test -n "$dhcp_interface" && x="nfs-root"
+test "$rootdev" != "$realrootdev" && x="$x ($realrootdev)"
+echo "using $x as root device (mounted on \"$root_dir\" as \"$rootfstype\")"
 
 # get INITRD_MODULES as set by YaST
 [ -f "$root_dir/etc/sysconfig/kernel" ] && . $root_dir/etc/sysconfig/kernel
@@ -803,7 +816,19 @@ for k in $kernels ; do
       echo " - pivot root support"
       cp -a $root_dir/sbin/pivot_root $tmp_mnt/bin
       cp -a $root_dir/bin/cat $tmp_mnt/bin
+      echo '#! /bin/sh' > $tmp_mnt/bin/init
+      echo 'echo initrd failed, goodbye...' >> $tmp_mnt/bin/init
+      chmod 755 $tmp_mnt/bin/init
       mkdir -p $tmp_mnt/mnt
+    fi
+
+    if [ -n "$dhcp_interface" ] ; then
+      echo " - using dhcp on $dhcp_interface"
+      cp -a $root_dir/sbin/dhcpcd $tmp_mnt/bin
+      cp -a $root_dir/usr/bin/killall $tmp_mnt/bin
+      cp -a $root_dir/$lib/libnss_dns.so.* $tmp_mnt/$lib
+      cp -a $root_dir/$lib/libresolv.so.* $tmp_mnt/$lib
+      mkdir -p $tmp_mnt/var/lib/dhcpcd
     fi
 
     if [ "$has_jfs" ] ; then
@@ -948,11 +973,68 @@ umount -n /proc
 EOF
     fi
 
-    if [ "$has_jfs" ] ; then
+    if [ "$dhcp_interface" ] ; then
+	cat >>$lx_rc <<EOF
+mount -n -tproc none /proc
+root=
+for o in \`cat /proc/cmdline\` ; do
+  case \$o in
+    root=*:*) root="\$o" ;;
+    root=*) root="\$o" ; no_dhcp=true ;;
+  esac
+done
+# run dhcp
+if test -z "\$no_dhcp" ; then
+    dhcp_mode=1
+    rootdev=
+    # ifconfig lo 127.0.0.1 netmask 255.0.0.0 broadcast 127.255.255.255 up
+    # portmap
+    echo "running dhcpcd on interface $dhcp_interface"
+    dhcpcd -R -Y -N -t 100000000 $dhcp_interface
+    test -s /var/lib/dhcpcd/dhcpcd-$dhcp_interface.info || {
+	echo "no response from dhcp server."
+	echo 256 > /proc/sys/kernel/real-root-dev
+	exit 0
+    }
+    . /var/lib/dhcpcd/dhcpcd-$dhcp_interface.info
+    killall -q -9 dhcpcd
+    if test -n "\$DNS" ; then
+	oifs="\$IFS"
+	IFS=","
+	for ns in \$DNS ; do
+	    echo "nameserver \$ns" >> /etc/resolv.conf
+	done
+	IFS="\$oifs"
+	test -n "\$DOMAIN" && echo "search \$DOMAIN" >> /etc/resolv.conf
+	echo 'hosts: dns' > /etc/nsswitch.conf
+    fi
+fi
+if test -z "\$root" ; then
+    if test -z "\$ROOTPATH" ; then
+	echo "no root= kernel option given and no rootpath set by the dhcp server."
+	echo 256 > /proc/sys/kernel/real-root-dev
+	exit 0
+    fi
+    if test -n "\$DHCPSIADDR" ; then
+	rootdev="\$DHCPSIADDR:\$ROOTPATH"
+    elif test -n "\$DHCPSNAME" ; then
+	rootdev="\$DHCPSNAME:\$ROOTPATH"
+    else
+	echo "no root= kernel option given and no root server set by the dhcp server."
+	echo 256 > /proc/sys/kernel/real-root-dev
+	exit 0
+    fi
+fi
+umount -n /proc
+
+EOF
+    fi
+
+    if [ "$has_jfs" -a -n "$rootdev" ] ; then
 	cat >>$lx_rc <<EOF
 # check filesystem if it is of type jfs
 mount -n -tproc none /proc
-fsck -t jfs "$rootdev"
+test -z "\$dhcp_mode" && fsck -t jfs "$rootdev"
 umount -n /proc
 
 EOF
@@ -962,20 +1044,22 @@ EOF
 	cat >>$lx_rc <<EOF
 # mount root with pivot_root call
 opt="-oro"
-rootdev="$rootdev"
+test -n "\$dhcp_mode" && opt=-oro,nolock
+test -z "\$dhcp_mode" && rootdev="$rootdev"
 root=
 nopivot=
 mount -n -tproc none /proc
 # bug in some kernels, need cat
 for o in \`cat /proc/cmdline\` ; do
   test "\$o" = rw && opt=
+  test "\$o" = rw -a -n "\$dhcp_mode" && opt=-onolock
   case \$o in
     root=ROOT=*) root="\$o" ;;
     root=LABEL=*) root="\$o" ;;
-    root=*) nopivot=1
+    root=*) root="\$o" ; nopivot=1 ;;
   esac
 done
-if test -n "\$nopivot" ; then
+if test -n "\$nopivot" -a -z "\$dhcp_mode" ; then
   umount -n /proc
   exit 0
 fi
