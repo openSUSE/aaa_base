@@ -2,10 +2,7 @@
 
 # Script to create an initial ram disk.
 #
-# usage:
-# mk_initrd [root_dir]
-#
-#   root_dir: the directory the root partition is mounted to (defaults to "/")
+# usage: see below usage() or call with -h
 #
 #   As an alternative, you can specify the root device via the environment
 #   variable rootdev (e.g. "rootdev=/dev/hda mk_initrd").
@@ -13,13 +10,18 @@
 # on errors:
 #   exit code > 0
 #
-# Version 1.09
+# Version 1.10
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
 # (c) 1999 Heiko Eiﬂfeldt bugfix, add module parameter passing
+# (c) 2000 Karsten Keil   option and kernel 2.4 support
 #
 # ChangeLog:
+#
+# 18/8/2000:    v1.10 Karsten Keil <kkeil@suse.de>
+#  - support for 2.4 kernel versions
+#  - optional parameter for easy use with other kernel versions
 #
 #  6/7/2000:	v1.09
 #    - started log
@@ -27,20 +29,111 @@
 #    - increased initrd size to 2000k
 #
 
+#
+# Print usage and exit
+#
+usage() {
+	cat<<EOM
+      	mk_initrd creates initial ramdisk images for booting linux
+                  with enviroments which need loading modules before
+                  mounting the root device (e.g SCSI controller)
+
+        mk_initrd [options] [root_dir]
+
+        options:
+          -h               This Text.
+          -k "kernel list" list of kernel images for which initrd files
+                           are created (relativ to boot_dir)
+                           defaults to "vmlinuz vmlinuz.suse"
+          -i "initrd list" list of file names (relativ to boot_dir) for
+                           the initrd; position have match to "kernel list"
+                           defaults to "initrd initrd.suse"
+          -m "module list" modules to include in initrd, defaults to
+                           INITRD_MODULES variable in /etc/rc.config
+          -b boot_dir      boot dir, defaults to "/boot"
+          -d root_device   root device, defaults to the device from which
+                           the root_dir is mounted; overwrites the rootdev
+                           enviroment variable if set
+
+        root_dir:          the directory the root partition is mounted to
+                           defaults to "/" 
+EOM
+	exit
+}
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# general configurable parameters
+
+kernels=""
+initrds=""
+modules=""
+boot_dir=""
+
+while getopts :hk:i:m:b:d: a ; do
+	case $a in
+		\:|\?)	case $OPTARG in
+				k)	echo "-k requires kernel list parameter"
+					;;
+				i)	echo "-i requires initrd list parameter"
+					;;
+				m)	echo "-m requires module list parameter"
+					;;
+				b)	echo "-b requires boot dir parameter"
+					;;
+				d)	echo "-d requires root device parameter"
+					;;
+				*)  echo "Unknown option: -$OPTARG"
+					echo "Try mk_initrd -h"
+					;;
+			esac
+			exit 1
+			;;
+		k)	kernels=$OPTARG
+			;;
+		i)	initrds=$OPTARG
+			;;
+		m)	modules=$OPTARG
+			;;
+		b)	boot_dir=$OPTARG
+			;;
+		d)	rootdev=$OPTARG
+			;;
+		h)	usage
+			;;
+	esac
+done
+shift `expr $OPTIND - 1`
+
+if [ -n "$kernels" ] ; then
+   if [ -z "$initrds" ] ; then
+      echo "you have to specify -k and -i or none"
+      exit 1
+   fi
+fi
+
+if [ -z "$kernels" ] ; then
+   if [ -n "$initrds" ] ; then
+      echo "you have to specify -k and -i or none"
+      exit 1
+   fi
+fi
 
 # the kernel images to use; must be in $boot_dir
-kernels="vmlinuz vmlinuz.suse"
+[ -z "$kernels" ] && kernels="vmlinuz vmlinuz.suse"
 
 # initial ram disks (corresponding to $kernels); dto. in $boot_dir
-initrds="initrd initrd.suse"
+[ -z "$initrds" ] && initrds="initrd initrd.suse"
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# adapt these only if needed
+kc=`echo $kernels |wc -w`
+ic=`echo $initrds |wc -w`
+if [ $kc != $ic ] ; then
+    echo "item count in -k and -i lists have to match"
+    exit 1
+fi
+
 
 # *full* paths
-boot_dir=/boot
+[ -z "$boot_dir" ] && boot_dir=/boot
+
 static_shell=/bin/ash.static
 static_insmod=/sbin/insmod.static
 
@@ -68,9 +161,7 @@ error () {
   exit $1
 }
 
-[ "$1" = -r ] && shift
-
-root_dir="$1"
+[ -n "$1" ] && root_dir="$1"
 [ "$root_dir" ] || root_dir=/
 
 tmp_initrd=$root_dir/tmp/initrd$$
@@ -93,10 +184,11 @@ fi
 [ "$rootdev" ] || error 1 "usage: mk_initrd [root_dir]"
 
 echo "using \"$rootdev\" as root device (mounted on \"$root_dir\")"
+echo "using \"$root_dir$boot_dir\" as boot directory"
 
 [ -f "$root_dir/etc/rc.config" ] && . $root_dir/etc/rc.config
 
-modules="$INITRD_MODULES"
+[ -z "$modules" ] && modules="$INITRD_MODULES"
 
 ( cd $root_dir$boot_dir ; rm -f $initrds )
 [ "$modules" ] || error 0 "no initrd required"
@@ -117,7 +209,7 @@ for k in $kernels ; do
     echo
     echo "creating initrd \"$ii\" for kernel \"$kk\" ($vv)"
 
-    [ -d "$root_dir/lib/modules/$vv/misc" ] || error 2 "no version \"$vv\" modules found"
+    [ -d "$root_dir/lib/modules/$vv" ] || error 2 "no version \"$vv\" modules found"
 
     mkdir $tmp_mnt
 
