@@ -59,7 +59,6 @@ gdm:x:50:15:Gnome Display Manager daemon:/var/lib/gdm:/bin/bash
 oracle:x:59:54:Oracle database admin:/opt/oracle:/bin/bash
 mysql:x:60:2:MySQL database admin:/var/lib/mysql:/bin/false
 dpbox:x:61:56:DpBox account:/var/spool/dpbox:/bin/false
-zope:x:64:2:Zope daemon:/var/lib/zope:/bin/false
 vscan:x:65:65534:Vscan account:/var/spool/vscan:/bin/false
 wnn:x:66:100:Wnn system account:/var/lib/wnn:/bin/false
 pop:x:67:100:POP admin:/var/lib/pop:/bin/false

@@ -1,12 +1,12 @@
 .\"
-.\" Copyright 2000,2001 Werner Fink, 2000,2001 SuSE GmbH Nuernberg, Germany.
+.\" Copyright 2000-2002 Werner Fink, 2000-2002 SuSE GmbH Nuernberg, Germany.
 .\"
 .\" This program is free software; you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
 .\" the Free Software Foundation; either version 2 of the License, or
 .\" (at your option) any later version.
 .\"
-.TH INSSERV 8 "Dec 14, 2001" "Version 0.94" "The SuSE boot concept"
+.TH INSSERV 8 "May 27, 2002" "Version 0.99" "The SuSE boot concept"
 .UC 8
 .OS SuSE Linux
 .SH NAME
@@ -15,6 +15,7 @@ Insserv \- Enable an installed system init script
 .\"
 .B insserv
 .RB [ -d ]
+.RB [ -f ]
 .RI [[ / ] path/to/init.d/ ] script \ ...
 .PP
 .B insserv
@@ -23,7 +24,11 @@ Insserv \- Enable an installed system init script
 .B insserv
 .B -r
 .RB [ -d ]
+.RB [ -f ]
 .RI [[ / ] path/to/init.d/ ] script \ ...
+.PP
+.B insserv
+.B -h
 .PP
 .RB /usr/lib/lsb/install_initd
 .RI [[ / ] path/to/init.d/script ]
@@ -41,6 +46,8 @@ by reading the comment header of the script, e.g.:
  # Provides:       boot_facility_1 [ boot_facility_2 ...]
  # Required-Start: boot_facility_1 [ boot_facility_2 ...]
  # Required-Stop:  boot_facility_1 [ boot_facility_2 ...]
+ # X-SuSE-Should-Start: boot_facility_1 [ boot_facility_2 ...]
+ # X-SuSE-Should-Stop:  boot_facility_1 [ boot_facility_2 ...]
  # Default-Start:  run_level_1 [ run_level_2 ...]
  # Default-Stop:   run_level_1 [ run_level_2 ...]
  # Description:    multiline_description
@@ -50,7 +57,9 @@ by reading the comment header of the script, e.g.:
 .sp 1
 and calculating the dependencies between all scripts.
 Please note, that the
-.B Required-Stop
+.BR Required-Stop,
+.\" .BR Should-Stop ,
+.BR X-SuSE-Should-Stop ,
 and
 .B Default-Stop
 are ignored in SuSE Linux, because the SuSE boot script concept
@@ -121,12 +130,18 @@ Here is an example for
 Currently there is only two options for
 .BR insserv .
 .TP
-.B \-r
+.BR \-r ,\  \-\-remove
 Remove the listed scripts from all runlevels.
 .TP
-.B \-d
+.BR \-d ,\  \-\-default
 Use default runlevels a defined in the scripts.
 This may restore an edited runlevel link scheme.
+.TP
+.BR \-f ,\  \-\-force
+Ignore if a required service is missed.
+.TP
+.BR \-h ,\  \-\-help
+Print out short usage message.
 .PP
 But you may use the argument syntax described in the
 following section.
@@ -195,7 +210,7 @@ required by the Linux Standard Base Specification (LSB).
 .BR checkproc (8),
 .BR killproc (8),
 .SH COPYRIGHT
-2000,2001 Werner Fink,
-2000,2001 SuSE GmbH Nuernberg, Germany.
+2000\-2002 Werner Fink,
+2000\-2002 SuSE GmbH Nuernberg, Germany.
 .SH AUTHOR
 Werner Fink <feedback@suse.de>

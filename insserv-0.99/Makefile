@@ -7,11 +7,11 @@
 INITDIR  =	/etc/init.d
 #INITDIR  =	/sbin/init.d
 INSCONF  =	/etc/insserv.conf
-#DEBUG	 =	-DDEBUG=1
+DEBUG	 =	-DDEBUG=1
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.97
+VERSION	 =	0.99
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #
@@ -22,7 +22,7 @@ DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 # egcs used with -O2 includes -fno-force-mem which is/was buggy (1998/10/08)
 #
 ifdef RPM_OPT_FLAGS
-	  COPTS = $(RPM_OPT_FLAGS)
+	  COPTS = -g $(RPM_OPT_FLAGS)
 else
 ifeq ($(ARCH),i386)
 	  COPTS = -O2 -mcpu=i486 -fomit-frame-pointer -fschedule-insns2

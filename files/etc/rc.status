@@ -210,6 +210,30 @@ function rc_exit ()
     exit $_rc_status_all
 }
 
+function rc_confirm()
+{
+    local timeout="30"
+    local answer=""
+    local ret=0
+
+    case "$1" in
+    -t) shift; timeout=$1; shift ;;
+    esac
+    local message="$@, (Y)es/(N)o/(C)ontinue? [y] "
+    : ${REDIRECT:=/dev/tty}
+
+    while true ; do
+	read -t ${timeout} -n 1 -p "${message}" answer < $REDIRECT > $REDIRECT 2>&1
+	case "$answer" in
+	[yY]|"") ret=0; break ;;
+	[nN])	 ret=1; break ;;
+	[cC])	 ret=2; break ;;
+	*)	 echo; continue
+	esac
+    done
+    return $ret
+}
+
 function rc_splash()
 {
     test "$BOOT_SPLASH" != "no" && test "$_rc_splash" -eq 1 && /bin/splash "$1"

@@ -3,8 +3,8 @@
 # Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
 # All rights reserved.
 #
-# Author: Ruediger Oertel <ro@suse.de>, 1996-2000
-#         Werner Fink <werner@suse.de>, 1996-2001
+# Author: Ruediger Oertel <ro@suse.de>, 1996-2002
+#         Werner Fink <werner@suse.de>, 1996-2002
 #         Burchard Steinbild <feedback@suse.de>, 1996-2000
 #         Florian La Roche <feedback@suse.de>, 1996
 #
@@ -14,6 +14,7 @@
 #
 
 . /etc/rc.status
+. /etc/sysconfig/boot
 echo "Running $0"
 
 rc_reset
@@ -27,20 +28,58 @@ mount -n -t devpts $optpts devpts /dev/pts
 rc_status -v1 -r
 
 #
+# Save old terminal settings and set -nl to avoid staircase
+# effect, do not lock scrolling, and avoid break characters.
+#
+otty=$(stty -g)
+if test "$FLOW_CONTROL" = "yes" ; then
+    stty -nl  ixon ignbrk -brkint 0>&1
+else
+    stty -nl -ixon ignbrk -brkint 0>&1
+fi
+
+#
+# Should we ask for interactive boot mode
+#
+DO_CONFIRM=""
+read -t 2 check < /proc/cmdline 2> /dev/null
+case "$check" in
+    *confirm*) DO_CONFIRM=yes ;;
+esac
+if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
+    echo -en "${extd}Enter (I)nteractive startup mode?${norm}"
+    read -t 30 -n 1 -p " [${extd}I${norm}] " answer
+    case "$anser" in
+    [iI]) DO_CONFIRM=yes ;;
+    *)    DO_CONFIRM=    ;;
+    esac
+    unset answer
+fi
+export DO_CONFIRM
+
+#
 # Start blogd, requires /proc and /dev/pts.
 # Export the real device in variable REDIRECT.
 #
 REDIRECT="`showconsole 2>/dev/null`"
-test -x /sbin/blogd && /sbin/blogd $REDIRECT
+test -x /sbin/blogd -a -n "$REDIRECT" && /sbin/blogd $REDIRECT
+: ${REDIRECT:=/dev/tty}
 export REDIRECT
 
-
 #
-# start bootup client scripts.
+# Start bootup client scripts.
 #
 if test -d /etc/init.d/boot.d/ ; then
     for i in /etc/init.d/boot.d/S*; do
 	test -f $i || continue
+	if test "$DO_CONFIRM" = "yes" ; then
+	    rc_confirm -t 30 "Start bootup script ${i##*/S[0-9][0-9]}" < $REDIRECT > $REDIRECT 2>&1
+	    case "$?" in
+	    0) true     ;;
+	    1) continue ;;
+	    2) DO_CONFIRM=""
+	    esac
+	fi
 	if test -x "$i" ; then
 	    # Active boot scripts, should have their own messages
 	    $i start
@@ -53,10 +92,8 @@ if test -d /etc/init.d/boot.d/ ; then
     done
 fi
 
-
-
 #
-# start user defined bootup script.
+# Start user defined bootup script.
 #
 if test -f /etc/init.d/boot.local ; then
         echo "Running /etc/init.d/boot.local"
@@ -68,6 +105,18 @@ fi
 # Stop blogd
 #
 test -x /sbin/blogd && killproc -QUIT /sbin/blogd
+
+#
+# Remember for master resource script
+#
+if test "$DO_CONFIRM" = "yes" ; then
+    touch /var/run/do_confirm
+fi
+
+#
+# Restore old terminal settings
+#
+stty $otty 0>&1
 
 #
 # Let YaST2 finish its installation, if you installed with YaST2

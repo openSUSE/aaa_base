@@ -140,7 +140,6 @@ static void ln_sf(const char * isprovided, const char * itrequires)
 
     if (!dir->link.target) {
 	dir->link.target = target;
-	insert(l_start, l_start->prev);
 	goto out;
     }
 
@@ -192,8 +191,10 @@ static void __follow (dir_t * dir, dir_t * skip, int level, int offset)
     register int deep = level;	/* Link depth, maybe we're called recursive */
     static boolean warned = false;
 
+#ifdef SYSFAC_NOT_EXPANDED
     if (*dir->name == '$') 	/* Dirty hack to decrease the order caused by */
 	offset--;		/* system facilities, may fail */
+#endif
 
     for (tmp = dir; tmp; tmp = tmp->link.target) {
 	list_t * dent, * l_start = &(tmp->link.l_list);
@@ -330,17 +331,17 @@ void follow_all()
 /*
  * For debuging: show all services
  */
-#if defined(DEBUG) && (DEBUG > 0)
+#if 1 // defined(DEBUG) && (DEBUG > 0)
 void show_all()
 {
     list_t *tmp;
     for (tmp = d_start->next; tmp != d_start; tmp = tmp->next) {
 	dir_t * dir = getdir(tmp);
 	if (dir->script)
-	    printf("%.2d %s 0x%.2x (%s)\n",
+	    fprintf(stderr, "%.2d %s 0x%.2x (%s)\n",
 		   dir->order, dir->script, dir->lvl, dir->name);
 	else
-	    printf("%.2d %s 0x%.2x (%%%s)\n",
+	    fprintf(stderr, "%.2d %s 0x%.2x (%%%s)\n",
 		   dir->order, dir->name, dir->lvl, *dir->name == '$' ? "system" : "guessed");
     }
 }

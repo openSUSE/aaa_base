@@ -4,7 +4,7 @@
 # All rights reserved.
 #
 # Author: Florian La Roche <feedback@suse.de> 1996
-#	  Werner Fink <werner@suse.de> 1994-99,2000-2001
+#	  Werner Fink <werner@suse.de> 1994-99,2000-2002
 #
 # /etc/init.d/rc   --    The Master Resource Control Script
 #
@@ -27,24 +27,61 @@ test "$PREVLEVEL" = "$RUNLEVEL" && exit 0
 test "$PREVLEVEL" = "1" -a "$RUNLEVEL" = "S" && exit 0
 
 #
-# Coming from runlevel S we have to check if the system was
-# booted cold into single user mode and call /etc/init.d/boot.  
+# Up from runlevel N we may want to run in confirm mode
 #
-if test "$PREVLEVEL" = "S" -a -x /sbin/runlevel ; then
+if test "$PREVLEVEL" = "N" ; then
+    read -t 2 check < /proc/cmdline 2> /dev/null
+    case "$check" in
+	*confirm*) DO_CONFIRM=yes ;;
+    esac
+    test -e /var/run/do_confirm && DO_CONFIRM=yes
+    rm -f   /var/run/do_confirm
+    export DO_CONFIRM
+fi
+
+#
+# Up from runlevel S we have to check if the system was
+# cold booted into single user mode and call /etc/init.d/boot.
+#
+if test "$PREVLEVEL" = "S" ; then
     # Double check
-    utmp=$(LC_ALL=POSIX /sbin/runlevel 2> /dev/null)
-    dpts="no"
-    proc="no"
-    if test -e /proc/mounts ; then
-	proc="yes"
-	while read des fs type rest; do
-	    case "$fs" in /dev/pts) dpts="yes" ;; esac
-	done < /proc/mounts
-    fi
-    unset des fs type rest
-    if test "$utmp" = "unknown" -a "$dpts" = "no" ; then
-	test "$proc" = "yes" && umount -n -t proc
+    single="no"
+    hvname="yes"
+    #
+    check=""
+    test -e /proc/cmdline || mount -n -t proc proc /proc
+    read -t 2 check < /proc/cmdline 2> /dev/null
+    case "$check" in
+	*single*)   single="yes"
+    esac
+    read -t 2 check < /proc/sys/kernel/hostname 2> /dev/null
+    case "$check" in
+	unknown|"") hvname="no"
+    esac
+    unset check
+
+    if test "$single" = "yes" -a "$hvname" = "no" ; then
+	# This is the case if we're up from cold boot
+	echo "Sending all processes the TERM signal..."
+	killall5 -15
+	sleep 3
+	echo "Sending all processes the KILL signal..."
+	killall5 -9
+	cat /proc/mounts | while read des fs type rest; do
+	    case "$type" in
+		proc)	continue ;;
+		nfs)	continue ;;
+		smbfs)	continue ;;
+	    esac
+	    umount -n -r $fs
+	done
+	cat /proc/swaps | while read des rest ; do
+	    test "$des" = "Filename" && continue
+	    swapoff $des &> /dev/null
+	done
+	umount -n -t proc /proc
 	/etc/init.d/boot
+	exit 0
     fi
 fi
 
@@ -99,21 +136,31 @@ fi
 #
 
 . /etc/rc.status
+. /etc/sysconfig/boot
 
 #
 # Save old terminal settings and set -nl to avoid staircase
 # effect, do not lock scrolling, and avoid break characters.
 #
 otty=$(stty -g)
-stty -nl -ixon ignbrk -brkint 0>&1
+if test "$FLOW_CONTROL" = "yes" ; then
+    stty -nl  ixon ignbrk -brkint 0>&1
+else
+    stty -nl -ixon ignbrk -brkint 0>&1
+fi
 
 #
 # Start blogd if not in single user mode
 #
-if test "$RUNLEVEL" != "S" -a -x /sbin/blogd ; then
+if test "$RUNLEVEL" != "S" -a -x /sbin/blogd -a -n "$REDIRECT" ; then
     /sbin/blogd $REDIRECT
 fi
+: ${REDIRECT:=/dev/tty}
 
+if test "$DO_CONFIRM" = "yes" ; then
+    echo -n "Master Resource Control: "
+    echo -e "${stat}${extd}Interactive startup${norm}"
+fi
 echo -n "Master Resource Control: "
 echo -n "previous runlevel: $PREVLEVEL, "
 echo -e "switching to runlevel: ${stat}${extd}${RUNLEVEL}${norm}"
@@ -169,6 +216,15 @@ for i in $runrc/S${rex}*; do
     set -- $prerc/K$rex$service
     test $# -gt 1 && echo -e "$attn$prerc/: more than one link for service $service$norm"
     test -x "$1"  && continue
+
+    if test "$DO_CONFIRM" = "yes" ; then
+	rc_confirm -t 30 "Start service $service"
+	case "$?" in
+	0) true     ;;
+	1) continue ;;
+	2) DO_CONFIRM=""
+	esac
+    fi
 
     # send information to splash icon viewer.
     rc_splash  "$i start"

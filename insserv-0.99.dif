@@ -1,0 +1,11 @@
+--- insserv.conf
++++ insserv.conf	2002/06/03 21:38:42
+@@ -1,7 +1,7 @@
+ #
+ # All local filesystems are mounted (done during boot phase)
+ #
+-$local_fs	boot
++$local_fs	boot.localfs
+ 
+ #
+ # Low level networking (ethernet card)

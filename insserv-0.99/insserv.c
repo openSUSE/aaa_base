@@ -23,6 +23,7 @@
 #include <regex.h>
 #include <errno.h>
 #include <limits.h>
+#include <getopt.h>
 #include "listing.h"
 
 #ifndef  INITDIR
@@ -39,21 +40,24 @@
 #define VALUE		":[[:blank:]]*([[:print:][:blank:]]*)"
 /* The second substring contains our value (the first is all) */
 #define SUBNUM		2
-#define START		"[-_]?start"
-#define STOP		"[-_]?stop"
+#define START		"[-_]+start"
+#define STOP		"[-_]+stop"
 
 /* The main regular search expressions */
 #define PROVIDES	COMM "provides" VALUE
 #define REQUIRED	COMM "required"
+#define SHOULD		COMM "(x[-_]+suse)?should"
 #define DEFAULT		COMM "default"
 #define REQUIRED_START  REQUIRED START VALUE
 #define REQUIRED_STOP	REQUIRED STOP  VALUE
+#define SHOULD_START	SHOULD   START VALUE
+#define SHOULD_STOP	SHOULD   STOP  VALUE
 #define DEFAULT_START	DEFAULT  START VALUE
 #define DEFAULT_STOP	DEFAULT  STOP  VALUE
 #define DESCRIPTION	COMM "description" VALUE
 
 /* System facility search within /etc/insserv.conf */
-#define EQSIGN		"([[:blank:]]?[=:]?[[:blank:]]?|[[:blank:]]+)"
+#define EQSIGN		"([[:blank:]]?[=:]+[[:blank:]]?|[[:blank:]]+)"
 #define CONFLINE	"^(\\$[a-z0-9_-]+)" EQSIGN "([[:print:][:blank:]]*)"
 #define SUBCONF		2
 #define SUBCONFNUM	4
@@ -66,6 +70,8 @@ typedef struct lsb_struct {
     char *provides;
     char *required_start;
     char *required_stop;
+    char *should_start;
+    char *should_stop;
     char *default_start;
     char *default_stop;
     char *description;
@@ -122,12 +128,34 @@ static void popd(void)
 out:
 }
 
+/*
+ * Linked list of system facilities services and their replacment
+ */
+typedef struct faci {
+    list_t	 list;
+    char	*name;
+    char	*repl;
+} faci_t;
+#define getfaci(arg)	list_entry((arg), struct faci, list)
+
+static list_t sysfaci = { &(sysfaci), &(sysfaci) }, *sysfaci_start = &(sysfaci);
 
 /*
- * Linked list to hold current service structure
+ * Linked list of required services of a service
+ */
+typedef struct req_serv {
+    list_t	 list;
+    char       * serv;
+} req_t;
+#define getreq(arg)	list_entry((arg), struct req_serv, list)
+
+/*
+ * Linked list to hold hold information of services
  */
 typedef struct serv_struct {
     list_t	   id;
+    req_t         req;
+    req_t         shd;
     char	order;
     char       * name;
     unsigned int lvls;
@@ -135,7 +163,7 @@ typedef struct serv_struct {
     unsigned int lvlk;
 #endif
 } serv_t;
-#define getserv(list)	list_entry((list), struct serv_struct, id)
+#define getserv(arg)	list_entry((arg), struct serv_struct, id)
 
 static list_t serv = { &(serv), &(serv) }, *serv_start = &(serv);
 
@@ -153,7 +181,15 @@ static serv_t * addserv(const char * serv)
 
     this = (serv_t *)malloc(sizeof(serv_t));
     if (this) {
+	list_t * req_start = &(this->req.list);
+	list_t * shd_start = &(this->shd.list);
 	insert(&(this->id), serv_start->prev);
+	req_start->next = req_start;
+	req_start->prev = req_start;
+	shd_start->next = shd_start;
+	shd_start->prev = shd_start;
+	this->req.serv = NULL;
+	this->shd.serv = NULL;
 	this->name  = xstrdup(serv);
 	this->order = 0;
 	this->lvls  = 0;
@@ -183,6 +219,104 @@ out:
     return ret;
 }
 
+/*
+ * Expand requested services
+ */
+static void expandreq(const char *name, req_t * cur)
+{
+    list_t * req_start = &(cur->list);
+    list_t * ptr;
+
+    if (cur->serv)
+	link(name, cur->serv);
+
+    for (ptr = req_start->next; ptr != req_start; ptr = ptr->next) {
+	char * needed = getreq(ptr)->serv;
+	if (needed)
+	    requiresv(name, needed);
+    }
+}
+
+/*
+ * Remember required services
+ */
+static void rememberreq(serv_t *serv, req_t * cur, char * required)
+{
+    list_t * req_start = &(cur->list);
+    char * token, * tmp = strdupa(required);
+
+    while ((token = strsep(&tmp, delimeter))) {
+	req_t * this = NULL;
+
+	if (!*token)
+	    continue;
+
+	if (!cur->serv) {
+	    this = cur;
+	} else {
+	    this = (req_t *)malloc(sizeof(req_t)); 
+	    if (!this) 
+		error("%s", strerror(errno));
+	    insert(&(this->list), req_start->prev);
+	    this->serv = NULL;
+	}
+
+	if (*token == '$') {
+	    list_t * ptr;
+	    for (ptr = sysfaci_start->next; ptr != sysfaci_start; ptr = ptr->next) {
+		if (!strcmp(token, getfaci(ptr)->name)) {
+		    rememberreq(NULL, this, getfaci(ptr)->repl);
+		    break;
+		}
+	    }
+	    continue;
+	}
+	this->serv = xstrdup(token);
+    }
+
+    if (serv)
+	expandreq(serv->name, cur);
+}
+
+/*
+ * Check requested services
+ */
+static boolean chkrequired(const char * name)
+{
+    serv_t * serv = findserv(name);
+    list_t * req_start, * ptr;
+    boolean ret = false;
+
+    ret = false;
+    if (serv && serv->req.serv)
+	req_start = &(serv->req.list);
+    else
+	goto out;
+
+    /*
+     * If only _one_  required service is misssed we run on an error.
+     */
+    if (!findserv(serv->req.serv)) {
+	warn("Service %s has to be enabled for service %s\n", serv->req.serv, name);
+	goto out;
+    }
+
+    ret = true;
+    if (req_start == req_start->next)
+	goto out;
+
+    for (ptr = req_start->next; ptr != req_start; ptr = ptr->next)
+	if (!findserv(getreq(ptr)->serv)) {
+	    warn("Service %s has to be enabled for service %s\n", getreq(ptr)->serv, name);
+	    ret = false;
+	}
+out:
+    return ret;
+}
+
+/*
+ * Useful for quick sort: swap two services
+ */
 static void swapserv(list_t * this, list_t * that)
 {
     serv_t * cont1 = getserv(this);
@@ -209,6 +343,9 @@ static void swapserv(list_t * this, list_t * that)
 #endif
 }
 
+/*
+ * The name says it all
+ */
 static void qsortserv(list_t * left, list_t * right)
 {
     list_t * start = left->next;
@@ -362,6 +499,8 @@ static void scan_script_defaults(const char *path)
     regex_t reg_prov;
     regex_t reg_req_start;
     regex_t reg_req_stop;
+    regex_t reg_shl_start;
+    regex_t reg_shl_stop;
     regex_t reg_def_start;
     regex_t reg_def_stop;
     regex_t reg_desc;
@@ -372,6 +511,8 @@ static void scan_script_defaults(const char *path)
 #define provides	script_inf.provides
 #define required_start	script_inf.required_start
 #define required_stop	script_inf.required_stop
+#define should_start	script_inf.should_start
+#define should_stop	script_inf.should_stop
 #define default_start	script_inf.default_start
 #define default_stop	script_inf.default_stop
 #define description	script_inf.description
@@ -379,6 +520,8 @@ static void scan_script_defaults(const char *path)
     regcompiler(&reg_prov,	PROVIDES,	REG_EXTENDED|REG_ICASE);
     regcompiler(&reg_req_start, REQUIRED_START, REG_EXTENDED|REG_ICASE|REG_NEWLINE);
     regcompiler(&reg_req_stop,  REQUIRED_STOP,	REG_EXTENDED|REG_ICASE|REG_NEWLINE);
+    regcompiler(&reg_shl_start, SHOULD_START,   REG_EXTENDED|REG_ICASE|REG_NEWLINE);
+    regcompiler(&reg_shl_stop,  SHOULD_STOP,	REG_EXTENDED|REG_ICASE|REG_NEWLINE);
     regcompiler(&reg_def_start, DEFAULT_START,	REG_EXTENDED|REG_ICASE|REG_NEWLINE);
     regcompiler(&reg_def_stop,  DEFAULT_STOP,	REG_EXTENDED|REG_ICASE|REG_NEWLINE);
     regcompiler(&reg_desc,	DESCRIPTION,	REG_EXTENDED|REG_ICASE|REG_NEWLINE);
@@ -391,6 +534,8 @@ static void scan_script_defaults(const char *path)
     xreset(provides);
     xreset(required_start);
     xreset(required_stop);
+    xreset(should_start);
+    xreset(should_stop);
     xreset(default_start);
     xreset(default_stop);
     xreset(description);
@@ -417,6 +562,20 @@ static void scan_script_defaults(const char *path)
 		required_stop = xstrdup(pbuf+val->rm_so);
 	    } else
 		required_stop = empty;
+	}
+	if (!should_start && regexecutor(&reg_shl_start, COMMON_ARGS) == true) {
+	    if (val->rm_so < val->rm_eo) {
+		*(pbuf+val->rm_eo) = '\0';
+		should_start = xstrdup(pbuf+val->rm_so);
+	    } else
+		should_start = empty;
+	}
+	if (!should_stop  && regexecutor(&reg_shl_stop,  COMMON_ARGS) == true) {
+	    if (val->rm_so < val->rm_eo) {
+		*(pbuf+val->rm_eo) = '\0';
+		should_stop = xstrdup(pbuf+val->rm_so);
+	    } else
+		should_stop = empty;
 	}
 	if (!default_start  && regexecutor(&reg_def_start, COMMON_ARGS) == true) {
 	    if (val->rm_so < val->rm_eo) {
@@ -446,6 +605,8 @@ static void scan_script_defaults(const char *path)
     regfree(&reg_prov);
     regfree(&reg_req_start);
     regfree(&reg_req_stop);
+    regfree(&reg_shl_start);
+    regfree(&reg_shl_stop);
     regfree(&reg_def_start);
     regfree(&reg_def_stop);
     regfree(&reg_desc);
@@ -454,6 +615,8 @@ static void scan_script_defaults(const char *path)
 #undef provides
 #undef required_start
 #undef required_stop
+#undef should_start
+#undef should_stop
 #undef default_start
 #undef default_stop
 #undef description
@@ -528,6 +691,8 @@ static void scan_script_locations(const char * path)
 	    xreset(script_inf.provides);
 	    xreset(script_inf.required_start);
 	    xreset(script_inf.required_stop);
+	    xreset(script_inf.should_start);
+	    xreset(script_inf.should_stop);
 	    xreset(script_inf.default_start);
 	    xreset(script_inf.default_stop);
 	    xreset(script_inf.description);
@@ -581,8 +746,23 @@ static void scan_conf(void)
 		*(pbuf+val->rm_eo) = '\0';
 		real = pbuf+val->rm_so;
 	    }
-	    if (virt)
-		virtprov(virt, real);
+	    if (virt) {
+		list_t * ptr;
+		boolean found = false;
+		for (ptr = sysfaci_start->next; ptr != sysfaci_start; ptr = ptr->next)
+		    if (!strcmp(getfaci(ptr)->name, virt)) {
+			found = true;
+			break;
+		    }
+		if (!found) {
+		    faci_t * this = (faci_t *)malloc(sizeof(faci_t));
+		    if (!this)
+			error("%s", strerror(errno));
+		    insert(&(this->list), sysfaci_start->prev);
+		    this->name = xstrdup(virt);
+		    this->repl = xstrdup(real);
+		}
+	    }
 	}
     }
     regfree(&reg_conf);
@@ -590,6 +770,16 @@ static void scan_conf(void)
     return;
 err:
     warn("fopen(%s): %s\n", INSCONF, strerror(errno));
+}
+
+/*
+ * Expand the system facilitis after all scripts have been scanned.
+ */
+static void expand_conf()
+{
+    list_t * ptr;
+    for (ptr = sysfaci_start->next; ptr != sysfaci_start; ptr = ptr->next)
+	virtprov(getfaci(ptr)->name, getfaci(ptr)->repl);
 }
 
 /*
@@ -641,6 +831,26 @@ static boolean chkfor(const char * script, char **list, const int cnt)
     return isinc;
 }
 
+static struct option long_options[] =
+{
+    {"default",	0, NULL, 'd'},
+    {"remove",	0, NULL, 'r'},
+    {"force",	0, NULL, 'f'},
+    {"help",	0, NULL, 'h'},
+    { 0,	0, NULL,  0 },
+};
+
+static void help(const char * name)
+{
+    printf("Usage: %s [<options>] [init_script|init_directory]\n", name);
+    printf("Available options:\n");
+    printf("  -h, --help       This help.\n");
+    printf("  -r, --remove     Remove the listed scripts from all runlevels.\n");
+    printf("  -f, --force      Ignore if a required service is missed.\n");
+    printf("  -d, --default    Use default runlevels a defined in the scripts\n");
+}
+
+
 /*
  * Do the job.
  */
@@ -654,13 +864,14 @@ int main (int argc, char *argv[])
     int runlevel, order, c;
     boolean del = false;
     boolean defaults = false;
+    boolean ignore = false;
 
     myname = basename(*argv);
 
     for (c = 0; c < argc; c++)
 	argr[c] = NULL;
 
-    while ((c = getopt(argc, argv, "drh")) != -1) {
+    while ((c = getopt_long(argc, argv, "dfrh", long_options, NULL)) != -1) {
 	switch (c) {
 	    case 'd':
 		defaults = true;
@@ -668,10 +879,13 @@ int main (int argc, char *argv[])
 	    case 'r':
 		del = true;
 		break;
+	    case 'f':
+		ignore = true;
+		break;
 	    case '?':
-		error("usage: %s [[-r] init_script|init_directory]\n", myname);
+		error("For help use: %s -h\n", myname);
 	    case 'h':
-		warn ("usage: %s [[-r] init_script|init_directory]\n", myname);
+		help(myname);
 		exit(0);
 	    default:
 		break;
@@ -754,6 +968,11 @@ int main (int argc, char *argv[])
 	if (argr[c])
 	    printf("Overwrite argument for %s is %s\n", argv[c], argr[c]);
 #endif
+
+    /*
+     * Scan and set our configuration for virtual services.
+     */
+    scan_conf();
 
     /*
      * Scan always for the runlevel links to see the current
@@ -865,11 +1084,18 @@ int main (int argc, char *argv[])
 	    service = findserv(script_inf.provides);
 
 	    if (service) {
+		/*
+		 * Try to guess required services out from current scheme.
+		 * Note, this means that all services are required.
+		 */
 		if (!script_inf.required_start || script_inf.required_start == empty) {
 		    list_t * ptr = NULL;
 		    for (ptr = (&(service->id))->prev; ptr != serv_start; ptr = ptr->prev) {
+			if (getserv(ptr)->order >= service->order)
+			    continue;
 			if (getserv(ptr)->lvls & service->lvls) {
 			    script_inf.required_start = xstrdup(getserv(ptr)->name);
+			    rememberreq(service, &service->req, script_inf.required_start);
 			    break;
 			}
 		    }
@@ -890,38 +1116,61 @@ int main (int argc, char *argv[])
 		    warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
 		    continue;
 		}
-		/*
-		 * First serve, first win: we need only one provide name to
-		 * identify a service script because next we handle scripts.
-		 */
-		if ((service = findserv(token)))
-			break;
+
+		if (makeprov(token, d->d_name) < 0) {
+		    warn("script %s: service %s already provided!\n", d->d_name, token);
+		    continue;
+	    	}
+
+		if (!(service = findserv(token)))
+			addserv(token);
+
+		if ((service = findserv(token))) {
+
+		    if (script_inf.required_start && script_inf.required_start != empty) {
+			rememberreq(service, &service->req, script_inf.required_start);
+			requiresv(token, script_inf.required_start);
+		    }
+
+		    if (script_inf.should_start && script_inf.should_start != empty) {
+			rememberreq(service, &service->shd, script_inf.should_start);
+			requiresv(token, script_inf.should_start);
+		    }
+
+		    /*
+		     * Use information from symbolic link structure to
+		     * check if all services are around for this script.
+		     */
+		    if (chkfor(d->d_name, argv, argc) && !ignore)
+			if (!chkrequired(d->d_name))
+			    error("exiting now!\n");
+
+		    if (script_inf.default_start && script_inf.default_start != empty) {
+		 	unsigned int deflvls = str2lvl(script_inf.default_start);
+
+			/*
+			 * Compare all bits, which means `==' and not `&' and overwrite
+			 * the defaults of the current script.
+			 */
+			if ((deflvls != service->lvls) && !defaults) {
+			    if (!del && chkfor(d->d_name, argv, argc) && !(argr[curr_argc]))
+				warn("Warning, current runlevel(s) of script `%s' overwrites defaults.\n",
+				     d->d_name);
+			}
+		    } else
+			script_inf.default_start = lvl2str(service->lvls);
+
+		    /*
+		     * required_stop, should_stop, and default_stop arn't used in SuSE Linux.
+		     */
+		}
 	    }
 	    free(begin);
 	}
 
-	if (service) {
-	    if (script_inf.default_start && script_inf.default_start != empty) {
-		unsigned int deflvls = str2lvl(script_inf.default_start);
-
-		/*
-		 * Compare all bits, which means `==' and not `&' and overwrite
-		 * the defaults of the current script.
-		 */
-		if ((deflvls != service->lvls) && !defaults) {
-		    if (!del && chkfor(d->d_name, argv, argc) && !(argr[curr_argc]))
-			warn("Warning, current runlevel(s) of script `%s' overwrites defaults.\n",
-			     d->d_name);
-		    xreset(script_inf.default_start);
-		    script_inf.default_start = lvl2str(service->lvls);
-		}
-	    } else
-		script_inf.default_start = lvl2str(service->lvls);
-
-	    /*
-	     * required_stop and default_stop arn't used in SuSE Linux.
-	     */
-	}
+	/* Ahh ... set default multiuser with network */
+	if (!script_inf.default_start)
+	    script_inf.default_start = xstrdup("3 5");
 
 	if (chkfor(d->d_name, argv, argc) && !defaults) {
 	    if (argr[curr_argc]) {
@@ -958,33 +1207,24 @@ int main (int argc, char *argv[])
 
 	begin = script_inf.provides;
 	while ((token = strsep(&script_inf.provides, delimeter)) && *token) {
-	    if (*token == '$') {
-		warn("script %s provides system facility %s, skiped!\n", d->d_name, token);
+	    if (*token == '$')
 		continue;
-	    }
-	    if (makeprov(token, d->d_name) < 0) {
-		warn("script %s: service %s already provided!\n", d->d_name, token);
-		continue;
-	    }
-	    if (script_inf.required_start && script_inf.required_start != empty)
-		requiresv(token, script_inf.required_start);
-
-	    /* Ahh ... set default multiuser with network */
-	    if (!script_inf.default_start)
-		script_inf.default_start = xstrdup("3 5");
 
 	    runlevels(token, script_inf.default_start);
 
 	    /*
-	     * required_stop and default_stop arn't used in SuSE Linux.
+	     * required_stop, should_stop, and default_stop arn't used in SuSE Linux.
 	     */
 	}
 	script_inf.provides = begin;
+
     }
     /* Reset remaining pointers */
     xreset(script_inf.provides);
     xreset(script_inf.required_start);
     xreset(script_inf.required_stop);
+    xreset(script_inf.should_start);
+    xreset(script_inf.should_stop);
     xreset(script_inf.default_start);
     xreset(script_inf.default_stop);
     xreset(script_inf.description);
@@ -993,10 +1233,7 @@ int main (int argc, char *argv[])
     popd();
     closedir(initdir);
 
-    /*
-     * Scan and set our configuration for virtual services.
-     */
-    scan_conf();
+    expand_conf();
 
     /*
      * Now generate for all scripts the dependencies
