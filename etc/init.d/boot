@@ -430,6 +430,22 @@ rm -f /etc/psdevtab
 test -x /bin/ps && /bin/ps > /dev/null 2> /dev/null
 
 #
+# mount shmfs is necessary (2.4 kernels)
+#
+unset HAVE_SHM
+while read dev type; do
+    test "$type" = "shm" && HAVE_SHM=1
+done < /proc/filesystems
+if test ! -z "$HAVE_SHM"; then
+    ECHO_RETURN=$rc_done
+    test -d /dev/shm || mkdir /dev/shm
+    echo -n "Mount SHM FS on /dev/shm"
+    mount -t shm shmfs /dev/shm || ECHO_RETURN=$rc_failed
+    echo -e $ECHO_RETURN
+fi	    
+#unset HAVE_SHM
+
+#
 # start bootup client scripts.
 #
 if test -d /etc/init.d/boot.d/ ; then

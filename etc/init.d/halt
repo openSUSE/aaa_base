@@ -103,7 +103,7 @@ while read des fs type rest; do
 	/proc)     continue ;;
 	/dev/pts)  continue ;;
 	/dev)      continue ;;
-	/var/shm)  continue ;;
+	/dev/shm)  continue ;;
     esac
     case "$type" in
 	proc)      umount -t proc     $fs ;;
