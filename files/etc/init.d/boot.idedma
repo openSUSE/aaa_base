@@ -30,7 +30,7 @@ rc_reset
 # enable/disable DMA mode
 function idedma_main() {
     local MODE DEVICE OPTIONS FIRST
-    if [ "$DEVICES_FORCE_IDE_DMA" == "" ] ; then
+    if [ "$DEVICES_FORCE_IDE_DMA" = "" ] ; then
 	exit 0;
     fi
 
@@ -62,9 +62,9 @@ function idedma_main() {
 	if [ -z "$MODE" ] ; then
 	    echo "Missing DMA mode for device $DEVICE"
 	    rc_failed  
-	elif [ $MODE == "off" ] ; then
+	elif [ $MODE = "off" ] ; then
 	    $HDPARM -d 0 "$DEVICE" || rc_failed
-	elif [ $MODE == "on" ] ; then
+	elif [ $MODE = "on" ] ; then
 	    $HDPARM -d 1 "$DEVICE" || rc_failed
 	else
 	    $HDPARM -d 1 -X "$MODE" ${OPTIONS:+$OPTIONS} "$DEVICE" || rc_failed

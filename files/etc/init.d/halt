@@ -134,17 +134,19 @@ if test -n "$REDIRECT" ; then
 	done
 	echo -en "\033[10;262]"
 	;;
+    "no")
+	;;
     *)
     	echo -en "\033[10;440]\a"
 	usleep 250000
 	;;
     esac
 else
-    echo -en "\a"
+    test "$HALT_SOUND" = "no" || echo -en "\a"
     sleep 2
 fi
 echo $message
-echo -en "\a"
+test "$HALT_SOUND" = "no" || echo -en "\a"
 
 # Set system console back to intial value
 test -n "$REDIRECT" -a -n "$CONSOLE" && setconsole $REDIRECT < $CONSOLE

@@ -71,17 +71,17 @@ case "$1" in
 	# Don't start xdm if no Xserver is configured and xdm is not 
 	# configured for remote access 
 	if [ ! -x /usr/X11R6/bin/X -a \
-		"$DISPLAYMANAGER_REMOTE_ACCESS" == "no" ]; then 
+		"$DISPLAYMANAGER_REMOTE_ACCESS" = "no" ]; then 
 			rc_status -u 
 			rc_exit 
 	fi
-	if [ "$DISPLAYMANAGER" == "/usr/X11R6/bin/xdm" ]; then
+	if [ "$DISPLAYMANAGER" = "/usr/X11R6/bin/xdm" ]; then
 		ln -snf $PIDFILE /etc/X11/xdm/xdm-pid
 		ln -snf /var/log/xdm.errors /etc/X11/xdm/xdm-errors
 	fi 
-	if [ "$DISPLAYMANAGER" == "/opt/gnome/bin/gdm" -a \
-		 "$DISPLAYMANAGER_REMOTE_ACCESS" == "yes"  -a \
-		 "$DISPLAYMANAGER_STARTS_XSERVER" == "no" ]; then
+	if [ "$DISPLAYMANAGER" = "/opt/gnome/bin/gdm" -a \
+		 "$DISPLAYMANAGER_REMOTE_ACCESS" = "yes"  -a \
+		 "$DISPLAYMANAGER_STARTS_XSERVER" = "no" ]; then
 		XDMOPTIONS="--no-console"
 	fi
 	startproc -p $PIDFILE $DISPLAYMANAGER $XDMOPTIONS || rc_failed
@@ -103,7 +103,7 @@ case "$1" in
 	# killproc(8) sleep upto five seconds and sends
 	# SIGKILL if xdm does not terminate within
 	#
-	if [ "$DISPLAYMANAGER" == "/usr/X11R6/bin/xdm" ]; then
+	if [ "$DISPLAYMANAGER" = "/usr/X11R6/bin/xdm" ]; then
 		rm -f /etc/X11/xdm/xdm-pid
 		rm -f /etc/X11/xdm/xdm-errors
 	fi
