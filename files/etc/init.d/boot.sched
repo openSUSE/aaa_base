@@ -1,0 +1,66 @@
+#! /bin/sh
+#
+# Copyright (c) 2003 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
+#
+# /etc/init.d/boot.sched
+#
+### BEGIN INIT INFO
+# Provides:          boot.sched
+# Required-Start:	boot.proc
+# X-UnitedLinux-Should-Start:	boot.localfs boot.ldconfig
+# Required-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       sets the scheduling timeslices
+### END INIT INFO
+
+. /etc/rc.status
+test -r /etc/sysconfig/kernel || exit 6
+. /etc/sysconfig/kernel
+
+rc_reset
+
+case "$1" in
+  start)
+	echo -n "Setting scheduling timeslices "
+	# Configured?
+	if test -z "$SCHED_MINTIMESLICE" -o -z "$SCHED_MAXTIMESLICE"; then
+		rc_failed 6a
+	# Sanity?
+	elif test $((2*$SCHED_MINTIMESLICE)) -gt $SCHED_MAXTIMESLICE; then
+		echo -n "2*$SCHED_MINTIMESLICE > $SCHED_MAXTIMESLICE"
+		rc_failed 1
+	# Kernel support?
+	elif test ! -r /proc/sys/kernel/min-timeslice; then
+		echo -n "not supported by kernel ";
+		rc_failed 3
+	# Go!	
+	else
+		echo -n "$SCHED_MINTIMESLICE "
+		echo $SCHED_MINTIMESLICE > /proc/sys/kernel/min-timeslice
+		rc_status
+		echo -n "$SCHED_MAXTIMESLICE "
+		echo $SCHED_MAXTIMESLICE > /proc/sys/kernel/max-timeslice
+		rc_status
+	fi
+	true
+	rc_status -v
+	;;
+	
+    stop|restart)
+	rc_failed 3
+	rc_status -v
+	;;
+    status)
+	rc_failed 4
+	rc_status -v
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status|restart}"
+	exit 1
+	;;
+esac
+
+rc_exit
+

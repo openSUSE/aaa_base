@@ -18,7 +18,7 @@ INITRD_MODULES=""
 #
 MODULES_LOADED_ON_BOOT=""
 
-## Description:	Should the dsdt be attomatically attached to the initrd (when mk_initrd is invoked)?
+## Description:	Should the dsdt be automatically attached to the initrd (when mk_initrd is invoked)?
 ## Type:        yesno
 ## Default:     no
 # Set this variable in conjunction with DSDT_PATH and the DSDT (acpi) will be attached to the initrd.
@@ -34,10 +34,40 @@ ATT_DSDT=""
 #
 DSDT_PATH="/proc/acpi/dsdt"
 
+## Description:	tmpfs/shmfs memory limit
 ## Type:	integer
 #
-# Size parameter for mounting the shmfs filesystem. The kernel defaults
+# Size parameter for mounting the tmpfs/shmfs filesystem. The kernel defaults
 # to 50% of the available RAM size, but this might not be enough for
 # some special setups.
 #
 SHMFS_SIZE=""
+
+## Description: Minimum timeslice for CPU scheduling
+## Type:	integer(1000:50000)
+#
+# Length of the shortest timeslice a process (with lowest priority / maximum 
+# niceness) will be running on a CPU. Time is given in microseconds (us).
+# This time should be much shorter than SCHED_MAXTIMESLICE to keep the
+# nice values meaningful. The values can only be specified up to a accuracy
+# of 1000 us, as the time frequency is 1000/s.
+# For interactive desktop use, SCHED_MINTIMESLICE/SCHED_MAXTIMESLICE values
+# of 1000 and 30000 are recommended. For non-interactive use, multiply both
+# values by 10 or 20.
+# 
+SCHED_MINTIMESLICE="1000"
+
+## Description: Maximum timeslice for CPU scheduling
+## Type:	integer(20000:1000000)
+#
+# Length of the shortest timeslice a process (with lowest priority / maximum 
+# niceness) will be running on a CPU. Time is given in microseconds (us).
+# This time should be much shorter than SCHED_MAXTIMESLICE to keep the
+# nice values meaningful. The values can only be specified up to a accuracy
+# of 1000 us, as the time frequency is 1000/s.
+# For interactive desktop use, SCHED_MINTIMESLICE/SCHED_MAXTIMESLICE values
+# of 1000 and 30000 are recommended. For non-interactive use, multiply both
+# values by 10 or 20.
+# 
+SCHED_MAXTIMESLICE="30000"
+
