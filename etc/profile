@@ -8,7 +8,7 @@
 #
 # Check which shell is reading this file
 #
-case "`ls -l /proc/$$/exe`" in
+case "`/bin/ls -l /proc/$$/exe`" in
     */bash)	is=bash ;;
     */rbash)	is=bash ;;
     */ash)	is=ash  ;;
