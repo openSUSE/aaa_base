@@ -3,7 +3,7 @@
 /*                                                                            */
 /* Copyrights to S.u.S.E. GmbH Fuerth (c) 1998                                */
 /*                                                                            */
-/* Time-stamp:                                                                */
+/* Time-stamp: 11/18/98                                                       */
 /* Project:    fillup                                                         */
 /* Module:     services                                                       */
 /* Filename:   services.c                                                     */
@@ -12,7 +12,7 @@
 /*                                                                            */
 /*     Standard library functions are not called directly. To avoid           */
 /*     problems in sublayers there are service function that call these       */
-/*     standard library functions.
+/*     standard library functions.                                            */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 
@@ -26,40 +26,14 @@
 
 #include "portab.h"
 
+#include "fillup_cfg.h"
 #include "services.h"
 
-/*-------------------------------- VARIABLES ---------------------------------*/
-
-static    FILE  * filePointerForWriting;
-
 /*----------------------------- IMPLEMENTATION -------------------------------*/
 
-/*----------------- compareStrings -----------------*/
-
-BOOLEAN
-compareStrings
-(
-    const char    * firstString,              /* in */
-    const char    * secondString              /* in */
-)
-{
-    BOOLEAN    returnValue;
-
-    if( strcmp( firstString, secondString ) == 0 )
-    {
-        returnValue = TRUE;
-    }
-    else
-    {
-        returnValue = FALSE;
-    }
-
-    return( returnValue );
-}
-
 /*------------- compareStringsExactly --------------*/
 
-BOOLEAN
+StringOrder_t
 compareStringsExactly
 (
     const char    * firstString,              /* in */
@@ -70,20 +44,20 @@ compareStringsExactly
 
     if( strncmp( firstString, secondString, strlen( firstString ) ) == 0 )
     {
-        returnValue = TRUE;
+        returnValue = Equal;
     }
     else
     {
-        returnValue = FALSE;
+        returnValue = Different;
     }
 
     return( returnValue );
 }
 
-/*------------------ sortStrings -------------------*/
+/*----------------- compareStrings -----------------*/
 
 StringOrder_t
-sortStrings
+compareStrings
 (
     const char    * firstString,              /* in */
     const char    * secondString              /* in */
@@ -123,15 +97,33 @@ stringLength
 
 /*------------- createNewBaseFileName --------------*/
 
-void
+Service_t
 createNewBaseFileName
 (
     const char    * oldString,                /* in */
           char    * newString                 /* in */
 )
 {
-    strcpy( newString, oldString );
-    strcat( newString, ".new" );
+    StringOrder_t          returnValue;
+    static const char    * extentionOfBaseFile = ".new";
+
+    if( ( strlen( oldString ) + strlen( extentionOfBaseFile ) + 1 ) < 
+        cfg_MaxVariableLength )
+    {
+        ( void )strcpy( newString, oldString );
+        ( void )strcat( newString, extentionOfBaseFile );
+
+        returnValue = Success;
+    }
+    else
+    {
+        fillup_exception( __FILE__, __LINE__, ConfigurationException,
+                          "createNewBaseFileName" );
+        exitOnFailure( );
+        returnValue = Error;
+    }
+
+    return( returnValue );
 }
 
 /*----------------- exitOnFailure ------------------*/
@@ -239,18 +231,20 @@ displayVersion
 
 /*------------------ getCardinal -------------------*/
 
-unsigned long
+Service_t
 getCardinal
 (
-    const char    * string                    /* in */
+    const char       * string,               /* in */
+    unsigned long    * cardinalValue         /* out */
 )
 {
-    long int        returnValue;
+    StringOrder_t      returnValue;
+    long               Value;
 
-    returnValue = strtol( string, ( char ** )NULL, 10 );
+    Value = strtol( string, ( char ** )NULL, 10 );
     if( errno == ERANGE )
     {
-        if( returnValue == LONG_MIN )
+        if( Value == LONG_MIN )
         {
             fillup_exception( __FILE__, __LINE__, ServiceException, 
                               "value overflow in getCardinal" );
@@ -260,15 +254,32 @@ getCardinal
             fillup_exception( __FILE__, __LINE__, ServiceException, 
                               "value underflow in getCardinal" );
         }
+
         errno = 0;     /* reset of errno variable */
+        returnValue = Error;
     }
-    else if( returnValue < 0 )
+    else if( Value < 0 )
     {
         fillup_exception( __FILE__, __LINE__, ServiceException, 
                           "negative value in getCardinal" );
+        returnValue = Error;
+    }
+    else
+    {
+        returnValue = Success;
     }
 
-    return( ( unsigned long )returnValue );
+    if( Success == returnValue )
+    {
+        *cardinalValue = ( unsigned long )Value;
+    }
+    else
+    {
+        *cardinalValue = ( unsigned long )0;
+        exitOnFailure( );
+    }
+
+    return( returnValue );
 }
 
 /*-------------- openFileForReading ----------------*/
@@ -299,51 +310,43 @@ openFileForReading
 
 /*-------------- openFileForWriting ----------------*/
 
-void
+Service_t
 openFileForWriting
 (
-    const char    * filename                  /* in */
-)
-{
-    filePointerForWriting = fopen( filename, "w" );
-    if( filePointerForWriting == NULL )
-    {
-        fillup_exception( __FILE__, __LINE__, ServiceException, 
-                          "file not opened" );
-    }
-}
-
-/*------------------- closeFile --------------------*/
-
-Service_t
-closeFile
-(
-    FILE          * filePointer               /* in */
+    const char    * filename,                 /* in */
+    FILE         ** filePointer              /* out */
 )
 {
     Service_t       returnValue;
 
-    if( 0 == fclose( filePointer ) )
+    *filePointer = fopen( filename, "w" );
+    if( *filePointer == NULL )
     {
-        returnValue = Success;
+        fillup_exception( __FILE__, __LINE__, ServiceException, 
+                          "file not opened" );
+        returnValue = FileOpenError;
     }
     else
     {
-        returnValue = Error;
+        returnValue = FileOpened;
     }
 
     return( returnValue );
 }
 
-/*-------------- closeFileForWriting ---------------*/
+/*------------------- closeFile --------------------*/
 
 void
-closeFileForWriting
+closeFile
 (
-    void
+    FILE          * filePointer               /* in */
 )
 {
-    ( void )fclose( filePointerForWriting );
+    if( 0 != fclose( filePointer ) )
+    {
+        fillup_exception( __FILE__, __LINE__, ServiceException, 
+                          "file not closed" );
+    }
 }
 
 /*----------------- getFileLength ------------------*/
@@ -357,7 +360,7 @@ getFileLength
 {
     Service_t       returnValue;
 
-    if( 0 == fseek( filePointer, 0, SEEK_END ) )
+    if( 0 == fseek( filePointer, 0L, SEEK_END ) )
     {
         *fileLength = ftell( filePointer );
         if( *fileLength < 0 )
@@ -394,7 +397,7 @@ readFileToBuffer
 {
     Service_t       returnValue;
 
-    if( 0 == fseek( filePointer, 0, SEEK_SET ) )
+    if( 0 == fseek( filePointer, 0L, SEEK_SET ) )
     {
         if( fileLength == 
             fread( *fileBuffer, sizeof( char ), fileLength, filePointer ) )
@@ -424,11 +427,12 @@ void
 writeVariableBlock
 (
     char          * buffer,                   /* in */
-    long            length                    /* in */
+    long            length,                   /* in */
+    FILE          * filePointer               /* in */
 )
 {
     if( length != 
-        fwrite( buffer, sizeof( char ), length, filePointerForWriting ) )
+        fwrite( buffer, sizeof( char ), length, filePointer ) )
     {
         fillup_exception( __FILE__, __LINE__, ServiceException, 
                           "fwrite" );
@@ -441,12 +445,12 @@ Service_t
 allocateBuffer
 (
     long            fileLength,                /* in */
-    char         ** buffer                    /* out */
+    void         ** buffer                    /* out */
 )
 {
     Service_t       returnValue;
 
-    *buffer = ( char * )malloc( fileLength + 1 );
+    *buffer = malloc( fileLength + 1 );
     if( *buffer == NULL )
     {
         fillup_exception( __FILE__, __LINE__, ServiceException, 

@@ -37,9 +37,12 @@ static  long                    baseFileBufferLength;
 static  long                    additionalFileBufferLength;
 static  long                    forbiddenFileBufferLength;
 
-static  VariableBlock_t         baseFileBlock[ cfg_baseFileBlocks ];
-static  VariableBlock_t         additionalFileBlock[ cfg_additionalFileBlocks ];
-static  VariableBlock_t         forbiddenFileBlock[ cfg_forbiddenFileBlocks ];
+static  VariableBlock_t       * baseFileBlock;
+static  VariableBlock_t       * additionalFileBlock;
+static  VariableBlock_t       * forbiddenFileBlock;
+static  long                    baseFileBlocksLength;
+static  long                    additionalFileBlocksLength;
+static  long                    forbiddenFileBlocksLength;
 static  VariableBlock_t       * headOfBaseFileList;
 static  VariableBlock_t       * headOfAdditionalFileList;
 static  VariableBlock_t       * headOfForbiddenFileList;
@@ -61,7 +64,7 @@ countDelimiters
 
 static
 void
-checkConfiguration
+createAdministrationInfo
 (
    void
 );
@@ -260,77 +263,60 @@ countDelimiters
     return( Counter );
 }
 
-/*--------------- checkConfiguration ---------------*\
+/*------------ createAdministrationInfo ------------*\
 |
-|   Purpose:  This function checks whether static buffers can hold the
+|   Purpose:  This function creates buffers that can hold the
 |             administration info for all variable blocks.
 |
 \* -------------------------------------------------*/
 
 static
 void
-checkConfiguration
+createAdministrationInfo
 (
    void
 )
 {
-    unsigned long      NumberOfBlocks;
+    unsigned long      Size;
     char             * delimiterString;
     char               delimiterChar;
 
     queryStringParameter( Delimiter, &delimiterString );
     delimiterChar = delimiterString[ 0 ];
 
-    NumberOfBlocks =
+
+    baseFileBlocksLength =
         countDelimiters( delimiterChar, baseFileBuffer, baseFileBufferLength );
-    if( NumberOfBlocks == 0 )
+    baseFileBlocksLength++;    /* add possible trailing comment */
+    Size = baseFileBlocksLength * sizeof( VariableBlock_t );
+    if( Success != allocateBuffer( Size, ( void ** )&baseFileBlock ) )
     {
-        /* there are no delimiters - then count lines */
-        NumberOfBlocks =
-            countDelimiters( '\n', baseFileBuffer, baseFileBufferLength );
-    }
-    if( NumberOfBlocks > cfg_baseFileBlocks )
-    {
-        /* Please, if this error occurs, the constant cfg_baseFileBlocks  */
-        /* is defined as too small. The definition is within fillup_cfg.h */
         fillup_exception( __FILE__, __LINE__, ConfigurationException,
-                          "checkConfiguration" );
+                          "createAdministrationInfo" );
         exitOnFailure( );
     }
 
-    NumberOfBlocks = countDelimiters( 
+    additionalFileBlocksLength = countDelimiters( 
         delimiterChar, additionalFileBuffer, additionalFileBufferLength );
-    if( NumberOfBlocks == 0 )
+    additionalFileBlocksLength++;    /* add possible trailing comment */
+    Size = additionalFileBlocksLength * sizeof( VariableBlock_t );
+    if( Success != allocateBuffer( Size, ( void ** )&additionalFileBlock ) )
     {
-        /* there are no delimiters - then count lines */
-        NumberOfBlocks = countDelimiters( 
-            '\n', additionalFileBuffer, additionalFileBufferLength );
-    }
-    if( NumberOfBlocks > cfg_additionalFileBlocks )
-    {
-        /* Please, if this error occurs, the constant cfg_additionalFileBlocks */
-        /* is defined as too small. The definition is within fillup_cfg.h      */
         fillup_exception( __FILE__, __LINE__, ConfigurationException,
-                          "checkConfiguration" );
+                          "createAdministrationInfo" );
         exitOnFailure( );
     }
 
     if( queryParameter( ForbiddenFile ) == TRUE )
     {
-        NumberOfBlocks = countDelimiters( 
+        forbiddenFileBlocksLength = countDelimiters( 
             delimiterChar, forbiddenFileBuffer, forbiddenFileBufferLength );
-        if( NumberOfBlocks == 0 )
+        forbiddenFileBlocksLength++;    /* add possible trailing comment */
+        Size = forbiddenFileBlocksLength * sizeof( VariableBlock_t );
+        if( Success != allocateBuffer( Size, ( void ** )&forbiddenFileBlock ) )
         {
-            /* there are no delimiters - then count lines */
-            NumberOfBlocks = countDelimiters( 
-                '\n', forbiddenFileBuffer, forbiddenFileBufferLength );
-        }
-        if( NumberOfBlocks > cfg_forbiddenFileBlocks )
-        {
-            /* Please, if this error occurs, the constant cfg_forbiddenFileBlocks */
-            /* is defined as too small. The definition is within fillup_cfg.h      */
             fillup_exception( __FILE__, __LINE__, ConfigurationException,
-                              "checkConfiguration" );
+                              "createAdministrationInfo" );
             exitOnFailure( );
         }
     }
@@ -559,7 +545,7 @@ getVariable
         }
     }
     else if( ( ( lineIndex + stringLength( commentMarkerString ) ) < lineLength )
-         &&  ( TRUE == 
+         &&  ( Equal == 
                compareStringsExactly( commentMarkerString, &Line[ lineIndex ] ) ) )
     {
         /* here the comment marker is detected */
@@ -575,7 +561,7 @@ getVariable
         offsetDelimiter = lineIndex;
 
         if( ( ( lineIndex + stringLength( delimiterString ) ) < lineLength ) &&
-            ( TRUE == 
+            ( Equal == 
               compareStringsExactly( delimiterString, &Line[ lineIndex ] ) ) )
         {
             /* this is an assignment within a comment */
@@ -609,8 +595,8 @@ getVariable
         offsetDelimiter = lineIndex;
 
         if( ( ( lineIndex + stringLength( delimiterString ) ) < lineLength ) &&
-            ( TRUE == 
-               compareStringsExactly( delimiterString, &Line[ lineIndex ] ) ) )
+            ( Equal == 
+              compareStringsExactly( delimiterString, &Line[ lineIndex ] ) ) )
         {
             /* this is an assignment */
             if( getVNumberOfCommentLines( outputBuffer ) > 0 )
@@ -791,7 +777,7 @@ sortBlockIntoList
     copyVariableName( *current, VariableNameOfCurrentListElement );
 
     serviceResult = 
-        sortStrings( VariableNameOfBlock, VariableNameOfCurrentListElement );
+        compareStrings( VariableNameOfBlock, VariableNameOfCurrentListElement );
     if( serviceResult == Equal )
     {
         /* insert the block after *current directly */
@@ -807,7 +793,7 @@ sortBlockIntoList
         if( predecessor != NULL )
         {
             copyVariableName( predecessor, VariableNameOfCurrentListElement );
-            serviceResult = sortStrings( 
+            serviceResult = compareStrings( 
                 VariableNameOfBlock, VariableNameOfCurrentListElement );
         }
         while( ( predecessor != NULL ) && ( serviceResult == Smaller ) )
@@ -817,7 +803,7 @@ sortBlockIntoList
             if( predecessor != NULL )
             {
                 copyVariableName( predecessor, VariableNameOfCurrentListElement );
-                serviceResult = sortStrings( 
+                serviceResult = compareStrings( 
                     VariableNameOfBlock, VariableNameOfCurrentListElement );
             }
         }
@@ -844,7 +830,7 @@ sortBlockIntoList
         if( successor != NULL )
         {
             copyVariableName( successor, VariableNameOfCurrentListElement );
-            serviceResult = sortStrings( 
+            serviceResult = compareStrings( 
                 VariableNameOfBlock, VariableNameOfCurrentListElement );
         }
         while( ( successor != NULL ) && ( serviceResult != Smaller ) )
@@ -854,7 +840,7 @@ sortBlockIntoList
             if( successor != NULL )
             {
                 copyVariableName( successor, VariableNameOfCurrentListElement );
-                serviceResult = sortStrings( 
+                serviceResult = compareStrings( 
                     VariableNameOfBlock, VariableNameOfCurrentListElement );
             }
         }
@@ -905,21 +891,21 @@ parseFile
             inputBuffer = baseFileBuffer;
             inputLength = baseFileBufferLength;
             outputBuffer = baseFileBlock;
-            outputLength = cfg_baseFileBlocks;
+            outputLength = baseFileBlocksLength;
             break;
 
         case AdditionalFile:
             inputBuffer = additionalFileBuffer;
             inputLength = additionalFileBufferLength;
             outputBuffer = additionalFileBlock;
-            outputLength = cfg_additionalFileBlocks;
+            outputLength = additionalFileBlocksLength;
             break;
 
         case ForbiddenFile:
             inputBuffer = forbiddenFileBuffer;
             inputLength = forbiddenFileBufferLength;
             outputBuffer = forbiddenFileBlock;
-            outputLength = cfg_forbiddenFileBlocks;
+            outputLength = forbiddenFileBlocksLength;
             break;
 
          default:
@@ -1038,7 +1024,7 @@ handleEqualVariableBlockIdentifiers
 
     while( ( headOfBaseFileList != NULL ) &&
            ( headOfAdditionalFileList != NULL ) &&
-           ( Equal == sortStrings( firstBuffer, secondBuffer ) ) )
+           ( Equal == compareStrings( firstBuffer, secondBuffer ) ) )
     {
         if( TRUE == queryParameter( Exchange ) )
         {
@@ -1228,7 +1214,7 @@ evaluateParsingResult
                 }
                 else    /* headOfForbiddenFileList != NULL */
                 {
-                    serviceResult = sortStrings( baseBuffer, forbiddenBuffer );
+                    serviceResult = compareStrings( baseBuffer, forbiddenBuffer );
                     if( serviceResult == Smaller )
                     {
                         setVEvaluationClass( headOfBaseFileList, Output );
@@ -1252,7 +1238,7 @@ evaluateParsingResult
             {
                 if( headOfForbiddenFileList == NULL )
                 {
-                    serviceResult = sortStrings( baseBuffer, additionalBuffer );
+                    serviceResult = compareStrings( baseBuffer, additionalBuffer );
                     if( serviceResult == Smaller )
                     {
                         if( TRUE == queryParameter( IgnoreDefinites ) )
@@ -1289,7 +1275,7 @@ evaluateParsingResult
                 }
                 else    /* headOfForbiddenFileList != NULL */
                 {
-                    serviceResult = sortStrings( baseBuffer, forbiddenBuffer );
+                    serviceResult = compareStrings( baseBuffer, forbiddenBuffer );
                     if( serviceResult == Greater )
                     {
                         displayVerbose( "forbidden", headOfForbiddenFileList );
@@ -1298,7 +1284,7 @@ evaluateParsingResult
                     else if( serviceResult == Equal )
                     {
                         serviceResult = 
-                            sortStrings( baseBuffer, additionalBuffer );
+                            compareStrings( baseBuffer, additionalBuffer );
                         if( serviceResult == Smaller )
                         {
                             setVEvaluationClass( headOfBaseFileList, Output );
@@ -1318,7 +1304,7 @@ evaluateParsingResult
                     else    /* serviceResult == Smaller */
                     {
                         serviceResult = 
-                            sortStrings( baseBuffer, additionalBuffer );
+                            compareStrings( baseBuffer, additionalBuffer );
                         if( serviceResult == Greater )
                         {
                             setVEvaluationClass( 
@@ -1378,71 +1364,78 @@ writeOutput
     char                      * outputFileName;
     char                        newBaseFileName[ cfg_MaxVariableLength ];
     char                      * variableBlock;
+    FILE                      * filePointer;
 
     
     if( TRUE == queryParameter( Remove ) )
     {
         displayVerboseString( "\nNow the new base file is displayed\n" );
         queryStringParameter( BaseFile, &baseFileName );
-        createNewBaseFileName( baseFileName, newBaseFileName );
-        openFileForWriting( newBaseFileName );
-        listPointer = &baseFileBlock[ 0 ];
+        if( ( Success == createNewBaseFileName( baseFileName, newBaseFileName ) ) 
+        &&  ( FileOpened == openFileForWriting( newBaseFileName, &filePointer ) ) )
+        {
+            listPointer = baseFileBlock;
+            for( index = 0; index < numberOfUsedBaseBlocks; index++ )
+            {
+                evaluationClass = getVEvaluationClass( listPointer );
+                switch( evaluationClass )
+                {
+                    case Output:
+                    case Ignored:
+                        displayVerbose( "base", listPointer );
+                        getVBeginOfBlock( listPointer, &variableBlock );
+                        writeVariableBlock( variableBlock, getVLength( listPointer ), filePointer );
+                        break;
+
+                    default: break;
+                }
+                listPointer++;
+            }    
+            closeFile( filePointer );
+        }
+    }
+
+    displayVerboseString( "\nNow the output file is displayed\n" );
+    queryStringParameter( OutputFile, &outputFileName );
+    if( FileOpened == openFileForWriting( outputFileName, &filePointer ) )
+    {
+        listPointer = baseFileBlock;
         for( index = 0; index < numberOfUsedBaseBlocks; index++ )
         {
             evaluationClass = getVEvaluationClass( listPointer );
             switch( evaluationClass )
             {
                 case Output:
-                case Ignored:
+                case OutputButRemoved:
                     displayVerbose( "base", listPointer );
                     getVBeginOfBlock( listPointer, &variableBlock );
-                    writeVariableBlock( variableBlock, getVLength( listPointer ) );
+                    writeVariableBlock( variableBlock, 
+                        getVLength( listPointer ), filePointer );
                     break;
 
                 default: break;
             }
             listPointer++;
         }    
-        closeFileForWriting( );
+        listPointer = additionalFileBlock;
+        for( index = 0; index < numberOfUsedAdditionalBlocks; index++ )
+        {
+            evaluationClass = getVEvaluationClass( listPointer );
+            switch( evaluationClass )
+            {
+                case Output:
+                    displayVerbose( "additional", listPointer );
+                    getVBeginOfBlock( listPointer, &variableBlock );
+                    writeVariableBlock( variableBlock, 
+                        getVLength( listPointer ), filePointer );
+                    break;
+
+                default: break;
+            }
+            listPointer++;
+        }    
+        closeFile( filePointer );
     }
-
-    displayVerboseString( "\nNow the output file is displayed\n" );
-    queryStringParameter( OutputFile, &outputFileName );
-    openFileForWriting( outputFileName );
-    listPointer = &baseFileBlock[ 0 ];
-    for( index = 0; index < numberOfUsedBaseBlocks; index++ )
-    {
-        evaluationClass = getVEvaluationClass( listPointer );
-        switch( evaluationClass )
-        {
-            case Output:
-            case OutputButRemoved:
-                displayVerbose( "base", listPointer );
-                getVBeginOfBlock( listPointer, &variableBlock );
-                writeVariableBlock( variableBlock, getVLength( listPointer ) );
-                break;
-
-            default: break;
-        }
-        listPointer++;
-    }    
-    listPointer = &additionalFileBlock[ 0 ];
-    for( index = 0; index < numberOfUsedAdditionalBlocks; index++ )
-    {
-        evaluationClass = getVEvaluationClass( listPointer );
-        switch( evaluationClass )
-        {
-            case Output:
-                displayVerbose( "additional", listPointer );
-                getVBeginOfBlock( listPointer, &variableBlock );
-                writeVariableBlock( variableBlock, getVLength( listPointer ) );
-                break;
-
-            default: break;
-        }
-        listPointer++;
-    }    
-    closeFileForWriting( );
 }
 
 /*------------------ startParser -------------------*/
@@ -1453,7 +1446,7 @@ startParser
     void
 )
 {
-    checkConfiguration( );
+    createAdministrationInfo( );
     parseFile( BaseFile, &numberOfUsedBaseBlocks );
     parseFile( AdditionalFile, &numberOfUsedAdditionalBlocks );
     if( queryParameter( ForbiddenFile ) == TRUE )

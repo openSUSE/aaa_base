@@ -3,7 +3,7 @@
 /*                                                                            */
 /* Copyrights to S.u.S.E. GmbH Fuerth (c) 1998                                */
 /*                                                                            */
-/* Time-stamp:                                                                */
+/* Time-stamp: 11/18/98                                                       */
 /* Project:    fillup                                                         */
 /* Module:     services                                                       */
 /* Filename:   services.h                                                     */
@@ -46,28 +46,22 @@ typedef enum
 {
     Smaller,
     Equal,
-    Greater
+    Greater,
+    Different
 } StringOrder_t;
 
 /*------------------- FUNCTION DECLARATIONS (PROTOTYPES) ---------------------*/
 
-BOOLEAN
+StringOrder_t
 compareStrings
 (
     const char    * firstString,              /* in */
     const char    * secondString              /* in */
 );
 
-BOOLEAN 
+StringOrder_t
 compareStringsExactly
 (    
-    const char    * firstString,              /* in */
-    const char    * secondString              /* in */
-);
-
-StringOrder_t
-sortStrings
-(
     const char    * firstString,              /* in */
     const char    * secondString              /* in */
 );
@@ -78,7 +72,7 @@ stringLength
     const char    * String                    /* in */
 );
 
-void
+Service_t
 createNewBaseFileName
 (
     const char    * oldString,                /* in */
@@ -109,7 +103,7 @@ displayStderrString
 void
 displayString
 (
-    const char    * string                    /* in */
+    const char    * string                   /* in */
 );
 
 void
@@ -130,10 +124,11 @@ displayVersion
     void
 );
 
-unsigned long
+Service_t
 getCardinal
 (
-    const char    * string                    /* in */
+    const char       * string,                /* in */
+    unsigned long    * cardinalValue         /* out */
 );
 
 Service_t
@@ -143,22 +138,17 @@ openFileForReading
     FILE         ** filePointer              /* out */
 );
 
-void
+Service_t
 openFileForWriting
 (
-    const char    * filename                  /* in */
+    const char    * filename,                 /* in */
+    FILE         ** filePointer              /* out */
 );
 
-Service_t
+void
 closeFile
 (
     FILE          * filePointer               /* in */
-);
-
-void
-closeFileForWriting
-(
-    void
 );
 
 Service_t
@@ -180,14 +170,15 @@ void
 writeVariableBlock
 (
     char          * buffer,                   /* in */
-    long            length                    /* in */
+    long            length,                   /* in */
+    FILE          * filePointer               /* in */
 );
 
 Service_t
 allocateBuffer
 (
     long            fileLength,               /* in */
-    char         ** buffer                   /* out */
+    void         ** buffer                   /* out */
 );
 
 Service_t

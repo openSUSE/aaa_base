@@ -106,11 +106,11 @@ checkArgument
 {
     BOOLEAN     returnValue;
 
-    if( compareStrings( argument, firstAlternative ) == TRUE ) 
+    if( compareStrings( argument, firstAlternative ) == Equal ) 
     {
         returnValue = TRUE;
     }
-    else if( compareStrings( argument, secondAlternative ) == TRUE ) 
+    else if( compareStrings( argument, secondAlternative ) == Equal ) 
     {
         returnValue = TRUE;
     }
@@ -135,7 +135,7 @@ main
 
     /* parse command line */
     initializeParameters( );
-    if( argc >= numberOfMandatoryParameters )
+    if( argc > 1 ) /* there are arguments */
     {
         argv++;
         argc--;
@@ -377,7 +377,7 @@ main
       /* check for help */
       else if( checkArgument( *argv, "-h", "--help" ) == TRUE )
       {
-          if( argc >= ( numberOfMandatoryParameters + numberOfSimpleParameter ) )
+          if( argc >= numberOfSimpleParameter )
           {
               setSimpleParameter( Help );
           }
@@ -439,7 +439,7 @@ main
       /* display current version */
       else if( checkArgument( *argv, "-V", "--version" ) == TRUE )
       {
-          if( argc >= ( numberOfMandatoryParameters + numberOfSimpleParameter ) )
+          if( argc >= numberOfSimpleParameter )
           {
               setSimpleParameter( Version );
           }
@@ -452,7 +452,7 @@ main
           argc = 0;
       }
       /* check for unknown option */
-      else if( compareStrings( *argv, "-" ) == TRUE )
+      else if( compareStringsExactly( "-", *argv ) == Equal )
       {
           fillup_exception( __FILE__, __LINE__, FormatException, 
                             "invalid option" );

@@ -2,18 +2,18 @@
 ################################################################################
 #									       #
 #									       #
-# Copyrights to S.u.S.E. GmbH Fuerth (c) 1996, 1997, 1998                      #
+# Copyrights to SuSE GmbH (c) 1996, 1997, 1998, 1999, 2000                     #
 #									       #
 # Time-stamp:                                                                  #
 # Project:     fillup                                                          #
 # Module:                                                                      #
 # Filename:    Makefile                                                        #
 # Authors:     Martin Scherbaum/Joerg Dippel                                   #
-# Description: see getArguments.c                                              #
+# Description: see also getArguments.c                                         #
 #									       #
 ################################################################################
 
-VERSION = 1.05
+VERSION = 1.06
 
 # Set "COMPILE_OPTION" to "DEBUG", "OPTIMIZE" or "PROFILE"
 COMPILE_OPTION = DEBUG
@@ -38,7 +38,7 @@ WARNINGS = -Wunused -Wswitch -Wformat -Wreturn-type -Wimplicit -Wmissing-prototy
 DEFINES   = -DVERSION=${VERSION}
 
 # LINUX system
-OPTISPLUS = -m486
+OPTISPLUS = 
 TM	  = \"LINUX\"
 INC       = -I/usr/include
 COMPILER  = -DGCC=1
@@ -49,19 +49,19 @@ OPTIS = $(OPTISPLUS) -O2 -fforce-addr -finline-functions -fno-function-cse \
 
 ifeq ($(COMPILE_OPTION),DEBUG)
   # compile for debugging
-  COMPILE  = gcc -DDEBUG -ansi -g -c ${WARNINGS} -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
+  COMPILE  = gcc -fsigned-char -DDEBUG -ansi -g -c ${WARNINGS} -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
   LINK	   = gcc -g
 endif
 
 ifeq ($(COMPILE_OPTION),OPTIMIZE)
   # compile with all optimizations
-  COMPILE  = gcc -ansi -c $(OPTIS) $(WARNINGS) -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
+  COMPILE  = gcc -fsigned-char -ansi -c $(OPTIS) $(WARNINGS) -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
   LINK	   = gcc -O -s
 endif
 
 ifeq ($(COMPILE_OPTION),PROFILE)
   # compile for use with "gprof"
-  COMPILE  = gcc -ansi -pg -c ${WARNINGS} -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
+  COMPILE  = gcc -fsigned-char -ansi -pg -c ${WARNINGS} -I${SRC} -I${INC} ${COMPILER} ${SYS} ${DEFINES}
   LINK	   = gcc -pg
 endif
 
@@ -105,7 +105,7 @@ $(OBJ)/fillup_cfg.o: $(SRC)/fillup_cfg.c
 #----------------------------------- any functions ------------------------------------#
 
 install: all
-	install -s -o root -m 755 $(BIN)/fillup /usr/local/bin
+	install -s -o root -m 755 $(BIN)/fillup /bin
 
 clean:
 	rm -f $(OBJ)/*.o $(SRC)/\#* $(SRC)/*~ 

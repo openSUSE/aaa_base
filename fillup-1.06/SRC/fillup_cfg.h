@@ -6,7 +6,7 @@
 /* Time-stamp:                                                                */
 /* Project:    fillup                                                         */
 /* Module:     configuration                                                  */
-/* Filename:   fillup_cfg.c                                                   */
+/* Filename:   fillup_cfg.h                                                   */
 /* Author:     Joerg Dippel (jd)                                              */
 /* Description:                                                               */
 /*                                                                            */
@@ -15,10 +15,6 @@
 /*----------------------------------------------------------------------------*/
 
 /*--------------------------------- DEFINES ----------------------------------*/
-
-#define cfg_baseFileBlocks            500
-#define cfg_additionalFileBlocks      500
-#define cfg_forbiddenFileBlocks       100
 
 #define cfg_MaxVariableLength         256
 

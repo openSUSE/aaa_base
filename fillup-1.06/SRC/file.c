@@ -39,7 +39,7 @@ readFile
         if( Success == getFileLength( filePointer, &fileLength ) )
         {
             if( Success ==
-                allocateBuffer( fileLength, &buffer ) )
+                allocateBuffer( fileLength, ( void ** )&buffer ) )
             {
                 if( Success == 
                     readFileToBuffer( filePointer, fileLength, &buffer ) )

@@ -171,7 +171,7 @@ setNumericParameter
         case CommentLines:
            parameterCommentLines = IsSet;
            commentLinesString = parameterId;
-           commentLinesValue = getCardinal( parameterId );
+           ( void )getCardinal( parameterId, &commentLinesValue );
            break;
 
         default:
