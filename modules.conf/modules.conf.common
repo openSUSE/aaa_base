@@ -421,6 +421,10 @@ alias char-major-175    mxser
 # options mxser ioaddr=0x180
 
 #alias char-major-180	  usbcore
+
+alias InterMezzo intermezzo
+alias char-major-185 intermezzo
+
 alias char-major-195      NVdriver
 alias char-major-206      osst
 alias char-major-240	  usb-serial

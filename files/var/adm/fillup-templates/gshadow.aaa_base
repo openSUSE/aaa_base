@@ -34,4 +34,6 @@ logmastr:*:root:root
 maildrop:*:root:root
 perforce:*:root:root,perforce
 sapdb:*:root:root,sapdb
+man:*:root:root
+intermezzo:*:root:root
 nogroup:*:root:root

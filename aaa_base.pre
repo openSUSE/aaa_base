@@ -37,6 +37,7 @@ echo "root:x:0:0:root:/root:/bin/bash
 bin:x:1:1:bin:/bin:/bin/bash
 daemon:x:2:2:Daemon:/sbin:/bin/bash
 lp:x:4:7:Printing daemon:/var/spool/lpd:/bin/bash
+mail:x:8:12:Mailer daemon:/var/spool/clientmqueue:/bin/false
 news:x:9:13:News system:/etc/news:/bin/bash
 uucp:x:10:14:Unix-to-Unix CoPy system:/etc/uucp:/bin/bash
 games:x:12:100:Games account:/var/games:/bin/bash
@@ -106,6 +107,7 @@ maildrop:x:59:
 perforce:x:60:perforce
 sapdb:x:61:sapdb
 man:x:62:
+intermezzo:x:63:
 users:x:100:
 nobody:x:65533:nobody,root
 nogroup:x:65534:nobody,root" > var/adm/fillup-templates/group.aaa_base
