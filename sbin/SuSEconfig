@@ -475,11 +475,11 @@ if test "$SORT_PASSWD_BY_UID" = yes ; then
 fi
 
 WINDOWMANAGER=`type -p $DEFAULT_WM`
-test -z "$WINDOWMANAGER" && {
+test -z "$WINDOWMANAGER" -a -n "$DEFAULT_WM" && {
     test -x /usr/X11R6/bin/$DEFAULT_WM && \
         WINDOWMANAGER=/usr/X11R6/bin/$DEFAULT_WM
 }
-test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/startkde
+test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/kde
 echo "WINDOWMANAGER=$WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo "export WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
 echo "setenv WINDOWMANAGER $WINDOWMANAGER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
