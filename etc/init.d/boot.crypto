@@ -35,6 +35,9 @@ case "$1" in
     start|b)
 	echo "Activating crypto devices using $CRYPTOTAB ... "
 	while read loopdev physdev access filesys crypto mopt rest ; do
+	    case "$loopdev" in
+		\#*|"") continue ;;
+	    esac
 	    #
 	    # Seeking for crypto modules
 	    #
@@ -77,6 +80,9 @@ case "$1" in
     stop)
 	echo "Turning off crypto devices using $CRYPTOTAB ... "
 	while read loopdev physdev access filesys crypto mopt rest ; do
+	    case "$loopdev" in
+		\#*|"") continue ;;
+	    esac
 	    #
 	    # Umount loop device
 	    #
