@@ -8,7 +8,6 @@
 ### BEGIN INIT INFO
 # Provides:          boot.clock
 # Required-Start:    boot.localfs
-# Should-Start:	boot.crypto boot.swap
 # Required-Stop:
 # Default-Start:     B S
 # Default-Stop:
