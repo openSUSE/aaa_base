@@ -76,7 +76,7 @@ MINICOM="-c on"
 export MINICOM
 
 unset MANPATH
-MANPATH=`manpath -q`
+MANPATH=`test -x /usr/bin/manpath && /usr/bin/manpath -q`
 export MANPATH
 
 #
