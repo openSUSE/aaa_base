@@ -5,7 +5,6 @@
 %config(noreplace) /etc/inittab
 %config(noreplace) /etc/modules.conf.local
 %config(noreplace) /etc/modprobe.conf.local
-%config(noreplace) /etc/nsswitch.conf
 %config /root/bin/cron.daily
 %config /root/bin/cron.daily.local
 %config /etc/conf.modules
@@ -15,7 +14,6 @@
 %config /etc/csh.login
 %config /etc/inputrc
 %config /etc/insserv.conf
-%config /etc/ld.so.conf
 %config /etc/mailcap
 %config /etc/mime.types
 %config /etc/permissions
