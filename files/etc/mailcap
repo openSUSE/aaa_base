@@ -94,16 +94,16 @@ video/*; xanim %s
 #application/pgp; pgp %s; needsterminal
 #
 #application/x-uudecode; uudecode -o- %s; copiousoutput
-audio/x-pn-realaudio;/usr/lib/RealPlayer8/realplay "%u"
-audio/vnd.rn-realaudio;/usr/lib/RealPlayer8/realplay "%u"
-application/smil;/usr/lib/RealPlayer8/realplay "%u"
-text/vnd.rn-realtext;/usr/lib/RealPlayer8/realplay "%u"
-video/vnd.rn-realvideo;/usr/lib/RealPlayer8/realplay "%u"
-image/vnd.rn-realflash;/usr/lib/RealPlayer8/realplay "%u"
-application/x-shockwave-flash2-preview;/usr/lib/RealPlayer8/realplay "%u"
-application/sdp;/usr/lib/RealPlayer8/realplay "%u"
-application/x-sdp;/usr/lib/RealPlayer8/realplay "%u"
-application/vnd.rn-realmedia;/usr/lib/RealPlayer8/realplay "%u"
-image/vnd.rn-realpix;/usr/lib/RealPlayer8/realplay "%u"
+audio/x-pn-realaudio;/usr/bin/realplay "%u"
+audio/vnd.rn-realaudio;/usr/bin/realplay "%u"
+application/smil;/usr/bin/realplay "%u"
+text/vnd.rn-realtext;/usr/bin/realplay "%u"
+video/vnd.rn-realvideo;/usr/bin/realplay "%u"
+image/vnd.rn-realflash;/usr/bin/realplay "%u"
+application/x-shockwave-flash2-preview;/usr/bin/realplay "%u"
+application/sdp;/usr/bin/realplay "%u"
+application/x-sdp;/usr/bin/realplay "%u"
+application/vnd.rn-realmedia;/usr/bin/realplay "%u"
+image/vnd.rn-realpix;/usr/bin/realplay "%u"
 #
 application/x-java-jnlp-file;/usr/bin/javaws "%s"
