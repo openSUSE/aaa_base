@@ -47,7 +47,6 @@ function _cd_ ()
     \$*)	COMPREPLY=($(compgen -v -P '$' $s	-- ${c#?}))	;;
     ~*/*)	COMPREPLY=($(compgen -d $s		-- "${c}"))	;;
     ~*)		COMPREPLY=($(compgen -u $s		-- "${c}"))	;;
-    *)		COMPREPLY=($(compgen -d $s		-- "${c}"))
     esac
     case "$1" in
     mkdir)
