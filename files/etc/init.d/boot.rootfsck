@@ -42,12 +42,6 @@ case "$1" in
 		rc_status -v1 -r
 	fi
 	
-	# /dev/shm is already there, call blkid might be needed
-	if [ -x /sbin/blkid ] ; then
-	    /sbin/blkid -c /dev/shm/tmp_blkid.tab > /dev/null
-	    export BLKID_FILE=/dev/shm/tmp_blkid.tab
-	fi
-
 	#
 	# If we use a serial console, don't use the fsck progress bar
 	#
@@ -57,16 +51,26 @@ case "$1" in
 	# do fsck and start sulogin, if it fails.
 	#
 	FSCK_RETURN=0
-	# on first startup of a system with a lvm root device lvm /dev entries
-	# may not exist at this time, so skip fsck in this case
-	ROOTFS_BLKDEV=`fsck -T -N / 2>/dev/null`
-	ROOTFS_BLKDEV=${ROOTFS_BLKDEV%% }
-        ROOTFS_BLKDEV=${ROOTFS_BLKDEV##* }
-	DES_OK=0
-	if test -n "$ROOTFS_BLKDEV" -a "$ROOTFS_BLKDEV" != "/" -a -b "$ROOTFS_BLKDEV" ; then
-	    DES_OK=1
-	fi
+	DES_OK=1
 
+	# we may get ROOTFS_BLKDEV passed from initrd, skip extra actions
+	if [ -n "$ROOTFS_BLKDEV" ]  ; then
+	    # /dev/shm is already there, call blkid might be needed
+	    if [ -x /sbin/blkid ] ; then
+		/sbin/blkid -c /dev/shm/tmp_blkid.tab > /dev/null
+		export BLKID_FILE=/dev/shm/tmp_blkid.tab
+	    fi
+	    # on first startup of a system with a lvm root device lvm /dev entries
+	    # may not exist at this time, so skip fsck in this case
+	    ROOTFS_BLKDEV=`fsck -T -N / 2>/dev/null`
+	    ROOTFS_BLKDEV=${ROOTFS_BLKDEV%% }
+	    ROOTFS_BLKDEV=${ROOTFS_BLKDEV##* }
+	    DES_OK=0
+	    if test -n "$ROOTFS_BLKDEV" -a "$ROOTFS_BLKDEV" != "/" -a -b "$ROOTFS_BLKDEV" ; then
+		DES_OK=1
+	    fi
+        fi
+	#
 	if test ! -f /fastboot -a -z "$fastboot" -a $DES_OK -eq 1 ; then
 	    FSCK_FORCE=""
 	    test -f /forcefsck && FSCK_FORCE="-f"
@@ -77,7 +81,7 @@ case "$1" in
 	    mount -n -o remount,ro / 2> /dev/null
 	    if test $? = 0; then
 	        echo "Checking root file system..."
-	        fsck $FSCK_PROGRESSBAR -a $FSCK_FORCE /
+	        fsck $FSCK_PROGRESSBAR -a $FSCK_FORCE $ROOTFS_BLKDEV
 	        # A return code of 1 indicates that file system errors
 	        # were corrected, but that the boot may proceed.
 	        # A return code of 2 or larger indicates failure.
