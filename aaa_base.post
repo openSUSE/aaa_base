@@ -91,7 +91,7 @@ fi
 #
 %{fillup_and_insserv -py boot.proc boot.localfs boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.idedma boot.localnet halt random reboot single xdm nfs}
 %{fillup_and_insserv -psy boot.crypto START_CRYPTO_FILESYSTEMS}
-%{insserv_force_if_yast etc/init.d/boot.loadmodules etc/init.d/boot.shm}
+%{insserv_force_if_yast etc/init.d/boot.loadmodules etc/init.d/boot.shm etc/init.d/boot.cleanup}
 # new line: boot.rootfsck depends on boot.shm
 %{insserv_force_if_yast etc/init.d/boot.rootfsck}
 ## powerfail probably needs empty header ...
