@@ -139,6 +139,9 @@
 /opt/kde3/bin/konsole                   root.root        755
 /usr/X11R6/bin/xterm                    root.root        755
 /usr/X11R6/bin/kterm                    root.root        755
-# fixme: needs completion.
-
-
+/usr/X11R6/bin/Eterm                    root.root        755
+/opt/gnome/bin/gnome-terminal           root.root        755
+/usr/X11R6/bin/rxvt                     root.root        755
+/usr/X11R6/bin/rxvt.xpm                 root.root        755
+/usr/X11R6/bin/wterm                    root.root        755
+/usr/X11R6/bin/hanterm                  root.root        755

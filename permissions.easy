@@ -85,6 +85,9 @@
 /etc/syslog.conf                       root.root         644
 /etc/termcap                           root.root         644
 
+# sysconfig files:
+/etc/sysconfig/network/providers       root.root         700
+
 
 #
 # suid system programs that need the suid bit to work:
@@ -118,6 +121,9 @@
 /usr/lib/pt_chown                      root.root        4755
 /sbin/pwdb_chkpwd                      root.shadow      2755
 /sbin/unix_chkpwd                      root.shadow      2755
+
+# utempter: See bottom of /etc/permissions:
+/usr/sbin/utempter                     root.tty         2755
 
 #
 # log files that do not grow remarkably
@@ -399,36 +405,6 @@
 
 
 
-#
-# SVGA demos. Need suid to root to initialize console graphics.
-#
-/usr/lib/vga/demos/printftest           root.root       4755
-/usr/lib/vga/demos/linearspeed          root.root       4755
-/usr/lib/vga/demos/bankspeed            root.root       4755
-/usr/lib/vga/demos/addmodetest          root.root       4755
-/usr/lib/vga/demos/mousetest            root.root       4755
-/usr/lib/vga/demos/speedtest            root.root       4755
-/usr/lib/vga/demos/testaccel            root.root       4755
-/usr/lib/vga/demos/plane                root.root       4755
-/usr/lib/vga/demos/testlinear           root.root       4755
-/usr/lib/vga/demos/keytest              root.root       4755
-/usr/lib/vga/demos/fun                  root.root       4755
-/usr/lib/vga/demos/forktest             root.root       4755
-/usr/lib/vga/demos/mjoytest             root.root       4755
-/usr/lib/vga/demos/bg_test              root.root       4755
-/usr/lib/vga/demos/spin                 root.root       4755
-/usr/lib/vga/demos/linearfork           root.root       4755
-/usr/lib/vga/demos/eventtest            root.root       4755
-/usr/lib/vga/demos/joytest              root.root       4755
-/usr/lib/vga/demos/scrolltest           root.root       4755
-/usr/lib/vga/demos/wrapdemo             root.root       4755
-/usr/lib/vga/demos/svidtune             root.root       4755
-/usr/lib/vga/demos/testgl               root.root       4755
-/usr/lib/vga/demos/accel                root.root       4755
-/usr/lib/vga/demos/vgatest              root.root       4755
-/usr/lib/vga/demos/lineart              root.root       4755
-
-
 
 #
 # amanda
@@ -676,61 +652,3 @@
 /opt/gnome/bin/soundtracker             root.root       755
 
 
-
-
-#
-# permission last-minute bugfixes:
-#
-/usr/lib/cmclient/lib                   root.root       755
-/usr/lib/cmclient/lib/swingall.jar      root.root       644
-/usr/lib/cmclient/lib/callman.jar       root.root       644
-/usr/share/doc/packages/pads/README     root.root       644
-/usr/share/doc/packages/susebuch/COPYING root.root      644
-/usr/share/doc/packages/ixware/suinstall.cgi root.root  755
-# pmb
-/usr/lib/pmb/PMB-MPI1                   root.root       755   
-# maxwell
-/usr/lib/maxwell/fonts/Type1            root.root       755
-/usr/lib/maxwell/template               root.root       755
-# ica client:
-/usr/lib/ICAClient/cache                root.root       755
-/usr/knox/log/nlpc.lg1                  root.root       640
-/usr/knox/log/nlpc.lck                  root.root       640
-/usr/include/licq                       root.root       755
-/usr/lib/licq                           root.root       755
-/usr/share/doc/packages/licq            root.root       755
-/usr/share/licq                         root.root       755
-/usr/share/licq/qt-gui                  root.root       755
-/usr/share/licq/qt-gui/dock.console     root.root       755
-/usr/share/licq/qt-gui/dock.flower      root.root       755
-/usr/share/licq/qt-gui/dock.flower-ns   root.root       755
-/usr/share/licq/qt-gui/dock.glicq       root.root       755
-/usr/share/licq/qt-gui/dock.pli         root.root       755
-/usr/share/licq/qt-gui/icons.computer   root.root       755
-/usr/share/licq/qt-gui/icons.icq        root.root       755
-/usr/share/licq/qt-gui/icons.icq2       root.root       755
-/usr/share/licq/qt-gui/icons.mark       root.root       755
-/usr/share/licq/qt-gui/locale           root.root       755
-/usr/share/licq/qt-gui/skin.basic       root.root       755
-/usr/share/licq/qt-gui/skin.basic-ncb   root.root       755
-/usr/share/licq/qt-gui/skin.bheart      root.root       755
-/usr/share/licq/qt-gui/skin.compact     root.root       755
-/usr/share/licq/qt-gui/skin.dim         root.root       755
-/usr/share/licq/qt-gui/skin.e           root.root       755
-/usr/share/licq/qt-gui/skin.gradient    root.root       755
-/usr/share/licq/qt-gui/skin.icq         root.root       755
-/usr/share/licq/qt-gui/skin.icq-ncb     root.root       755
-/usr/share/licq/qt-gui/skin.pli         root.root       755
-/usr/share/licq/qt-gui/skin.shale       root.root       755
-/usr/share/licq/sounds                  root.root       755
-/usr/share/licq/sounds/fun              root.root       755
-/usr/share/licq/sounds/icq              root.root       755
-/usr/share/licq/translations            root.root       755
-/usr/share/licq/utilities               root.root       755
-/var/log/schemeswitch.jrnl              root.root       640
-/var/lib/support                        root.root       700
-/opt/graffy/tmp                         root.root       755
-/opt/XQuick/datadt.inf                  root.root       644
-/opt/XQuick/dataengl.inf                root.root       644
-/etc/icalicense                         root.root       755
-/opt/FrontBase/Databases                root.root       755
