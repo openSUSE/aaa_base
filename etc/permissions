@@ -23,6 +23,7 @@
 /tmp/.X11-unix                         root.root        1777
 /usr/postgres/data/base                postgres.daemon   700
 /usr/postgres/data/files               postgres.daemon   755
+/usr/lib/ircd                          irc.root          700
 /usr/tmp                               root.root        1777
 /var/X11R6/scores                      root.root        1777
 /var/catman                            man.root          755
@@ -65,7 +66,6 @@
 /usr/X11R6/bin/Xwrapper                root.root        4755
 /usr/X11R6/bin/dga                     root.root        4755
 /usr/X11R6/bin/xlock                   root.shadow      2755
-/usr/X11R6/bin/xosview.bin             root.root        4755
 /usr/X11R6/bin/xterm                   root.root        4755
 /usr/bin/at                            root.root        4755
 /usr/bin/crontab                       root.root        4755

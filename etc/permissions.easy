@@ -29,6 +29,7 @@
 # 'normal' suid root programs
 #
 /usr/X11R6/bin/cardinfo                root.root        4755
+/usr/X11R6/bin/xosview.bin             root.root        4755
 /usr/bin/bttvgrab                      root.root        4755
 /usr/bin/chage                         root.shadow      4755
 /usr/bin/chfn                          root.shadow      4755

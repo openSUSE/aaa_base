@@ -202,7 +202,7 @@
 /usr/X11R6/bin/Xwrapper                root.root        4755
 /usr/X11R6/bin/dga                     root.root        4755
 /usr/X11R6/bin/xlock                   root.shadow      2755
-/usr/X11R6/bin/xosview.bin             root.root        4755
+/usr/X11R6/bin/xosview.bin             root.root         755
 /usr/X11R6/bin/xterm                   root.root        4755
 /usr/bin/at                            root.trusted     4750
 /usr/bin/crontab                       root.trusted     4750
