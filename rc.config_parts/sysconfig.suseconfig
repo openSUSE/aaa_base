@@ -1,0 +1,38 @@
+
+#
+# Some people don't want SuSEconfig to modify the system. With this
+# entry you can disable SuSEconfig completely. 
+# Please don't contact our support if you have trouble configuring your 
+# system after having disabled SuSEconfig.  (yes/no)
+#
+ENABLE_SUSECONFIG=yes
+
+#
+# SuSEconfig can mail reports (created by YaST or included in packages)
+# to you.  Here you can set the address.  If you don't want reports to
+# be sent, then simply set it to "".
+#
+MAIL_REPORTS_TO="root"
+
+#
+# There are two levels of mailing. If you set MAIL_LEVEL it to "warn"
+# you will only get the important mails. If you set it to "all", you will
+# also receive the logs.
+#
+MAIL_LEVEL="warn"
+
+#
+# We have a small perl script to generate the usr/info/dir file. Do you
+# want this file to be generated? (yes/no)
+#
+CREATE_INFO_DIR="yes"
+
+#
+# SuSEconfig can automatically create the links /usr/lib/java and /usr/lib/jre
+# that point to a suitable JDK or JRE respectively if you set CREATE_JAVALINK
+# to "yes"
+# If you are not satisfied with the choice it makes, set CREATE_JAVALINK to
+# "no" and set the link manually.
+#
+CREATE_JAVALINK="yes"
+

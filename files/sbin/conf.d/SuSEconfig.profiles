@@ -24,7 +24,7 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 }
 . $r/lib/YaST/SuSEconfig.functions
 
-for i in $r/etc/rc.config $r/etc/sysconfig/language $r/etc/sysconfig/displaymanager ; do
+for i in $r/etc/rc.config $r/etc/sysconfig/language $r/etc/sysconfig/displaymanager $r/etc/sysconfig/suseconfig ; do
   test -f $i || {
     echo "No $i found."
     exit 1

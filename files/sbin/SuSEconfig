@@ -103,12 +103,14 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 
 echo "Reading $r/etc/rc.config and updating the system..."
 
-if test ! -f $r/etc/rc.config ; then
-    echo "No $r/etc/rc.config found."
+for i in $r/etc/rc.config $r/etc/sysconfig/suseconfig ; do
+  if test ! -f $i ; then
+    echo "No $i found."
     exit 1
-fi
+  fi
 
-. $r/etc/rc.config
+  . $i
+done
 
 if test -n "$ENABLE_SUSECONFIG" -a "$ENABLE_SUSECONFIG" = "no" ; then
     echo "SuSEconfig is disabled in $r/etc/rc.config. Exit..."
