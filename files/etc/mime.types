@@ -169,3 +169,13 @@ application/sdp sdp
 application/x-sdp sdp
 application/vnd.rn-realmedia rm
 image/vnd.rn-realpix rp
+application/vnd.sun.xml.writer sxw  
+application/vnd.sun.xml.writer.template stw  
+application/vnd.sun.xml.writer.global sxg  
+application/vnd.sun.xml.calc sxc  
+application/vnd.sun.xml.calc.template stc  
+application/vnd.sun.xml.impress sxi  
+application/vnd.sun.xml.impress.template sti  
+application/vnd.sun.xml.draw sxd  
+application/vnd.sun.xml.draw.template std  
+application/vnd.sun.xml.math sxm 

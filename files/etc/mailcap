@@ -72,7 +72,8 @@ image/*; display %s; ;  test=test -n "$DISPLAY"
 # to test if Lynx is running or not you can use 'test -n "LYNX_VERSION"'
 #
 # HTML
-text/html; lynx -dump %s; copiousoutput; nametemplate=%s.html
+#text/html; lynx -dump %s; copiousoutput; nametemplate=%s.html
+text/html; w3m -dump %s; copiousoutput; nametemplate=%s.html
 # Compressed
 application/x-gunzip; gunzip -c %s; copiousoutput
 application/x-gzip; gunzip -c %s; copiousoutput
