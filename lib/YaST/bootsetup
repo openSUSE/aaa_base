@@ -169,7 +169,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     echo_login_as_root () {
         case "$LANGUAGE" in
           german)
-            echo "Geben Sie jetzt \"root\" ein um sich als Benutzer root einzuloggen..."
+            echo "Geben Sie jetzt \"root\" ein, um sich als Benutzer root einzuloggen..."
           ;;
           french)
             echo "Tapez maintenant \"root\" pour vous connecter"
@@ -314,6 +314,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     #
     # Almost white border line on grey background
     #
+    echo -ne '\r'
     tput smacs
     tput bold; tput setab 7; tput setaf 7
     echo -n Ú
