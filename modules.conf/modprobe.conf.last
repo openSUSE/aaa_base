@@ -1,0 +1,2 @@
+# please keep this at the end and add local modifications to modules.conf.local
+include /etc/modprobe.conf.local

@@ -1,0 +1,54 @@
+# begin of i386 part for modprobe.conf
+
+alias char-major-4        serial
+alias char-major-5        serial
+
+alias parport_lowlevel    parport_pc
+# options parport_pc io=0x378 irq=none,none
+# If you have multiple parallel ports, specify them this way:
+# options parport_pc io=0x378,0x278  irq=none,none
+
+# Linux ACP modem (Mwave)
+alias char-major-10-219 mwave
+# options mwave dspirq=10 dspio=0x130 uartirq=3 uartio=0x2f8
+
+# nVidia nforce chipset (network + audio)
+#alias eth0 nvnet
+#alias sound-slot-1 nvaudio
+#alias usb-interface usb-ohci
+
+# IBM thinkpad tpctl
+# see /usr/share/doc/packages/tpctl/
+alias char-major-10-170 thinkpad
+# options thinkpad enable_smapi=0
+
+# Linux-ABI
+alias char-major-30       abi-ibcs
+alias binfmt-0004         binfmt_coff
+alias binfmt-332          abi-ibcs
+alias binfmt-518          abi-ibcs
+alias binfmt-002c         abi-ibcs
+alias personality-1       abi-ibcs
+alias personality-2       abi-ibcs
+alias personality-3       abi-sco
+alias personality-4       abi-wyse
+alias personality-5       abi-ibcs
+alias personality-7       abi-ibcs
+alias personality-13      abi-solaris
+alias personality-14      abi-uw7
+install binfmt_misc /sbin/modprobe --ignore-install binfmt_misc && { mount -t binfmt_misc none /proc/sys/fs/binfmt_misc; }
+remove binfmt_misc { umount /proc/sys/fs/binfmt_misc; } ; /sbin/modprobe -r --ignore-remove binfmt_misc
+
+# required for DRI support on SiS chips
+options sisfb             mode=none mem=12288
+
+########################################################################
+# AGP
+########################################################################
+
+install mga    { /sbin/modprobe -k agpgart; } ; /sbin/modprobe --ignore-install mga
+install r128   { /sbin/modprobe -k agpgart; } ; /sbin/modprobe --ignore-install r128
+install radeon { /sbin/modprobe -k agpgart; } ; /sbin/modprobe --ignore-install radeon
+options agpgart agp_try_unsupported=1
+
+# end of i386 part for modprobe.conf
