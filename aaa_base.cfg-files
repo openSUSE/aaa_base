@@ -9,7 +9,7 @@ etc/inittab
 etc/inputrc
 etc/issue
 etc/issue.net
-etc/ld.so.conf.in
+etc/ld.so.conf
 etc/mailcap
 etc/mime.types
 etc/motd

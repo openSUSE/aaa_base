@@ -302,17 +302,6 @@ if test -e $r/etc/shells.in ; then
         check_md5_and_move $r/etc/shells
 fi
 
-if test -e $r/etc/ld.so.conf.in ; then
-        echo_warning /etc/ld.so.conf \
-            "# Change /etc/ld.so.conf.in instead." \
-            > $r/etc/ld.so.conf.SuSEconfig
-
-        (for i in `cat $r/etc/ld.so.conf.in` ; do
-                test -d $r/$i && echo $i
-        done) >> $r/etc/ld.so.conf.SuSEconfig
-        check_md5_and_move $r/etc/ld.so.conf
-fi
-
 if test -n "$TIMEZONE" -a "$TIMEZONE" != "YAST_ASK" -a \
    -e $r/usr/lib/zoneinfo/$TIMEZONE ; then
         my_test_write $r/usr/lib/zoneinfo/ && {
