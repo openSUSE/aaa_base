@@ -89,7 +89,7 @@ check_log_file () {
         echo "The following backup(s) do exist now:"
         ls -l "$1"-[0-9]*
         echo
-	df -k .
+	df -k $1
 	echo
     fi
 }

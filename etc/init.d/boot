@@ -406,6 +406,9 @@ if test "$START_LOOPBACK" = yes; then
     rc_status -v -r
 fi
 
+# clean up old yp bindings
+rm -f /var/yp/binding/*.[12]
+
 #
 # set hostname and domainname
 #
