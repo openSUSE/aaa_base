@@ -1,6 +1,5 @@
 root/.exrc
 root/.xinitrc
-root/.gnupg/pubring.gpg
 etc/DIR_COLORS
 etc/netgroup
 etc/host.conf
