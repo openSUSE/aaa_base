@@ -212,8 +212,6 @@ for k in $kernels ; do
 
     cp $tmp_initrd.gz $ii || error 8 "failed to install initrd"
 
-    kernel_idx=$((kernel_idx+1))
-
     clean_up
 
   else
@@ -221,6 +219,8 @@ for k in $kernels ; do
     echo "no kernel image \"$k\""
 
   fi
+
+  kernel_idx=$((kernel_idx+1))
 
 done
 
