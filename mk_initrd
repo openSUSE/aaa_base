@@ -311,11 +311,11 @@ if [ "x$splash" = xauto ] ; then
     for vga in `cat $vgascan | sed -n -e '/^[ 	]*#/d' -e 's/^.*[ 	]*vga[ 	]*=[ 	]*\([0-9a-fA-FxX]*\).*$/\1/p'` ; do
 	splashsize=
 	case $vga in
-	    785|786|0x311|0x312) splashsize=640x480   ;;
-	    788|789|0x314|0x315) splashsize=800x600   ;;
-	    791|792|0x317|0x318) splashsize=1024x768  ;;
-	    794|0x31a|0x31A)     splashsize=1280x1024 ;;
-	    795|0x31b|0x31B)     splashsize=1280x1024 ;;
+	    785|786|0x311|0x312|0x0311|0x0312) splashsize=640x480   ;;
+	    788|789|0x314|0x315|0x0314|0x0315) splashsize=800x600   ;;
+	    791|792|0x317|0x318|0x0317|0x0318) splashsize=1024x768  ;;
+	    794|0x31a|0x31A|0x031a)     splashsize=1280x1024 ;;
+	    795|0x31b|0x31B|0x031b)     splashsize=1280x1024 ;;
 	    *)
 		vgahex=`printf 0x%04x "$vga"`
 		splashsize=`hwinfo debug=0 -all +bios.vbe | sed -ne 's/^.*Mode '$vgahex': \([^ ][^ ]*\) .*$/\1/p' 2>/dev/null`
