@@ -299,3 +299,5 @@ test -d /etc/profile.d && \
 #
 test -e /etc/profile.local && . /etc/profile.local
 
+unset DIR
+
