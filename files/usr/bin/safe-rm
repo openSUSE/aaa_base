@@ -1,10 +1,47 @@
-#!/bin/sh
+#!/bin/bash
 
-test ${1:0:1} == "/" || { echo "usage: $0 _absolute_path_to_file" ; exit 1;  }
-DIRNAME=${1//\/.\//\/}
-FILENAME=${DIRNAME##*/}
-DIRNAME=${DIRNAME%/*}
-cd -P "$DIRNAME" || { echo "$0: no symlinks allowed in the path of $1" ; exit 1; }
-test "$PWD" == "$DIRNAME" || exit 1
-/bin/rm -f -- "$FILENAME"
+todo=
+opts=
+case "${0##*/}" in
+    safe-rm)	todo=rm    ; opts=-f ;;
+    safe-rmdir) todo=rmdir ; opts=   ;;
+esac
 
+set -o physical
+test -n "$todo"     || exit 2
+test -x /bin/$todo  || exit 2
+test -x /bin/pwd    || exit 2
+
+for d; do
+    if [[ "$d" != /* ]] ; then
+	echo "usage: $0 _absolute_path_to_file" 2>&1
+	exit 1
+    fi
+    path=${d//\/.\//\/}
+    name=${path##*/}
+
+    if test "/$name" = "$path" ; then
+	echo "$0: usage in root directory not allowed" 2>&1
+	exit 1
+    fi
+    path=${path%/*}
+
+    if test -z "${path}" ; then
+	echo "$0: empty dirname not allowed" 2>&1
+	exit 1
+    fi
+
+    if cd -P "${path}" && test "${path}" = "$(pwd -P)" ; then
+
+	if test "$PWD" = "$(/bin/pwd)" ; then
+	    /bin/$todo $opts -- "$name"
+	else
+	    echo "$0: no symlinks allowed in the path of $d" 2>&1
+	    exit 1
+	fi
+
+    else
+	echo "$0: no symlinks allowed in the path of $d" 2>&1
+	exit 1
+    fi
+done
