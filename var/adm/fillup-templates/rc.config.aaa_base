@@ -41,13 +41,29 @@ MODEM="YAST_ASK"
 # (e.g. "de-latin1-nodeadkeys" for KEYTABLE, empty for US settings)
 #
 KEYTABLE="de-latin1-nodeadkeys"
-FONT="YAST_ASK"
 
 #
-# some key tables need a unimap.  Add it to TRANSLATION if you need it.
-# "none" does nothing here.
+# what font for console shall be loaded?
 #
-TRANSLATION=""
+CONSOLE_FONT="YAST_ASK"
+
+#
+# does your console font need a screenmap. so add it to CONSOLE_SCREENMAP.
+#
+CONSOLE_SCREENMAP=""
+
+#
+# some fonts/keymap need a unicode map (TRANSLATION in former releases).
+# add it to CONSOLE_UNICODEMAP.
+#
+CONSOLE_UNICODEMAP=""
+
+#
+# for some fonts the console has to be initialized with CONSOLE_MAGIC.
+# CONSOLE_MAGIC can be empty or have the values "B" or "K".
+#
+CONSOLE_MAGIC=""
+
 
 #
 # keyboard repeat rate (2.0 - 30.0)

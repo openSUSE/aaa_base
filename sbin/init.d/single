@@ -12,22 +12,38 @@
 
 case "$1" in
     start)
-        if test -n "$FONT" -a "$FONT" != "YAST_ASK" -a \
-                -x /usr/bin/setfont -a -d /usr/lib/kbd/consolefonts
-        then
+        if test -d /usr/lib/kbd/consolefonts ; then
+            if test -n "$CONSOLE_FONT" -a "$CONSOLE_FONT" != "YAST_ASK" -a \
+                -x /usr/bin/setfont ; then
                 ECHO_RETURN=$rc_done_up
-                echo Loading console font $FONT
-                /usr/bin/setfont $FONT || ECHO_RETURN=$rc_failed_up
-		if test -x /usr/bin/loadunimap -a -d /usr/lib/kbd/consoletrans
-		then
-			test -n "$TRANSLATION" -a "$TRANSLATION" != "none" && {
-			    /usr/bin/loadunimap $TRANSLATION || \
-                                ECHO_RETURN=$rc_failed_up
-                        }
-		else
-			/usr/bin/loadunimap || ECHO_RETURN=$rc_failed_up
-		fi
+                echo Loading console font $CONSOLE_FONT
+                /usr/bin/setfont $CONSOLE_FONT || ECHO_RETURN=$rc_failed_up
                 echo -e "$ECHO_RETURN"
+            fi
+            if test -n "$CONSOLE_UNICODEMAP" -a \
+                "$CONSOLE_UNICODEMAP" != "none" -a \
+                -x /usr/bin/loadunimap ; then
+                ECHO_RETURN=$rc_done_up
+                echo Loading unimap $CONSOLE_UNICODEMAP
+                /usr/bin/loadunimap $CONSOLE_UNICODEMAP || ECHO_RETURN=$rc_failed_up
+                echo -e "$ECHO_RETURN"
+            fi
+            if test -n "$CONSOLE_SCREENMAP" -a \
+                "$CONSOLE_SCREENMAP" != "none" -a \
+                -x /usr/bin/setfont ; then
+                ECHO_RETURN=$rc_done_up
+                echo Loading screenmap $CONSOLE_SCREENMAP
+                /usr/bin/setfont -m $CONSOLE_SCREENMAP || ECHO_RETURN=$rc_failed_up
+                echo -e "$ECHO_RETURN"
+            fi
+            if test -n "$CONSOLE_MAGIC" -a "$CONSOLE_MAGIC" != "none" ; then
+                ECHO_RETURN=$rc_done_up
+                echo Setting up console ttys
+                for i in /dev/tty[1-6]; do
+                     echo "\033($CONSOLE_MAGIC" > $i || ECHO_RETURN=$rc_failed_up
+                done
+                echo -e "$ECHO_RETURN"
+            fi
         fi
         if test -n "$KBD_RATE" -a -n "$KBD_DELAY" -a -x /sbin/kbdrate; then
                 ECHO_RETURN=$rc_done_up
