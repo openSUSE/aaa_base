@@ -174,15 +174,15 @@ done
 echo -n "Master Resource Control: "
 echo -e "runlevel ${RUNLEVEL} has been ${stat}${extd}reached${norm}"
 if test -n "$failed" ; then
-    n=$((${#failed} + 2))
+    n=$((${#failed} + 7))
     echo -n  "Failed services in runlevel ${RUNLEVEL}: "
-    test $n -lt 41 && echo -en "\033[${COLUMNS}C\033[${n}D"
+    test $n -lt 47 && echo -en "\033[${COLUMNS}C\033[${n}D"
     echo -e  "${warn}${failed}${norm}"
 fi
 if test -n "$skipped" ; then
-    n=$((${#skipped} + 2))
+    n=$((${#skipped} + 7))
     echo -n  "Skipped services in runlevel ${RUNLEVEL}: "
-    test $n -lt 41 && echo -en "\033[${COLUMNS}C\033[${n}D"
+    test $n -lt 47 && echo -en "\033[${COLUMNS}C\033[${n}D"
     echo -e  "${attn}${skipped}${norm}"
 fi
 

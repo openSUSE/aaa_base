@@ -27,10 +27,12 @@ mount -n -t devpts $optpts devpts /dev/pts
 rc_status -v1 -r
 
 #
-# Start blogd, requires /proc and /dev/pts
+# Start blogd, requires /proc and /dev/pts.
+# Export the real device in variable REDIRECT.
 #
 REDIRECT="`showconsole 2>/dev/null`"
 test -x /sbin/blogd && /sbin/blogd $REDIRECT
+export REDIRECT
 
 #
 # possibly there are file systems on devices, which need a kernel 

@@ -18,6 +18,9 @@
 . /etc/rc.status
 . /etc/rc.config
 
+trap "echo" SIGINT SIGSEGV
+set +e
+
 # Determine the base and follow a runlevel link name.
 base=${0##*/}
 link=${base#*[SK][0-9][0-9]}
@@ -26,11 +29,14 @@ link=${base#*[SK][0-9][0-9]}
 test $link = $base && START_CRYPTO_FILESYSTEMS=yes
 test "$START_CRYPTO_FILESYSTEMS" = "yes" || exit 0
 
+# Redirect to real device (e.g. in case of boot logging)
 : ${CRYPTOTAB:=/etc/cryptotab}
+: ${REDIRECT:=/dev/tty}
 test -s $CRYPTOTAB || exit 0
 type -p losetup &> /dev/null || exit 0
 
 rc_reset
+main_status=0
 case "$1" in
     start|b)
 	echo "Activating crypto devices using $CRYPTOTAB ... "
@@ -38,6 +44,12 @@ case "$1" in
 	    case "$loopdev" in
 		\#*|"") continue ;;
 	    esac
+	    #
+	    # Each loop is a new try
+	    #
+	    rc_status
+	    main_status=$?
+	    rc_reset
 	    #
 	    # Seeking for crypto modules
 	    #
@@ -47,12 +59,43 @@ case "$1" in
 	    rc_status
 	    test $? -ne 0 && continue
 	    #
-	    # Setting up loop device
 	    #
-	    echo -n "Please enter password for $physdev. "
-	    losetup -e $crypto $loopdev $physdev
-	    rc_status
-	    test $? -ne 0 && continue
+	    #
+	    while true; do
+		#
+		# Restore virgin state
+		#
+		losetup -d $loopdev &> /dev/null || true
+
+		#
+		# Setting up loop device
+		#
+		echo -n "${extd}Please enter passphrase for $physdev. ${norm}"
+		losetup -e $crypto $loopdev $physdev < $REDIRECT > $REDIRECT 2>&1
+		rc_status
+		test $? -ne 0 && continue 2
+
+		#
+		# Check if we've success
+		#
+		if   mount -t $filesys -n -o ro $loopdev $access &> /dev/null ; then
+		    umount -n $access &> /dev/null || true
+		    break
+		else
+		    umount -n $access &> /dev/null || true
+		    echo    "${warn}An error occured.  Maybe the wrong passphrase was"
+		    echo    "entered or the file system on $physdev is corrupted.${norm}"
+		    while true ; do
+			echo -n "${extd}Do you want to retry entering the passphrase ...?${norm}"
+			read -p " ([${extd}yes${norm}]/${extd}no${norm}) " prolo < $REDIRECT
+			case "$prolo" in
+			    [yY][eE][sS]|"")	continue 2 ;;
+			    [nN][oO])		break    2 ;;
+			esac
+		    done
+		fi
+		break
+	    done
 	    #
 	    # Checking the structure on the loop device
 	    #
@@ -63,7 +106,7 @@ case "$1" in
 	    if test $FSCK_RETURN -gt 1; then
 		echo "fsck of $loopdev failed.  Please repair manually."
 		PS1="(repair filesystem) # "
-		/sbin/sulogin
+		/sbin/sulogin $REDIRECT < $REDIRECT > $REDIRECT 2>&1
 		sync
 	    fi
 	    #
@@ -76,7 +119,8 @@ case "$1" in
 	    mount -t $filesys $mopt $loopdev $access
 	    rc_status
 	done < $CRYPTOTAB
-	rc_status -v
+	test $main_status -gt 0 && rc_failed 1 || true
+	rc_status -v1
 	;;
     stop)
 	echo "Turning off crypto devices using $CRYPTOTAB ... "
@@ -85,9 +129,15 @@ case "$1" in
 		\#*|"") continue ;;
 	    esac
 	    #
+	    # Each loop is a new try
+	    #
+	    rc_status
+	    main_status=$?
+	    rc_reset
+	    #
 	    # Umount loop device
 	    #
-	    umount $loopdev
+	    umount $access
 	    rc_status
 	    test $? -ne 0 && continue
 	    #
@@ -96,7 +146,8 @@ case "$1" in
 	    losetup -d $loopdev
 	    rc_status
 	done < $CRYPTOTAB
-	rc_status -v
+	test $main_status -gt 0 && rc_failed 1 || true
+	rc_status -v1
 	;;
     *)
 	echo "Usage: $0 {start|stop}"

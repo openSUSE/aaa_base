@@ -243,7 +243,7 @@
 /opt/synchronize/linux/bin/websyncd     root.root       0755
 # scotty:
 /usr/bin/ntping                         root.trusted    4750
-/usr/bin/straps                         root.trusted    4750
+/usr/bin/straps                         root.trusted    0755
 /sbin/cardctl                           root.trusted    4750
 # use it as root if you must:
 /usr/X11R6/bin/dga                      root.root       0755

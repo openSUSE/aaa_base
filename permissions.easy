@@ -192,7 +192,7 @@
 /opt/synchronize/linux/bin/websyncd     root.root       4755
 # scotty:
 /usr/bin/ntping                         root.root       4755
-/usr/bin/straps                         root.root       4755
+/usr/bin/straps                         root.root       0755
 /sbin/cardctl                           root.root       4755
 /usr/X11R6/bin/dga                      root.root       4755
 /usr/X11R6/bin/xlock                    root.shadow     2755

@@ -34,6 +34,7 @@ test $LINES   -eq 0 && LINES=24
 test $COLUMNS -eq 0 && COLUMNS=80
 export LINES COLUMNS
 
+if test "$TERM" != "raw" ; then
 	 esc=`echo -en "\033"`
         extd="${esc}[1m"
         warn="${esc}[1;31m"
@@ -42,13 +43,11 @@ export LINES COLUMNS
         norm=`echo -en "${esc}[m\017"`
         stat=`echo -en "\015${esc}[${COLUMNS}C${esc}[10D"`
 
-if test "$TERM" != "raw" ; then
      rc_done="${stat}${done}done${norm}"
   rc_running="${stat}${done}running${norm}"
    rc_failed="${stat}${warn}failed${norm}"
    rc_missed="${stat}${warn}missed${norm}"
   rc_skipped="${stat}${attn}skipped${norm}"
-  rc_running="${stat}${done}running${norm}"
      rc_dead="${stat}${warn}dead${norm}"
    rc_unused="${stat}${extd}unused${norm}"
   rc_done_up="${esc}[1A${rc_done}"
@@ -58,12 +57,19 @@ rc_failed_up="${esc}[1A${rc_failed}"
   rc_restore="${esc}8"
     function rc_cuu () { echo -en "\033[${1}A"; }
 else
+	 esc=""
+        extd=""
+        warn=""
+        done=""
+        attn=""
+        norm=""
+        stat=""
+
      rc_done="..done"
   rc_running="..running"
    rc_failed="..failed"
    rc_missed="..missed"
   rc_skipped="..skipped"
-  rc_running="..running"
      rc_dead="..dead"
    rc_unused="..unused"
   rc_done_up="${rc_done}"
@@ -101,10 +107,10 @@ function rc_status ()
 	    echo -en "$rc_save"
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    case "$_rc_status" in
-	    0)	echo -en "$rc_running"   ;; # service running
+	    0)	echo -en "$rc_running"	 ;; # service running
 	    1)	echo -en "$rc_dead" 1>&2 ;; # service dead (no pid file)
 	    2)	echo -en "$rc_dead" 1>&2 ;; # service dead (no lock if any)
-	    3)	echo -en "$rc_unused"	;; # service not running
+	    3)	echo -en "$rc_unused"	 ;; # service not running
 	    esac
 	    echo -en "$rc_restore"
 	    test -z "${i#-v}" && echo ;;
@@ -126,16 +132,18 @@ function rc_status ()
 	    echo -en "$rc_save"
 	    test -n "${i#-v}" && rc_cuu ${i#-v}
 	    case "$_rc_status" in
-	    0)	echo -en "$rc_done"	   ;; # success
+	    0)	echo -en "$rc_done"	    ;; # success
 	    1)	echo -en "$rc_failed"  1>&2 ;; # generic or unspecified error
 	    2)	echo -en "$rc_failed"  1>&2 ;; # invalid or excess args
 	    3)	echo -en "$rc_missed"  1>&2 ;; # unimplemented feature
 	    4)	echo -en "$rc_failed"  1>&2 ;; # insufficient privilege
 	    5)	echo -en "$rc_skipped" 1>&2 ;; # program is not installed
 	    6)	echo -en "$rc_unused"  1>&2 ;; # program is not configured
-	    7)	test "$_rc_todo" = "stop"  && \
-		echo -en "$rc_failed"	   || \
+	    7)	test "$_rc_todo" = "stop"   && \
+		echo -en "$rc_failed"	    || \
 		echo -en "$rc_running" 1>&2 ;; # program is not running
+	    *)	rc_failed 1
+		echo -en "$rc_failed"  1>&2 ;; # unknown (maybe used in future)
 	    esac
 	    echo -en "$rc_restore"
 	    test -z "${i#-v}" && echo ;;
