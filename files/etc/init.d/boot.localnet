@@ -52,6 +52,12 @@ case "$1" in
 	
 	unset XHOSTNAME
 	unset XDOMAINNAME
+
+	test -x /sbin/ifup -a -f /etc/sysconfig/network/ifcfg-lo && {
+	    echo -n Setting up loopback interface
+	    /sbin/ifup lo
+            rc_status -v -r
+	}
 	
 	#
 	# clean up
