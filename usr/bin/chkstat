@@ -66,6 +66,7 @@ while (<LIST>) {
                 }
             }
         }
+        @file_stat = stat ($test_file) if ($is_wrong == 1);
         $lmod = &get_type (@file_stat[2]);
         if (oct($mod) != $lmod) {
             $is_wrong = 1 ;
