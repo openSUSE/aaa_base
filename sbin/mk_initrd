@@ -13,7 +13,7 @@
 # on errors:
 #   exit code > 0
 #
-# Version 1.07
+# Version 1.08
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999 SuSE GmbH
@@ -136,9 +136,10 @@ for k in $kernels ; do
 
     ii="$root_dir$boot_dir/${initrd_a[$kernel_idx]}"
 
+    echo
     echo "creating initrd \"$ii\" for kernel \"$kk\" ($vv)"
 
-    [ -d "$root_dir/lib/modules/$vv/misc" ] || error 3 "no version \"$vv\" modules found"
+    [ -d "$root_dir/lib/modules/$vv/misc" ] || error 2 "no version \"$vv\" modules found"
 
     mkdir $tmp_mnt
 
@@ -150,10 +151,10 @@ for k in $kernels ; do
       if [ -f /lib/loop.o ] ; then
         insmod /lib/loop.o
         mount -oloop $tmp_initrd $tmp_mnt 2>/dev/null || {
-          error 4 "failed to mount image"
+          error 3 "failed to mount image"
         }
       else
-        error 4 "failed to mount image"
+        error 3 "failed to mount image"
       fi
     }
     is_mounted=1
@@ -161,8 +162,8 @@ for k in $kernels ; do
     rmdir $tmp_mnt/lost+found
     mkdir $tmp_mnt/{bin,dev}
     cp -a $root_dir/dev/{tty1,tty2,zero,null,ram0,ram1,ram2,ram,ramdisk,fb0,console} $tmp_mnt/dev
-    cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 5 "no static shell"
-    cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 6 "no static insmod"
+    cp $static_shell $tmp_mnt/bin/sh 2>/dev/null || error 4 "no static shell"
+    cp $static_insmod $tmp_mnt/bin/insmod 2>/dev/null || error 5 "no static insmod"
 
     echo '#! /bin/sh' >$lx_rc
     echo >>$lx_rc
@@ -174,18 +175,20 @@ for k in $kernels ; do
     for i in $modules; do
       x=`cd $root_dir ; find lib/modules/$vv/ -name $i.o`
       if [ "$x" ] ; then
-        echo "adding module \"/$x\""
+        echo "module $i is \"/$x\""
         tar -C $root_dir -cf - $x 2>/dev/null | tar -C $tmp_mnt -xpf - 2>/dev/null
         if [ $? != 0 ] ; then
-          error 7 "initrd too small"
+          echo "failed to add module \"/$x\""
+          error 6 "initrd too small"
         fi
-        modparms=`grep "options $i" "$root_dir"/etc/modules.conf`
+        modparms=`grep "^[ 	]*options $i" "$root_dir"/etc/modules.conf`
         modparms="${modparms#* * }"
         echo "echo \"Loading module $i $modparms ...\"" >>$lx_rc
+        echo "-> insmod $i $modparms"
         echo "insmod $i $modparms" >>$lx_rc
         echo >>$lx_rc
       else
-        error 8 "no such module: $i"
+        error 7 "no such module: $i"
       fi
     done
 
@@ -194,7 +197,7 @@ for k in $kernels ; do
 
     gzip -9 $tmp_initrd
 
-    cp $tmp_initrd.gz $ii || error 9 "failed to install initrd"
+    cp $tmp_initrd.gz $ii || error 8 "failed to install initrd"
 
     kernel_idx=$((kernel_idx+1))
 
