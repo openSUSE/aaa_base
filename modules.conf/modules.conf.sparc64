@@ -1,9 +1,0 @@
-# begin of sparc64 part for modules.conf
-
-alias char-major-4        off
-alias char-major-5        off
-
-alias parport_lowlevel    parport_pc
-
-# end of sparc64 part for modules.conf
-
