@@ -57,7 +57,10 @@ function idedma_main() {
 	done
 
 	# set DMA mode by hdparm utility
-	if [ $MODE == "off" ] ; then
+	if [ -z "$MODE" ] ; then
+	    echo "Missing DMA mode for device $DEVICE"
+	    rc_failed  
+	elif [ $MODE == "off" ] ; then
 	    $HDPARM -d 0 "$DEVICE" || rc_failed
 	elif [ $MODE == "on" ] ; then
 	    $HDPARM -d 1 "$DEVICE" || rc_failed
