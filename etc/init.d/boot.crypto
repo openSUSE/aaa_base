@@ -38,7 +38,7 @@ type -p losetup &> /dev/null || exit 0
 otty=$(stty -g)
 stty $otty < $REDIRECT
 stty -nl -ixon ignbrk -brkint < $REDIRECT
-if test -x /etc/init.d/kbd ; then
+if test -x /etc/init.d/kbd -a -n "$RUNLEVEL" ; then
     /etc/init.d/kbd start < $REDIRECT > $REDIRECT 2>&1
 fi
 

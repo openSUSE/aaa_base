@@ -311,7 +311,11 @@ rc_status -v1 -r
 # Run boot.crypto before fideling with files and file systems
 #
 if test -x /etc/init.d/boot.crypto ; then
-    /etc/init.d/boot.crypto start
+    #
+    # Set argv[0] for the process and source the file
+    # to get auto detection of forced execution working.
+    #
+    /bin/bash -c '. /etc/init.d/boot.crypto' S01boot.crypto start
 fi
 
 #

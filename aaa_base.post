@@ -368,12 +368,13 @@ if [ -n "$OLDMODCONF" ] ; then
     echo -n "Checking old modules.conf..."
     rm -f etc/modules.conf.aa.sed
     rm -f etc/modules.conf.aa.add
-    KEEPOPTIONS="tuner|bttv"
+    KEEPOPTIONS="tuner|bttv|ctc|iucv|xpram"
     while read field orig target ; do
       case $field in
 	alias)
 	  case $orig in
-	    eth0|eth1|tr0|scsi_hostadapter|usb-hostadapter|char-major-14\
+	    eth[0-9]|tr[0-9]|ci[0-9]\
+	    |scsi_hostadapter|usb-hostadapter|char-major-14\
 	    |char-major-116|sound|snd-card-[0-9]|sound-slot-[0-9]\
 	    |sound-service-[0-9]-[0-9]|sound-service-[0-9]-[0-9][0-9]|midi)
 	      if [ "$target" != "off" ] ; then
