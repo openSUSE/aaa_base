@@ -42,12 +42,6 @@ GMT="YAST_ASK"
 TIMEZONE="YAST_ASK"
 
 #
-# Start loopback networking? ("yes" or "no")
-# (this will be needed for all rpc services)
-#
-START_LOOPBACK="yes"
-
-#
 # Name of the printer queue used when 'lpr' is invoked with no '-P'
 #
 DEFAULT_PRINTER="lp"
@@ -90,12 +84,6 @@ IFCONFIG_0=""
 IFCONFIG_1=""
 IFCONFIG_2=""
 IFCONFIG_3=""
-
-# 
-# Setup dummy network device for IPADDR_0? This is useful for non permanent
-# network connections (e.g. SLIP, PPP). Some software needs a connection
-# to FQHOSTNAME (e.g. plp). (yes, no)
-SETUPDUMMYDEV=no
 
 #
 # Do you want the "dynamic IP patch" to be enabled at bootup? (yes/no)
@@ -312,17 +300,17 @@ MAX_DAYS_IN_TMP=0
 TMP_DIRS_TO_CLEAR="/tmp /var/tmp"
 
 #
+# In OWNER_TO_KEEP_IN_TMP, you can specify, whose files shall not be deleted.
+#
+OWNER_TO_KEEP_IN_TMP="root"
+
+#
 # "Set this to "yes" to entirely remove (rm -rf) all  files and subdirectories
 # from the temporary directories defined in TMP_DIRS_TO_CLEAR on bootup.
 # Please note, that this feature ignores OWNER_TO_KEEP_IN_TMP - all files will
 # be removed without exception."
 #
 CLEAR_TMP_DIRS_AT_BOOTUP="no"
-
-#
-# In OWNER_TO_KEEP_IN_TMP, you can specify, whoms file shall not be deleted.
-#
-OWNER_TO_KEEP_IN_TMP="root"
 
 #
 # Do you want to have "." in root path?  This is not recommended, but
@@ -344,11 +332,6 @@ CWD_IN_USER_PATH="yes"
 PASSWD_USE_CRACKLIB="no"
 
 #
-# Run the Name Service Caching Daemon at boot time? (yes/no)
-#
-START_NSCD=yes
-
-#
 # Attention! This variable PATH is NOT setting the PATH for user or root
 # shells. It is only used internally for /etc/init.d/*, SuSEconfig and 
 # cron.daily. Please do NOT change PATH here.
@@ -363,15 +346,6 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 # "no" and set the link manually.
 #
 CREATE_JAVALINK="yes"
-
-#
-# This variable determines if encrypted filesystems are automatically activated
-# on bootup. Since this requires the input of the crypto passwort, this might be
-# unwanted in certain situations where you want to be sure the machine boots
-# without any user intervention. If you set this variable to "no", encrypted
-# filesystems need to be mounted manually by "/etc/init.d/boot.crypto start".
-#
-START_CRYPTO_FILESYSTEMS="yes"
 
 #
 # There are some services (ppp, ippp, dhclient, pcmcia, hotplug) that have to

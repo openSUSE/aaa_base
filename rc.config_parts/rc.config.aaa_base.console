@@ -80,17 +80,6 @@ KBD_CAPSLOCK="no"
 KBD_TTY="tty1 tty2 tty3 tty4 tty5 tty6"
 
 #
-# Do you want gpm to be started on this machine? ("yes" or "no")
-#
-START_GPM="YAST_ASK"
-
-#
-# gpm will be started with these parameters (example: "-t msc -m /dev/mouse")
-# GPM won't be started in runlevel 5 (xdm)
-#
-GPM_PARAM=""
-
-#
 # If you want to allow root logins from other machines, set ROOT_LOGIN_REMOTE
 # to "yes". (Logging in via ssh is not affected by this variable since SSH
 # is seen as a safe login method).

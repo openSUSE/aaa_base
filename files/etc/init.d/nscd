@@ -23,15 +23,6 @@
 
 # Source SuSE config
 . /etc/rc.status
-. /etc/rc.config
-
-# Determine the base and follow a runlevel link name.
-base=${0##*/}
-link=${base#*[SK][0-9][0-9]}
-
-# Force execution if not called by a runlevel directory.
-test $link = $base && START_NSCD=yes
-test "$START_NSCD" = yes || exit 0
 
 NSCD_BIN=/usr/sbin/nscd
 test -x $NSCD_BIN || exit 5
@@ -44,7 +35,6 @@ test -x $NSCD_BIN || exit 5
 #      rc_failed        set local and overall rc status to failed
 #      rc_reset         clear local rc status (overall remains)
 #      rc_exit          exit appropriate to overall rc status
-. /etc/rc.status
 
 # First reset status of this service
 rc_reset

@@ -21,14 +21,6 @@
 trap "echo" SIGINT SIGSEGV
 set +e
 
-# Determine the base and follow a runlevel link name.
-base=${0##*/}
-link=${base#*[SK][0-9][0-9]}
-
-# Force execution if not called by the boot  directory.
-test $link = $base && START_CRYPTO_FILESYSTEMS=yes
-test "$START_CRYPTO_FILESYSTEMS" = "yes" || exit 0
-
 # Redirect to real device (e.g. in case of boot logging)
 : ${CRYPTOTAB:=/etc/cryptotab}
 : ${REDIRECT:=/dev/tty}

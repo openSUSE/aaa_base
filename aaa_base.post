@@ -50,38 +50,35 @@ if test -s etc/rc.config ; then
     rm -f etc/rc.config.t
 fi
 if [ ! -e etc/rc.config ]; then
- echo "#
+  cat << EOF > etc/rc.config
+#
 # /etc/rc.config
 #
-# Copyright (c) 1996,98 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996-2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Werner Fink <werner@suse.de>, 1996
 #         Burchard Steinbild <bs@suse.de>, 1996
 #
 # Configuration database for shell scripts in /etc/init.d, /sbin/SuSEconfig
-# and /etc/cron.daily/aaa_base
+# and /etc/cron.daily/aaa_base*
 #
 # Please edit this file and execute /sbin/SuSEconfig to configure everything.
-# Also don't forget to edit the following files:
-#       - /etc/lilo.conf
-#       - /etc/fstab
-#       - /etc/profile
-#       - /etc/hosts
 #
-" > etc/rc.config
- cat var/adm/fillup-templates/rc.config.aaa_base >> etc/rc.config
+
+EOF
  chmod 644 etc/rc.config
-else
- echo "Updating etc/rc.config..."
- if [ -x bin/fillup ] ; then
-  bin/fillup -q -d "=" etc/rc.config var/adm/fillup-templates/rc.config.aaa_base
+fi
+
+#
+# Initialize runlevel links
+#
+%{fillup_and_insserv -ps dummy SETUPDUMMYDEV }
+%{fillup_and_insserv -psy boot.crypto START_CRYPTO_FILESYSTEMS boot.loopback START_LOOPBACK }
+%{fillup_and_insserv -py nscd halt network nfs random reboot route single xdm boot.clock boot.ibmsis boot.ipconfig boot.isapnp boot.klog boot.ldconfig boot.localfs boot.localnet boot.lvm boot.md boot.proc boot.quota boot.setup boot.swap }
+## powerfail probably needs empty header ...
+if [ -x bin/fillup ] ; then
   bin/fillup -q -t -r -i -d "=" etc/rc.config var/adm/fillup-templates/rc.config.aaa_base.oldstat /dev/null
   test -s etc/rc.config.new && mv etc/rc.config.new etc/rc.config
- else
-  echo "ERROR: fillup not found. This should not happen. Please compare"
-  echo "etc/rc.config and var/adm/fillup-templates/rc.config.aaa_base "
-  echo "and update by hand."
- fi
 fi
 # Add rc.config.d/lang.rc.config
 if ! [ -d etc/rc.config.d ] ; then
@@ -455,11 +452,6 @@ The file containing the key can be found in /root/.gnupg/suse_build_key.
 This key is necessary to check the SuSE built RPMs for authenticity.
 EOT
 fi
-#
-# Initialize runlevel links
-#
-sbin/insserv etc/init.d/{dummy,halt,network,nfs,nscd,random,reboot,route,single,xdm}
-sbin/insserv etc/init.d/boot.{clock,crypto,ibmsis,ipconfig,isapnp,klog,ldconfig,localfs,localnet,loopback,lvm,md,proc,quota,setup,swap}
-## powerfail probably needs empty header ...
+
 exit 0
 
