@@ -78,7 +78,13 @@ MINICOM="-c on"
 export MINICOM
 
 MANPATH=/usr/local/man:/usr/man:/usr/X11R6/man
-for DIR in /usr/openwin/man /usr/man/allman /usr/man/de /usr/man/allman/de ; do
+for DIR in /usr/openwin/man \
+           /usr/man/allman \
+           /usr/man/de \
+           /usr/man/es \
+           /usr/man/fr \
+           /usr/man/it \
+           ; do
     test -d $DIR && MANPATH=$MANPATH:$DIR
 done
 
