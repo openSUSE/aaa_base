@@ -78,13 +78,15 @@ case "$1" in
 	rc_status -v
 	;;
     stop)
-	test "$NEED_NFS" = "yes" && echo -n "Remove Net File System (NFS)"
-	#
-	# Unmount in background because during long timeouts
-	#
-	umount -at nfs &
-	sleep 2
-	test "$NEED_NFS" = "yes" && rc_status -v
+	if test "$nfs" = "yes" ; then
+	  echo -n "Remove Net File System (NFS)"
+	  #
+	  # Unmount in background because during long timeouts
+	  #
+	  umount -at nfs &
+	  sleep 2
+	  rc_status -v
+	fi
 	;;
     restart)
         ## Stop the service and regardless of whether it was
@@ -94,8 +96,8 @@ case "$1" in
 	rc_status
 	;;
     status)
-	echo -n "Checking for mounted nfs shared (from /etc/fstab):"
-	test "$NEED_NFS" = "yes" && {
+	echo -n "Checking for mounted nfs shares (from /etc/fstab):"
+	if test "$nfs" = "yes" ; then
 	  while read  where what type options rest  ; do
 	    case "$where" in
 	      \#*|"") ;;
@@ -107,7 +109,9 @@ case "$1" in
 		 esac
 	    esac
           done < /etc/fstab
-        }
+        else
+	  rc_failed 3
+	fi
         rc_status -v
 	;;
     *)
