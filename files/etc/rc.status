@@ -66,6 +66,26 @@ rc_failed_up="${esc}[1A${rc_failed}"
      rc_save="${esc}7"
   rc_restore="${esc}8"
     function rc_cuu () { echo -en "\033[${1}A"; }
+    function rc_timer_on () {
+	# Draw seconds of running timout to column.
+	# Two arguments: timeout in seconds and offset
+	local n=$1
+	local c=$2
+	(while test $((n--)) -gt 0; do
+	    sleep 1;
+	    if test $n -gt 9 ; then
+		echo -en "\015${esc}[${c}C(${n}s) "
+	    else
+		echo -en "\015${esc}[${c}C( ${n}s) "
+	    fi
+	done) & _rc_timer_pid=$!
+    }
+    function rc_timer_off () {
+	if test -n "$_rc_timer_pid" ; then
+	    kill -15 $_rc_timer_pid > /dev/null 2>&1
+	fi
+	unset _rc_timer_pid
+    }
 else
 	 esc=""
         extd=""
@@ -89,6 +109,8 @@ rc_failed_up="${rc_failed}"
      rc_save=""
   rc_restore=""
     function rc_cuu () { return; }
+    function rc_timer_on  () { return; }
+    function rc_timer_off () { return; }
 fi
 
 _rc_status=0

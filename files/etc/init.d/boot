@@ -48,7 +48,9 @@ case "$check" in
 esac
 if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
     echo -en "${extd}Enter Interactive startup mode?${norm}"
-    read -t 15 -n 1 -p " ${extd}y${norm}/[${extd}n${norm}] " answer
+    rc_timer_on 15 37
+    read -t 15 -n 1 -p " ${extd}y${norm}/[${extd}n${norm}](15s) " answer
+    rc_timer_off
     case "$answer" in
     [yYiI]) DO_CONFIRM=yes ;;
     *)      DO_CONFIRM=    ;;
