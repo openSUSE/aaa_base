@@ -1,9 +1,32 @@
 --- lib/YaST/bootsetup
-+++ lib/YaST/bootsetup	2000/08/05 16:09:46
-@@ -305,56 +305,6 @@
-     echo " "
-     echo " "
++++ lib/YaST/bootsetup	2001/01/17 10:57:26
+@@ -166,21 +166,6 @@
+     }
  
+ 
+-    echo_login_as_root () {
+-        case "$LANGUAGE" in
+-          german)
+-            echo "Geben Sie jetzt \"root\" ein, um sich als Benutzer root einzuloggen..."
+-          ;;
+-          french)
+-            echo "Tapez maintenant \"root\" pour vous connecter"
+-            echo "en tant qu'utilisateur root..."
+-          ;;
+-          *)
+-            echo "Please enter \"root\" to login as user root..."
+-          ;;
+-        esac
+-    }
+-
+     press_enter () {
+         case "$LANGUAGE" in
+           german)
+@@ -304,57 +289,6 @@
+     echo " "
+     echo " "
+     echo " "
+-
 -    exec > /etc/issue-SuSE-first-run
 -    #
 -    # Ring the bell
@@ -13,6 +36,7 @@
 -    #
 -    # Almost white border line on grey background
 -    #
+-    echo -ne '\r'
 -    tput smacs
 -    tput bold; tput setab 7; tput setaf 7
 -    echo -n Ú
@@ -53,7 +77,6 @@
 -
 -    tput setab 0; tput setaf 7; tput sgr0; tput cud1
 -    echo
--
+ 
      exit 0
  fi
- 
