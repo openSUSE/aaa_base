@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.21
+# Version 1.26
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 # (c) 1999-2002 SuSE Linux AG
@@ -30,6 +30,8 @@
 #
 # ChangeLog:
 #
+# 25/3/2002:	v1.26
+#  - handle splash properly if using a different root dir
 #
 # 21/3/2002:	v1.25
 #  - add /sbin/fsck.jfs if jfs.o is loaded
@@ -203,10 +205,13 @@ while getopts :hk:i:m:b:d:o:s:t: a ; do
 done
 shift `expr $OPTIND - 1`
 
+[ -n "$1" ] && root_dir="$1"
+[ "$root_dir" ] || root_dir=/
+
 [ "x$splash" = xoff ] && splash=
 if [ "x$splash" = xauto ] ; then
     splash=
-    for vga in `test -f /etc/lilo.conf && sed -ne 's/[ 	]*vga[ 	]*='//p </etc/lilo.conf`; do
+    for vga in `test -f $root_dir/etc/lilo.conf && sed -ne 's/[ 	]*vga[ 	]*='//p <$root_dir/etc/lilo.conf`; do
 	splashsize=
 	case $vga in
 	    785|786|0x311|0x312) splashsize=640x480   ;;
@@ -262,10 +267,8 @@ fi
 
 static_shell=/bin/ash.static
 static_insmod=/sbin/insmod.static
-static_fbmngplay=/bin/fbmngplay
 
-bootsplash_anim=/usr/share/splash/device.mng
-bootsplash_picture_dir=/usr/share/splash
+bootsplash_picture_dir="$root_dir/usr/share/splash"
 # maximum initrd size
 image_blocks=10000
 image_inodes=2000
@@ -303,9 +306,6 @@ oops () {
   echo "$2"
   clean_up
 }
-
-[ -n "$1" ] && root_dir="$1"
-[ "$root_dir" ] || root_dir=/
 
 tmp_initrd=$root_dir/$tmp_dir/initrd$$
 tmp_initrd_small=${tmp_initrd}_small
@@ -600,8 +600,8 @@ xxx
 
 done
 
-if [ "$exit_code" = 0 -a -f /etc/lilo.conf ] ; then
-  if grep -q initrd /etc/lilo.conf ; then
+if [ "$exit_code" = 0 -a -f "$root_dir/etc/lilo.conf" ] ; then
+  if grep -q initrd "$root_dir/etc/lilo.conf" ; then
     echo -e "\n\nIf you're using lilo as bootmanager, you may want to run 'lilo' now.\n"
   fi
 fi
