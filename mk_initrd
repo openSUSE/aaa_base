@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.40
+# Version 1.41
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 #         Susanne Oberhauser  <froh@suse.de>
@@ -33,6 +33,11 @@
 #
 # ChangeLog:
 #
+# 05/12/2002:   v1.41
+# - handle signals which terminate mkinitrd with proper cleanup and exit
+# - employ safer names for temp files using mktemp for the temp dir
+# - show the error messages from mount to help in case of problems
+# - check packaged programs for missing libraries
 # 16/11/2002:   v1.40
 # - use $root_dir for checking if the initrd needs lib64 libs and ld.so
 # 14/11/2002:   v1.39
@@ -374,7 +379,12 @@ image_inodes=2000
 
 PATH=/sbin:/usr/sbin:$PATH
 
-tmp_mnt=$tmp_dir/mnt$$
+tmp_dir=`mktemp -qd $root_dir/$tmp_dir/mkinitrd.XXXXXX`
+if [ $? -ne 0 ]; then
+	echo "$0: Can't create temp dir, exiting..."
+	exit 1
+fi
+tmp_mnt=$tmp_dir/mnt
 tmp_mnt_small=${tmp_mnt}_small
 tmp_msg=$tmp_dir/msg$$
 tmp_modconf=$tmp_dir/modconf$$
@@ -399,6 +409,11 @@ clean_up () {
   [ -d $tmp_mnt_small ] && rmdir $tmp_mnt_small
 }
 
+cleanup_finish () {
+  umount_proc
+  [ -d $tmp_dir ] && rmdir $tmp_dir
+}
+
 enable_module () {
   modules="$modules $1"
   echo -e "\nNote: If you want to add $2 support for later mkinitrd"
@@ -406,10 +421,19 @@ enable_module () {
   echo 'to INITRD_MODULES in /etc/sysconfig/kernel'
 }
 
+handle_terminate () {
+  echo -e "(received signal)\n\nInterrupted, cleaning up."
+  clean_up
+  cleanup_finish
+  exit 255
+}
+
+trap handle_terminate 1 2 3 15
+
 error () {
   echo "$2"
   clean_up
-  umount_proc
+  cleanup_finish
   exit $1
 }
 
@@ -419,7 +443,7 @@ oops () {
 }
 
 # working directories
-tmp_initrd=$root_dir/$tmp_dir/initrd$$
+tmp_initrd=$tmp_dir/initrd
 tmp_initrd_small=${tmp_initrd}_small
 
 ###################################################################
@@ -483,8 +507,7 @@ fi
 cat /proc/modules | grep -q "^zfcp" && do_zfcp=1
 
 #
-# If the initial zfcp setup is not done, do it (important for
-# installation):
+# If the initial zfcp setup is not done, do it(important for installation):
 #
 test "$do_zfcp" -a ! -s $root_dir/etc/zfcp.conf && {
     fcpconf=`cat /proc/scsi/zfcp/map`
@@ -667,8 +690,9 @@ fi
 
 lib=lib
 case $arch in
-  x86_64) lib=lib64 ;;
-  s390)   [ -s $root_dir/lib/ld64.so.1 ] && lib=lib64 ;;
+  x86_64)                                                lib=lib64;;
+  i?86)   [ -s $root_dir/lib64/ld-linux-x86-64.so.2 ] && lib=lib64;;
+  s390)   [ -s $root_dir/lib/ld64.so.1              ] && lib=lib64;;
 esac
 
 # put the initrds in an array
@@ -711,10 +735,10 @@ for k in $kernels ; do
     tune2fs -i 0 $tmp_initrd >/dev/null 2>&1
 
     # mount it
-    mount -t ext2 -oloop $tmp_initrd $tmp_mnt 2>/dev/null || {
+    mount -t ext2 -oloop $tmp_initrd $tmp_mnt || {
       if [ -f /lib/loop.o ] ; then
         insmod /lib/loop.o
-        mount -t ext2 -oloop $tmp_initrd $tmp_mnt 2>/dev/null || {
+        mount -t ext2 -oloop $tmp_initrd $tmp_mnt || {
           error 3 "failed to mount image"
         }
       else
@@ -785,6 +809,18 @@ for k in $kernels ; do
       cp -a $root_dir/$lib/libcom_err.so.* $tmp_mnt/$lib
     fi
 
+    if [ "$need_libc" -a -x /usr/bin/ldd ]; then
+      cd $tmp_mnt
+      cp -a /usr/bin/ldd $tmp_mnt
+      for binary in bin/*; do
+	chroot $tmp_mnt /ldd $binary >/dev/null || {
+	  echo "Warning: Missing libraries for $binary!!!"
+	}
+      done
+      rm $tmp_mnt/ldd
+      cd -
+    fi
+
     echo '#! /bin/sh' >$lx_rc
     echo >>$lx_rc
     echo "export PATH=/bin" >>$lx_rc
@@ -826,7 +862,7 @@ for k in $kernels ; do
 	if [ "$i" = dasd_mod -a -z "$modparms" ]; then
 	  modparms='dasd=$dasd'
 	fi
-        if [ "$i" = zfcp -a -z "$modparms" ]; then
+	if [ "$i" = zfcp -a -z "$modparms" ]; then
 	  modparms="map=\"
 $zfcp_conf_contents\""
 	fi
@@ -1026,7 +1062,7 @@ EOF
 
 done
 
-umount_proc
+cleanup_finish
 
 if [ "$exit_code" = 0 -a -f "$root_dir/etc/lilo.conf" ] ; then
   if grep -q initrd "$root_dir/etc/lilo.conf" ; then
