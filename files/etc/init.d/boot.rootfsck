@@ -148,6 +148,8 @@ case "$1" in
 	    echo "File systems are NOT being checked."
 	    mount -n -o remount,rw /
 	fi
+	rm -f /etc/mtab*
+	mount -f /
 	;;
     stop)
 	;;
