@@ -17,6 +17,7 @@ test -n "$ROOT" && exit 0
 LC_ALL=POSIX
 
 # test if not mounted readonly
+test -d /usr/X11R6/lib/X11/fonts || exit 0
 touch /usr/X11R6/lib/X11/fonts 2>/dev/null || exit 0
 
 TIMESTAMP=/var/adm/SuSEconfig/lastrun.SuSEconfig.fonts
