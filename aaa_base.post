@@ -302,20 +302,9 @@ fi
 HOME_TMP_FOUND=false
 grep ":/tmp:" etc/passwd > /dev/null 2>&1 && HOME_TMP_FOUND=true
 if test "$HOME_TMP_FOUND" = "true" ; then
-    mkdir -p var/adm/notify/messages
-    cat << EOT > var/adm/notify/messages/tmp_as_homedir_is_unsafe
-Hallo,  (english text below)
-Ihr System enthält gemäss /etc/passwd noch Benutzer, für die /tmp als
-Home-Verzeichnis angegeben ist. Da dies ein potentielles Sicherheitsrisiko
-darstellt, empfehlen wir, diese Home-Verzeichnisse nach /var/lib/$USERNAME
-zu verlegen, indem Sie das Feld zwischen dem 5. und 6. Doppelpunkt in der
-entsprechenden Zeile von /etc/passwd anpassen.
-Hi,
-your system has (according to /etc/password) users with /tmp as home-
-directory. Since this implies a potential security risk, we recommend to
-change these home-directories to /var/lib/$USERNAME by editing the field
-between the fifth and sixth colon in the respective lines of /etc/passwd.
-EOT
+    touch /var/lib/update-messages/aaa_base
+else
+    rm -f /var/lib/update-messages/aaa_base
 fi
 #
 # Now do the ugly part.  Delete mess from former times...
@@ -324,35 +313,18 @@ if test -L usr/i486-linux-libc6/lib/libqimgio.so ; then
     rm -f usr/i486-linux-libc6/lib/libqimgio.so
 fi
 ### import suse package build key to gpg keyring
-GPG_IMPORT_FAIL=false
 if test -f root/.gnupg/pubring.gpg ; then
    if test -x usr/bin/gpg -a -f usr/lib/libgdbm.so.2 ; then
       chroot . usr/bin/gpg --export --armor --no-default-keyring \
                    --keyring root/.gnupg/suse_build_key build@suse.de \
 	| chroot . usr/bin/gpg --import || true
       if ! chroot . usr/bin/gpg --list-keys build@suse.de >/dev/null 2>&1 ; then
-         GPG_IMPORT_FAIL=true
+	 echo "gpg import for build@suse.de failed, please import manually" >&2
       fi
    fi
 else
    cp root/.gnupg/suse_build_key root/.gnupg/pubring.gpg
 fi
 chmod 600 root/.gnupg/suse_build_key root/.gnupg/pubring.gpg
-
-if test "$GPG_IMPORT_FAIL" = "true" ; then
-    mkdir -p var/adm/notify/messages
-    cat << EOT > var/adm/notify/messages/add_build_gpg_key
-Hallo,  (english text below)
-leider konnte der gpg Key für SuSE-pakete nicht importiert werden.
-Die Datei, die den entsprechenden Key enthält, findet sich in
-/root/.gnupg/suse_build_key.
-Dieser Key ist erforderlich um die von SuSE gebauten RPMs auf
-Echtheit zu überprüfen.
-Hi,
-unfortunately the import of the gpg-key for suse built packages failed.
-The file containing the key can be found in /root/.gnupg/suse_build_key.
-This key is necessary to check the SuSE built RPMs for authenticity.
-EOT
-fi
 
 exit 0
