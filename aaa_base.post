@@ -3,7 +3,7 @@
 #
 # post.sh - to be done after extraction
 #
-# Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.
+# Copyright (c) 2003 SuSE Linux AG Nuernberg, Germany.
 #
 #
 #
@@ -200,13 +200,13 @@ touch var/log/faillog
 chmod 600 var/log/faillog
 touch root/.bash_history
 chmod 600 root/.bash_history
-chown root.root var/log/faillog
+chown root:root var/log/faillog
 touch var/log/lastlog
 chmod 644 var/log/lastlog
-chown root.root var/log/lastlog
+chown root:root var/log/lastlog
 touch var/log/wtmp
 chmod 664 var/log/wtmp
-chown root.tty var/log/wtmp
+chown root:tty var/log/wtmp
 if test -e usr/sbin/usrdel.local -a ! -e usr/sbin/userdel.local ; then
     cp usr/sbin/usrdel.local usr/sbin/userdel.local
 fi
