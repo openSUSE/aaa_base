@@ -9,7 +9,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.crypto
-# Required-Start:    boot.md boot.lvm boot.localfs
+# Required-Start:    boot.localfs
+# X-UnitedLinux-Should-Start: boot.md boot.lvm
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
