@@ -18,6 +18,12 @@ CHECK_INITTAB=no
 DISPLAYMANAGER=""
 
 #
+# Allow remote access to your display manager (kdm only for now)
+#
+DISPLAYMANAGER_REMOTE_ACCESS="no"
+
+
+#
 # Here you can set the default window manager (kde, fvwm, ...)
 #
 DEFAULT_WM=kde

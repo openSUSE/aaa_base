@@ -432,7 +432,7 @@ GPG_IMPORT_FAIL=false
 if test -f root/.gnupg/pubring.gpg ; then
    if test -x usr/bin/gpg -a -f usr/lib/libgdbm.so.2 ; then
       chroot . usr/bin/gpg --export --armor --keyring root/.gnupg/suse_build_key \
-         build@suse.de | usr/bin/gpg --import || true
+         build@suse.de | chroot . usr/bin/gpg --import || true
       if ! chroot . usr/bin/gpg --list-keys build@suse.de >/dev/null 2>&1 ; then
          GPG_IMPORT_FAIL=true
       fi

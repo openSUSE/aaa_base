@@ -22,6 +22,21 @@ export TERM
 
 . /etc/rc.config
 
+start_firewall() {
+	case `uname -r` in
+	    2.[34].*)
+		if test "$START_FW2" = yes ; then
+		    /sbin/SuSEfirewall2
+		else
+		    test "$START_FW" = yes && /sbin/SuSEfirewall
+		fi
+		;;
+	    *)  test "$START_FW" = yes && /sbin/SuSEfirewall
+		;;
+	esac
+	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
+}
+
 case "$INTERFACE" in
 ippp*)
 
@@ -64,9 +79,7 @@ EOT
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#
-	test "$START_FW" = yes && /sbin/SuSEfirewall
-	test "$START_FW2" = yes && /sbin/SuSEfirewall2
-	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
+	start_firewall
 
 	#
 	# You may choose to use a default firewall script, configured for
@@ -114,9 +127,7 @@ EOT
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#
-	test "$START_FW" = yes && /sbin/SuSEfirewall
-	test "$START_FW2" = yes && /sbin/SuSEfirewall2
-	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
+	start_firewall
 
 	# call ip-down.local if it exists and is executable:
 	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local "$@"
@@ -154,9 +165,7 @@ EOT
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#
-	test "$START_FW" = yes && /sbin/SuSEfirewall
-	test "$START_FW2" = yes && /sbin/SuSEfirewall2
-	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
+	start_firewall
 	
 	#
 	# You may choose to use a default firewall script, configured for
@@ -183,9 +192,7 @@ EOT
 	# then set START_FW in /etc/rc.config to yes and it will be
 	# started here:
 	#
-	test "$START_FW" = yes && /sbin/SuSEfirewall
-	test "$START_FW2" = yes && /sbin/SuSEfirewall2
-	test -x /sbin/SuSEpersonal-firewall && . /sbin/SuSEpersonal-firewall
+	start_firewall
 
 	# call ip-down.local if it exists and is executable:
 	test -x /etc/ppp/ip-down.local && /etc/ppp/ip-down.local "$@"
