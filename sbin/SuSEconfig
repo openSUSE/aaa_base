@@ -267,8 +267,7 @@ if test -n "$CREATE_RESOLVCONF" -a "$CREATE_RESOLVCONF" = "yes" -a \
     test -x /sbin/init.d/nscd -a -x /usr/bin/find -a -z "$r" \
          -a "$DO_RESTARTS" = true && (
         test -t 1 || exec 1> /dev/null
-        /usr/bin/find /etc/resolv.conf -mmin -1 -exec /sbin/init.d/nscd restart
-\;
+        /usr/bin/find /etc/resolv.conf -mmin -1 -exec /sbin/init.d/nscd restart \;
     )
 fi
 
