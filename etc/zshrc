@@ -20,18 +20,18 @@ fi
 #
 # Environment
 #
-HISTSIZE=500
+HISTSIZE=1000
 HISTFILE=${HOME}/.zsh_history
-SAVEHIST=200
+SAVEHIST=500
 RPROMPT="[%T]"
 #
 # Set/unset  shell options
 #
-setopt   globdots correct pushdtohome cdablevars autolist
-setopt   correctall autocd recexact longlistjobs autoresume
+setopt   globdots nocorrect pushdtohome cdablevars autolist
+setopt   nocorrectall autocd recexact longlistjobs autoresume
 setopt   histignoredups pushdsilent appendhistory histexpiredupsfirst
 setopt   autopushd pushdminus extendedglob rcquotes mailwarning
-unsetopt bgnice autoparamslash
+unsetopt bgnice autoparamslash hup
 
 # Setup some basic programmable completions.  To see more examples
 # of these, check out /usr/doc/packages/zsh/compctl-examples.
