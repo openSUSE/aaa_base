@@ -37,7 +37,7 @@ if ( length($ENV{'INFOPATH'}) > 0 ) {
 # different paths ... it's really buggy.
 #
 	     "/usr/X11R6/lib/xemacs/info",
-             "/usr/share/xemacs/info",
+	     "/usr/share/xemacs/info",
 );
 #
 # Special: flushing file descriptor for speed, smothing, and big results
@@ -66,9 +66,10 @@ sub cleanup {
     unlink $mdirtmp;
     exit(1);
 }
-$SIG{'INT'} = "cleanup";
+$SIG{'INT'}  = "cleanup";
 $SIG{'TERM'} = "cleanup";
-$SIG{'HUP'} = "cleanup";
+$SIG{'HUP'}  = "cleanup";
+$SIG{'PIPE'} = 'IGNORE';
 
 if ( !-e $mdir ) { `touch $mdir 2>&1 /dev/null`; }
 
@@ -85,7 +86,7 @@ if ( -w $mdir ) {
     printf(STDERR "  ... using STDOUT!\n", $0, $mdir);
     flush(STDERR);
     sleep (2);
-    $filehandle = "-";
+    $filehandle = ">-";
 }
 
 ##
@@ -112,12 +113,11 @@ for ( @PATHS ) {
 sub read_entry {
     local($file) = @_;
     local(@buf, $add, $lines);
-    local($source) = $file =~ /\.gz$/ ? "gunzip -q -d -c $file |" : "< $file";
+    local($source) = $file =~ /\.gz$/ ? "gunzip -q -d -c $file 2>/dev/null |" : "< $file";
 
     @buf = ();
     $add = 0;
     $lines = 0;
-
     open(_FILE, $source) or warn "can't open $source\n";
     while (<_FILE>) {
 	chomp;
@@ -151,7 +151,7 @@ sub path {
     return ($name);
 }
 
-open(DIR, ">$filehandle") || die "Cannot open $filehandle\n";
+open(DIR, "$filehandle") || die "Cannot open $filehandle\n";
 
 ##
 ## define top format
