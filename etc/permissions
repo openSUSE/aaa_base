@@ -34,6 +34,7 @@
 /var/lib/xdm/authdir                   root.root         700
 /var/lib/xdm/authdir/authfiles         root.root         700
 /var/lock                              root.uucp         775
+/var/log/uucp                          uucp.uucp         755
 /var/man2html                          root.root        1777
 /var/run                               root.root         755
 /var/run/sudo                          root.root         700
