@@ -60,7 +60,7 @@ CONSOLE_UNICODEMAP=""
 
 #
 # for some fonts the console has to be initialized with CONSOLE_MAGIC.
-# CONSOLE_MAGIC can be empty or have the values "B" or "K".
+# CONSOLE_MAGIC can be empty or have the values "(B", ")B", "(K" or ")K".
 #
 CONSOLE_MAGIC=""
 

@@ -44,7 +44,7 @@ case "$1" in
                 ECHO_RETURN=$rc_done_up
                 echo Setting up console ttys
                 for i in /dev/tty[1-6]; do
-                     echo "\033($CONSOLE_MAGIC" > $i || ECHO_RETURN=$rc_failed_up
+                     echo "\033$CONSOLE_MAGIC" > $i || ECHO_RETURN=$rc_failed_up
                 done
                 echo -e "$ECHO_RETURN"
             fi
