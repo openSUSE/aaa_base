@@ -1,0 +1,41 @@
+# Do you want the "dynamic IP patch" to be enabled at bootup? (yes/no)
+#
+IP_DYNIP=no
+
+#
+# Enable syn flood protection (see /usr/src/linux/Documentation/Configure.help)
+# (yes/no)
+#
+IP_TCP_SYNCOOKIES=yes
+
+#
+# Runtime-configurable parameter: forward IP packets.
+# Is this host a router? (yes/no)
+#
+IP_FORWARD=no
+
+
+#
+# Enable Magic SysRq Keys?
+# If you say yes here, you will have some control over the system even
+# if it crashes (e.g. during kernel debugging).
+# For further information see /usr/src/linux/Documentation/sysrq.txt
+#
+ENABLE_SYSRQ=no
+
+#
+# DISABLE_ECN
+# If you have trouble connecting to some machines on the internet with
+# your 2.4 kernel, but there are no problems with 2.2, this may be due
+# to broken firewalls dropping network packets with the ECN (early
+# congestion notification) flag set.
+# Set this to yes to have ECN disabled at boot time.
+#
+DISABLE_ECN="yes"
+
+#
+# BOOT_SPLASH can be set to "no" to turn off the splash-screen on console 1
+# at boot time (after kernel load).
+#
+BOOT_SPLASH="yes"
+

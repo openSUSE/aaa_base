@@ -15,6 +15,7 @@
 
 . /etc/rc.status
 . /etc/rc.config
+. /etc/sysconfig/sysctl
 #
 # check if sysrq should be enabled
 #

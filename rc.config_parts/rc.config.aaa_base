@@ -4,24 +4,6 @@
 DEFAULT_PRINTER="lp"
 
 #
-# Do you want the "dynamic IP patch" to be enabled at bootup? (yes/no)
-#
-IP_DYNIP=no
-
-#
-# Enable syn flood protection (see /usr/src/linux/Documentation/Configure.help)
-# (yes/no)
-#
-IP_TCP_SYNCOOKIES=yes
-
-#
-# Runtime-configurable parameter: forward IP packets.
-# Is this host a router? (yes/no)
-#
-IP_FORWARD=no
-
-
-#
 # SuSEconfig can do some checks and modifications in /etc/hosts. 
 # If this is not wanted, set the following variable to 'no' (yes/no).
 #

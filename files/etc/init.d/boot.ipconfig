@@ -6,7 +6,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.ipconfig
-# Required-Start:    serial boot.setup boot.isapnp
+# Required-Start:    serial boot.setup boot.isapnp boot.sysctl
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
@@ -15,6 +15,7 @@
 
 . /etc/rc.status
 . /etc/rc.config
+. /etc/sysconfig/sysctl
 #
 # Enable "dynamic IP patch"
 #
