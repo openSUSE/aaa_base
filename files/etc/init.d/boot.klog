@@ -46,7 +46,7 @@ case "$1" in
     #
     # Say blogd that I/O is possible now
     #
-    killproc -IO /sbin/blogd
+    test -x /sbin/blogd && killproc -IO /sbin/blogd
    ;;
   stop)
     rc_failed 3

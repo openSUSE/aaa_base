@@ -226,7 +226,7 @@ fi
 #
 # Stop blogd if running
 #
-killproc -QUIT /sbin/blogd
+test -x /sbin/blogd && killproc -QUIT /sbin/blogd
 
 #
 # Restore old terminal settings

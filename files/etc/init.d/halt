@@ -82,7 +82,7 @@ $command -w
 > /success
 
 # Stop blogd before umounting /var
-killproc -QUIT /sbin/blogd
+test -x /sbin/blogd && killproc -QUIT /sbin/blogd
 
 # Redirect our mesages to default console
 test -n "$REDIRECT" && exec 0<> $REDIRECT 1>&0 2>&0

@@ -70,7 +70,7 @@ case "$1" in
 		rc_status -v1 -r
 	        if test $FSCK_RETURN -gt 1; then
 		    # Stop blogd since we reboot after sulogin
-		    killproc -QUIT /sbin/blogd
+		    test -x /sbin/blogd && killproc -QUIT /sbin/blogd
 		    if test -x /etc/init.d/kbd ; then
 			/etc/init.d/kbd start
 		    fi

@@ -68,7 +68,7 @@ fi
 #
 # Stop blogd
 #
-killproc -QUIT /sbin/blogd
+test -x /sbin/blogd && killproc -QUIT /sbin/blogd
 
 #
 # Let YaST2 finish its installation, if you installed with YaST2
