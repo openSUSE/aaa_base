@@ -2,6 +2,7 @@
 
 . /etc/profile
 . /etc/rc.config
+. /etc/sysconfig/security
 
 test "$UID" = 0 || {
     echo Check does not work for normal users.

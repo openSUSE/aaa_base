@@ -58,3 +58,15 @@ CWD_IN_ROOT_PATH="no"
 #
 CWD_IN_USER_PATH="yes"
 
+#
+# SuSEconfig can do some modifications to /etc/inittab.  If you don't want
+# this, set CHECK_INITTAB to "no".  (yes/no)
+#
+CHECK_INITTAB=yes
+
+#
+# Set to "yes" or "quint" to play a quint tone sequence at system halt or reboot
+# or set to "octave" to play octave sound at that occasion.
+#
+HALT_SOUND="no"
+

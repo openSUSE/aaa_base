@@ -24,7 +24,8 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 }
 . $r/lib/YaST/SuSEconfig.functions
 
-for i in $r/etc/rc.config $r/etc/sysconfig/suseconfig ; do
+for i in $r/etc/rc.config $r/etc/sysconfig/security \
+	 $r/etc/sysconfig/suseconfig ; do
   if test ! -f $i ; then
     echo "No $i found."
     exit 1
