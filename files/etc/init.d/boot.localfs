@@ -131,6 +131,7 @@ case "$1" in
 	#
 	echo "Mounting local file systems..."
 	mount -fv -t proc proc /proc
+	mount -fv -t sysfs sysfs /sys
 	mount -fv -t tmpfs tmpfs /dev/shm
 	rc_status
 	optpts="-o mode=0620,gid=5"
