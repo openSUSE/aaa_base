@@ -27,13 +27,13 @@
  # <id>:<runlevels>:<action>:<process>
  # The "id" field  MUST be the same as the last
  # characters of the device (after "tty").
--1:01236:respawn:/sbin/mingetty --noclear tty1
--2:01236:respawn:/sbin/mingetty tty2
--3:01236:respawn:/sbin/mingetty tty3
--4:01236:respawn:/sbin/mingetty tty4
--5:01236:respawn:/sbin/mingetty tty5
--6:01236:respawn:/sbin/mingetty tty6
--#S0:01236:respawn:/sbin/agetty -L 9600 ttyS0
+-1:123:respawn:/sbin/mingetty --noclear tty1
+-2:123:respawn:/sbin/mingetty tty2
+-3:123:respawn:/sbin/mingetty tty3
+-4:123:respawn:/sbin/mingetty tty4
+-5:123:respawn:/sbin/mingetty tty5
+-6:123:respawn:/sbin/mingetty tty6
+-#S0:123:respawn:/sbin/agetty -L 9600 ttyS0
 -
 -#
 -#
