@@ -196,7 +196,7 @@ if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
     #
     grep localhost $r/etc/hosts > /dev/null 2>&1
     if test $? -eq 1 ; then
-        echo "127.0.0.1       localhost" >> $r/etc/hosts
+        echo -e "\n127.0.0.1       localhost" >> $r/etc/hosts
     fi
 
     echo $FQHOSTNAME >> $OLDHOSTENTRY
@@ -996,6 +996,23 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
         test -n "$NEWALIASES" && eval $NEWALIASES
     fi
 fi
+
+#
+# safety-check: look for duplicated variables in /etc/rc.config
+#
+MYTMP=`mktemp -d /tmp/rcconfigchk.XXXXXX`
+grep -v "^#" $r/etc/rc.config | grep -v "^$" | sort -u > $MYTMP/single
+grep -v "^#" $r/etc/rc.config | grep -v "^$" | sort > $MYTMP/double
+diff $MYTMP/single $MYTMP/double > $MYTMP/toomuch
+if [ $? != 0 ] ; then
+  echo "This is a warning message." > $MYTMP/rc.config_check
+  echo "The following variables seem to be doubled in /etc/rc.config." >> $MYTMP/rc.config_check
+  cat $MYTMP/toomuch >> $MYTMP/rc.config_check
+  echo "Please check which of the instances is correct." >> $MYTMP/rc.config_check
+  test -d /var/adm/notify/warnings && \
+    mv $MYTMP/rc.config_check /var/adm/notify/warnings
+fi
+rm -rf $MYTMP
 
 #
 # now look for reports and mail them

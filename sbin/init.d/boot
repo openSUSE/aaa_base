@@ -77,8 +77,9 @@ fi
 
 #
 # If we use a serial console, don't use the fsck progress bar
+# For S390, don't use it either.
 #
-if [ -z "$SERIAL_CONSOLE" ]; then
+if [ -z "$SERIAL_CONSOLE" -a "$(uname -m)" != "s390" ]; then
    FSCK_PROGRESSBAR="-C"
 else
    FSCK_PROGRESSBAR=""

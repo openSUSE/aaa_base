@@ -40,7 +40,7 @@ IFS="$OLD_IFS"
 if test -n "$RPM_BUILD_ROOT" ; then
     TDIRS=""
     for DIR in $DIRS ; do
-        TDIRS="$TDIRS $DIR $RPM_BUILD_ROOT/$DIR"
+        TDIRS="$TDIRS $DIR ${RPM_BUILD_ROOT%/}/$DIR"
     done
     DIRS="$TDIRS"
 fi
