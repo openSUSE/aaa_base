@@ -19,8 +19,9 @@
 . /etc/rc.status
 . /etc/rc.config
 
+NEED_NFS=no
+test "$START_AUTOFS" = yes && NEED_NFS=yes
 nfs=no
-test "$START_AUTOFS" = yes && nfs=yes
 while read  where what type options rest  ; do
     case "$where" in
 	\#*|"") ;;
@@ -33,13 +34,20 @@ while read  where what type options rest  ; do
 	    esac
     esac
 done < /etc/fstab
+test "$nfs" = yes && NEED_NFS=yes
 
 case `uname -r` in
-   0.*|1.*|2.0.*) RPCSTATD="" ; RPCLOCKD="" ;;
+   0.*|1.*|2.0.*) RPCSTATD="" ;;
    *)
       test -x /usr/sbin/rpc.statd && RPCSTATD=/usr/sbin/rpc.statd
       test -x /usr/sbin/rpc.kstatd && RPCSTATD=/usr/sbin/rpc.kstatd
       test -x /sbin/rpc.statd && RPCSTATD=/sbin/rpc.statd
+      ;;
+esac
+# no explicit start for lockd needed for 2.4
+case `uname -r` in
+   0.*|1.*|2.0.*|2.4.*) RPCLOCKD="" ;;
+   *)
       test -x /usr/sbin/rpc.lockd && RPCLOCKD=/usr/sbin/rpc.lockd
       test -x /usr/sbin/rpc.klockd && RPCLOCKD=/usr/sbin/rpc.klockd
       test -x /sbin/rpc.lockd && RPCLOCKD=/sbin/rpc.lockd
@@ -49,11 +57,17 @@ esac
 rc_reset
 case "$1" in
     start|reload)
-	test "$nfs" = "yes" || exit 0;
-
-	test -n "$RPCLOCKD" && startproc $RPCLOCKD
-	test -n "$RPCSTATD" && startproc $RPCSTATD
+	test "$NEED_NFS" = "yes" || exit 0;
 	echo -n "Importing Net File System (NFS)"
+	if test -n "$RPCLOCKD" ; then
+	  startproc $RPCLOCKD
+	  rc_status
+	fi
+	if test -n "$RPCSTATD" ; then
+	  checkproc $RPCSTATD || startproc $RPCSTATD
+	  rc_status
+	fi
+	if test "$nfs" = yes ; then
 	# Mount all auto NFS devices (-> nfs(5) and mount(8) )
 	#  NFS-Server sometime not reachable during boot phase.
 	#  It's sometime usefull to mount NFS devices in
@@ -66,23 +80,24 @@ case "$1" in
 	#  Note: Some people importing the /usr partition.
 	#        Therefore we do _NOT_ use an ampersand!
 	#
-	mount -at nfs
-	rc_status
-	sleep 1
+	  mount -at nfs
+	  rc_status
+	  sleep 1
 	#
     	# generate new list of available shared libraries
 	#
-	ldconfig -X 2>/dev/null
+	  ldconfig -X 2>/dev/null
+	fi
 	rc_status -v
 	;;
     stop)
-	test "$nfs" = "yes" && echo -n "Remove Net File System (NFS)"
+	test "$NEED_NFS" = "yes" && echo -n "Remove Net File System (NFS)"
 	#
 	# Unmount in background because during long timeouts
 	#
 	umount -at nfs &
 	sleep 2
-	test "$nfs" = "yes" && rc_status -v
+	test "$NEED_NFS" = "yes" && rc_status -v
 	;;
     restart)
         ## Stop the service and regardless of whether it was
@@ -93,7 +108,7 @@ case "$1" in
 	;;
     status)
 	echo -n "Checking for mounted nfs shared (from /etc/fstab):"
-	test "$nfs" = "yes" && {
+	test "$NEED_NFS" = "yes" && {
 	  while read  where what type options rest  ; do
 	    case "$where" in
 	      \#*|"") ;;
