@@ -10,7 +10,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          xdm
-# Required-Start:    $remote_fs $syslog ypclient
+# Required-Start:    $remote_fs $syslog ypbind
 # Required-Stop:
 # Default-Start:     5
 # Default-Stop:
