@@ -32,3 +32,12 @@ DISPLAYMANAGER_ROOT_LOGIN_REMOTE="no"
 # set to "no" on architectures without any Xserver (e.g. s390/s390x)
 #
 DISPLAYMANAGER_STARTS_XSERVER="yes"
+
+## Type:        yesno
+## Default:     no
+#
+# Tcp port 6000 of Xserver. When set to "no" (default) Xserver is 
+# started with "-nolisten tcp". Only set this to "yes" if you really 
+# need to. Use ssh X11 port forwarding whenever possible.
+#
+DISPLAYMANAGER_XSERVER_TCP_PORT_6000_OPEN="no"
