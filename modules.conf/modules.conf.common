@@ -315,6 +315,11 @@ endif
 alias plip0               plip
 alias plip1               plip
 
+# Tunnel interfaces
+alias sit0 ipv6
+alias gre0 ip_gre
+alias ipip0 ipip
+
 alias ppp-compress-18          ppp_mppe
 alias ppp-compress-21          bsd_comp
 alias ppp-compress-24          ppp_deflate
