@@ -41,6 +41,20 @@ case "$0" in
 esac
 
 #
+# helper shell function
+#
+reverse ()
+{
+    local _line
+    while read -r _line ; do
+        reverse
+        echo "$_line"
+        break
+    done
+}
+
+
+#
 # first do local stuff
 #
 rc_reset
@@ -76,16 +90,22 @@ setterm -bfreq 200 -blen 500 &>/dev/null
 
 mounts=/etc/fstab
 test -r /proc/mounts && mounts=/proc/mounts
+reverse < $mounts | \
 while read des fs type rest; do
-    test "$fs" = "/proc"    && continue
-    test "$fs" = "/dev/pts" && continue
-    test "$fs" = "/dev"     && continue
-    test "$fs" = "/var/shm" && continue
-    test "$type" = "proc"   && umount -t proc   $fs
-    test "$type" = "devpts" && umount -t devpts $fs
-    test "$type" = "devfs"  && umount -t devfs  $fs
-    test "$type" = "shm"    && umount -t shm    $fs
-done < $mounts
+    case "$fs"   in
+	/proc)     continue ;;
+	/dev/pts)  continue ;;
+	/dev)      continue ;;
+	/var/shm)  continue ;;
+    esac
+    case "$type" in
+	proc)      umount -t proc     $fs ;;
+	devpts)    umount -t devpts   $fs ;;
+	devfs)     umount -t devfs    $fs ;;
+	shm)       umount -t shm      $fs ;;
+	usbdevfs)  umount -t usbdevfs $fs ;;
+    esac
+done
 
 UMOUNT_FAILED=false
 echo "Unmounting file systems"
