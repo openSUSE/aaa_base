@@ -16,14 +16,14 @@ function usage() {
 }
 
 
-if [ -z "$*" ] ; then
+if [ -z "$@" ] ; then
     usage
     exit
 fi
 
 DATESTRING=`date +"%Y%m%d"`
 
-for i in $* ; do
+for i in $@ ; do
     i=${i%%/}
     if [ -e $i ] ; then
         NEWNAME=$i-$DATESTRING
@@ -38,3 +38,4 @@ for i in $* ; do
         echo $i does not exist.
     fi
 done
+
