@@ -57,24 +57,6 @@ NNTPSERVER="news"
 FROM_HEADER="YAST_ASK"
 
 #
-# Some programs (e.g. lynx, arena and wget) support proxies, if set in
-# the environment.  SuSEconfig can add these environment variables to
-# /etc/SuSEconfig/* (sourced by /etc/profile etc.) -
-# See http://www.suse.de/Support/sdb_e/lynx_proxy.html for more details.
-# Example: HTTP_PROXY="http://proxy.provider.de:3128/"
-HTTP_PROXY=""
-
-#
-# Example: FTP_PROXY="http://proxy.provider.de:3128/"
-#
-FTP_PROXY=""
-
-#
-# Example: NO_PROXY="www.me.de, do.main, localhost"
-#
-NO_PROXY="localhost"
-
-#
 # When shutting down routing, all net connection can be closed (not useful
 # in all cases). If CLOSE_CONNECTIONS is set to "true", /etc/init.d/route
 # will scan /proc for active network connections and send term signals
