@@ -154,7 +154,7 @@ static_shell=/bin/ash.static
 static_insmod=/sbin/insmod.static
 
 # initrd size
-image_blocks=2000
+image_blocks=5000
 image_inodes=100
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
