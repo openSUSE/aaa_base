@@ -1,0 +1,19 @@
+--- sbin/SuSEconfig
++++ sbin/SuSEconfig	2002/09/12 13:30:36
+@@ -18,7 +18,15 @@
+ # Thorsten Kukuk <kukuk@suse.de>, 2000
+ #
+ 
+-echo "Starting SuSEconfig, the SuSE Configuration Tool..."
++MYNAME=`basename $0`
++case $MYNAME in
++	ULconfig)
++		echo "Starting ULconfig, the UnitedLinux Configuration Tool..."
++		;;
++	*)
++		echo "Starting SuSEconfig, the SuSE Configuration Tool..."
++		;;
++esac
+ umask 022
+ 
+ # check if we are started as root

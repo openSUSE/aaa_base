@@ -273,7 +273,7 @@ if test -z "$r" -a -x /usr/bin/mail -a -x /usr/sbin/sendmail \
 	cat $FILE >> $UPDATE_MESSAGES
 	echo "----------------------------------------" >> $UPDATE_MESSAGES
         rm -f $FILE
-        sleep 2
+        #sleep 2
     done
     rm -f /var/adm/notify/log/*
 fi

@@ -21,7 +21,7 @@
 # USA.
 
 
-# Version 1.31
+# Version 1.33
 #
 # Author: Steffen Winterfeldt <wfeldt@suse.de>
 #         Susanne Oberhauser  <froh@suse.de>
@@ -32,6 +32,8 @@
 #
 # ChangeLog:
 #
+# 12/9/2002:    v1.33
+# - resolve module dependencies for each kernel
 # 03/9/2002:    v1.32
 # - use lib64 on 64-bit systems
 # - use /var/tmp instead of /tmp (/tmp may be tmpfs)
@@ -347,11 +349,13 @@ PATH=/sbin:/usr/sbin:$PATH
 tmp_mnt=$tmp_dir/mnt$$
 tmp_mnt_small=${tmp_mnt}_small
 tmp_msg=$tmp_dir/msg$$
+tmp_modconf=$tmp_dir/modconf$$
 lx_rc=$tmp_mnt/linuxrc
 is_mounted=
 is_mounted_small=
 
 clean_up () {
+  rm -f $tmp_modconf
   [ "$is_mounted" ] && umount $tmp_mnt
   is_mounted=
   [ "$is_mounted_small" ] && umount $tmp_mnt_small
@@ -549,19 +553,6 @@ test "$do_zfcp" && {
     test "$has_zfcp" || modules="zfcp $modules"
 }
 
-# resolve module dependencies
-mods2=
-modprobe=/sbin/modprobe
-[ "$root_dir" != / ] && modprobe="/usr/bin/chroot $root_dir /sbin/modprobe"
-for mod in $modules ; do
-  modlist=`$modprobe -v -n $mod 2>/dev/null | sed -ne 's#^/sbin/insmod.*/\(.*\)\.o.*#\1#p'`
-  [ "$modlist" ] || modlist=$mod
-  for i in $modlist ; do
-    [ "$mods2" = "${mods2/ $i / }" ] && mods2="$mods2 $i "
-  done
-done
-modules=`echo $mods2`
-
 ###################################################################
 # more sanity checks after all variables and $modules are synchronized:
 
@@ -736,8 +727,22 @@ for k in $kernels ; do
 
     chmod 755 $lx_rc
 
+    # resolve module dependencies, individually for each kernel version
+    # kernel version is $vv
+    rm -f $tmp_modconf
+    echo "depfile=$root_dir/lib/modules/$vv" >$tmp_modconf
+    mods2=
+    for mod in $modules ; do
+      modlist=`/sbin/modprobe -C $tmp_modconf -v -n $mod 2>/dev/null | sed -ne 's#^/sbin/insmod.*/\(.*\)\.o.*#\1#p'`
+      [ "$modlist" ] || modlist=$mod
+      for i in $modlist ; do
+        [ "$mods2" = "${mods2/ $i / }" ] && mods2="$mods2 $i "
+      done
+    done
+    modules_res=`echo $mods2`
+
     # copy the modules to the initrd
-    for i in $modules; do
+    for i in $modules_res; do
       # Note: we rely on module names being unique here. While this is true
       # so far there _are_ modules that are just links to others with the
       # same name in different directories (pcmcia mods, for example). But
