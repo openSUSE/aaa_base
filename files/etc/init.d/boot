@@ -122,6 +122,8 @@ stty $otty 0>&1
 # Let YaST2 finish its installation, if you installed with YaST2
 #
 if test -f /var/lib/YaST2/runme_at_boot ; then
+    HOSTTYPE=$(uname -m)
+    [ "$HOSTTYPE" = "s390" -o "$HOSTTYPE" = "s390x"  -o -d /proc/iSeries ] && rcnetwork start
     rc_splash "YaST"
     exec 0<> $REDIRECT 1>&0 2>&0
     # if yast2 failed, this ensures proper system setup
@@ -132,6 +134,7 @@ if test -f /var/lib/YaST2/runme_at_boot ; then
 	# oops, yast2 not installed
 	rm -f /var/lib/YaST2/runme_at_boot
     fi
+    [ "$HOSTTYPE" = "s390" -o "$HOSTTYPE" = "s390x"  -o -d /proc/iSeries ] && rcnetwork stop
 fi
 # run SuSEconfig (with args) if needed
 if test -f /var/lib/YaST2/run_suseconfig ; then
