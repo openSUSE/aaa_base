@@ -48,7 +48,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
           *)
             echo "------------------------------------------------------------------------------"
             echo " "
-            echo "                        Welcome to SuSE Linux"
+            echo "                         Welcome to SuSE Linux"
             echo " "
           ;;
         esac
@@ -73,8 +73,8 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
             echo " "
           ;;
           *)
-            echo "    You should set a password for root first. If you don't want a"
-            echo "    password for root, simply hit enter. "
+            echo "    First of all, you should set a password for the root user. If you"
+	    echo "    don't want a password, simply press RETURN."
             echo " "
           ;;
         esac
@@ -106,7 +106,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
           *)
             echo "------------------------------------------------------------------------------"
             echo " "
-            echo "    Probably YaST has to configure some things, so we simply start it ;-) "
+            echo "    Probably YaST still has to configure a few things, so let's just start ;-)"
             echo " "
           ;;
         esac
@@ -119,7 +119,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
             echo " "
             echo " Nun müssen noch einige Skripte laufen. Diese werden in etwa einer"
             echo " Minute automatisch gestartet.  Eine Logdatei finden Sie dann unter"
-            echo " /var/log/Config.bootup.  Außerdem können Sie die Ausgaben auf"
+            echo " \"/var/log/Config.bootup\".  Außerdem können Sie die Ausgaben auf"
             echo " Console 9 beobachten."
             echo " Sie können das System jetzt bereits normal benutzen. Wenn Sie "
             echo " das System herunterfahren, bevor die Skripte beendet sind, werden "
@@ -131,7 +131,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
             echo " "
             echo " Quelques scripts doivent encore être exécutés. Ils seront lancés "
             echo " automatiquement dans une minute environ."
-            echo " Vous trouverez alors un fichier de trace sous /var/log/Config.bootup."
+            echo " Vous trouverez alors un fichier de trace sous \"/var/log/Config.bootup\"."
             echo " Vous pouvez en outre voir les affichages sur la console 9."
             echo " Vous pouvez déjà maintenant utiliser le système normalement. Si vous"
             echo " arrêtez le système avant que les scripts ne soient terminés, ils seront"
@@ -143,7 +143,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
             echo " "
             echo " Alcuni script devono ancora essere esecutati. Verranno automaticamente"
             echo " avviati entro un minuto circa.  Troverete allora un logfile sotto"
-            echo " /var/log/Config.bootup. Inoltre potete visualizzare il display sulla"
+            echo " \"/var/log/Config.bootup\". Inoltre potete visualizzare il display sulla"
             echo " console 9."
             echo " Potete già utilizzare il sistema normalmente. Se portate giù il sistema"
             echo " prima che gli script vengano terminati, verranno di nuovo avviati la"
@@ -154,12 +154,12 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
             echo " "
             echo "------------------------------------------------------------------------------"
             echo " "
-            echo " Now scripts have to be started.  They will be started in one"
-            echo " minute.  You can find a log file under /var/log/Config.bootup."
-            echo " It will also be printed on console 9."
-            echo " You can now already use your system. If you shut down the system "
-            echo " before the scripts are finished, they are executed again at the "
-            echo " next system startup."
+	    echo " A few scripts still have to be executed. They will be started automatically"
+            echo " in 1 minute. The output will be logged in the file \"/var/log/Config.bootup\"."
+	    echo " You can also find the messages on console 9, in case you want to watch."
+	    echo " The system is already fully functional and ready for use!"
+	    echo " In case you shut down the system before the scripts have finished, they"
+	    echo " will be started again next time the system comes up."
             echo " "
           ;;
         esac
@@ -176,7 +176,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
             echo "en tant qu'utilisateur root..."
           ;;
           *)
-            echo "Please enter \"root\" to login as user root..."
+            echo "Please enter \"root\" to login as the root user..."
           ;;
         esac
     }
@@ -233,7 +233,7 @@ if [ ! -e /usr/lib/YaST/.configured2 -a -w /tmp ] ; then
     # So we start cardmanager if it exists.
     #
     # ATTENTION! After finishing YaST, we need to shut down cardmanager.
-    # Otherwise system might hang when cardmanager is started on regular
+    # Otherwise the system might hang when cardmanager is started on regular
     # bootup.
     #               hm, 11.06.1997
 
