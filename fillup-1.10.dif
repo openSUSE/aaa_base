@@ -1,0 +1,17 @@
+--- SRC/parser.c
++++ SRC/parser.c	2002/02/04 14:53:05
+@@ -388,9 +388,11 @@
+     {
+         Counter = 1;
+         buffer++;
+-        while( ( Counter < lineLength ) && 
+-               ( ( isalnum( *buffer ) )  || ( *buffer == '_' ) ) && 
+-               ( *buffer != delimiterStart ) )
++	while( ( Counter < lineLength )        &&
++		( ( isalnum( *buffer ) )        ||
++		( *buffer == '_' )     ||
++		( *buffer == '.' ) )   &&
++		( *buffer != delimiterStart ) )
+         {
+             Counter++;
+             buffer++;
