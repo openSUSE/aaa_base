@@ -59,6 +59,9 @@
 #
 /bin/ping                              root.root        4755
 /bin/su                                root.root        4755
+/opt/gnome/bin/gnome-pty-helper        root.tty         2755
+/opt/kde/bin/konsole_grantpty          root.root        4755
+/opt/kde/bin/kcheckpass                root.root        4755
 /opt/kde/bin/kvt                       root.tty         4755
 /sbin/cardctl                          root.root        4755
 /sbin/isdnbutton                       root.root        4755
@@ -81,6 +84,7 @@
 /usr/bin/ssh                           root.root        4755
 /usr/bin/sudo                          root.root        4755
 /usr/lib/majordomo/wrapper             root.root        4755
+/usr/lib/pt_chown                      root.root        4755
 /usr/sbin/traceroute                   root.root        4755
 /usr/sbin/dip                          root.dialout     4754
 /usr/sbin/pppd                         root.dialout     6754

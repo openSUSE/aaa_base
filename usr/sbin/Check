@@ -3,6 +3,11 @@
 . /etc/profile
 . /etc/rc.config
 
+test "$UID" = 0 || {
+    echo Check does not work for normal users.
+    exit 1
+}
+
 do_gzip() {
 	while read input; do
 		if test -f $input.gz; then
@@ -53,7 +58,8 @@ for DIR in $DIRS ; do
         \! -name fonts.scale \! -name "*.spd" \! -name "*.pfa" \
         \! -name "*.pfb" \! -name "*.phont" \! -name ".*.gz" \
         \! -name ".*.Z" \! -name ".*.spd" \! -name ".*.pfa" \
-        \! -name ".*.pfb" \! -name ".*.phont" \! -type d | do_gzip
+        \! -name ".*.pfb" \! -name ".*.phont" \! -name URW \
+        \! -type d | do_gzip
 done
 
 

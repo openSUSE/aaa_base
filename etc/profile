@@ -35,7 +35,7 @@ for DIR in ~/bin/$MACHINE ~/bin ; do
     test -d $DIR && PATH=$DIR:$PATH
 done
 #test "$UID" = 0 && PATH=/sbin:/usr/sbin:$PATH
-test "$UID" = 0 && PATH=/sbin:/usr/sbin:/usr/local/sbin/$PATH
+test "$UID" = 0 && PATH=/sbin:/usr/sbin:/usr/local/sbin/:$PATH
 for DIR in /usr/lib/java/bin \
            /var/lib/dosemu \
            /usr/games/bin \

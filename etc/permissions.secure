@@ -30,6 +30,7 @@
 # 'normal' suid root programs
 #
 /bin/mount                             root.root         755
+/bin/umount                            root.root         755
 /usr/X11R6/bin/cardinfo                root.root         755
 /usr/X11R6/bin/v4l-conf                root.video        755
 /usr/X11R6/bin/rxvt                    root.tty          755

@@ -29,7 +29,6 @@
 #
 # 'normal' suid root programs
 #
-/bin/mount                             root.root         755
 /usr/X11R6/bin/cardinfo                root.root         755
 /usr/X11R6/bin/v4l-conf                root.video        755
 /usr/X11R6/bin/xtvscreen.SuSE-dynamic  root.video        755

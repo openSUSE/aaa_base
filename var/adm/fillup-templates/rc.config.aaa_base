@@ -246,7 +246,7 @@ CHECK_ETC_HOSTS=yes
 # flag, where you can configure if /etc/hosts should be "beautified".
 # (yes/no)
 #
-BEAUTIFY_ETC_HOSTS=yes
+BEAUTIFY_ETC_HOSTS=no
 
 #
 # if SORT_PASSWD_BY_UID is set to yes, SuSEconfig sorts your /etc/passwd
