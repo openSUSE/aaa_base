@@ -272,22 +272,6 @@ NO_PROXY="localhost"
 CLOSE_CONNECTIONS="false"
 
 #
-# start pcnfsd (for PCNFS clients; needs activated portmapper - 
-# see man pcnfsd) (yes/no)
-#
-START_PCNFSD=no
-
-#
-# start bwnfsd (pcnfs related) (yes/no)
-#
-START_BWNFSD=no
-
-#
-# pcnfsd and bwnfsd need spool directory for lpd. Set it here.
-#
-PCNFSD_LPSPOOL=/var/spool/lpd
-
-#
 # start the named (package bind)? You have to configure the named first,
 # before you can start it (man named).
 #
