@@ -42,7 +42,7 @@ function _cd_ ()
 	    fi
 	 esac
     esac
-    IFS="$o"
+    test -z "$o" && unset IFS || IFS="$o"
 }
 
 complete -d -F _cd_ ${_dir}		cd rmdir pushd chroot chrootx
@@ -132,6 +132,7 @@ _exp_ ()
     *[?*+\!@]\(*\)*)
 	if test $g -eq 0 ; then
 			COMPREPLY=($(compgen -f -X "$e" -- $c))
+			test -z "$o" && unset IFS || IFS="$o"
 			test $g -eq 0 && shopt -u extglob
 			return
 	fi
@@ -149,8 +150,7 @@ _exp_ ()
 			done
 	fi									;;
     esac
-    IFS="$o"
-
+    test -z "$o" && unset IFS || IFS="$o"
     test $g -eq 0 && shopt -u extglob
 }
 
