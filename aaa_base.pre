@@ -45,7 +45,6 @@ man:x:13:62:Manual pages viewer:/var/cache/man:/bin/bash
 wwwrun:x:30:65534:WWW daemon apache:/var/lib/wwwrun:/bin/bash
 ftp:x:40:2:FTP account:/usr/local/ftp:/bin/bash
 named:x:44:44:Nameserver daemon:/var/named:/bin/bash
-mysql:x:60:2:MySQL database admin:/var/lib/mysql:/bin/false
 nobody:x:65534:65533:nobody:/var/lib/nobody:/bin/bash" \
  > var/adm/fillup-templates/passwd.aaa_base
 
@@ -253,9 +252,9 @@ for DIR in etc/rc.d usr/X11 ; do
 done
 
 # Backup YP_DOMAINNAME, before we remove it
-if test ! -f etc/defaultdomain ; then
+if test ! -f etc/defaultdomain -a -f /etc/rc.config ; then
   eval `grep ^YP_DOMAINNAME etc/rc.config 2>/dev/null`
-  echo $YP_DOMAINNAME > etc/defaultdomain
+  echo -n $YP_DOMAINNAME > etc/defaultdomain
   chmod 644 etc/defaultdomain
 fi
 

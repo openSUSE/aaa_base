@@ -24,10 +24,24 @@ if ( -f /var/spool/mail/$USER ) then
 endif
 
 set _xpath
-set _tpath=( /opt/bin /usr/andrew/bin /usr/games )
+set _tpath
+foreach _d (~/bin/$MACHTYPE ~/bin \
+	/var/lib/dosemu \
+	/usr/games \
+	/opt/bin \
+	/opt/gnome2/bin \
+	/opt/gnome/bin \
+	/opt/kde3/bin \
+	/opt/kde2/bin \
+	/opt/kde/bin \
+	/usr/openwin/bin \
+	/opt/cross/bin \
+	/usr/andrew/bin )
+    if ( -d $_d ) set _tpath=( $_d $_tpath)
+end
 
-if ( -d /usr/openwin/bin ) then
-    set _xpath=( /usr/openwin/bin )
+if ( ${?OPENWINHOME} && -d $OPENWINHOME/bin ) then
+    set _xpath=( $OPENWINHOME/bin )
 endif
 if ( -d /usr/bin/X11 ) then
     set _xpath=( /usr/bin/X11   $_xpath )
@@ -37,17 +51,16 @@ else if ( -d /usr/X11/bin ) then
     set _xpath=( /usr/X11/bin   $_xpath )
 endif
 
-set _tpath=( $_tpath $_xpath ~/bin )
+set _tpath=( $_tpath $_xpath )
 
 #
 # Doing only one rehash
 #
-foreach _d ($_tpath)
-    if ( -d $_d ) set path=( $_d $path )
-end
+set -f path=( $_tpath $path )
 
 unset _tpath
 unset _xpath
+unset _d
 
 #
 # SuSEconfig stuff

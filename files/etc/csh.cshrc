@@ -25,7 +25,7 @@ setenv HOST     "`hostname -s`"
 if ( -f /etc/organization ) then
    setenv ORGANIZATION "`cat /etc/organization`"
 endif
-setenv MACHTYPE `uname -m`
+setenv MACHTYPE "`uname -m`"
 setenv LESS "-M -I"
 setenv LESSOPEN "lessopen.sh %s"
 setenv LESSCLOSE "lessclose.sh %s %s"
