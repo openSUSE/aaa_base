@@ -96,6 +96,7 @@ done
 for i in passwd group shadow gshadow ; do
     test -e var/adm/fillup-templates/$i.aaa_base || continue
     echo -n "Updating etc/$i..."
+    touch etc/$i
     cp etc/$i etc/$i.tmp
     sort +0 -1 -t: -u etc/$i var/adm/fillup-templates/$i.aaa_base \
     | sort +0 -1 -t: etc/$i - | uniq -u >> etc/$i
