@@ -133,6 +133,13 @@ enum {	ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
 #define NPAR 16
 static unsigned int state = ESnormal;
 static int npar = 0, nl = 0;
+
+#ifdef BLOGGER
+/*
+ * If 1 use sequences handled but not used by console.c
+ */
+static int blogger = 0;
+#endif
 static void parselog(FILE * log, const char *buf, const size_t s)
 {
     int c;
@@ -230,6 +237,35 @@ static void parselog(FILE * log, const char *buf, const size_t s)
 		state = ESnormal;
 	    else
 		state = ESnormal;
+#ifdef BLOGGER
+	    if (c>='0'&&c<='9') {
+		blogger = 1;
+		if (!nl)
+		    fputc('\n', log);
+		switch (c) {
+		case 1:
+		default:
+		    fprintf(log, "<notice>");
+		    break;
+		case 2:
+		    fprintf(log, "<done>");
+		    break;
+		case 3:
+		    fprintf(log, "<failed>");
+		    break;
+		case 4:
+		    fprintf(log, "<skipped>");
+		    break;
+		case 5:
+		    fprintf(log, "<unused>");
+		    break;
+		}
+	    } else {
+		if (blogger)
+		    fputc('\n', log);
+		blogger = 0;
+	    }
+#endif
 	    break;
 	case ESpalette:
 	    if ((c>='0'&&c<='9') || (c>='A'&&c<='F') || (c>='a'&&c<='f')) {
@@ -260,7 +296,13 @@ static void parselog(FILE * log, const char *buf, const size_t s)
 	    state = ESnormal;
 	    break;
 	case ESpercent:
+	    state = ESnormal;
+	    break;
 	case ESfunckey:
+#ifdef BLOGGER
+	    if (blogger)
+		fputc(c, log);
+#endif
 	case EShash:
 	case ESsetG0:
 	case ESsetG1:
@@ -295,17 +337,50 @@ static void sigio(int sig)
     nsigio = sig;
 }
 
+/*
+ * The stdio file pointer for our log file
+ */
+static FILE * flog = NULL;
+
+#ifdef NEWBLOGGER
+static sigset_t ttin;
+static void sigttin(int sig)
+{
+    sigprocmask (SIG_BLOCK, &ttin, NULL);
+    parselog(flog, "Signal TTIN\n", sizeof(char)*strlen("Signal TTIN\n"));
+    sigprocmask (SIG_UNBLOCK, &ttin, NULL);
+}
+#endif
+
+/*
+ * Prepare I/O
+ */
 static void (*rw_connect)(void) = NULL;
 void prepareIO(void (*rfunc)(int), void (*cfunc)(void))
 {
+#ifdef NEWBLOGGER
+    struct sigaction act;
+#endif
+
     vc_reconnect = rfunc;
     rw_connect   = cfunc;
+
+#ifdef NEWBLOGGER
+    act.sa_handler = sigttin;
+    act.sa_flags   = SA_RESTART;
+    if (sigemptyset (&act.sa_mask))
+	error("can not set empty signal set: %s\n", strerror(errno));
+    if (sigaddset   (&act.sa_mask, SIGTTIN))
+	error("can not set add TTIN to signal set: %s\n", strerror(errno));
+    if (sigaction (SIGTTIN, &act, NULL))
+	error("can not set signal action: %s\n", strerror(errno));
+    ttin = act.sa_mask;
+#endif
 }
 
 /*
  *  The main routine for blogd.
  */
-static FILE * flog = NULL;
 void safeIO (const int fdread, const int fdwrite)
 {
     fd_set watch;
@@ -442,29 +517,65 @@ char * fetchtty(const pid_t pid, const pid_t ppid)
     ctty(pid, &tty, &ttypgrp);
 
     if (pgrp != ttypgrp && ppgrp != ttypgrp) {
-	void (*save_sighup);
-	if (pid != getsid(pid)) {
-	    if (pid == getpgid(pid))
-		setpgid(0, ppgrp);
-	    setsid();
+	int fdfrom[2];
+	pid_t pid = -1;  /* Inner pid */
+
+	if (pipe(fdfrom) < 0)
+	    error("can not create a pipe: %s\n", strerror(errno));
+
+	switch ((pid = fork())) {
+	case 0:
+	    {   void (*save_sighup);
+
+		dup2( fdfrom[1], 1);
+		close(fdfrom[1]);
+		close(fdfrom[0]);
+
+		pid = getpid();	/* our pid is not zero */
+
+		if (pid != getsid(pid)) {
+		    if (pid == getpgid(pid))
+			setpgid(0, ppgrp);
+		    setsid();
+		}
+
+		/* Remove us from any controlling tty */
+		save_sighup = signal(SIGHUP, SIG_IGN);
+		if (ttypgrp > 0)
+		    ioctl(0, TIOCNOTTY, (void *)1);
+		(void)signal(SIGHUP, save_sighup);
+
+		/* Take stdin as our controlling tt< */
+		if (ioctl(0, TIOCSCTTY, (void *)1) < 0)
+		    warn("can not set controlling tty: %s\n", strerror(errno));
+
+		ctty(pid, &tty, &ttypgrp);
+
+		/* Never hold this controlling tty */
+		save_sighup = signal(SIGHUP, SIG_IGN);
+		if (ttypgrp > 0)
+		    ioctl(0, TIOCNOTTY, (void *)1);
+		(void)signal(SIGHUP, save_sighup);
+
+		printf("|%d|%d|", tty, ttypgrp);  /* stdout to pipe synchronize ... */
+
+		exit(0);
+	    } break;
+	case -1:
+	    error("can not execute: %s\n", strerror(errno));
+	    break;
+	default:
+	    {   int fd = dup(0);
+		dup2( fdfrom[0], 0);
+		close(fdfrom[0]);
+		close(fdfrom[1]);
+
+		scanf("|%d|%d|", &tty, &ttypgrp); /* ... with stdin from pipe here  */
+
+		dup2(fd, 0);
+		close(fd);
+	    } break;
 	}
-	/* Remove us from any controlling tty */
-	save_sighup = signal(SIGHUP, SIG_IGN);
-	if (ttypgrp > 0)
-	    ioctl(0, TIOCNOTTY, (void *)1);
-	(void)signal(SIGHUP, save_sighup);
-
-	/* Take stdin as our controlling tt< */
-	if (ioctl(0, TIOCSCTTY, (void *)1) < 0)
-	    warn("can not set controlling tty\n", strerror(errno));
-
-	ctty(pid, &tty, &ttypgrp);
-
-	/* Never hold this controlling tty */
-	save_sighup = signal(SIGHUP, SIG_IGN);
-	if (ttypgrp > 0)
-	    ioctl(0, TIOCNOTTY, (void *)1);
-	(void)signal(SIGHUP, save_sighup);
     }
 
     if (!(dev = opendir("/dev")))

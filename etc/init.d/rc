@@ -63,6 +63,7 @@ else
     # Serial: columns and lines are not defined
       LINES=24
     COLUMNS=80
+    test "$TERM" = "linux" -o -z "$TERM" && TERM=vt102
 fi
 
 #

@@ -6,12 +6,13 @@
 
 LOG_BUFFER_SIZE	= 65536
 BOOT_LOGFILE	= /var/log/boot.msg
+#BLOGGER		= 1
 
 #DEBUG	 =	-DDEBUG=1
 #DESTDIR =	/tmp/root
 DEBUG	 =
 DESTDIR	 =
-VERSION	 =	0.4
+VERSION	 =	0.5
 DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
 
 #
@@ -30,6 +31,9 @@ endif
 		  -DLOG_BUFFER_SIZE=$(LOG_BUFFER_SIZE) \
 		  -DBOOT_LOGFILE=\"$(BOOT_LOGFILE)\" -Wall -pipe
 	  CLOOP = -funroll-loops
+ifeq ($(BLOGGER),1)
+	 CFLAGS := $(CFLAGS) -DBLOGGER
+endif
 	     CC = gcc
 	     RM = rm -f
 	  MKDIR = mkdir -p
@@ -50,11 +54,18 @@ endif
 #
 #
 #
+ifeq ($(BLOGGER),1)
+TODO	=	showconsole blogd blogger
+else
 TODO	=	showconsole blogd
+endif
 
 all: $(TODO)
 
 libconsole.o:	libconsole.c libconsole.h
+	$(CC) $(CFLAGS) $(CLOOP) -c $<
+
+libblogger.o:	libblogger.c libblogger.h
 	$(CC) $(CFLAGS) $(CLOOP) -c $<
 
 showconsole:	showconsole.c libconsole.o
@@ -63,8 +74,11 @@ showconsole:	showconsole.c libconsole.o
 blogd:	blogd.c libconsole.o
 	$(CC) $(CFLAGS) $(CLOOP) -o $@ $^ -lutil
 
+blogger:	blogger.c libblogger.o
+	$(CC) $(CFLAGS) $(CLOOP) -o $@ $^
+
 clean:
-	$(RM) *.o *~ showconsole blogd
+	$(RM) *.o *~ showconsole blogd blogger
 
 install:	$(TODO)
 	$(MKDIR)   $(SBINDIR)
@@ -89,6 +103,7 @@ FILES	= README         \
 	  showconsole.c  \
 	  blogd.c        \
 	  blogd.8        \
+	  blogger.c      \
 	  showconsole-$(VERSION).lsm
 
 dest:

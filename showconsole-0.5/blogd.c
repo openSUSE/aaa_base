@@ -101,11 +101,12 @@ static void (*saved_sighup)  = SIG_DFL;
 static void (*saved_sigint)  = SIG_DFL;
 static void (*saved_sigquit) = SIG_DFL;
 static void (*saved_sigterm) = SIG_DFL;
-static int signaled = 0;
+static volatile sig_atomic_t signaled = 0;
 static void sighandle(int sig)
 {
     signaled = sig;
 }
+
 /*
  * To be able to reconnect to real tty on EIO
  */
