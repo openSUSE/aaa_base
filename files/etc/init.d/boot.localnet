@@ -73,7 +73,8 @@ case "$1" in
 	  for CURDIR in $TMP_DIRS_TO_CLEAR ; do
 	    find $CURDIR -printf '%P\0' | ( cd $CURDIR ; xargs -0 rm -rf )
 	  done
-	  for CURDIR in /tmp /tmp/.X11-unix /var/tmp /var/tmp/vi.recover ; do
+	  for CURDIR in /tmp /tmp/.X11-unix /tmp/.ICE-unix \
+			/var/tmp /var/tmp/vi.recover ; do
 		test -d $CURDIR || mkdir -p $CURDIR
 		chown root.root $CURDIR
 		chmod 1777 $CURDIR
