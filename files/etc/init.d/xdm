@@ -51,9 +51,9 @@ KDEROOTHOME=/root/.kdm
 export KDEROOTHOME
 
 case "$DISPLAYMANAGER" in
-    kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde3/bin/kdm ;;
+    kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde3/bin/kdm;  PIDFILE="/var/run/kdm.pid" ;;
     xdm) DISPLAYMANAGER=/usr/X11R6/bin/xdm ;;
-    gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/bin/gdm ;;
+    gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/bin/gdm; PIDFILE="/var/run/gdm.pid" ;;
     wdm|WDM)		 DISPLAYMANAGER=/usr/X11R6/bin/wdm ;;
     console) exit 0 ;;
     *)			 DISPLAYMANAGER=/usr/X11R6/bin/xdm 
