@@ -133,7 +133,7 @@ ippp*)
         #ipfwadm-wrapper -O -f
 
         # set routes from /etc/route.conf 
-        test -z "$DEST"    || /sbin/route add -host $DEST dev $INTERFACE
+        # test -z "$DEST"    || /sbin/route add -host $DEST dev $INTERFACE
         test -z "$DEFAULT" || /sbin/route add default gw $DEFAULT 
 
 	# call ip-down.local if it exists and is executable:
