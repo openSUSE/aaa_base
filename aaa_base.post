@@ -50,7 +50,8 @@ if test -s etc/rc.config ; then
     rm -f etc/rc.config.t
 fi
 
-if [ ! -e etc/rc.config ]; then
+# XXX uncommented temporary
+if [ -e etc/aaa_base_debug -a ! -e etc/rc.config ]; then
   cat << EOF > etc/rc.config
 #
 # /etc/rc.config
@@ -83,7 +84,7 @@ fi
 
 #
 # remove old stuff from rc.config (oldstuff only has removed variables)
-if [ -x bin/fillup ] ; then
+if [ -x bin/fillup -a -f etc/rc.config ] ; then
   bin/fillup -q -t -r -i -d "=" etc/rc.config var/adm/fillup-templates/rc.config.aaa_base.oldstat /dev/null
   test -s etc/rc.config.new && mv etc/rc.config.new etc/rc.config
 fi
