@@ -119,6 +119,13 @@ case "$-" in
 		_t="\[\e]2;\u@\h:\$(ppwd)\007\e]1;\h\007\]"
 	    fi
 	fi
+	case $(locale charmap) in
+		UTF-8)
+		    _t=""
+		;;
+		*)
+		;;
+	esac
 	# With full path on prompt
 	PS1="${_t}${_u}:\w${_p} "
 #	# With short path on prompt
