@@ -32,9 +32,13 @@
 
 # the kernel images to use; must be in $boot_dir
 kernels="vmlinuz vmlinuz_24 vmlinuz.suse"
+arch=`uname -m`
+[ "$arch" = ia64 -o "$arch" = ppc ] && kernels="vmlinux vmlinux.suse"
+[ "$arch" = alpha ] && kernels="vmlinux.gz vmlinux.suse.gz"
 
 # initial ram disks (corresponding to $kernels); dto. in $boot_dir
 initrds="initrd initrd_24 initrd.suse"
+[ "$arch" = ia64 -o "$arch" = ppc -o "$arch" = alpha ] && initrds="initrd initrd.suse"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # adapt these only if needed
