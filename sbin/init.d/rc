@@ -43,7 +43,7 @@ test "$PREVLEVEL" = "$RUNLEVEL" && exit 0
 #
 if test $COLUMNS -gt 0 ; then
     # VGA
-    if test "$RUNLEVEL" = "0" -o "$RUNLEVEL" -o "6" ; then
+    if test "$RUNLEVEL" = "0" -o "$RUNLEVEL" = "6" ; then
 	CONSOLE=/dev/tty1
 	test -x /usr/bin/chvt && /usr/bin/chvt 1
     fi

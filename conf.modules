@@ -312,6 +312,7 @@ alias char-major-81       bttv
 alias char-major-96       pt
 alias char-major-97       pg
 alias char-major-107      3dfx
+alias char-major-109      lvm
 # IrDA
 alias char-major-161	  ircomm-tty
 # USB

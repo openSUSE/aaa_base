@@ -39,7 +39,9 @@ case "$1" in
 	echo -e "$return"
 	;;
     stop)
-        killproc -TERM /usr/sbin/rpc.ugidd      || return=$rc_failed
+	if test -x /usr/sbin/rpc.ugidd ; then
+	  killproc -TERM /usr/sbin/rpc.ugidd      || return=$rc_failed
+	fi
 	echo -n "Shutting down RPC services"
 	killproc -TERM $PORTMAP || return=$rc_failed
 	echo -e "$return"

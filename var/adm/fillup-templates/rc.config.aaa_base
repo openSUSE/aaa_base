@@ -172,6 +172,7 @@ TIMEZONE="YAST_ASK"
 
 #
 # start loopback networking? ("yes" or "no")
+# (this will be needed for all rpc services)
 #
 START_LOOPBACK="yes"
 

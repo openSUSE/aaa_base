@@ -72,6 +72,7 @@ case "$1" in
 	killproc    -TERM /usr/sbin/rpc.kstatd
       else
         echo -n "Shutting down NFS server"
+	test -x /usr/sbin/rpc.mountd || exit 0
         killproc -TERM /usr/sbin/rpc.mountd     || return=$rc_failed
         killproc -TERM /usr/sbin/rpc.nfsd       || return=$rc_failed
       fi
