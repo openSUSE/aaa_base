@@ -214,15 +214,6 @@ SORT_PASSWD_BY_UID=no
 FQHOSTNAME=""
 
 #
-# Shall SuSEconfig maintain /etc/resolv.conf (needed for DNS) ? 
-# If set to yes and one of SEARCHLIST and NAMESERVER is empty,
-# it is assumed, that no DNS is wanted and /etc/resolv.conf will
-# be deleted. If yes and both are filled out, it will be created.
-# "no" leaves /etc/resolv.conf untouched.
-#
-CREATE_RESOLVCONF=yes
-
-#
 # domain searchlist that should be used in /etc/resolv.conf
 # (e.g. "suse.de linux.de uni-stuttgart.de")
 # Attention! this has to be filled out, if you want to access a name server

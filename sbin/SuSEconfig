@@ -257,26 +257,6 @@ if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
     fi
 fi
 
-
-if test -n "$CREATE_RESOLVCONF" -a "$CREATE_RESOLVCONF" = "yes" -a \
-    "$DHCLIENT" != yes ; then
-    if test -z "$SEARCHLIST" -a -z "$NAMESERVER" ; then
-        # user wants no DNS - delete it.
-        rm -f $r/etc/resolv.conf
-    else
-        echo_warning /etc/resolv.conf \
-             "# Change variables (NAMESERVER + SEARCHLIST) in /etc/rc.config instead." \
-            > $r/etc/resolv.conf.SuSEconfig
-
-        test -n "$SEARCHLIST" && echo -e "search $SEARCHLIST" >> $r/etc/resolv.conf.SuSEconfig
-        for NSIP in $NAMESERVER; do
-            echo -e "nameserver $NSIP" >> $r/etc/resolv.conf.SuSEconfig
-        done
-        check_md5_and_move $r/etc/resolv.conf
-    fi
-fi
-
-
 test -n "$ORGANIZATION" && {
     echo "$ORGANIZATION" > $r/etc/organization.SuSEconfig
     check_md5_and_move $r/etc/organization
