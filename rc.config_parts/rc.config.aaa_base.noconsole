@@ -1,7 +1,8 @@
 
 #
 # If you want to allow root logins from other machines, set ROOT_LOGIN_REMOTE
-# to "yes". 
+# to "yes". (Logging in via ssh is not affected by this variable since SSH
+# is seen as a safe login method).
 #
 ROOT_LOGIN_REMOTE="yes"
 
