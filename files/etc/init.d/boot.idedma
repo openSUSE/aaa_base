@@ -25,7 +25,7 @@ test -x $HDPARM || exit 5
 rc_reset
 
 # read values from sysconfig
-. /etc/sysconfig/hardware
+. /etc/sysconfig/ide
 
 # enable/disable DMA mode
 function idedma_main() {
