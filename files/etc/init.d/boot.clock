@@ -10,7 +10,7 @@
 # Required-Start:    boot.localfs
 # X-UnitedLinux-Should-Start:	boot.crypto boot.swap
 # Required-Stop:
-# Default-Start:     B
+# Default-Start:     B S
 # Default-Stop:
 # Description:       set cmos clock
 ### END INIT INFO
