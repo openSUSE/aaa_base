@@ -394,6 +394,7 @@ sub findknown {
     $known_all{$_} = 1;
   }
   return unless -d $inetddir;
+  return unless -f "/etc/inetd.conf";
   local *F;
   my $gotinetd = 0;
   if (!open(F, "</etc/inetd.conf")) {
