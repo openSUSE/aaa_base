@@ -61,7 +61,7 @@ case "$1" in
         done
 	;;
     restart|reload)
-	$0 stop && $0 stop || return=$rc_failed
+	$0 stop && $0 start || return=$rc_failed
 	;;
     status)
         for I in $NETCONFIG; do
