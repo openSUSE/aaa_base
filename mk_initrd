@@ -468,7 +468,7 @@ if [ -z "$rootdev" ] ; then
   done < <( sed -e '/^[ 	]*#/d' < $root_dir/etc/fstab)
 else
   # get type from /etc/fstab or /proc/mounts (actually not needed)
-  x1=`cat /etc/fstab /proc/mounts 2>/dev/null | grep -E "$rootdev[[:space:]]" | tail -1`
+  x1=`cat /etc/fstab /proc/mounts 2>/dev/null | grep -E "$rootdev[[:space:]]" | tail -n 1`
   rootfstype=`echo $x1 | cut -f 3 -d " "`
 fi
 
@@ -855,7 +855,7 @@ for k in $kernels ; do
       # so far there _are_ modules that are just links to others with the
       # same name in different directories (pcmcia mods, for example). But
       # in this case it doesn't really matter which one we use.
-      x=`cd $root_dir ; find lib/modules/$vv/ -name $i.o | head -1`
+      x=`cd $root_dir ; find lib/modules/$vv/ -name $i.o -o -name $i.ko | head -n 1`
       if [ "$x" ] ; then
         tar -C $root_dir -cf - $x 2>/dev/null | tar -C $tmp_mnt -xpf - 2>/dev/null
         if [ $? != 0 ] ; then

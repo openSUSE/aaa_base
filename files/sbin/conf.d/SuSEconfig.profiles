@@ -121,26 +121,18 @@ else
     #
     # /etc/sysconfig/language: ROOT_USES_LANG = ctype:
     #
-    # root uses only the LC_CTYPE, we export all the other locale variables
-    # from /etc/sysconfig/language as-is, and don't assign them to their effective
-    # counterparts. We unset all effective locale variables but LC_CTYPE
-    # and set LANG to POSIX.
+    # root uses only the LC_CTYPE. We unset all effective locale variables
+    # but LC_CTYPE and set LANG to POSIX.
     # This is necessary for non iso-8859-1 roots to be able to type all
     # the characters in X Windows.
-    # root can later decide to use specific locale variables with simple
-    # assignments and do not need to source sysconfig. i.e. LANG=\$RC_LANG
     #"
     else
     root_message="\
     #
     # /etc/sysconfig/language: ROOT_USES_LANG != yes|ctype:
     #
-    # root doesn't use locales, we export the locale variables from
-    # /etc/sysconfig/language as-is, and don't assign them to their effective
-    # counterparts. We unset all effective locale variables and set
-    # LANG to POSIX.
-    # root can later decide to use specific locale variables with simple
-    # assignments and do not need to source sysconfig. i.e. LANG=\$RC_LANG
+    # root doesn't use locales. We unset all effective locale variables
+    # and set LANG to POSIX.
     #"
     fi
 
@@ -154,10 +146,6 @@ else
     echo "$root_message"             >> $r/etc/SuSEconfig/profile.SuSEconfig
     for var in $locale_vars
     do
-        if eval test "\$RC_$var"; then
-            eval echo "'    'RC_$var=\\\"\$RC_$var\\\""
-            echo "    export RC_$var"
-        fi
 	if test "$ROOT_USES_LANG" = ctype -a "$var" = LC_CTYPE ; then
             if eval test "\$RC_$var"; then
                eval echo "'    '$var=\\\"\$RC_LC_CTYPE\\\""
@@ -187,9 +175,6 @@ else
     echo "$root_message"             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
     for var in $locale_vars
     do
-        if eval test "\$RC_$var"; then
-            eval echo "'    'setenv RC_$var \\\"\$RC_$var\\\""
-        fi
 	if test "$ROOT_USES_LANG" = ctype -a "$var" = LC_CTYPE ; then
             if eval test "\$RC_$var"; then
                eval echo "'    'setenv $var \\\"\$RC_CTYPE\\\""
