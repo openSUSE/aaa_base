@@ -2,4 +2,4 @@ root/.exrc
 root/.xinitrc
 etc/DIR_COLORS
 etc/netgroup
-
+etc/ppp/ip-up
