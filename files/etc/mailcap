@@ -86,7 +86,7 @@ application/x-tar-gz; gunzip -c %s | tar -tf -; copiousoutput
 # ps interpreter gs
 #application/postscript; gv %s
 # Real audio player
-video/*; xanim %s
+video/*; xine %s
 #video/mpeg; xmpeg %s
 # PGP decoding in case your MUA is not clever enough by itself.
 # Commented out, as you might use a clever mailer or want to use gpg instead.
