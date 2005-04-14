@@ -71,3 +71,11 @@ SCHED_MINTIMESLICE=""
 # 
 SCHED_MAXTIMESLICE=""
 
+## Type:	string(yes)
+## Default:	""
+#
+# Skip doing a minimal preparation of the /usr/src/linux source tree so
+# that most header files can be directly included. If set, /usr/src/linux
+# will not be touched.
+#
+SKIP_RUNNING_KERNEL=""
