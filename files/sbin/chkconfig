@@ -530,7 +530,7 @@ if (@ARGV) {
   @services = @ARGV;
   $mode = @services == 1 ? 't' : 's' if $mode eq '';
 } else {
-  die("Please specify a service to check\n") if $mode eq 'c';
+  die("Please specify a service\n") if $mode eq 'c' || $mode eq 'a' || $mode eq 'd';
   @services = sort grep {!$skips_rc{$_}} keys %known_all if $mode ne 's';
 }
 $mode = 't' if $mode eq '';
