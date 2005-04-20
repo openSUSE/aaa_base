@@ -330,7 +330,7 @@ chmod 600 root/.gnupg/suse_build_key root/.gnupg/pubring.gpg
 # change all /media mounts (subfs) to noauto
 if test -f /etc/fstab ; then
 rm -f /etc/fstab.$$
-sed -e '/^[[:space:]]*#/{p;d}' -e '/[[:space:]]subfs.*noauto/{p;d}' -e '/\/media/s/\([[:space:]]subfs[[:space:]][[:space:]]*\)/\1noauto,/' < /etc/fstab > /etc/fstab.$$
+sed -e '/^[[:space:]]*#/{p;d}' -e '/[[:space:]]subfs.*noauto/{p;d}' -e '/\/media.*fs=\(cdfss\|floppyfss\)/s/\([[:space:]]subfs[[:space:]][[:space:]]*\)/\1noauto,/' < /etc/fstab > /etc/fstab.$$
 cmp -s /etc/fstab /etc/fstab.$$ || {
     mv /etc/fstab.$$ /etc/fstab
     chmod 644 /etc/fstab
