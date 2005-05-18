@@ -40,6 +40,13 @@ ACPI_DSDT=""
 #
 SHMFS_SIZE=""
 
+## Type:	string
+## Default:     ""
+#
+# other options for mounting shmfs
+#
+SHMFS_OPTIONS=""
+
 ## Type:	integer(1000:50000)
 ## Default:	1000
 #

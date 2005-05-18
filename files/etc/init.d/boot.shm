@@ -31,9 +31,7 @@ case "$1" in
 	if test ! -z "$HAVE_SHM"; then
 	    # SHMFS_SIZE is set in /etc/sysconfig/kernel
 	    if test -n "$SHMFS_SIZE" ; then
-		SHMFS_OPTIONS="-osize=$SHMFS_SIZE"
-	    else
-		SHMFS_OPTIONS=""
+		SHMFS_OPTIONS="$SHMFS_OPTIONS -osize=$SHMFS_SIZE"
 	    fi
 	    ECHO_RETURN=$rc_done
 	    test -d /dev/shm || mkdir /dev/shm
