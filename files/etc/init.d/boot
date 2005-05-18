@@ -154,34 +154,35 @@ splashtrigger "rlchange B"
 #
 # Check if we are able to use make for booting
 #
-test -s /etc/init.d/.depend.boot || USE_MAKE="no"
-test -s /etc/init.d/Makefile	 || USE_MAKE="no"
-test "$DO_CONFIRM"   = "yes"	 && USE_MAKE="no"
-test "$RUN_PARALLEL" = "yes"	 || USE_MAKE="no"
-startpar -v &> /dev/null	 || USE_MAKE="no"
-
-#
-# Do we stop/start scripts in parallel?
-#
-startpar=$(type -p startpar)
-test "$RUN_PARALLEL" = "yes" || startpar=""
-test "$DO_CONFIRM"   = "yes" && startpar=""
+test -s /etc/init.d/.depend.boot || RUN_PARALLEL="no"
+test -s /etc/init.d/Makefile	 || RUN_PARALLEL="no"
+test "$DO_CONFIRM"   = "yes"	 && RUN_PARALLEL="no"
+type -p startpar &> /dev/null    || RUN_PARALLEL="no"
+startpar -v &> /dev/null	 || RUN_PARALLEL="no"
 
 #
 # Start bootup client scripts.
 #
-if test "$USE_MAKE" = "yes" -a -n "$startpar" ; then
+if test "$RUN_PARALLEL" = "yes" ; then
+
+    #
+    # Start scripts in parallel with make behaviour of startpar
+    #
 
     startopt="-p4 -t 30 -T 3 $(splashmake)"
-    eval $($startpar $startopt -M boot)
+    eval $(startpar $startopt -M boot)
     failed="${failed:+$failed }$failed_service"
     skipped="${skipped:+$skipped }$skipped_service"
 
-    unset failed_service skipped_service
-    unset startopt startpar
+    unset failed_service skipped_service startopt
 
 elif test -d ${bootrc}/ ; then
+
+    #
+    # Start scripts in given link order
+    #
     for i in ${bootrc}/S${rex}*; do
+
 	test -f $i || continue
 
 	B=${i##*/}
@@ -197,73 +198,26 @@ elif test -d ${bootrc}/ ; then
 	    esac
 	fi
 
-	if test -z "$startpar" ; then
-	    blogger "$script start"
+	blogger "$script start"
 
-	    if test -x "$i" ; then
+	if test -x "$i" ; then
 		$i start
-	    else
-	        echo Running $i
-		/bin/sh $i b
-		rc_status -v1 -r
-	    fi
-	    status=$?
-	    echo -en "$rc_reset"
-	    splashprogress "$script start"
-
-	    case $status in
-	    [1-4])   failed="${failed:+$failed }$script"   ;;
-	    [56])   skipped="${skipped:+$skipped }$script" ;;
-	    [07]|*) ;;
-	    esac
-
-	    blogger "'$script start' exits with status $status"
 	else
-	    # Parallel boot only for valid scripts
-	    test -x $i || continue
-
-	    # Current vector
-	    eval cur=\${$B}
-	    test -n "$cur" || callord="${callord:+$callord }$B"
-
-	    # Remember scripts
-	    eval $B="\${cur:+$i }\${cur:-$i}"
+	    echo Running $i
+	    /bin/sh $i b
+	    rc_status -v1 -r
 	fi
-    done
-fi
-
-#
-# Call the scripts in correct order
-#
-if test -n "$startpar" ; then
-    declare -i s
-    for p in $callord ; do
-	vect=$p
-	eval p=(\${$p})
-
-	blogger "run boot scripts (${p[@]##*S$rex})"
-	if test ${#p[@]} -eq 1 ; then
-	    ${p} start
-	    status=($?)
-	    service=${p##*/}
-	    service=${service#*[SK]$rex}
-	    splashprogress "$service start"
-	else
-	    startopt="-p4 -t 30 -T 3 $(splashparallel)"
-	    status=($($startpar $startop -a start ${p[@]}))
-	fi
+	status=$?
 	echo -en "$rc_reset"
-	blogger "exit status of (${p[@]##*S$rex}) is (${status[@]})"
+	splashprogress "$script start"
 
-	s=0
-	for script in ${p[@]##*S$rex} ; do
-	    case "${status[$s]}" in
-	    [1-4])  failed="${failed:+$failed }$script"   ;;
-	    [56])  skipped="${skipped:+$skipped }$script" ;;
-	    0|*)   ;;
-	    esac
-	    : $((s++))
-	done
+	case $status in
+	[1-4])   failed="${failed:+$failed }$script"   ;;
+	[56])   skipped="${skipped:+$skipped }$script" ;;
+	[07]|*) ;;
+	esac
+
+	blogger "'$script start' exits with status $status"
     done
 fi
 

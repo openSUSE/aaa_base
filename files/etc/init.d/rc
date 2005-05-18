@@ -217,53 +217,51 @@ callord=""
 #
 # Check if we are able to use make like booting
 #
-test -s /etc/init.d/.depend.start || USE_MAKE="no"
-test -s /etc/init.d/.depend.stop  || USE_MAKE="no"
-test "$DO_CONFIRM"   = "yes"	  && USE_MAKE="no"
-test "$RUN_PARALLEL" = "yes"	  || USE_MAKE="no"
-startpar -v &> /dev/null	  || USE_MAKE="no"
+test -s /etc/init.d/.depend.start || RUN_PARALLEL="no"
+test -s /etc/init.d/.depend.stop  || RUN_PARALLEL="no"
+test "$DO_CONFIRM"   = "yes"	  && RUN_PARALLEL="no"
+type -p startpar &> /dev/null     || RUN_PARALLEL="no"
+startpar -v      &> /dev/null	  || RUN_PARALLEL="no"
 
 #
-# Do we stop/start services in parallel?
+# Stop/Start services to enter new runlevel
 #
-startpar=$(type -p startpar)
-test "$RUN_PARALLEL" = "yes" || startpar=""
-test "$DO_CONFIRM"   = "yes" && startpar=""
+if test "$RUN_PARALLEL" = "yes" ; then
 
-#
-# Stop/Start services with make like feature of startpar
-#
-if test "$USE_MAKE" = "yes" -a -n "$startpar" ; then
+    #
+    # Stop/Start services in parallel with make behaviour of startpar
+    #
 
     startopt="-p4 -t 30 -T 3 $(splashmake)"
-    eval $($startpar $startopt -M stop  -P $PREVLEVEL -R $RUNLEVEL)
+    eval $(startpar $startopt -M stop  -P $PREVLEVEL -R $RUNLEVEL)
     failed="${failed:+$failed }$failed_service"
     skipped="${skipped:+$skipped }$skipped_service"
 
-    eval $($startpar $startopt -M start -P $PREVLEVEL -R $RUNLEVEL)
+    eval $(startpar $startopt -M start -P $PREVLEVEL -R $RUNLEVEL)
     failed="${failed:+$failed }$failed_service"
     skipped="${skipped:+$skipped }$skipped_service"
 
-    unset failed_service skipped_service
-    unset startopt startpar
+    unset failed_service skipped_service startopt 
+
 else
-#
-# First check and test services of previous and current (new) runlevel.
-#
-for i in $prerc/K${rex}*; do
-    test -x "$i" || continue
 
     #
-    # Don't stop service if the new runlevel requires the service.
+    # First check and test services of previous and current (new) runlevel.
     #
-    K=${i##*/}
-    service=${K#*K$rex}
-    K=${K%$service}
-    set -- $runrc/S$rex$service
-    test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
-    test -x "$1"  && continue
+    for i in $prerc/K${rex}*; do
 
-    if test -z "$startpar" ; then
+	test -x "$i" || continue
+
+	#
+	# Don't stop service if the new runlevel requires the service.
+	#
+	K=${i##*/}
+	service=${K#*K$rex}
+	K=${K%$service}
+	set -- $runrc/S$rex$service
+	test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
+	test -x "$1"  && continue
+
 	blogger "$service stop"
 	$i stop; status=$?
 	echo -en "$rc_reset"
@@ -276,42 +274,35 @@ for i in $prerc/K${rex}*; do
 	esac
 
 	blogger "'$service stop' exits with status $status"
-    else
-	# Current vector
-	eval cur=\${$K}
-	test -n "$cur" || callord="${callord:+$callord }$K"
 
-	# Remember services
-	eval $K="\${cur:+$i }\${cur:-$i}"
-    fi
-done
+    done
 
-for i in $runrc/S${rex}*; do
-    test -x "$i" || continue
+    for i in $runrc/S${rex}*; do
 
-    #
-    # Don't start service if previous runlevel includes the service.
-    #
-    S=${i##*/}
-    service=${S#*S$rex}
-    S=${S%$service}
-    set -- $prerc/K$rex$service
-    test $# -gt 1 && echo -e "$attn$prerc/: more than one link for service $service$norm"
-    test -x "$1"  && continue
+	test -x "$i" || continue
 
-    #
-    # Ask the user if wanted
-    #
-    if test "$DO_CONFIRM" = "yes" ; then
-	rc_confirm -t 5 "Start service $service"
-	case "$?" in
-	0) true		;;
-	1) continue	;;
-	2) DO_CONFIRM=""
-	esac
-    fi
+	#
+	# Don't start service if previous runlevel includes the service.
+	#
+	S=${i##*/}
+	service=${S#*S$rex}
+	S=${S%$service}
+	set -- $prerc/K$rex$service
+	test $# -gt 1 && echo -e "$attn$prerc/: more than one link for service $service$norm"
+	test -x "$1"  && continue
 
-    if test -z "$startpar" ; then
+	#
+	# Ask the user if wanted
+	#
+	if test "$DO_CONFIRM" = "yes" ; then
+	    rc_confirm -t 5 "Start service $service"
+	    case "$?" in
+	    0) true	;;
+	    1) continue	;;
+	    2) DO_CONFIRM=""
+	    esac
+	fi
+
 	blogger "$service start"
 	$i start; status=$?
         echo -en "$rc_reset"
@@ -324,68 +315,6 @@ for i in $runrc/S${rex}*; do
 	esac
 
 	blogger "'$service start' exits with status $status"
-    else
-	# Current vector
-	eval cur=\${$S}
-	test -n "$cur" || callord="${callord:+$callord }$S"
-
-	# Remember services
-	eval $S="\${cur:+$i }\${cur:-$i}"
-    fi
-done
-fi
-
-#
-# Stop the services of the previous runlevel if they are missed
-# within the current (new) runlevel.
-# Start the services of the current (new) runlevel if they are missed
-# within the previous runlevel.
-#
-if test -n "$startpar" ; then
-    declare -i s
-    for p in $callord ; do
-	vect=$p
-	eval p=(\${$p})
-
-	case $vect in
-	K*) todo=stop  ;;
-	S*) todo=start ;;
-	esac
-
-	blogger "$todo services (${p[@]##*[SK]$rex})"
-	if test ${#p[@]} -eq 1 ; then
-	    ${p} $todo
-	    status=($?)
-	    service=${p##*/}
-	    service=${service#*[SK]$rex}
-	    splashprogress "$service $todo"
-	else
-	    startopt="-p4 -t 30 -T 3 $(splashparallel)"
-	    status=($($startpar $startopt -a $todo ${p[@]}))
-	fi
-	# May change to first terminal
-	chvt
-	echo -en "$rc_reset"
-	blogger "exit status of (${p[@]##*[SK]$rex}) is (${status[@]})"
-
-	s=0
-	for service in ${p[@]##*[SK]$rex} ; do
-	    case $todo in
-	    stop)
-		case "${status[$s]}" in
-		[1-4])	 failed="${failed:+$failed }$service"	;;
-		[56])	skipped="${skipped:+$skipped }$service" ;;
-		[07]|*)	;;
-		esac ;;
-	    start)
-		case "${status[$s]}" in
-		[1-47])	 failed="${failed:+$failed }$service"	;;
-		[56])	skipped="${skipped:+$skipped }$service" ;;
-		0|*)	;;
-		esac ;;
-	    esac
-	    : $((s++))
-	done
     done
 fi
 
