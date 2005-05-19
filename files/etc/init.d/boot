@@ -212,9 +212,9 @@ elif test -d ${bootrc}/ ; then
 	splashprogress "$script start"
 
 	case $status in
-	[1-4])   failed="${failed:+$failed }$script"   ;;
+	[1-47])  failed="${failed:+$failed }$script"   ;;
 	[56])   skipped="${skipped:+$skipped }$script" ;;
-	[07]|*) ;;
+	0|*) ;;
 	esac
 
 	blogger "'$script start' exits with status $status"
