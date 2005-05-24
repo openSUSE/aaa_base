@@ -11,25 +11,25 @@ DISPLAYMANAGER=""
 ## Type:	yesno
 ## Default:	no
 #
-# Allow remote access to your display manager (xdm/kdm). Please note 
+# Allow remote access to your display manager (xdm/kdm/gdm). Please note 
 # that a modified kdm or xdm configuration, e.g. by KDE control center
-# will not be changed.
+# will not be changed. For gdm, values will be updated after change.
 #
 DISPLAYMANAGER_REMOTE_ACCESS="no"
 
 ## Type:	yesno
 ## Default:	no
 #
-# Allow remote access of the user root to your display manager
+# Allow remote access of the user root to your display manager.
 #
 DISPLAYMANAGER_ROOT_LOGIN_REMOTE="no"
 
 ## Type:	yesno
 ## Default:	yes
 #
-# let the displaymanager start a local Xserver
-# set to "no" for remote-access only
-# set to "no" on architectures without any Xserver (e.g. s390/s390x)
+# Let the displaymanager start a local Xserver.
+# Set to "no" for remote-access only.
+# Set to "no" on architectures without any Xserver (e.g. s390/s390x).
 #
 DISPLAYMANAGER_STARTS_XSERVER="yes"
 
@@ -37,7 +37,7 @@ DISPLAYMANAGER_STARTS_XSERVER="yes"
 ## Default:     no
 ## Config:      xdm
 #
-# Tcp port 6000 of Xserver. When set to "no" (default) Xserver is 
+# TCP port 6000 of Xserver. When set to "no" (default) Xserver is 
 # started with "-nolisten tcp". Only set this to "yes" if you really 
 # need to. Use ssh X11 port forwarding whenever possible.
 #
