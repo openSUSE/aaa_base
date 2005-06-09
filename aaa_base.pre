@@ -85,11 +85,11 @@ rm -f var/adm/fillup-templates/shadow.aaa_base
 while read LINE ; do
   case $LINE in
     root*)
-	echo "root::9473:0:10000::::" \
+	echo "root::$(($(date '+%s')/86400)):0:10000::::" \
 		>> var/adm/fillup-templates/shadow.aaa_base
 	;;
     *)
-	echo "${LINE%%%%:*}:*:8902:0:10000::::" \
+	echo "${LINE%%%%:*}:*:8902::::::" \
 		>> var/adm/fillup-templates/shadow.aaa_base
 	;;
   esac
