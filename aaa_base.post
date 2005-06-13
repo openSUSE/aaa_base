@@ -231,7 +231,7 @@ chmod 600 root/.bash_history
 chown root:root var/log/faillog
 touch var/log/lastlog
 chmod 644 var/log/lastlog
-chown root:root var/log/lastlog
+chown root:tty var/log/lastlog
 touch var/log/wtmp
 chmod 664 var/log/wtmp
 chown root:tty var/log/wtmp

@@ -39,4 +39,4 @@
 %ghost /var/adm/fillup-templates/group.aaa_base
 %ghost /var/adm/fillup-templates/gshadow.aaa_base
 %ghost /var/adm/fillup-templates/shadow.aaa_base
-
+%ghost %attr(0644,root,tty) %verify(not md5 size mtime) /var/log/lastlog
