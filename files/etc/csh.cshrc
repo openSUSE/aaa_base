@@ -18,58 +18,44 @@ onintr -
 #
 set echo_style=both
 #
-setenv MANPATH  "`(unsetenv MANPATH; manpath -q)`"
-setenv MINICOM  "-c on"
+#
 setenv HOSTNAME "`hostname -f`"
 setenv HOST     "`hostname -s`"
-if ( -f /etc/organization ) then
-   setenv ORGANIZATION "`cat /etc/organization`"
-endif
 setenv MACHTYPE "`uname -m`"
-setenv LESS "-M -I"
-setenv LESSOPEN "lessopen.sh %s"
-setenv LESSCLOSE "lessclose.sh %s %s"
-if ( -f /etc/lesskey.bin ) then
-   setenv LESSKEY /etc/lesskey.bin
+#
+# Do only once the initial setup
+#
+if (! ${?CSHRCREAD} ) then
+    setenv MANPATH  "`(unsetenv MANPATH; manpath -q)`"
+    setenv MINICOM  "-c on"
+    setenv INFODIR  /usr/local/info:/usr/share/info:/usr/info
+    setenv INFOPATH $INFODIR
+    setenv LESS "-M -I"
+    setenv LESSOPEN "lessopen.sh %s"
+    setenv LESSCLOSE "lessclose.sh %s %s"
+    if ( -s /etc/lesskey.bin ) then
+	setenv LESSKEY /etc/lesskey.bin
+    endif
+    setenv PAGER '/usr/bin/less'
+    setenv MORE -sl
+    setenv GZIP -9
+    setenv CSHEDIT emacs
+    setenv COLORTERM 1
 endif
-setenv MORE -sl
-setenv PAGER '/usr/bin/less'
-setenv GZIP -9
-setenv CSHEDIT emacs
-if ( -d /usr/info ) then
-   setenv INFODIR /usr/info:/usr/share/info:/usr/local/info
-else
-   setenv INFODIR /usr/share/info:/usr/local/info
-endif
-setenv INFOPATH $INFODIR
+#
+#
 if ( -s /etc/nntpserver ) then
    setenv NNTPSERVER `cat /etc/nntpserver`
 else
    setenv NNTPSERVER news
 endif
-#
-set XLIBDIR=/usr/X11R6/lib/X11/
-if ( -d /usr/lib/X11/app-defaults/ ) then
-    set XLIBDIR=/usr/lib/X11/
-endif
-set path_xr5=${XLIBDIR}%L/%T/%N%C:${XLIBDIR}%l/%T/%N%C:${XLIBDIR}%T/%N%C
-set path_xr6=${XLIBDIR}%L/%T/%N:${XLIBDIR}%l/%T/%N:${XLIBDIR}%T/%N
-set path_var=/var/X11R6/%T/%N%C:/var/X11R6/%T/%N
-setenv XFILESEARCHPATH "${path_xr5}:${path_xr6}:${path_var}"
-if ( -d ${HOME}/.app-defaults/ ) then
-    setenv XAPPLRESDIR  ${HOME}/.app-defaults/
-endif
-unset XLIBDIR path_xr5 path_xr6 path_var
-#
-if ( -f /usr/lib/teTeX/texmf.cnf ) then
-   setenv TETEXDIR /usr/lib/teTeX
-   if ( -d /usr/bin/TeX ) set path=( /usr/bin/TeX $path )
+if ( -s /etc/organization ) then
+   setenv ORGANIZATION "`cat /etc/organization`"
 endif
 #
 # For all readline library based applications
 #
-if (-r /etc/inputrc) setenv INPUTRC /etc/inputrc
-setenv COLORTERM 1
+if ( -r /etc/inputrc && ! ${?INPUTRC} ) setenv INPUTRC /etc/inputrc
 #
 # SuSEconfig stuff
 #
@@ -77,8 +63,6 @@ setenv COLORTERM 1
 # overriding locale variables already present in the environment
 #
 if (! ${?CSHRCREAD} ) then
-    setenv CSHRCREAD true
-    set -r CSHRCREAD=$CSHRCREAD
     if ( -r /etc/profile.d/csh.ssh )    source /etc/profile.d/csh.ssh
     if ( -r /etc/SuSEconfig/csh.cshrc ) source /etc/SuSEconfig/csh.cshrc
     if (! ${?SSH_SENDS_LOCALE} ) then
@@ -93,7 +77,7 @@ endif
 #
 # source extensions for special packages
 #
-if ( -d /etc/profile.d ) then
+if ( -d /etc/profile.d && ! ${?CSHRCREAD} ) then
   set _tmp=${?nonomatch}
   set nonomatch
   foreach _s ( /etc/profile.d/*.csh )
@@ -103,6 +87,14 @@ if ( -d /etc/profile.d ) then
   end
   if ( ! ${_tmp} ) unset nonomatch
   unset _tmp _s
+endif
+
+#
+# Avoid overwriting user settings if called twice
+#
+if (! ${?CSHRCREAD} ) then
+    setenv CSHRCREAD true
+    set -r CSHRCREAD=$CSHRCREAD
 endif
 #
 #

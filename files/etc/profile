@@ -129,8 +129,10 @@ fi
 #
 # Most bourn shell clones knows about this
 #
-HISTSIZE=1000
-export HISTSIZE
+if test -z "$PROFILEREAD" ; then
+    HISTSIZE=1000
+    export HISTSIZE
+fi
 
 #
 # Set some environment variables for TeX/LaTeX
@@ -158,15 +160,25 @@ fi
 #
 # Minicom 
 #
-MINICOM="-c on"
-export MINICOM
+if test -z "$PROFILEREAD" ; then
+    MINICOM="-c on"
+    export MINICOM
+fi
 
 #
 # Current manpath
 #
-unset MANPATH
-MANPATH=`test -x /usr/bin/manpath && /usr/bin/manpath -q`
-export MANPATH
+if test -z "$PROFILEREAD" ; then
+    tmp="$MANPATH"
+    unset MANPATH
+    if test -n "$tmp" ; then
+	MANPATH="${tmp}:`test -x /usr/bin/manpath && /usr/bin/manpath -q`"
+    else
+	MANPATH="`test -x /usr/bin/manpath && /usr/bin/manpath -q`"
+    fi
+    unset tmp
+    export MANPATH
+fi
 
 #
 # Some applications do not handle the XAPPLRESDIR environment properly,
@@ -181,17 +193,27 @@ export MANPATH
 #
 # Set INFOPATH to tell xemacs where he can find the info files
 #
-INFODIR=/usr/local/info:/usr/share/info:/usr/info
-INFOPATH=$INFODIR
-export INFODIR INFOPATH
+if test -z "$PROFILEREAD" ; then
+    tmp="$INFODIR"
+    if test -n "$tmp" ; then
+	INFODIR="${tmp}:/usr/local/info:/usr/share/info:/usr/info"
+    else
+	INFODIR="/usr/local/info:/usr/share/info:/usr/info"
+    fi
+    INFOPATH=$INFODIR
+    unset tmp
+    export INFODIR INFOPATH
+fi
 
 #
 # These settings are recommended for old motif applications
 #
-XKEYSYMDB=/usr/X11R6/lib/X11/XKeysymDB
-export XKEYSYMDB
-XNLSPATH=/usr/X11R6/lib/X11/nls
-export XNLSPATH
+if test -z "$PROFILEREAD" ; then
+    XKEYSYMDB=/usr/X11R6/lib/X11/XKeysymDB
+    export XKEYSYMDB
+    XNLSPATH=/usr/X11R6/lib/X11/nls
+    export XNLSPATH
+fi
 
 if test -s /etc/nntpserver ; then
     read NNTPSERVER < /etc/nntpserver
@@ -206,8 +228,10 @@ fi
 #
 # Midnight Commander needs this to run in color mode
 #
-COLORTERM=1
-export COLORTERM
+if test -z "$PROFILEREAD" ; then
+    COLORTERM=1
+    export COLORTERM
+fi
 
 #
 # For RCS
