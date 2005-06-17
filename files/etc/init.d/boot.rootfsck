@@ -38,7 +38,7 @@ case "$1" in
 	#
 	if [ "$DUMP_ACTIVE" != "1" ]; then
 		echo "Activating swap-devices in /etc/fstab..."
-		swapon -a &> /dev/null
+		swapon -ae &> /dev/null
 		rc_status -v1 -r
 	fi
 	
