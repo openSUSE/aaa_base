@@ -44,7 +44,7 @@ fi
 # now look for reports and mail them
 #
 if test -z "$r" -a -x /usr/bin/mail -a -x /usr/sbin/sendmail \
-    -a -n "$MAIL_REPORTS_TO" -a "$FASTRUN" != "true" -a "$MAIL_LEVEL" != "off" ; then
+    -a -n "$MAIL_REPORTS_TO" -a "$MAIL_LEVEL" != "off" ; then
     for FILE in /var/lib/update-messages/* ; do
         test -f $FILE || continue
 	PACKAGE=${FILE##/var/lib/update-messages/}
