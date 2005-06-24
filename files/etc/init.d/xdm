@@ -53,7 +53,7 @@ export KDEROOTHOME
 case "$DISPLAYMANAGER" in
     kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde3/bin/kdm;  PIDFILE="/var/run/kdm.pid" ;;
     xdm) DISPLAYMANAGER=/usr/X11R6/bin/xdm ;;
-    gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/bin/gdm; PIDFILE="/var/run/gdm.pid" ;;
+    gdm|GDM|Gnome|GNOME|/opt/gnome/bin/gdm) DISPLAYMANAGER=/opt/gnome/sbin/gdm; PIDFILE="/var/run/gdm.pid" ;;
     wdm|WDM)		 DISPLAYMANAGER=/usr/X11R6/bin/wdm ;;
     console) exit 0 ;;
     *)			 DISPLAYMANAGER=/usr/X11R6/bin/xdm 
@@ -79,7 +79,7 @@ case "$1" in
 		ln -snf $PIDFILE /etc/X11/xdm/xdm-pid
 		ln -snf /var/log/xdm.errors /etc/X11/xdm/xdm-errors
 	fi 
-	if [ "$DISPLAYMANAGER" = "/opt/gnome/bin/gdm" -a \
+	if [ "$DISPLAYMANAGER" = "/opt/gnome/sbin/gdm" -a \
 		 "$DISPLAYMANAGER_REMOTE_ACCESS" = "yes"  -a \
 		 "$DISPLAYMANAGER_STARTS_XSERVER" = "no" ]; then
 		XDMOPTIONS="--no-console"
