@@ -47,7 +47,7 @@ function cleanup_tmp
       find $DIR/. $OMIT ! -type d ! -type s ! -type p \
         -atime +$MAX_DAYS -exec /usr/bin/safe-rm {} \;
       } || echo "Error: Can not find /usr/bin/safe-rm"
-      find $DIR/. $OMIT -depth -type d -empty -mindepth 1 \
+      find $DIR/. -depth -mindepth 1 $OMIT -type d -empty \
         -mtime +$MAX_DAYS -exec /usr/bin/safe-rmdir {} \;
     done
   fi 
