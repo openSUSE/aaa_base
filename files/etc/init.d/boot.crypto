@@ -101,6 +101,15 @@ case "$1" in
 	    #
 	    doskip=0
 	    #
+	    # Does the physical device, the mount point, exit?
+	    #
+	    test -d $physdev
+	    rc_status
+	    if test $? -ne 0 ; then
+		echo "${extd}${physdev}: No such directory${norm}"
+		continue
+	    fi
+	    #
 	    # Seeking for crypto modules
 	    #
 	    case "$crypto" in
