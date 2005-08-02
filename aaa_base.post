@@ -153,7 +153,7 @@ if [ "$NEW_DMA" != "" ] ; then
 fi
 
 # replace capability by subdomain
-sed -e "s|MODULES_LOADED_ON_BOOT=\\(.*\\)capability\\(.*\\)|MODULES_LOADED_ON_BOOT=\\1subdomain\\2|" \
+sed -e "s|MODULES_LOADED_ON_BOOT=\\(.*\\)capability\\(.*\\)|MODULES_LOADED_ON_BOOT=\\1\\2|" \
 	etc/sysconfig/kernel > etc/sysconfig/kernel.new \
 	&& mv etc/sysconfig/kernel.new etc/sysconfig/kernel
 rm -f etc/sysconfig/kernel.new
