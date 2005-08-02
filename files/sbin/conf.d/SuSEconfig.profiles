@@ -70,147 +70,6 @@ if test "$CWD_IN_USER_PATH" = "yes" ; then
         >> $r/etc/SuSEconfig/csh.login.SuSEconfig
 fi
 
-# start of i18n support
-echo '# start of i18n support'       >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo '# start of i18n support'       >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-
-echo 'if test -z "$SSH_SENDS_LOCALE" ; then' >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo 'if (! ${?SSH_SENDS_LOCALE} ) then'    >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-
-locale_vars="\
-LANG         \
-LC_ALL       \
-LC_MESSAGES  \
-LC_CTYPE     \
-LC_COLLATE   \
-LC_TIME      \
-LC_NUMERIC   \
-LC_PAPER     \
-LC_MONETARY"
-
-if test "$ROOT_USES_LANG" = yes ; then
-    message="\
-#
-# /etc/sysconfig/language: ROOT_USES_LANG = yes:
-#
-# All users get all the locale variables from /etc/sysconfig/language:
-#"
-
-    # sh und ksh:
-    echo "$message"                  >> $r/etc/SuSEconfig/profile.SuSEconfig
-    for var in $locale_vars
-    do
-        if eval test "\$RC_$var"; then
-            eval echo "$var=\\\"\$RC_$var\\\""
-            echo "export $var"
-        else
-            echo "unset $var"
-        fi
-    done                             >> $r/etc/SuSEconfig/profile.SuSEconfig
-
-    # csh:
-    echo "$message"                  >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    for var in $locale_vars
-    do
-        if eval test "\$RC_$var"; then
-            eval echo "setenv $var \\\"\$RC_$var\\\""
-        else
-            echo "unsetenv $var"
-        fi
-    done                             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-
-else
-    if test "$ROOT_USES_LANG" = ctype ; then
-    root_message="\
-    #
-    # /etc/sysconfig/language: ROOT_USES_LANG = ctype:
-    #
-    # root uses only the LC_CTYPE. We unset all effective locale variables
-    # but LC_CTYPE and set LANG to POSIX.
-    # This is necessary for non iso-8859-1 roots to be able to type all
-    # the characters in X Windows.
-    #"
-    else
-    root_message="\
-    #
-    # /etc/sysconfig/language: ROOT_USES_LANG != yes|ctype:
-    #
-    # root doesn't use locales. We unset all effective locale variables
-    # and set LANG to POSIX.
-    #"
-    fi
-
-    user_message="\
-    #
-    # All other users get all the locale variables from /etc/sysconfig/language:
-    #"
-
-    # sh und ksh:
-    echo 'if test "$UID" = 0 ; then' >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "$root_message"             >> $r/etc/SuSEconfig/profile.SuSEconfig
-    for var in $locale_vars
-    do
-	if test "$ROOT_USES_LANG" = ctype -a "$var" = LC_CTYPE ; then
-            if eval test "\$RC_$var"; then
-               eval echo "'    '$var=\\\"\$RC_LC_CTYPE\\\""
-            else
-               eval echo "'    '$var=\\\"\$RC_LANG\\\""
-            fi
-            echo "    export LC_CTYPE"
-        else
-            echo "    unset $var"
-        fi
-    done                             >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo 'else'                      >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "$user_message"             >> $r/etc/SuSEconfig/profile.SuSEconfig
-    for var in $locale_vars
-    do
-        if eval test "\$RC_$var"; then
-            eval echo "'    '$var=\\\"\$RC_$var\\\""
-            echo "    export $var"
-        else
-            echo "    unset $var"
-        fi
-    done                             >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo 'fi'                        >> $r/etc/SuSEconfig/profile.SuSEconfig
-
-    # csh:
-    echo 'if ( "$uid" == "0" ) then' >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    echo "$root_message"             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    for var in $locale_vars
-    do
-	if test "$ROOT_USES_LANG" = ctype -a "$var" = LC_CTYPE ; then
-            if eval test "\$RC_$var"; then
-               eval echo "'    'setenv $var \\\"\$RC_CTYPE\\\""
-            else
-               eval echo "'    'setenv $var \\\"\$RC_LANG\\\""
-            fi
-        else
-            echo "    unsetenv $var"
-        fi
-    done                             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    echo 'else'                      >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    echo "$user_message"             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    for var in $locale_vars
-    do
-        if eval test "\$RC_$var"; then
-            eval echo "'    'setenv $var \\\"\$RC_$var\\\""
-        else
-            echo "    unsetenv $var"
-        fi
-    done                             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    echo 'endif'                     >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-
-echo '# end of i18n support'         >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo '# end of i18n support'         >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-
-echo 'fi'                            >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo 'endif'                         >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-# end of i18n support
-
-
-
 if test -n "$FROM_HEADER" ; then
     echo "FROM_HEADER=\"$FROM_HEADER\"" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export FROM_HEADER" >> $r/etc/SuSEconfig/profile.SuSEconfig
@@ -230,17 +89,6 @@ if test -d $r/usr/lib/qt3 ; then
     echo "QTDIR=/usr/lib/qt3" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv QTDIR /usr/lib/qt3" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-else
-  if test -d $r/usr/lib/qt2 ; then
-    echo "QTDIR=/usr/lib/qt2" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv QTDIR /usr/lib/qt2" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-  fi
-fi
-if test -d $r/usr/X11R6/lib/xad ; then
-    echo "XADIDIR=/usr/X11R6/lib/xad" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export XADIDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv XADIDIR /usr/X11R6/lib/xad" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test -d $r/usr/lib/dvgt_help ; then
     echo "DV_IMMED_HELP=/usr/lib/dvgt_help" >> $r/etc/SuSEconfig/profile.SuSEconfig
@@ -251,16 +99,6 @@ if test -d $r/usr/lib/rasmol ; then
     echo "RASMOLPATH=/usr/lib/rasmol" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export RASMOLPATH" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv RASMOLPATH /usr/lib/rasmol" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/cint ; then
-    echo "CINTSYSDIR=/usr/lib/cint" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export CINTSYSDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv CINTSYSDIR /usr/lib/cint" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/maxwell ; then
-    echo "MAXHOME=/usr/lib/maxwell" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export MAXHOME" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv MAXHOME /usr/lib/maxwell" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test "$PROXY_ENABLED" != "no"; then
     if test -n "$HTTP_PROXY" ; then
