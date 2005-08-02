@@ -31,7 +31,7 @@ if test -s /etc/sysconfig/language ; then
 	esac
     done < /etc/sysconfig/language
 fi
-test -s $HOME/.i18ni && . $HOME/.i18n
+test -s $HOME/.i18n && . $HOME/.i18n
 
 #
 # Handle all LC and the LANG variable

@@ -22,10 +22,10 @@ if ( -s /etc/sysconfig/language ) then
 	< /etc/sysconfig/language`
     if ( "$uid" != 0 ) set ROOT_USES_LANG=yes
 endif
-if ( -s $HOME/.i18ni ) then
+if ( -s $HOME/.i18n ) then
     eval `sed -n \
 	-e 's/^\(\(LANG\|LC_[A-Z_]\+\)\)=/set \1=/p' \
-	< $HOME/.i18ni
+	< $HOME/.i18n
 endif
 
 #
