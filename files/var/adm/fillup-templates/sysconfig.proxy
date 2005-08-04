@@ -27,7 +27,7 @@ HTTP_PROXY=""
 # the environment.  SuSEconfig can add these environment variables to
 # /etc/SuSEconfig/* (sourced by /etc/profile etc.) -
 # this setting is for https connections
-HTTP_PROXY=""
+HTTPS_PROXY=""
 
 ## Type:	string
 ## Default:	""
