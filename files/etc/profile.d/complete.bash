@@ -38,11 +38,11 @@ function _cd_ ()
     esac
 
     case "$c" in
-    \$\(*\))	eval COMPREPLY=(${c}) ;;
+    \$\(*\))	eval COMPREPLY=\(${c}\) ;;
     \$\(*)	COMPREPLY=($(compgen -c -P '$(' -S ')'	-- ${c#??}))	;;
-    \`*\`)	eval COMPREPLY=(${c}) ;;
+    \`*\`)	eval COMPREPLY=\(${c}\) ;;
     \`*)	COMPREPLY=($(compgen -c -P '\`' -S '\`' -- ${c#?}))	;;
-    \$\{*\})	eval COMPREPLY=(${c}) ;;
+    \$\{*\})	eval COMPREPLY=\(${c}\) ;;
     \$\{*)	COMPREPLY=($(compgen -v -P '${' -S '}'	-- ${c#??}))	;;
     \$*)	COMPREPLY=($(compgen -v -P '$' $s	-- ${c#?}))	;;
     \~*/*)	COMPREPLY=($(compgen -d $s		-- "${c}"))	;;
@@ -134,11 +134,11 @@ _exp_ ()
     IFS='
 '
     case "$c" in
-    \$\(*\))	   eval COMPREPLY=(${c}) ;;
+    \$\(*\))	   eval COMPREPLY=\(${c}\) ;;
     \$\(*)		COMPREPLY=($(compgen -c -P '$(' -S ')'  -- ${c#??}))	;;
-    \`*\`)	   eval COMPREPLY=(${c}) ;;
+    \`*\`)	   eval COMPREPLY=\(${c}\) ;;
     \`*)		COMPREPLY=($(compgen -c -P '\`' -S '\`' -- ${c#?}))	;;
-    \$\{*\})	   eval COMPREPLY=(${c}) ;;
+    \$\{*\})	   eval COMPREPLY=\(${c}\) ;;
     \$\{*)		COMPREPLY=($(compgen -v -P '${' -S '}'  -- ${c#??}))	;;
     \$*)		COMPREPLY=($(compgen -v -P '$'          -- ${c#?}))	;;
     \~*/*)		COMPREPLY=($(compgen -f -X "$e"         -- ${c}))	;;

@@ -119,6 +119,7 @@ EXEC 00;32
 .xpm  01;35
 .dl   01;35
 .gl   01;35
+.wmv  01;35
 
 # sound formats
 .aiff 00;32
@@ -128,3 +129,4 @@ EXEC 00;32
 .ogg  00;32
 .voc  00;32
 .wav  00;32
+

@@ -23,6 +23,15 @@ HTTP_PROXY=""
 ## Type:	string
 ## Default:	""
 #
+# Some programs (e.g. lynx, arena and wget) support proxies, if set in
+# the environment.  SuSEconfig can add these environment variables to
+# /etc/SuSEconfig/* (sourced by /etc/profile etc.) -
+# this setting is for https connections
+HTTP_PROXY=""
+
+## Type:	string
+## Default:	""
+#
 # Example: FTP_PROXY="http://proxy.provider.de:3128/"
 #
 FTP_PROXY=""

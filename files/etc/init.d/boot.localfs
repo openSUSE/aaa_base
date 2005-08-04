@@ -167,7 +167,7 @@ case "$1" in
 	        proc)      umount -t proc     $fs ;;
 	        devpts)    umount -t devpts   $fs ;;
 	        devfs)     umount -t devfs    $fs ;;
-	        shm)       umount -t shm      $fs ;;
+	        tmpfs)     umount -t tmpfs    $fs ;;
 	        usbfs)     umount -t usbfs    $fs ;;
 	        usbdevfs)  umount -t usbdevfs $fs ;;
 	    esac

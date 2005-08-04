@@ -101,12 +101,12 @@ case "$1" in
 	    #
 	    doskip=0
 	    #
-	    # Does the physical device, the mount point, exit?
+	    # Does the mount point exit?
 	    #
-	    test -d $physdev
+	    test -d $access
 	    rc_status
 	    if test $? -ne 0 ; then
-		echo "${extd}${physdev}: No such directory${norm}"
+		echo "${extd}${access}: No such directory${norm}"
 		continue
 	    fi
 	    #
