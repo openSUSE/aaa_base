@@ -49,6 +49,13 @@ It calls the run level master script
 to start or stop services provided by the other scripts under
 .IR /etc/init.d/ .
 .PP
+Both scripts, then boot level master script
+.I /etc/init.d/boot
+and the the run level master script
+.I /etc/init.d/rc
+starts all other boot or runlevel scripts either sequential
+or partial parallel within their dependencies order.
+.PP
 To control the services of a run level, the corresponding scripts
 are linked into run level directories
 .IR /etc/init.d/rc<X>.d/ ,
@@ -68,6 +75,23 @@ a stop link.  Within SuSE boot concept a
 link scheme is used to be able to
 .B change
 a runlevel in comparision with the former level.
+.PP
+If parallel executing of the boot scripts is enabled (see
+.I /etc/sysconfig/boot
+variable
+.BR RUN_PARALLEL )
+then both master scripts uses the program
+.BR startpar (8)
+which starts or stops multiple services in parallel.
+.BR Startpar (8)
+will look for the files
+.IR /etc/init.d/.depend.boot ,
+.IR /etc/init.d/.depend.start ,\ and
+.I /etc/init.d/.depend.stop
+to get the dependencies for each service.  The files will
+be written, beside the symbolic links in the boot and
+runlevel directories, by the program
+.BR insserv (8).
 .PP
 To avoid redundant starts when changing run levels, only those
 services are started which have no start link in the previous run
@@ -244,12 +268,21 @@ to include your own script into a run level.
 .br
 .I /etc/init.d/rcS.d/{K,S}[0-9][0-9]*
 .br
+.I /etc/init.d/.depend.boot
+.br
+.I /etc/init.d/.depend.start
+.br
+.I /etc/init.d/.depend.stop
+.br
 .I /etc/inittab
+.br
+.I /etc/sysconfig/boot
 .br
 .I /etc/sysconfig
 .\"
 .SH SEE ALSO
 .BR insserv (8),
+.BR startpar (8),
 .BR init (8),
 .BR inittab (5),
 and the
@@ -257,7 +290,7 @@ and the
 handbook, chapter
 .IR "The SuSE boot concept" .
 .SH COPYRIGHT
-1996-2002 SuSE Linux AG, Nuernberg, Germany.
+1996-2005 SuSE Linux AG, Nuernberg, Germany.
 .SH AUTHORS
 Florian La Roche <http://www.suse.de/feedback>,
 Werner Fink <werner@suse.de>,
