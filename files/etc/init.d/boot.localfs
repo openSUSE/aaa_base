@@ -172,6 +172,21 @@ case "$1" in
 	        usbdevfs)  umount -t usbdevfs $fs ;;
 	    esac
 	done
+
+	while read major minor blocks name ; do
+	    des=/dev/$name
+	    case "$name" in
+		""|\#*)    continue ;;
+		loop*)
+		           des=/dev/loop/${name#loop}
+		           losetup $des &> /dev/null
+		           test $? -eq 0 && losetup -d $des
+			   des=/dev/$name
+		           losetup $des &> /dev/null
+		           test $? -eq 0 && losetup -d $des
+	    esac
+	done < /proc/partitions
+
 	UMOUNT_FAILED=false
 	echo "Unmounting file systems"
 	umount -avt noproc,nonfs,nosmbfs || {
