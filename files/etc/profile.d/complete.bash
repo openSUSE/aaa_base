@@ -49,9 +49,16 @@ function _cd_ ()
     \~*)	COMPREPLY=($(compgen -u $s		-- "${c}"))	;;
     esac
 
-    # Replace spaces in path names with `\ '
+    # Escape spaces and braces in path names with `\'
     for x in ${COMPREPLY[@]} ; do
-	C=(${C[@]} ${x// /\\ })
+	x=${x// /\\ }
+	x=${x//(/\\(}
+	x=${x//)/\\)}
+	x=${x//\{/\\\{}
+	x=${x//\}/\\\}}
+	x=${x//\[/\\\[}
+	x=${x//\]/\\\]}
+	C=(${C[@]} $x)
     done
     COMPREPLY=(${C[@]})
 
