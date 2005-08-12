@@ -240,6 +240,7 @@ switch ( `locale charmap` )
 #
 end:
     onintr
+    unset noglob
 
 #
 # Local configuration

@@ -20,6 +20,8 @@ if ( -o /dev/$tty && ${?prompt} ) then
 endif
 umask 022
 setenv SHELL /bin/tcsh
+
+set noglob
 if ( -f /var/spool/mail/$USER ) then
     setenv MAIL /var/spool/mail/$USER
     set mail=$MAIL
@@ -27,6 +29,11 @@ endif
 
 set _xpath
 set _tpath
+if ( "$uid" == "0" ) then
+    if ( -d /opt/gnome/sbin ) set _tpath=( /opt/gnome/sbin )
+    if ( -d /opt/kde3/sbin  ) set _tpath=( /opt/kde3/sbin $_tpath )
+    set _tpath=( /sbin /usr/sbin /usr/local/sbin )
+endif
 foreach _d (~/bin/$MACHTYPE ~/bin \
 	/var/lib/dosemu \
 	/usr/games \
@@ -38,7 +45,7 @@ foreach _d (~/bin/$MACHTYPE ~/bin \
 	/usr/openwin/bin \
 	/opt/cross/bin \
 	/usr/andrew/bin )
-    if ( -d $_d ) set _tpath=( $_d $_tpath)
+    if ( -d $_d ) set _tpath=( $_tpath $_d )
 end
 
 if ( ${?OPENWINHOME} ) then
@@ -64,6 +71,7 @@ set -f path=( $_tpath $path )
 unset _tpath
 unset _xpath
 unset _d
+unset noglob
 
 #
 # SuSEconfig stuff
