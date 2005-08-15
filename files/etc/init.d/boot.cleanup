@@ -8,6 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.cleanup
 # Required-Start:    boot.localfs
+# Should-Start:      boot.quota
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
