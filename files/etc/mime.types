@@ -114,6 +114,7 @@ image/gif			gif
 image/ief			ief
 image/jpeg			jpeg jpg jpe
 image/png			png
+image/svg+xml			svg
 image/tiff			tiff tif
 image/vnd.djvu			djvu djv
 image/vnd.wap.wbmp		wbmp
