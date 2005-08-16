@@ -152,12 +152,21 @@ if [ "$NEW_DMA" != "" ] ; then
     rm -f etc/sysconfig/ide.new
 fi
 
-# replace capability by subdomain
-sed -e "s|MODULES_LOADED_ON_BOOT=\\(.*\\)capability\\(.*\\)|MODULES_LOADED_ON_BOOT=\\1\\2|" \
+# clear old install settings of MODULES_LOADED_ON_BOOT
+eval `grep "^MODULES_LOADED_ON_BOOT" etc/sysconfig/kernel`
+MLOB_NEW=""
+for i in $MODULES_LOADED_ON_BOOT ; do
+    case $i in
+	capability|raw1394|video1394) continue ;;
+    esac
+    MLOB_NEW="$MLOB_NEW${MLOB_NEW:+ }$i"
+done
+if test "$MODULES_LOADED_ON_BOOT" != "$MLOB_NEW" ; then
+    sed -e "s|^MODULES_LOADED_ON_BOOT=.*|MODULES_LOADED_ON_BOOT=\"$MLOB_NEW\"|" \
 	etc/sysconfig/kernel > etc/sysconfig/kernel.new \
 	&& mv etc/sysconfig/kernel.new etc/sysconfig/kernel
-rm -f etc/sysconfig/kernel.new
-
+    rm -f etc/sysconfig/kernel.new
+fi
 #
 # Backup gshadow file and remove it (merge passwords into
 # /etc/group before).

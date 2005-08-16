@@ -35,8 +35,13 @@ fi
 test -s $CRYPTOTAB || exit 0
 type -p losetup &> /dev/null || exit 0
 
+splash=""
 redirect ()
 {
+    if test -e /proc/splash ; then
+	read splash  < /proc/splash
+	echo verbose > /proc/splash
+    fi
     otty=$(stty -g)
     stty $otty < $REDIRECT
     stty -nl -ixon ignbrk -brkint < $REDIRECT
@@ -45,7 +50,11 @@ redirect ()
     fi
 }
 
-restore () { stty $otty < $REDIRECT; }
+restore ()
+{
+    stty $otty < $REDIRECT;
+    [[ "$splash" =~ silent ]] && echo silent > /proc/splash
+}
 
 ppid=0
 prmt=""
