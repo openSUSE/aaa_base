@@ -103,7 +103,7 @@ if (${?TERM}) then
 	# shadow passwd
 	# Note: on normal console this will be done
 	#       by /bin/login
-	if ( -x "`which faillog`" && -r /var/log/faillog ) faillog -p
+	if ( -x "`which faillog`" && -r /var/log/faillog ) faillog
     endif
 endif
 #

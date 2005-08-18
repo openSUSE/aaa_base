@@ -58,7 +58,7 @@ o    () { less    ${1+"$@"}; }
 rd   () { rmdir ${1+"$@"}; }
 md   () { mkdir -p ${1+"$@"}; }
 rehash   () { hash -r ${1+"$@"}; }
-you   () { yast2 online_update ${1+"$@"}; }
+you   () { su - -c "yast2 online_update"; }
 beep     () { echo -n ' ' | tr ' ' '\007'; }
 unmount  () { echo "Error: Try the command: umount" 1>&2; return 1; }
 

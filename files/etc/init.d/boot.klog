@@ -25,13 +25,13 @@ case "$1" in
     if test -x /sbin/klogd ; then
 	echo Creating /var/log/boot.msg
 	/sbin/klogd -s -o -n -f /var/log/boot.msg
-	/bin/sleep 1
+	/bin/sync
 	test -s /var/log/boot.msg
 	rc_status -v1 -r
     elif test -x /bin/dmesg ; then
 	echo Creating /var/log/boot.msg
 	/bin/dmesg -s16384 > /var/log/boot.msg
-	/bin/sleep 1
+	/bin/sync
 	test -s /var/log/boot.msg
 	rc_status -v1 -r
     fi

@@ -31,6 +31,11 @@
 #    \015          carriage return (without newline)
 #
 
+# Do _not_ be fooled by non POSIX locale
+LC_ALL=POSIX
+export LC_ALL
+
+# Seek for terminal size and, if needed, set default size
 if test -z "$LINES" -o -z "$COLUMNS" ; then
     eval `exec 3<&1; stty size <&3 2>/dev/null | (read L C; \
 	  echo LINES=${L:-24} COLUMNS=${C:-80})`

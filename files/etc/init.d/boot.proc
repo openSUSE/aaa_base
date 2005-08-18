@@ -40,27 +40,26 @@ case "$1" in
 	# check if STOP-A should be enabled
 	#
 	if test -e /proc/sys/kernel/stop-a ; then
-	if test "$ENABLE_STOP_A" = yes ; then
-	    echo "1" > /proc/sys/kernel/stop-a
-	else
-	    echo "0" > /proc/sys/kernel/stop-a
-	fi
+	    if test "$ENABLE_STOP_A" = yes ; then
+		echo "1" > /proc/sys/kernel/stop-a
+	    else
+		echo "0" > /proc/sys/kernel/stop-a
+	    fi
 	fi
 	
 	#
 	# check if bootsplash graphics should be disabled
 	#
 	if test -e /proc/splash ; then
-	if test "$SPLASH" = "no" ; then
-	    echo "0" > /proc/splash
-	fi
+	    test "$SPLASH" = "no" && echo "0" > /proc/splash
 	fi
 	
 	# Disable ECN if required.
-	if test "$DISABLE_ECN" = "yes" -a -f /proc/sys/net/ipv4/tcp_ecn; then
-		echo "0" >/proc/sys/net/ipv4/tcp_ecn
+	if test -e /proc/sys/net/ipv4/tcp_ecn; then
+	    test "$DISABLE_ECN" = "yes" && echo "0" > /proc/sys/net/ipv4/tcp_ecn
+	    test "$DISABLE_ECN" = "no"  && echo "1" > /proc/sys/net/ipv4/tcp_ecn
 	fi
-	
+
 	;;
     stop|restart)
         # skip / nothing to do

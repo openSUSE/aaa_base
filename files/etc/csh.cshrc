@@ -207,37 +207,40 @@ if ($?tcsh) then
     set _rev=${tcsh:r}
     set _rel=${_rev:e}
     set _rev=${_rev:r}
-    if ($_rel > 5 && $_rev > 1 && -r /etc/profile.d/complete.tcsh) then
+    if (($_rev > 6 || ($_rev == 6 && $_rel > 1)) && -r /etc/profile.d/complete.tcsh) then
 	source /etc/profile.d/complete.tcsh
     endif
+    #
+    # Enable editing in multibyte encodings for the locales
+    # where this make sense, but not for the new tcsh 6.14.
+    #
+    if ($_rev < 6 || ($_rev == 6 && $_rel < 14)) then
+	switch ( `locale charmap` )
+	case UTF-8:
+	    set dspmbyte=utf8
+            breaksw
+	case BIG5:
+	    set dspmbyte=big5
+            breaksw
+	case EUC-JP:
+	    set dspmbyte=euc
+            breaksw
+	case EUC-KR:
+	    set dspmbyte=euc
+            breaksw
+	case GB2312:
+	    set dspmbyte=euc
+	    breaksw
+	case SHIFT_JIS:
+	    set dspmbyte=sjis
+            breaksw
+	default:
+            breaksw
+	endsw
+    endif
+    #
     unset _rev _rel
 endif
-#
-# Enable editing in multibyte encodings for the locales where this make sense:
-#
-switch ( `locale charmap` )
-    case UTF-8:
-	set dspmbyte=utf8
-        breaksw
-    case BIG5:
-	set dspmbyte=big5
-        breaksw
-    case EUC-JP:
-	set dspmbyte=euc
-        breaksw
-    case EUC-KR:
-	set dspmbyte=euc
-        breaksw
-    case GB2312:
-	set dspmbyte=euc
-	breaksw
-    case SHIFT_JIS:
-	set dspmbyte=sjis
-        breaksw
-    default:
-        breaksw
-    endsw
-#
 end:
     onintr
     unset noglob
