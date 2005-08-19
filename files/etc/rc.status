@@ -45,12 +45,13 @@ test $COLUMNS -eq 0 && COLUMNS=80
 export LINES COLUMNS
 
 # Make sure we have /sbin and /usr/sbin in PATH
-case $PATH in 
-	*sbin*)
-		;;
-	*)
-		export PATH=/sbin:/usr/sbin:$PATH
-		;;
+case ":$PATH:" in 
+    *:/sbin:*)
+	;;
+    *)
+	PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
+	export PATH
+	;;
 esac
 
 if test -t 1 -a "$TERM" != "raw" -a "$TERM" != "dumb" && stty size <&1 > /dev/null 2>&1 ; then
