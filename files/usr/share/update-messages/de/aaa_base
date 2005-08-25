@@ -1,6 +1,6 @@
 Hallo,
 
-Ihr System enth‰lt gem‰ss /etc/passwd noch Benutzer, f¸r die /tmp als
+Ihr System enth√§lt gem√§ss /etc/passwd noch Benutzer, f√ºr die /tmp als
 Home-Verzeichnis angegeben ist. Da dies ein potentielles Sicherheitsrisiko
 darstellt, empfehlen wir, diese Home-Verzeichnisse nach /var/lib/$USERNAME
 zu verlegen, indem Sie das Feld zwischen dem 5. und 6. Doppelpunkt in der

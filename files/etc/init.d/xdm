@@ -44,14 +44,16 @@ LC_MEASUREMENT    \
 LC_IDENTIFICATION \
 LC_ALL"
 
-for var in $locale_vars
+unset LC_ALL
+for lc in $locale_vars
 do
-    if eval test -z "\$$var"; then
-        eval $var="\$RC_$var"
-        export $var
+    eval val="\$RC_$lc"
+    if test -n "$val"; then
+        eval $lc="\$RC_$lc"
+        export $lc
     fi
 done
-unset var
+unset lc val
 
 test -z "$DEFAULT_WM" && DEFAULT_WM=twm
 SAVEPATH=$PATH
