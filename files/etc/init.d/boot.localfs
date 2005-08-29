@@ -60,7 +60,7 @@ case "$1" in
 	    FSCK_FORCE=""
 	    test -f /forcefsck && FSCK_FORCE="-f"
 	        echo "Checking file systems..."
-	        fsck $FSCK_PROGRESSBAR -R -A -a $FSCK_FORCE
+	        fsck $FSCK_PROGRESSBAR -R -A -a $FSCK_FORCE -t noopts=hotplug
 	        # A return code of 1 indicates that file system errors
 	        # were corrected, but that the boot may proceed.
 	        # A return code of 2 or larger indicates failure.
