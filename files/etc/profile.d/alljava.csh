@@ -10,7 +10,7 @@
 #
 
 set __libdir=lib
-if ( -L /usr/lib64/jvm/java || -L /usr/lib64/jvm/jre ) then
+if ( -l /usr/lib64/jvm/java || -l /usr/lib64/jvm/jre ) then
   set __libdir=lib64
 endif
 
