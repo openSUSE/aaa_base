@@ -688,7 +688,8 @@ if ($mode eq 'l') {
     }
     printf "%-24s", $s;
     my $l;
-    for $l (0, 1, 2, 3, 4, 5, 6) {
+    for $l (0, 1, 2, 3, 4, 5, 6, 'B') {
+      next if $l eq 'B' && !$links{$l}->{$s};
       if ($usecolor) {
 	print $links{$l}->{$s} ? "  \e[0;1;32m$l:on\e[m " : "  $l:off";
       } else {
