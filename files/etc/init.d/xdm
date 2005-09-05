@@ -14,7 +14,7 @@
 ### BEGIN INIT INFO
 # Provides:          xdm
 # Required-Start:    $remote_fs
-# Should-Start: ypbind $syslog gpm firstboot kbd resmgr
+# Should-Start: ypbind $syslog gpm firstboot kbd resmgr earlykdm
 # Required-Stop:
 # Default-Start:     5
 # Default-Stop:
@@ -94,6 +94,13 @@ DM=${DISPLAYMANAGER##*/}
 rc_reset
 case "$1" in
     start)
+        # Avoid duplicated messages when earlykdm is in use
+        if test "$DISPLAYMANAGER" = /opt/kde3/bin/kdm && \
+	   test -s /var/run/kdm.pid && \
+	   /sbin/checkproc -p /var/run/kdm.pid /opt/kde3/bin/kdm; then
+	  rc_exit 0
+        fi
+
 	echo -n "Starting service $DM"
 	# Don't start xdm if no Xserver is configured and xdm is not 
 	# configured for remote access 
