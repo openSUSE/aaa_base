@@ -19,6 +19,7 @@
 
 # to get max number of parallel fsck processes
 . /etc/sysconfig/boot
+. /etc/sysconfig/kernel
 
 if [ -f /etc/sysconfig/dump ]; then
 	. /etc/sysconfig/dump
@@ -132,6 +133,9 @@ case "$1" in
 	echo "Mounting local file systems..."
 	mount -fv -t proc proc /proc
 	mount -fv -t sysfs sysfs /sys
+	if [ -n "$DEV_ON_TMPFS" -a "$DEV_ON_TMPFS" != "yes" ] ; then
+	    mount -fv -t tmpfs initramdevs /dev
+	fi
 	mount -fv -t tmpfs tmpfs /dev/shm
 	rc_status
 	optpts="-o mode=0620,gid=5"
