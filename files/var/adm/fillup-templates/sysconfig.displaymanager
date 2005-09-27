@@ -11,9 +11,11 @@ DISPLAYMANAGER=""
 ## Type:	yesno
 ## Default:	no
 #
-# Allow remote access to your display manager (xdm/kdm/gdm). Please note 
+# Allow remote access (XDMCP) to your display manager (xdm/kdm/gdm). Please note
 # that a modified kdm or xdm configuration, e.g. by KDE control center
 # will not be changed. For gdm, values will be updated after change.
+# You have to open XDMCP TCP/UDP firewall port to allow this service.
+# If you want to make your server visible, you have to listen XDMCP broadcasts.
 #
 DISPLAYMANAGER_REMOTE_ACCESS="no"
 
