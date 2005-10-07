@@ -89,7 +89,7 @@ fi
 #
 # Initialize runlevel links
 #
-%{fillup_and_insserv -py boot.proc boot.localfs boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.idedma boot.localnet halt random reboot single xdm nfs}
+%{fillup_and_insserv -py boot.proc boot.localfs boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single xdm nfs}
 %{fillup_and_insserv -psy boot.crypto START_CRYPTO_FILESYSTEMS}
 %{insserv_force_if_yast etc/init.d/boot.loadmodules etc/init.d/boot.shm etc/init.d/boot.cleanup}
 # new line: boot.rootfsck depends on boot.shm
@@ -97,7 +97,7 @@ fi
 ## powerfail probably needs empty header ...
 
 # add Kill-links in boot.d if needed:
-for i in proc localfs swap clock ldconfig ipconfig klog idedma localnet crypto loadmodules sched ; do
+for i in proc localfs swap clock ldconfig ipconfig klog localnet crypto loadmodules sched ; do
     if [ -f /etc/init.d/boot.d/S??boot.$i -a ! -f /etc/init.d/boot.d/K??boot.$i ] ; then
 %{insserv_force_if_yast boot.$i}
     fi
@@ -119,38 +119,11 @@ fi
 if [ ! -f etc/sysconfig/language -a -f etc/rc.config.d/lang.rc.config ] ; then
   mv etc/rc.config.d/lang.rc.config etc/sysconfig/language
 fi
-if [ -f etc/sysconfig/hardware ] ; then
-  mv etc/sysconfig/hardware etc/sysconfig/ide
-fi
-%{remove_and_set -n ide DEVICES_FORCE_IDE_DMA_ON DEVICES_FORCE_IDE_DMA_OFF}
 for i in language backup boot displaymanager kernel \
 	suseconfig clock proxy windowmanager sysctl mail \
-	ide cron news ; do
+	cron news ; do
 %{fillup_only -n $i}
 done
-
-# new settings
-NEW_DMA=""
-# convert old settings
-if [ "$DEVICES_FORCE_IDE_DMA_ON" != "" -a "$DEVICES_FORCE_IDE_DMA_ON" != "no" ] ; then
-  for dev in $DEVICES_FORCE_IDE_DMA_ON; do
-    NEW_DMA="${NEW_DMA:+$NEW_DMA }/dev/$dev:on"
-  done
-fi
-if [ "$DEVICES_FORCE_IDE_DMA_OFF" != "" -a "$DEVICES_FORCE_IDE_DMA_OFF" != "no" ] ; then
-  for dev in $DEVICES_FORCE_IDE_DMA_OFF; do
-    NEW_DMA="${NEW_DMA:+$NEW_DMA }/dev/$dev:off"
-  done
-fi
-# update sysconfig file
-if [ "$NEW_DMA" != "" ] ; then
-    echo "Updating etc/sysconfig/ide"
-    # remove old values, update new variable
-    sed -e "s|^DEVICES_FORCE_IDE_DMA=\"\\(.*\\)\"|DEVICES_FORCE_IDE_DMA=\"$NEW_DMA \\1\"|" \
-        etc/sysconfig/ide > etc/sysconfig/ide.new \
-      && mv etc/sysconfig/ide.new etc/sysconfig/ide
-    rm -f etc/sysconfig/ide.new
-fi
 
 # clear old install settings of MODULES_LOADED_ON_BOOT
 eval `grep "^MODULES_LOADED_ON_BOOT" etc/sysconfig/kernel`
