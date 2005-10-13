@@ -27,7 +27,7 @@ case "$1" in
 	#
 	rm -f /var/lib/rpm/__db*
 	rm -rf /tmp/screens /tmp/uscreens /var/run/screens /var/run/uscreens 2>/dev/null
-	rm -f /tmp/.X*lock /var/spool/uucp/LCK* /fsck_corrected_errors 2>/dev/null
+	rm -f /tmp/.X*lock /var/spool/uucp/LCK* /var/log/sa/sadc.LOCK /fsck_corrected_errors 2>/dev/null
 	if test -x /usr/bin/find -a -x /usr/bin/xargs ; then
 	    find /tmp/ssh-* -type s -name "*agent*" -maxdepth 1 -print0 2>/dev/null | xargs -0 -r rm -f
 	    find /var/run /var/lock -type f -print0 | xargs -0 -r rm -f 2>/dev/null
