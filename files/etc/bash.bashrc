@@ -201,6 +201,7 @@ case "$-" in
 	alias o='less'
 	alias ..='cd ..'
 	alias ...='cd ../..'
+	alias cd..='cd ..'
 	if test "$is" != "ksh" ; then
 	    alias -- +='pushd .'
 	    alias -- -='popd'

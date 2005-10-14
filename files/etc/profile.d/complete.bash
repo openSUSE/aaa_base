@@ -117,11 +117,11 @@ _exp_ ()
     uncompress)		e='!*.Z'				;;
     unzip)		e='!*.+(zip|ZIP|jar|exe|EXE)'		;;
     gs|ghostview)	e='!*.+(eps|EPS|ps|PS|pdf|PDF)'		;;
-    gv)			e='!*.+(eps|EPS|ps|PS|ps.gz|pdf|PDF)'	;;
-    acroread|xpdf)	e='!*.+(pdf|PDF)'			;;
+    gv|kghostview)	e='!*.+(eps|EPS|ps|PS|ps.gz|pdf|PDF)'	;;
+    acroread|[xk]pdf)	e='!*.+(pdf|PDF)'			;;
     dvips)		e='!*.+(dvi|DVI)'			;;
-    xdvi)		e='!*.+(dvi|dvi.gz|DVI|DVI.gz)'		;;
-    tex|latex)		e='!*.+(tex|TEX|texi|latex)'		;;
+    [xk]dvi)		e='!*.+(dvi|dvi.gz|DVI|DVI.gz)'		;;
+    tex|latex|pdflatex)	e='!*.+(tex|TEX|texi|latex)'		;;
     export)
 	case "$a" in
 	*=*)		c=${c#*=}				;;
@@ -184,10 +184,10 @@ complete -d -X '.[^./]*' -F _exp_ ${_file} \
 					uncompress \
 					unzip \
 					gs ghostview \
-					gv \
-					acroread xpdf \
-					dvips xdvi \
-					tex latex
+					gv kghostview \
+					acroread xpdf kpdf \
+					dvips xdvi kdvi \
+					tex latex pdflatex
 # No clean way to hande variable expansion _and_ file/dir name expansion
 # with the same string. So let the default expansion on for that commands.
 #complete -d -F _exp_ ${_def}		chown chgrp chmod chattr ln

@@ -165,6 +165,12 @@ alias dir  'ls --format=vertical'
 alias vdir 'ls --format=long'
 alias d dir;
 alias v vdir;
+alias o 'less'
+alias .. 'cd ..'
+alias ... 'cd ../..'
+alias cd.. 'cd ..'
+alias rd rmdir
+alias md 'mkdir -p'
 # Handle emacs
 if ($?EMACS) then
   setenv LS_OPTIONS '-N --color=none -T 0';
