@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-#     Template SUSE system startup script for example service/daemon FOO
+#     Template LSB system startup script for example service/daemon FOO
 #     Copyright (C) 1995--2005  Kurt Garloff, SUSE / Novell Inc.
 #          
 #     This library is free software; you can redistribute it and/or modify it
@@ -19,27 +19,26 @@
 #     USA.
 #
 # /etc/init.d/FOO
-#   and its symbolic link
-# /(usr/)sbin/rcFOO
-#
-# Template system startup script for some example service/daemon FOO
-#
 # LSB compatible service control script; see http://www.linuxbase.org/spec/
+# Please send feedback to http://www.suse.de/feedback/
 # 
 # Note: This template uses functions rc_XXX defined in /etc/rc.status on
-# UnitedLinux/SUSE/Novell based Linux distributions. If you want to base your
-# script on this template and ensure that it works on non UL based LSB 
-# compliant Linux distributions, you either have to provide the rc.status
-# functions from UL or change the script to work without them.
-# See skeleton.compat for a template that works with other distros as well.
+# UnitedLinux/SUSE/Novell based Linux distributions. However, it will work
+# on other distributions as well, by using the LSB (Linux Standard Base) 
+# or RH functions or by open coding the needed functions.
+# Read http://www.tldp.org/HOWTO/HighQuality-Apps-HOWTO/ if you prefer not 
+# to use this template.
 #
+# chkconfig: 345 99 00
+# description: FOO XYZ daemon providing ZYX
+# 
 ### BEGIN INIT INFO
 # Provides:          FOO
 # Required-Start:    $syslog $remote_fs
 # Should-Start: $time ypbind sendmail
 # Required-Stop:     $syslog $remote_fs
 # Should-Stop: $time ypbind sendmail
-# Default-Start:     3 5
+# Default-Start:     3 4 5
 # Default-Stop:      0 1 2 6
 # Short-Description: FOO XYZ daemon providing ZYX
 # Description:       Start FOO to allow XY and provide YZ
@@ -51,7 +50,7 @@
 ### END INIT INFO
 # 
 # Any extensions to the keywords given above should be preceeded by 
-# X-VendorTag- (X-UnitedLinux- X-SuSE- for us) according to LSB.
+# X-VendorTag- according to LSB.
 # 
 # Notes on Required-Start/Should-Start:
 # * There are two different issues that are solved by Required-Start
@@ -88,7 +87,7 @@
 #   These are new (LSB 1.2):
 #	$time			the system time has been set correctly	
 #	$portmap		SunRPC portmapping service available
-#   UnitedLinux extensions:
+#   UnitedLinux/SUSE/Novell extensions:
 #	$ALL			indicates that a script should be inserted
 #				at the end
 # * The services specified in the stop tags 
@@ -102,7 +101,6 @@
 # * X-UnitedLinux-Default-Enabled: yes/no is used at installation time
 #   (%fillup_and_insserv macro in %post of many RPMs) to specify whether
 #   a startup script should default to be enabled after installation.
-#   It's not used by insserv.
 #
 # Note on runlevels:
 # 0 - halt/poweroff 			6 - reboot
@@ -153,7 +151,92 @@ test -r $FOO_CONFIG || { echo "$FOO_CONFIG not existing";
 #      rc_reset         clear both the local and overall rc status
 #      rc_exit          exit appropriate to overall rc status
 #      rc_active        checks whether a service is activated by symlinks
-. /etc/rc.status
+
+# Use the SUSE rc_ init script functions;
+# emulate them on LSB, RH and other systems
+
+# Default: Assume sysvinit binaries exist
+start_daemon() { return /sbin/start_daemon ${1+"$@"}; }
+killproc()     { return /sbin/killproc     ${1+"$@"}; }
+pidofproc()    { return /sbin/pidofproc    ${1+"$@"}; }
+checkproc()    { return /sbin/checkproc    ${1+"$@"}; }
+if test -e /etc/rc.status; then
+    # SUSE rc script library
+    . /etc/rc.status
+else
+    export LC_ALL=POSIX
+    _cmd=$1
+    declare -a _SMSG
+    if test "${_cmd}" = "status"; then
+	_SMSG=(running dead dead unused unknown reserved)
+	_RC_UNUSED=3
+    else
+	_SMSG=(done failed failed missed failed skipped unused failed failed reserved)
+	_RC_UNUSED=6
+    fi
+    if test -e /lib/lsb/init-functions; then
+	# LSB    
+    	. /lib/lsb/init-functions
+	echo_rc()
+	{
+	    if test ${_RC_RV} = 0; then
+		log_success_msg "  [${_SMSG[${_RC_RV}]}] "
+	    else
+		log_failure_msg "  [${_SMSG[${_RC_RV}]}] "
+	    fi
+	}
+	# TODO: Add checking for lockfiles
+	checkproc() { return pidofproc ${1+"$@"} >/dev/null 2>&1; }
+    elif test -e /etc/init.d/functions; then
+	# RHAT
+	. /etc/init.d/functions
+	echo_rc()
+	{
+	    #echo -n "  [${_SMSG[${_RC_RV}]}] "
+	    if test ${_RC_RV} = 0; then
+		success "  [${_SMSG[${_RC_RV}]}] "
+	    else
+		failure "  [${_SMSG[${_RC_RV}]}] "
+	    fi
+	}
+	checkproc() { return status ${1+"$@"}; }
+	start_daemon() { return daemon ${1+"$@"}; }
+    else
+	# emulate it
+	echo_rc() { echo "  [${_SMSG[${_RC_RV}]}] "; }
+    fi
+    rc_reset() { _RC_RV=0; }
+    rc_failed()
+    {
+	if test -z "$1"; then 
+	    _RC_RV=1;
+	elif test "$1" != "0"; then 
+	    _RC_RV=$1; 
+    	fi
+	return ${_RC_RV}
+    }
+    rc_check()
+    {
+	return rc_failed $?
+    }	
+    rc_status()
+    {
+	rc_failed $?
+	if test "$1" = "-r"; then _RC_RV=0; shift; fi
+	if test "$1" = "-s"; then rc_failed 5; echo_rc; rc_failed 3; shift; fi
+	if test "$1" = "-u"; then rc_failed ${_RC_UNUSED}; echo_rc; rc_failed 3; shift; fi
+	if test "$1" = "-v"; then echo_rc; shift; fi
+	if test "$1" = "-r"; then _RC_RV=0; shift; fi
+	return ${_RC_RV}
+    }
+    rc_exit() { exit ${_RC_RV}; }
+    rc_active() 
+    {
+	if test -z "$RUNLEVEL"; then read RUNLEVEL REST < <(/sbin/runlevel); fi
+	if test -e /etc/init.d/S[0-9][0-9]${1}; then return 0; fi
+	return 1
+    }
+fi
 
 # Reset status of this service
 rc_reset
@@ -179,7 +262,7 @@ case "$1" in
 	echo -n "Starting FOO "
 	## Start daemon with startproc(8). If this fails
 	## the return value is set appropriately by startproc.
-	/sbin/startproc $FOO_BIN
+	start_daemon $FOO_BIN
 
 	# Remember status and be verbose
 	rc_status -v
@@ -189,7 +272,7 @@ case "$1" in
 	## Stop daemon with killproc(8) and if this fails
 	## killproc sets the return value according to LSB.
 
-	/sbin/killproc -TERM $FOO_BIN
+	killproc -TERM $FOO_BIN
 
 	# Remember status and be verbose
 	rc_status -v
@@ -227,7 +310,7 @@ case "$1" in
 
 	echo -n "Reload service FOO "
 	## if it supports it:
-	/sbin/killproc -HUP $FOO_BIN
+	killproc -HUP $FOO_BIN
 	#touch /var/run/FOO.pid
 	rc_status -v
 
@@ -241,7 +324,7 @@ case "$1" in
 
 	# If it supports signaling:
 	echo -n "Reload service FOO "
-	/sbin/killproc -HUP $FOO_BIN
+	killproc -HUP $FOO_BIN
 	#touch /var/run/FOO.pid
 	rc_status -v
 	
@@ -263,7 +346,7 @@ case "$1" in
 	# 5--199 reserved (5--99 LSB, 100--149 distro, 150--199 appl.)
 	
 	# NOTE: checkproc returns LSB compliant status values.
-	/sbin/checkproc $FOO_BIN
+	checkproc $FOO_BIN
 	# NOTE: rc_status knows that we called this init script with
 	# "status" option and adapts its messages accordingly.
 	rc_status -v
