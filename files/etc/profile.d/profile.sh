@@ -98,13 +98,15 @@ if test "$PROXY_ENABLED" != "yes" ; then
 fi
 unset PROXY_ENABLED
 
-test -z "$DEFAULT_WM" && DEFAULT_WM=twm
-SAVEPATH=$PATH
-PATH=$PATH:/usr/X11R6/bin:/opt/gnome/bin:/usr/openwin/bin
-WINDOWMANAGER="`type -p ${DEFAULT_WM##*/}`"
-PATH=$SAVEPATH
-export WINDOWMANAGER
-unset DEFAULT_WM SAVEPATH
+if test -n "$DEFAULT_WM" ; then
+    SAVEPATH=$PATH
+    PATH=$PATH:/usr/X11R6/bin:/opt/gnome/bin:/usr/openwin/bin
+    WINDOWMANAGER="`type -p ${DEFAULT_WM##*/}`"
+    PATH=$SAVEPATH
+    export WINDOWMANAGER
+    unset SAVEPATH
+fi
+unset DEFAULT_WM
 
 if test -n "$CONSOLE_MAGIC" ; then
     case "$(tty 2> /dev/null)" in

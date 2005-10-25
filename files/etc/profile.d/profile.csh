@@ -98,21 +98,22 @@ if ( ${?proxy_enabled} ) then
     unset proxy_enabled
 endif
 
-if (! ${?default_wm} )     set default_wm=twm
-if ( ${%default_wm} == 0 ) set default_wm=twm
-set default_wm=${default_wm:t}
-
 #
 # Do not use the `which' builtin nor set path to avoid a rehash
 #
-foreach val ($path /usr/X11R6/bin /opt/gnome/bin /usr/openwin/bin)
-    if ( ${val:q} =~ *.* ) continue
-    set val=${val:q}/${default_wm:q}
-    if ( ! -x ${val:q} ) continue
-    setenv WINDOWMANAGER ${val:q}
-    break
-end
-unset val default_wm
+if (! ${?default_wm} )    set default_wm
+if ( ${%default_wm} > 0 ) then
+    set default_wm=${default_wm:t}
+    foreach val ($path /usr/X11R6/bin /opt/gnome/bin /usr/openwin/bin)
+	if ( ${val:q} =~ *.* ) continue
+	set val=${val:q}/${default_wm:q}
+	if ( ! -x ${val:q} ) continue
+	setenv WINDOWMANAGER ${val:q}
+	break
+    end
+    unset val
+endif
+unset default_wm
 
 if ( ${?loginsh} && ${?console_magic} && "$tty" =~ tty* ) then
     if ( "$TERM" == "linux" && -o /dev/$tty ) then
