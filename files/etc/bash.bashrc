@@ -15,6 +15,7 @@ if test -z "$is" ; then
     */rbash)	is=bash ;;
     */ash)	is=ash  ;;
     */ksh)	is=ksh  ;;
+    */pdksh)	is=ksh  ;;
     */zsh)	is=zsh  ;;
     */*)	is=sh   ;;
   esac

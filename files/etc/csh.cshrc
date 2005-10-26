@@ -189,5 +189,5 @@ unset noglob
 if ( -r /etc/csh.cshrc.local ) source /etc/csh.cshrc.local
 
 #
-# csh.cshrc end here
+# End of /etc/csh.cshrc
 #

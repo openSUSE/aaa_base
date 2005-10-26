@@ -20,13 +20,25 @@ if ( -o /dev/$tty && ${?prompt} ) then
 	if ( -x "`which stty`" ) stty sane cr0 pass8 dec
 	if ( -x "`which tset`" ) tset -I -Q
     endif
-    unsetenv TERMCAP
+    # on iSeries virtual console, detect screen size and terminal
+    if ( -d /proc/iSeries && ( $tty == "tty1" || "$tty" == "console")) then
+	setenv LINES   24
+	setenv COLUMNS 80
+	if ( -x "`which initviocons`" ) then
+	    eval `initviocons -q -e -c`
+	endif
+    endif
     settc km yes
 endif
+unsetenv TERMCAP
+
+#
+# The user file-creation mask
+#
 umask 022
 
 #
-# Do only once the initial setup
+# Setup for gzip and (t)csh users
 #
 if (! ${?CSHRCREAD} ) then
     setenv GZIP -9
@@ -244,6 +256,13 @@ if ( -d /etc/profile.d && ! ${?CSHRCREAD} ) then
 endif
 
 #
+# System wide configuration of bourne shells like ash
+#
+if (! ${?CSHRCREAD} ) then
+    setenv ENV /etc/bash.bashrc
+endif
+
+#
 # Avoid overwriting user settings if called twice
 #
 if (! ${?CSHRCREAD} ) then
@@ -251,6 +270,9 @@ if (! ${?CSHRCREAD} ) then
     set -r CSHRCREAD=$CSHRCREAD
 endif
 
+#
+# Restore globbing on Ctrl-C
+#
 onintr
 unset noglob
 
@@ -262,31 +284,22 @@ if ( -r /etc/csh.login.local ) source /etc/csh.login.local
 #
 # An X session
 #
-if (${?TERM}) then
+if (${?TERM} && -o /dev/$tty && ${?prompt}) then
     if (${TERM} == "xterm") then
 	if ( -f /etc/motd ) cat /etc/motd
-	echo "Directory: $cwd"
+	if (! ${?SSH_TTY} ) then
+	    # Go home
+	    cd; echo "Directory: $cwd"
+	endif
 	#
 	# shadow passwd
-	# Note: on normal console this will be done
-	#       by /bin/login
+	# Note: on normal console this will be done by /bin/login
 	if ( -x "`which faillog`" && -r /var/log/faillog ) faillog
+	# Last but not least
+	date
     endif
 endif
+
 #
-# Do you really like this?
+# End of /etc/csh.login
 #
-#if (-x "`which fortune`" ) then
-#   echo " "
-#   fortune -s
-#   echo " "
-#endif
-#
-# last but not least
-#
-if ( -o /dev/$tty && ${?prompt} ) date
-#
-# Go home
-#
-cd
-##
