@@ -65,7 +65,7 @@ if test -z "$PROFILEREAD" ; then
     GZIP=-9
     CSHEDIT=emacs
     export GZIP CSHEDIT
-endif
+fi
 
 #
 # ksh/ash sometimes do not know
