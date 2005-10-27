@@ -14,8 +14,8 @@ DISPLAYMANAGER=""
 # Allow remote access (XDMCP) to your display manager (xdm/kdm/gdm). Please note
 # that a modified kdm or xdm configuration, e.g. by KDE control center
 # will not be changed. For gdm, values will be updated after change.
-# You have to open XDMCP TCP/UDP firewall port to allow this service.
-# If you want to make your server visible, you have to listen XDMCP broadcasts.
+# XDMCP service should run only on trusted networks and you have to disable
+# firewall for interfaces, where you want to provide this service.
 #
 DISPLAYMANAGER_REMOTE_ACCESS="no"
 
@@ -39,8 +39,10 @@ DISPLAYMANAGER_STARTS_XSERVER="yes"
 ## Default:     no
 ## Config:      xdm
 #
-# TCP port 6000 of Xserver. When set to "no" (default) Xserver is 
-# started with "-nolisten tcp". Only set this to "yes" if you really 
-# need to. Use ssh X11 port forwarding whenever possible.
+# TCP port 6000 of Xserver. When set to "no" (default) Xserver is
+# started with "-nolisten tcp". Only set this to "yes" if you really
+# need to. Remote X service should run only on trusted networks and
+# you have to disable firewall for interfaces, where you want to
+# provide this service. Use ssh X11 port forwarding whenever possible.
 #
 DISPLAYMANAGER_XSERVER_TCP_PORT_6000_OPEN="no"
