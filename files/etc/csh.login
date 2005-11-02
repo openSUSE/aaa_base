@@ -83,14 +83,16 @@ endif
 #
 # Make path more comfortable
 #
+unset noglob
 set _xpath
-set _tpath
+set _upath
+set _spath
 if ( "$uid" == "0" ) then
-    if ( -d /opt/gnome/sbin ) set _tpath=( /opt/gnome/sbin )
-    if ( -d /opt/kde3/sbin  ) set _tpath=( /opt/kde3/sbin $_tpath )
-    set _tpath=( /sbin /usr/sbin /usr/local/sbin )
+    if ( -d /opt/gnome/sbin ) set _spath=( /opt/gnome/sbin )
+    if ( -d /opt/kde3/sbin  ) set _spath=( /opt/kde3/sbin $_spath )
+    set _spath=( /sbin /usr/sbin /usr/local/sbin $_spath )
 endif
-foreach _d (~/bin/$MACHTYPE ~/bin \
+foreach _d ( ${HOME}/bin/${CPU} ${HOME}/bin \
 	/var/lib/dosemu \
 	/usr/games \
 	/opt/bin \
@@ -101,7 +103,7 @@ foreach _d (~/bin/$MACHTYPE ~/bin \
 	/usr/openwin/bin \
 	/opt/cross/bin \
 	/usr/andrew/bin )
-    if ( -d $_d ) set _tpath=( $_tpath $_d )
+    if ( -d $_d ) set _upath=( $_upath $_d )
 end
 
 if ( ${?OPENWINHOME} ) then
@@ -117,15 +119,17 @@ else if ( -d /usr/X11/bin ) then
     set _xpath=( /usr/X11/bin   $_xpath )
 endif
 
-set _tpath=( $_tpath $_xpath )
+set _upath=( $_upath $_xpath )
 
 #
 # Doing only one rehash
 #
-set -f path=( $_tpath $path )
-unset _tpath
+set -f path=( $_spath $path $_upath )
+unset _upath
+unset _spath
 unset _xpath
 unset _d
+set noglob
 
 #
 # For all readline library based applications
