@@ -251,6 +251,13 @@ case "$-" in
     ;;
 esac
 
+#
+# Just in case the user excutes a command with ssh
+#
+if test -n "$SSH_CLIENT" -a -z "$PROFILEREAD" ; then
+    . /etc/profile > /dev/null 2>&1
+fi
+
 if test "$is" != "ash" ; then
     #
     # And now let's see if there is a local bash.bashrc

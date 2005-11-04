@@ -184,6 +184,13 @@ onintr
 unset noglob
 
 #
+# Just in case the user excutes a command with ssh
+#
+if ( ${?SSH_CLIENT} && ! ${?CSHRCREAD} ) then
+    source /etc/csh.login >& /dev/null
+endif
+
+#
 # Local configuration
 #
 if ( -r /etc/csh.cshrc.local ) source /etc/csh.cshrc.local

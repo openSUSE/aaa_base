@@ -88,23 +88,23 @@ set _xpath
 set _upath
 set _spath
 if ( "$uid" == "0" ) then
-    if ( -d /opt/gnome/sbin ) set _spath=( /opt/gnome/sbin )
-    if ( -d /opt/kde3/sbin  ) set _spath=( /opt/kde3/sbin $_spath )
+if ( -d /opt/gnome/sbin ) set _spath=( /opt/gnome/sbin )
+if ( -d /opt/kde3/sbin  ) set _spath=( /opt/kde3/sbin $_spath )
     set _spath=( /sbin /usr/sbin /usr/local/sbin $_spath )
 endif
-foreach _d ( ${HOME}/bin/${CPU} ${HOME}/bin \
-	/var/lib/dosemu \
-	/usr/games \
-	/opt/bin \
-	/opt/gnome/bin \
-	/opt/kde3/bin \
-	/opt/kde2/bin \
-	/opt/kde/bin \
-	/usr/openwin/bin \
-	/opt/cross/bin \
-	/usr/andrew/bin )
+foreach _d (${HOME}/bin/${CPU} ${HOME}/bin \
+	    /var/lib/dosemu \
+	    /usr/games \
+	    /opt/bin \
+	    /opt/gnome/bin \
+	    /opt/kde3/bin \
+	    /opt/kde2/bin \
+	    /opt/kde/bin \
+	    /usr/openwin/bin \
+	    /opt/cross/bin )
     if ( -d $_d ) set _upath=( $_upath $_d )
 end
+unset _d
 
 if ( ${?OPENWINHOME} ) then
     if ( -d $OPENWINHOME/bin ) then
@@ -120,6 +120,7 @@ else if ( -d /usr/X11/bin ) then
 endif
 
 set _upath=( $_upath $_xpath )
+unset _xpath
 
 #
 # Doing only one rehash
@@ -127,8 +128,6 @@ set _upath=( $_upath $_xpath )
 set -f path=( $_spath $path $_upath )
 unset _upath
 unset _spath
-unset _xpath
-unset _d
 set noglob
 
 #
