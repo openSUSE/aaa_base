@@ -75,7 +75,7 @@ _exp_ ()
     # -d, -f, and -X pattern without missing directories.
     local c=${COMP_WORDS[COMP_CWORD]}
     local a="${COMP_LINE}"
-    local e s g=0 cd dc
+    local e s g=0 cd dc t=""
     local IFS
 
     shopt -q extglob && g=1
@@ -115,7 +115,8 @@ _exp_ ()
 	esac							;;
     gunzip)		e='!*.+(gz|tgz|z|Z)'			;;
     uncompress)		e='!*.Z'				;;
-    unzip)		e='!*.+(zip|ZIP|jar|exe|EXE)'		;;
+    unzip)		e='!*.+(???)'
+			t="@(MS-DOS executable|Zip archive)*"	;;
     gs|ghostview)	e='!*.+(eps|EPS|ps|PS|pdf|PDF)'		;;
     gv|kghostview)	e='!*.+(eps|EPS|ps|PS|ps.gz|pdf|PDF)'	;;
     acroread|[xk]pdf)	e='!*.+(pdf|PDF)'			;;
@@ -166,8 +167,12 @@ _exp_ ()
 			for s in $(compgen -f -X "$e" -- $c) ; do
 			    if test -d $s ; then
 				COMPREPLY=(${COMPREPLY[@]} $(compgen -f -X "$e" -S / -- $s))
-			    else
+			    elif test -z "$t" ; then
 				COMPREPLY=(${COMPREPLY[@]} $s)
+			    else
+				case "$(file -b $s 2> /dev/null)" in
+				$t) COMPREPLY=(${COMPREPLY[@]} $s)		;;
+				esac
 			    fi
 			done
 	fi									;;

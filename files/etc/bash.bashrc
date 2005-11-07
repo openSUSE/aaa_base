@@ -221,8 +221,14 @@ case "$-" in
 	test -s $HOME/.alias && . $HOME/.alias
     fi
 
-    # Complete builtin of the bash 2.0 and higher
-    if test "$is" = "bash" ; then
+    #
+    # Expert mode: if we find $HOME/.bash.expert we skip our settings
+    # used for interactive completion and read in the expert file.
+    #
+    if test "$is" = "bash" -a -r $HOME/.bash.expert ; then
+	. $HOME/.bash.expert
+    elif test "$is" = "bash" ; then
+	# Complete builtin of the bash 2.0 and higher
 	case "$BASH_VERSION" in
 	[2-9].*)
 	    if test -e $HOME/.bash_completion ; then

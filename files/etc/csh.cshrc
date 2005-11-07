@@ -40,15 +40,6 @@ endif
 if ($?tcsh && -r /etc/profile.d/bindkey.tcsh) source /etc/profile.d/bindkey.tcsh
 
 #
-# Expert mode: if we find $HOME/.csh.expert we skip our settings
-# used for interactive sessions and read in the expert file.
-#
-if (-r $HOME/.csh.expert) then
-    source $HOME/.csh.expert
-    goto done
-endif
-
-#
 # Some useful settings
 #
 set autocorrect=1
@@ -136,6 +127,16 @@ endif
 # Therefore we use whatis as alias for this helpcommand
 #
 alias helpcommand whatis
+
+#
+# Expert mode: if we find $HOME/.csh.expert we skip our settings
+# used for interactive completion and read in the expert file.
+#
+if (-r $HOME/.csh.expert) then
+    unset noglob
+    source $HOME/.csh.expert
+    goto done
+endif
 
 #
 # Source the completion extension of the tcsh
