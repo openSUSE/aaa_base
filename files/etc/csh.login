@@ -45,13 +45,15 @@ if (! ${?CSHRCREAD} ) then
     setenv CSHEDIT emacs
 endif
 
-if (! ${?UID}  ) setenv UID  "`id -ur`"
-if (! ${?EUID} ) setenv EUID "`id -u`"
-if (! ${?USER} ) setenv USER "`id -un`"
-if ( -f /var/spool/mail/$USER ) then
-    setenv MAIL /var/spool/mail/$USER
-    set mail=$MAIL
-endif
+#
+# In case if not known
+#
+if (! ${?UID}  ) set -r  UID="`id -ur`"
+if (! ${?EUID} ) set -r EUID="`id -u`"
+if (! ${?USER} ) set    USER="`id -un`"
+if (! ${?LOGNAME} ) set LOGNAME=$USER
+
+if (! ${?MAIL} ) setenv MAIL /var/spool/mail/$USER
 if (! ${?HOST} ) setenv HOST "`hostname -s`"
 if (! ${?CPU}  ) setenv CPU  "`uname -m`"
 if (! ${?HOSTNAME} ) setenv HOSTNAME "`hostname -f`"
@@ -63,6 +65,11 @@ else
 endif
 setenv OSTYPE linux
 setenv MACHTYPE "${CPU}-suse-${OSTYPE}"
+
+#
+# Get message if mail is reached
+#
+set mail=$MAIL
 
 #
 # Adjust some size limits (see tcsh(1) -> limit)

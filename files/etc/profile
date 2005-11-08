@@ -70,8 +70,8 @@ fi
 #
 # ksh/ash sometimes do not know
 #
-test -z "$UID"  &&  UID=`id -ur 2> /dev/null`
-test -z "$EUID" && EUID=`id -u  2> /dev/null`
+test -z "$UID"  && readonly  UID=`id -ur 2> /dev/null`
+test -z "$EUID" && readonly EUID=`id -u  2> /dev/null`
 test -z "$USER" && USER=`id -un 2> /dev/null`
 test -z "$MAIL" && MAIL=/var/spool/mail/$USER
 test -z "$HOST" && HOST=`hostname -s 2> /dev/null`
@@ -84,8 +84,8 @@ case "$CPU" in
 esac
   OSTYPE=linux
 MACHTYPE=${CPU}-suse-${OSTYPE}
-# Do NOT export UID, EUID, USER, MAIL, and LOGNAME
-export HOST CPU HOSTNAME HOSTTYPE OSTYPE MACHTYPE
+# Do NOT export UID, EUID, USER, and LOGNAME
+export MAIL HOST CPU HOSTNAME HOSTTYPE OSTYPE MACHTYPE
 
 #
 # Adjust some size limits (see bash(1) -> ulimit)

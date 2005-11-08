@@ -20,6 +20,12 @@ set noglob
 set echo_style=both
 
 #
+# In case if not known
+#
+if (! ${?UID}  ) set -r  UID="`id -ur`"
+if (! ${?EUID} ) set -r EUID="`id -u`"
+
+#
 # Only for interactive shells
 #
 if (! ${?prompt}) goto done
