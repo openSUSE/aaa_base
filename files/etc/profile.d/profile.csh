@@ -101,8 +101,8 @@ endif
 #
 # Do not use the `which' builtin nor set path to avoid a rehash
 #
-if (! ${?default_wm} )    set default_wm
-if ( ${%default_wm} > 0 ) then
+if (! ${?default_wm} ) set default_wm
+if ( ${%default_wm} > 0 && ! ${?WINDOWMANAGER} ) then
     set default_wm=${default_wm:t}
     foreach val ($path /usr/X11R6/bin /opt/gnome/bin /usr/openwin/bin)
 	if ( ${val:q} =~ *.* ) continue
