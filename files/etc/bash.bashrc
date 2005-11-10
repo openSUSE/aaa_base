@@ -109,7 +109,7 @@ case "$-" in
 	    test -O /dev/$_t || return
 	    _w="$(dirs +0)"
 	    _x=$((${#_w}-18))
-	    test ${#_w} -le 18 || _w=...${_w#$(printf "%.*s" $_x $_w)}
+	    test ${#_w} -le 18 || _w=...${_w#$(printf "%.*s" $_x "$_w")}
 	    echo -en "\e]2;${USER}@${HOST}:${_w}\007\e]1;${HOST}\007" > /dev/$_t
 	    }
 	# If set: do not follow sym links
