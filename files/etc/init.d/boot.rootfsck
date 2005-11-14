@@ -59,11 +59,6 @@ case "$1" in
 		ROOTFS_BLKDEV=$ROOTFS_REALDEV
 	    fi
 	else
-	    # /dev/shm is already there, call blkid might be needed
-	    if [ -x /sbin/blkid ] ; then
-		/sbin/blkid -c /dev/shm/tmp_blkid.tab > /dev/null
-		export BLKID_FILE=/dev/shm/tmp_blkid.tab
-	    fi
 	    # on first startup of a system with a lvm root device lvm /dev entries
 	    # may not exist at this time, so skip fsck in this case
 	    ROOTFS_BLKDEV=`fsck -T -N / 2>/dev/null`
@@ -154,8 +149,6 @@ case "$1" in
 		echo '*** ERROR!  Cannot fsck because root is not read-only!'
 		echo
 	    fi
-	    unset BLKID_FILE
-	    rm -f /dev/shm/tmp_blkid.tab
 	else
 	    if test "$ROOTFS_FSCK" != "0" ; then
 		echo "root file system (/) is NOT being checked."

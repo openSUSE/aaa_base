@@ -44,10 +44,6 @@ rc_reset
 case "$1" in
   start)
 	# rootfs is mounted rw, lvm et al should be up now
-	# updated blkid
-	if [ -x /sbin/blkid ] ; then
-	    /sbin/blkid > /dev/null
-	fi
 	#
 	# If we use a serial console, don't use the fsck progress bar
 	#
