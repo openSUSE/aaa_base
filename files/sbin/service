@@ -1,0 +1,141 @@
+#!/bin/sh
+#
+# /sbin/service		Handle boot and runlevel services
+#
+
+#
+# Only root should do
+#
+if test "$(id -u)" -ne 0; then
+   echo "${0##*/}: only root can use ${0##*/}" 1>&2
+   exit 1
+fi
+
+#
+# Location of our service scripts
+#
+RCDIR="/etc/init.d"
+
+#
+# Clean environment
+#
+PATH=/sbin:/usr/sbin:/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin
+test -n "$TERM" || TERM=raw
+LANG=POSIX
+export PATH TERM LANG
+
+exec_rc ()
+{
+    env -i LANG=$LANG PATH=$PATH TERM=$TERM ${1+"$@"}
+}
+
+usage ()
+{
+    echo "Usage: ${0##*/} [--help | --status-all | <service> [<args>| --full-restart]]" 1>&2
+    exit 1
+}
+
+help ()
+{
+    echo "Usage: ${0##*/} [<options> | <service> [<args> | --full-restart]]"
+    echo "Available <options>:"
+    echo "  -h,--help        This help."
+    echo "  -s,--status-all  List out status of all services."
+    echo "Usage for specific <service>:"
+    echo "  ${0##*/} service_name argument [option]"
+    echo "  ${0##*/} service_name --full-restart"
+    echo "  ${0##*/} --full-restart service_name"
+    exit 0
+}
+
+  status_all=0
+full_restart=0
+        args=""
+while test $# -gt 0; do
+    opt=
+    if test "${1::1}" = "-"; then
+	if test ${#1} -gt 2 -a "${1::2}" = "--" ; then
+	    opt="${1:2}"
+	else
+	    opt="${1:1}"
+	fi
+	shift
+    else
+	args="${args:+$args }$1"
+	shift
+	continue
+    fi
+
+    case "$opt" in
+    status-all|s)   status_all=1 ;;
+    full-restart) full_restart=1 ;;
+    h*)			    help ;;
+    *)			   usage ;;
+    esac
+done
+
+#
+# Determine the status of all services
+#
+if test $status_all -gt 0 ; then
+    if test -n "$args" ; then
+	usage 1>&2
+	exit 1
+    fi
+    for rc in ${RCDIR}/*; do
+	test ! -x "$rc" -o -d "$rc"    && continue
+	case "${rc##*/}" in
+	*.local|*.rpm*|*.ba*|*.old|*.new) continue ;;
+	*.dpkg|*.save|*.swp|*.core)	  continue ;;
+	boot|rc|single|halt|reboot)	  continue ;;
+	powerfail|rx|Makefile|README)	  continue ;;
+	skeleton|*.d)			  continue ;;
+	esac
+	exec_rc $rc status
+    done
+    exit 0
+fi
+
+#
+# Do a full restart of a few services
+#
+if test $full_restart -gt 0 ; then
+    if test -z "$args" ; then
+	usage 1>&2
+	exit 1
+    fi
+    for rc in $args; do
+	if test ! -x ${RCDIR}/$rc ; then
+	    echo "${0##*/}: no such service $rc" 1>&2
+	    exit 1
+	fi
+    done
+    status=0
+    for rc in $args; do
+	rc=${RCDIR}/$rc
+	exec_rc $rc stop
+	exec_rc $rc start
+	test $? -gt 0 && status=1
+    done
+    exit $status
+fi
+
+
+#
+# Execute single service with options
+#
+if test -z "${args}" ; then
+    usage 1>&2
+    exit 1
+fi
+
+set -- $args
+if test ! -x ${RCDIR}/$1 ; then
+    echo "${0##*/}: no such service $1" 1>&2
+    exit 1
+fi
+rc=${RCDIR}/$1
+shift
+
+exec_rc $rc ${1+"$@"}
+exit $?

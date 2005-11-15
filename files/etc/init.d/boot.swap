@@ -19,11 +19,23 @@
 . /etc/sysconfig/kernel
 
 get_swap_id() {
-    local line;
+    local line dev min type;
     type -p fdisk >/dev/null || return
-    fdisk -l | while read line; do
+    fdisk -l 2>&1 | while read line; do
 	case "$line" in
-	/*Linux\ [sS]wap*) echo "${line%% *}"
+	/*Linux\ [sS]wap*)
+	    echo "${line%% *}"
+	    ;;
+	Disk\ /dev/*\ doesn*)
+	    dev="${line##*/}"
+	    dev="${dev%% *}"
+	    type -p parted >/dev/null || continue
+	    while read min type; do
+		case "$type" in
+		*type=82|*type=82,*) echo /dev/${dev}${min}
+		esac
+	    done < <(parted -s /dev/$dev print quit 2>/dev/null)
+	    ;;
 	esac
     done
 }
