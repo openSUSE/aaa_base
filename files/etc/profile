@@ -87,21 +87,15 @@ MACHTYPE=${CPU}-suse-${OSTYPE}
 # Do NOT export UID, EUID, USER, and LOGNAME
 export MAIL HOST CPU HOSTNAME HOSTTYPE OSTYPE MACHTYPE
 
-#
-# Adjust some size limits (see bash(1) -> ulimit)
-# Note: You may use /etc/initscript instead to set up ulimits and your PATH.
-# Setting of ulimits are skipped if /etc/initscript (ulimit package) exists.
-if test "$is" != "ash" -a ! -r /etc/initscript; then
-    #ulimit -c 20000		# only core-files less than 20 MB are written
-    #ulimit -d 15000		# max data size of a program is 15 MB
-    #ulimit -s 15000		# max stack size of a program is 15 MB
-    #ulimit -m 30000		# max resident set size is 30 MB
+# You may use /etc/initscript (or ulimit package) 
+# instead to set up ulimits and your PATH.
 
-    ulimit -Sc 0		# don't create core files
-    ulimit -Sd $(ulimit -Hd)
-    ulimit -Ss $(ulimit -Hs)
-    ulimit -Sm $(ulimit -Hm)
-fi
+# if test "$is" != "ash" -a ! -r /etc/initscript; then
+    # ulimit -Sc 0		# don't create core files
+    # ulimit -Sd $(ulimit -Hd)
+    # ulimit -Ss $(ulimit -Hs)
+    # ulimit -Sm $(ulimit -Hm)
+# fi
 
 #
 # Make path more comfortable
