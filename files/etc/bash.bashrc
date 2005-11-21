@@ -206,7 +206,7 @@ case "$-" in
 	fi
 	alias rd=rmdir
 	alias md='mkdir -p'
-	unalias which
+	unalias which 2>/dev/null
 	which () {
 	    local file=$(type -p ${1+"$@"} 2>/dev/null)
 	    if test -n "$file" -a -x "$file"; then
