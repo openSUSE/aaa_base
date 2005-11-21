@@ -72,20 +72,15 @@ setenv MACHTYPE "${CPU}-suse-${OSTYPE}"
 set mail=$MAIL
 
 #
-# Adjust some size limits (see tcsh(1) -> limit)
-# Note: You may use /etc/initscript instead to set up ulimits and your PATH.
-# Setting of ulimits are skipped if /etc/initscript (ulimit package) exists.
-if (! -r /etc/initscript ) then
-    #limit coredumpsize 20000	# only core-files less than 20 MB are written
-    #limit datasize	15000	# max data size of a program is 15 MB 
-    #limit stacksize	15000	# max stack size of a program is 15 MB
-    #limit memoryuse	30000	# max resident set size is 30 MB 
-    
-    limit coredumpsize	0	# don't create core files
-    eval limit `limit -h datasize`
-    eval limit `limit -h stacksize`
-    eval limit `limit -h memoryuse`
-endif
+# You may use /etc/initscript, /etc/profile.local or the
+# ulimit package instead to set up ulimits and your PATH.
+#
+# if (! -r /etc/initscript ) then
+#     limit coredumpsize	0	# don't create core files
+#     eval limit `limit -h datasize`
+#     eval limit `limit -h stacksize`
+#     eval limit `limit -h memoryuse`
+# endif
 
 #
 # Make path more comfortable

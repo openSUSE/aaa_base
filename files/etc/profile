@@ -87,14 +87,15 @@ MACHTYPE=${CPU}-suse-${OSTYPE}
 # Do NOT export UID, EUID, USER, and LOGNAME
 export MAIL HOST CPU HOSTNAME HOSTTYPE OSTYPE MACHTYPE
 
-# You may use /etc/initscript (or ulimit package) 
-# instead to set up ulimits and your PATH.
-
+#
+# You may use /etc/initscript, /etc/profile.local or the
+# ulimit package instead to set up ulimits and your PATH.
+#
 # if test "$is" != "ash" -a ! -r /etc/initscript; then
-    # ulimit -Sc 0		# don't create core files
-    # ulimit -Sd $(ulimit -Hd)
-    # ulimit -Ss $(ulimit -Hs)
-    # ulimit -Sm $(ulimit -Hm)
+#     ulimit -Sc 0		# don't create core files
+#     ulimit -Sd $(ulimit -Hd)
+#     ulimit -Ss $(ulimit -Hs)
+#     ulimit -Sm $(ulimit -Hm)
 # fi
 
 #
