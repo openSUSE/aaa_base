@@ -66,26 +66,38 @@ echo "Running $0"
 # Start of e.g. blogd, requires /proc and /dev/pts.
 #
 rc_reset
-echo -n "Mounting /proc filesystem"
+echo -n "Mounting procfs at /proc"
 mount -n -t proc proc /proc
 rc_status -v -r
 
-test -d /sys && {
-    while read a b c  ; do
-	case "$b" in 
-	    sysfs)
-		echo -n "Mounting sysfs on /sys"
-		mount -n -t sysfs sysfs /sys
-		rc_status -v -r
-		break
-		;;
-	esac
-    done < /proc/filesystems
-}
+echo -n "Mounting sysfs at /sys"
+mount -n -t sysfs sysfs /sys
+rc_status -v -r
 
-echo -n "Mounting /dev/pts"
-optpts="-o mode=0620,gid=5"
-mount -n -t devpts $optpts devpts /dev/pts
+#
+# mount tmpfs on /dev if not already done by initramfs
+#
+while read dev dir type options; do
+    if test "$dir" = "/dev" -a "$type" = "tmpfs"; then
+	DEV_MOUNTED=1;
+	break;
+    fi
+done < /proc/mounts
+if test -z "$DEV_MOUNTED"; then
+    echo -n "Mounting tmpfs at /dev"
+    mount -n -o mode=0755 -t tmpfs tmpfs /dev
+    rc_status -v -r
+fi
+
+#
+# populate /dev with initial content
+#
+echo -n "Initializing /dev"
+cp --preserve=all --recursive --remove-destination /lib/udev/devices/* /dev
+rc_status -v -r
+
+echo -n "Mounting devpts at /dev/pts"
+mount -n -t devpts -o mode=0620,gid=5 devpts /dev/pts
 rc_status -v -r
 
 #
