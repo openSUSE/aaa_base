@@ -87,17 +87,3 @@ SCHED_MAXTIMESLICE=""
 #
 SKIP_RUNNING_KERNEL=""
 
-## Type:           yesno
-## Default:        yes
-#
-# Select whether a fully dynamic device nodes directory should be used. If set
-# to 'yes' the device node directory /dev will be mounted on tmpfs. In this
-# case all manual modification in the directory will be lost on reboot; these
-# modification should rather be done via custom udev rules.
-# If 'no' then /dev is on your disk, but is still modified from udev. That
-# means if your manual modifications persist depends on udev rules. 
-# You should leave that to 'yes' except you know exactly what you are doing.
-# See man udev for details. 
-#
-DEV_ON_TMPFS="yes"
-

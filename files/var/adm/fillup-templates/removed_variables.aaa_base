@@ -113,6 +113,9 @@ BEAUTIFY_ETC_HOSTS=""
 # obsolete variable
 USE_MAKE=""
 
+# obsolete variable
+DEV_ON_TMPFS=""
+
 ##
 ## Formatting the boot script messages:
 ##   The boot scripts should use the variables rc_done and rc_fail to
