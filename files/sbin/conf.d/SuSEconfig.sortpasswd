@@ -51,6 +51,7 @@ if test "$SORT_PASSWD_BY_UID" = yes ; then
                 echo "Sorting /etc/$i. Saving old to /etc/$i.unsorted."
                 mv $r/etc/$i $r/etc/$i.unsorted
                 cp $r/etc/$i.t $r/etc/$i
+		chmod --reference $r/etc/$i.unsorted $r/etc/$i
             }
         }
         rm $r/etc/$i.t
