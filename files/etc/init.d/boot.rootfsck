@@ -7,7 +7,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.rootfsck
-# Required-Start:    boot.shm
+# Required-Start:
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
