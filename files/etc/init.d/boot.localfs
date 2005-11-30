@@ -129,8 +129,7 @@ case "$1" in
 	echo "Mounting local file systems..."
 	mount -fv -t proc proc /proc
 	mount -fv -t sysfs sysfs /sys
-	mount -fv -t tmpfs initramdevs /dev
-	mount -fv -t tmpfs tmpfs /dev/shm
+	mount -fv -t tmpfs udev /dev
 	rc_status
 	optpts="-o mode=0620,gid=5"
 	mount -fv -t devpts $optpts devpts /dev/pts
@@ -164,10 +163,8 @@ case "$1" in
 	    case "$type" in
 	        proc)      umount -t proc     $fs ;;
 	        devpts)    umount -t devpts   $fs ;;
-	        devfs)     umount -t devfs    $fs ;;
 	        tmpfs)     umount -t tmpfs    $fs ;;
 	        usbfs)     umount -t usbfs    $fs ;;
-	        usbdevfs)  umount -t usbdevfs $fs ;;
 	    esac
 	done
 
@@ -187,7 +184,7 @@ case "$1" in
 
 	UMOUNT_FAILED=false
 	echo "Unmounting file systems"
-	umount -avt noproc,nonfs,nosmbfs,nocifs || {
+	umount -avt noproc,nonfs,nosmbfs,nocifs,notmpfs || {
 	    rc_status
 	    UMOUNT_FAILED=true
 	}
