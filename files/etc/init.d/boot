@@ -94,6 +94,7 @@ fi
 #
 echo -n "Initializing /dev"
 cp --preserve=all --recursive --remove-destination /lib/udev/devices/* /dev
+chmod 1777 /dev/shm
 rc_status -v -r
 
 echo -n "Mounting devpts at /dev/pts"

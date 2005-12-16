@@ -32,21 +32,6 @@ MODULES_LOADED_ON_BOOT=""
 #
 ACPI_DSDT=""
 
-## Type:	integer
-#
-# Size parameter for mounting the tmpfs/shmfs filesystem. The kernel defaults
-# to 50% of the available RAM size, but this might not be enough for
-# some special setups.
-#
-SHMFS_SIZE=""
-
-## Type:	string
-## Default:     ""
-#
-# other options for mounting shmfs
-#
-SHMFS_OPTIONS=""
-
 ## Type:	integer(1000:50000)
 ## Default:	1000
 #
