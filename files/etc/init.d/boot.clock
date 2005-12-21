@@ -23,7 +23,7 @@ case "$1" in
 	#
 	# Set and adjust the hardware clock
 	#	
-	if test HOSTTYPE" = "s390" -o "$HOSTTYPE" = "s390x" ; then
+	if test "$HOSTTYPE" = "s390" -o "$HOSTTYPE" = "s390x" ; then
 
 	    echo -n Setting up the system clock
 
