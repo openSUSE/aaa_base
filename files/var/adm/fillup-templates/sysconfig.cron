@@ -56,3 +56,21 @@ OWNER_TO_KEEP_IN_TMP="root"
 # files out of other directories.
 #
 CLEAR_TMP_DIRS_AT_BOOTUP="no"
+
+# Type:         time (eg: 14:00)
+# Default:      nothing
+#
+# At which time cron.daily should start. Default is 15 minutes after booting
+# the system. Due the cron script runs only every 15 minutes, it will only
+# run on xx:00, xx:15, xx:30, xx:45, not at the accurate time you set.
+DAILY_TIME=""
+
+# Type:         integer (days)
+# Default:      5
+#
+# Maximum days not running when using a fixed time set in DAILY_TIME.
+# 0 to skip this. This is for users who will power off their system.
+#
+# There is a fixed max. of 14 days set,  if you want to override this
+# change MAX_NOT_RUN_FORCE in /usr/lib/cron/run-crons
+MAX_NOT_RUN="5"

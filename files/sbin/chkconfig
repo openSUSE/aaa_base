@@ -652,20 +652,24 @@ if ($mode eq 's') {
 #
 # compatibility section
 #
+my $status = 0;
 if ($mode eq 'a' || $mode eq 'd') {
   for $s (splice @services) {
-    if (! $known_all{$s}) {
+    if (!$known_all{$s}) {
       print STDERR "$s: unknown service\n";
+      $status = 1;
+      next;
     }
-    if (! $known_rc{$s}) {
+    if (!$known_rc{$s}) {
       print STDERR "$s: not a runlevel service\n";
+      $status = 1;
       next;
     }
     push @services, $s;
     if ($mode eq 'a') {
-      insserv("$initdir/$s");
+      insserv("$initdir/$s") or $status = 1;
     } else {
-      insserv('-r', "$initdir/$s");
+      insserv('-r', "$initdir/$s") or $status = 1;
     }
   }
   $mode = 'l';
@@ -688,8 +692,8 @@ if ($mode eq 'l') {
     }
     printf "%-24s", $s;
     my $l;
-    for $l (0, 1, 2, 3, 4, 5, 6, 'B') {
-      next if $l eq 'B' && !$links{$l}->{$s};
+    for $l (0, 1, 2, 3, 4, 5, 6, 'B', 'S') {
+      next if ($l eq 'B' || $l eq 'S') && !$links{$l}->{$s};
       if ($usecolor) {
 	print $links{$l}->{$s} ? "  \e[0;1;32m$l:on\e[m " : "  $l:off";
       } else {
@@ -723,5 +727,5 @@ if ($mode eq 'l') {
       }
     }
   }
-  exit(0);
+  exit($status);
 }
