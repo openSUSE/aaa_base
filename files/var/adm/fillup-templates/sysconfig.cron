@@ -74,3 +74,21 @@ DAILY_TIME=""
 # There is a fixed max. of 14 days set,  if you want to override this
 # change MAX_NOT_RUN_FORCE in /usr/lib/cron/run-crons
 MAX_NOT_RUN="5"
+
+## Type:	yesno
+## Default:	no
+#
+# send status email even if all scripts in 
+# cron.{hourly,daily,weekly,monthly} 
+# returned without error? (yes/no)
+#
+SEND_MAIL_ON_NO_ERROR="no"
+
+## Type:	yesno
+## Default:	no
+#
+# generate syslog message for all scripts in 
+# cron.{hourly,daily,weekly,monthly} 
+# even if they haven't returned an error? (yes/no)
+#
+SYSLOG_ON_NO_ERROR="no"
