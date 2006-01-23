@@ -156,10 +156,6 @@ case "$1" in
 	    # remount in any case to apply additional options like xattr
 	    mount -n -o remount,rw /
 	fi
-	# unmount devfs passed from initrd
-        if test -d /lib/klibc/dev/.udevdb ; then
-	    umount /lib/klibc/dev >/dev/null 2>/dev/null
-        fi
         # start with a clean mtab and enter root fs entry
 	rm -f /etc/mtab*
 	mount -f /
