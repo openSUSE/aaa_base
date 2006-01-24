@@ -131,6 +131,9 @@ case "$1" in
 	mount -fv -t sysfs sysfs /sys
 	mount -fv -t tmpfs udev /dev
 	rc_status
+	if test ! -d /sys/block/loop0 ; then
+	    /sbin/modprobe loop
+	fi
 	optpts="-o mode=0620,gid=5"
 	mount -fv -t devpts $optpts devpts /dev/pts
 	rc_status
