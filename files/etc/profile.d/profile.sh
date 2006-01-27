@@ -78,11 +78,6 @@ do
 done
 unset sys line val
 
-if test -d /usr/lib/qt3 ; then
-    QTDIR=/usr/lib/qt3
-    export QTDIR
-fi
-
 if test -d /usr/lib/dvgt_help ; then
     DV_IMMED_HELP=/usr/lib/dvgt_help
     export DV_IMMED_HELP

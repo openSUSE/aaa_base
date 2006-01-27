@@ -79,10 +79,6 @@ foreach line ( "`grep -vh '^#' $sysconf`" )
 end
 unset sysconf line
 
-if ( -d /usr/lib/qt3 ) then
-    setenv QTDIR /usr/lib/qt3
-endif
-
 if ( -d /usr/lib/dvgt_help ) then
     setenv DV_IMMED_HELP /usr/lib/dvgt_help
 endif
