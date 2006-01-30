@@ -47,7 +47,7 @@ case "$1" in
 	    # exactly once, at boot.
 
 	    if test "$HWCLOCK" != "-u"; then
-		date $(date -u +'%m%d%H%M%Y')
+		date $(date -u +'%m%d%H%M%Y.%S')
 		rc_status
 	    fi
 	    #
