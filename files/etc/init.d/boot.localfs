@@ -115,7 +115,7 @@ case "$1" in
 	#
 	# clean up
 	#
-	rm -f /etc/mtab* /etc/nologin /nologin /fastboot /forcefsck /success
+	rm -f /etc/nologin /nologin /fastboot /forcefsck /success
 
 	# update modules.dep if needed
 	echo -n "Setting up kernel module dependencies (if required)"
