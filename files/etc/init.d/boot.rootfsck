@@ -59,11 +59,16 @@ case "$1" in
 		ROOTFS_BLKDEV=$ROOTFS_REALDEV
 	    fi
 	else
-	    # on first startup of a system with a lvm root device lvm /dev entries
-	    # may not exist at this time, so skip fsck in this case
-	    ROOTFS_BLKDEV=`fsck -T -N / 2>/dev/null`
-	    ROOTFS_BLKDEV=${ROOTFS_BLKDEV%% }
-	    ROOTFS_BLKDEV=${ROOTFS_BLKDEV##* }
+	    # if not booted via initrd, /dev is empty.
+	    # use private devnode with proper permissions
+	    ROOTFS_BLKDEV="/dev/shm/root"
+	    rootcpio=`echo / | /bin/cpio --quiet -o -H newc`
+	    rootmajor=0x${rootcpio:62:8}
+	    rootminor=0x${rootcpio:70:8}
+	    if [ $((rootmajor)) -ne 0 ] ; then
+	    	echo /bin/mknod -m600 $ROOTFS_BLKDEV b $((rootmajor)) $((rootminor))
+	    	/bin/mknod -m600 $ROOTFS_BLKDEV b $((rootmajor)) $((rootminor))
+	    fi
 	    MAY_FSCK=0
 	    if test -n "$ROOTFS_BLKDEV" -a "$ROOTFS_BLKDEV" != "/" -a -b "$ROOTFS_BLKDEV" ; then
 		MAY_FSCK=1
