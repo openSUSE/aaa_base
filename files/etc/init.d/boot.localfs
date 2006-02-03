@@ -117,9 +117,6 @@ case "$1" in
 	#
 	rm -f /etc/nologin /nologin /fastboot /forcefsck /success
 
-	# update modules.dep if needed
-	echo -n "Setting up kernel module dependencies (if required)"
-	/sbin/update-modules.dep -r
 	rc_status -v -r
 
 	#

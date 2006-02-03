@@ -228,10 +228,6 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
         test -e /usr/bin/elvis && ln -s elvis /usr/bin/vi
         test -e /usr/bin/vim && ln -s vim /usr/bin/vi
     fi
-
-    if test "$FASTRUN" != "true" ; then
-	/sbin/update-modules.dep
-    fi
 fi
 
 #
