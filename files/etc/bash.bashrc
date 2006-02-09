@@ -92,6 +92,8 @@ case "$-" in
     #
     case "$is" in
     bash)
+	# Force a reset of the readline library
+	unset TERMCAP
 	# Returns short path (last two directories)
 	spwd () {
 	  ( IFS=/
