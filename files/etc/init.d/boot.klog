@@ -30,7 +30,7 @@ case "$1" in
 	rc_status -v1 -r
     elif test -x /bin/dmesg ; then
 	echo Creating /var/log/boot.msg
-	/bin/dmesg -s16384 > /var/log/boot.msg
+	/bin/dmesg > /var/log/boot.msg
 	/bin/sync
 	test -s /var/log/boot.msg
 	rc_status -v1 -r

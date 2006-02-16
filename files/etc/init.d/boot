@@ -290,11 +290,10 @@ if test -f /var/lib/YaST2/runme_at_boot ; then
     splashtrigger "YaST"
     exec 0<> $REDIRECT 1>&0 2>&0
     # if yast2 failed, this ensures proper system setup
+    #ulimit -c unlimited
     touch /var/lib/YaST2/run_suseconfig
     if test -x /usr/lib/YaST2/startup/YaST2.Second-Stage; then
 	/usr/lib/YaST2/startup/YaST2.Second-Stage
-    elif test -x /usr/lib/YaST2/bin/YaST2.firstboot; then
-	/usr/lib/YaST2/bin/YaST2.firstboot
     else
 	# oops, yast2 not installed
 	rm -f /var/lib/YaST2/runme_at_boot
