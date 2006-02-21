@@ -134,7 +134,7 @@ case "$1" in
 	optpts="-o mode=0620,gid=5"
 	mount -fv -t devpts $optpts devpts /dev/pts
 	rc_status
-	mount -av -t nonfs,noproc,nodevpts,nosmbfs,nocifs -O no_netdev
+	mount -av -t nonfs,nonfs4,noproc,nodevpts,nosmbfs,nocifs -O no_netdev
 	rc_status -v1 -r
 	;;
     stop)
@@ -184,7 +184,7 @@ case "$1" in
 
 	UMOUNT_FAILED=false
 	echo "Unmounting file systems"
-	umount -avt noproc,nonfs,nosmbfs,nocifs,notmpfs || {
+	umount -avt noproc,nonfs,nonfs4,nosmbfs,nocifs,notmpfs || {
 	    rc_status
 	    UMOUNT_FAILED=true
 	}
@@ -202,9 +202,8 @@ case "$1" in
 	        case "$type" in
 	            swap)     continue ;; # No umount on swap devices
 	            proc)     continue ;; # Required
-	            nfs)      continue ;; # Avoid hanging reboot/halt
-	            smbfs)    continue ;; # Avoid hanging reboot/halt
-	            cifs)     continue ;; # Avoid hanging reboot/halt
+	            nfs|nfs4)      continue ;; # Avoid hanging reboot/halt
+	            smbfs|cifs)    continue ;; # Avoid hanging reboot/halt
 	        esac
 	        mount -v -n -o remount,ro $fs
 	    done

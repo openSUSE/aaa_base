@@ -88,8 +88,8 @@ if test "$PREVLEVEL" = "S" ; then
 	cat /proc/mounts | while read des fs type rest; do
 	    case "$type" in
 		proc)	continue ;;
-		nfs)	continue ;;
-		smbfs)	continue ;;
+		nfs|nfs4)	continue ;;
+		smbfs|cifs)	continue ;;
 	    esac
 	    umount -n -r $fs
 	done

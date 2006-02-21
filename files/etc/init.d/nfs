@@ -28,7 +28,7 @@ while read  where what type options rest  ; do
 	\#*|"") ;;
 	*) case "$options" in
 	    *noauto*) ;;
-	    *) if test "$type" = "nfs" ; then
+	    *) if test "$type" = "nfs" -o "$type" = "nfs4" ; then
 		    nfs=yes
 		    case "$where" in
 			/usr*|/opt*)
@@ -58,13 +58,13 @@ case "$1" in
 	#  background with an ampersand (&) and a sleep time of
 	#  two or more seconds, e.g:
 	#  
-	#   sleep 2 && mount -at nfs &
+	#   sleep 2 && mount -at nfs,nfs4 &
 	#   sleep 2 
 	#  
 	#  Note: Some people importing the /usr partition.
 	#        Therefore we do _NOT_ use an ampersand!
 	#
-	  mount -at nfs
+	  mount -at nfs,nfs4
 	#
     	# generate new list of available shared libraries
 	#
@@ -86,7 +86,7 @@ case "$1" in
 	  #
 	  # Unmount in background because during long timeouts
 	  #
-	  umount -at nfs &
+	  umount -at nfs,nfs4 &
 	  sleep 2
 	  rc_status -v
 	else
@@ -108,7 +108,7 @@ case "$1" in
 	      \#*|"") ;;
 	      *) case "$options" in
 		   *noauto*) ;;
-		   *) if test "$type" = "nfs" ; then
+		   *) if test "$type" = "nfs" -o "$type" = "nfs4" ; then
 			grep -q "$where $what nfs" /proc/mounts || rc_failed 3
 		      fi ;;
 		 esac
