@@ -26,7 +26,7 @@ CONFIRM_PROMPT_TIMEOUT="5"
 # Run all scripts or rather start/stop all services
 # which are independent from each other in parallel.
 #
-RUN_PARALLEL=yes
+RUN_PARALLEL="yes"
 
 ## Type:	yesno
 ## Default:	no

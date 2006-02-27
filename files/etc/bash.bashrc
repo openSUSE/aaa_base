@@ -54,7 +54,7 @@ else
     LS_OPTIONS=--color=none
 fi
 if test "$UID" = 0 ; then
-    LS_OPTIONS="-a -N $LS_OPTIONS -T 0"
+    LS_OPTIONS="-A -N $LS_OPTIONS -T 0"
 else
     LS_OPTIONS="-N $LS_OPTIONS -T 0"
 fi
@@ -191,8 +191,8 @@ case "$-" in
 	fi
 	alias dir='ls -l'
 	alias ll='ls -l'
-	alias la='ls -la'
-	alias l='ls -alF'
+	alias la='ls -lA'
+	alias l='ls -AlF'
 	alias ls-l='ls -l'
 
 	#

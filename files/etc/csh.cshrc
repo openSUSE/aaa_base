@@ -82,7 +82,7 @@ if ( ${?LS_COLORS} ) then
 endif
 unalias ls
 if ( "$uid" == "0" ) then
-    setenv LS_OPTIONS "-a -N $LS_OPTIONS -T 0"
+    setenv LS_OPTIONS "-A -N $LS_OPTIONS -T 0"
 else
     setenv LS_OPTIONS "-N $LS_OPTIONS -T 0"
 endif
