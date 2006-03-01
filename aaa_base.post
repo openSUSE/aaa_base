@@ -109,6 +109,7 @@ if [ -x bin/fillup -a -f etc/rc.config ] ; then
 fi
 %{remove_and_set -n security CONSOLE_SHUTDOWN}
 %{remove_and_set -n suseconfig CHECK_INITTAB}
+%{remove_and_set -n displaymanager KDM_SHUTDOWN}
 
 if ! [ -d etc/sysconfig ] ; then
   mkdir -p etc/sysconfig
@@ -122,6 +123,15 @@ for i in language backup boot displaymanager kernel \
 	cron news ; do
 %{fillup_only -n $i}
 done
+# migrate KDM_SHUTDOWN value if set before
+if [ -n "$KDM_SHUTDOWN" ] ; then
+    if [ "$KDM_SHUTDOWN" = "local" ] ; then
+	KDM_SHUTDOWN=all
+    fi
+    sed -e "s|^DISPLAYMANAGER_SHUTDOWN=.*|DISPLAYMANAGER_SHUTDOWN=\"$KDM_SHUTDOWN\"|" \
+	etc/sysconfig/displaymanager > etc/sysconfig/displaymanager.new \
+	&& mv etc/sysconfig/displaymanager.new etc/sysconfig/displaymanager
+fi
 
 # clear old install settings of MODULES_LOADED_ON_BOOT
 eval `grep "^MODULES_LOADED_ON_BOOT" etc/sysconfig/kernel`
