@@ -107,7 +107,8 @@ if test -n "$CONSOLE_MAGIC" ; then
     case "$(tty 2> /dev/null)" in
     /dev/tty*)
 	if test "$TERM" = "linux" -a -t ; then
-	    echo -en "\033$CONSOLE_MAGIC"
+	    # Use /bin/echo due ksh can not do that
+	    /bin/echo -en "\033$CONSOLE_MAGIC"
 	fi
     esac
 fi
