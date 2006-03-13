@@ -297,7 +297,7 @@ fi
 #
 # System wide configuration of bourne shells like ash
 #
-if test -z "$PROFILEREAD" ; then
+if test "$is" != "ksh" -a -z "$PROFILEREAD" ; then
     ENV=/etc/bash.bashrc
     export ENV
 fi
@@ -312,8 +312,11 @@ fi
 
 #
 # System BASH specials, maybe also good for other shells
+# Note that ksh always reads /etc/ksh.kshrc
 #
-test -r /etc/bash.bashrc   && . /etc/bash.bashrc
+if test "$is" != ksh -a -r /etc/bash.bashrc ; then
+    . /etc/bash.bashrc
+fi
 if test "$is" = "bash" -a -z "$_HOMEBASHRC" ; then
     # loop detection
     readonly _HOMEBASHRC=true
@@ -325,13 +328,13 @@ fi
 #
 if test "$is" = "ksh" -a -r /etc/ksh.kshrc ; then
     if test ! /etc/bash.bashrc -ef /etc/ksh.kshrc ; then
-	. /etc/ksh.kshrc
+	test -r /etc/bash.bashrc && . /etc/bash.bashrc
     fi
-fi
-if test "$is" = "ksh"  -a -z "$_HOMEKSHRC"  ; then
-    # loop detection
-    readonly _HOMEKSHRC=true
-    test -r $HOME/.kshrc   && . $HOME/.kshrc
+    if test -n "$ENV" -a "$ENV" != "\$HOME/.kshrc" ; then
+	# loop detection
+	readonly _HOMEKSHRC=true
+	test -r $HOME/.kshrc	 && . $HOME/.kshrc
+    fi
 fi
 
 #

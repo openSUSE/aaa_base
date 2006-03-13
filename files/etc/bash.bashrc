@@ -208,16 +208,16 @@ case "$-" in
 	fi
 	alias rd=rmdir
 	alias md='mkdir -p'
-	unalias which 2>/dev/null
-	function which {
+	_which () {
 	    local file=$(type -p ${1+"$@"} 2>/dev/null)
 	    if test -n "$file" -a -x "$file"; then
 		echo "$file"
 		return 0
 	    fi
 	    hash -r
-	    type -p ${1+"$@"}
+	    type -P ${1+"$@"}
 	}
+	alias which=_which
 	alias rehash='hash -r'
 	alias you='su - -c "/sbin/yast2 online_update"'
 	if test "$is" != "ksh" ; then
