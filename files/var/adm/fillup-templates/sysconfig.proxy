@@ -48,4 +48,4 @@ GOPHER_PROXY=""
 #
 # Example: NO_PROXY="www.me.de, do.main, localhost"
 #
-NO_PROXY="localhost"
+NO_PROXY="localhost, 127.0.0.1"
