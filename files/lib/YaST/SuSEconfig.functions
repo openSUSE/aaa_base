@@ -92,7 +92,7 @@ my_test_for_space () { # test if we have enough space
         rm -f $1/testforspace.SuSEconfig
         echo
         echo
-        echo We do not have enough disk space in $DIR. Exit.
+        echo We do not have enough disk space in $1. Exit.
         echo
         RETURN=false
       }
