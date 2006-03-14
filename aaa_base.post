@@ -124,7 +124,7 @@ for i in language backup boot displaymanager kernel \
 %{fillup_only -n $i}
 done
 # migrate KDM_SHUTDOWN value if set before
-if [ -n "$KDM_SHUTDOWN" ] ; then
+if [ -n "$KDM_SHUTDOWN" -a "$KDM_SHUTDOWN" != "no" ] ; then
     if [ "$KDM_SHUTDOWN" = "local" ] ; then
 	KDM_SHUTDOWN=all
     fi
