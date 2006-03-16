@@ -69,12 +69,14 @@ if test "$PREVLEVEL" = "S" ; then
     check=""
     test -e /proc/cmdline || mount -n -t proc proc /proc
     read -t 2 check < /proc/cmdline 2> /dev/null
-    case "$check" in
-	*single*)   single="yes"
+    case " ${check} " in
+	*\ single\ *|*\ s\ *)
+	    single="yes"
     esac
     read -t 2 check < /proc/sys/kernel/hostname 2> /dev/null
-    case "$check" in
-	unknown|"") hvname="no"
+    case "${check}" in
+	"(none)"|unknown|"")
+	    hvname="no"
     esac
     unset check
 
@@ -87,6 +89,7 @@ if test "$PREVLEVEL" = "S" ; then
 	killall5 -9
 	cat /proc/mounts | while read des fs type rest; do
 	    case "$type" in
+		swap)	continue ;;
 		proc)	continue ;;
 		nfs|nfs4)	continue ;;
 		smbfs|cifs)	continue ;;
@@ -99,7 +102,12 @@ if test "$PREVLEVEL" = "S" ; then
 	done
 	umount -n -t proc /proc
 	/etc/init.d/boot
-	exit 0
+    else
+	for b in /etc/init.d/boot.d/S*boot.udev
+	do
+	    test -x $b || continue
+	    $b start
+	done
     fi
 fi
 

@@ -259,8 +259,8 @@ case "$-" in
     if test "$is" = "ksh" ; then
 	# Use a ksh specific history file and enable
     	# emacs line editor
-    	HISTFILE=$HOME/.kshrc_history
-    	VISUAL=emacs
+    	: ${HISTFILE=$HOME/.kshrc_history}
+    	: ${VISUAL=emacs}
     fi
     ;;
 esac
