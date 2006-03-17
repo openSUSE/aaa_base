@@ -60,11 +60,3 @@ CWD_IN_ROOT_PATH="no"
 # Defaults to "yes" since this has been the case for years.
 #
 CWD_IN_USER_PATH="yes"
-
-## Type:	list(no,yes,octave)
-## Default:	no
-#
-# Set to "yes" or "quint" to play a quint tone sequence at system halt or reboot
-# or set to "octave" to play octave sound at that occasion.
-#
-HALT_SOUND="no"

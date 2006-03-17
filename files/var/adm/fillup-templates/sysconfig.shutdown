@@ -1,0 +1,15 @@
+## Type:	list(no,yes,octave)
+## Default:	no
+#
+# Set to "yes" or "quint" to play a quint tone sequence at system halt or reboot
+# or set to "octave" to play octave sound at that occasion.
+#
+HALT_SOUND="no"
+
+## Path:        System/Boot
+## Default:     ""
+## Type:        string
+#
+# Hook during system shutdown to run extra command
+#
+HALT_POWERDOWN_INSERT=""

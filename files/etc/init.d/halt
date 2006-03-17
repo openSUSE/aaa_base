@@ -12,7 +12,7 @@
 
 . /etc/rc.status
 . /etc/sysconfig/clock
-. /etc/sysconfig/suseconfig
+. /etc/sysconfig/shutdown
 
 #
 # Avoid being interrupted by child or keyboard
@@ -147,6 +147,8 @@ else
 fi
 echo $message
 test "$HALT_SOUND" = "no" || echo -en "\a"
+
+test -n "$HALT_POWERDOWN_INSERT" && $HALT_POWERDOWN_INSERT
 
 # Set system console back to intial value
 test -n "$REDIRECT" -a -n "$CONSOLE" && setconsole $REDIRECT < $CONSOLE
