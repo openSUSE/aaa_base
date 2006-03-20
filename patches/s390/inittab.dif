@@ -7,9 +7,9 @@
 +# Default HMC/3215/3270 console:
 +1:2345:respawn:/sbin/mingetty --noclear /dev/ttyS0 dumb
 +# VT220(Linux) console:
-+#2:2345:respawn:/sbin/mingetty --noclear /dev/ttyS0 linux
++#2:2345:respawn:/sbin/mingetty --noclear /dev/ttyS1 xterm
 +# additional 3270 terminals:
-+#3:2345:respawn:/sbin/mingetty --noclear /dev/ttyS1 dumb
++#3:2345:respawn:/sbin/mingetty --noclear /dev/3270/ttycons dumb
 +
  # what to do when CTRL-ALT-DEL is pressed
  ca::ctrlaltdel:/sbin/shutdown -r -t 4 now
