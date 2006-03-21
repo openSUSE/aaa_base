@@ -39,11 +39,52 @@ reverse ()
     done
 }
 
+wait_for_udev ()
+{
+    mount_opts="-t nonfs,nonfs4,noproc,nodevpts,nosmbfs,nocifs -O no_netdev"
+    fstab_devices=$(mount -afnv $mount_opts 2> /dev/null | grep -v mounted | cut -d ' ' -f 1)
+    missing=
+    for dev in $fstab_devices; do
+	if [ ! -b $dev ]; then
+	    missing="$dev $missing"
+	fi
+    done
+    if [ -z "$missing" ]; then
+	return
+    fi
+    echo -n "Waiting for $missing "
+    timeout=30
+    while [ "$timeout" -gt 0 ] ; do
+	sleep 1
+	echo ". "
+	still_missing=""
+	for dev in $missing; do
+	    if [ ! -b $dev ] ; then
+		still_missing="$dev $still_missing"
+	    fi
+	done
+	if [ -z "$still_missing" ]; then
+	    echo "ok"
+	    break;
+	fi
+	missing="$still_missing"
+	if [ ! -d /dev/.udev/queue ] ; then
+	    echo "no more events"
+	    break;
+	fi
+	timeout=$(( $timeout - 1 ))
+    done
+    if [ "$timeout" -eq 0 ] ; then
+	echo "timeout"
+    fi
+}
+
 rc_reset
 
 case "$1" in
   start)
 	# rootfs is mounted rw, lvm et al should be up now
+	wait_for_udev
 	#
 	# If we use a serial console, don't use the fsck progress bar
 	#
