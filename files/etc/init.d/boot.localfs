@@ -7,7 +7,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.localfs
-# Required-Start:    boot.udev
+# Required-Start:    boot.udev boot.loadmodules
 # Should-Start: boot.ibmsis boot.md boot.lvm dasd_devfs_compat boot.scsidev
 # Required-Stop:
 # Default-Start:     B

@@ -105,14 +105,14 @@ case "$-" in
 	    fi ) ; }
 	# Set xterm prompt with short path (last 18 characters)
 	ppwd () {
-	    local _t="$1" _w _x
+	    local _t="$1" _w _x _u="$USER" _h="$HOST"
 	    test -n "$_t"    || return
 	    test "${_t#tty}" = $_t && _t=pts/$_t
 	    test -O /dev/$_t || return
 	    _w="$(dirs +0)"
 	    _x=$((${#_w}-18))
-	    test ${#_w} -le 18 || _w=...${_w#$(printf "%.*s" $_x "$_w")}
-	    echo -en "\e]2;${USER}@${HOST}:${_w}\007\e]1;${HOST}\007" > /dev/$_t
+	    test ${#_w} -le 18 || _w="...${_w#$(printf "%.*s" $_x "$_w")}"
+	    printf "\e]2;%s@%s:%s\007\e]1;%s\007" "$_u" "$_h" "$_w" "$_h" > /dev/$_t
 	    }
 	# If set: do not follow sym links
 	# set -P
