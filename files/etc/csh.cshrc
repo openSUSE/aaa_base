@@ -20,6 +20,13 @@ set noglob
 set echo_style=both
 
 #
+# If `login files' are not sourced first
+#
+if ( ${?loginsh} && ! ${?CSHRCREAD} ) then
+    source /etc/csh.login >& /dev/null
+endif
+
+#
 # In case if not known
 #
 if (! ${?UID}  ) set -r  UID="`id -ur`"
