@@ -343,4 +343,31 @@ cmp -s /etc/fstab /etc/fstab.$$ || {
 rm -f /etc/fstab.$$
 fi
 
+# IA64 Altix update hook
+if test -d /proc/sgi_sn ; then
+    if grep -q "console=ttyS0" /etc/elilo.conf ; then
+	echo "replacing ttyS0 by ttySG0 in elilo.conf, inittab and securetty files"
+	#
+	rm -f /etc/elilo.conf.tmp
+	sed -e "s/console=ttyS0/console=ttySG0/g" /etc/elilo.conf > /etc/elilo.conf.tmp
+	cat /etc/elilo.conf.tmp > /etc/elilo.conf
+	rm -f /etc/elilo.conf.tmp
+	#
+	rm -f /etc/inittab.tmp
+	sed -e "s/getty\(.*\)ttyS0/getty\1ttySG0/g" /etc/inittab > /etc/inittab.tmp
+	cat /etc/inittab.tmp > /etc/inittab
+	rm -f /etc/inittab.tmp
+	#
+	rm -f /etc/securetty.tmp
+	sed -e "s/ttyS0/ttySG0/g" /etc/securetty > /etc/securetty.tmp
+	cat /etc/securetty.tmp > /etc/securetty
+	rm -f /etc/securetty.tmp
+	#
+	if grep -q /boot/efi /proc/mounts ; then
+	    echo "calling elilo to update"
+	    /sbin/elilo || true
+	fi
+    fi
+fi
+
 exit 0
