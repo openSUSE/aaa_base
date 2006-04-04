@@ -4,10 +4,20 @@
 ## Command:     /sbin/mkinitrd
 #
 # This variable contains the list of modules to be added to the initial
-# ramdisk by calling the script "mk_initrd"
+# ramdisk by calling the script "mkinitrd"
 # (like drivers for scsi-controllers, for lvm or reiserfs)
 #
 INITRD_MODULES=""
+ 
+## Type:        string
+## Command:     /sbin/mkinitrd
+#
+# This variable contains the list of modules to be added to the initial
+# ramdisk that is created for unprivilegd Xen domains (domU); you may need
+# drivers for virtual block and network devices in addition to filesystem
+# and device-mapper modules.
+#
+DOMU_INITRD_MODULES="xennet xenblk"
 
 ## Type:		string
 ## ServiceRestart:	boot.loadmodules
