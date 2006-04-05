@@ -42,7 +42,7 @@ reverse ()
 wait_for_udev ()
 {
     mount_opts="-t nonfs,nonfs4,noproc,nodevpts,nosmbfs,nocifs -O no_netdev"
-    fstab_devices=$(mount -afnv $mount_opts 2> /dev/null | grep -v mounted | cut -d ' ' -f 1)
+    fstab_devices=$(mount -afnv $mount_opts 2> /dev/null | grep -v mounted | sed -e "s@ .*@@")
     missing=
     for dev in $fstab_devices; do
 	if [ ! -b $dev ]; then
