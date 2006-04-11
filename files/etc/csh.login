@@ -251,11 +251,13 @@ endif
 if ( -d /etc/profile.d && ! ${?CSHRCREAD} ) then
     set _tmp=${?nonomatch}
     set nonomatch
+    unset noglob
     foreach _s ( /etc/profile.d/*.csh )
 	if ( -r $_s ) then
 	    source $_s
 	endif
     end
+    set noglob
     if ( ! ${_tmp} ) unset nonomatch
     unset _tmp _s
 endif

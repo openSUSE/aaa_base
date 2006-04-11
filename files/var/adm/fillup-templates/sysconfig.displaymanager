@@ -1,6 +1,6 @@
 ## Path:	Desktop/Display manager
 ## Description:	settings to generate a proper displaymanager config
-## Config:      xdm kdm3 gdm
+## Config:      xdm,kdm3,gdm
 
 ## Type:	string(kdm,xdm,gdm,wdm,console)
 ## Default:	""

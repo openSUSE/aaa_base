@@ -39,16 +39,25 @@ reverse ()
     done
 }
 
+list_missed ()
+{
+    local dev
+    local mount_opts="-t nonfs,nonfs4,noproc,nodevpts,nosmbfs,nocifs -O no_netdev"
+
+    mount -afnv $mount_opts 2> /dev/null | while read line ; do
+	dev="${line%% *}"
+	case "$line" in
+	*mounted*)
+	    continue	  ;;
+	*)  test -b $dev && continue
+	    echo "${dev}" ;;
+	esac
+    done
+}
+
 wait_for_udev ()
 {
-    mount_opts="-t nonfs,nonfs4,noproc,nodevpts,nosmbfs,nocifs -O no_netdev"
-    fstab_devices=$(mount -afnv $mount_opts 2> /dev/null | grep -v mounted | sed -e "s@ .*@@")
-    missing=
-    for dev in $fstab_devices; do
-	if [ ! -b $dev ]; then
-	    missing="$dev $missing"
-	fi
-    done
+    missing=$(list_missed)
     if [ -z "$missing" ]; then
 	return
     fi
@@ -184,7 +193,14 @@ case "$1" in
 
 	# move to intermezzo package ?
 	# First umount intermezzo filesystems
-	test -x /usr/sbin/umountizo -a ! -z "`grep -i intermezzo <$mounts`" && /usr/sbin/umountizo >/dev/null 2>&1
+	if test -x /usr/sbin/umountizo ; then
+	    while read line ; do
+		case "$line" in
+		*[Ii][Nn][Tt][Ee][Rr][Mm][Ee][Zz][Zz][Oo]*)
+		    /usr/sbin/umountizo >/dev/null 2>&1
+		esac
+	    done < $mounts
+	fi
 
 	reverse < $mounts | \
 	while read des fs type rest; do

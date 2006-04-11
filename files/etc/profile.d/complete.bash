@@ -241,19 +241,22 @@ _man_ ()
  	 -) COMPREPLY=($os)	;;
 	--) COMPREPLY=($ol) 	;;
  	-?) COMPREPLY=($c)	;;
-    [1-9n]) COMPREPLY=($c)	;;
+    [0-9n]|[0-9n]p)
+	    COMPREPLY=($c)	;;
 	 *)
 	case "$o" in
-	    -l) COMPREPLY=($(compgen -f -d -X '.*' -- $c)) ;;
-	[1-9n]) s=$(eval echo {${m}}$o/)
+	    -l|--local-file)
+		COMPREPLY=($(compgen -f -d -X '.*' -- $c)) ;;
+	[0-9n]|[0-9n]p)
+		s=$(eval echo {${m}}$o/)
 		if type -p sed &> /dev/null ; then
 		    COMPREPLY=(\
 			$(ls -1fUA $s 2>/dev/null|\
-			  sed -n "/^$c/{s@\.[1-9n].*\.gz@@g;s@.*/:@@g;p;}")\
+			  sed -n "/^$c/{s@\.[0-9n].*\.gz@@g;s@.*/:@@g;p;}")\
 		    )
 		else
 		    s=($(ls -1fUA $s 2>/dev/null))
-		    s=(${s[@]%%.[1-9n]*})
+		    s=(${s[@]%%.[0-9n]*})
 		    s=(${s[@]#*/:})
 		    for m in ${s[@]} ; do
 			case "$m" in
@@ -261,7 +264,7 @@ _man_ ()
 			esac
 		    done
 		    unset m s
-		    COMPREPLY=(${COMPREPLY[@]%%.[1-9n]*})
+		    COMPREPLY=(${COMPREPLY[@]%%.[0-9n]*})
 		    COMPREPLY=(${COMPREPLY[@]#*/:})
 		fi					   ;;
 	     *) COMPREPLY=($(compgen -c -- $c))		   ;;
