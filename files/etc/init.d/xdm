@@ -67,6 +67,16 @@ PIDFILE="/var/run/xdm.pid"
 KDEROOTHOME=/root/.kdm
 export KDEROOTHOME
 
+
+if [ "$DISPLAYMANAGER_XSERVER" == "Xgl" -a -r /etc/X11/xorg.conf ]; then
+  cat /etc/X11/xorg.conf | tr "\t" " " | \
+    grep -q -i -E '^ *Driver +"fglrx"'
+  if [ $? -eq 0 ]; then
+    /sbin/lsmod | grep -q fglrx || /sbin/modprobe fglrx &> /dev/null
+  fi
+  . /etc/profile.d/fglrx.sh
+fi
+
 case "${DISPLAYMANAGER##*/}" in
     kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde3/bin/kdm
 			 PIDFILE="/var/run/kdm.pid"
