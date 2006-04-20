@@ -176,6 +176,11 @@ case "$1" in
 	echo "Mounting local file systems..."
 	mount -fv -t proc proc /proc
 	mount -fv -t sysfs sysfs /sys
+	while read a b ; do
+	    if test "$b" = "debugfs" ; then
+		mount -fv -t debugfs debugfs /sys/kernel/debug
+	    fi
+	done < /proc/filesystems
 	mount -fv -t tmpfs udev /dev
 	rc_status
 	if test ! -d /sys/block/loop0 ; then

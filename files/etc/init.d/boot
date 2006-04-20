@@ -69,6 +69,15 @@ echo -n "Mounting sysfs at /sys"
 mount -n -t sysfs sysfs /sys
 rc_status -v -r
 
+if test -d /sys/kernel/debug ; then
+    while read dev type ; do
+	if test "$type" = "debugfs" ; then
+	    echo -n "Mounting debugfs at /sys/kernel/debug"
+	    mount -n -t debugfs debugfs /sys/kernel/debug
+	    rc_status -v -r
+	fi
+    done < /proc/filesystems
+fi
 #
 # mount tmpfs on /dev if not already done by initramfs
 #
