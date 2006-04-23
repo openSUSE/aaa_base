@@ -74,7 +74,7 @@ if [ "$DISPLAYMANAGER_XSERVER" == "Xgl" -a -r /etc/X11/xorg.conf ]; then
   if [ $? -eq 0 ]; then
     /sbin/lsmod | grep -q fglrx || /sbin/modprobe fglrx &> /dev/null
   fi
-  . /etc/profile.d/fglrx.sh
+  test -r /etc/profile.d/fglrx.sh && . /etc/profile.d/fglrx.sh
 fi
 
 case "${DISPLAYMANAGER##*/}" in
