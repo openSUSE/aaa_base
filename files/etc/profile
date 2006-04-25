@@ -62,9 +62,10 @@ umask 022
 # Setup for gzip and (t)csh users
 #
 if test -z "$PROFILEREAD" ; then
-    GZIP=-9
+    # GZIP=-9
+    # export GZIP
     CSHEDIT=emacs
-    export GZIP CSHEDIT
+    export CSHEDIT
 fi
 
 #

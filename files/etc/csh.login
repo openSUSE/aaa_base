@@ -41,7 +41,7 @@ umask 022
 # Setup for gzip and (t)csh users
 #
 if (! ${?CSHRCREAD} ) then
-    setenv GZIP -9
+    # setenv GZIP -9
     setenv CSHEDIT emacs
 endif
 
