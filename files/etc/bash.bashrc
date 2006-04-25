@@ -208,16 +208,22 @@ case "$-" in
 	fi
 	alias rd=rmdir
 	alias md='mkdir -p'
-	_which () {
-	    local file=$(type -p ${1+"$@"} 2>/dev/null)
-	    if test -n "$file" -a -x "$file"; then
-		echo "$file"
-		return 0
-	    fi
-	    hash -r
-	    type -P ${1+"$@"}
-	}
-	alias which=_which
+	if test "$is" = "bash" ; then
+	    #
+	    # Other shells use the which command in path (e.g. ash) or
+	    # their own builtin for the which command (e.g. ksh and zsh).
+	    #
+	    _which () {
+		local file=$(type -p ${1+"$@"} 2>/dev/null)
+		if test -n "$file" -a -x "$file"; then
+		    echo "$file"
+		    return 0
+		fi
+		hash -r
+		type -P ${1+"$@"}
+	    }
+	    alias which=_which
+	fi
 	alias rehash='hash -r'
 	alias you='su - -c "/sbin/yast2 online_update"'
 	if test "$is" != "ksh" ; then
