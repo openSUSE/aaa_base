@@ -94,7 +94,7 @@ else
     setenv LS_OPTIONS "-N $LS_OPTIONS -T 0"
 endif
 alias ls 'ls $LS_OPTIONS'
-alias la 'ls -AF --color=none'
+alias la 'ls -aF --color=none'
 alias ll 'ls -l  --color=none'
 alias l  'll'
 alias dir  'ls --format=vertical'

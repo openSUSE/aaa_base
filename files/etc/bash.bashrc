@@ -191,8 +191,8 @@ case "$-" in
 	fi
 	alias dir='ls -l'
 	alias ll='ls -l'
-	alias la='ls -lA'
-	alias l='ls -AlF'
+	alias la='ls -la'
+	alias l='ls -alF'
 	alias ls-l='ls -l'
 
 	#
