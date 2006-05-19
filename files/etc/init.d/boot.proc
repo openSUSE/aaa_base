@@ -60,6 +60,12 @@ case "$1" in
 	    test "$DISABLE_ECN" = "no"  && echo "1" > /proc/sys/net/ipv4/tcp_ecn
 	fi
 
+	# handle DMAPI_PROBE here, boot.sysctl is too late
+	if test "$DMAPI_PROBE" = "yes" ; then
+	    test -d /proc/sys/fs/xfs || modprobe xfs
+	    test -e /proc/sys/fs/xfs/probe_dmapi && echo 1 > /proc/sys/fs/xfs/probe_dmapi
+	fi
+
 	;;
     stop|restart)
         # skip / nothing to do

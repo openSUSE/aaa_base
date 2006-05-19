@@ -66,3 +66,12 @@ DISABLE_ECN="yes"
 # For further information see /usr/src/linux/Documentation/sysrq.txt
 #
 ENABLE_SYSRQ="no"
+
+## Path:	System/Kernel
+## Type:        yesno
+## Default:     no
+#
+# Enable dmapi module probe for the xfs filesystem driver
+# (yes/no)
+#
+DMAPI_PROBE="no"
