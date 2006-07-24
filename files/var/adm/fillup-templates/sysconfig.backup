@@ -28,7 +28,7 @@ MAX_RPMDB_BACKUPS="5"
 # called and the the content of those files has changed.
 # Setting the variable to "" disables this feature.
 #
-RCCONFIG_BACKUP_DIR="/var/adm/backup/rpmdb"
+RCCONFIG_BACKUP_DIR="/var/adm/backup/sysconfig"
 
 ## Type:	integer
 ## Default:	5
