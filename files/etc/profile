@@ -226,10 +226,16 @@ fi
 # These settings are recommended for old motif applications
 #
 if test -z "$PROFILEREAD" ; then
-    XKEYSYMDB=/usr/X11R6/lib/X11/XKeysymDB
-    export XKEYSYMDB
-    XNLSPATH=/usr/X11R6/lib/X11/nls
-    export XNLSPATH
+    if [ -r /usr/share/X11/XKeysymDB ]; then
+	export XKEYSYMDB=/usr/share/X11/XKeysymDB
+    else
+	export XKEYSYMDB=/usr/X11R6/lib/X11/XKeysymDB
+    fi
+    if [ -d /usr/share/X11/nls ]; then
+	export XNLSPATH=/usr/share/X11/nls
+    else
+	export XNLSPATH=/usr/X11R6/lib/X11/nls
+    fi
 fi
 
 if test -s /etc/nntpserver ; then

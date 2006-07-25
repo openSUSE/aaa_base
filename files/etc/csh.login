@@ -204,8 +204,16 @@ endif
 # These settings are recommended for old motif applications
 #
 if (! ${?CSHRCREAD} ) then
-    setenv XKEYSYMDB /usr/X11R6/lib/X11/XKeysymDB
-    setenv XNLSPATH  /usr/X11R6/lib/X11/nls
+    if ( -r /usr/share/X11/XKeysymDB ) then
+	setenv XKEYSYMDB /usr/share/X11/XKeysymDB
+    else
+	setenv XKEYSYMDB /usr/X11R6/lib/X11/XKeysymDB
+    endif
+    if ( -d /usr/share/X11/nls ) then
+	setenv XNLSPATH /usr/share/X11/nls
+    else
+	setenv XNLSPATH /usr/X11R6/lib/X11/nls
+    endif
 endif
 
 if ( -s /etc/nntpserver ) then

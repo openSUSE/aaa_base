@@ -140,7 +140,7 @@ if [ -n "$HALT_SOUND" -a "$HALT_SOUND" != "no" ] ; then
         && mv etc/sysconfig/shutdown.new etc/sysconfig/shutdown
 fi
 # fix sysconfig backup dir
-if grep -q "RCCONFIG_BACKUP_DIR../var/adm/backup/rpmdb" ; then
+if grep -q RCCONFIG_BACKUP_DIR../var/adm/backup/rpmdb etc/sysconfig/backup; then
     sed -e "s|^RCCONFIG_BACKUP_DIR=.*|RCCONFIG_BACKUP_DIR=\"/var/adm/backup/sysconfig\"|" \
 	etc/sysconfig/backup > etc/sysconfig/backup.new \
         && mv etc/sysconfig/backup.new etc/sysconfig/backup
