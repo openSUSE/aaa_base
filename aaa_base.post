@@ -145,7 +145,7 @@ if grep -q RCCONFIG_BACKUP_DIR../var/adm/backup/rpmdb etc/sysconfig/backup; then
 	etc/sysconfig/backup > etc/sysconfig/backup.new \
         && mv etc/sysconfig/backup.new etc/sysconfig/backup
     mkdir -p /var/adm/backup/sysconfig
-    mv /var/adm/backup/rpmdb/sysconfig[-_]* /var/adm/backup/sysconfig
+    mv /var/adm/backup/rpmdb/sysconfig[-_]* /var/adm/backup/sysconfig 2>/dev/null
 fi
 
 
