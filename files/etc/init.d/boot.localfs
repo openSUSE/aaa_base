@@ -7,8 +7,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.localfs
-# Required-Start:    boot.udev
-# Should-Start: boot.ibmsis boot.md boot.lvm dasd_devfs_compat boot.scsidev boot.multipath boot.loadmodules
+# Required-Start:    boot.udev boot.rootfsck
+# Should-Start:      boot.md boot.lvm dasd_devfs_compat boot.scsidev boot.multipath boot.evms boot.loadmodules
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:

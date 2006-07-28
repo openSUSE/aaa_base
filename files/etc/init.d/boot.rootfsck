@@ -7,7 +7,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.rootfsck
-# Required-Start:
+# Required-Start:    boot.udev
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:

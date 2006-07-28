@@ -8,7 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.ipconfig
 # Required-Start: 
-# Should-Start: setserial boot.isapnp boot.sysctl
+# Should-Start:      boot.sysctl
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:

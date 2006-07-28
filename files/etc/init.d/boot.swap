@@ -7,8 +7,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.swap
-# Required-Start:    boot.localfs
-# Should-Start: boot.lvm boot.crypto boot.lkcd
+# Required-Start:    boot.rootfsck
+# Should-Start:      boot.md boot.lvm boot.evms boot.crypto boot.lkcd $local_fs
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:

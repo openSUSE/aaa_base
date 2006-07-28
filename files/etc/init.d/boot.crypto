@@ -9,8 +9,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.crypto
-# Required-Start:    boot.localfs boot.klog
-# Should-Start: boot.md boot.lvm
+# Required-Start:    boot.rootfsck
+# Should-Start:      boot.md boot.lvm boot.evms $local_fs boot.klog
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:

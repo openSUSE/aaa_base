@@ -6,8 +6,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.klog
-# Required-Start:    boot.localfs
-# Required-Stop:
+# Required-Start:    boot.rootfsck
+# Should-Start:      $local_fs
 # Default-Start:     B
 # Default-Stop:
 # Description:       dump kernel messages
