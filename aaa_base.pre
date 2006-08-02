@@ -240,28 +240,6 @@ for LINK in usr/X11R6/lib/X11 var/X11R6/lib/fonts usr/lib/mgetty+sendfax \
         rm -f $LINK
     fi
 done
-#
-# old var/X11R6/lib stuff?
-#
-if test -d var/X11R6/lib -a ! -L var/X11R6/lib ; then
-    echo
-    echo "Found old style var/X11R6/lib. Moving to var/X11R6/lib.old..."
-    if [ -e var/X11R6/lib.old ] ; then
-        echo "var/X11R6/lib.old exists. giving up..."
-    else
-        mv var/X11R6/lib var/X11R6/lib.old
-        echo "Trying to copy to usr/X11R6/lib/X11. This leads to incorrect "
-        echo "harddisk space computation in YaST. Good Luck..."
-        test -e usr/X11R6/lib/X11 || mkdir -p usr/X11R6/lib/X11
-        if [ -d usr/X11R6/lib/X11 -a ! -L usr/X11R6/lib/X11 ] ; then
-            ( cd var/X11R6/lib.old ; \
-              tar cfp - . | tar xfpC - ../../../usr/X11R6/lib/X11 )
-            echo done...
-        else
-            echo "usr/X11R6/lib/X11 is no directory. giving up..."
-        fi
-    fi
-fi
 for DIR in etc/rc.d usr/X11 ; do
     if test -d $DIR -a ! -L $DIR ; then
         echo -n "Found oldish directory /$DIR.  "
