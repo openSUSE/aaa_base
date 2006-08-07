@@ -39,14 +39,6 @@ CREATE_INFO_DIR="yes"
 ## Type:	yesno
 ## Default:	no
 #
-# If SORT_PASSWD_BY_UID is set to yes, SuSEconfig sorts your /etc/passwd
-# and /etc/group by uid/gid.
-#
-SORT_PASSWD_BY_UID="no"
-
-## Type:	yesno
-## Default:	no
-#
 # Do you want to have "." in root path?  This is not recommended, but
 # many people do prefer it (yes/no). The setting affects all system
 # users (with uid < 100)
