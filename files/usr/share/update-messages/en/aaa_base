@@ -1,7 +1,0 @@
-Hi,
-
-your system has (according to /etc/password) users with /tmp as home-
-directory. Since this implies a potential security risk, we recommend to
-change these home-directories to /var/lib/$USERNAME by editing the field
-between the fifth and sixth colon in the respective lines of /etc/passwd.
-

@@ -1,8 +1,0 @@
-Hallo,
-
-Ihr System enthält gemäss /etc/passwd noch Benutzer, für die /tmp als
-Home-Verzeichnis angegeben ist. Da dies ein potentielles Sicherheitsrisiko
-darstellt, empfehlen wir, diese Home-Verzeichnisse nach /var/lib/$USERNAME
-zu verlegen, indem Sie das Feld zwischen dem 5. und 6. Doppelpunkt in der
-entsprechenden Zeile von /etc/passwd anpassen.
-

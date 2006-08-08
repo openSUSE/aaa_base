@@ -311,13 +311,6 @@ if test ! -e etc/permissions.local ; then
 EOT
    chmod 644 etc/permissions.local
 fi
-HOME_TMP_FOUND=false
-grep ":/tmp:" etc/passwd > /dev/null 2>&1 && HOME_TMP_FOUND=true
-if test "$HOME_TMP_FOUND" = "true" ; then
-    touch /var/lib/update-messages/aaa_base
-else
-    rm -f /var/lib/update-messages/aaa_base
-fi
 #
 # Now do the ugly part.  Delete mess from former times...
 #

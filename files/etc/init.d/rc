@@ -61,7 +61,7 @@ prerc=/etc/init.d/rc${PREVLEVEL}.d
 # Up from runlevel S we have to check if the system was
 # cold booted into single user mode and call /etc/init.d/boot.
 #
-if test "$PREVLEVEL" = "S" ; then
+if test "$PREVLEVEL" = "S" -a "$RUNLEVEL" != "0" -a "$RUNLEVEL" != "6" ; then
     # Double check
     single="no"
     hvname="yes"
@@ -87,6 +87,13 @@ if test "$PREVLEVEL" = "S" ; then
 	sleep 3
 	echo "Sending all processes the KILL signal..."
 	killall5 -9
+
+	# If the root file system is writable init has
+	# already set up the runlevel in the utmp file
+	utmp=no
+	cp -p /var/run/utmp /var/lib/ 2> /dev/null
+	test $? -eq 0 && utmp=yes
+
 	cat /proc/mounts | while read des fs type rest; do
 	    case "$type" in
 		swap)	continue ;;
@@ -102,6 +109,13 @@ if test "$PREVLEVEL" = "S" ; then
 	done
 	umount -n -t proc /proc
 	/etc/init.d/boot
+
+	# Restore the utmp file if required
+	if test "$utmp" = "yes" -a -s /var/lib/utmp ; then
+	    mv /var/lib/utmp /var/run/utmp
+	fi
+	rm -f /var/lib/utmp
+	unset utmp
     else
 	for b in /etc/init.d/boot.d/S*boot.udev
 	do
@@ -303,7 +317,7 @@ else
 	# Ask the user if wanted
 	#
 	if test "$DO_CONFIRM" = "yes" ; then
-	    rc_confirm -t 5 "Start service $service"
+	    rc_confirm -t $CONFIRM_PROMPT_TIMEOUT "Start service $service"
 	    case "$?" in
 	    0) true	;;
 	    1) continue	;;

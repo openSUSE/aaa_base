@@ -272,6 +272,9 @@ case "$-" in
     	# emacs line editor
     	: ${HISTFILE=$HOME/.kshrc_history}
     	: ${VISUAL=emacs}
+	case $(set -o) in
+	*multiline*) set -o multiline
+	esac
     fi
     ;;
 esac

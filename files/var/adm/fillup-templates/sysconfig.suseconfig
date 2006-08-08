@@ -10,24 +10,6 @@
 #
 ENABLE_SUSECONFIG="yes"
 
-## Type:	string(root,"")
-## Default:	root
-#
-# SuSEconfig can mail reports (created by YaST or included in packages)
-# to you.  Here you can set the address.  If you don't want reports to
-# be sent, then simply set it to "".
-#
-MAIL_REPORTS_TO="root"
-
-## Type:	list(warn,all,off)
-## Default:	off
-#
-# There are two levels of mailing. If you set MAIL_LEVEL it to "warn"
-# you will only get the important mails. If you set it to "all", you will
-# also receive the logs.
-#
-MAIL_LEVEL="off"
-
 ## Type:	yesno
 ## Default:	yes
 #
