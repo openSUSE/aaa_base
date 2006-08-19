@@ -108,6 +108,8 @@ case "$1" in
 	  rc_exit 0
         fi
 
+        test -x /etc/X11/xdm/SuSEconfig.xdm && /etc/X11/xdm/SuSEconfig.xdm
+
 	echo -n "Starting service $DM"
 	# Don't start xdm if no Xserver is configured and xdm is not 
 	# configured for remote access 
@@ -149,6 +151,7 @@ case "$1" in
 	rc_status
 	;;
     reload|force-reload)
+        test -x /etc/X11/xdm/SuSEconfig.xdm && /etc/X11/xdm/SuSEconfig.xdm
 	echo -n "Reload service $DM"
 	killproc -p $PIDFILE -HUP  $DISPLAYMANAGER
 	rc_status -v
