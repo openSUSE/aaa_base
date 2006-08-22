@@ -87,13 +87,6 @@ if test "$PREVLEVEL" = "S" -a "$RUNLEVEL" != "0" -a "$RUNLEVEL" != "6" ; then
 	sleep 3
 	echo "Sending all processes the KILL signal..."
 	killall5 -9
-
-	# If the root file system is writable init has
-	# already set up the runlevel in the utmp file
-	utmp=no
-	cp -p /var/run/utmp /var/lib/ 2> /dev/null
-	test $? -eq 0 && utmp=yes
-
 	cat /proc/mounts | while read des fs type rest; do
 	    case "$type" in
 		swap)	continue ;;
@@ -109,13 +102,6 @@ if test "$PREVLEVEL" = "S" -a "$RUNLEVEL" != "0" -a "$RUNLEVEL" != "6" ; then
 	done
 	umount -n -t proc /proc
 	/etc/init.d/boot
-
-	# Restore the utmp file if required
-	if test "$utmp" = "yes" -a -s /var/lib/utmp ; then
-	    mv /var/lib/utmp /var/run/utmp
-	fi
-	rm -f /var/lib/utmp
-	unset utmp
     else
 	for b in /etc/init.d/boot.d/S*boot.udev
 	do

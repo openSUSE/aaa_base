@@ -48,6 +48,10 @@ case "$1" in
 	: > /var/run/utmp
 	chmod 664 /var/run/utmp
 	chown root:tty /var/run/utmp
+
+	# Re-read inittab for jobs and redo utmp records if required
+	test "$PREVLEVEL" = "S" && telinit q
+
 	# Restore a possibly dynamically modified /etc/resolv.conf
 	if ls /etc/resolv.conf.saved.by.* &>/dev/null ; then
 	    echo "Cleaning up using /sbin/modify_resolvconf:"
