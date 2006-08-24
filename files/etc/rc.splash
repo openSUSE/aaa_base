@@ -1,4 +1,5 @@
 # /etc/rc.splash
+# vim: syntax=sh
 #
 # Initialize bootsplash progressbar variables and
 # define the bootsplash boot script functions.

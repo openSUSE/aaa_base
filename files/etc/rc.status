@@ -1,4 +1,5 @@
 # /etc/rc.status
+# vim: syntax=sh
 # Definition of boot script return messages
 #
 #   The bootscripts should use the variables rc_done and rc_failed to

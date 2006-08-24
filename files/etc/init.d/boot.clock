@@ -21,6 +21,13 @@ rc_reset
 case "$1" in
     start|restart)
 	#
+	# mkinitrd will set this variable if the system time was older than
+	# the mkinitrd.rpm build time.
+	if test "$SYSTEM_TIME_INCORRECT" != "" ; then
+		echo -n "The system time was incorrect: '$SYSTEM_TIME_INCORRECT'"
+		rc_status -s
+		rc_exit
+	fi
 	# Set and adjust the hardware clock
 	#	
 	if test "$HOSTTYPE" = "s390" -o "$HOSTTYPE" = "s390x" ; then
