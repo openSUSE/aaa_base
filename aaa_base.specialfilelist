@@ -33,7 +33,6 @@
 %config /etc/init.d/routed
 %config /etc/init.d/serial
 %config /etc/init.d/single
-%config /etc/init.d/xdm
 %config /sbin/quick_halt
 %ghost /var/adm/fillup-templates/passwd.aaa_base
 %ghost /var/adm/fillup-templates/group.aaa_base

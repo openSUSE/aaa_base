@@ -89,7 +89,7 @@ fi
 #
 # Initialize runlevel links
 #
-%{fillup_and_insserv -py boot.proc boot.localfs boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single xdm nfs}
+%{fillup_and_insserv -py boot.proc boot.localfs boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single nfs}
 %{fillup_and_insserv -psy boot.crypto START_CRYPTO_FILESYSTEMS}
 %{insserv_force_if_yast etc/init.d/boot.loadmodules etc/init.d/boot.cleanup etc/init.d/boot.rootfsck}
 ## powerfail probably needs empty header ...
@@ -109,7 +109,6 @@ if [ -x bin/fillup -a -f etc/rc.config ] ; then
 fi
 %{remove_and_set -n security CONSOLE_SHUTDOWN}
 %{remove_and_set -n suseconfig CHECK_INITTAB}
-%{remove_and_set -n displaymanager KDM_SHUTDOWN}
 %{remove_and_set -n suseconfig HALT_SOUND}
 
 if ! [ -d etc/sysconfig ] ; then
@@ -119,20 +118,11 @@ fi
 if [ ! -f etc/sysconfig/language -a -f etc/rc.config.d/lang.rc.config ] ; then
   mv etc/rc.config.d/lang.rc.config etc/sysconfig/language
 fi
-for i in language backup boot displaymanager kernel \
+for i in language backup boot kernel \
 	suseconfig clock proxy windowmanager sysctl mail \
 	cron news shutdown ; do
 %{fillup_only -n $i}
 done
-# migrate KDM_SHUTDOWN value if set before
-if [ -n "$KDM_SHUTDOWN" -a "$KDM_SHUTDOWN" != "no" ] ; then
-    if [ "$KDM_SHUTDOWN" = "local" ] ; then
-	KDM_SHUTDOWN=all
-    fi
-    sed -e "s|^DISPLAYMANAGER_SHUTDOWN=.*|DISPLAYMANAGER_SHUTDOWN=\"$KDM_SHUTDOWN\"|" \
-	etc/sysconfig/displaymanager > etc/sysconfig/displaymanager.new \
-	&& mv etc/sysconfig/displaymanager.new etc/sysconfig/displaymanager
-fi
 # migrate HALT_SOUND value if set before
 if [ -n "$HALT_SOUND" -a "$HALT_SOUND" != "no" ] ; then
     sed -e "s|^HALT_SOUND=.*|HALT_SOUND=\"$HALT_SOUND\"|" \
