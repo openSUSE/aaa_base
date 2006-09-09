@@ -78,11 +78,11 @@ case "$-" in
     # Some useful functions
     #
     startx  () {
-	test -x /usr/X11R6/bin/startx || {
+	test -x /usr/bin/startx || {
 	    echo "No startx installed" 1>&2
 	    return 1;
 	}
-	/usr/X11R6/bin/startx ${1+"$@"} 2>&1 | tee $HOME/.X.err
+	/usr/bin/startx ${1+"$@"} 2>&1 | tee $HOME/.xsession-errors
     }
 
     remount () { /bin/mount -o remount,${1+"$@"} ; }
