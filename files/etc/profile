@@ -56,7 +56,9 @@ unset TERMCAP
 #
 # The user file-creation mask
 #
-umask 022
+# The global umask value is stored in /etc/login.defs and
+# will be set by pam_umask.so (see "man pam_umask").
+#umask 022
 
 #
 # Setup for gzip and (t)csh users
