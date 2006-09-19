@@ -200,10 +200,10 @@ if (! ${?CSHRCREAD} ) then
     setenv INFOPATH $INFODIR
 endif
 
-#
-# These settings are recommended for old motif applications
-#
 if (! ${?CSHRCREAD} ) then
+    #
+    # These settings are recommended for old motif applications
+    #
     if ( -r /usr/share/X11/XKeysymDB ) then
 	setenv XKEYSYMDB /usr/share/X11/XKeysymDB
     else
@@ -214,20 +214,11 @@ if (! ${?CSHRCREAD} ) then
     else
 	setenv XNLSPATH /usr/X11R6/lib/X11/nls
     endif
-endif
 
-if ( -s /etc/nntpserver ) then
-   setenv NNTPSERVER "`cat /etc/nntpserver`"
-else
-   setenv NNTPSERVER news
-endif
-
-if ( -s /etc/organization ) then
-   setenv ORGANIZATION "`cat /etc/organization`"
-endif
-
-if (! ${?CSHRCREAD} ) then
-   setenv COLORTERM 1
+    #
+    # Midnight Commander needs this to run in color mode
+    #
+    setenv COLORTERM 1
 endif
 
 #

@@ -238,25 +238,10 @@ if test -z "$PROFILEREAD" ; then
     else
 	export XNLSPATH=/usr/X11R6/lib/X11/nls
     fi
-fi
 
-if test -s /etc/nntpserver ; then
-    read NNTPSERVER < /etc/nntpserver
-    export NNTPSERVER
-else
-    NNTPSERVER=news
-    export NNTPSERVER
-fi
-
-if test -s /etc/organization ; then
-    read ORGANIZATION < /etc/organization
-    export ORGANIZATION
-fi
-
-#
-# Midnight Commander needs this to run in color mode
-#
-if test -z "$PROFILEREAD" ; then
+    #
+    # Midnight Commander needs this to run in color mode
+    #
     COLORTERM=1
     export COLORTERM
 fi

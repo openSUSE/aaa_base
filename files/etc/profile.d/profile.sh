@@ -8,13 +8,15 @@
 #     /etc/sysconfig/mail
 #     /etc/sysconfig/proxy
 #     /etc/sysconfig/console
+#     /etc/sysconfig/news
 #
 
 for sys in /etc/sysconfig/windowmanager	\
 	   /etc/sysconfig/suseconfig	\
 	   /etc/sysconfig/mail		\
 	   /etc/sysconfig/proxy		\
-	   /etc/sysconfig/console
+	   /etc/sysconfig/console	\
+	   /etc/sysconfig/news
 do
     test -s $sys || continue
     while read line ; do
@@ -73,6 +75,14 @@ do
 	CONSOLE_MAGIC=*)
 	    CONSOLE_MAGIC="${val}"
 	    ;;
+	ORGANIZATION=*)
+	    ORGANIZATION="${val}"
+	    export ORGANIZATION
+	    ;;
+	NNTPSERVER=*)
+	    NNTPSERVER="${val}"
+	    test -z "$NNTPSERVER" && NNTPSERVER=news
+	    export NNTPSERVER
 	esac
     done < $sys
 done

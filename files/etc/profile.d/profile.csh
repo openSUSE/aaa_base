@@ -8,6 +8,7 @@
 #     /etc/sysconfig/mail
 #     /etc/sysconfig/proxy
 #     /etc/sysconfig/console
+#     /etc/sysconfig/news
 #
 
 set noglob
@@ -16,7 +17,8 @@ foreach sys (/etc/sysconfig/windowmanager	\
 	     /etc/sysconfig/suseconfig		\
 	     /etc/sysconfig/mail		\
 	     /etc/sysconfig/proxy		\
-	     /etc/sysconfig/console)
+	     /etc/sysconfig/console		\
+	     /etc/sysconfig/news)
     if (! -s ${sys:q} ) continue
     set sysconf="${sysconf} ${sys}"
 end
@@ -72,6 +74,13 @@ foreach line ( "`grep -vh '^#' $sysconf`" )
 	breaksw
     case CONSOLE_MAGIC=*:
 	set console_magic=${val:q}
+	breaksw
+    case ORGANIZATION=*:
+	setenv ORGANIZATION ${val:q}
+	breaksw
+    case NNTPSERVER=*:
+	setenv NNTPSERVER ${val:q}
+	if ( ! ${?NNTPSERVER} ) setenv NNTPSERVER news
 	breaksw
     default:
 	breaksw
