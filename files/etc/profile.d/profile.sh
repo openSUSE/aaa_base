@@ -76,6 +76,7 @@ do
 	    CONSOLE_MAGIC="${val}"
 	    ;;
 	ORGANIZATION=*)
+	    test -n "$val" || continue
 	    ORGANIZATION="${val}"
 	    export ORGANIZATION
 	    ;;

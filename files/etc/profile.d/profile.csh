@@ -76,6 +76,7 @@ foreach line ( "`grep -vh '^#' $sysconf`" )
 	set console_magic=${val:q}
 	breaksw
     case ORGANIZATION=*:
+	if (! ${%val} ) continue
 	setenv ORGANIZATION ${val:q}
 	breaksw
     case NNTPSERVER=*:
