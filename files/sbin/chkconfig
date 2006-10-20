@@ -167,6 +167,7 @@ sub set_rc {
 }
 
 my $force;
+my $allservices;
 
 #
 # run insserv
@@ -503,6 +504,8 @@ usage:
 EOF
 }
 
+Getopt::Long::Configure('no_ignore_case');
+
 if (!GetOptions('list|l'   => \&addmode,
                 'terse|t'  => \&addmode,
                 'add|a'    => \&addmode,
@@ -513,6 +516,7 @@ if (!GetOptions('list|l'   => \&addmode,
                 'check|c'  => \&addmode,
                 'level=s'  => \$level,
                 'force|f'  => \$force,
+                'allservices|A'  => \$allservices,
                 'deps'     => \$printdeps
    )) {
   usage();
@@ -535,7 +539,16 @@ if (@ARGV) {
 }
 $mode = 't' if $mode eq '';
 
-initlinks_rc() if $mode eq 'e' || $mode eq 't' || $mode eq 's' || $mode eq 'c';
+initlinks_rc() if $mode eq 'e' || $mode eq 't' || $mode eq 's' || $mode eq 'c' || $mode eq 'l';
+
+if (!@ARGV && !$allservices) {
+  my $l;
+  my %ison;
+  for $l (0, 1, 2, 3, 4, 5, 6) {
+    $ison{$_} = 1 for keys %{$links{$l}};
+  }
+  @services = grep {!/^boot\./ || $ison{$_}} @services;
+}
 
 my %current = ();
 
@@ -673,18 +686,10 @@ if ($mode eq 'a' || $mode eq 'd') {
     }
   }
   $mode = 'l';
+  initlinks_rc();
 }
 if ($mode eq 'l') {
-  initlinks_rc();
   my $usecolor = -t STDOUT;
-  if (!@ARGV) {
-    my $l;
-    my %ison;
-    for $l (0, 1, 2, 3, 4, 5, 6) {
-      $ison{$_} = 1 for keys %{$links{$l}};
-    }
-    @services = grep {!/^boot\./ || $ison{$_}} @services;
-  }
   for $s (@services) {
     if (!$known_rc{$s}) {
       print STDERR "$s: unknown service\n" unless $known_all{$s};

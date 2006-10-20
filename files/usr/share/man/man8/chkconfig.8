@@ -1,11 +1,11 @@
 .\"
 .\" SuSE man page for chkconfig
-.\" Copyright (c) 2003 SuSE Linux AG, Nuernberg, Germany.
+.\" Copyright (c) 2003-2006 SuSE Linux AG, Nuernberg, Germany.
 .\" please send bugfixes or comments to http://www.suse.de/feedback.
 .\"
 .\" Author: Michael Schroeder <mls@suse.de>
 .\"
-.TH CHKCONFIG 8 "Jan 2003"
+.TH CHKCONFIG 8 "Oct 2006"
 .SH NAME
 chkconfig \- enable or disable system services
 
@@ -128,7 +128,16 @@ to enable a service and uses list mode to display the new
 setting afterwards.
 .SH DEL MODE
 Same as add mode, but disable the service.
-
+.SH OTHER OPTIONS
+When no service names are given on the command line, chkconfig
+defaults to all known services excluding those
+that are not enabled in runlevels 1 to 6 and start with 
+.RB ' boot. '.
+Use the
+.B --allservices
+or
+.B -A
+option if you want to see such services as well.
 .SH EXAMPLES
 .IP
 chkconfig
@@ -165,7 +174,7 @@ chkconfig finger xinetd
 .PP
 configure a xinetd service
 .IP
-chkconfig >~root/chkconfig.save
+chkconfig -A >~root/chkconfig.save
 .PP
 backup the current configuration
 .IP
