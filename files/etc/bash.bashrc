@@ -10,7 +10,7 @@
 #
 if test -z "$is" ; then
  if test -f /proc/mounts ; then
-  case "`/bin/ls -l /proc/$$/exe`" in
+  case "`ls --color=never -l /proc/$$/exe`" in
     */bash)	is=bash ;;
     */rbash)	is=bash ;;
     */ash)	is=ash  ;;
@@ -130,6 +130,9 @@ case "$-" in
 	    then
 		_t="\$(ppwd \l)"
 	    fi
+	    if test "${BASH##*/}" = "rbash" ; then
+		_t=""
+	    fi
 	fi
 	# With full path on prompt
 	PS1="${_t}${_u}:\w${_p} "
@@ -189,11 +192,11 @@ case "$-" in
 	test -s /etc/profile.d/alias.ash && . /etc/profile.d/alias.ash
     else
 	unalias ls 2>/dev/null
-	if test "$is" = "zsh" ; then
-	    alias ls='/bin/ls $=LS_OPTIONS'
-	else
-	    alias ls='/bin/ls $LS_OPTIONS'
-	fi
+        case "$is" in
+	bash) alias ls='ls $LS_OPTIONS'		;;
+	zsh)  alias ls='/bin/ls $=LS_OPTIONS'	;;
+	*)    alias ls='/bin/ls $LS_OPTIONS'	;;
+	esac
 	alias dir='ls -l'
 	alias ll='ls -l'
 	alias la='ls -la'

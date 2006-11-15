@@ -22,18 +22,21 @@ case "$1" in
   start)
     # Read all kernel messages generated until now and put them in one file.
     test -s /var/log/boot.msg && mv -f /var/log/boot.msg /var/log/boot.omsg
+    echo Creating /var/log/boot.msg
     if test -x /sbin/klogd ; then
-	echo Creating /var/log/boot.msg
 	/sbin/klogd -s -o -n -f /var/log/boot.msg
 	/bin/sync
 	test -s /var/log/boot.msg
 	rc_status -v1 -r
     elif test -x /bin/dmesg ; then
-	echo Creating /var/log/boot.msg
 	/bin/dmesg > /var/log/boot.msg
 	/bin/sync
 	test -s /var/log/boot.msg
 	rc_status -v1 -r
+    fi
+    if test -e /dev/shm/initrd.msg ; then
+	cat /dev/shm/initrd.msg >> /var/log/boot.msg
+	rm -f /dev/shm/initrd.msg
     fi
     if test -x /usr/sbin/klogconsole ; then
 	if test -x /sbin/showconsole ; then
