@@ -1,0 +1,7 @@
+## Path:		System/Yast2
+## Description:		Preferred package update stack if both installed
+## Type:		string(zlm,opensuse)
+## Default:             zlm
+# set to "opensuse" to use opensuse_updater as preferred update applet
+# set to "zlm" to use zen-updater as preferred update applet
+PREFERRED_SW_MANAGER_STACK="zlm"
