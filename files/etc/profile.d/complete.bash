@@ -26,7 +26,7 @@ complete -r _nullcommand &> /dev/null
 function _cd_ ()
 {
     local c=${COMP_WORDS[COMP_CWORD]}
-    local s g=0 x C
+    local s g=0 x o C
     local IFS='
 '
     shopt -q extglob && g=1
@@ -50,14 +50,20 @@ function _cd_ ()
     esac
 
     # Escape spaces and braces in path names with `\'
+    s="${COMP_WORDBREAKS// }"
+    s="${s//	}"
+    s="${s//[\{\}()\[\]]}"
+    s="${s} 	(){}[]"
+
+    declare -a C=()
+    declare -i o
+
     for x in ${COMPREPLY[@]} ; do
-	x=${x// /\\ }
-	x=${x//(/\\(}
-	x=${x//)/\\)}
-	x=${x//\{/\\\{}
-	x=${x//\}/\\\}}
-	x=${x//\[/\\\[}
-	x=${x//\]/\\\]}
+	o=${#s}
+	while test $((o--)) -gt 0 ; do
+	    c="${s:${o}:1}"
+	    x=${x//${c}/\\${c}}
+	done
 	C=(${C[@]} $x)
     done
     COMPREPLY=(${C[@]})
