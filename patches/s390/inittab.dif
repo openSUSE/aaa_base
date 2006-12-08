@@ -40,7 +40,7 @@
 -6:2345:respawn:/sbin/mingetty tty6
 -#
 -#S0:12345:respawn:/sbin/agetty -L 9600 ttyS0 vt102
--#cons:1235:respawn:/sbin/smart_agetty -L 38400 console
+-#cons:12345:respawn:/sbin/smart_agetty -L 38400 console
 -
 -#
 -#  Note: Do not use tty7 in runlevel 3, this virtual line
