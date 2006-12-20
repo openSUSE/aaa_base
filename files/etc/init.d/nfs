@@ -82,6 +82,14 @@ case "$1" in
 	;;
     stop)
 	echo -n "Remove Net File System (NFS)"
+	while read  where what type options rest  ; do
+	    case "$where" in
+		\#*|"") ;;
+		*)  if test "$type" = "nfs" ; then
+			nfs=yes
+		    fi ;;
+	    esac
+	done < /etc/mtab
 	if test "$nfs" = "yes" ; then
 	  #
 	  # Unmount in background because during long timeouts
