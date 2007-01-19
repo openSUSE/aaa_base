@@ -42,7 +42,6 @@ foreach lc (LANG LC_CTYPE LC_NUMERIC LC_TIME	\
     if  ( "$ROOT_USES_LANG" == "yes" ) then
 	if ( ${%val} == 0 ) then
 	    eval unsetenv $lc
-	    eval unset $lc
 	else
 	    eval setenv $lc $val
 	endif
@@ -53,16 +52,15 @@ foreach lc (LANG LC_CTYPE LC_NUMERIC LC_TIME	\
 	    setenv LANG POSIX
 	else
 	    eval unsetenv $lc
-	    eval unset $lc
 	endif
     else
 	if ( "$lc" == "LANG" ) then
 	    setenv LANG POSIX
 	else
 	    eval unsetenv $lc
-	    eval unset $lc
 	endif
     endif
+    eval unset $lc
 end
 
 #
@@ -74,8 +72,8 @@ if ( ${?LC_ALL} ) then
 	setenv LC_ALL $LC_ALL
     else
 	unsetenv LC_ALL
-	unset LC_ALL
     endif
+    unset LC_ALL
 endif
 
 unset ROOT_USES_LANG lc val
