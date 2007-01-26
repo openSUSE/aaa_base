@@ -11,14 +11,6 @@
 ENABLE_SUSECONFIG="yes"
 
 ## Type:	yesno
-## Default:	yes
-#
-# We have a small perl script to generate the usr/info/dir file. Do you
-# want this file to be generated? (yes/no)
-#
-CREATE_INFO_DIR="yes"
-
-## Type:	yesno
 ## Default:	no
 #
 # Do you want to have "." in root path?  This is not recommended, but

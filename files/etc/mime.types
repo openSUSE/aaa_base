@@ -10,7 +10,9 @@ application/andrew-inset ez
 application/chemtool cht
 application/dicom dcm
 application/docbook+xml docbook
+application/ecmascript es
 application/illustrator ai
+application/javascript js
 application/mac-binhex40
 application/mathematica nb
 application/msword doc
@@ -172,7 +174,6 @@ application/x-jar jar
 application/x-java class
 application/x-java-archive jar ear war
 application/x-java-jnlp-file jnlp
-application/x-javascript js
 application/x-jbuilder-project jpr jpx
 application/x-karbon karbon
 application/x-kchart chrt

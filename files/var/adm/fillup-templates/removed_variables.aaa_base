@@ -131,6 +131,9 @@ MAIL_REPORTS_TO=""
 # obsolete variable
 MAIL_LEVEL=""
 
+# obsolete variable
+CREATE_INFO_DIR=""
+
 ##
 ## Formatting the boot script messages:
 ##   The boot scripts should use the variables rc_done and rc_fail to

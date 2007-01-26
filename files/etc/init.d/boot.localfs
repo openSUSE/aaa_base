@@ -237,7 +237,7 @@ case "$1" in
 	    esac
 	done
 
-	while read major minor blocks name ; do
+	grep "loop" /proc/partitions | while read major minor blocks name ; do
 	    des=/dev/$name
 	    case "$name" in
 		""|\#*)    continue ;;
@@ -249,7 +249,7 @@ case "$1" in
 		           losetup $des &> /dev/null
 		           test $? -eq 0 && losetup -d $des
 	    esac
-	done < /proc/partitions
+	done
 
 	UMOUNT_FAILED=false
 	echo "Unmounting file systems"
