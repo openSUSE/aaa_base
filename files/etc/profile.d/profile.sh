@@ -106,7 +106,7 @@ unset PROXY_ENABLED
 
 if test -n "$DEFAULT_WM" -a -z "$WINDOWMANAGER" ; then
     SAVEPATH=$PATH
-    PATH=$PATH:/usr/X11R6/bin:/opt/gnome/bin:/usr/openwin/bin
+    PATH=$PATH:/usr/X11R6/bin:/usr/openwin/bin
     WINDOWMANAGER="`type -p ${DEFAULT_WM##*/}`"
     PATH=$SAVEPATH
     export WINDOWMANAGER

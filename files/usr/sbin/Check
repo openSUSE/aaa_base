@@ -28,12 +28,12 @@ do_gzip() {
 	return
 }
 
-DIRS="/usr/info /usr/share/info /opt/gnome/info /usr/X11R6/lib/X11/fonts/* /usr/share/fonts/*"
+DIRS="/usr/info /usr/share/info /usr/X11R6/lib/X11/fonts/* /usr/share/fonts/*"
 
 OLD_IFS="$IFS"
 IFS="$IFS:"
 
-for MANDIR in $MANPATH $manpath /usr/openwin/man /opt/gnome/man ; do
+for MANDIR in $MANPATH $manpath /usr/openwin/man ; do
     DIRS="$DIRS $MANDIR"
 done
 

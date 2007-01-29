@@ -1,21 +1,27 @@
 #!/bin/bash
 #
 # Copyright (c) 2001-2002 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c)      2006 SuSE LINUX Products GmbH, Germany.
 # All rights reserved.
 #
-# Author:  Werner Fink <werner@suse.de>, 2001
+# Author:  Werner Fink <werner@suse.de>, 2001-2006
+#          Chris Rivera <crivera@novell.com> 2006
 #
 # /etc/init.d/boot.crypto
 #
 ### BEGIN INIT INFO
 # Provides:          boot.crypto
-# Required-Start:    boot.rootfsck
-# Should-Start:      boot.md boot.lvm boot.evms $local_fs boot.klog
+# Required-Start:    boot.localfs boot.device-mapper
+# Should-Start:
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
 # Description:       Enable crypto file systems before leaving boot phase
 ### END INIT INFO
+
+# Determine the base and follow a runlevel link name.
+base=${0##*/}
+link=${base#*[SK][0-9][0-9]}
 
 . /etc/rc.status
 
@@ -24,6 +30,7 @@ set +e
 
 # Redirect to real device (e.g. in case of boot logging)
 : ${CRYPTOTAB:=/etc/cryptotab}
+: ${CRYPTTAB:=/etc/crypttab}
 : ${TIMEOUT:=120}
 if test -z "$REDIRECT" ; then
     if (echo -n > /dev/tty) 2>/dev/null ; then
@@ -32,8 +39,16 @@ if test -z "$REDIRECT" ; then
 	REDIRECT=/dev/console
     fi
 fi
-test -s $CRYPTOTAB || exit 0
-type -p losetup &> /dev/null || exit 0
+
+has_losetup=0
+has_dmcrypt=0
+if test -s $CRYPTOTAB && type -p losetup    &> /dev/null ; then
+    has_losetup=1
+fi
+if test -s $CRYPTTAB  && type -p cryptsetup &> /dev/null ; then
+    modprobe -q dm-crypt && has_dmcrypt=1 || true
+fi
+test $has_losetup -ne 0 -o $has_dmcrypt -ne 0 || exit 0
 
 splash=""
 redirect ()
@@ -87,198 +102,556 @@ unsetprompt ()
     return $ret
 }
 
+reverse ()
+{
+    local _line
+    while read -r _line ; do
+	case "$_line" in \#*|"") continue ;; esac
+	reverse
+	echo "$_line"
+	break
+    done
+}
+
+start_cryptotab ()
+{
+    local ret=0
+    local stat=0
+
+    echo "Activating crypto devices using $CRYPTOTAB ... "
+    while read loopdev physdev access filesys crypto mopt info rest ; do
+	case "$loopdev" in
+	    \#*|"") continue ;;
+	esac
+	#
+	# Does the user want to skip current entry?
+	#
+	doskip=0
+	#
+	# Does the mount point exit?
+	#
+	if ! test -d $access ; then
+	    ret=1
+	    echo "${extd}${access}: No such directory${norm}"
+	    continue
+	fi
+	#
+	# Seeking for crypto modules
+	#
+	case "$crypto" in
+	    twofish)	   modprobe loop_fish2 ;;
+	    twofishSL92)   modprobe loop_fish2 ;;
+	    twofish[0-9]*) modprobe cryptoloop && modprobe twofish ;;
+	esac
+
+	if test $? -ne 0; then
+	    ret=1
+	    continue
+	fi
+	while true; do
+	    #
+	    # Restore virgin state
+	    #
+	    losetup -d $loopdev &> /dev/null || true
+
+	    #
+	    # Setting up loop device
+	    #
+	    if test -n "$info" ; then
+		prmt="${extd}Please enter passphrase for \"$info\" ($physdev): ${norm}"
+	    else
+		prmt="${extd}Please enter passphrase for $physdev: ${norm}"
+	    fi
+	    setprompt
+	    losetup -t $TIMEOUT -e $crypto $loopdev $physdev < $REDIRECT > $REDIRECT 2>&1
+	    stat=$?
+	    unsetprompt
+
+	    #
+	    # New losetup has different exit status for empty passphrase (5) and
+	    # to short passphrase (6), in last case let losetup retry to ask.
+	    #
+	    case "$stat" in
+	    0)	true		;;
+	    5)  sleep 1
+		break		;;
+	    6)  sleep 1
+		continue	;;
+	    *)	ret=1
+		continue 2	;;
+	    esac
+
+	    #
+	    # Check if we've success
+	    #
+	    if mount -t $filesys -n -o ro $loopdev $access &> /dev/null ; then
+		umount -n $access &> /dev/null || true
+		break
+	    else
+		umount -n $access &> /dev/null || true
+		echo    "${warn}An error occured.  Maybe the wrong passphrase was"
+		echo    "entered or the file system on $physdev is corrupted.${norm}"
+		while true ; do
+		    echo    "${extd}Do you want to retry entering the passphrase or${norm}"
+		    echo -n "${extd}do you want to continue with a file system check?${norm}"
+		    read -p " ([${extd}yes${norm}]/${extd}no${norm}/${extd}check${norm}/) " prolo < $REDIRECT
+		    case "$prolo" in
+			[yY][eE][sS]|[yY]|"")
+			    continue 2 ;;
+			[nN][oO]|[nN])
+			    doskip=1
+			    break    2 ;;
+			[Cc][hH][eE][Cc][kK]|[Cc])
+			    break    2 ;;
+		    esac
+		done
+	    fi
+	    break
+	done
+	#
+	# Does the user want to skip this entry?
+	#
+	if test $doskip -gt 0 ; then
+	    losetup -d $loopdev &> /dev/null || true
+	    continue
+	fi
+	#
+	# Check for valid super blocks
+	#
+	case "$filesys" in
+	    ext[23])  tune2fs -l $loopdev    &> /dev/null ;;
+	    reiserfs) debugreiserfs $loopdev &> /dev/null ;;
+	    *)	      true ;;
+	esac
+	    
+	if test $? -gt 0 ; then
+	    ret=1
+	    losetup -d $loopdev &> /dev/null || true
+	    continue
+	fi
+	#
+	# Checking the structure on the loop device
+	#
+	fsck -a -t $filesys $loopdev
+	if test $? -gt 1; then
+	    echo "fsck of $loopdev failed.  Please repair manually."
+	    echo "${warn}Warning: do never try to repair if you have entered the wrong passphrase.${norm}"
+	    PS1="(repair filesystem) # "
+	    /sbin/sulogin $REDIRECT < $REDIRECT > $REDIRECT 2>&1
+	    sync
+	fi
+	#
+	# Mounting loop device to mount point WITHOUT entry in /etc/mtab
+	#
+	case "$mopt" in
+	    default|"") mopt=""	;;
+	esac
+	    
+	mount -t $filesys -n ${mopt:+-o $mopt} $loopdev $access
+	if test $? -gt 0 ; then
+	    ret=1
+	    losetup -d $loopdev &> /dev/null
+	else
+	    #
+	    # Generate entry in /etc/mtab (to enable umount to run losetup -d)
+	    #
+	    loopopt="loop=${loopdev},encryption=${crypto}"
+	    case "$mopt" in
+		default|"") mopt="${loopopt}"		;;
+		*)	    mopt="${loopopt},${mopt}"	;;
+	    esac
+	    mount -t $filesys -f -o $mopt $physdev $access
+	    test $? -gt 0 && ret=1
+	fi
+    done < $CRYPTOTAB
+    return $ret
+}
+
+start_crypttab ()
+{
+    local ret=0
+    echo "Activating crypto devices using $CRYPTTAB ... "
+    while read name device keyfile options info fs_type rest; do
+	case "$name" in
+	\#*|"") continue ;;
+	esac
+
+	# skip mapped entries
+	if test -b /dev/mapper/$name; then
+	    echo "Skipping mapped entry ${extd}$name${norm}."
+	    continue
+	fi
+
+	test "$keyfile" = "none" && keyfile=""
+	test "$options" = "none" && options=""
+	
+	# make sure the keyfile exists
+	if test -n "$keyfile" -a ! -e "$keyfile"; then
+	    echo "$keyfile does not exist, skipping"
+	    ret=1
+	    continue
+	fi
+
+	# parse the options field
+	skip=""
+	params=""
+	makeswap=""
+	maketmp=""
+	loopdev=""
+	while test -n "$options"; do
+	    arg=${options%%,*}
+	    options=${options##$arg}
+	    options=${options##,}
+	    param=${arg%%=*}
+	    value=${arg##$param=}
+
+	    case "$param" in
+	    cipher)
+		params="$params -c $value"
+		if test -z "$value" ; then
+		    echo $"$dst: no value for cipher option, skipping"
+		    skip="yes"
+		fi
+		;;
+	    size)
+		params="$params -s $value"
+		if test -z "$value" ; then
+		    echo $"$dst: no value for size option, skipping"
+		    skip="yes"
+		fi
+		;;
+	    hash)
+		params="$params -h $value"
+		if test -z "$value" ; then
+		    echo $"$dst: no value for hash option, skipping"
+		    skip="yes"
+		fi
+		;;
+	    verify) params="$params -y" ;;
+	    swap)   makeswap="yes" ;;
+	    tmp)    maketmp="yes" ;;
+	    loop)   loopdev="yes" ;;
+	    *)      echo "unknown crypttab option: '$param'" ;;
+	    esac
+	done
+
+	if test "$skip" = "yes" ; then
+	    ret=1
+	    continue
+	fi
+
+	# load our crypto modules
+	case "$params" in
+	    *aes*)	modprobe aes ;;
+	    *twofish*)	modprobe twofish ;;
+	    *)		true ;;
+	esac
+
+	if test $? -ne 0; then
+	    ret=1
+	    continue
+	fi
+
+	# if loop was given then device is an image
+	if test "$loopdev" = "yes"; then
+	    found_loop=0
+	    for i in `seq 0 7`; do
+		if ! test -b "/dev/loop$i"; then
+		    continue
+		fi
+        
+		/sbin/losetup "/dev/loop$i" $device &> /dev/null
+		if test $? -eq 0; then
+		    found_loop=1
+		    device="/dev/loop$i"
+		    break
+		fi
+	    done
+
+	    if test $found_loop -eq 0; then
+		echo "Failed to find open loop device"
+		ret=1
+		continue
+	    fi
+	fi
+
+	# map and mount the luks devices
+	if cryptsetup isLuks "$device" &> /dev/null; then
+	    if test -n "$info" ; then
+		prmt="${extd}Please enter passphrase for \"$info\" $device ($name): ${norm}"
+	    else
+		prmt="${extd}Please enter passphrase for $device ($name): ${norm}"
+	    fi
+
+	    setprompt
+	    /sbin/cryptsetup ${keyfile:+-d $keyfile} luksOpen "$device" "$name" < $REDIRECT &> $REDIRECT
+	    unsetprompt
+	else
+	    # this is used for things like swap or other temp mappings
+	    /sbin/cryptsetup $params ${keyfile:+-d $keyfile} create "$name" "$device" <&1
+	fi
+
+	if test $? -ne 0; then
+	    if test "$loopdev" = "yes"; then
+		/sbin/losetup -d $device
+	    fi
+	    ret=1
+	    continue
+	fi
+
+	# run mkfs if the tmp option was given
+	if test "$maketmp" = "yes"; then
+	    echo "Creating filesystem on /dev/mapper/$name..."
+	    case "$fs_type" in
+	    reiserfs) /sbin/mkfs -t reiserfs /dev/mapper/$name &> /dev/null ;;
+	    ext2)     /sbin/mkfs -t ext2     /dev/mapper/$name &> /dev/null ;;
+	    *)        /sbin/mkfs -t ext3     /dev/mapper/$name &> /dev/null ;;
+	    esac
+
+	    if test $? -ne 0; then
+		echo "Failed to create temporary file system."
+		/sbin/cryptsetup luksClose $name &> /dev/null 
+        
+		if test "$loopdev" = "yes"; then
+		    /sbin/losetup -d $device
+		fi
+		ret=1
+		continue
+	    fi
+	fi
+    
+	# check for super blocks
+	case "$fs_type" in
+	    ext[23])  tune2fs -l /dev/mapper/$name &> /dev/null ;;
+	    reiserfs) debugreiserfs /dev/mapper/$name &> /dev/null ;;
+	    *)	      true ;;
+	esac
+	
+	if test $? -ne 0; then
+	    echo "Failed to find valid super block"
+	    /sbin/cryptsetup luksClose $name &> /dev/null 
+	    if test "$loopdev" = "yes"; then
+		/sbin/losetup -d $device
+	    fi
+	    ret=1
+	    continue
+	fi
+
+	# run mkswap if necessary
+	if test -b "/dev/mapper/$name" -a "$makeswap" = "yes"; then
+	    mkswap "/dev/mapper/$name" &> /dev/null
+	    test $? -ne 0 && ret=1
+	else
+	    # mount the mapped device
+	    while true; do
+		mount /dev/mapper/$name &> /dev/null
+		if test $? -ne 0; then
+		    ret=1
+		    echo   "${warn}An error occured while mounting /dev/mapper/$name.${norm}"
+		    if test "$fs_type" = "ext3" -o "$fs_type" = "ext2" -o "$fs_type" = "reiserfs"; then 
+			echo    "${extd}Do you want to check the file system?${norm}"
+			read -p " ([${extd}check${norm}]/${extd}skip${norm}/) " prolo < $REDIRECT
+			case "$prolo" in
+			[Cc][hH][eE][Cc][kK]|[Cc]|"")
+			    fsck -a -t $fs_type /dev/mapper/$name
+			    test $? -eq 0 && continue
+			    echo "file system check failed" ;;
+			esac
+		    fi
+
+		    # unmap the device
+		    /sbin/cryptsetup luksClose $name &> /dev/null 
+		    if test "$loopdev" = "yes"; then
+			/sbin/losetup -d $device
+		    fi
+		fi
+
+		# set permissions for tmp dirs
+		if test "$maketmp" = "yes"; then
+		    while read pdev pmnt rest; do
+			case "$pdev" in
+			/dev/mapper/$name) chmod 1777 $pmnt
+			esac
+		    done < /proc/mounts
+		    unset pdev pmnt rest
+		fi
+
+		break
+	    done
+	fi
+    done < $CRYPTTAB
+    return $ret
+}
+
+stop_cryptotab ()
+{
+    local ret=0
+    echo "Turning off crypto devices using $CRYPTOTAB ... "
+    while read loopdev physdev access filesys crypto mopt rest ; do
+	case "$loopdev" in
+	    \#*|"") continue ;;
+	esac
+	#
+	# Umount loop device
+	#
+	umount $access
+	test $? -gt 0 && ret=1
+	#
+	# If /etc/mtab is linked to /proc/mounts
+	# we've to run losetup to detach loop device
+	#
+	if test -L /etc/mtab ; then
+	    losetup -d $loopdev
+	    test $? -gt 0 && ret=1
+	fi
+    done < <(reverse < $CRYPTOTAB)
+    return $ret
+}
+
+stop_crypttab ()
+{
+    ret=0
+    echo "Turning off crypto devices using $CRYPTTAB ... "
+    while read name device keyfile options info fs_type rest; do
+	case "$name" in
+	\#*|"") continue ;;
+	esac
+
+	# skip this entry if the device isn't mapped
+	if ! test -b "/dev/mapper/$name"; then
+	    continue
+	fi
+
+	# unmount device
+	case ",${options}," in
+	*,swap,*) ;;
+	*)
+	    umount "/dev/mapper/$name" &> /dev/null
+	    if test $? -gt 0 ; then
+		ret=1
+		continue
+	    fi
+	esac
+
+	# delete the loop device
+	case "$options" in
+	*loop*)
+	    while read line; do
+		case "$line" in
+		*\(${device}\)*) device=${line%%:*}
+		esac
+	    done < <(/sbin/losetup -a)
+	esac
+
+	if cryptsetup isLuks "$device" &> /dev/null; then
+	    /sbin/cryptsetup luksClose "/dev/mapper/$name" &> /dev/null
+	else
+	    /sbin/cryptsetup remove "/dev/mapper/$name" &> /dev/null
+	fi
+
+	case "$options" in
+	*loop*) /sbin/losetup -d $device
+	esac
+
+	test $? -gt 0 && ret=1
+    done < <(reverse < $CRYPTTAB)
+    return $ret
+}
+
+#
+# Cutomize_{start,stop}_hook are for interactive usage only
+#
+cutomize_start_hook ()
+{
+    local srv
+
+    test "$base" != "$link"             && return 0
+    test -s /etc/sysconfig/boot.crypto  || return 0
+    . /etc/sysconfig/boot.crypto
+
+    for srv in $TRY_RESTART_AT_START ; do
+	test -n "$srv" || break
+	test -x /etc/init.d/$srv || continue
+	/etc/init.d/$srv try-restart
+    done
+
+    for srv in $RESTART_AT_START ; do
+	test -n "$srv" || break
+	test -x /etc/init.d/$srv || continue
+	/etc/init.d/$srv restart
+    done
+
+    for srv in $RELOAD_AT_START ; do
+        test -n "$srv" || break
+        test -x /etc/init.d/$srv || continue
+        /etc/init.d/$srv reload
+    done
+}
+
+cutomize_stop_hook ()
+{
+    local srv
+
+    test "$base" != "$link"             && return 0
+    test -s /etc/sysconfig/boot.crypto  || return 0
+    . /etc/sysconfig/boot.crypto
+
+    for srv in $TRY_RESTART_AT_STOP ; do
+	test -n "$srv" || break
+	test -x /etc/init.d/$srv || continue
+	/etc/init.d/$srv try-restart
+    done
+
+    for srv in $RESTART_AT_STOP ; do
+	test -n "$srv" || break
+	test -x /etc/init.d/$srv || continue
+	/etc/init.d/$srv restart
+    done
+
+    for srv in $RELOAD_AT_STOP ; do
+	test -n "$srv" || break
+	test -x /etc/init.d/$srv || continue
+	/etc/init.d/$srv reload
+    done
+}
+
 rc_reset
-main_status=0
 case "$1" in
     start|b)
 	redirect
-	echo "Activating crypto devices using $CRYPTOTAB ... "
-	while read loopdev physdev access filesys crypto mopt info rest ; do
-	    case "$loopdev" in
-		\#*|"") continue ;;
-	    esac
-	    #
-	    # Each loop is a new try
-	    #
+	if test $has_losetup -ne 0; then
+	    start_cryptotab
 	    rc_status
-	    if test $? -gt 0 ; then
-		main_status=1
-	    fi
-	    rc_reset
-	    #
-	    # Does the user want to skip current entry?
-	    #
-	    doskip=0
-	    #
-	    # Does the mount point exit?
-	    #
-	    test -d $access
-	    rc_status
-	    if test $? -ne 0 ; then
-		echo "${extd}${access}: No such directory${norm}"
-		continue
-	    fi
-	    #
-	    # Seeking for crypto modules
-	    #
-	    case "$crypto" in
-		twofish)	modprobe loop_fish2 ;;
-		twofishSL92)	modprobe loop_fish2 ;;
-		twofish[0-9]*)	modprobe cryptoloop && modprobe twofish ;;
-	    esac
-	    rc_status
-	    test $? -ne 0 && continue
-	    #
-	    #
-	    #
-	    while true; do
-		#
-		# Restore virgin state
-		#
-		losetup -d $loopdev &> /dev/null || true
+	fi
 
-		#
-		# Setting up loop device
-		#
-		if test -n "$info" ; then
-		    prmt="${extd}Please enter passphrase for \"$info\" ($physdev): ${norm}"
-		else
-		    prmt="${extd}Please enter passphrase for $physdev: ${norm}"
-		fi
-		setprompt
-		losetup -t $TIMEOUT -e $crypto $loopdev $physdev < $REDIRECT > $REDIRECT 2>&1
-		unsetprompt
-		rc_status
-		test $? -ne 0 && continue 2
+	if test $has_dmcrypt -ne 0; then
+	    start_crypttab
+	    rc_status
+	fi
 
-		#
-		# Check if we've success
-		#
-		if   mount -t $filesys -n -o ro $loopdev $access &> /dev/null ; then
-		    umount -n $access &> /dev/null || true
-		    break
-		else
-		    umount -n $access &> /dev/null || true
-		    echo    "${warn}An error occured.  Maybe the wrong passphrase was"
-		    echo    "entered or the file system on $physdev is corrupted.${norm}"
-		    while true ; do
-			echo    "${extd}Do you want to retry entering the passphrase or${norm}"
-			echo -n "${extd}do you want to continue with a file system check?${norm}"
-			read -p " ([${extd}yes${norm}]/${extd}no${norm}/${extd}check${norm}/) " prolo < $REDIRECT
-			case "$prolo" in
-			    [yY][eE][sS]|[yY]|"")
-				continue 2 ;;
-			    [nN][oO]|[nN])
-				doskip=1
-				break    2 ;;
-			    [Cc][hH][eE][Cc][kK]|[Cc])
-				break    2 ;;
-			esac
-		    done
-		fi
-		break
-	    done
-	    #
-	    # Does the user have skipped this entry?
-	    #
-	    if test $doskip -gt 0 ; then
-		losetup -d $loopdev &> /dev/null || true
-		continue
-	    fi
-	    #
-	    # Check for valid super blocks
-	    #
-	    case "$filesys" in
-		ext2)	  tune2fs -l $loopdev	 &> /dev/null ;;
-		reiserfs) debugreiserfs $loopdev &> /dev/null ;;
-		*)	  true ;;
-	    esac
-	    rc_status
-	    if test $? -gt 0 ; then
-		losetup -d $loopdev &> /dev/null || true
-		continue
-	    fi
-	    #
-	    # Checking the structure on the loop device
-	    #
-	    fsck -a -t $filesys $loopdev
-	    FSCK_RETURN=$?
-	    test $FSCK_RETURN -lt 2
-	    rc_status
-	    if test $FSCK_RETURN -gt 1; then
-		echo "fsck of $loopdev failed.  Please repair manually."
-		echo "${warn}Warning: do never try to repair if you have entered the wrong passphrase.${norm}"
-		PS1="(repair filesystem) # "
-		/sbin/sulogin $REDIRECT < $REDIRECT > $REDIRECT 2>&1
-		sync
-	    fi
-	    #
-	    # Mounting loop device to mount point WITHOUT entry in /etc/mtab
-	    #
-	    case "$mopt" in
-		default|"") mopt=""	;;
-	    esac
-	    mount -t $filesys -n ${mopt:+-o $mopt} $loopdev $access
-	    rc_status
-	    if test $? -gt 0 ; then
-		losetup -d $loopdev &> /dev/null
-	    else
-		#
-		# Generate entry in /etc/mtab (to enable umount to run losetup -d)
-		#
-		loopopt="loop=${loopdev},encryption=${crypto}"
-		case "$mopt" in
-		    default|"") mopt="${loopopt}"		;;
-		    *)		mopt="${loopopt},${mopt}"	;;
-		esac
-		mount -t $filesys -f -o $mopt $physdev $access
-		rc_status
-	    fi
-	done < $CRYPTOTAB
-	test $main_status -gt 0 && rc_failed 1 || true
+	rc_status
+	test $? -gt 0 && rc_failed 1 || true
 	rc_status -v1
 	restore
+
+	cutomize_start_hook
 	;;
     stop)
-	reverse ()
-	{
-	    local _line
-	    while read -r _line ; do
-		case "$_line" in \#*|"") continue ;; esac
-		reverse
-		echo "$_line"
-		break
-	    done
-	}
-	echo "Turning off crypto devices using $CRYPTOTAB ... "
-	while read loopdev physdev access filesys crypto mopt rest ; do
-	    case "$loopdev" in
-		\#*|"") continue ;;
-	    esac
-	    #
-	    # Each loop is a new try
-	    #
+	if test $has_losetup -ne 0; then
+	    stop_cryptotab
 	    rc_status
-	    if test $? -gt 0 ; then
-		main_status=1
-	    fi
-	    rc_reset
-	    #
-	    # Umount loop device
-	    #
-	    umount $access
+	fi
+
+	if test $has_dmcrypt -ne 0; then
+	    stop_crypttab
 	    rc_status
-	    #
-	    # If /etc/mtab is linked to /proc/mounts
-	    # we've to run losetup to detach loop device
-	    #
-	    if test -L /etc/mtab ; then
-		losetup -d $loopdev
-		rc_status
-	    fi
-	done < <(reverse < $CRYPTOTAB)
-	test $main_status -gt 0 && rc_failed 1 || true
+	fi
+
+	rc_status
+	test $? -gt 0 && rc_failed 1 || true
 	rc_status -v1
+
+	cutomize_stop_hook
 	;;
     status)
 	rc_failed 4

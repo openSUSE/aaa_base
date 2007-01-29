@@ -1,0 +1,50 @@
+## Path:		System/Environment/Crypto
+## Description:		Fine control for interactive enabling and disabling Crypto Service
+## Config:		boot.crypto
+## Type:		string
+## Default:		""
+#
+# List of service boot scripts which should be executed with
+# `try-restart' after boot.crypto has been started interactivly.
+#
+TRY_RESTART_AT_START=""
+
+## Type:		string
+## Default:		""
+#
+# List of service boot scripts which should be executed with
+# `restart' after boot.crypto has been started interactivly.
+#
+RESTART_AT_START=""
+
+## Type:		string
+## Default:		""
+#
+# List of service boot scripts which should be executed with
+# `reload' after boot.crypto has been started interactivly.
+#
+RELOAD_AT_START=""
+
+## Type:		string
+## Default:		""
+#
+# List of service boot scripts which should be executed with
+# `try-restart' after boot.crypto has been stopped interactivly.
+#
+TRY_RESTART_AT_STOP=""
+
+## Type:		string
+## Default:		""
+#
+# List of service boot scripts which should be executed with
+# `restart' after boot.crypto has been stopped interactivly.
+#
+RESTART_AT_STOP=""
+
+## Type:		string
+## Default:		""
+#
+# List of service boot scripts which should be executed with
+# `reload' after boot.crypto has been stopped interactivly.
+#
+RELOAD_AT_STOP=""

@@ -90,15 +90,13 @@ set _xpath
 set _upath
 set _spath
 if ( "$uid" == "0" ) then
-if ( -d /opt/gnome/sbin ) set _spath=( /opt/gnome/sbin )
-if ( -d /opt/kde3/sbin  ) set _spath=( /opt/kde3/sbin $_spath )
+if ( -d /opt/kde3/sbin  ) set _spath=( /opt/kde3/sbin )
     set _spath=( /sbin /usr/sbin /usr/local/sbin $_spath )
 endif
 foreach _d (${HOME}/bin/${CPU} ${HOME}/bin \
 	    /var/lib/dosemu \
 	    /usr/games \
 	    /opt/bin \
-	    /opt/gnome/bin \
 	    /opt/kde3/bin \
 	    /opt/kde2/bin \
 	    /opt/kde/bin \

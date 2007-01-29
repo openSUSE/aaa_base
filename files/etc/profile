@@ -112,14 +112,12 @@ if test -z "$PROFILEREAD" ; then
 	done
     fi
     if test "$UID" = 0 ; then
-	test -d /opt/gnome/sbin && PATH=/opt/gnome/sbin:$PATH
 	test -d /opt/kde3/sbin  && PATH=/opt/kde3/sbin:$PATH
 	PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
     fi
     for dir in  /var/lib/dosemu \
 		/usr/games \
 		/opt/bin \
-		/opt/gnome/bin \
 		/opt/kde3/bin \
 		/opt/kde2/bin \
 		/opt/kde/bin \
