@@ -86,14 +86,21 @@ set mail=$MAIL
 # Make path more comfortable
 #
 unset noglob
-set _xpath
-set _upath
+set _hpath
 set _spath
+set _upath=( /usr/local/bin /usr/bin /bin )
+if ( "$HOME" != "/" ) then
+    foreach _d (${HOME}/bin/${CPU} ${HOME}/bin)
+	if ( -d $_d ) set _hpath=( $_hpath $_d )
+    end
+endif
 if ( "$uid" == "0" ) then
-if ( -d /opt/kde3/sbin  ) set _spath=( /opt/kde3/sbin )
+    if ( -d /opt/kde3/sbin ) set _spath=( /opt/kde3/sbin )
     set _spath=( /sbin /usr/sbin /usr/local/sbin $_spath )
 endif
-foreach _d (${HOME}/bin/${CPU} ${HOME}/bin \
+foreach _d (/usr/X11/bin \
+	    /usr/bin/X11 \
+	    /usr/X11R6/bin \
 	    /var/lib/dosemu \
 	    /usr/games \
 	    /opt/bin \
@@ -108,26 +115,17 @@ unset _d
 
 if ( ${?OPENWINHOME} ) then
     if ( -d $OPENWINHOME/bin ) then
-	set _xpath=( $OPENWINHOME/bin )
+	set _upath=( $_upath $OPENWINHOME/bin )
     endif
 endif
-if ( -d /usr/bin/X11 ) then
-    set _xpath=( /usr/bin/X11   $_xpath )
-else if ( -d /usr/X11R6/bin ) then
-    set _xpath=( /usr/X11R6/bin $_xpath )
-else if ( -d /usr/X11/bin ) then
-    set _xpath=( /usr/X11/bin   $_xpath )
-endif
-
-set _upath=( $_upath $_xpath )
-unset _xpath
 
 #
 # Doing only one rehash
 #
-set -f path=( $_spath $path $_upath )
+set -f path=( $_hpath $_spath $path $_upath )
 unset _upath
 unset _spath
+unset _hpath
 set noglob
 
 #

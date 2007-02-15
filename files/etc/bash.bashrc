@@ -216,7 +216,7 @@ case "$-" in
 	fi
 	alias rd=rmdir
 	alias md='mkdir -p'
-	if test "$is" = "bash" && ! type -p which &> /dev/null ; then
+	if test "$is" = "bash" && ! type -p which > /dev/null 2>&1 ; then
 	    #
 	    # Other shells use the which command in path (e.g. ash) or
 	    # their own builtin for the which command (e.g. ksh and zsh).

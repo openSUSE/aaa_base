@@ -20,45 +20,82 @@
 trap "echo" SIGINT SIGSEGV SIGQUIT SIGTERM
 set +e
 
-case "$0" in
-	*halt)
-		message="The system will be halted immediately."
-		case `/bin/uname -m` in
-                    i?86)
-                        command="halt"
-                        if test -e /proc/apm -o -e /proc/acpi -o -e /proc/sys/acpi ; then
-                            command="halt -p"
-                        else
-                            read cmdline < /proc/cmdline
-                            case "$cmdline" in
-                                *apm=smp-power-off*|*apm=power-off*)  command="halt -p" ;;
-                            esac
-                        fi
-                        ;;
-                    *)
-                        command="halt -p"
-                        ;;
-                esac
-		;;
-	*reboot)
-		message="Please stand by while rebooting the system..."
-		command="reboot"
-		;;
-	*)
-		echo "$0: call me as \"halt\" or \"reboot\" please!"
-		exit 1
-		;;
+case "${0##*/}" in
+    *halt)
+	message="The system will be halted immediately."
+	arch=$(/bin/uname -m)
+	opts=""
+	command="halt"
+	#
+	# Sysvinit's shutdown is knowning about the option -P and -H to set
+	# the environment variable INIT_HALT within init for the runlevel 0.
+	# If this variable is not set we use the system default.
+	#
+	if test -z "$INIT_HALT" ; then
+	    case "$HALT" in
+	    [Pp]*) INIT_HALT=POWEROFF ;;
+	    [Hh]*) INIT_HALT=HALT     ;;
+	    *)
+		INIT_HALT=POWEROFF
+		#
+		# Check this if valid for AMD/Intel based systems
+		#
+		case "$arch" in
+		i?86|x86_64)
+		    if test -e /proc/apm -o -e /proc/acpi -o -e /proc/sys/acpi ; then
+			INIT_HALT=POWEROFF
+		    else
+		    	INIT_HALT=HALT
+			read -t 2 cmdline < /proc/cmdline
+			case "$cmdline" in
+			*apm=smp-power-off*|*apm=power-off*) INIT_HALT=POWEROFF
+			esac
+		    fi
+		esac
+	    esac
+	fi
+	if test "$INIT_HALT" = "POWEROFF" ; then
+	    opts="${opts:+$opts }-p"
+	fi
+	#
+	# Sometimes wake-on-lan isn't wanted, if so stop network
+	#
+	if test "$HALT_NETWORK" = "yes" ; then
+	    opts="${opts:+$opts }-i"
+	fi
+	#
+	# Sometimes it is wanted to stop also the disks, but
+	# do not do this for software raids.
+	#
+	if test "$HALT_DISKS" = "yes" ; then
+	    while read line ; do
+		case "$line" in
+		md.*active) HALT_DISKS=no; break
+		esac
+	    done < /proc/mdstat
+	    test "$HALT_DISKS" = "no" || opts="${opts:+$opts }-h"
+	fi
+	;;
+    *reboot)
+	message="Please stand by while rebooting the system..."
+	opts="-i"
+	command="reboot"
+	;;
+    *)
+	echo "$0: call me as \"halt\" or \"reboot\" please!"
+	exit 1
+	;;
 esac
 
 #
 # first do local stuff
 #
 rc_reset
-test -e /etc/init.d/halt.local && {
+if test -e /etc/init.d/halt.local ; then
     echo Running /etc/init.d/halt.local
     /bin/sh /etc/init.d/halt.local
     rc_status -v1 -r
-}
+fi
 
 # Write to wtmp file before unmounting /var
 $command -w 
@@ -90,14 +127,14 @@ test -n "$REDIRECT" && exec 0<> $REDIRECT 1>&0 2>&0
 
 if test -d /etc/init.d/boot.d/ ; then
     for i in /etc/init.d/boot.d/K*; do
-        test -f $i || continue
-        if test -x "$i" ; then
-            # Active boot scripts, should have their own messages
-            $i stop
-        else
-            # Old boot scripts, may not have any message
-            echo Skipping $i, not executable
-        fi
+	test -f $i || continue
+	if test -x "$i" ; then
+	    # Active boot scripts, should have their own messages
+	    $i stop
+	else
+	    # Old boot scripts, may not have any message
+	    echo Skipping $i, not executable
+	fi
     done
 fi
 
@@ -154,4 +191,4 @@ test -n "$HALT_POWERDOWN_INSERT" && $HALT_POWERDOWN_INSERT
 test -n "$REDIRECT" -a -n "$CONSOLE" && setconsole $REDIRECT < $CONSOLE
 
 # Now talk to kernel
-exec $command -d -f
+exec $command -d -f $opts

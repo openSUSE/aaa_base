@@ -27,8 +27,10 @@ function _cd_ ()
 {
     local c=${COMP_WORDS[COMP_CWORD]}
     local s g=0 x o C
-    local IFS='
-'
+    local IFS=$'\n'
+    declare -a C=()
+    declare -i o
+
     shopt -q extglob && g=1
     test $g -eq 0 && shopt -s extglob
 
@@ -49,14 +51,32 @@ function _cd_ ()
     \~*)	COMPREPLY=($(compgen -u $s		-- "${c}"))	;;
     esac
 
+    if test "${1##*/}" = "cd" ; then
+	#
+	# Handle the CDPATH variable
+	#
+	x="$(bind -v)"
+	local dir=$([[ $x =~ mark-directories+([[:space:]])on ]] && echo on)
+	local sym=$([[ $x =~ mark-symlinked-directories+([[:space:]])on ]] && echo on)
+
+	for x in ${CDPATH//:/$'\n'}; do
+	    o=${#COMPREPLY[@]}
+	    for s in $(compgen -d $x/$c); do
+		if [[ (($sym == on && -h $s) || ($dir == on && ! -h $s)) && ! -d ${s#$x/} ]] ; then
+		    s="${s}/"
+		fi
+		COMPREPLY[o++]=${s#$x/}
+	    done
+	done
+    fi
+
+    #
     # Escape spaces and braces in path names with `\'
+    #
     s="${COMP_WORDBREAKS// }"
     s="${s//	}"
     s="${s//[\{\}()\[\]]}"
     s="${s} 	(){}[]"
-
-    declare -a C=()
-    declare -i o
 
     for x in ${COMPREPLY[@]} ; do
 	o=${#s}
@@ -68,10 +88,26 @@ function _cd_ ()
     done
     COMPREPLY=(${C[@]})
 
+    #
+    # Append a slash on the real result, avoid annoying double tab
+    #
+    if test "${1##*/}" != "mkdir" -a ${#COMPREPLY[@]} -eq 1 ; then
+	x=${COMPREPLY[0]}
+	o=$((${#x} - 1))
+	if test "$x" = "$c" -a "${x:${o}:1}" != "/"; then
+	    COMPREPLY[0]="${x}/"
+	fi
+    fi
+
     test $g -eq 0 && shopt -u extglob
 }
 
-complete ${_minusdd} -F _cd_		cd rmdir pushd chroot chrootx
+if shopt -q cdable_vars; then
+    complete ${_minusdd} -vF _cd_	cd
+else
+    complete ${_minusdd} -F  _cd_	cd
+fi
+complete ${_minusdd} -F _cd_		rmdir pushd chroot chrootx
 complete ${_minusdf} -F _cd_		mkdir
 
 # General expanding shell function
@@ -145,8 +181,7 @@ _exp_ ()
 	*) s="-S/"
     esac
 
-    IFS='
-'
+    IFS=$'\n'
     case "$c" in
     \$\(*\))	   eval COMPREPLY=\(${c}\) ;;
     \$\(*)		COMPREPLY=($(compgen -c -P '$(' -S ')'  -- ${c#??}))	;;

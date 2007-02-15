@@ -105,7 +105,7 @@ export MAIL HOST CPU HOSTNAME HOSTTYPE OSTYPE MACHTYPE
 # Make path more comfortable
 #
 if test -z "$PROFILEREAD" ; then
-    PATH=/usr/local/bin:/usr/bin:/usr/X11R6/bin:/bin
+    PATH=/usr/local/bin:/usr/bin:/bin
     if test "$HOME" != "/" ; then
 	for dir in $HOME/bin/$CPU $HOME/bin ; do
 	    test -d $dir && PATH=$dir:$PATH
@@ -115,7 +115,10 @@ if test -z "$PROFILEREAD" ; then
 	test -d /opt/kde3/sbin  && PATH=/opt/kde3/sbin:$PATH
 	PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
     fi
-    for dir in  /var/lib/dosemu \
+    for dir in  /usr/X11/bin \
+		/usr/bin/X11 \
+		/usr/X11R6/bin \
+		/var/lib/dosemu \
 		/usr/games \
 		/opt/bin \
 		/opt/kde3/bin \

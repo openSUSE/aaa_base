@@ -25,7 +25,7 @@ endif
 if ( -s $HOME/.i18n ) then
     eval `sed -n \
 	-e 's/^\(\(LANG\|LC_[A-Z_]\+\)\)=/set \1=/p' \
-	< $HOME/.i18n
+	< $HOME/.i18n`
 endif
 
 #
@@ -68,6 +68,7 @@ end
 # overwrites all LC but not the LANG variable
 #
 if ( ${?LC_ALL} ) then
+    set LC_ALL=$LC_ALL
     if ( ${%LC_ALL} > 0 && "$LC_ALL" != "$LANG" ) then
 	setenv LC_ALL $LC_ALL
     else
