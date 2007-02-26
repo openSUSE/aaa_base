@@ -282,6 +282,8 @@ _man_ ()
  	 -) COMPREPLY=($os)	;;
 	--) COMPREPLY=($ol) 	;;
  	-?) COMPREPLY=($c)	;;
+	\./*)
+	    COMPREPLY=($(compgen -f -d -X '\./.*'  -- $c)) ;;
     [0-9n]|[0-9n]p)
 	    COMPREPLY=($c)	;;
 	 *)

@@ -200,8 +200,10 @@ unset noglob
 #
 # Just in case the user excutes a command with ssh
 #
-if ( ${?SSH_CLIENT} && ! ${?CSHRCREAD} ) then
+if ( ${?SSH_CONNECTION} && ! ${?CSHRCREAD} ) then
+    set _SOURCED_FOR_SSH=true
     source /etc/csh.login >& /dev/null
+    unset _SOURCED_FOR_SSH
 endif
 
 #
