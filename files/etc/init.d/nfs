@@ -23,7 +23,7 @@
 
 nfs=no
 LDCONFIG_NEEDED=0
-while read  where what type options rest  ; do
+while read -r where what type options rest  ; do
     case "$where" in
 	\#*|"") ;;
 	*) case "$options" in
@@ -36,7 +36,7 @@ while read  where what type options rest  ; do
 				break
 				;;
 			*)
-				if grep -q "^$where" /etc/ld.so.conf; then
+				if grep -q -F "^$where" /etc/ld.so.conf; then
 				    LDCONFIG_NEEDED=1
 				    break;
 				fi
@@ -82,7 +82,7 @@ case "$1" in
 	;;
     stop)
 	echo -n "Remove Net File System (NFS)"
-	while read  where what type options rest  ; do
+	while read -r where what type options rest  ; do
 	    case "$where" in
 		\#*|"") ;;
 		*)  if test "$type" = "nfs" ; then
@@ -111,13 +111,13 @@ case "$1" in
     status)
 	echo -n "Checking for mounted nfs shares (from /etc/fstab):"
 	if test "$nfs" = "yes" ; then
-	  while read  where what type options rest  ; do
+	  while read -r where what type options rest  ; do
 	    case "$where" in
 	      \#*|"") ;;
 	      *) case "$options" in
 		   *noauto*) ;;
 		   *) if test "$type" = "nfs" -o "$type" = "nfs4" ; then
-			grep -q "$where $what nfs" /proc/mounts || rc_failed 3
+			grep -q -F "$where $what nfs" /proc/mounts || rc_failed 3
 		      fi ;;
 		 esac
 	    esac

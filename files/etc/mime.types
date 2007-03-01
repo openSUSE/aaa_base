@@ -11,6 +11,7 @@ application/chemtool cht
 application/dicom dcm
 application/docbook+xml docbook
 application/ecmascript es
+application/flash-video flv
 application/illustrator ai
 application/javascript js
 application/mac-binhex40

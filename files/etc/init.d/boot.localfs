@@ -183,6 +183,9 @@ case "$1" in
 	echo "Mounting local file systems..."
 	mount -fv -t proc proc /proc
 	mount -fv -t sysfs sysfs /sys
+	# remount to make sure options from fstab are honoured
+	mount -oremount /proc
+	mount -oremount /sys
 	while read a b ; do
 	    if test "$b" = "debugfs" ; then
 		mount -fv -t debugfs debugfs /sys/kernel/debug
