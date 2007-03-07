@@ -119,7 +119,7 @@ case "$-" in
 	#
 	# Other prompting for root
 	_t=""
-	if test "$UID" = 0 ; then
+	if test "$UID" -eq 0  ; then
 	    _u="\h"
 	    _p=" #"
 	else
@@ -140,6 +140,13 @@ case "$-" in
 #	PS1="${_t}${_u}:\$(spwd)${_p} "
 #	# With physical path even if reached over sym link
 #	PS1="${_t}${_u}:\$(pwd -P)${_p} "
+	# Colored root prompt (see bugzilla #144620)
+	if test "$UID" -eq 0 -a -t && type -p tput > /dev/null 2>&1 ; then
+	    _bred="$(tput bold 2> /dev/null; tput setaf 1 2> /dev/null)"
+	    _sgr0="$(tput sgr0 2> /dev/null)"
+	    PS1="\[$_bred\]$PS1\[$_sgr0\]"
+	    unset _bred _sgr0
+	fi
 	unset _u _p _t
 	;;
     ash)
