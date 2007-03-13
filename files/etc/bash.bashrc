@@ -290,22 +290,6 @@ case "$-" in
 esac
 
 #
-# The bash sources ~/.bashrc if exists, remember this here
-#
-if test "$is" = "bash" -a -z "$_HOMEBASHRC" ; then
-    readonly _HOMEBASHRC=true
-fi
-
-#
-# The ksh sources ~/.kshrc if exists, remember this here
-#
-if test "$is" = "ksh" -a -z "$_HOMEKSHRC" ; then
-    if test -n "$ENV" -a "$ENV" != "\$HOME/.kshrc" ; then
-	readonly _HOMEKSHRC=true
-    fi
-fi
-
-#
 # Just in case the user excutes a command with ssh
 #
 if test -n "$SSH_CONNECTION" -a -z "$PROFILEREAD" ; then

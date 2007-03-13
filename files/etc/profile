@@ -306,32 +306,37 @@ if test -z "$PROFILEREAD" ; then
 fi
 
 #
-# System BASH specials, maybe also good for other shells
-# Note that ksh always reads /etc/ksh.kshrc
+# Standard ssh command does not do an login, therefore
+# /etc/profile will be sourced by /etc/bash.bashrc
 #
-if test "$is" != ksh -a -z "$_SOURCED_FOR_SSH" ; then
-    test -r /etc/bash.bashrc && . /etc/bash.bashrc
-fi
-if test "$is" = "bash" -a -z "$_HOMEBASHRC" ; then
-    # loop detection
-    readonly _HOMEBASHRC=true
-    test -r $HOME/.bashrc && . $HOME/.bashrc
-fi
-
-#
-# KSH specials
-#
-if test "$is" = "ksh" -a -r /etc/ksh.kshrc ; then
-    if test ! /etc/bash.bashrc -ef /etc/ksh.kshrc ; then
+if test -z "$_SOURCED_FOR_SSH" ; then
+    #
+    # System BASH specials, maybe also good for other shells
+    # Note that ksh always reads /etc/ksh.kshrc
+    #
+    if test "$is" != ksh ; then
 	test -r /etc/bash.bashrc && . /etc/bash.bashrc
     fi
-    if test -n "$ENV" -a "$ENV" != "\$HOME/.kshrc" -a -z "$_HOMEKSHRC" ; then
+    if test "$is" = "bash" -a -z "$_HOMEBASHRC" ; then
 	# loop detection
-	readonly _HOMEKSHRC=true
-	test -r $HOME/.kshrc && . $HOME/.kshrc
+	readonly _HOMEBASHRC=true
+	test -r $HOME/.bashrc && . $HOME/.bashrc
+    fi
+
+    #
+    # KSH specials
+    #
+    if test "$is" = "ksh" -a -r /etc/ksh.kshrc ; then
+	if test ! /etc/bash.bashrc -ef /etc/ksh.kshrc ; then
+	    test -r /etc/bash.bashrc && . /etc/bash.bashrc
+	fi
+	if test -n "$ENV" -a "$ENV" != "\$HOME/.kshrc" -a -z "$_HOMEKSHRC" ; then
+	    # loop detection
+	    readonly _HOMEKSHRC=true
+	    test -r $HOME/.kshrc && . $HOME/.kshrc
+	fi
     fi
 fi
-
 #
 # End of /etc/profile
 #
