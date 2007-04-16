@@ -172,7 +172,6 @@ splashtrigger "rlchange B"
 # Check if we are able to use make for booting
 #
 test -s /etc/init.d/.depend.boot || RUN_PARALLEL="no"
-test -s /etc/init.d/Makefile	 || RUN_PARALLEL="no"
 test "$DO_CONFIRM"   = "yes"	 && RUN_PARALLEL="no"
 type -p startpar &> /dev/null    || RUN_PARALLEL="no"
 startpar -v &> /dev/null	 || RUN_PARALLEL="no"
