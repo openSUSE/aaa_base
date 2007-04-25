@@ -134,12 +134,18 @@ case "$-" in
 		_t=""
 	    fi
 	fi
-	# With full path on prompt
-	PS1="${_t}${_u}:\w${_p} "
-#	# With short path on prompt
-#	PS1="${_t}${_u}:\$(spwd)${_p} "
-#	# With physical path even if reached over sym link
-#	PS1="${_t}${_u}:\$(pwd -P)${_p} "
+	case "$(declare -p PS1 2> /dev/null)" in
+	*-x*PS1=*)
+	    ;;
+	*)
+	    # With full path on prompt
+	    PS1="${_t}${_u}:\w${_p} "
+#	    # With short path on prompt
+#	    PS1="${_t}${_u}:\$(spwd)${_p} "
+#	    # With physical path even if reached over sym link
+#	    PS1="${_t}${_u}:\$(pwd -P)${_p} "
+	    ;;
+	esac
 	# Colored root prompt (see bugzilla #144620)
 	if test "$UID" -eq 0 -a -t && type -p tput > /dev/null 2>&1 ; then
 	    _bred="$(tput bold 2> /dev/null; tput setaf 1 2> /dev/null)"
