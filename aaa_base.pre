@@ -153,9 +153,6 @@ fi
 for LOCALFILE in root/bin/cron.daily.local \
 		etc/init.d/boot.local \
 		etc/init.d/halt.local \
-		etc/permissions.local.rpmsave \
-		etc/permissions.local.rpmorig \
-		etc/permissions.local \
 		sbin/init.d/boot.local \
 		sbin/init.d/halt.local \
 		usr/sbin/usradd.local \
