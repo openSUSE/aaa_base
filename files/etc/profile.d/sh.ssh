@@ -20,7 +20,7 @@ test_lc()
     return 1
 }
 
-if test -n "$SSH_TTY" && test_lc ; then
+if test -n "$SSH_CONNECTION" && test_lc ; then
     SSH_SENDS_LOCALE=yes
     export SSH_SENDS_LOCALE
 fi

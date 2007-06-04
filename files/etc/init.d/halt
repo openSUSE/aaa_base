@@ -54,9 +54,14 @@ case "${0##*/}" in
 		esac
 	    esac
 	fi
-	if test "$INIT_HALT" = "POWEROFF" ; then
+	#
+	# The manual page of shutdown utilizes POWEROFF whereas in
+	# the code the word POWERDOWN shows up for the option -P.
+	#
+	case "$INIT_HALT" in
+	POWEROFF|POWERDOWN)
 	    opts="${opts:+$opts }-p"
-	fi
+	esac
 	#
 	# Sometimes wake-on-lan isn't wanted, if so stop network
 	#
