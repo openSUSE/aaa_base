@@ -227,12 +227,14 @@ case "$1" in
 	                   test $? -eq 0 && losetup -d $des ;;
 	    esac
 	    case "$fs"   in
+	        /sys)      continue ;;
 	        /proc)     continue ;;
 	        /dev/pts)  continue ;;
 	        /dev)      continue ;;
 	        /dev/shm)  continue ;;
 	    esac
 	    case "$type" in
+	        sysfs)     umount -t sysfs    $fs ;;
 	        proc)      umount -t proc     $fs ;;
 	        devpts)    umount -t devpts   $fs ;;
 	        tmpfs)     umount -t tmpfs    $fs ;;
@@ -256,7 +258,7 @@ case "$1" in
 
 	UMOUNT_FAILED=false
 	echo "Unmounting file systems"
-	umount -avt noproc,nonfs,nonfs4,nosmbfs,nocifs,notmpfs || {
+	umount -avt noproc,nonfs,nonfs4,nosmbfs,nocifs,notmpfs,nosysfs || {
 	    rc_status
 	    UMOUNT_FAILED=true
 	}
@@ -273,7 +275,7 @@ case "$1" in
 	        case "$des" in ""|\#*) continue ;; esac
 	        case "$type" in
 	            swap)     continue ;; # No umount on swap devices
-	            proc)     continue ;; # Required
+	            proc|sysfs)    continue ;; # Required
 	            nfs|nfs4)      continue ;; # Avoid hanging reboot/halt
 	            smbfs|cifs)    continue ;; # Avoid hanging reboot/halt
 	        esac

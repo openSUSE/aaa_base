@@ -11,8 +11,11 @@
 #
 
 . /etc/rc.status
+. /etc/sysconfig/bootsplash
 . /etc/sysconfig/clock
 . /etc/sysconfig/shutdown
+
+test -e /proc/splash || SPLASH="no"
 
 #
 # Avoid being interrupted by child or keyboard
@@ -146,7 +149,6 @@ fi
 # kill splash animation
 test "$SPLASH" = yes && /sbin/splash -q
 
-umount -anvt proc
 
 # on umsdos fs this would lead to an error message, so direct errors to
 # /dev/null
@@ -154,11 +156,10 @@ mount -no remount,ro / 2> /dev/null
 sync
 
 # show "the system is down" message
-if test "$SPLASH" = yes ; then
-    mount -nt proc proc /proc
-    /sbin/splash -q -p 65535 -t "isdown"
-    umount -n /proc
-fi
+test "$SPLASH" = yes && /sbin/splash -q -p 65535 -t "isdown"
+
+# we do not really unmount /proc any more since halt(8) might need it
+#umount -anvt proc
 
 # Make reboot noise and wait a few seconds to give harddisks the chance
 # to really flush their buffers before power goes down.
