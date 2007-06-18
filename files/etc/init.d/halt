@@ -11,10 +11,10 @@
 #
 
 . /etc/rc.status
-. /etc/sysconfig/bootsplash
 . /etc/sysconfig/clock
 . /etc/sysconfig/shutdown
 
+test -s /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
 test -e /proc/splash || SPLASH="no"
 
 #
