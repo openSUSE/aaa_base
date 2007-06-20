@@ -11,6 +11,7 @@
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
+# Short-Description: check and mount root filesystem
 # Description:       check and mount root filesystem
 ### END INIT INFO
 

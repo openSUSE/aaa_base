@@ -12,7 +12,7 @@
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
-# Description:       do cleanup
+# Short-Description: do cleanup
 ### END INIT INFO
 
 . /etc/rc.status

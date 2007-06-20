@@ -11,6 +11,7 @@
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
+# Short-Description: setup hostname and yp
 # Description:       setup hostname and yp
 ### END INIT INFO
 

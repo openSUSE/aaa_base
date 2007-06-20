@@ -11,7 +11,7 @@
 # Should-Start:      boot.localfs
 # Default-Start:     B S
 # Default-Stop:
-# Description:       Read or set hardware clock
+# Short-Description: Read or set hardware clock
 ### END INIT INFO
 
 . /etc/rc.status

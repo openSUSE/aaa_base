@@ -10,6 +10,7 @@
 # Should-Start:      $local_fs
 # Default-Start:     B
 # Default-Stop:
+# Short-Description: dump kernel messages
 # Description:       dump kernel messages
 ### END INIT INFO
 

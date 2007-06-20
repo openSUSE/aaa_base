@@ -10,6 +10,7 @@
 # Required-Start:
 # Default-Start:     B
 # Default-Stop:
+# Short-Description: sets the scheduling timeslices
 # Description:       sets the scheduling timeslices
 ### END INIT INFO
 

@@ -12,6 +12,7 @@
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
+# Short-Description: sets some procfs values
 # Description:       sets some procfs values
 ### END INIT INFO
 

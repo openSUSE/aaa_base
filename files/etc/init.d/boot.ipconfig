@@ -12,7 +12,7 @@
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
-# Description:       run ip configuration hooks
+# Short-Description: run ip configuration hooks
 ### END INIT INFO
 
 . /etc/rc.status

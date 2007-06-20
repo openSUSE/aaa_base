@@ -12,6 +12,7 @@
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
+# Short-Description: start rest of swap devices
 # Description:       start rest of swap devices
 ### END INIT INFO
 

@@ -12,6 +12,7 @@
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
+# Short-Description: run ldconfig if needed
 # Description:       run ldconfig if needed
 ### END INIT INFO
 

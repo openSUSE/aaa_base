@@ -12,6 +12,7 @@
 # Required-Stop:
 # Default-Start:     B
 # Default-Stop:
+# Short-Description: check and mount local filesystems except /
 # Description:       check and mount local filesystems except /
 ### END INIT INFO
 
