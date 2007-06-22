@@ -114,12 +114,43 @@ $command -w
 # Stop blogd before umounting /var
 test -x /sbin/blogd && killproc -QUIT /sbin/blogd
 
+# give processes in front a chance to quit
+fuser -sk -HUP /dev/tty1 /dev/tty2 /dev/tty3 /dev/tty4 /dev/tty5 /dev/tty6
+
 echo "Sending all processes the TERM signal..."
 killall5 -15
 echo -e "$rc_done_up"
 
-sleep 1
-test "$1" = "fast" -o -e /fastboot || sleep 4
+etime=$(date +%s)
+etime=$(($etime+6))
+parent_processes=" $$ "
+p=$$
+while test $p -ne 0; do
+  set $(< /proc/$p/stat)
+  parent_processes="$parent_processes$4 "
+  p=$4
+done
+pushd /proc
+while test $(date +%s) -lt $etime; do 
+   left_processes=
+   echo -n "Left processes: "
+    
+   for dir in [0-9]*; do 
+       case $parent_processes in
+          *" $dir "*) continue;; 
+       esac
+       test -n "$(cat $dir/cmdline 2>/dev/null)" || continue 
+       set $(< $dir/stat)
+       name=$2
+       left_processes="$left_processes $name/$dir"
+   done
+   if test -z "$left_processes"; then
+     break
+   fi
+   echo "Waiting for: $left_processes"
+   usleep 500000
+done
+popd
 
 echo "Sending all processes the KILL signal..."
 killall5 -9
@@ -164,14 +195,12 @@ test "$SPLASH" = yes && /sbin/splash -q -p 65535 -t "isdown"
 # Make reboot noise and wait a few seconds to give harddisks the chance
 # to really flush their buffers before power goes down.
 if test -n "$REDIRECT" ; then
-    sleep 1
     case "$HALT_SOUND" in
     "yes"|"quint")
 	echo -en "\033[10;393]\a\033[10;262]"
-	sleep 1
 	;;
     "octave")
-	for tone in 524 491 440 393 349 328 295 ; do
+	for tone in 524 491 440 393 349 328 295 262; do
 	    echo -en "\033[10;${tone}]\a"
 	    usleep 125000
 	done
@@ -186,7 +215,6 @@ if test -n "$REDIRECT" ; then
     esac
 else
     test "$HALT_SOUND" = "no" || echo -en "\a"
-    sleep 2
 fi
 echo $message
 test "$HALT_SOUND" = "no" || echo -en "\a"
@@ -197,4 +225,4 @@ test -n "$HALT_POWERDOWN_INSERT" && $HALT_POWERDOWN_INSERT
 test -n "$REDIRECT" -a -n "$CONSOLE" && setconsole $REDIRECT < $CONSOLE
 
 # Now talk to kernel
-exec $command -d -f $opts
+exec $command -d -f -n $opts
