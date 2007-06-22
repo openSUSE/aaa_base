@@ -142,6 +142,10 @@ while test $(date +%s) -lt $etime; do
        test -n "$(cat $dir/cmdline 2>/dev/null)" || continue 
        set $(< $dir/stat)
        name=$2
+       # special case some processes - match with * as they are named (splash)
+       case "$name" in
+         *splash*) continue;;
+       esac
        left_processes="$left_processes $name/$dir"
    done
    if test -z "$left_processes"; then
