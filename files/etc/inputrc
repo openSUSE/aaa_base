@@ -433,6 +433,17 @@ $if term=xterm
 "\eOw":		"7"
 "\eOx":		"8"
 "\eOy":		"9"
+# Shift+Alt+KP_<0...9> of konsole
+"\e0":		yank
+"\e1":		end-of-line
+"\e2":		down-history
+"\e3":		history-search-forward
+"\e4":		backward-word
+"\e5":		re-read-init-file
+"\e6":		forward-word
+"\e7":		beginning-of-line
+"\e8":		up-history
+"\e9":		history-search-backward
 $endif
 #
 $if term=kterm
@@ -557,16 +568,17 @@ $if term=mlterm
 "\e[21;8~":	""
 "\e[23;8~":	""
 "\e[24;8~":	""
-"\e1":		"1"
-"\e2":		"2"
-"\e3":		"3"
-"\e4":		"4"
-"\e5":		"5"
-"\e6":		"6"
-"\e7":		"7"
-"\e8":		"8"
-"\e9":		"9"
-"\e0":		"0"
+# Shift+Alt+KP_<0...9>
+"\e0":		yank
+"\e1":		end-of-line
+"\e2":		down-history
+"\e3":		history-search-forward
+"\e4":		backward-word
+"\e5":		re-read-init-file
+"\e6":		forward-word
+"\e7":		beginning-of-line
+"\e8":		up-history
+"\e9":		history-search-backward
 $endif
 #
 $if term=rxvt-unicode
@@ -649,26 +661,8 @@ $if term=rxvt-unicode
 "\e\e[7$":	beginning-of-line
 "\e\e[8$":	end-of-line
 "\e=":		accept-line
-"\000":		yank
-"\001":		end-of-line
-"\002":		down-history
-"\003":		history-search-forward
-"\004":		backward-word
-"\005":		re-read-init-file
-"\006":		forward-word
-"\007":		beginning-of-line
-"\010":		up-history
-"\011":		history-search-backward
-"\e0":		yank
-"\e1":		end-of-line
-"\e2":		down-history
-"\e3":		history-search-forward
-"\e4":		backward-word
-"\e5":		re-read-init-file
-"\e6":		forward-word
-"\e7":		beginning-of-line
-"\e8":		up-history
-"\e9":		history-search-backward
+# Shift+Ctrl+(Alt+)KP_<0...9> generates
+# \000 ... \011 (^@ upto TAB) we ignore these
 $endif
 #
 #  EMACS line editing
