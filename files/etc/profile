@@ -11,27 +11,13 @@
 if test -f /proc/mounts ; then
   case "`/bin/ls -l /proc/$$/exe`" in
     */bash)	is=bash ;;
+    */rbash)	is=bash ;;
     */ash)	is=ash  ;;
     */ksh)	is=ksh  ;;
     */pdksh)	is=ksh  ;;
     */zsh)	is=zsh  ;;
     */*)	is=sh   ;;
   esac
-  #
-  # `r' in $- occurs *after* system files are parsed
-  #
-  argv="`/bin/ps -p $$ --no-header -o args=`"
-  argv=${argv#-}
-  for a in $argv ; do
-    case "$a" in
-      r*sh)
-	readonly restricted=true ;;
-      -r*|-[!-]r*|-[!-][!-]r*)
-	readonly restricted=true ;;
-      --restricted)
-	readonly restricted=true ;;
-    esac
-  done
 else
   is=sh
 fi
@@ -129,7 +115,7 @@ if test -z "$PROFILEREAD" ; then
 	test -d /opt/kde3/sbin  && PATH=/opt/kde3/sbin:$PATH
 	PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
     fi
-    for dir in	/usr/X11/bin \
+    for dir in  /usr/X11/bin \
 		/usr/bin/X11 \
 		/usr/X11R6/bin \
 		/var/lib/dosemu \
@@ -331,9 +317,6 @@ if test -z "$_SOURCED_FOR_SSH" ; then
     if test "$is" != ksh ; then
 	test -r /etc/bash.bashrc && . /etc/bash.bashrc
     fi
-    if test -n "$restricted" ; then
-	readonly _HOMEBASHRC=true
-    fi
     if test "$is" = "bash" -a -z "$_HOMEBASHRC" ; then
 	# loop detection
 	readonly _HOMEBASHRC=true
@@ -344,9 +327,6 @@ if test -z "$_SOURCED_FOR_SSH" ; then
     # KSH specials
     #
     if test "$is" = "ksh" -a -r /etc/ksh.kshrc ; then
-	if test -n "$restricted" ; then
-	    readonly _HOMEKSHRC=true
-	fi
 	if test ! /etc/bash.bashrc -ef /etc/ksh.kshrc ; then
 	    test -r /etc/bash.bashrc && . /etc/bash.bashrc
 	fi
@@ -356,10 +336,6 @@ if test -z "$_SOURCED_FOR_SSH" ; then
 	    test -r $HOME/.kshrc && . $HOME/.kshrc
 	fi
     fi
-fi
-if test -n "$restricted" ; then
-    PATH=/usr/lib/restricted/bin
-    export PATH
 fi
 #
 # End of /etc/profile
