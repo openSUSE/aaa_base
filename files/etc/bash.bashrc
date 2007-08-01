@@ -10,15 +10,29 @@
 #
 if test -z "$is" ; then
  if test -f /proc/mounts ; then
-  case "`ls --color=never -l /proc/$$/exe`" in
+  case "`/bin/ls --color=never -l /proc/$$/exe`" in
     */bash)	is=bash ;;
-    */rbash)	is=bash ;;
     */ash)	is=ash  ;;
     */ksh)	is=ksh  ;;
     */pdksh)	is=ksh  ;;
     */zsh)	is=zsh  ;;
     */*)	is=sh   ;;
   esac
+  #
+  # `r' in $- occurs *after* system files are parsed
+  #
+  argv="`/bin/ps -p $$ --no-header -o args=`"
+  argv=${argv#-}
+  for a in $argv ; do
+    case "$a" in
+      r*sh) 
+	readonly restricted=true ;;
+      -r*|-[!-]r*|-[!-][!-]r*)
+	readonly restricted=true ;;
+      --restricted)
+	readonly restricted=true ;;
+    esac
+  done
  else
   is=sh
  fi
@@ -38,9 +52,9 @@ if test -x /usr/bin/dircolors ; then
     # set up the color-ls environment variables:
     #
     if test -f $HOME/.dir_colors ; then
-	eval "`dircolors -b $HOME/.dir_colors`"
+	eval "`/usr/bin/dircolors -b $HOME/.dir_colors`"
     elif test -f /etc/DIR_COLORS ; then
-	eval "`dircolors -b /etc/DIR_COLORS`"
+	eval "`/usr/bin/dircolors -b /etc/DIR_COLORS`"
     fi
 fi
 
@@ -77,15 +91,16 @@ case "$-" in
     #
     # Some useful functions
     #
-    startx  () {
-	test -x /usr/bin/startx || {
-	    echo "No startx installed" 1>&2
-	    return 1;
+    if test -z "$restricted" ; then
+	startx  () {
+	    test -x /usr/bin/startx || {
+		echo "No startx installed" 1>&2
+		return 1;
+	    }
+		/usr/bin/startx ${1+"$@"} 2>&1 | tee $HOME/.xsession-errors
 	}
-	/usr/bin/startx ${1+"$@"} 2>&1 | tee $HOME/.xsession-errors
-    }
-
-    remount () { /bin/mount -o remount,${1+"$@"} ; }
+	remount () { /bin/mount -o remount,${1+"$@"} ; }
+    fi
 
     #
     # Set prompt to something useful
@@ -130,7 +145,7 @@ case "$-" in
 	    then
 		_t="\$(ppwd \l)"
 	    fi
-	    if test "${BASH##*/}" = "rbash" ; then
+	    if test -n "$restricted" ; then
 		_t=""
 	    fi
 	fi
@@ -207,7 +222,7 @@ case "$-" in
 	unalias ls 2>/dev/null
         case "$is" in
 	bash) alias ls='ls $LS_OPTIONS'		;;
-	zsh)  alias ls='/bin/ls $=LS_OPTIONS'	;;
+	zsh)  alias ls='\ls $=LS_OPTIONS'	;;
 	*)    alias ls='/bin/ls $LS_OPTIONS'	;;
 	esac
 	alias dir='ls -l'
@@ -312,6 +327,10 @@ if test "$is" != "ash" ; then
     test -s /etc/bash.bashrc.local && . /etc/bash.bashrc.local
 fi
 
+if test -n "$restricted" -a -z "$PROFILEREAD" ; then
+    PATH=/usr/lib/restricted/bin
+    export PATH
+fi
 #
 # End of /etc/bash.bashrc
 #

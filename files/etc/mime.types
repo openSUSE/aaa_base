@@ -459,6 +459,8 @@ text/x-scheme scm
 text/x-setext etx
 text/x-speech
 text/x-sql sql
+text/x-suse-ymp ymp
+text/x-suse-ymu ymu
 text/x-tcl tcl tk
 text/x-tex tex ltx sty cls
 text/x-texinfo texi texinfo
