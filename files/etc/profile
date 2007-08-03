@@ -20,16 +20,14 @@ if test -f /proc/mounts ; then
   #
   # `r' in $- occurs *after* system files are parsed
   #
-  argv="`/bin/ps -p $$ --no-header -o args=`"
-  argv=${argv#-}
-  for a in $argv ; do
+  for a in $SHELL ; do
     case "$a" in
-      r*sh)
-	readonly restricted=true ;;
+      */r*sh)
+        readonly restricted=true ;;
       -r*|-[!-]r*|-[!-][!-]r*)
-	readonly restricted=true ;;
+        readonly restricted=true ;;
       --restricted)
-	readonly restricted=true ;;
+        readonly restricted=true ;;
     esac
   done
 else
