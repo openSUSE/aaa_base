@@ -38,8 +38,16 @@ MODULES_LOADED_ON_BOOT=""
 # contains a DSDT, this table replaces the DSDT of the bios. If the file
 # specified in ACPI_DSDT is not found or ACPI_DSDT is empty/not specified,
 # no DSDT will be appended to the initrd.
-# Example path /etc/acpi/dsdt
-#
+# Example path /etc/acpi/DSDT.aml
+# You can also override Secondary System Description Tables (SSDTs).
+# Add DSDT and SSDT files separated by spaces, e.g. "DSDT.aml SSDT1.aml"
+# The files must be named DSDT.aml and/or SSDT[1-9]*.aml.
+# For compatiblity reasons, if only one file is added it is assumed it is
+# the DSDT and will be used as such, in future the above naming scheme
+# will be enforce.
+# Be aware that overriding these tables can harm your system.
+# Only do this if you know what you are doing and file a bug on
+# bugzilla.kernel.org so that the root cause of the issue will get fixed.
 ACPI_DSDT=""
 
 ## Type:	integer(1000:50000)
