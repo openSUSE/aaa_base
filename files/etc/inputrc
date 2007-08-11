@@ -433,17 +433,6 @@ $if term=xterm
 "\eOw":		"7"
 "\eOx":		"8"
 "\eOy":		"9"
-# Shift+Alt+KP_<0...9> of konsole
-"\e0":		yank
-"\e1":		end-of-line
-"\e2":		down-history
-"\e3":		history-search-forward
-"\e4":		backward-word
-"\e5":		re-read-init-file
-"\e6":		forward-word
-"\e7":		beginning-of-line
-"\e8":		up-history
-"\e9":		history-search-backward
 $endif
 #
 $if term=kterm
@@ -568,17 +557,6 @@ $if term=mlterm
 "\e[21;8~":	""
 "\e[23;8~":	""
 "\e[24;8~":	""
-# Shift+Alt+KP_<0...9>
-"\e0":		yank
-"\e1":		end-of-line
-"\e2":		down-history
-"\e3":		history-search-forward
-"\e4":		backward-word
-"\e5":		re-read-init-file
-"\e6":		forward-word
-"\e7":		beginning-of-line
-"\e8":		up-history
-"\e9":		history-search-backward
 $endif
 #
 $if term=rxvt-unicode

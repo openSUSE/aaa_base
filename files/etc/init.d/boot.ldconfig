@@ -50,7 +50,8 @@ case "$1" in
 	        break
 	    }
 	done
-
+	# cache is corrupt?
+	/sbin/ldconfig -p > /dev/null 2>&1 || LDCONFIG_NEEDED=true
 	test -x /sbin/ldconfig -a "$LDCONFIG_NEEDED" = true && {
 	    echo -n "Setting up linker cache (/etc/ld.so.cache) using ldconfig"
 	    { /sbin/ldconfig -X 2>/dev/null || \
