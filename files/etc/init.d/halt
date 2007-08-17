@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 1996-2007 SuSE Linux Products GmbH, Nuernberg, Germany.
 # All rights reserved.
 #
 # Author: Florian La Roche, 1996
@@ -126,25 +126,27 @@ etime=$(($etime+6))
 parent_processes=" $$ "
 p=$$
 while test $p -ne 0; do
-  set $(< /proc/$p/stat)
+  set -- $(cat /proc/$p/stat 2>/dev/null)
   parent_processes="$parent_processes$4 "
   p=$4
 done
-pushd /proc
+cd /proc
+oIFS=$IFS
 while test $(date +%s) -lt $etime; do 
    left_processes=
-   echo -n "Left processes: "
-    
    for dir in [0-9]*; do 
        case $parent_processes in
           *" $dir "*) continue;; 
        esac
        test -n "$(cat $dir/cmdline 2>/dev/null)" || continue 
-       set $(< $dir/stat)
+       IFS='()'
+       set -- $(cat $dir/stat 2>/dev/null)
+       IFS=$oIFS
        name=$2
-       # special case some processes - match with * as they are named (splash)
+       test -n "$name" || continue
+       # special case some processes
        case "$name" in
-         *splash*) continue;;
+         splash) continue;;
        esac
        left_processes="$left_processes $name/$dir"
    done
@@ -154,7 +156,7 @@ while test $(date +%s) -lt $etime; do
    echo "Waiting for: $left_processes"
    usleep 500000
 done
-popd
+cd $OLDPWD
 
 echo "Sending all processes the KILL signal..."
 killall5 -9
