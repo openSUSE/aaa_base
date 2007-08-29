@@ -115,7 +115,14 @@ $command -w
 test -x /sbin/blogd && killproc -QUIT /sbin/blogd
 
 # give processes in front a chance to quit
-fuser -sk -HUP /dev/tty1 /dev/tty2 /dev/tty3 /dev/tty4 /dev/tty5 /dev/tty6
+hupon=""
+for tty in tty1 tty2 tty3 tty4 tty5 tty6; do
+    test -w /dev/$tty || continue
+    test -c /dev/$tty || continue
+    > /dev/$tty > /dev/null 2>&1 || continue
+    hupon="${hupon:+$hupon }/dev/$tty"
+done
+fuser -sk -HUP $hupon
 
 echo "Sending all processes the TERM signal..."
 killall5 -15
