@@ -16,10 +16,17 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+static inline int my_is_alnum_punct(char c)
+{
+  return isdigit(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') 
+    || c == '.' || c == ',' || c == '-' || c == '_';
+}
 
 int
 main (int argc, char *argv[])
@@ -92,10 +99,33 @@ main (int argc, char *argv[])
 	    buffer[i+8] == 'r' && buffer[i+9] == 's' &&
 	    buffer[i+10] == 'i' && buffer[i+11] == 'o' &&
 	    buffer[i+12] == 'n' && buffer[i+13] == ' ')
-	  {
-	    found = 1;
-	    break;
-	  }
+          {
+	    int j = i+14;
+	    int invalid_char = 0;
+	    int in_number_range = 1;
+
+	    /* check if we really found a version */
+	    for (j = j+1; buffer[j] != ' '; j++)
+	      {
+		char c = buffer[j];
+
+		if (c == '-')
+		  in_number_range = 0;
+
+		if ((in_number_range && !isdigit(c) && c != '.') ||
+		    (!in_number_range && !my_is_alnum_punct(c)))
+		  {
+		    invalid_char = 1;
+		    break;
+		  }
+	      }
+
+	    if (!invalid_char)
+	      {
+		found = 1;
+		break;
+	      }
+          }
 
       if (found)
 	{
@@ -106,7 +136,7 @@ main (int argc, char *argv[])
 	}
       else
 	{
-	  if (in < (sizeof (buffer) - MAX_VERSION_LENGTH))
+	  if (in < (ssize_t)(sizeof (buffer) - MAX_VERSION_LENGTH))
 	    break;
 	  memcpy (&buffer[0], &buffer[sizeof (buffer) - MAX_VERSION_LENGTH],
 		  MAX_VERSION_LENGTH);
@@ -154,3 +184,5 @@ main (int argc, char *argv[])
 
   return 0;
 }
+
+/* vim: set sw=4 ts=8 sts=4 noet: */

@@ -1,7 +1,7 @@
 set nonomatch
 if ( ! ${?XDG_DATA_DIRS} ) then
     setenv XDG_DATA_DIRS /usr/local/share/
-    foreach xdgdir ( /usr/share /etc/opt/*/share /opt/*/share )
+    foreach xdgdir ( /usr/share /etc/opt/*/share /opt/*/share /usr/share/gnome/help )
 	if ( -d $xdgdir ) then
 	    if ( -d $xdgdir/applications ) then
 		setenv XDG_DATA_DIRS "${XDG_DATA_DIRS}:${xdgdir}"
