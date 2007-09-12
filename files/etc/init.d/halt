@@ -122,48 +122,46 @@ for tty in tty1 tty2 tty3 tty4 tty5 tty6; do
     > /dev/$tty > /dev/null 2>&1 || continue
     hupon="${hupon:+$hupon }/dev/$tty"
 done
-fuser -sk -HUP $hupon
+test -z "$hupon" || fuser -sk -HUP $hupon
 
 echo "Sending all processes the TERM signal..."
 killall5 -15
 echo -e "$rc_done_up"
 
-etime=$(date +%s)
-etime=$(($etime+6))
-parent_processes=" $$ "
-p=$$
-while test $p -ne 0; do
-  set -- $(cat /proc/$p/stat 2>/dev/null)
-  parent_processes="$parent_processes$4 "
-  p=$4
+# Wait between last SIGTERM and the next SIGKILL
+declare -i etime=$SECONDS
+if test -f /fastboot ; then
+    etime=$((etime+2))
+else
+    etime=$((etime+6))
+fi
+
+ppid=$$
+parent_processes="$ppid"
+while test $ppid -ne 0; do
+    read -t 1 pid comm state ppid rest < /proc/$ppid/stat
+    parent_processes="${parent_processes:+$parent_processes }${ppid}"
 done
-cd /proc
-oIFS=$IFS
-while test $(date +%s) -lt $etime; do 
-   left_processes=
-   for dir in [0-9]*; do 
-       case $parent_processes in
-          *" $dir "*) continue;; 
-       esac
-       test -n "$(cat $dir/cmdline 2>/dev/null)" || continue 
-       IFS='()'
-       set -- $(cat $dir/stat 2>/dev/null)
-       IFS=$oIFS
-       name=$2
-       test -n "$name" || continue
-       # special case some processes
-       case "$name" in
-         splash) continue;;
-       esac
-       left_processes="$left_processes $name/$dir"
-   done
-   if test -z "$left_processes"; then
-     break
-   fi
-   echo "Waiting for: $left_processes"
-   usleep 500000
+for comm in /sbin/splash /sbin/blogd; do
+    ppid="$(/sbin/pidofproc $comm)" || continue
+    parent_processes="${parent_processes:+$parent_processes }${ppid}"
 done
-cd $OLDPWD
+unset comm state ppid rest
+
+while test $SECONDS -lt $etime; do
+    left_processes=""
+    for proc in /proc/[0-9]* ; do
+	pid=${proc##*/}
+	case "${parent_processes// /:}" in
+	*:${pid}:*) continue
+	esac
+	/bin/ls -L ${proc}/exe > /dev/null 2>&1 || continue
+	left_processes="${left_processes:+$left_processes }${pid}"
+    done
+    test -n "${left_processes}" || break
+    usleep 500000
+done
+unset pid proc etime parent_processes left_processes
 
 echo "Sending all processes the KILL signal..."
 killall5 -9
