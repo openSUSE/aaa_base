@@ -31,11 +31,13 @@ case "$1" in
 	    case "$a" in
 		*sysrq=yes*|*sysrq=1*) ENABLE_SYSRQ="yes" ;;
 	    esac
-	    if test "$ENABLE_SYSRQ" = yes ; then
-		echo "1" > /proc/sys/kernel/sysrq 
-	    else
-		echo "0" > /proc/sys/kernel/sysrq 
-	    fi
+	    case "$ENABLE_SYSRQ" in
+		yes) ENABLE_SYSRQ=1 ;;
+		no) ENABLE_SYSRQ=0 ;;
+		[0-9]*) ;;
+		*) ENABLE_SYSRQ=0 ;;
+	    esac
+	    echo "$ENABLE_SYSRQ" > /proc/sys/kernel/sysrq
 	fi
 	
 	#

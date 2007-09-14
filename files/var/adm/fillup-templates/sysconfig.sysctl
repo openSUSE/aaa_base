@@ -66,12 +66,24 @@ DMAPI_PROBE="no"
 
 ## Path:	System/Kernel
 ## Description:
-## Type:	yesno
-## Default:	no
+## Type:	string
 #
-# Enable Magic SysRq Keys?
-# If you say yes here, you will have some control over the system even
-# if it crashes (e.g. during kernel debugging).
+# Magic SysRq Keys enable some control over the system even if it
+# crashes (e.g. during kernel debugging).
+#
+# Possible values:
+# - no: disable sysrq completely
+# - yes: enable all functions of sysrq
+# - bitmask of allowed sysrq functions:
+#          2 - enable control of console logging level
+#          4 - enable control of keyboard (SAK, unraw)
+#          8 - enable debugging dumps of processes etc.
+#         16 - enable sync command
+#         32 - enable remount read-only
+#         64 - enable signalling of processes (term, kill, oom-kill)
+#        128 - allow reboot/poweroff
+#        256 - allow nicing of all RT tasks
+#
 # For further information see /usr/src/linux/Documentation/sysrq.txt
 #
-ENABLE_SYSRQ="no"
+ENABLE_SYSRQ="176"
