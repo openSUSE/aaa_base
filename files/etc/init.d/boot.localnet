@@ -32,6 +32,10 @@ case "$1" in
 	test -f /etc/HOSTNAME && {
 	    XHOSTNAME=`cat /etc/HOSTNAME`
 	}
+	test -n "$HOSTNAME" && {
+	    echo Using boot-specified hostname \'${HOSTNAME}\'
+	    XHOSTNAME="$HOSTNAME"
+	}
 	test -n "$XHOSTNAME" && {
 	    echo -n Setting up hostname \'${XHOSTNAME%%.*}\'
 	    hostname ${XHOSTNAME%%.*}
