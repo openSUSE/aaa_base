@@ -119,7 +119,7 @@ if [ ! -f etc/sysconfig/language -a -f etc/rc.config.d/lang.rc.config ] ; then
 fi
 for i in language backup boot kernel \
 	suseconfig clock proxy windowmanager sysctl \
-	cron news shutdown sw_management ; do
+	cron news shutdown ; do
 %{fillup_only -n $i}
 done
 # migrate HALT_SOUND value if set before
