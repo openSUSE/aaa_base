@@ -32,7 +32,7 @@ case "$1" in
 	test -f /etc/HOSTNAME && {
 	    XHOSTNAME=`cat /etc/HOSTNAME`
 	}
-	test -n "$HOSTNAME" && {
+	test -n "$HOSTNAME" -a "$HOSTNAME" != '(none)' && {
 	    echo Using boot-specified hostname \'${HOSTNAME}\'
 	    XHOSTNAME="$HOSTNAME"
 	}
