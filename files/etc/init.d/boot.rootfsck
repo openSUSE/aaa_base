@@ -163,7 +163,7 @@ case "$1" in
 	    mount -n -o remount,rw /
 	fi
         # start with a clean mtab and enter root fs entry
-	rm -f /etc/mtab*
+	rm -f /etc/mtab* /media/.hal-mtab*
 	mount -f /
 	;;
     stop)
