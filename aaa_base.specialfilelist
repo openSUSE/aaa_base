@@ -25,6 +25,7 @@
 %config /etc/profile.d/lang.csh
 %config /etc/profile.d/lang.sh
 %config /etc/profile.d/malloc-debug.sh
+%config /etc/profile.d/malloc-debug.csh
 %config /etc/profile.d/profile.csh
 %config /etc/profile.d/profile.sh
 %config /etc/profile.d/sh.ssh
