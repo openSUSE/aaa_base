@@ -84,9 +84,11 @@ test -z "$SYSLOGCONS" && SYSLOGCONS=10
 
 # Now shut down filesystems ... properly 
 umount -av
-# The swapoff is only needed if we have swap files or swap on top
-# of raid or LVM; otherwise you may comment it out.
-swapoff -a; umount -av
+cat /proc/swaps | while read des type rest ; do
+    test "$type" = "file" || continue
+    swapoff -v $des &> /dev/null
+done
+umount -av
 
 chvt $SYSLOGCONS &
 # Stop raid and LVM

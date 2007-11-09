@@ -76,20 +76,17 @@ case "$1" in
 	rc_status -v1 -r
 	;;
     stop)
-	echo "Turning off swap"
-	sync ; sync
-	rc_reset
-	swapoff -a &> /dev/null
-	rc_status -v1 -r
-	# Something forgotten?
+	echo "Turning off swap files"
 	if test -r /proc/swaps ; then
 	    # Use cat and a pipe because swapoff changes
 	    # /proc/swaps during direct read call
 	    cat /proc/swaps | \
-	    while read des rest ; do
-		test "$des" = "Filename" && continue
+	    while read des type rest ; do
+		# Release only swapfiles to allow a clean filesystem umount
+		test "$type" = "file" || continue
 		swapoff $des &> /dev/null
 	    done
+	    sync
 	fi
 	;;
     restart)

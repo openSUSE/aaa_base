@@ -96,8 +96,8 @@ if test "$PREVLEVEL" = "S" -a "$RUNLEVEL" != "0" -a "$RUNLEVEL" != "6" ; then
 	    esac
 	    umount -n -r $fs
 	done
-	cat /proc/swaps | while read des rest ; do
-	    test "$des" = "Filename" && continue
+	cat /proc/swaps | while read des type rest ; do
+	    test "$type" = "file" || continue
 	    swapoff $des &> /dev/null
 	done
 	umount -n -t proc /proc
