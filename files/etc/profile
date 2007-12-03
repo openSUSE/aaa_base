@@ -304,7 +304,7 @@ fi
 #
 # System wide configuration of bourne shells like ash
 #
-if test "$is" != "ksh" -a -z "$PROFILEREAD" ; then
+if test "$is" != "ksh" -a "$is" != "zsh" -a -z "$PROFILEREAD" ; then
     ENV=/etc/bash.bashrc
     export ENV
 fi
@@ -326,7 +326,7 @@ if test -z "$_SOURCED_FOR_SSH" ; then
     # System BASH specials, maybe also good for other shells
     # Note that ksh always reads /etc/ksh.kshrc
     #
-    if test "$is" != ksh ; then
+    if test "$is" != ksh -a "$is" != zsh ; then
 	test -r /etc/bash.bashrc && . /etc/bash.bashrc
     fi
     if test -n "$restricted" ; then
