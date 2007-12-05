@@ -11,7 +11,12 @@
 if test -z "$is" ; then
  if test -f /proc/mounts ; then
   case "`/bin/ls --color=never -l /proc/$$/exe`" in
-    */bash)	is=bash ;;
+    */bash)	is=bash
+	read -t 1 a r </proc/$$/cmdline
+	case "$a" in
+	sh|-sh|*/sh)
+		is=sh	;;
+	esac            ;;
     */ash)	is=ash  ;;
     */ksh)	is=ksh  ;;
     */pdksh)	is=ksh  ;;
@@ -31,6 +36,7 @@ if test -z "$is" ; then
         readonly restricted=true ;;
     esac
   done
+  unset a r
  else
   is=sh
  fi
@@ -204,8 +210,8 @@ case "$-" in
 	fi
 	;;
     *)
-#	PS1='\u:\w\$ '
-	PS1='\h:\w\$ '
+#	PS1='\u:\w> '
+	PS1='\h:\w> '
 	;;
     esac
     PS2='> '

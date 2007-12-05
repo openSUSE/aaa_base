@@ -10,7 +10,12 @@
 #
 if test -f /proc/mounts ; then
   case "`/bin/ls -l /proc/$$/exe`" in
-    */bash)	is=bash ;;
+    */bash)	is=bash
+	read -t 1 a r </proc/$$/cmdline
+	case "$a" in
+	sh|-sh|*/sh)
+		is=sh	;;
+	esac		;;
     */ash)	is=ash  ;;
     */ksh)	is=ksh  ;;
     */pdksh)	is=ksh  ;;
@@ -30,6 +35,7 @@ if test -f /proc/mounts ; then
         readonly restricted=true ;;
     esac
   done
+  unset a r
 else
   is=sh
 fi
