@@ -16,6 +16,14 @@
 
 . /etc/rc.status
 . /etc/sysconfig/clock
+
+#
+# Don't run into trouble due daylight-saving time
+#
+case "$HWCLOCK" in
+*-l*) HWCLOCK="$HWCLOCK --noadjfile"
+esac
+
 rc_reset
 
 case "$1" in
@@ -70,28 +78,26 @@ case "$1" in
 	else
 
 	    echo -n Setting up the hardware clock
-
+	    #
+	    # Read out to hardware clock and for UTC calculate adjtime
+	    # write back the system time later at reboot/shutdown time.
+	    #
 	    if test "$SYSTOHC" = "yes" ; then
 		#
-		# We write back the system time later at
-		# reboot/shutdown time.
+		# For UTC calculate adjtime
 		#
-		if test ! -f /etc/adjtime ; then
-		    echo "0.0 0 0"     >  /etc/adjtime
-		    echo "0"           >> /etc/adjtime
-		    case "$HWCLOCK" in
-		    *-u*) echo "UTC"   >> /etc/adjtime ;;
-		    *-l*) echo "LOCAL" >> /etc/adjtime ;;
-		    esac
-		fi
-		/sbin/hwclock --adjust $HWCLOCK
-		rc_status
-		/sbin/hwclock --hctosys $HWCLOCK
-		rc_status
-	    else
-		/sbin/hwclock --hctosys --noadjfile $HWCLOCK
+		case "$HWCLOCK" in
+		*-u*)
+		    if test ! -s /etc/adjtime ; then
+			echo "0.0 0 0.0" >  /etc/adjtime
+			echo "0"	 >> /etc/adjtime
+			echo "UTC"	 >> /etc/adjtime
+		    fi
+		    /sbin/hwclock --adjust $HWCLOCK
+		    rc_status
+		esac
 	    fi
-
+	    /sbin/hwclock --hctosys $HWCLOCK
 	    rc_status -v -r
 	fi
 	;;
@@ -100,7 +106,7 @@ case "$1" in
 	    if test "$SYSTOHC" = "yes" ; then
 		echo -n "Set Hardware Clock to the current System Time"
 		#
-		# Write back to hardware clock and calculate adjtime
+		# Write back to hardware clock and for UTC calculate adjtime
 		#
 		/sbin/hwclock --systohc $HWCLOCK
 		rc_status -v -r
