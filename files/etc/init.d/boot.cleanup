@@ -30,7 +30,7 @@ case "$1" in
 	rm -f /tmp/.X*lock /var/spool/uucp/LCK* /var/log/sa/sadc.LOCK /fsck_corrected_errors 2>/dev/null
 	if test -x /usr/bin/find -a -x /usr/bin/xargs ; then
 	    find /tmp/ssh-* -type s -name "*agent*" -maxdepth 1 -print0 2>/dev/null | xargs -0 -r rm -f
-	    find /var/run /var/lock -type f -print0 | xargs -0 -r rm -f 2>/dev/null
+	    find /var/run /var/lock -wholename /var/run/utmp -prune -o -type f -print0 | xargs -0 -r rm -f 2>/dev/null
 	else
 	    # fallback for find if we get /usr from nfs
 	    rec_rem() {
@@ -45,7 +45,7 @@ case "$1" in
 	    test -d /var/run && rec_rem /var/run
 	    test -d /var/lock && rec_rem /var/lock
 	fi
-	: > /var/run/utmp
+	touch /var/run/utmp
 	chmod 664 /var/run/utmp
 	chown root:tty /var/run/utmp
 
