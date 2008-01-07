@@ -28,14 +28,15 @@ case "$1" in
 	rm -f /var/lib/rpm/__db*
 	rm -rf /tmp/screens /tmp/uscreens /var/run/screens /var/run/uscreens 2>/dev/null
 	rm -f /tmp/.X*lock /var/spool/uucp/LCK* /var/log/sa/sadc.LOCK /fsck_corrected_errors 2>/dev/null
-	if test -x /usr/bin/find -a -x /usr/bin/xargs ; then
-	    find /tmp/ssh-* -type s -name "*agent*" -maxdepth 1 -print0 2>/dev/null | xargs -0 -r rm -f
-	    find /var/run /var/lock -wholename /var/run/utmp -prune -o -type f -print0 | xargs -0 -r rm -f 2>/dev/null
+	if test -x /usr/bin/find; then
+	    find /tmp/ssh-* -type s -name "*agent*" -maxdepth 1 -exec rm -f {} + 2>/dev/null
+	    find /var/run /var/lock -type f ! -wholename /var/run/utmp -exec rm -f {} + 2>/dev/null
 	else
 	    # fallback for find if we get /usr from nfs
 	    rec_rem() {
 		for f in "$1"/*
 		do
+		test "$f" = /var/run/utmp && continue
 		test -L "$f" && continue
 		test -f "$f" && rm -f "$f"
 		test -d "$f" && rec_rem "$f"
@@ -67,11 +68,11 @@ case "$1" in
 	  CLEAR_DIRS="$CLEAR_TMP_DIRS_AT_BOOTUP"
 	  CLEAR_TMP_DIRS_AT_BOOTUP=yes
 	fi
-	if test -x /usr/bin/find -a -x /usr/bin/xargs ; then
+	if test -x /usr/bin/find; then
 	    if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
 		echo -n "Cleaning temporary directories $CLEAR_DIRS"
 		for CURDIR in $CLEAR_DIRS ; do
-		    find $CURDIR -maxdepth 1 -printf '%P\0' | ( cd $CURDIR ; xargs -0 rm -rf -- )
+		    find $CURDIR -maxdepth 1 -exec rm -rf {} +
 		done
 		rc_status -v -r
 	    fi
@@ -89,12 +90,6 @@ case "$1" in
 		chown root:root $CURDIR && \
 		chmod 755 $CURDIR
 	done
-	
-	#
-	# there could be a new kernel version.  reinit /etc/psdevtab, to be sure.
-	#
-	rm -f /etc/psdevtab
-	test -x /bin/ps && /bin/ps > /dev/null 2> /dev/null
 	;;
     stop|restart)
         # skip / nothing to do
