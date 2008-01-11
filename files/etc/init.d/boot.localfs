@@ -23,10 +23,6 @@
 . /etc/sysconfig/kernel
 . /etc/sysconfig/sysctl
 
-if [ -f /etc/sysconfig/dump ]; then
-	. /etc/sysconfig/dump
-fi
-
 export FSCK_MAX_INST
 
 # helper shell function

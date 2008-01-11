@@ -156,10 +156,10 @@ test -r $FOO_CONFIG || { echo "$FOO_CONFIG not existing";
 # emulate them on LSB, RH and other systems
 
 # Default: Assume sysvinit binaries exist
-start_daemon() { return /sbin/start_daemon ${1+"$@"}; }
-killproc()     { return /sbin/killproc     ${1+"$@"}; }
-pidofproc()    { return /sbin/pidofproc    ${1+"$@"}; }
-checkproc()    { return /sbin/checkproc    ${1+"$@"}; }
+start_daemon() { /sbin/start_daemon ${1+"$@"}; }
+killproc()     { /sbin/killproc     ${1+"$@"}; }
+pidofproc()    { /sbin/pidofproc    ${1+"$@"}; }
+checkproc()    { /sbin/checkproc    ${1+"$@"}; }
 if test -e /etc/rc.status; then
     # SUSE rc script library
     . /etc/rc.status

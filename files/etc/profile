@@ -290,11 +290,12 @@ if test -z "$PROFILEREAD" ; then
 fi
 
 #
-# Source profile extensions for certain packages
+# Source profile extensions for certain packages, the super
+# may disable some of them by setting the sticky bit.
 #
 if test -d /etc/profile.d -a -z "$PROFILEREAD" ; then
     for s in /etc/profile.d/*.sh ; do
-	test -r $s && . $s
+	test -r $s -a -! -k $s && . $s
     done
     unset s
 fi

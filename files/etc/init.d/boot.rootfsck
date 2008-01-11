@@ -20,10 +20,6 @@
 # to get max number of parallel fsck processes
 . /etc/sysconfig/boot
 
-if [ -f /etc/sysconfig/dump ]; then
-	. /etc/sysconfig/dump
-fi
-
 export FSCK_MAX_INST
 
 rc_reset
@@ -33,15 +29,9 @@ case "$1" in
 	#
 	# fsck may need a huge amount of memory, so make sure, it is there.
 	#
-	# However, in the case of an active LKCD configuration, we need to
-	# recover the crash dump from the swap partition first, so we cannot
-	# yet activate them.
-	#
-	if [ "$DUMP_ACTIVE" != "1" ]; then
-		echo "Activating swap-devices in /etc/fstab..."
-		swapon -ae &> /dev/null
-		rc_status -v1 -r
-	fi
+	echo "Activating swap-devices in /etc/fstab..."
+	swapon -ae &> /dev/null
+	rc_status -v1 -r
 	
 	#
 	# If we use a serial console, don't use the fsck progress bar

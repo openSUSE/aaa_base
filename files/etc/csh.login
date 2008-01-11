@@ -241,14 +241,15 @@ if (! ${?CSHRCREAD} ) then
 endif
 
 #
-# Source profile extensions for certain packages
+# Source profile extensions for certain packages, the super
+# may disable some of them by setting the sticky bit.
 #
 if ( -d /etc/profile.d && ! ${?CSHRCREAD} ) then
     set _tmp=${?nonomatch}
     set nonomatch
     unset noglob
     foreach _s ( /etc/profile.d/*.csh )
-	if ( -r $_s ) then
+	if ( -r $_s && ! -k $_s ) then
 	    source $_s
 	endif
     end
