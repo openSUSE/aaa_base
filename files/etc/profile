@@ -295,7 +295,7 @@ fi
 #
 if test -d /etc/profile.d -a -z "$PROFILEREAD" ; then
     for s in /etc/profile.d/*.sh ; do
-	test -r $s -a -! -k $s && . $s
+	test -r $s -a ! -k $s && . $s
     done
     unset s
 fi
