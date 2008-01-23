@@ -255,3 +255,5 @@ if test ! -f etc/defaultdomain -a -f /etc/rc.config ; then
   echo -n $YP_DOMAINNAME > etc/defaultdomain
   chmod 644 etc/defaultdomain
 fi
+
+cp -a /root/.gnupg/secring.gpg /root/.gnupg/secring.gpg.aaa_save
