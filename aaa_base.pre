@@ -256,4 +256,4 @@ if test ! -f etc/defaultdomain -a -f /etc/rc.config ; then
   chmod 644 etc/defaultdomain
 fi
 
-cp -a /root/.gnupg/secring.gpg /root/.gnupg/secring.gpg.aaa_save
+test -e /root/.gnupg/secring.gpg && cp -a /root/.gnupg/secring.gpg /root/.gnupg/secring.gpg.aaa_save
