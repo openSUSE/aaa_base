@@ -8,6 +8,16 @@
 #
 onintr -
 set noglob
+#   
+# Call common progams from /bin or /usr/bin only
+#   
+alias path 'if ( -x /bin/\!^ ) /bin/\!*; if ( -x /usr/bin/\!^ ) /usr/bin/\!*'
+if ( -x /bin/id ) then
+    set id=/bin/id
+else if ( -x /usr/bin/id ) then
+    set id=/usr/bin/id
+endif
+
 #
 # Initialize terminal
 #
@@ -16,16 +26,15 @@ if ( -o /dev/$tty && ${?prompt} ) then
     if ( ! ${?TERM} )           setenv TERM linux
     if ( "$TERM" == "unknown" ) setenv TERM linux
     if ( ! ${?SSH_TTY} ) then
-	# No tset available on SlackWare
-	if ( -x "`which stty`" ) stty sane cr0 pass8 dec
-	if ( -x "`which tset`" ) tset -I -Q
+	path stty sane cr0 pass8 dec
+	path tset -I -Q
     endif
     # on iSeries virtual console, detect screen size and terminal
     if ( -d /proc/iSeries && ( $tty == "tty1" || "$tty" == "console")) then
 	setenv LINES   24
 	setenv COLUMNS 80
-	if ( -x "`which initviocons`" ) then
-	    eval `initviocons -q -e -c`
+	if ( -x /bin/initviocons ) then
+	    eval `/bin/initviocons -q -e -c`
 	endif
     endif
     settc km yes
@@ -48,16 +57,14 @@ endif
 #
 # In case if not known
 #
-if (! ${?UID}  ) set -r  UID="`id -ur`"
-if (! ${?EUID} ) set -r EUID="`id -u`"
-if (! ${?USER} ) set    USER="`id -un`"
-if (! ${?LOGNAME} ) set LOGNAME=$USER
-
+if (! ${?UID}  ) set -r  UID=${uid}
+if (! ${?EUID} ) set -r EUID="`${id} -u`"
+if (! ${?USER} ) set    USER="`${id} -un`"
 if (! ${?MAIL} ) setenv MAIL /var/spool/mail/$USER
-if (! ${?HOST} ) setenv HOST "`hostname -s`"
-if (! ${?CPU}  ) setenv CPU  "`uname -m`"
-if (! ${?HOSTNAME} ) setenv HOSTNAME "`hostname -f`"
-if (! ${?LOGNAME}  ) setenv LOGNAME  "$USER"
+if (! ${?HOST} ) setenv HOST "`/bin/hostname -s`"
+if (! ${?CPU}  ) setenv CPU  "`/bin/uname -m`"
+if (! ${?HOSTNAME} ) setenv HOSTNAME "`/bin/hostname -f`"
+if (! ${?LOGNAME} )  set    LOGNAME=$USER
 if ( ${CPU} =~ i?86 ) then
     setenv HOSTTYPE i386
 else
@@ -169,9 +176,9 @@ endif
 #
 if (! ${?CSHRCREAD} && -x /usr/bin/manpath ) then
     if ( ${?MANPATH} ) then
-	setenv MANPATH "${MANPATH}:`(unsetenv MANPATH; manpath -q)`"
+	setenv MANPATH "${MANPATH}:`(unsetenv MANPATH; /usr/bin/manpath -q)`"
     else
-	setenv MANPATH "`(unsetenv MANPATH; manpath -q)`"
+	setenv MANPATH "`(unsetenv MANPATH; /usr/bin/manpath -q)`"
     endif
 endif
 
@@ -233,7 +240,7 @@ if (! ${?CSHRCREAD} ) then
     if ( -r /etc/SuSEconfig/csh.login ) source /etc/SuSEconfig/csh.login
     if (! ${?SSH_SENDS_LOCALE} ) then
 	if ( -r /etc/sysconfig/language && -r /etc/profile.d/csh.utf8 ) then
-	    set _tmp=`sh -c '. /etc/sysconfig/language; echo $AUTO_DETECT_UTF8'`
+	    set _tmp=`/bin/sh -c '. /etc/sysconfig/language; echo $AUTO_DETECT_UTF8'`
 	    if ( ${_tmp} == "yes" ) source /etc/profile.d/csh.utf8
 	    unset _tmp
 	endif
@@ -297,9 +304,12 @@ if (${?TERM} && -o /dev/$tty && ${?prompt}) then
 	#
 	# shadow passwd
 	# Note: on normal console this will be done by /bin/login
-	if ( -x "`which faillog`" && -r /var/log/faillog ) faillog
+	if ( -r /var/log/faillog ) then
+	    if ( -x /bin/faillog ) /bin/faillog
+	    if ( -x /usr/bin/faillog ) /usr/bin/faillog
+	endif
 	# Last but not least
-	date
+	/bin/date
     endif
 endif
 

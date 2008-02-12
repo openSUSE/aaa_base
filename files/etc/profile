@@ -41,17 +41,29 @@ else
 fi
 
 #
+# Call common progams from /bin or /usr/bin only
+#
+path ()
+{
+    if test -x /usr/bin/$1 ; then
+	${1+"/usr/bin/$@"}
+    elif test -x   /bin/$1 ; then
+	${1+"/bin/$@"}
+    fi
+}
+
+#
 # Initialize terminal
 #
-tty=`tty 2> /dev/null`
+tty=`path tty 2> /dev/null`
 test $? -ne 0 && tty=""
 if test -O "$tty" -a -n "$PS1"; then
     test -z "${TERM}"		&& { TERM=linux; export TERM; }
     test "${TERM}" = "unknown"	&& { TERM=linux; export TERM; }
     # Do not change settings on local line if connected to remote
     if test -z "$SSH_TTY" ; then
-	test -x /bin/stty     && /bin/stty sane cr0 pass8 dec
-	test -x /usr/bin/tset && /usr/bin/tset -I -Q
+	path stty sane cr0 pass8 dec
+	path tset -I -Q
     fi
     # on iSeries virtual console, detect screen size and terminal
     if test -d /proc/iSeries -a \( "$tty" = "/dev/tty1" -o "$tty" = "/dev/console" \) ; then
@@ -91,9 +103,9 @@ fi
 #
 # ksh/ash sometimes do not know
 #
-test -z "$UID"  && readonly  UID=`id -ur 2> /dev/null`
-test -z "$EUID" && readonly EUID=`id -u  2> /dev/null`
-test -z "$USER" && USER=`id -un 2> /dev/null`
+test -z "$UID"  && readonly  UID=`path id -ur 2> /dev/null`
+test -z "$EUID" && readonly EUID=`path id -u  2> /dev/null`
+test -z "$USER" && USER=`path id -un 2> /dev/null`
 test -z "$MAIL" && MAIL=/var/spool/mail/$USER
 test -z "$HOST" && HOST=`/bin/hostname -s 2> /dev/null`
 test -z "$CPU"  &&  CPU=`/bin/uname -m 2> /dev/null`

@@ -43,10 +43,23 @@ if test -z "$is" ; then
 fi
 
 #
-# ksh/ash soemtimes do not know
+# Call common progams from /bin or /usr/bin only
 #
-test -z "$UID"  && readonly  UID=`id -ur 2> /dev/null`
-test -z "$EUID" && readonly EUID=`id -u  2> /dev/null`
+path ()
+{
+    if test -x /usr/bin/$1 ; then
+	${1+"/usr/bin/$@"}
+    elif test -x   /bin/$1 ; then
+	${1+"/bin/$@"}
+    fi
+}
+
+
+#
+# ksh/ash sometimes do not know
+#
+test -z "$UID"  && readonly  UID=`path id -ur 2> /dev/null`
+test -z "$EUID" && readonly EUID=`path id -u  2> /dev/null`
 
 #
 # Colored file listings
@@ -82,8 +95,8 @@ fi
 #
 if test "$EMACS" = "t" ; then
     LS_OPTIONS='-N --color=none -T 0';
-    tset -I -Q
-    stty cooked pass8 dec nl -echo
+    path tset -I -Q
+    path stty cooked pass8 dec nl -echo
 fi
 export LS_OPTIONS
 
@@ -101,7 +114,7 @@ case "$-" in
 		echo "No startx installed" 1>&2
 		return 1;
 	    }
-		/usr/bin/startx ${1+"$@"} 2>&1 | tee $HOME/.xsession-errors
+	    /usr/bin/startx ${1+"$@"} 2>&1 | tee $HOME/.xsession-errors
 	}
 	remount () { /bin/mount -o remount,${1+"$@"} ; }
     fi
@@ -166,9 +179,9 @@ case "$-" in
 	    ;;
 	esac
 	# Colored root prompt (see bugzilla #144620)
-	if test "$UID" -eq 0 -a -t && type -p tput > /dev/null 2>&1 ; then
-	    _bred="$(tput bold 2> /dev/null; tput setaf 1 2> /dev/null)"
-	    _sgr0="$(tput sgr0 2> /dev/null)"
+	if test "$UID" -eq 0 -a -t ; then
+	    _bred="$(path tput bold 2> /dev/null; path tput setaf 1 2> /dev/null)"
+	    _sgr0="$(path tput sgr0 2> /dev/null)"
 	    PS1="\[$_bred\]$PS1\[$_sgr0\]"
 	    unset _bred _sgr0
 	fi
@@ -248,7 +261,7 @@ case "$-" in
 	fi
 	alias rd=rmdir
 	alias md='mkdir -p'
-	if test "$is" = "bash" && ! type -p which > /dev/null 2>&1 ; then
+	if test "$is" = "bash" -a ! -x /bin/which -a ! -x /usr/bin/which ; then
 	    #
 	    # Other shells use the which command in path (e.g. ash) or
 	    # their own builtin for the which command (e.g. ksh and zsh).
@@ -265,7 +278,7 @@ case "$-" in
 	    alias which=_which
 	fi
 	alias rehash='hash -r'
-	alias you='[ `id -u` = 0 ] && /sbin/yast2 online_update || su - -c "/sbin/yast2 online_update"'
+	alias you='test "$EUID" = 0 && /sbin/yast2 online_update || su - -c "/sbin/yast2 online_update"'
 	if test "$is" != "ksh" ; then
 	    alias beep='echo -en "\007"' 
 	else

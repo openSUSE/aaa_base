@@ -15,6 +15,16 @@
 onintr -
 set noglob
 #
+# Call common progams from /bin or /usr/bin only
+#
+alias path 'if ( -x /bin/\!^ ) /bin/\!*; if ( -x /usr/bin/\!^ ) /usr/bin/\!*'
+if ( -x /bin/id ) then
+    set id=/bin/id
+else if ( -x /usr/bin/id ) then
+    set id=/usr/bin/id
+endif
+
+#
 # Default echo style
 #
 set echo_style=both
@@ -29,8 +39,18 @@ endif
 #
 # In case if not known
 #
-if (! ${?UID}  ) set -r  UID="`id -ur`"
-if (! ${?EUID} ) set -r EUID="`id -u`"
+if (! ${?UID}  ) set -r  UID=${uid}
+if (! ${?EUID} ) set -r EUID="`${id} -u`"
+
+#
+# Avoid trouble with Emacs shell mode
+#
+if ($?EMACS) then
+  setenv LS_OPTIONS '-N --color=none -T 0';
+  path tset -I -Q
+  path stty cooked pass8 dec nl -echo
+# if ($?tcsh) unset edit
+endif
 
 #
 # Only for interactive shells
@@ -78,9 +98,9 @@ unset ignoreeof
 #
 if ( -x /usr/bin/dircolors ) then
     if ( -r $HOME/.dir_colors ) then
-	eval `dircolors -c $HOME/.dir_colors`
+	eval `/usr/bin/dircolors -c $HOME/.dir_colors`
     else if ( -r /etc/DIR_COLORS ) then
-	eval `dircolors -c /etc/DIR_COLORS`
+	eval `/usr/bin/dircolors -c /etc/DIR_COLORS`
     endif
 endif
 setenv LS_OPTIONS '--color=tty'
@@ -107,13 +127,9 @@ alias ... 'cd ../..'
 alias cd.. 'cd ..'
 alias rd rmdir
 alias md 'mkdir -p'
-# Handle emacs
-if ($?EMACS) then
-  setenv LS_OPTIONS '-N --color=none -T 0';
-  tset -I -Q
-  stty cooked pass8 dec nl -echo
-# if ($?tcsh) unset edit
-endif
+alias startx 'if ( ! -x /usr/bin/startx ) echo "No startx installed";\
+	      if (   -x /usr/bin/startx ) /usr/bin/startx |& tee ${HOME}/.xsession-error'
+alias remount '/bin/mount -o remount,\!*'
 
 #
 # Prompting and Xterm title
@@ -166,7 +182,7 @@ if ($?tcsh) then
     # where this make sense, but not for the new tcsh 6.14.
     #
     if ($_rev < 6 || ($_rev == 6 && $_rel < 14)) then
-	switch ( `locale charmap` )
+	switch ( `/usr/bin/locale charmap` )
 	case UTF-8:
 	    set dspmbyte=utf8
             breaksw
