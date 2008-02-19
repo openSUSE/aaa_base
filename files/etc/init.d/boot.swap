@@ -44,11 +44,14 @@ get_swap_id() {
 check_swap_sig () {
     local part="$(get_swap_id)"
     local where what type rest p c
-    while read  where what type rest ; do
+    while read where what type rest ; do
 	test "$type" = "swap" || continue
 	c=continue
 	for p in $part ; do
-	    test "$p" = "$where" && c=true
+	    if test "$p" -ef "$where"; then
+		c=true
+		break
+	    fi
 	done
 	$c
 	case "$(dd if=$where bs=1 count=6 skip=4086 2>/dev/null)" in
