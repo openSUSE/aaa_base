@@ -10,7 +10,7 @@ application/andrew-inset ez
 application/chemtool cht
 application/dicom dcm
 application/docbook+xml docbook
-application/ecmascript es
+application/ecmascript ecma
 application/flash-video flv
 application/illustrator ai
 application/javascript js
@@ -304,7 +304,6 @@ audio/x-aiff aif aiff
 audio/x-aiff aiff aif aifc
 audio/x-aiffc
 audio/x-flac flac
-audio/x-it it
 audio/x-m4a m4a
 audio/x-mod mod ult uni XM m15 mtm 669
 audio/x-mp3-playlist
@@ -426,7 +425,6 @@ text/x-chdr h h++ hp
 text/x-comma-separated-values csv
 text/x-copying
 text/x-credits
-text/x-csharp cs
 text/x-csrc c
 text/x-dcl dcl
 text/x-dsl dsl
