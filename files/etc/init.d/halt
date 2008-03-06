@@ -109,7 +109,7 @@ fi
 $command -w 
 
 # Set a flag that we had success upto this point
-> /success
+test -w / && > /success
 
 # Stop blogd before umounting /var
 test -x /sbin/blogd && killproc -QUIT /sbin/blogd
