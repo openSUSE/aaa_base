@@ -23,24 +23,48 @@
 . /etc/sysconfig/kernel
 . /etc/sysconfig/sysctl
 
+test -z "$REDIRECT" && REDIRECT="$(showconsole 2>/dev/null)"
+export REDIRECT
 export FSCK_MAX_INST
 
+#
+# Special file systems (memory and network based)
+#
+typeset -r memfs=tmpfs,devpts,proc,usbfs,sysfs
+typeset -r netfs=nfs,nfs4,smbfs,cifs
+typeset -r  nofs=no${netfs//,/,no},no${memfs//,/,no}
+
+#
 # helper shell function
 #
-reverse ()
+if type -p tac > /dev/null 1>&2 ; then
+    reverse ()
+    {
+	tac
+    }
+else
+    reverse ()
+    {
+	local line
+	while read -r line ; do
+	    reverse
+	    echo "$line"
+	    break
+	done
+    }
+fi
+
+loopdel ()
 {
-    local _line
-    while read -r _line ; do
-	reverse
-	echo "$_line"
-	break
-    done
+   losetup ${1+"$@"} > /dev/null 2>&1
+   test $? -eq 0 || return 0
+   losetup -d ${1+"$@"}
 }
 
 list_missed ()
 {
-    local dev
-    local mount_opts="-t nonfs,nonfs4,noproc,nodevpts,nosmbfs,nocifs -O no_netdev"
+    local dev line
+    local mount_opts="-t $nofs -O no_netdev"
 
     mount -afnv $mount_opts 2> /dev/null | while read line ; do
 	dev="${line%% *}"
@@ -55,35 +79,33 @@ list_missed ()
 
 wait_for_udev ()
 {
-    missing=$(list_missed)
-    if [ -z "$missing" ]; then
-	return
-    fi
+    local dev
+    local -i timeout=30
+    local missing=$(list_missed)
+
+    test -n "$missing" || return 0
     echo -n "Waiting for $missing "
-    timeout=30
-    while [ "$timeout" -gt 0 ] ; do
+    while test $timeout -gt 0 ; do
 	sleep 1
 	echo -n "."
 	still_missing=""
 	for dev in $missing; do
-	    if [ ! -b $dev ] ; then
+	    if test ! -b $dev ; then
 		still_missing="$dev $still_missing"
 	    fi
 	done
-	if [ -z "$still_missing" ]; then
+	if test -z "$still_missing" ; then
 	    echo " ok"
-	    break;
+	    break
 	fi
 	missing="$still_missing"
-	if [ ! -d /dev/.udev/queue ] ; then
+	if test ! -d /dev/.udev/queue ; then
 	    echo " no more events"
-	    break;
+	    break
 	fi
-	timeout=$(( $timeout - 1 ))
+	let timeout--
     done
-    if [ "$timeout" -eq 0 ] ; then
-	echo " timeout!"
-    fi
+    test $timeout -eq 0 && echo " timeout! "
 }
 
 rc_reset
@@ -102,7 +124,7 @@ case "$1" in
 	# If we use a serial console, don't use the fsck progress bar
 	#
 	FSCK_PROGRESSBAR="-V"
-        [ -x /sbin/showconsole ] && [ "`/sbin/showconsole`" = "/dev/tty1" ] && FSCK_PROGRESSBAR="-C"
+	test "$REDIRECT" = "/dev/tty1" && FSCK_PROGRESSBAR="-C"
 	#
 	# do fsck and start sulogin, if it fails.
 	#
@@ -196,72 +218,60 @@ case "$1" in
 	optpts="-o mode=0620,gid=5"
 	mount -fv -t devpts $optpts devpts /dev/pts
 	rc_status
-	mount -av -t nonfs,nonfs4,noproc,nodevpts,nosmbfs,nocifs -O no_netdev
+	mount -av -t $nofs -O no_netdev
 	rc_status -v1 -r
 	;;
     stop)
 	mounts=/etc/fstab
 	test -r /proc/mounts && mounts=/proc/mounts
 
+	mtab=
+	test "$2" = "nomtab" && mtab=-n
+
 	# move to intermezzo package ?
 	# First umount intermezzo filesystems
-	if test -x /usr/sbin/umountizo ; then
+	if type -p umountizo > /dev/null 1>&2 ; then
 	    while read line ; do
 		case "$line" in
 		*[Ii][Nn][Tt][Ee][Rr][Mm][Ee][Zz][Zz][Oo]*)
-		    /usr/sbin/umountizo >/dev/null 2>&1
+		    umountizo >/dev/null 2>&1
 		esac
 	    done < $mounts
 	fi
 
 	reverse < $mounts | \
 	while read des fs type rest; do
-	    case "$des"  in
-	        ""|\#*)    continue ;;
-	        /dev/loop*)
-	                   umount $fs
-	                   losetup $des &> /dev/null
-	                   test $? -eq 0 && losetup -d $des ;;
+	    case "${des##*/}"  in
+		""|\#*)    continue ;;
+		loop*)	   umount $mtab $fs
+			   loopdel $des ;;
 	    esac
 	    case "$fs"   in
-	        /sys)      continue ;;
-	        /proc)     continue ;;
-	        /dev/pts)  continue ;;
-	        /dev)      continue ;;
-	        /dev/shm)  continue ;;
+		/sys*)     continue ;;
+		/proc*)    continue ;;
+		/dev*)     continue ;;
 	    esac
-	    case "$type" in
-	        sysfs)     umount -t sysfs    $fs ;;
-	        proc)      umount -t proc     $fs ;;
-	        devpts)    umount -t devpts   $fs ;;
-	        tmpfs)     umount -t tmpfs    $fs ;;
-	        usbfs)     umount -t usbfs    $fs ;;
+	    case ",$memfs," in
+		*,$type,*) umount $mtab -t $type $fs ;;
 	    esac
 	done
 
 	grep "loop" /proc/partitions | while read major minor blocks name ; do
-	    des=/dev/$name
 	    case "$name" in
-		""|\#*)    continue ;;
-		loop*)
-		           des=/dev/loop/${name#loop}
-		           losetup $des &> /dev/null
-		           test $? -eq 0 && losetup -d $des
-			   des=/dev/$name
-		           losetup $des &> /dev/null
-		           test $? -eq 0 && losetup -d $des
+		loop*)	   loopdel /dev/loop/${name#loop}
+			   loopdel /dev/$name ;;
 	    esac
 	done
 
 	UMOUNT_FAILED=false
 	echo "Unmounting file systems"
-	umount -avt noproc,nonfs,nonfs4,nosmbfs,nocifs,notmpfs,nosysfs || {
+	umount -av $mtab -t $nofs -O no_netdev || {
 	    rc_status
 	    UMOUNT_FAILED=true
 	}
 	rc_status -v1 -r
 
-	if test "$UMOUNT_FAILED" = true ; then
+	if test "$UMOUNT_FAILED" = true -a -z "$mtab" ; then
 	    echo "Oops: umount failed :-(  --  trying to remount readonly..."
 	    mounts=/etc/fstab
 	    test -r /proc/mounts && mounts=/proc/mounts
@@ -269,18 +279,21 @@ case "$1" in
 	    # /proc/mounts during direct read call
 	    cat $mounts | \
 	    while read des fs type rest; do
-	        case "$des" in ""|\#*) continue ;; esac
-	        case "$type" in
-	            swap)     continue ;; # No umount on swap devices
-	            proc|sysfs)    continue ;; # Required
-	            nfs|nfs4)      continue ;; # Avoid hanging reboot/halt
-	            smbfs|cifs)    continue ;; # Avoid hanging reboot/halt
-	        esac
-	        mount -v -n -o remount,ro $fs
+	        case "$des" in
+		    ""|\#*)	continue ;; Comment
+		    swap)	continue ;; No umount on swap devices
+		esac
+		case ",$memfs," in
+		    *,$type,*)	continue ;; Most of them are required
+		esac
+		case ",$netfs," in
+		    *,$type,*)	continue ;; Avoid hanging reboot/halt
+		esac
+		mount -v -n -o remount,ro $fs
 	    done
 
 	    echo "extra sync..."
-	    sync; sync
+	    sync; sleep 1; sync
 	    echo "... hope now it's ok to reboot."
 	fi
 	;;
