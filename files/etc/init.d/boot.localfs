@@ -280,14 +280,14 @@ case "$1" in
 	    cat $mounts | \
 	    while read des fs type rest; do
 	        case "$des" in
-		    ""|\#*)	continue ;; Comment
-		    swap)	continue ;; No umount on swap devices
+		    ""|\#*)	continue ;; # Comment
+		    swap)	continue ;; # No umount on swap devices
 		esac
 		case ",$memfs," in
-		    *,$type,*)	continue ;; Most of them are required
+		    *,$type,*)	continue ;; # Most of them are required
 		esac
 		case ",$netfs," in
-		    *,$type,*)	continue ;; Avoid hanging reboot/halt
+		    *,$type,*)	continue ;; # Avoid hanging reboot/halt
 		esac
 		mount -v -n -o remount,ro $fs
 	    done
