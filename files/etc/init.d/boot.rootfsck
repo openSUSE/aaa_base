@@ -151,7 +151,7 @@ case "$1" in
 	    fi
 	fi
         # start with a clean mtab and enter root fs entry
-	rm -f /etc/mtab* /media/.hal-mtab*
+	rm -f /etc/mtab* 
 	mount -f /
 	;;
     stop)
