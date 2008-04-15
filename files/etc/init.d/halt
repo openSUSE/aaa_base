@@ -78,7 +78,7 @@ case "${0##*/}" in
 	if test "$HALT_DISKS" = "yes" ; then
 	    while read line ; do
 		case "$line" in
-		md.*active) HALT_DISKS=no; break
+		md*active) HALT_DISKS=no; break
 		esac
 	    done < /proc/mdstat
 	    test "$HALT_DISKS" = "no" || opts="${opts:+$opts }-h"
