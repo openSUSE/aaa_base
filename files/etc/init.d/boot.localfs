@@ -30,17 +30,19 @@ export FSCK_MAX_INST
 #
 # Special file systems (memory and network based)
 #
-typeset -r memfs=tmpfs,devpts,proc,usbfs,sysfs
+typeset -r memfs=tmpfs,nfsd,devpts,proc,usbfs,sysfs,securityfs,debugfs,fusectl
 typeset -r netfs=nfs,nfs4,smbfs,cifs
 typeset -r  nofs=no${netfs//,/,no},no${memfs//,/,no}
 
 #
-# helper shell function
+# Helper shell function for reading files reverse, note
+# that /proc and /sys files are not seekable, therefore
+# we use a TMPDIR on the tmpfs /dev/shm.
 #
-if type -p tac > /dev/null 1>&2 ; then
+if type -p tac > /dev/null 2>&1 ; then
     reverse ()
     {
-	tac
+	TMPDIR=/dev/shm tac
     }
 else
     reverse ()
@@ -243,10 +245,15 @@ case "$1" in
 	while read des fs type rest; do
 	    case "${des##*/}"  in
 		""|\#*)    continue ;;
+		rootfs)    continue ;;
 		loop*)	   umount $mtab $fs
 			   loopdel $des ;;
 	    esac
+	    case "$type}"  in
+		autofs)    continue ;;
+	    esac
 	    case "$fs"   in
+		/)         continue ;;
 		/sys*)     continue ;;
 		/proc*)    continue ;;
 		/dev*)     continue ;;

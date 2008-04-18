@@ -1,18 +1,20 @@
 #! /bin/sh
 #
 # Copyright (c) 2001-2002 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 2008 SuSE LINUX Products GmbH, Nuernberg, Germany.
 # All rights reserved.
 #
-# /etc/init.d/boot.clock
+# /etc/init.d/boot.setclock
 #
 ### BEGIN INIT INFO
-# Provides:          boot.clock
+# Provides:          boot.setclock
 # Required-Start:    boot.rootfsck
 # Should-Start:
 # X-Start-Before:    boot.localfs
 # Default-Start:     B S
 # Default-Stop:
-# Short-Description: Read or set hardware clock
+# Description:       Read hardware clock and set system clock
+# Short-Description: Read hardware clock and set system clock
 ### END INIT INFO
 
 . /etc/rc.status
@@ -21,9 +23,11 @@
 #
 # Don't run into trouble due daylight-saving time
 #
+USE_ADJFILE=no
 case "$HWCLOCK" in
-*-l*) HWCLOCK="$HWCLOCK --noadjfile"
+*-u*) USE_ADJFILE=yes
 esac
+test "$USE_ADJFILE" = no && HWCLOCK="$HWCLOCK --noadjfile"
 
 rc_reset
 
@@ -62,10 +66,11 @@ case "$1" in
 	    # settimeofday, and it only works as long as $0 is executed
 	    # exactly once, at boot.
 
-	    if test "$HWCLOCK" != "-u"; then
+	    case "$HWCLOCK" in
+	    *-l*)
 		date $(date -u +'%m%d%H%M%Y.%S')
 		rc_status
-	    fi
+	    esac
 	    #
 	    # Let zic set timezone - if present.
 	    #
@@ -83,36 +88,23 @@ case "$1" in
 	    # Read out to hardware clock and for UTC calculate adjtime
 	    # write back the system time later at reboot/shutdown time.
 	    #
-	    if test "$SYSTOHC" = "yes" ; then
+	    if test "$SYSTOHC" = yes -a "$USE_ADJFILE" = yes ; then
 		#
 		# For UTC calculate adjtime
 		#
-		case "$HWCLOCK" in
-		*-u*)
-		    if test ! -s /etc/adjtime ; then
-			echo "0.0 0 0.0" >  /etc/adjtime
-			echo "0"	 >> /etc/adjtime
-			echo "UTC"	 >> /etc/adjtime
-		    fi
-		    /sbin/hwclock --adjust $HWCLOCK
-		    rc_status
-		esac
+		if test ! -s /etc/adjtime ; then
+		    echo "0.0 0 0.0"	>  /etc/adjtime
+		    echo "0"		>> /etc/adjtime
+		    echo "UTC"		>> /etc/adjtime
+		fi
+		/sbin/hwclock --adjust $HWCLOCK
+		rc_status
 	    fi
 	    /sbin/hwclock --hctosys $HWCLOCK
 	    rc_status -v -r
 	fi
 	;;
     stop)
-	if test "$HOSTTYPE" != "s390" -a "$HOSTTYPE" != "s390x" ; then
-	    if test "$SYSTOHC" = "yes" ; then
-		echo -n "Set Hardware Clock to the current System Time"
-		#
-		# Write back to hardware clock and for UTC calculate adjtime
-		#
-		/sbin/hwclock --systohc $HWCLOCK
-		rc_status -v -r
-	    fi
-	fi
 	;;
     status)
 	rc_failed 4
