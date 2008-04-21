@@ -89,7 +89,7 @@ fi
 #
 # Initialize runlevel links
 #
-%{fillup_and_insserv -py boot.proc boot.localfs boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single}
+%{fillup_and_insserv -py boot.proc boot.localfs boot.swap boot.setclock boot.getclock boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single}
 %{insserv_force_if_yast etc/init.d/boot.loadmodules etc/init.d/boot.cleanup etc/init.d/boot.rootfsck}
 ## powerfail probably needs empty header ...
 
