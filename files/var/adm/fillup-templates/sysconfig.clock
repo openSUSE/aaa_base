@@ -1,7 +1,7 @@
 ## Path:		System/Environment/Clock
 ## Description:		Information about your timezone and time
 ## Type:		string
-## ServiceRestart:	boot.clock
+## ServiceRestart:	boot.setclock
 #
 # Set to "-u" if your system clock is set to UTC, and to "--localtime"
 # if your clock runs that way.
@@ -23,7 +23,7 @@ HWCLOCK=""
 SYSTOHC="yes"
 
 ## Type:		string(Europe/Berlin,Europe/London,Europe/Paris)
-## ServiceRestart:	boot.clock
+## ServiceRestart:	boot.setclock
 #
 # Timezone (e.g. CET)
 # (this will set /usr/lib/zoneinfo/localtime)

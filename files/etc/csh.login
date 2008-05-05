@@ -25,7 +25,7 @@ if ( -o /dev/$tty && ${?prompt} ) then
     # Console
     if ( ! ${?TERM} )           setenv TERM linux
     if ( "$TERM" == "unknown" ) setenv TERM linux
-    if ( ! ${?SSH_TTY} ) then
+    if ( ! ${?SSH_TTY} && "$TERM" != "dumb" ) then
 	path stty sane cr0 pass8 dec
 	path tset -I -Q
     endif
@@ -60,10 +60,13 @@ endif
 if (! ${?UID}  ) set -r  UID=${uid}
 if (! ${?EUID} ) set -r EUID="`${id} -u`"
 if (! ${?USER} ) set    USER="`${id} -un`"
+if (! ${?HOME} ) set    HOME=""
 if (! ${?MAIL} ) setenv MAIL /var/spool/mail/$USER
-if (! ${?HOST} ) setenv HOST "`/bin/hostname -s`"
+if (! ${?HOST} ) setenv HOST "`/bin/uname -n`"
 if (! ${?CPU}  ) setenv CPU  "`/bin/uname -m`"
-if (! ${?HOSTNAME} ) setenv HOSTNAME "`/bin/hostname -f`"
+if (! ${?HOSTNAME} ) then
+    setenv HOSTNAME ${HOST}."`cat /proc/sys/kernel/domainname`"
+endif
 if (! ${?LOGNAME} )  set    LOGNAME=$USER
 if ( ${CPU} =~ i?86 ) then
     setenv HOSTTYPE i386
