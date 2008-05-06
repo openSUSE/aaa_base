@@ -1,0 +1,54 @@
+Index: aaa_base/sbin/chkconfig
+===================================================================
+--- aaa_base.orig/sbin/chkconfig
++++ aaa_base/sbin/chkconfig
+@@ -489,6 +489,7 @@ sub addmode {
+ sub usage {
+   print <<EOF;
+ usage:
++        chkconfig -A|--allservices              (together with -l: show all services)
+         chkconfig -t|--terse [names]            (shows the links)
+         chkconfig -e|--edit  [names]            (configure services)
+         chkconfig -s|--set   [name state]...    (configure services)
+Index: aaa_base/usr/share/man/man8/chkconfig.8
+===================================================================
+--- aaa_base.orig/usr/share/man/man8/chkconfig.8
++++ aaa_base/usr/share/man/man8/chkconfig.8
+@@ -34,6 +34,9 @@ chkconfig \- enable or disable system se
+ .RI [ names ]
+ .br
+ .B chkconfig
++.B -A|--allservices
++.br
++.B chkconfig
+ .B -a|--add
+ .RI [ names ]
+ .br
+@@ -68,7 +71,11 @@ are used. Inetd/xinetd services are conf
+ .I /etc/inetd.d
+ and
+ .IR /etc/xinetd.d ,
+-respectively.
++respectively. You can use the 
++.B -A
++or
++.B --allservices
++parameter to get all services (even the boot.*-services) listed.
+ .PP
+ If chkconfig is called without arguments, all services are listed
+ in terse mode.
+@@ -121,7 +128,13 @@ terminal. If the
+ .B --deps
+ option is given, the names of the services that must be started
+ before this service is appended to each line. The inetd/xinetd
+-services are listed in extra sections.
++services are listed in extra sections. 
++
++You can use the
++.B -A
++or
++.B --allservices
++parameter to get all services (even the boot.*-services) listed.
+ .SH ADD MODE
+ Calls insserv
+ to enable a service and uses list mode to display the new
