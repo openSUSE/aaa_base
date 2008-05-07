@@ -13,6 +13,9 @@
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: do cleanup
+# Description: Cleanup left over tempfiles from 
+#	last run: screen sockets, temporary rpm-database files,
+#	ssh agent infos, various lockfiles, utmp and some more.
 ### END INIT INFO
 
 . /etc/rc.status

@@ -13,6 +13,8 @@
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: run ip configuration hooks
+# Description: Set IP configuration hooks depending on 
+#	values entered in /etc/sysconfig/sysctl
 ### END INIT INFO
 
 . /etc/rc.status

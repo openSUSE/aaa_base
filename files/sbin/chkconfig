@@ -489,6 +489,7 @@ sub addmode {
 sub usage {
   print <<EOF;
 usage:
+        chkconfig -A|--allservices              (together with -l: show all services)
         chkconfig -t|--terse [names]            (shows the links)
         chkconfig -e|--edit  [names]            (configure services)
         chkconfig -s|--set   [name state]...    (configure services)
