@@ -4,10 +4,10 @@
 # Copyright (c) 2008 SuSE LINUX Products GmbH, Nuernberg, Germany.
 # All rights reserved.
 #
-# /etc/init.d/boot.setclock
+# /etc/init.d/boot.clock
 #
 ### BEGIN INIT INFO
-# Provides:          boot.setclock boot.clock
+# Provides:          boot.clock boot.setclock
 # Required-Start:    boot.rootfsck
 # Should-Start:
 # X-Start-Before:    boot.localfs
