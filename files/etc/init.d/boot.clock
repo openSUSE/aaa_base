@@ -7,7 +7,7 @@
 # /etc/init.d/boot.clock
 #
 ### BEGIN INIT INFO
-# Provides:          boot.clock boot.setclock
+# Provides:          boot.clock
 # Required-Start:    boot.rootfsck
 # Should-Start:
 # X-Start-Before:    boot.localfs
