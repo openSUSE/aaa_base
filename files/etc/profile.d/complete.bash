@@ -49,9 +49,14 @@ function _cd_ ()
     \$*)	COMPREPLY=($(compgen -v -P '$' $s	-- ${c#?}))	;;
     \~*/*)	COMPREPLY=($(compgen -d $s		-- "${c}"))	;;
     \~*)	COMPREPLY=($(compgen -u $s		-- "${c}"))	;;
+    *\:*)
+		if [[ $COMP_WORDBREAKS =~ : ]] ; then
+		    COMPREPLY=($(compgen -d $s		-- "${c}"))
+		    COMPREPLY=(${COMPREPLY[*]//${c%:*}:/})
+		fi
     esac
 
-    if test "${1##*/}" = "cd" ; then
+    if test "${1##*/}" = "cd" -a ${#COMPREPLY[@]} -gt 0 ; then
 	#
 	# Handle the CDPATH variable
 	#
@@ -70,23 +75,21 @@ function _cd_ ()
 	done
     fi
 
-    #
-    # Escape spaces and braces in path names with `\'
-    #
-    s="${COMP_WORDBREAKS// }"
-    s="${s//	}"
-    s="${s//[\{\}()\[\]]}"
-    s="${s} 	(){}[]"
-
-    for x in ${COMPREPLY[@]} ; do
+    if test ${#COMPREPLY[@]} -gt 0 ; then
+	#
+	# Escape spaces and braces in path names with `\'
+	#
+	s="${COMP_WORDBREAKS// }"
+	s="${s//	}"
+	s="${s//[\{\}()\[\]]}"
+	s="${s} 	(){}[]"
 	o=${#s}
+    
 	while test $((o--)) -gt 0 ; do
 	    c="${s:${o}:1}"
-	    x=${x//${c}/\\${c}}
+	    COMPREPLY=(${COMPREPLY[*]//${c}/\\${c}})
 	done
-	C=(${C[@]} $x)
-    done
-    COMPREPLY=(${C[@]})
+    fi
 
     #
     # Append a slash on the real result, avoid annoying double tab

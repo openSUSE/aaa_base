@@ -4,6 +4,7 @@
 %config(noreplace) /etc/inittab
 %config /root/bin/cron.daily
 %config /root/bin/cron.daily.local
+%config /etc/bash.bashrc
 %config /etc/csh.cshrc
 %config /etc/csh.login
 %config /etc/inputrc
