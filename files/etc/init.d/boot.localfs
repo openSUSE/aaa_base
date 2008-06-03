@@ -30,7 +30,8 @@ export FSCK_MAX_INST
 #
 # Special file systems (memory and network based)
 #
-typeset -r memfs=tmpfs,nfsd,devpts,proc,usbfs,sysfs,securityfs,debugfs,fusectl
+typeset -r tmpfs=tmpfs
+typeset -r memfs=nfsd,devpts,proc,usbfs,sysfs,securityfs,debugfs,fusectl
 typeset -r netfs=nfs,nfs4,smbfs,cifs
 typeset -r  nofs=no${netfs//,/,no},no${memfs//,/,no}
 
@@ -254,11 +255,13 @@ case "$1" in
 	    esac
 	    case "$fs"   in
 		/)         continue ;;
-		/sys*)     continue ;;
-		/proc*)    continue ;;
 		/dev*)     continue ;;
+		/proc*)    continue ;;
+		/sys*)     continue ;;
+		/tmp)      continue ;;
+		/var/tmp)  continue ;;
 	    esac
-	    case ",$memfs," in
+	    case ",$tmpfs,$memfs," in
 		*,$type,*) umount $mtab -t $type $fs ;;
 	    esac
 	done
