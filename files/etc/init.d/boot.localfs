@@ -275,7 +275,7 @@ case "$1" in
 
 	UMOUNT_FAILED=false
 	echo "Unmounting file systems"
-	umount -av $mtab -t $nofs -O no_netdev || {
+	umount -av $mtab -t no${tmpfs//,/,no},$nofs -O no_netdev || {
 	    rc_status
 	    UMOUNT_FAILED=true
 	}
@@ -293,7 +293,7 @@ case "$1" in
 		    ""|\#*)	continue ;; # Comment
 		    swap)	continue ;; # No umount on swap devices
 		esac
-		case ",$memfs," in
+		case ",$tmpfs,$memfs," in
 		    *,$type,*)	continue ;; # Most of them are required
 		esac
 		case ",$netfs," in
