@@ -100,13 +100,11 @@ if test "$PREVLEVEL" = "S" -a "$RUNLEVEL" != "0" -a "$RUNLEVEL" != "6" ; then
 fi
 
 #
-# Get terminal size of standard input of the system console
+# Standard input from the system console
 #
 test -z "$CONSOLE" && CONSOLE=/dev/console
-set -- $(stty size < $CONSOLE)
-  LINES=$1
-COLUMNS=$2
-export LINES COLUMNS CONSOLE
+REDIRECT="$(showconsole 2>/dev/null)"
+export CONSOLE REDIRECT
 
 #
 # Set I/O of this script and its childs to console
@@ -114,20 +112,29 @@ export LINES COLUMNS CONSOLE
 exec 0<> $CONSOLE 1>&0 2>&0
 
 #
-# Dummy shell function
+# Configuration and coloring of the boot messages
 #
-chvt () { true; }
+
+. /etc/rc.status
+. /etc/sysconfig/boot
+
+#
+# Reset status of this script
+#
+rc_reset
+
+#
+# First kill all vlock sessions
+#
+if vlock=$(type -p vlock) ; then
+    killall -q $vlock
+fi
 
 #
 # This redirects all rc messages during reboot and halt
 # to tty1 if the system console is bound on VGA (tty0).
 #
-REDIRECT="$(showconsole 2>/dev/null)"
-export REDIRECT
 if test -x /sbin/isserial && /sbin/isserial ; then
-    # Serial: columns and lines are not defined
-    : ${LINES:=24}
-    : ${COLUMNS:=80}
     test "$TERM" = "linux" -o -z "$TERM" && TERM=vt102
 else
     # VGA
@@ -135,28 +142,10 @@ else
 	case "$REDIRECT" in /dev/tty[1-9]*)
 	    REDIRECT=/dev/tty1
 	    setconsole $REDIRECT < $CONSOLE
-	    # Overwrite chvt shell function
-	    chvt () { test -x /usr/bin/chvt && /usr/bin/chvt 1 ; }
-	    set -- $(stty size < $REDIRECT)
-	    LINES=$1
-	    COLUMNS=$2
-	    export LINES COLUMNS
+	    command -p chvt 1 > /dev/null 2>&1
 	esac
     fi
 fi
-
-#
-# May change to first terminal, but first we kill all vlock sessions
-#
-killall -q /usr/bin/vlock &> /dev/null || true
-chvt
-
-#
-# Configuration and coloring of the boot messages
-#
-
-. /etc/rc.status
-. /etc/sysconfig/boot
 
 #
 # Save old terminal settings and set -nl to avoid staircase
@@ -172,14 +161,15 @@ fi
 #
 # Start blogd if not in single user mode
 #
-if test "$RUNLEVEL" != "S" -a -x /sbin/blogd -a -n "$REDIRECT" ; then
-    /sbin/blogd $REDIRECT
-fi
 if test -z "$REDIRECT" ; then
     if (echo -n > /dev/tty) 2>/dev/null ; then
 	REDIRECT=/dev/tty
     else
 	REDIRECT=/dev/console
+    fi
+else
+    if test "$RUNLEVEL" != "S" -a -x /sbin/blogd ; then
+	/sbin/blogd $REDIRECT
     fi
 fi
 

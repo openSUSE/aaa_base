@@ -37,13 +37,20 @@ LC_ALL=POSIX
 export LC_ALL
 
 # Seek for terminal size and, if needed, set default size
-if test -z "$LINES" -o -z "$COLUMNS" ; then
-    eval `exec 3<&1; stty size <&3 2>/dev/null | (read L C; \
-	  echo LINES=${L:-24} COLUMNS=${C:-80})`
-fi
-test $LINES   -eq 0 && LINES=24
-test $COLUMNS -eq 0 && COLUMNS=80
-export LINES COLUMNS
+rc_lc () {
+    if test -n "$REDIRECT" ; then
+	set -- $(stty size < "$REDIRECT")
+    else
+	set -- $(stty size)
+    fi
+    LINES=$1
+    COLUMNS=$2
+    test $LINES   -eq 0 && LINES=24
+    test $COLUMNS -eq 0 && COLUMNS=80
+    export LINES COLUMNS
+}
+trap 'rc_lc' SIGWINCH
+rc_lc
 
 # Make sure we have /sbin and /usr/sbin in PATH
 case ":$PATH:" in 
@@ -77,14 +84,14 @@ rc_failed_up="${esc}[1A${rc_failed}"
     rc_reset="${norm}${esc}[?25h"
      rc_save="${esc}7${esc}[?25l"
   rc_restore="${esc}8${esc}[?25h"
-    function rc_cuu () { test $1 -eq 0 && return; echo -en "\033[${1}A"; }
-    function rc_cud () { test $1 -eq 0 && return; echo -en "\033[${1}B"; }
-    function rc_timer_on () {
+    rc_cuu () { test $1 -eq 0 && return; echo -en "\033[${1}A"; }
+    rc_cud () { test $1 -eq 0 && return; echo -en "\033[${1}B"; }
+    rc_timer_on () {
 	# Draw seconds of running timout to column.
 	# Two arguments: timeout in seconds and offset
 	local n=$1
 	local c=$2
-	(trap "exit 0" TERM
+	(trap "exit 0" SIGTERM
 	 while test $((n--)) -gt 0; do
 	    sleep 1;
 	    if test $n -gt 9 ; then
@@ -94,7 +101,7 @@ rc_failed_up="${esc}[1A${rc_failed}"
 	    fi
 	done) & _rc_timer_pid=$!
     }
-    function rc_timer_off () {
+    rc_timer_off () {
 	if test -n "$_rc_timer_pid" ; then
 	    kill -TERM $_rc_timer_pid > /dev/null 2>&1
 	fi
@@ -122,10 +129,10 @@ rc_failed_up="${rc_failed}"
     rc_reset=""
      rc_save=""
   rc_restore=""
-    function rc_cuu () { return; }
-    function rc_cud () { return; }
-    function rc_timer_on  () { return; }
-    function rc_timer_off () { return; }
+    rc_cuu () { return; }
+    rc_cud () { return; }
+    rc_timer_on  () { return; }
+    rc_timer_off () { return; }
 fi
 
 _rc_service=${0##*/[SK][0-9][0-9]}
@@ -133,7 +140,7 @@ _rc_status=0
 _rc_status_all=0
 _rc_todo=$1
 
-function rc_check ()
+rc_check ()
 {
     _rc_status_ret=$?
     test $_rc_status_ret -eq 0 || _rc_status=$_rc_status_ret
@@ -141,7 +148,7 @@ function rc_check ()
     return $_rc_status_ret
 }
 
-function rc_reset ()
+rc_reset ()
 {
     _rc_status=0
     _rc_status_all=0
@@ -150,7 +157,7 @@ function rc_reset ()
 }
 
 if   test "$_rc_todo" = "status" ; then
-function rc_status ()
+rc_status ()
 {
     rc_check
     _rc_status_ret=$_rc_status
@@ -183,7 +190,7 @@ function rc_status ()
     return $_rc_status_ret
 }
 elif test -n "$_rc_todo" ; then
-function rc_status ()
+rc_status ()
 {
     rc_check
     test "$_rc_status" -gt 7 && rc_failed 1
@@ -227,7 +234,7 @@ function rc_status ()
     return $_rc_status_ret
 }
 else
-function rc_status ()
+rc_status ()
 {
     rc_check
     _rc_status_ret=$_rc_status
@@ -258,7 +265,7 @@ function rc_status ()
 }
 fi
 
-function rc_failed ()
+rc_failed ()
 {
     rc_reset
     case "$1" in
@@ -269,12 +276,12 @@ function rc_failed ()
     return $_rc_status
 }
 
-function rc_exit ()
+rc_exit ()
 {
     exit $_rc_status_all
 }
 
-function rc_confirm()
+rc_confirm()
 {
     local timeout="30"
     local answer=""
@@ -299,7 +306,7 @@ function rc_confirm()
     return $ret
 }
 
-function rc_active ()
+rc_active ()
 {
     local x
     for x in /etc/init.d/*.d/S[0-9][0-9]${1} ; do
@@ -309,7 +316,7 @@ function rc_active ()
     return 1
 }
 
-function rc_splash()
+rc_splash()
 {
     return 0
 }

@@ -22,30 +22,16 @@ trap "echo" SIGINT SIGSEGV SIGQUIT
 set +e
 
 #
-# Get terminal size of standard input of the system console
+# Standard input from the system console
 #
 test -z "$CONSOLE" && CONSOLE=/dev/console
-set -- $(stty size < $CONSOLE)
-  LINES=$1
-COLUMNS=$2
-export LINES COLUMNS CONSOLE
+REDIRECT="$(showconsole 2>/dev/null)"
+export CONSOLE REDIRECT
 
 #
 # Set I/O of this script and its childs to console
 #
 exec 0<> $CONSOLE 1>&0 2>&0
-
-#
-# Export the real device in variable REDIRECT.
-#
-REDIRECT="$(showconsole 2>/dev/null)"
-export REDIRECT
-if test $COLUMNS -eq 0 ; then
-    # Serial: columns and lines are not defined
-      LINES=24
-    COLUMNS=80
-    test "$TERM" = "linux" -o -z "$TERM" && TERM=vt102
-fi
 
 #
 # Configuration and coloring of the boot messages
@@ -54,13 +40,51 @@ fi
 . /etc/rc.status
 . /etc/sysconfig/boot
 
+#
+# Reset status of this script
+#
+rc_reset
+
+#
+# Export the real device in variable REDIRECT.
+#
+if test -x /sbin/isserial && /sbin/isserial ; then
+    test "$TERM" = "linux" -o -z "$TERM" && TERM=vt102
+fi
+
+#
+# Save old terminal settings and set -nl to avoid staircase
+# effect, do not lock scrolling, and avoid break characters.
+#
+otty=$(stty -g)
+if test "$FLOW_CONTROL" = "yes" ; then
+    stty -nl  ixon ignbrk -brkint
+else
+    stty -nl -ixon ignbrk -brkint
+fi
+
+#
+# Start blogd, requires /proc and /dev/pts.
+# Export the real device in variable REDIRECT.
+#
+if test -z "$REDIRECT" ; then
+    if (echo -n > /dev/tty) 2>/dev/null ; then
+	REDIRECT=/dev/tty
+    else
+	REDIRECT=/dev/console
+    fi
+else
+    if -x /sbin/blogd ; then
+	/sbin/blogd $REDIRECT
+    fi
+fi
+
 echo -n "System Boot Control: "
 echo "Running $0"
 
 #
 # Start of e.g. blogd, requires /proc and /dev/pts.
 #
-rc_reset
 echo -n "Mounting procfs at /proc"
 mount -n -t proc proc /proc
 rc_status -v -r
@@ -106,17 +130,6 @@ mount -n -t devpts -o mode=0620,gid=5 devpts /dev/pts
 rc_status -v -r
 
 #
-# Save old terminal settings and set -nl to avoid staircase
-# effect, do not lock scrolling, and avoid break characters.
-#
-otty=$(stty -g)
-if test "$FLOW_CONTROL" = "yes" ; then
-    stty -nl  ixon ignbrk -brkint
-else
-    stty -nl -ixon ignbrk -brkint
-fi
-
-#
 # Should we ask for interactive boot mode
 #
 DO_CONFIRM=""
@@ -139,19 +152,6 @@ if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
     echo
 fi
 export DO_CONFIRM
-
-#
-# Start blogd, requires /proc and /dev/pts.
-# Export the real device in variable REDIRECT.
-#
-test -x /sbin/blogd -a -n "$REDIRECT" && /sbin/blogd $REDIRECT
-if test -z "$REDIRECT" ; then
-    if (echo -n > /dev/tty) 2>/dev/null ; then
-	REDIRECT=/dev/tty
-    else
-	REDIRECT=/dev/console
-    fi
-fi
 
 #
 # Common used variables
@@ -282,7 +282,7 @@ test -s /lib/bootcycle/stats && . /lib/bootcycle/stats
 # Remember for master resource script
 #
 if test "$DO_CONFIRM" = "yes" ; then
-    touch /var/run/do_confirm
+    > /var/run/do_confirm
 fi
 
 #
@@ -299,7 +299,7 @@ if test -f /var/lib/YaST2/runme_at_boot ; then
     exec 0<> $REDIRECT 1>&0 2>&0
     # if yast2 failed, this ensures proper system setup
     #ulimit -c unlimited
-    touch /var/lib/YaST2/run_suseconfig
+    > /var/lib/YaST2/run_suseconfig
     if test -x /usr/lib/YaST2/startup/YaST2.Second-Stage; then
 	/usr/lib/YaST2/startup/YaST2.Second-Stage
     else
@@ -324,5 +324,4 @@ if test -f /var/lib/YaST2/run_suseconfig ; then
     rm -f /var/lib/YaST2/run_suseconfig
 fi
 
-rc_reset
 exit 0

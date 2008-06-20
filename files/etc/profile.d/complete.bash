@@ -26,10 +26,9 @@ complete -r _nullcommand &> /dev/null
 function _cd_ ()
 {
     local c=${COMP_WORDS[COMP_CWORD]}
-    local s g=0 x o C
+    local s g=0 x
     local IFS=$'\n'
-    declare -a C=()
-    declare -i o
+    local -i o
 
     shopt -q extglob && g=1
     test $g -eq 0 && shopt -s extglob
@@ -50,10 +49,13 @@ function _cd_ ()
     \~*/*)	COMPREPLY=($(compgen -d $s		-- "${c}"))	;;
     \~*)	COMPREPLY=($(compgen -u $s		-- "${c}"))	;;
     *\:*)
-		if [[ $COMP_WORDBREAKS =~ : ]] ; then
-		    COMPREPLY=($(compgen -d $s		-- "${c}"))
-		    COMPREPLY=(${COMPREPLY[*]//${c%:*}:/})
-		fi
+                if [[ $COMP_WORDBREAKS =~ : ]] ; then
+		    local C=${c%"${c##*[^\\]:}"}
+		    COMPREPLY=($(compgen -d $s          -- "${c}"))
+		    for ((o=0; o<${#COMPREPLY[@]}; o++)) ; do
+			COMPREPLY[o]=${COMPREPLY[o]#"$C"}
+		    done
+                fi
     esac
 
     if test "${1##*/}" = "cd" -a ${#COMPREPLY[@]} -gt 0 ; then
