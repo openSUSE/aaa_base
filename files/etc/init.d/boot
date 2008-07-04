@@ -74,7 +74,7 @@ if test -z "$REDIRECT" ; then
 	REDIRECT=/dev/console
     fi
 else
-    if -x /sbin/blogd ; then
+    if test -x /sbin/blogd ; then
 	/sbin/blogd $REDIRECT
     fi
 fi
