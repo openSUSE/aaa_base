@@ -30,10 +30,19 @@ case "$1" in
 	echo "Sending all processes the TERM signal..."
 	killall5 -15
 	echo -e "$rc_done_up"
-	sleep 3
+
+	# Wait between last SIGTERM and the next SIGKILL
+	rc_wait /sbin/blogd /sbin/splash
+
 	echo "Sending all processes the KILL signal..."
 	killall5 -9
 	echo -e "$rc_done_up"
+
+	if test -n "$REDIRECT" && /sbin/checkproc /sbin/blogd ; then
+    	    # redirect our famous last messages to default console
+    	    exec 0<> $REDIRECT 1>&0 2>&0
+	fi
+
 	#
 	# If we're not in single user mode we should go down there.
 	#

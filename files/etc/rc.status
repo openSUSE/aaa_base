@@ -308,9 +308,9 @@ rc_confirm()
 
 rc_active ()
 {
-    local x
-    for x in /etc/init.d/*.d/S[0-9][0-9]${1} ; do
-	test -e $x || break
+    local link
+    for link in /etc/init.d/*.d/S[0-9][0-9]${1} ; do
+	test -e $link || break
 	return 0
     done
     return 1
@@ -319,5 +319,59 @@ rc_active ()
 rc_splash()
 {
     return 0
+}
+
+# Wait between last SIGTERM and the next SIGKILL
+# any argument specify a *path* of a process which
+# process identity should *not* be checked.
+rc_wait()
+{
+    local -i etime=$SECONDS
+
+    if test -f /fastboot ; then
+	let etime+=2
+    else
+	let etime+=6
+    fi
+
+    local -i pid
+    local -i ppid=$$
+    local comm state rest
+    local parent_processes="$ppid"
+
+    while test $ppid -gt 1; do
+	read -t 1 pid comm state ppid rest < /proc/$ppid/stat
+	parent_processes="${parent_processes:+$parent_processes:}${ppid}"
+    done
+    for comm ; do
+	ppid="$(/sbin/pidofproc $comm)" || continue
+	parent_processes="${parent_processes:+$parent_processes:}${ppid}"
+    done
+    unset comm state ppid rest
+
+    local -i busy
+    while test $SECONDS -lt $etime; do
+	let busy=0
+	for proc in /proc/[0-9]* ; do
+	    test -e $proc/exe || continue
+	    let pid=${proc##*/}
+	    case ":${parent_processes}:" in
+	    *:${pid}:*) continue
+	    esac
+	    let busy=pid
+	    break
+	done
+	test $busy -ne 0 || return 0
+	usleep 500000
+    done
+}
+
+rc_runlevel()
+{
+    test -z "$RUNLEVEL" || return
+    set -- $(/sbin/runlevel)
+    PREVLEVEL=$1
+    RUNLEVEL=$2
+    export PREVLEVEL RUNLEVEL
 }
 

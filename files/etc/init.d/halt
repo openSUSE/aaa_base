@@ -11,7 +11,7 @@
 #
 
 . /etc/rc.status
-. /etc/sysconfig/clock
+. /etc/sysconfig/boot
 . /etc/sysconfig/shutdown
 
 test -s /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
@@ -105,14 +105,11 @@ if test -e /etc/init.d/halt.local ; then
     rc_status -v1 -r
 fi
 
-# Write to wtmp file before unmounting /var
+# write to wtmp file before unmounting /var
 $command -w 
 
-# Set a flag that we had success upto this point
+# set a flag that we had success upto this point
 test -w / && > /success
-
-# Stop blogd before umounting /var
-test -x /sbin/blogd && killproc -QUIT /sbin/blogd
 
 # give processes in front a chance to quit
 hupon=""
@@ -124,73 +121,51 @@ for tty in tty1 tty2 tty3 tty4 tty5 tty6; do
 done
 test -z "$hupon" || fuser -sk -HUP $hupon
 
-echo "Sending all processes the TERM signal..."
-killall5 -15
-echo -e "$rc_done_up"
-
-# Wait between last SIGTERM and the next SIGKILL
-declare -i etime=$SECONDS
-if test -f /fastboot ; then
-    etime=$((etime+2))
-else
-    etime=$((etime+6))
-fi
-
-ppid=$$
-parent_processes="$ppid"
-while test $ppid -ne 0; do
-    read -t 1 pid comm state ppid rest < /proc/$ppid/stat
-    parent_processes="${parent_processes:+$parent_processes }${ppid}"
-done
-for comm in /sbin/splash /sbin/blogd; do
-    ppid="$(/sbin/pidofproc $comm)" || continue
-    parent_processes="${parent_processes:+$parent_processes }${ppid}"
-done
-unset comm state ppid rest
-
-while test $SECONDS -lt $etime; do
-    left_processes=""
-    for proc in /proc/[0-9]* ; do
-	pid=${proc##*/}
-	case "${parent_processes// /:}" in
-	*:${pid}:*) continue
-	esac
-	/bin/ls -L ${proc}/exe > /dev/null 2>&1 || continue
-	left_processes="${left_processes:+$left_processes }${pid}"
-    done
-    test -n "${left_processes}" || break
-    usleep 500000
-done
-unset pid proc etime parent_processes left_processes
-
-echo "Sending all processes the KILL signal..."
-killall5 -9
-echo -e "$rc_done_up"
-
-# Redirect our mesages to default console
-test -n "$REDIRECT" && exec 0<> $REDIRECT 1>&0 2>&0
+test -s /etc/init.d/.depend.halt  || RUN_PARALLEL="no"
+type -p startpar &> /dev/null     || RUN_PARALLEL="no"
+startpar -v      &> /dev/null     || RUN_PARALLEL="no"
 
 #
-# call modules in boot.d via K* symlinks
-# (reverse sequence)
+# set back system boot configuration
 #
+if test "$RUN_PARALLEL" = "yes" ; then
 
-if test -d /etc/init.d/boot.d/ ; then
-    for i in /etc/init.d/boot.d/K*; do
-	test -f $i || continue
-	if test -x "$i" ; then
-	    # Active boot scripts, should have their own messages
-	    $i stop
-	else
-	    # Old boot scripts, may not have any message
-	    echo Skipping $i, not executable
-	fi
+    startopt="-p4 -t 30 -T 3"
+    eval $(startpar $startopt -M halt)
+    unset failed_service skipped_service
+
+elif -d /etc/init.d/boot.d/ ; then
+
+    #
+    # call modules in boot.d via K* symlinks
+    #
+
+    for link in /etc/init.d/boot.d/K[0-9][0-9]*; do
+	test -x $link || continue
+	$link stop
     done
+    unset link
+
 fi
 
 # kill splash animation
 test "$SPLASH" = yes && /sbin/splash -q
 
+echo "Sending all processes the TERM signal..."
+killall5 -15
+echo -e "$rc_done_up"
+
+# wait between last SIGTERM and the next SIGKILL
+rc_wait /sbin/blogd /sbin/splash
+
+echo "Sending all processes the KILL signal..."
+killall5 -9
+echo -e "$rc_done_up"
+
+if test -n "$REDIRECT" && /sbin/checkproc /sbin/blogd ; then
+    # redirect our famous last messages to default console
+    exec 0<> $REDIRECT 1>&0 2>&0
+fi
 
 # on umsdos fs this would lead to an error message, so direct errors to
 # /dev/null

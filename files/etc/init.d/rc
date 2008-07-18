@@ -209,47 +209,50 @@ test "$DO_CONFIRM"   = "yes"	  && RUN_PARALLEL="no"
 type -p startpar &> /dev/null     || RUN_PARALLEL="no"
 startpar -v      &> /dev/null	  || RUN_PARALLEL="no"
 
+checklink()
+{
+    if test $# -gt 1 ; then
+	local service=${1#*[SK]$rex}
+	echo -e "$attn${1%/*}/: more than one link for service $service$norm"
+    fi
+    test -x $1
+}
+
 #
-# Stop/Start services to enter new runlevel
+# Stop running services not enabled in new runlevel
 #
 if test "$RUN_PARALLEL" = "yes" ; then
 
+    startopt="-p4 -t 30 -T 3 $(splashmake)"
+
     #
-    # Stop/Start services in parallel with make behaviour of startpar
+    # Stop services in parallel with make behaviour of startpar
     #
 
-    startopt="-p4 -t 30 -T 3 $(splashmake)"
     eval $(startpar $startopt -M stop  -P $PREVLEVEL -R $RUNLEVEL)
     failed="${failed:+$failed }$failed_service"
     skipped="${skipped:+$skipped }$skipped_service"
 
-    eval $(startpar $startopt -M start -P $PREVLEVEL -R $RUNLEVEL)
-    failed="${failed:+$failed }$failed_service"
-    skipped="${skipped:+$skipped }$skipped_service"
+    unset failed_service skipped_service
 
-    unset failed_service skipped_service startopt 
-
-else
+elif test -d ${prerc}/ ; then
 
     #
     # First check and test services of previous and current (new) runlevel.
     #
-    for i in $prerc/K${rex}*; do
 
-	test -x "$i" || continue
+    for link in $prerc/K${rex}* ; do
+
+	test -x "$link" || continue
 
 	#
 	# Don't stop service if the new runlevel requires the service.
 	#
-	K=${i##*/}
-	service=${K#*K$rex}
-	K=${K%$service}
-	set -- $runrc/S$rex$service
-	test $# -gt 1 && echo -e "$attn$runrc/: more than one link for service $service$norm"
-	test -x "$1"  && continue
+	service=${link##*/K$rex}
+	checklink $runrc/S$rex$service && continue
 
 	blogger "$service stop"
-	$i stop; status=$?
+	$link stop; status=$?
 	echo -en "$rc_reset"
 	splashprogress "$service stop"
 
@@ -262,26 +265,52 @@ else
 	blogger "'$service stop' exits with status $status"
 
     done
+    unset link service
 
-    for i in $runrc/S${rex}*; do
+fi
 
-	test -x "$i" || continue
+#
+# Do never call startpar for single, halt or reboot script
+#
+case "$RUNLEVEL" in
+    S|0|1|6)
+	DO_CONFIRM=no
+	RUN_PARALLEL=no
+	test -x /sbin/blogd && killproc -QUIT /sbin/blogd
+esac
+
+#
+# Start services required to enter new runlevel
+#
+if test "$RUN_PARALLEL" = "yes" ; then
+
+    #
+    # Start services in parallel with make behaviour of startpar
+    #
+
+    eval $(startpar $startopt -M start -P $PREVLEVEL -R $RUNLEVEL)
+    failed="${failed:+$failed }$failed_service"
+    skipped="${skipped:+$skipped }$skipped_service"
+
+    unset failed_service skipped_service startopt 
+
+elif test -d ${runrc}/ ; then
+
+    for link in $runrc/S${rex}*; do
+
+	test -x "$link" || continue
 
 	#
 	# Don't start service if previous runlevel includes the service.
 	#
-	S=${i##*/}
-	service=${S#*S$rex}
-	S=${S%$service}
-	set -- $prerc/K$rex$service
-	test $# -gt 1 && echo -e "$attn$prerc/: more than one link for service $service$norm"
-	test -x "$1"  && continue
+	service=${link##*/S$rex}
+	checklink $prerc/K$rex$${service} && continue
 
 	#
 	# Ask the user if wanted
 	#
 	if test "$DO_CONFIRM" = "yes" ; then
-	    rc_confirm -t $CONFIRM_PROMPT_TIMEOUT "Start service $service"
+	    rc_confirm -t $CONFIRM_PROMPT_TIMEOUT "Start service $service" 0<>$REDIRECT 1>&0 2>&0
 	    case "$?" in
 	    0) true	;;
 	    1) continue	;;
@@ -290,7 +319,7 @@ else
 	fi
 
 	blogger "$service start"
-	$i start; status=$?
+	$link start; status=$?
         echo -en "$rc_reset"
 	splashprogress "$service start"
 
@@ -302,6 +331,8 @@ else
 
 	blogger "'$service start' exits with status $status"
     done
+    unset link service
+
 fi
 
 #

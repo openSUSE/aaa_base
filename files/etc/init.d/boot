@@ -206,7 +206,7 @@ elif test -d ${bootrc}/ ; then
 	B=${B%$script}
 
 	if test "$DO_CONFIRM" = "yes" ; then
-	    rc_confirm -t $CONFIRM_PROMPT_TIMEOUT "Start bootup script ${script}" < $REDIRECT > $REDIRECT 2>&1
+	    rc_confirm -t $CONFIRM_PROMPT_TIMEOUT "Start bootup script ${script}" 0<>$REDIRECT 1>&0 2>&0
 	    case "$?" in
 	    0) true     ;;
 	    1) continue ;;
