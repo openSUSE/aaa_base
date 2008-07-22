@@ -34,10 +34,10 @@
 # 
 ### BEGIN INIT INFO
 # Provides:          FOO
-# Required-Start:    $syslog $remote_fs
-# Should-Start: $time ypbind smtp
+# Required-Start:    $syslog $remote_fs $time
+# Should-Start:      $time ypbind smtp
 # Required-Stop:     $syslog $remote_fs
-# Should-Stop: $time ypbind smtp
+# Should-Stop:       ypbind smtp
 # Default-Start:     3 4 5
 # Default-Stop:      0 1 2 6
 # Short-Description: FOO XYZ daemon providing ZYX

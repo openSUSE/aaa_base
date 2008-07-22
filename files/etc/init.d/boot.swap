@@ -7,9 +7,10 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.swap
-# Required-Start:    boot.rootfsck
-# Should-Start:      boot.md boot.lvm boot.evms boot.crypto boot.lkcd $local_fs
-# Required-Stop:
+# Required-Start:    boot.rootfsck $local_fs
+# Should-Start:      boot.md boot.lvm boot.evms boot.crypto
+# Required-Stop:     $local_fs
+# Should-Stop:       boot.lvm boot.crypto
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: start rest of swap devices

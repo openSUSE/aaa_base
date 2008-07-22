@@ -8,7 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.loadmodules
 # Required-Start:    boot.udev
-# Required-Stop:
+# Required-Stop:     boot.udev
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: load modules required to be loaded in specific order

@@ -10,6 +10,7 @@
 # Required-Start:    boot.rootfsck
 # Should-Start:      $local_fs boot.quota
 # Required-Stop:
+# Should-Stop:
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: do cleanup

@@ -10,6 +10,7 @@
 # Required-Start:    
 # Should-Start:      boot.crypto boot.swap boot.clock
 # Required-Stop:
+# Should-Stop:       boot.crypto boot.swap boot.clock
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: run ldconfig if needed

@@ -9,8 +9,9 @@
 ### BEGIN INIT INFO
 # Provides:          boot.clock
 # Required-Start:    boot.rootfsck
-# Should-Start:
+# Required-Stop:
 # X-Start-Before:    boot.localfs
+# X-Stop-After:
 # Default-Start:     B S
 # Default-Stop:
 # Description:       Read hardware clock and set system clock
@@ -105,6 +106,16 @@ case "$1" in
 	fi
 	;;
     stop)
+	if test "$HOSTTYPE" != "s390" -a "$HOSTTYPE" != "s390x" ; then
+	    if test "$SYSTOHC" = "yes" ; then
+		echo -n "Set Hardware Clock to the current System Time"
+		#
+		# Write back to hardware clock and for UTC calculate adjtime
+		#
+		/sbin/hwclock --systohc $HWCLOCK
+		rc_status -v -r
+	    fi
+	fi
 	;;
     status)
 	rc_failed 4

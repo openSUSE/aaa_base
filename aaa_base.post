@@ -89,12 +89,12 @@ fi
 #
 # Initialize runlevel links
 #
-%{fillup_and_insserv -py boot.proc boot.localfs boot.swap boot.clock boot.getclock boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single}
+%{fillup_and_insserv -py boot.proc boot.localfs boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single}
 %{insserv_force_if_yast etc/init.d/boot.loadmodules etc/init.d/boot.cleanup etc/init.d/boot.rootfsck}
 ## powerfail probably needs empty header ...
 
 # add Kill-links in boot.d if needed:
-for i in proc localfs swap clock getclock ldconfig ipconfig klog localnet loadmodules sched ; do
+for i in proc localfs swap clock ldconfig ipconfig klog localnet loadmodules sched ; do
     if [ -f /etc/init.d/boot.d/S??boot.$i -a ! -f /etc/init.d/boot.d/K??boot.$i ] ; then
 %{insserv_force_if_yast boot.$i}
     fi

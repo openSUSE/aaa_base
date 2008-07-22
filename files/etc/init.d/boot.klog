@@ -8,6 +8,8 @@
 # Provides:          boot.klog
 # Required-Start:    boot.rootfsck
 # Should-Start:      $local_fs
+# Required-Stop:
+# Should-Stop:       $local_fs
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: dump kernel messages

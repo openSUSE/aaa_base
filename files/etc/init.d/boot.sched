@@ -8,6 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.sched
 # Required-Start:
+# Required-Stop:
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: sets the scheduling timeslices

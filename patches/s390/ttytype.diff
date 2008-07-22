@@ -1,0 +1,8 @@
+--- etc/ttytype
++++ etc/ttytype	2003/09/10 11:47:31
+@@ -20,3 +20,5 @@
+ vt100	ttypd
+ vt100	ttype
+ vt100	ttypf
++dumb	ttyS0
++linux	ttyS1

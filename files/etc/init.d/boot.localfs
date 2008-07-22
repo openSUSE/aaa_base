@@ -8,8 +8,9 @@
 ### BEGIN INIT INFO
 # Provides:          boot.localfs
 # Required-Start:    boot.udev boot.rootfsck
-# Should-Start:      boot.md boot.lvm dasd_devfs_compat boot.scsidev boot.multipath boot.evms boot.loadmodules
-# Required-Stop:
+# Should-Start:      boot.md boot.lvm dasd_devfs_compat boot.multipath boot.evms boot.loadmodules
+# Required-Stop:     boot.udev
+# Should-Stop:       boot.lvm dasd_devfs_compat boot.multipath
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: check and mount local filesystems except /
