@@ -101,7 +101,7 @@ set _spath
 set _upath=( /usr/local/bin /usr/bin /bin )
 if ( "$HOME" != "/" ) then
     foreach _d (${HOME}/bin/${CPU} ${HOME}/bin)
-	if ( -d $_d ) set _hpath=( $_hpath $_d )
+	if ( -d $_d ) set _hpath=( $_d $_hpath )
     end
 endif
 if ( "$uid" == "0" ) then
@@ -299,8 +299,8 @@ if ( -r /etc/csh.login.local ) source /etc/csh.login.local
 #
 if (${?TERM} && -o /dev/$tty && ${?prompt}) then
     if (${TERM} == "xterm") then
-	if ( -f /etc/motd ) cat /etc/motd
 	if (! ${?SSH_TTY} ) then
+	    if ( -f /etc/motd ) cat /etc/motd
 	    # Go home
 	    cd; echo "Directory: $cwd"
 	endif

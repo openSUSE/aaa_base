@@ -380,6 +380,27 @@ if test -n "$restricted" ; then
     PATH=/usr/lib/restricted/bin
     export PATH
 fi
+
+#
+# An X session
+#
+case "$-" in
+*i*)
+    if test $TERM = "xterm" -a -O "$tty" ; then
+	if test -z ${SSH_TTY} ; then
+	    test ! -f $HOME/.hushlogin -a /etc/motd && cat /etc/motd
+	    # Go home
+	    cd; echo "Directory: $PWD"
+	    # Last but not least
+	    date
+	fi
+	#
+	# shadow passwd
+	# Note: on normal console this will be done by /bin/login
+	type faillog > /dev/null 2>&1 && test -r /var/log/faillog && faillog 
+    fi
+esac
+
 #
 # End of /etc/profile
 #
