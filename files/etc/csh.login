@@ -300,9 +300,11 @@ if ( -r /etc/csh.login.local ) source /etc/csh.login.local
 if (${?TERM} && -o /dev/$tty && ${?prompt}) then
     if (${TERM} == "xterm") then
 	if (! ${?SSH_TTY} ) then
-	    if ( -f /etc/motd ) cat /etc/motd
+	    if ( ! -f $HOME/.hushlogin && -s /etc/motd ) cat /etc/motd
 	    # Go home
 	    cd; echo "Directory: $cwd"
+	    # Last but not least
+	    date
 	endif
 	#
 	# shadow passwd
@@ -311,8 +313,6 @@ if (${?TERM} && -o /dev/$tty && ${?prompt}) then
 	    if ( -x /bin/faillog ) /bin/faillog
 	    if ( -x /usr/bin/faillog ) /usr/bin/faillog
 	endif
-	# Last but not least
-	/bin/date
     endif
 endif
 

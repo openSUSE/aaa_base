@@ -386,9 +386,9 @@ fi
 #
 case "$-" in
 *i*)
-    if test $TERM = "xterm" -a -O "$tty" ; then
-	if test -z ${SSH_TTY} ; then
-	    test ! -f $HOME/.hushlogin -a /etc/motd && cat /etc/motd
+    if test "$TERM" = "xterm" -a -O "$tty" ; then
+	if test -z "${SSH_TTY}" ; then
+	    test ! -f $HOME/.hushlogin -a -s /etc/motd && cat /etc/motd
 	    # Go home
 	    cd; echo "Directory: $PWD"
 	    # Last but not least
@@ -397,7 +397,10 @@ case "$-" in
 	#
 	# shadow passwd
 	# Note: on normal console this will be done by /bin/login
-	type faillog > /dev/null 2>&1 && test -r /var/log/faillog && faillog 
+	if test -r /var/log/faillog ; then
+	    test -x /bin/faillog && /bin/faillog
+	    test -x /usr/bin/faillog && /usr/bin/faillog
+	fi
     fi
 esac
 
