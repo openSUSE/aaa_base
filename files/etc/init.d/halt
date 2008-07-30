@@ -1,9 +1,9 @@
 #! /bin/sh
-# Copyright (c) 1996-2007 SuSE Linux Products GmbH, Nuernberg, Germany.
+# Copyright (c) 1996-2008 SuSE Linux Products GmbH, Nuernberg, Germany.
 # All rights reserved.
 #
 # Author: Florian La Roche, 1996
-#	  Werner Fink <werner@suse.de>, 1996-2001
+#	  Werner Fink <werner@suse.de>, 1996-2008
 #
 # Please send feedback to http://www.suse.de/feedback
 #
@@ -27,8 +27,9 @@ case "${0##*/}" in
     *halt)
 	message="The system will be halted immediately."
 	arch=$(/bin/uname -m)
-	opts=""
 	command="halt"
+	mddev=""
+	opts=""
 	#
 	# Sysvinit's shutdown is knowning about the option -P and -H to set
 	# the environment variable INIT_HALT within init for the runlevel 0.
@@ -53,6 +54,7 @@ case "${0##*/}" in
 			case "$cmdline" in
 			*apm=smp-power-off*|*apm=power-off*) INIT_HALT=POWEROFF
 			esac
+			unset cmdline
 		    fi
 		esac
 	    esac
@@ -72,22 +74,17 @@ case "${0##*/}" in
 	    opts="${opts:+$opts }-i"
 	fi
 	#
-	# Sometimes it is wanted to stop also the disks, but
-	# do not do this for software raids.
+	# Sometimes it is wanted to stop also the disks
 	#
 	if test "$HALT_DISKS" = "yes" ; then
-	    while read line ; do
-		case "$line" in
-		md*active) HALT_DISKS=no; break
-		esac
-	    done < /proc/mdstat
-	    test "$HALT_DISKS" = "no" || opts="${opts:+$opts }-h"
+	    opts="${opts:+$opts }-h"
 	fi
 	;;
     *reboot)
 	message="Please stand by while rebooting the system..."
-	opts="-i"
 	command="reboot"
+	mddev=""
+	opts="-i"
 	;;
     *)
 	echo "$0: call me as \"halt\" or \"reboot\" please!"
@@ -148,6 +145,25 @@ elif -d /etc/init.d/boot.d/ ; then
 
 fi
 
+# check out if a software raid is active
+if test -e /proc/mdstat -a -x /sbin/mdadm ; then
+    while read line ; do
+	case "$line" in
+	md*:*active*) mddev=--scan; break
+	esac
+    done < /proc/mdstat
+    unset line
+    if test -n "$mddev" -a -e /etc/mdadm.conf ; then
+	mddev=""
+	while read type dev rest; do
+	    case "$dev" in
+	    /dev/md*) mddev="${mddev:+$mddev }$dev"
+	    esac
+	done < /etc/mdadm.conf
+	unset type dev rest
+    fi
+fi
+
 # kill splash animation
 test "$SPLASH" = yes && /sbin/splash -q
 
@@ -171,6 +187,24 @@ fi
 # /dev/null
 mount -no remount,ro / 2> /dev/null
 sync
+
+# stop any inactive software raid
+if test -n "$mddev" ; then
+    /sbin/mdadm --quiet --stop $mddev
+    # redirect shell errors to /dev/null
+    exec 3>&2 2>/dev/null
+    # cause the md arrays to be marked clean immediately
+    for proc in /proc/[0-9]* ; do
+	test ! -e $proc/exe || continue
+	read -t 1 tag name rest < $proc/status || continue
+	case "$name" in
+	md*_raid*) killproc -n -SIGKILL "$name"
+	esac
+    done
+    unset tag name rest
+    # get shell errors back
+    exec 2>&3-
+fi
 
 # show "the system is down" message
 test "$SPLASH" = yes && /sbin/splash -q -p 65535 -t "isdown"

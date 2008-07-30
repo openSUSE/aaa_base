@@ -39,9 +39,9 @@ export LC_ALL
 # Seek for terminal size and, if needed, set default size
 rc_lc () {
     if test -n "$REDIRECT" ; then
-	set -- $(stty size < "$REDIRECT")
+	set -- $(stty size < "$REDIRECT"  2> /dev/null || echo 0 0)
     else
-	set -- $(stty size)
+	set -- $(stty size 2> /dev/null || echo 0 0)
     fi
     LINES=$1
     COLUMNS=$2
