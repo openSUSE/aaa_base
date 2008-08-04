@@ -131,7 +131,7 @@ if test "$RUN_PARALLEL" = "yes" ; then
     eval $(startpar $startopt -M halt)
     unset failed_service skipped_service
 
-elif -d /etc/init.d/boot.d/ ; then
+elif test -d /etc/init.d/boot.d/ ; then
 
     #
     # call modules in boot.d via K* symlinks

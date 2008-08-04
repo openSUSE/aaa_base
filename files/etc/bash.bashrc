@@ -308,6 +308,9 @@ case "$-" in
 	    for s in /etc/bash_completion.d/*.sh ; do
 		test -r $s && . $s
 	    done
+	    if test -f /etc/bash_command_not_found ; then
+		. /etc/bash_command_not_found
+	    fi
 	    ;;
 	*)  ;;
 	esac
@@ -323,6 +326,12 @@ case "$-" in
 	case $(set -o) in
 	*multiline*) set -o multiline
 	esac
+    fi
+    # command not found handler in zsh version
+    if test "$is" = "zsh" ; then
+	if test -f /etc/zsh_command_not_found ; then
+	    . /etc/zsh_command_not_found
+	fi
     fi
     ;;
 esac
