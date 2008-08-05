@@ -50,6 +50,8 @@ rc_reset
 #
 if test -x /sbin/isserial && /sbin/isserial ; then
     test "$TERM" = "linux" -o -z "$TERM" && TERM=vt102
+elif test "${REDIRECT%[0-9]}" = "/dev/ttyS" ; then
+    test "$TERM" = "linux" -o -z "$TERM" && TERM=vt102
 fi
 
 #
@@ -61,22 +63,6 @@ if test "$FLOW_CONTROL" = "yes" ; then
     stty -nl  ixon ignbrk -brkint
 else
     stty -nl -ixon ignbrk -brkint
-fi
-
-#
-# Start blogd, requires /proc and /dev/pts.
-# Export the real device in variable REDIRECT.
-#
-if test -z "$REDIRECT" ; then
-    if (echo -n > /dev/tty) 2>/dev/null ; then
-	REDIRECT=/dev/tty
-    else
-	REDIRECT=/dev/console
-    fi
-else
-    if test -x /sbin/blogd ; then
-	/sbin/blogd $REDIRECT
-    fi
 fi
 
 echo -n "System Boot Control: "
@@ -152,6 +138,22 @@ if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
     echo
 fi
 export DO_CONFIRM
+
+#
+# Start blogd, requires /proc and /dev/pts.
+# Export the real device in variable REDIRECT.
+#
+if test -z "$REDIRECT" ; then
+    if (echo -n > /dev/tty) 2>/dev/null ; then
+	REDIRECT=/dev/tty
+    else
+	REDIRECT=/dev/console
+    fi
+else
+    if test -x /sbin/blogd ; then
+	/sbin/blogd $REDIRECT
+    fi
+fi
 
 #
 # Common used variables

@@ -196,7 +196,6 @@ case "$1" in
 	# clean up
 	#
 	rm -f /etc/nologin /nologin /fastboot /forcefsck /success
-
 	rc_status -v -r
 
 	#

@@ -136,6 +136,8 @@ fi
 #
 if test -x /sbin/isserial && /sbin/isserial ; then
     test "$TERM" = "linux" -o -z "$TERM" && TERM=vt102
+elif test "${REDIRECT%[0-9]}" = "/dev/ttyS" ; then
+    test "$TERM" = "linux" -o -z "$TERM" && TERM=vt102
 else
     # VGA
     if test "$RUNLEVEL" = "0" -o "$RUNLEVEL" = "6" ; then

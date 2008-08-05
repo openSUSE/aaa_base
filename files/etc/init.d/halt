@@ -110,10 +110,14 @@ test -w / && > /success
 
 # give processes in front a chance to quit
 hupon=""
-for tty in tty1 tty2 tty3 tty4 tty5 tty6; do
+for tty in ${REDIRECT##*/} tty1 tty2 tty3 tty4 tty5 tty6 ttyS0 ttyS1; do
     test -w /dev/$tty || continue
     test -c /dev/$tty || continue
-    > /dev/$tty > /dev/null 2>&1 || continue
+    # redirect shell errors to /dev/null
+    exec 3>&2 2>/dev/null
+    > /dev/$tty || continue
+    # get shell errors back
+    exec 2>&3-
     hupon="${hupon:+$hupon }/dev/$tty"
 done
 test -z "$hupon" || fuser -sk -HUP $hupon
