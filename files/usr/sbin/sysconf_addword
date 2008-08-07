@@ -10,7 +10,7 @@
 
 debug=false
 
-function usage() {
+usage() {
 	cat <<-EOF
 	usage: $(basename $0) [-r] FILE VAR WORD
 
@@ -32,14 +32,14 @@ function usage() {
 	EOF
 }
 
-function find_last_occurrence () {
+find_last_occurrence () {
 	# takes two arguments, FILE and VAR
 	# and return the number of the last line where
 	# VAR occurs in FILE (not commented)
 	grep -n -- "^[[:space:]]*$1" $2 | tail -n 1 | cut -d: -f1
 }
 
-function word_present () {
+word_present () {
 	. $file
 	case " ${!var} " in
 	*" $word "*) true;;
@@ -47,7 +47,7 @@ function word_present () {
 	esac
 }
 
-function add_word() {
+add_word() {
 	local word=$1
 	local word_quoted=$2
 	if ! word_present; then
@@ -63,7 +63,7 @@ function add_word() {
 	# some balancing for vim"s syntax highlighting
 }
 
-function remove_word() {
+remove_word() {
 	local word=$1
 	local word_quoted=$2
 	if word_present; then

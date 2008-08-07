@@ -23,7 +23,7 @@ fi
 complete -r _nullcommand &> /dev/null
 
 # Expanding shell function for directories
-function _cd_ ()
+_cd_ ()
 {
     local c=${COMP_WORDS[COMP_CWORD]}
     local s g=0 x

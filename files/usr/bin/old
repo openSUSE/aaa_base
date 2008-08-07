@@ -11,7 +11,7 @@
 # usage - tell user to use program
 #
 
-function usage() {
+usage() {
     echo usage: "$0" file\|dir [file\|dir ...]
 }
 

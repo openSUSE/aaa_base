@@ -139,7 +139,7 @@ case "$1" in
 	        fi
 	        sync
 	        mount -n -o remount,rw /
-		test $FSCK_RETURN -gt 0 && touch /fsck_corrected_errors
+		test $FSCK_RETURN -gt 0 && > /fsck_corrected_errors
 	    else
 		echo
 		echo '*** ERROR!  Cannot fsck because root is not read-only!'

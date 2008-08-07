@@ -3,7 +3,7 @@
 
 #echo "$0: called with '$*'" > /dev/kmsg
 
-function stop_me () {
+stop_me () {
 	kill -STOP $$
 	exit 1
 }

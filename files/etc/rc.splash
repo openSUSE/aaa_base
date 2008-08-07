@@ -60,7 +60,7 @@ if test "$SPLASH" = "yes" ; then
 	done
 	unset i
     fi
-    function splashtrigger  ()
+    splashtrigger  ()
     {
 	case "$1" in
 	rlreached*) SPLASHSTART=$SPLASHEND
@@ -70,7 +70,7 @@ if test "$SPLASH" = "yes" ; then
 	*)    /sbin/splash    -p $SPLASHSTART -t "$1" "$SPLASHCFG"
 	esac
     }
-    function splashprogress ()
+    splashprogress ()
     {
 	local SPLASHDIFF
 	test "$SPLASHNUM" -ge 1 || SPLASHNUM=1
@@ -79,7 +79,7 @@ if test "$SPLASH" = "yes" ; then
 	SPLASHSTART=$((SPLASHSTART+SPLASHDIFF))
 	: $((SPLASHNUM--))
     }
-    function splashparallel ()
+    splashparallel ()
     {
 	local SPLASHDIFF
 	local SPLASHOLDSTART=$SPLASHSTART
@@ -92,7 +92,7 @@ if test "$SPLASH" = "yes" ; then
 	SPLASHDIFF=$((SPLASHSTART-SPLASHOLDSTART))
 	echo "-S $SPLASHOLDSTART:$SPLASHDIFF"
     }
-    function splashmake ()
+    splashmake ()
     {
 	local SPLASHDIFF=$((SPLASHEND-SPLASHSTART))
 	echo "-S $SPLASHSTART:$SPLASHDIFF"
@@ -100,8 +100,8 @@ if test "$SPLASH" = "yes" ; then
 	SPLASHNUM=0
     }
 else
-    function splashtrigger  () { :; }
-    function splashprogress () { :; }
-    function splashparallel () { echo ""; }
-    function splashmake     () { echo ""; }
+    splashtrigger  () { :; }
+    splashprogress () { :; }
+    splashparallel () { echo ""; }
+    splashmake     () { echo ""; }
 fi

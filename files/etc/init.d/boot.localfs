@@ -31,8 +31,8 @@ export FSCK_MAX_INST
 #
 # Special file systems (memory and network based)
 #
-typeset -r tmpfs=tmpfs
-typeset -r memfs=nfsd,devpts,proc,usbfs,sysfs,securityfs,debugfs,fusectl
+typeset -r tmpfs=tmpfs,ramfs
+typeset -r memfs=nfsd,devpts,proc,usbfs,sysfs,securityfs,debugfs,fusectl,rpc_pipefs
 typeset -r netfs=nfs,nfs4,smbfs,cifs
 typeset -r  nofs=no${netfs//,/,no},no${memfs//,/,no}
 
@@ -188,7 +188,7 @@ case "$1" in
 	        fi
 	        if test $FSCK_RETURN -gt 0; then
 	            sync
-		    touch /fsck_corrected_errors
+		    > /fsck_corrected_errors
 		fi
 	fi
 
@@ -246,6 +246,7 @@ case "$1" in
 	while read des fs type rest; do
 	    case "${des##*/}"  in
 		""|\#*)    continue ;;
+		swap)      continue ;;
 		rootfs)    continue ;;
 		loop*)	   umount $mtab $fs
 			   loopdel $des ;;
@@ -273,9 +274,17 @@ case "$1" in
 	    esac
 	done
 
+	#
+	# Use fuser with option -w if available to terminate all
+	# processes having write access to the root file system.
+	#
+	if fuser -skmw -TERM / > /dev/null 2>&1 ; then
+	    sleep 1
+	fi
+
 	UMOUNT_FAILED=false
 	echo "Unmounting file systems"
-	umount -av $mtab -t no${tmpfs//,/,no},$nofs -O no_netdev || {
+	umount -arv $mtab -t no${tmpfs//,/,no},$nofs -O no_netdev || {
 	    rc_status
 	    UMOUNT_FAILED=true
 	}
@@ -288,10 +297,13 @@ case "$1" in
 	    # Use cat and a pipe because umount changes
 	    # /proc/mounts during direct read call
 	    cat $mounts | \
-	    while read des fs type rest; do
+	    while read des fs type opts rest; do
 	        case "$des" in
 		    ""|\#*)	continue ;; # Comment
 		    swap)	continue ;; # No umount on swap devices
+		esac
+		case ",$opts," in
+		    *,ro,*)	continue ;; # Already done
 		esac
 		case ",$tmpfs,$memfs," in
 		    *,$type,*)	continue ;; # Most of them are required
@@ -299,7 +311,7 @@ case "$1" in
 		case ",$netfs," in
 		    *,$type,*)	continue ;; # Avoid hanging reboot/halt
 		esac
-		mount -v -n -o remount,ro $fs
+		mount -nv -o remount,ro $fs
 	    done
 
 	    echo "extra sync..."
@@ -322,4 +334,3 @@ case "$1" in
 esac
 
 rc_exit
-
