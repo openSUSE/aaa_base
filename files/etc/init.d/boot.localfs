@@ -31,10 +31,24 @@ export FSCK_MAX_INST
 #
 # Special file systems (memory and network based)
 #
-typeset -r tmpfs=tmpfs,ramfs
-typeset -r memfs=nfsd,devpts,proc,usbfs,sysfs,securityfs,debugfs,fusectl,rpc_pipefs
-typeset -r netfs=nfs,nfs4,smbfs,cifs
+typeset -r nomnt=autofs,bdev,rootfs,sockfs,pipefs,anon_inodefs,inotifyfs,eventpollfs,futexfs
+typeset -r tmpfs=tmpfs,ramfs,hugetlbfs,mqueue
+typeset -r netfs=nfs,nfs4,smbfs,cifs,afs,ncpfs
+
+tmp=""
+while read tag name rest ; do
+    test "$tag" = "nodev" || continue
+    [[ "$name" =~ ^(${nomnt//,/|})$ ]] && continue
+    [[ "$name" =~ ^(${tmpfs//,/|})$ ]] && continue
+    [[ "$name" =~ ^(${netfs//,/|})$ ]] && continue
+    tmp=${tmp:+$tmp,}$name
+done < /proc/filesystems
+
+typeset -r memfs=$tmp
+typeset -r mntfs=$tmpfs,$memfs
 typeset -r  nofs=no${netfs//,/,no},no${memfs//,/,no}
+
+unset tmp name rest
 
 #
 # Helper shell function for reading files reverse, note
@@ -244,25 +258,29 @@ case "$1" in
 
 	reverse < $mounts | \
 	while read des fs type rest; do
-	    case "${des##*/}"  in
+	    case "${des##*/}" in
 		""|\#*)    continue ;;
 		swap)      continue ;;
-		rootfs)    continue ;;
 		loop*)	   umount $mtab $fs
 			   loopdel $des ;;
 	    esac
-	    case "$type}"  in
-		autofs)    continue ;;
+	    case ",$nomnt," in
+		*,$type,*) continue ;;
 	    esac
-	    case "$fs"   in
+	    case ",$netfs," in
+		*,$type,*) continue ;;
+	    esac
+	    case "$fs" in
 		/)         continue ;;
 		/dev*)     continue ;;
 		/proc*)    continue ;;
 		/sys*)     continue ;;
 		/tmp)      continue ;;
 		/var/tmp)  continue ;;
+		/var/lib/nfs/rpc_pipefs)
+			   continue ;;
 	    esac
-	    case ",$tmpfs,$memfs," in
+	    case ",$mntfs," in
 		*,$type,*) umount $mtab -t $type $fs ;;
 	    esac
 	done
@@ -305,8 +323,11 @@ case "$1" in
 		case ",$opts," in
 		    *,ro,*)	continue ;; # Already done
 		esac
-		case ",$tmpfs,$memfs," in
+		case ",$mntfs," in
 		    *,$type,*)	continue ;; # Most of them are required
+		esac
+		case ",$nomnt," in
+		    *,$type,*)  continue ;; # Not mountable
 		esac
 		case ",$netfs," in
 		    *,$type,*)	continue ;; # Avoid hanging reboot/halt
