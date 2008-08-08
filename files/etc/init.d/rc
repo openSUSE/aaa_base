@@ -35,20 +35,6 @@ test "$PREVLEVEL" = "$RUNLEVEL" && exit 0
 #
 test "$PREVLEVEL" = "1" -a "$RUNLEVEL" = "S" && exit 0
 
-#
-# Up from runlevel N we may want to run in confirm mode
-#
-if test "$PREVLEVEL" = "N" ; then
-    test -e /proc/cmdline || mount -n -t proc proc /proc
-    read -t 2 check < /proc/cmdline 2> /dev/null
-    case "$check" in
-	*confirm*) DO_CONFIRM=yes ;;
-    esac
-    test -e /var/run/do_confirm && DO_CONFIRM=yes
-    rm -f   /var/run/do_confirm
-    export DO_CONFIRM
-fi
-
 runrc=/etc/init.d/rc${RUNLEVEL}.d
 prerc=/etc/init.d/rc${PREVLEVEL}.d
 
@@ -56,6 +42,13 @@ prerc=/etc/init.d/rc${PREVLEVEL}.d
 # Initialize boosplash progressbar variables
 #
 . /etc/rc.splash $RUNLEVEL
+
+#
+# Configuration and coloring of the boot messages
+#
+
+. /etc/rc.status
+. /etc/sysconfig/boot
 
 #
 # Up from runlevel S we have to check if the system was
@@ -66,19 +59,14 @@ if test "$PREVLEVEL" = "S" -a "$RUNLEVEL" != "0" -a "$RUNLEVEL" != "6" ; then
     single="no"
     hvname="yes"
     #
-    check=""
-    test -e /proc/cmdline || mount -n -t proc proc /proc
-    read -t 2 check < /proc/cmdline 2> /dev/null
-    case " ${check} " in
-	*\ single\ *|*\ s\ *)
-	    single="yes"
+    if rc_cmdline single s S ; then
+	single="yes"
+    fi
+    read -t 2 hostname < /proc/sys/kernel/hostname 2> /dev/null
+    case "${hostname}" in
+    "(none)"|unknown|"") hvname="no"
     esac
-    read -t 2 check < /proc/sys/kernel/hostname 2> /dev/null
-    case "${check}" in
-	"(none)"|unknown|"")
-	    hvname="no"
-    esac
-    unset check
+    unset hostname
 
     if test "$single" = "yes" -a "$hvname" = "no" ; then
 	# This is the case if we're up from cold boot
@@ -112,11 +100,17 @@ export CONSOLE REDIRECT
 exec 0<> $CONSOLE 1>&0 2>&0
 
 #
-# Configuration and coloring of the boot messages
+# Up from runlevel N we may want to run in confirm mode
 #
-
-. /etc/rc.status
-. /etc/sysconfig/boot
+DO_CONFIRM=""
+if test "$PREVLEVEL" = "N" ; then
+    if rc_cmdline confirm > /dev/null ; then
+	DO_CONFIRM=yes
+    fi
+    test -e /var/run/do_confirm && DO_CONFIRM=yes
+    rm -f   /var/run/do_confirm
+    export DO_CONFIRM
+fi
 
 #
 # Reset status of this script

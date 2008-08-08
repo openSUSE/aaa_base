@@ -138,72 +138,78 @@ case "$1" in
 
 	# rootfs is mounted rw, lvm et al should be up now
 	wait_for_udev
-	#
-	# If we use a serial console, don't use the fsck progress bar
-	#
-	FSCK_PROGRESSBAR="-V"
-	test "$REDIRECT" = "/dev/tty1" && FSCK_PROGRESSBAR="-C"
+
 	#
 	# do fsck and start sulogin, if it fails.
 	#
 	FSCK_RETURN=0
-	if test ! -f /fastboot -a -z "$fastboot" ; then
-	    FSCK_FORCE=""
-	    test -f /forcefsck && FSCK_FORCE="-f"
-	        echo "Checking file systems..."
-	        fsck $FSCK_PROGRESSBAR -R -A -M -a $FSCK_FORCE -t noopts=nofail
-	        # A return code of 1 indicates that file system errors
-	        # were corrected, but that the boot may proceed.
-	        # A return code of 2 or larger indicates failure.
-	        FSCK_RETURN=$?
-		test $FSCK_RETURN -lt 4
-		rc_status -v1 -r
-		if test $FSCK_RETURN -gt 1 -a $FSCK_RETURN -lt 4 ; then
-		    # if appropriate, switch bootsplash to verbose 
-		    # mode to make text messages visible.
-		    test -f /proc/splash && echo "verbose" > /proc/splash
-		    echo
-		    echo "fsck succeed, but reboot is required."
-		    echo
-		    sleep 1
-		    sync
-		    reboot -f
-		elif test $FSCK_RETURN -gt 3; then
-		    # if appropriate, switch bootsplash to verbose 
-		    # mode to make text messages visible.
-		    test -f /proc/splash && echo "verbose" > /proc/splash
-		    # Stop blogd since we reboot after sulogin
-		    test -x /sbin/blogd && killproc -QUIT /sbin/blogd
-		    if test -x /etc/init.d/kbd ; then
-			/etc/init.d/kbd start
-		    fi
-	            echo
-	            echo "fsck failed for at least one filesystem (not /)."
-		    echo "Please repair manually and reboot."
-		    echo "The root file system is is already mounted read-write."
-	            echo
-	            echo "Attention: Only CONTROL-D will reboot the system in this"
-	            echo "maintanance mode. shutdown or reboot will not work."
-	            echo
-	            PS1="(repair filesystem) # "
-	            export PS1
-	            /sbin/sulogin /dev/console
-
-	            # if the user has mounted something rw, this should be umounted
-	            echo "Unmounting file systems (ignore error messages)"
-	            umount -avn
-
-	            # on umsdos fs this would lead to an error message.
-		    # so direct errors to /dev/null
-	            mount -no remount,ro / 2> /dev/null
-
-	            sync
-	            reboot -f
-	        fi
-	        if test $FSCK_RETURN -gt 0; then
-	            sync
-		    > /fsck_corrected_errors
+	if test ! -f /fastboot -a -z "$DO_FASTBOOT" ; then
+	    # common options for file system check
+	    FSCK_OPTS="-R -A -M -a -t noopts=nofail"
+	    # force file system check if forced
+	    if test -f /forcefsck -o "$DO_FORCEFSCK" = "yes" ; then
+		FSCK_OPTS="$FSCK_OPTS -f"
+	    fi
+	    # If we use a serial console, don't use the fsck progress bar
+	    if "$REDIRECT" = "/dev/tty1" ; then
+		FSCK_OPTS="$FSCK_OPTS -C"
+	    else
+		FSCK_OPTS="$FSCK_OPTS -V"
+	    fi
+	    echo "Checking file systems..."
+	    fsck $FSCK_OPTS
+	    # A return code of 1 indicates that file system errors
+	    # were corrected, but that the boot may proceed.
+	    # A return code of 2 or larger indicates failure.
+	    FSCK_RETURN=$?
+	    test $FSCK_RETURN -lt 4
+	    rc_status -v1 -r
+	    if test $FSCK_RETURN -gt 1 -a $FSCK_RETURN -lt 4 ; then
+		# if appropriate, switch bootsplash to verbose 
+		# mode to make text messages visible.
+		test -f /proc/splash && echo "verbose" > /proc/splash
+		echo
+		echo "fsck succeed, but reboot is required."
+		echo
+		sleep 1
+		sync
+		reboot -f
+	    elif test $FSCK_RETURN -gt 3; then
+		# if appropriate, switch bootsplash to verbose 
+		# mode to make text messages visible.
+		test -f /proc/splash && echo "verbose" > /proc/splash
+		# Stop blogd since we reboot after sulogin
+		test -x /sbin/blogd && killproc -QUIT /sbin/blogd
+		if test -x /etc/init.d/kbd ; then
+		    /etc/init.d/kbd start
 		fi
+	        echo
+	        echo "fsck failed for at least one filesystem (not /)."
+		echo "Please repair manually and reboot."
+		echo "The root file system is is already mounted read-write."
+	        echo
+	        echo "Attention: Only CONTROL-D will reboot the system in this"
+	        echo "maintanance mode. shutdown or reboot will not work."
+	        echo
+	        PS1="(repair filesystem) # "
+	        export PS1
+	        /sbin/sulogin /dev/console
+
+	        # if the user has mounted something rw, this should be umounted
+	        echo "Unmounting file systems (ignore error messages)"
+	        umount -avn
+
+	        # on umsdos fs this would lead to an error message.
+		# so direct errors to /dev/null
+	        mount -no remount,ro / 2> /dev/null
+
+	        sync
+	        reboot -f
+	    fi
+	    if test $FSCK_RETURN -gt 0; then
+		sync
+		> /fsck_corrected_errors
+	    fi
 	fi
 
 	#

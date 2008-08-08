@@ -26,9 +26,8 @@ case "$1" in
 	# check if sysrq should be enabled
 	#
 	if test -e /proc/sys/kernel/sysrq ; then
-	    read a < /proc/cmdline
-	    case "$a" in
-		*sysrq=yes*|*sysrq=1*) ENABLE_SYSRQ="yes" ;;
+	    case "$(rc_cmdline sysrq)" in
+		sysrq=yes|sysrq=1) ENABLE_SYSRQ="yes" ;;
 	    esac
 	    case "$ENABLE_SYSRQ" in
 		yes) ENABLE_SYSRQ=1 ;;

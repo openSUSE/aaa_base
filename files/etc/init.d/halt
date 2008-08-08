@@ -50,11 +50,9 @@ case "${0##*/}" in
 			INIT_HALT=POWEROFF
 		    else
 		    	INIT_HALT=HALT
-			read -t 2 cmdline < /proc/cmdline
-			case "$cmdline" in
-			*apm=smp-power-off*|*apm=power-off*) INIT_HALT=POWEROFF
+			case "$(rc_cmdline apm)" in
+			apm=smp-power-off|apm=power-off) INIT_HALT=POWEROFF
 			esac
-			unset cmdline
 		    fi
 		esac
 	    esac

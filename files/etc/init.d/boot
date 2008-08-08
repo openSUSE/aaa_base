@@ -119,10 +119,16 @@ rc_status -v -r
 # Should we ask for interactive boot mode
 #
 DO_CONFIRM=""
-read -t 2 check < /proc/cmdline 2> /dev/null
-case "$check" in
-    *confirm*) DO_CONFIRM=yes ;;
-esac
+DO_FORCEFSCK=""
+if rc_cmdline confirm > /dev/null ; then
+    DO_CONFIRM=yes
+fi
+if rc_cmdline forcefsck > /dev/null ; then
+    DO_FORCEFSCK=yes
+fi
+if rc_cmdline fastboot > /dev/null ; then
+    DO_FASTBOOT=yes
+fi
 test -z "$CONFIRM_PROMPT_TIMEOUT" && CONFIRM_PROMPT_TIMEOUT=5
 if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
     echo -en "${extd}Enter Interactive startup mode?${norm}"
@@ -137,7 +143,7 @@ if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
     unset answer
     echo
 fi
-export DO_CONFIRM
+export DO_CONFIRM DO_FORCEFSCK DO_FASTBOOT
 
 #
 # Start blogd, requires /proc and /dev/pts.

@@ -34,11 +34,6 @@ case "$1" in
 	rc_status -v1 -r
 	
 	#
-	# If we use a serial console, don't use the fsck progress bar
-	#
-	FSCK_PROGRESSBAR="-V"
-        [ -x /sbin/showconsole ] && [ "`/sbin/showconsole`" = "/dev/tty1" ] && FSCK_PROGRESSBAR="-C"
-	#
 	# do fsck and start sulogin, if it fails.
 	#
 	FSCK_RETURN=0
@@ -67,7 +62,7 @@ case "$1" in
         fi
 	#
         FSCK_FORCE=""
-	if test -f /forcefsck ; then
+	if test -f /forcefsck -o "$DO_FORCEFSCK" = "yes" ; then
 	    FSCK_FORCE="-f"
 	    ROOTFS_FSCK=""
         fi
@@ -75,7 +70,19 @@ case "$1" in
 	    # already checked and ok, skip the rest
             MAY_FSCK=0
         fi
-	if test ! -f /fastboot -a -z "$fastboot" -a $MAY_FSCK -eq 1 ; then
+	if test ! -f /fastboot -a -z "$DO_FASTBOOT" -a $MAY_FSCK -eq 1 ; then
+	    # common options for file system check
+	    FSCK_OPTS="-a"
+	    # force file system check if forced
+	    if test -f /forcefsck -o "$DO_FORCEFSCK" = "yes" ; then
+                FSCK_OPTS="$FSCK_OPTS -f"
+	    fi
+	    # If we use a serial console, don't use the fsck progress bar
+	    if "$REDIRECT" = "/dev/tty1" ; then
+                FSCK_OPTS="$FSCK_OPTS -C"
+	    else
+                FSCK_OPTS="$FSCK_OPTS -V"
+	    fi
 	    # on an umsdos root fs this mount will fail,
 	    # so direct error messages to /dev/null.
 	    # this seems to be ugly, but should not really be a problem.
@@ -85,7 +92,7 @@ case "$1" in
 		    FSCK_RETURN=$ROOTFS_FSCK
 		else
 		    echo "Checking root file system..."
-		    fsck $FSCK_PROGRESSBAR -a $FSCK_FORCE $ROOTFS_BLKDEV
+		    fsck $FSCK_OPTS $ROOTFS_BLKDEV
 		    # A return code of 1 indicates that file system errors
 		    # were corrected, but that the boot may proceed.
 		    # A return code of 2 or larger indicates failure.

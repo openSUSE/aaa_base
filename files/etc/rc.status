@@ -375,3 +375,26 @@ rc_runlevel()
     export PREVLEVEL RUNLEVEL
 }
 
+cmdline=""
+rc_cmdline()
+{
+    local arg cmd key val
+    test -e /proc/cmdline || mount -nt proc proc /proc
+    test -n "$cmdline"    || read -t 2 cmdline < /proc/cmdline
+    for arg; do
+	for cmd in $cmdline ; do
+	    key="${cmd%%=*}"
+	    key="${key//-/_}"
+	    case "${key}" in
+	    $arg)
+		case "$cmd" in
+		*=*) val="${cmd#*=}" ;;
+		*)   val=yes
+		esac
+		echo $key=$val
+		return 0
+	    esac
+	done
+    done
+    return 1
+}
