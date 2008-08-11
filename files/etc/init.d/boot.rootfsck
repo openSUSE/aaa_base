@@ -8,7 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.rootfsck
 # Required-Start:    boot.udev
-# Required-Stop:
+# Required-Stop:     $null
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: check and mount root filesystem
@@ -60,10 +60,11 @@ case "$1" in
 		MAY_FSCK=1
 	    fi
         fi
-	#
-        FSCK_FORCE=""
+	# common options for file system check
+	FSCK_OPTS="-a"
 	if test -f /forcefsck -o "$DO_FORCEFSCK" = "yes" ; then
-	    FSCK_FORCE="-f"
+	    # force file system check if forced is specified
+	    FSCK_OPTS="$FSCK_OPTS -f"
 	    ROOTFS_FSCK=""
         fi
 	if test "$ROOTFS_FSCK" = "0" ; then
@@ -71,14 +72,8 @@ case "$1" in
             MAY_FSCK=0
         fi
 	if test ! -f /fastboot -a -z "$DO_FASTBOOT" -a $MAY_FSCK -eq 1 ; then
-	    # common options for file system check
-	    FSCK_OPTS="-a"
-	    # force file system check if forced
-	    if test -f /forcefsck -o "$DO_FORCEFSCK" = "yes" ; then
-                FSCK_OPTS="$FSCK_OPTS -f"
-	    fi
 	    # If we use a serial console, don't use the fsck progress bar
-	    if "$REDIRECT" = "/dev/tty1" ; then
+	    if test "$REDIRECT" = "/dev/tty1" ; then
                 FSCK_OPTS="$FSCK_OPTS -C"
 	    else
                 FSCK_OPTS="$FSCK_OPTS -V"

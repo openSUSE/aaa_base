@@ -7,10 +7,10 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.ipconfig
-# Required-Start: 
+# Required-Start:
 # Should-Start:      boot.sysctl
 # Required-Stop:
-# Should-Stop:
+# Should-Stop:       $null
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: run ip configuration hooks

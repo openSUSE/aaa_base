@@ -9,8 +9,8 @@
 # Provides:          boot.cleanup
 # Required-Start:    boot.rootfsck
 # Should-Start:      $local_fs boot.quota
-# Required-Stop:
-# Should-Stop:
+# Required-Stop:     $null
+# Should-Stop:       $null
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: do cleanup

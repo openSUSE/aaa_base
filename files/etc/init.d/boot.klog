@@ -8,7 +8,7 @@
 # Provides:          boot.klog
 # Required-Start:    boot.rootfsck
 # Should-Start:      $local_fs
-# Required-Stop:
+# Required-Stop:     $null
 # Should-Stop:       $local_fs
 # Default-Start:     B
 # Default-Stop:

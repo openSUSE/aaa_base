@@ -9,9 +9,9 @@
 ### BEGIN INIT INFO
 # Provides:          boot.clock
 # Required-Start:    boot.rootfsck
-# Required-Stop:
+# Required-Stop:     boot.rootfsck
 # X-Start-Before:    boot.localfs
-# X-Stop-After:
+# X-Stop-After:      $null
 # Default-Start:     B S
 # Default-Stop:
 # Description:       Read hardware clock and set system clock
