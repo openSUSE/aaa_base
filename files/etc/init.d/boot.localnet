@@ -8,7 +8,7 @@
 ### BEGIN INIT INFO
 # Provides:          boot.localnet
 # Required-Start:    boot.cleanup
-# Required-Stop:
+# Required-Stop:     $null
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: setup hostname and yp
