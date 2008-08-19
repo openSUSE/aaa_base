@@ -249,13 +249,6 @@ for DIR in etc/rc.d usr/X11 ; do
     fi
 done
 
-# Backup YP_DOMAINNAME, before we remove it
-if test ! -f etc/defaultdomain -a -f /etc/rc.config ; then
-  eval `grep ^YP_DOMAINNAME etc/rc.config 2>/dev/null`
-  echo -n $YP_DOMAINNAME > etc/defaultdomain
-  chmod 644 etc/defaultdomain
-fi
-
 if test -f /root/.gnupg/secring.gpg ; then
   cp -a /root/.gnupg/secring.gpg /root/.gnupg/secring.gpg.aaa_save
 fi

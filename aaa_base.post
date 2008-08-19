@@ -34,62 +34,13 @@ test -f etc/nsswitch.conf.rpmnew && grep dns6 etc/nsswitch.conf >/dev/null 2>&1 
    cp etc/nsswitch.conf etc/nsswitch.conf.aaa_base
    sed "s|dns6|dns|g" < etc/nsswitch.conf.aaa_base > etc/nsswitch.conf
 }
-#
-# the following rc.config-variables changed their names during the releases,
-# so we have to change them here ...
-# FONT        to CONSOLE_FONT
-# TRANSLATION to CONSOLE_UNICODEMAP
-# GMT         to HWCLOCK
-# replace CREATE_RESOLVCONF by comment
-# comment out NAMESERVER
-# comment out SEARCHLIST
-# comment out LANGUAGE
-# delete umask line
-#
-if test -s etc/rc.config ; then
-    sed -e"s/^FONT=/CONSOLE_FONT=/" \
-        -e"s/^TRANSLATION=/CONSOLE_UNICODEMAP=/" \
-        -e"s/^GMT=/HWCLOCK=/" \
-	-e"s/^CREATE_RESOLVCONF=.*/# Update: SuSEconfig will no longer touch resolv.conf/" \
-	-e"s/^NAMESERVER=\(.*\)/# NAMESERVER=\1/" \
-	-e"s/^SEARCHLIST=\(.*\)/# SEARCHLIST=\1/" \
-	-e"s/^umask .*//" \
-	-e"s/^test \$rc_done=/test \"\$rc_done\"=/" \
-        -e"s/^LANGUAGE=/# LANGUAGE=/" etc/rc.config \
-    > etc/rc.config.t && mv etc/rc.config.t etc/rc.config
-    rm -f etc/rc.config.t
-fi
 # GMT might already be in sysconfig/clock
 %{rename_sysconfig_variable -f etc/sysconfig/clock GMT HWCLOCK}
-# XXX uncommented temporary
-if [ -e etc/aaa_base_debug -a ! -e etc/rc.config ]; then
-  cat << EOF > etc/rc.config
-#
-# /etc/rc.config
-#
-# Copyright (c) 1996-2002 SuSE Linux AG Nuernberg, Germany.
-# All rights reserved.
-#
-# Author: Werner Fink <werner@suse.de>, 1996
-#         Burchard Steinbild, 1996
-#
-# The configuration databases for shell scripts in /etc/init.d,
-# /sbin/SuSEconfig and /etc/cron.daily/suse.de-* can now be found
-# in the /etc/sysconfig directory. This file should not be used any
-# longer and will disappear in one of the next releases.
-#
-# Please edit the files in the /etc/sysconfig directory and execute
-# /sbin/SuSEconfig to configure everything.
-#
-
-EOF
- chmod 644 etc/rc.config
-fi
 
 #
 # Initialize runlevel links
 #
-%{fillup_and_insserv -py boot.proc boot.localfs boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single}
+%{fillup_and_insserv -y boot.proc boot.localfs boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single}
 %{insserv_force_if_yast etc/init.d/boot.loadmodules etc/init.d/boot.cleanup etc/init.d/boot.rootfsck}
 ## powerfail probably needs empty header ...
 
@@ -100,22 +51,12 @@ for i in proc localfs swap clock ldconfig ipconfig klog localnet loadmodules sch
     fi
 done
 
-#
-# remove old stuff from rc.config
-if [ -x bin/fillup -a -f etc/rc.config ] ; then
-  bin/fillup -q -t -r -i -d "=" etc/rc.config var/adm/fillup-templates/removed_variables.aaa_base /dev/null
-  test -s etc/rc.config.new && mv etc/rc.config.new etc/rc.config
-fi
 %{remove_and_set -n security CONSOLE_SHUTDOWN}
 %{remove_and_set -n suseconfig CHECK_INITTAB}
 %{remove_and_set -n suseconfig HALT_SOUND}
 
 if ! [ -d etc/sysconfig ] ; then
   mkdir -p etc/sysconfig
-fi
-# language was called lang before
-if [ ! -f etc/sysconfig/language -a -f etc/rc.config.d/lang.rc.config ] ; then
-  mv etc/rc.config.d/lang.rc.config etc/sysconfig/language
 fi
 for i in language backup boot kernel \
 	suseconfig clock proxy windowmanager sysctl \
