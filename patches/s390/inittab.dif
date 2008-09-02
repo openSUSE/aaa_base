@@ -1,6 +1,6 @@
 --- etc/inittab	2004/04/28 17:34:30	1.1
 +++ etc/inittab	2004/04/28 17:41:29
-@@ -44,55 +44,21 @@
+@@ -44,55 +44,23 @@
  ls:S:wait:/etc/init.d/rc S
  ~~:S:respawn:/sbin/sulogin
  
@@ -10,6 +10,8 @@
 +#2:2345:respawn:/sbin/mingetty --noclear /dev/ttyS1 xterm
 +# additional 3270 terminals:
 +#3:2345:respawn:/sbin/mingetty --noclear /dev/3270/ttycons dumb
++# KVM hypervisor console:
++#1:2345:respawn:/sbin/mingetty --noclear /dev/hvc0 linux
 +
  # what to do when CTRL-ALT-DEL is pressed
  ca::ctrlaltdel:/sbin/shutdown -r -t 4 now
