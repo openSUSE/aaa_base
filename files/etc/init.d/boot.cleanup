@@ -58,11 +58,8 @@ case "$1" in
 	test "$PREVLEVEL" = "S" && telinit q
 
 	# Restore a possibly dynamically modified /etc/resolv.conf
-	if ls /etc/resolv.conf.saved.by.* &>/dev/null ; then
-	    echo "Cleaning up using /sbin/modify_resolvconf:"
-	    /sbin/modify_resolvconf cleanup
-	    echo -e "$rc_done_up"
-	fi
+	/sbin/netconfig update
+
 	# delete temp files
 	# If $CLEAR_TMP_DIRS_AT_BOOTUP = yes, delete files in
 	# $TMP_DIRS_TO_CLEAR, if $CLEAR_TMP_DIRS_AT_BOOTUP starts with a "/"

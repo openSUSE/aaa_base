@@ -71,6 +71,11 @@ case "$1" in
 	    # already checked and ok, skip the rest
             MAY_FSCK=0
         fi
+        if test -x /usr/bin/on_ac_power ; then
+            # skip fsck if running on battery
+            /usr/bin/on_ac_power -q || MAY_FSCK=0
+        fi
+
 	if test ! -f /fastboot -a -z "$DO_FASTBOOT" -a $MAY_FSCK -eq 1 ; then
 	    # If we use a serial console, don't use the fsck progress bar
 	    if test "$REDIRECT" = "/dev/tty1" ; then

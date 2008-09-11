@@ -142,8 +142,13 @@ case "$1" in
 	#
 	# do fsck and start sulogin, if it fails.
 	#
+	MAY_FSCK=1
+        if test -x /usr/bin/on_ac_power ; then
+            # skip fsck if running on battery
+            /usr/bin/on_ac_power -q || MAY_FSCK=0
+        fi
 	FSCK_RETURN=0
-	if test ! -f /fastboot -a -z "$DO_FASTBOOT" ; then
+	if test ! -f /fastboot -a -z "$DO_FASTBOOT" -a $MAY_FSCK -eq 1 ; then
 	    # common options for file system check
 	    FSCK_OPTS="-R -A -M -a -t noopts=nofail"
 	    # force file system check if forced
