@@ -93,6 +93,12 @@ or
 .B xinetd
 to configure a service managed by the inetd/xinetd daemons.
 .PP
+Insserv can calculate dependencies for only one service at the same
+time. To work around this limitation imposed by insserv, chkconfig
+uses the '-f' option of insserv when it reads the list of services from
+standard input. Note that --force switches off all dependency checks
+and could lead to depending services no longer working, use with care.
+.PP
 If no services are specified, chkconfig reads lines from standard
 input. Each line must consist of a service/state pair. As this is
 exactly the output of the terse list mode, this can be used to
