@@ -184,14 +184,14 @@ if test -z "$PROFILEREAD" ; then
 fi
 
 #
-# Set some environment variables for TeX/LaTeX
+# Set some environment variables for TeX/LaTeX (Not used due luatex)
 #
-if test -n "$TEXINPUTS" ; then
-    TEXINPUTS=":$TEXINPUTS:$HOME/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
-else
-    TEXINPUTS=":$HOME/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
-fi
-export TEXINPUTS
+#if test -n "$TEXINPUTS" ; then
+#    TEXINPUTS=":$TEXINPUTS:$HOME/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
+#else
+#    TEXINPUTS=":$HOME/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
+#fi
+#export TEXINPUTS
 
 #
 # Configure the default pager on SuSE Linux

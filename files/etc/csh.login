@@ -144,13 +144,13 @@ set noglob
 if ( -r /etc/inputrc && ! ${?INPUTRC} ) setenv INPUTRC /etc/inputrc
 
 #
-# Set some environment variables for TeX/LaTeX
+# Set some environment variables for TeX/LaTeX (Not used due luatex)
 #
-if ( ${?TEXINPUTS} ) then
-    setenv TEXINPUTS ":${TEXINPUTS}:${HOME}/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
-else
-    setenv TEXINPUTS ":${HOME}/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
-endif
+#if ( ${?TEXINPUTS} ) then
+#    setenv TEXINPUTS ":${TEXINPUTS}:${HOME}/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
+#else
+#    setenv TEXINPUTS ":${HOME}/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX"
+#endif
 
 #
 # Configure the default pager on SuSE Linux
