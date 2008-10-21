@@ -51,10 +51,12 @@ case "${0##*/}" in
 		    else
 		    	INIT_HALT=HALT
 			case "$(rc_cmdline apm)" in
-			apm=smp-power-off|apm=power-off) INIT_HALT=POWEROFF
+			apm=smp-power-off|apm=power-off) INIT_HALT=POWEROFF ;;
 			esac
 		    fi
+		    ;;
 		esac
+		;;
 	    esac
 	fi
 	#
@@ -63,7 +65,7 @@ case "${0##*/}" in
 	#
 	case "$INIT_HALT" in
 	POWEROFF|POWERDOWN)
-	    opts="${opts:+$opts }-p"
+	    opts="${opts:+$opts }-p" ;;
 	esac
 	#
 	# Sometimes wake-on-lan isn't wanted, if so stop network
@@ -151,7 +153,7 @@ fi
 if test -e /proc/mdstat -a -x /sbin/mdadm ; then
     while read line ; do
 	case "$line" in
-	md*:*active*) mddev=--scan; break
+	md*:*active*) mddev=--scan; break ;;
 	esac
     done < /proc/mdstat
     unset line
@@ -159,7 +161,7 @@ if test -e /proc/mdstat -a -x /sbin/mdadm ; then
 	mddev=""
 	while read type dev rest; do
 	    case "$dev" in
-	    /dev/md*) mddev="${mddev:+$mddev }$dev"
+	    /dev/md*) mddev="${mddev:+$mddev }$dev" ;;
 	    esac
 	done < /etc/mdadm.conf
 	unset type dev rest
@@ -200,7 +202,7 @@ if test -n "$mddev" ; then
 	test ! -e $proc/exe || continue
 	read -t 1 tag name rest < $proc/status || continue
 	case "$name" in
-	md*_raid*) killproc -n -SIGKILL "$name"
+	md*_raid*) killproc -n -SIGKILL "$name" ;;
 	esac
     done
     unset tag name rest

@@ -26,7 +26,7 @@
 #
 USE_ADJFILE=no
 case "$HWCLOCK" in
-*-u*) USE_ADJFILE=yes
+*-u*) USE_ADJFILE=yes ;;
 esac
 test "$USE_ADJFILE" = no && HWCLOCK="$HWCLOCK --noadjfile"
 
@@ -71,6 +71,7 @@ case "$1" in
 	    *-l*)
 		date $(date -u +'%m%d%H%M%Y.%S')
 		rc_status
+		;;
 	    esac
 	    #
 	    # Let zic set timezone - if present.

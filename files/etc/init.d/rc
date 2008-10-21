@@ -64,7 +64,7 @@ if test "$PREVLEVEL" = "S" -a "$RUNLEVEL" != "0" -a "$RUNLEVEL" != "6" ; then
     fi
     read -t 2 hostname < /proc/sys/kernel/hostname 2> /dev/null
     case "${hostname}" in
-    "(none)"|unknown|"") hvname="no"
+    "(none)"|unknown|"") hvname="no" ;;
     esac
     unset hostname
 
@@ -139,6 +139,7 @@ else
 	    REDIRECT=/dev/tty1
 	    setconsole $REDIRECT < $CONSOLE
 	    command -p chvt 1 > /dev/null 2>&1
+	    ;;
 	esac
     fi
 fi
@@ -273,6 +274,7 @@ case "$RUNLEVEL" in
 	DO_CONFIRM=no
 	RUN_PARALLEL=no
 	test -x /sbin/blogd && killproc -QUIT /sbin/blogd
+	;;
 esac
 
 #
@@ -310,7 +312,7 @@ elif test -d ${runrc}/ ; then
 	    case "$?" in
 	    0) true	;;
 	    1) continue	;;
-	    2) DO_CONFIRM=""
+	    2) DO_CONFIRM="" ;;
 	    esac
 	fi
 

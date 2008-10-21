@@ -218,7 +218,7 @@ elif test -d ${bootrc}/ ; then
 	    case "$?" in
 	    0) true     ;;
 	    1) continue ;;
-	    2) DO_CONFIRM=""
+	    2) DO_CONFIRM="" ;;
 	    esac
 	fi
 
