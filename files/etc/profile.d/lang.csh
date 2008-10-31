@@ -13,6 +13,11 @@
 if ( ${?SSH_SENDS_LOCALE} ) goto end
 
 #
+# Already done by the GDM
+#
+if ( ${?GDM_LANG} ) goto end
+
+#
 # Get the system and after that the users configuration
 #
 if ( -s /etc/sysconfig/language ) then

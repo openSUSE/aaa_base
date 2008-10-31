@@ -13,6 +13,11 @@
 test -z "$SSH_SENDS_LOCALE" || return
 
 #
+# Already done by the GDM
+#
+test -z "$GDM_LANG" || return
+
+#
 # Get the system and after that the users configuration
 #
 if test -s /etc/sysconfig/language ; then
