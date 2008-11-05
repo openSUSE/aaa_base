@@ -34,6 +34,9 @@ OLD_IFS="$IFS"
 IFS="$IFS:"
 
 for MANDIR in $MANPATH $manpath /usr/openwin/man ; do
+    case $MANDIR in
+	.|..) continue ;;
+    esac
     DIRS="$DIRS $MANDIR"
 done
 

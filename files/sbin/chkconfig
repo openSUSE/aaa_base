@@ -142,30 +142,6 @@ sub initlinks_rc {
   %links_unknown = ();
 }
 
-#
-# set the state of a service. 'on' is interpreted as default
-#
-sub set_rc {
-  my $s = shift;
-  my $want = shift;
-  my $ret = 1;
-
-  if (!$known_rc{$s}) {
-    print STDERR "$s: not a runlevel service\n";
-    return;
-  }
-  if ($want eq '') {
-    $ret = insserv('-r', '-d', "$initdir/$s");
-  } elsif ($want eq getdef_rc($s)) {
-    $ret = insserv('-d', "$initdir/$s");
-  } else {
-    $ret = insserv('-r', '-d', "$initdir/$s");
-    $ret = undef unless insserv("$initdir/$s,start=".join(',', split('', $want)));
-  }
-  $links_unknown{$s} = 1;	# check again for this service
-  return $ret;
-}
-
 my $force;
 my $allservices;
 
@@ -528,6 +504,8 @@ if ($mode eq 'h') {
   exit 0;
 }
 my (@services, $s);
+my (@remove, $s);
+my (@enable, $s);
 
 findknown();
 
@@ -611,7 +589,6 @@ if ($mode eq 's') {
   my $status = 0;
   my $usestdin = !@services;
   my $ln = 0;
-  $force = 1 if @services != 2;		# stupid hack
   do {
     if ($usestdin) {
       while (<STDIN>) {
@@ -634,6 +611,8 @@ if ($mode eq 's') {
       printf("Usage: chkconfig -s service on|off|runlevels\n");
       exit 1;
     }
+    @remove = ('-r', '-d', '-p', "$initdir");
+    @enable = ('-p', "$initdir");
     while (@services) {
       $s = shift @services;
       my $want = shift @services;
@@ -657,8 +636,24 @@ if ($mode eq 's') {
       $want =~ s/[TX]//g;
       $current =~ s/[TX]//g;
       next if $want eq $current;
-      $status = 1 unless set_rc($s, $want);
+
+      if (!$known_rc{$s}) {
+        print STDERR "$s: not a runlevel service\n";
+	$status = 1;
+        next;
+      }
+      if ($want eq '') {
+        push @remove, $s;
+      } elsif ($want eq getdef_rc($s)) {
+        push @enable, $s;
+      } else {
+        push @remove, $s;
+        push @enable, "$s".join(',', split('', $want));
+      }
+      $links_unknown{$s} = 1;	# check again for this service
     }
+    $status = 1 unless insserv(@remove);
+    $status = 1 unless insserv(@enable);
   } while ($usestdin);
   exit $status;
 }
@@ -680,10 +675,12 @@ if ($mode eq 'a' || $mode eq 'd') {
       next;
     }
     push @services, $s;
+  }
+  if (!$status) {
     if ($mode eq 'a') {
-      insserv("$initdir/$s") or $status = 1;
+      insserv('-p', "$initdir", @services) or $status = 1;
     } else {
-      insserv('-r', "$initdir/$s") or $status = 1;
+      insserv('-p', "$initdir", '-r', @services) or $status = 1;
     }
   }
   $mode = 'l';

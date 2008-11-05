@@ -169,7 +169,7 @@ rc_status ()
 	    local out=1
 	    local opt="en"
 
-	    test -n "${i#-v}" && vrt="$vrt${esc}[${i#-v}A" || opt="e"
+	    test -n "${i#-v}" && vrt=${esc:+"${esc}[${i#-v}A"} || opt="e"
 	    case "$_rc_status" in
 	    0)	vrt="$vrt$rc_running";		;; # service running
 	    1)	vrt="$vrt$rc_dead"   ; out=2	;; # service dead (but has pid file)
@@ -209,7 +209,7 @@ rc_status ()
 	    local out=1
 	    local opt="en"
 
-	    test -n "${i#-v}" && vrt="$vrt${esc}[${i#-v}A" || opt="e"
+	    test -n "${i#-v}" && vrt=${esc:+"${esc}[${i#-v}A"} || opt="e"
 	    case "$_rc_status" in
 	    0)	vrt="$vrt$rc_done"   ;		;; # success
 	    1)	vrt="$vrt$rc_failed" ; out=2	;; # generic or unspecified error
@@ -246,7 +246,7 @@ rc_status ()
 	    local out=1
 	    local opt="en"
 
-	    test -n "${i#-v}" && vrt="$vrt${esc}[${i#-v}A" || opt="e"
+	    test -n "${i#-v}" && vrt=${esc:+"${esc}[${i#-v}A"} || opt="e"
 	    case "$_rc_status" in
 	    0)	vrt="$vrt$rc_done"  ;		;; # success
 	    *)	vrt="$vrt$rc_failed"; out=2	;; # failed
