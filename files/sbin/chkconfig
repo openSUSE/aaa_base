@@ -611,8 +611,8 @@ if ($mode eq 's') {
       printf("Usage: chkconfig -s service on|off|runlevels\n");
       exit 1;
     }
-    @remove = ('-r', '-d', '-p', "$initdir");
-    @enable = ('-p', "$initdir");
+    @remove = ();
+    @enable = ();
     while (@services) {
       $s = shift @services;
       my $want = shift @services;
@@ -652,8 +652,12 @@ if ($mode eq 's') {
       }
       $links_unknown{$s} = 1;	# check again for this service
     }
-    $status = 1 unless insserv(@remove);
-    $status = 1 unless insserv(@enable);
+    if (scalar(@remove)) {
+      $status = 1 unless insserv('-r', '-d', '-p', "$initdir", @remove);
+    }
+    if (scalar(@enable)) {
+      $status = 1 unless insserv('-p', "$initdir", @enable);
+    }
   } while ($usestdin);
   exit $status;
 }
