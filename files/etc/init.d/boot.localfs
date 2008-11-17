@@ -252,9 +252,12 @@ case "$1" in
     stop)
 	mounts=/etc/fstab
 	test -r /proc/mounts && mounts=/proc/mounts
+	reverse < $mounts > /dev/shm/mtab
 
 	mtab=
 	test "$2" = "nomtab" && mtab=-n
+
+	echo "Unmounting file systems"
 
 	# move to intermezzo package ?
 	# First umount intermezzo filesystems
@@ -264,10 +267,11 @@ case "$1" in
 		*[Ii][Nn][Tt][Ee][Rr][Mm][Ee][Zz][Zz][Oo]*)
 		    umountizo >/dev/null 2>&1
 		esac
-	    done < $mounts
+	    done < /dev/shm/mtab
 	fi
 
-	reverse < $mounts | \
+	ulist=
+
 	while read des fs type rest; do
 	    case "${des##*/}" in
 		""|\#*)    continue ;;
@@ -286,15 +290,18 @@ case "$1" in
 		/dev*)     continue ;;
 		/proc*)    continue ;;
 		/sys*)     continue ;;
-		/tmp)      continue ;;
-		/var/tmp)  continue ;;
 		/var/lib/nfs/rpc_pipefs)
 			   continue ;;
+	    esac
+	    ulist="${ulist:+$ulist }$fs"
+	    case "$fs" in
+		/tmp)      continue ;;
+		/var/tmp)  continue ;;
 	    esac
 	    case ",$mntfs," in
 		*,$type,*) umount $mtab -t $type $fs ;;
 	    esac
-	done
+	done < /dev/shm/mtab
 
 	grep "loop" /proc/partitions | while read major minor blocks name ; do
 	    case "$name" in
@@ -311,9 +318,13 @@ case "$1" in
 	    sleep 1
 	fi
 
+	if test -z "$ulist" ; then
+	    rc_status -v1 -r
+	    rc_exit
+	fi
+
 	UMOUNT_FAILED=false
-	echo "Unmounting file systems"
-	umount -arv $mtab -t no${tmpfs//,/,no},$nofs -O no_netdev || {
+	umount -rv $mtab -t no${tmpfs//,/,no},$nofs -O no_netdev $ulist || {
 	    rc_status
 	    UMOUNT_FAILED=true
 	}

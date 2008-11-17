@@ -84,6 +84,10 @@ case "$1" in
 
 	    rc_status -v -r
 	else
+	    #
+	    # Without having this loaded hwclock will fail on x86
+	    #
+	    modprobe -q rtc_cmos || true
 
 	    echo -n Setting up the hardware clock
 	    #

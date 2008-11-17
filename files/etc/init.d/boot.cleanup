@@ -35,6 +35,9 @@ case "$1" in
 	if test -x /usr/bin/find; then
 	    find /tmp/ssh-* /tmp/gpg-* -type s -name "*agent*" -maxdepth 1 -exec rm -f {} + 2>/dev/null
 	    find /var/run /var/lock -type f ! -wholename /var/run/utmp -exec rm -f {} + 2>/dev/null
+	    if test -d /var/lib/ntp/var/run; then
+		find /var/lib/ntp/var/run -type f -exec rm -f {} + 2>/dev/null
+	    fi
 	else
 	    # fallback for find if we get /usr from nfs
 	    rec_rem() {
