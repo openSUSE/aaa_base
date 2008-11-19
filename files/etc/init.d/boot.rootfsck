@@ -60,6 +60,10 @@ case "$1" in
 		MAY_FSCK=1
 	    fi
         fi
+	ROOTFS_TYPE=`stat -f -c "%T" /`
+	case $ROOTFS_TYPE in
+		afs|cifs|nfs|novell|smb) MAY_FSCK=0 ;;
+	esac
 	# common options for file system check
 	FSCK_OPTS="-a"
 	if test -f /forcefsck -o "$DO_FORCEFSCK" = "yes" ; then
