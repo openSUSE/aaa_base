@@ -648,7 +648,7 @@ if ($mode eq 's') {
         push @enable, $s;
       } else {
         push @remove, $s;
-        push @enable, "$s".join(',', split('', $want));
+        push @enable, "$s,start=".join(',', split('', $want));
       }
       $links_unknown{$s} = 1;	# check again for this service
     }

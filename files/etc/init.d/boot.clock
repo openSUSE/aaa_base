@@ -103,10 +103,10 @@ case "$1" in
 		    echo "0"		>> /etc/adjtime
 		    echo "UTC"		>> /etc/adjtime
 		fi
-		/sbin/hwclock --adjust $HWCLOCK
-		rc_status
+		/sbin/hwclock --adjust --hctosys $HWCLOCK
+	    else
+		/sbin/hwclock --hctosys $HWCLOCK
 	    fi
-	    /sbin/hwclock --hctosys $HWCLOCK
 	    rc_status -v -r
 	fi
 	;;
