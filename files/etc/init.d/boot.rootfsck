@@ -55,15 +55,7 @@ case "$1" in
 	    	echo /bin/mknod -m600 $ROOTFS_BLKDEV b $((rootmajor)) $((rootminor))
 	    	/bin/mknod -m600 $ROOTFS_BLKDEV b $((rootmajor)) $((rootminor))
 	    fi
-	    MAY_FSCK=0
-	    if test -n "$ROOTFS_BLKDEV" -a "$ROOTFS_BLKDEV" != "/" -a -b "$ROOTFS_BLKDEV" ; then
-		MAY_FSCK=1
-	    fi
         fi
-	ROOTFS_TYPE=`stat -f -c "%T" /`
-	case $ROOTFS_TYPE in
-		afs|cifs|nfs|novell|smb) MAY_FSCK=0 ;;
-	esac
 	# common options for file system check
 	FSCK_OPTS="-a"
 	if test -f /forcefsck -o "$DO_FORCEFSCK" = "yes" ; then
@@ -74,10 +66,17 @@ case "$1" in
 	if test "$ROOTFS_FSCK" = "0" ; then
 	    # already checked and ok, skip the rest
             MAY_FSCK=0
-        fi
-        if test -x /usr/bin/on_ac_power ; then
-            # skip fsck if running on battery
-            /usr/bin/on_ac_power -q || MAY_FSCK=0
+        else
+	    ROOTFS_TYPE=`stat -f -c "%T" /`
+	    case $ROOTFS_TYPE in
+		afs|cifs|nfs|novell|smb) MAY_FSCK=0 ;;
+		*)
+		    if test -x /usr/bin/on_ac_power ; then
+			# skip fsck if running on battery
+			/usr/bin/on_ac_power -q || MAY_FSCK=0
+		    fi
+		;;
+	    esac
         fi
 
 	if test ! -f /fastboot -a -z "$DO_FASTBOOT" -a $MAY_FSCK -eq 1 ; then

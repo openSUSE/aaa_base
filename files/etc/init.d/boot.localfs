@@ -323,6 +323,12 @@ case "$1" in
 	    rc_exit
 	fi
 
+	# if /var is on a different filesystem than / make sure we can umount
+        if test $(stat -c "%i" -f /) != $(stat -c "%i" -f /var) ; then
+            echo "/var is an extra partition, killing all processes accessing it"
+            fuser -skm /var
+        fi
+
 	UMOUNT_FAILED=false
 	umount -rv $mtab -t no${tmpfs//,/,no},$nofs -O no_netdev $ulist || {
 	    rc_status
