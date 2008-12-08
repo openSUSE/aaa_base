@@ -1,12 +1,12 @@
 ## Path:	Desktop/Window manager
 ## Description:	
-## Type:	string(kde,fvwm,gnome,windowmaker)
+## Type:	string(gnome,startkde,startkde3,startxfce4,twm)
 ## Default:	kde
 ## Config:      profiles,kde,susewm
 #
 # Here you can set the default window manager (kde, fvwm, ...)
 # changes here require at least a re-login
-DEFAULT_WM="kde"
+DEFAULT_WM="startkde"
 
 ## Type:	yesno
 ## Default:	yes

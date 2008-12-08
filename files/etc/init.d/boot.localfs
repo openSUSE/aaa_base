@@ -310,14 +310,6 @@ case "$1" in
 	    esac
 	done
 
-	#
-	# Use fuser with option -w if available to terminate all
-	# processes having write access to the root file system.
-	#
-	if fuser -skmw -TERM / > /dev/null 2>&1 ; then
-	    sleep 1
-	fi
-
 	if test -z "$ulist" ; then
 	    rc_status -v1 -r
 	    rc_exit
@@ -359,6 +351,9 @@ case "$1" in
 		esac
 		case ",$netfs," in
 		    *,$type,*)	continue ;; # Avoid hanging reboot/halt
+		esac
+		case "$fs" in
+		    /)		continue ;; # leave rootfs alone here
 		esac
 		mount -nv -o remount,ro $fs
 	    done

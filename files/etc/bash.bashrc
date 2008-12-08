@@ -278,7 +278,7 @@ case "$-" in
 	    alias which=_which
 	fi
 	alias rehash='hash -r'
-	alias you='test "$EUID" = 0 && /sbin/yast2 online_update || su - -c "/sbin/yast2 online_update"'
+	alias you='if test "$EUID" = 0 ; then /sbin/yast2 online_update ; else su - -c "/sbin/yast2 online_update" ; fi'
 	if test "$is" != "ksh" ; then
 	    alias beep='echo -en "\007"' 
 	else
