@@ -71,13 +71,17 @@ echo "Running $0"
 #
 # Start of e.g. blogd, requires /proc and /dev/pts.
 #
-echo -n "Mounting procfs at /proc"
-mount -n -t proc proc /proc
-rc_status -v -r
+if test ! -d /proc/1 ; then
+    echo -n "Mounting procfs at /proc"
+    mount -n -t proc proc /proc
+    rc_status -v -r
+fi
 
-echo -n "Mounting sysfs at /sys"
-mount -n -t sysfs sysfs /sys
-rc_status -v -r
+if test ! -d /sys/kernel ; then
+    echo -n "Mounting sysfs at /sys"
+    mount -n -t sysfs sysfs /sys
+    rc_status -v -r
+fi
 
 if test -d /sys/kernel/debug ; then
     while read dev type ; do

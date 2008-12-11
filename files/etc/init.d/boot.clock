@@ -30,6 +30,15 @@ case "$HWCLOCK" in
 esac
 test "$USE_ADJFILE" = no && HWCLOCK="$HWCLOCK --noadjfile"
 
+#
+# Don't use hwclock if not valid
+#
+USE_HWCLOCK=yes
+case "$(uname -i)" in
+s390*) USE_HWCLOCK=no ;;
+esac
+test -e /proc/sys/xen/independent_wallclock && USE_HWCLOCK=no
+
 rc_reset
 
 case "$1" in
@@ -44,7 +53,7 @@ case "$1" in
 	fi
 	# Set and adjust the hardware clock
 	#	
-	if test "$HOSTTYPE" = "s390" -o "$HOSTTYPE" = "s390x" ; then
+	if test "$USE_HWCLOCK" != "yes" ; then
 
 	    echo -n Setting up the system clock
 

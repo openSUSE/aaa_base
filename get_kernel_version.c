@@ -102,20 +102,23 @@ main (int argc, char *argv[])
           {
 	    int j = i+14;
 	    int invalid_char = 0;
-	    int in_number_range = 1;
+	    int number_dots = 0;
 
 	    /* check if we really found a version */
 	    for (j = j+1; buffer[j] != ' '; j++)
 	      {
 		char c = buffer[j];
 
-		if (c == '-')
-		  in_number_range = 0;
+		if (c == '.') {
+		  number_dots++;
+		  continue;
+		}
 
-		if ((in_number_range && !isdigit(c) && c != '.') ||
-		    (!in_number_range && !my_is_alnum_punct(c)))
+		if (((number_dots < 2) && !isdigit(c)) ||
+		    ((number_dots >= 2) && !my_is_alnum_punct(c)))
 		  {
-		    invalid_char = 1;
+		    //invalid_char = 1;
+		    printf("invalid=1 for %c\n", c);
 		    break;
 		  }
 	      }
