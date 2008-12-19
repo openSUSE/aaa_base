@@ -77,13 +77,15 @@ if test ! -d /proc/1 ; then
     rc_status -v -r
 fi
 
-if test ! -d /sys/kernel ; then
+if test ! -d /sys/block ; then
     echo -n "Mounting sysfs at /sys"
     mount -n -t sysfs sysfs /sys
     rc_status -v -r
 fi
 
 if test -d /sys/kernel/debug ; then
+    DTYPE=`stat -f -c "%T" /sys/kernel/debug 2>/dev/null`
+    if test "$DTYPE" = "sysfs" ; then
     while read dev type ; do
 	if test "$type" = "debugfs" ; then
 	    echo -n "Mounting debugfs at /sys/kernel/debug"
@@ -91,6 +93,7 @@ if test -d /sys/kernel/debug ; then
 	    rc_status -v -r
 	fi
     done < /proc/filesystems
+    fi
 fi
 #
 # mount tmpfs on /dev if not already done by initramfs
