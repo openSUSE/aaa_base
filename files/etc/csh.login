@@ -301,8 +301,7 @@ if (${?TERM} && -o /dev/$tty && ${?prompt}) then
     if (${TERM} == "xterm") then
 	if (! ${?SSH_TTY} ) then
 	    if ( ! -f $HOME/.hushlogin && -s /etc/motd ) cat /etc/motd
-	    # Go home
-	    cd; echo "Directory: $cwd"
+	    echo "Directory: $cwd"
 	    # Last but not least
 	    date
 	endif

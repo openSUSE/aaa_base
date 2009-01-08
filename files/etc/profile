@@ -389,8 +389,7 @@ case "$-" in
     if test "$TERM" = "xterm" -a -O "$tty" ; then
 	if test -z "${SSH_TTY}" ; then
 	    test ! -f $HOME/.hushlogin -a -s /etc/motd && cat /etc/motd
-	    # Go home
-	    cd; echo "Directory: $PWD"
+	    echo "Directory: $PWD"
 	    # Last but not least
 	    date
 	fi
