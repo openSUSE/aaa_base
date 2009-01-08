@@ -22,7 +22,7 @@ uniquefy_search_path ()
 }
 
 for xdgdir in /usr/local/share /usr/share /etc/opt/*/share /opt/*/share /usr/share/gnome ; do
-   if test -d $xdgdir && test -d $xdgdir/applications; then
+   if test -d "$xdgdir" && test -d "$xdgdir/applications"; then
       if test -z "$XDG_DATA_DIRS"; then
          XDG_DATA_DIRS="$xdgdir"
       else
@@ -35,7 +35,7 @@ XDG_DATA_DIRS=$(uniquefy_search_path "$XDG_DATA_DIRS")
 export XDG_DATA_DIRS
 
 for xdgdir in /usr/local/etc/xdg /etc/xdg /etc/opt/*/xdg ; do
-   if test -d $xdgdir; then
+   if test -d "$xdgdir"; then
       if test -z "XDG_CONFIG_DIRS"; then
          XDG_CONFIG_DIRS="$xdgdir"
       else
