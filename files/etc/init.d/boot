@@ -71,13 +71,15 @@ echo "Running $0"
 #
 # Start of e.g. blogd, requires /proc and /dev/pts.
 #
-if test ! -d /proc/1 ; then
+DTYPE=`stat -f -c "%T" /proc 2>/dev/null`
+if test "$DTYPE" != "proc" ; then
     echo -n "Mounting procfs at /proc"
     mount -n -t proc proc /proc
     rc_status -v -r
 fi
 
-if test ! -d /sys/block ; then
+DTYPE=`stat -f -c "%T" /sys 2>/dev/null`
+if test "$DTYPE" != "sysfs" ; then
     echo -n "Mounting sysfs at /sys"
     mount -n -t sysfs sysfs /sys
     rc_status -v -r
@@ -122,10 +124,12 @@ cp --preserve=all --recursive --remove-destination /lib/udev/devices/* /dev
 chmod 1777 /dev/shm
 rc_status -v -r
 
-echo -n "Mounting devpts at /dev/pts"
-mount -n -t devpts -o mode=0620,gid=5 devpts /dev/pts
-rc_status -v -r
-
+DTYPE=`stat -f -c "%T" /dev/pts 2>/dev/null`
+if test "$DTYPE" != "devpts" ; then
+    echo -n "Mounting devpts at /dev/pts"
+    mount -n -t devpts -o mode=0620,gid=5 devpts /dev/pts
+    rc_status -v -r
+fi
 #
 # Should we ask for interactive boot mode
 #

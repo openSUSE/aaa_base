@@ -39,6 +39,9 @@ _cd_ ()
     esac
 
     case "$c" in
+    *\**)	COMPREPLY=($(for x in $c; do
+		    test -d $x && echo $x/
+		done)) ;;
     \$\(*\))	eval COMPREPLY=\(${c}\) ;;
     \$\(*)	COMPREPLY=($(compgen -c -P '$(' -S ')'	-- ${c#??}))	;;
     \`*\`)	eval COMPREPLY=\(${c}\) ;;
