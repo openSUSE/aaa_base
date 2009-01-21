@@ -36,7 +36,7 @@ export XDG_DATA_DIRS
 
 for xdgdir in /usr/local/etc/xdg /etc/xdg /etc/opt/*/xdg ; do
    if test -d "$xdgdir"; then
-      if test -z "XDG_CONFIG_DIRS"; then
+      if test -z "$XDG_CONFIG_DIRS"; then
          XDG_CONFIG_DIRS="$xdgdir"
       else
          XDG_CONFIG_DIRS="$XDG_CONFIG_DIRS:$xdgdir"
