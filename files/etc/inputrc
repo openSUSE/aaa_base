@@ -125,6 +125,10 @@ $endif
 #
 "\C-?":		backward-delete-char
 "\C-H":		backward-delete-char
+$if term=xterm
+"\e\303\277":	backward-delete-word
+"\eÿ":		backward-delete-word
+$endif
 #
 # Home and End
 #
