@@ -96,7 +96,9 @@ case "$1" in
 	    #
 	    # Without having this loaded hwclock will fail on x86
 	    #
-	    modprobe -q rtc_cmos || true
+	    if modprobe -q rtc_cmos; then
+		/sbin/udevadm settle --timeout=2
+	    fi
 
 	    echo -n Setting up the hardware clock
 	    #
