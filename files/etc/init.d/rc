@@ -54,36 +54,56 @@ prerc=/etc/init.d/rc${PREVLEVEL}.d
 # Up from runlevel S we have to check if the system was
 # cold booted into single user mode and call /etc/init.d/boot.
 #
-if test "$PREVLEVEL" = "S" -a "$RUNLEVEL" != "0" -a "$RUNLEVEL" != "6" ; then
-    # Double check
-    single="no"
-    hvname="yes"
+if test "$PREVLEVEL" = "S" -a -n "$INIT_VERSION" ; then
     #
-    if rc_cmdline single s S ; then
-	single="yes"
+    # Check if this is a cold boot
+    #
+    COLD_BOOT=no
+    DTYPE=$(stat -f -c "%T" /proc 2>/dev/null)
+    if test "$DTYPE" != "proc" ; then
+	mount -n -t proc proc /proc
+	COLD_BOOT=yes
+    fi
+    DTYPE=$(stat -f -c "%T" /sys 2>/dev/null)
+    if test "$DTYPE" != "sysfs" ; then
+	mount -n -t sysfs sysfs /sys
+	COLD_BOOT=yes
+    fi
+    DTYPE=$(stat -f -c "%T" /dev/pts 2>/dev/null)
+    if test "$DTYPE" != "devpts" ; then
+	mount -n -t devpts -o mode=0620,gid=5 devpts /dev/pts
+	COLD_BOOT=yes
     fi
     read -t 2 hostname < /proc/sys/kernel/hostname 2> /dev/null
     case "${hostname}" in
-    "(none)"|unknown|"") hvname="no" ;;
+    "(none)"|unknown|"") COLD_BOOT=yes ;;
     esac
     unset hostname
+    export COLD_BOOT
 
-    if test "$single" = "yes" -a "$hvname" = "no" ; then
-	# This is the case if we're up from cold boot
-	echo "Sending all processes the TERM signal..."
-	killall5 -15
-	sleep 3
-	echo "Sending all processes the KILL signal..."
-	killall5 -9
-	/etc/init.d/boot.swap    stop nomtab
-	/etc/init.d/boot.localfs stop nomtab
-	/etc/init.d/boot
-    else
-	for b in /etc/init.d/boot.d/S*boot.udev
-	do
-	    test -x $b || continue
-	    $b start
-	done
+    #
+    # Changing from single user mode into runlevel mode
+    # For cold boot run all run boot otherwise start udev
+    #
+    if "$RUNLEVEL" != "0" -a "$RUNLEVEL" != "6" ; then
+	if test "$COLD_BOOT" = "yes" ; then
+	    # This is the case if we're up from cold boot
+	    echo "Sending all processes the TERM signal..."
+	    killall5 -15
+	    sleep 3
+	    echo "Sending all processes the KILL signal..."
+	    killall5 -9
+	    /etc/init.d/boot.swap    stop nomtab
+	    /etc/init.d/boot.localfs stop nomtab
+	    /etc/init.d/boot
+	else
+	    for b in /etc/init.d/boot.d/S*boot.udev
+	    do
+		test -x $b || continue
+		$b start
+	    done
+	fi
+	unset COLD_BOOT
     fi
 fi
 

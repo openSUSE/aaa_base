@@ -115,27 +115,26 @@ test -s /etc/init.d/.depend.halt  || RUN_PARALLEL="no"
 type -p startpar &> /dev/null     || RUN_PARALLEL="no"
 startpar -v      &> /dev/null     || RUN_PARALLEL="no"
 
-#
-# set back system boot configuration
-#
-if test "$RUN_PARALLEL" = "yes" ; then
-
-    startopt="-p4 -t 30 -T 3"
-    eval $(startpar $startopt -M halt)
-    unset failed_service skipped_service
-
-elif test -d /etc/init.d/boot.d/ ; then
-
+if test -z "$COLD_BOOT" ; then
     #
-    # call modules in boot.d via K* symlinks
+    # set back system boot configuration
     #
+    if test "$RUN_PARALLEL" = "yes" ; then
 
-    for link in /etc/init.d/boot.d/K[0-9][0-9]*; do
-	test -x $link || continue
-	$link stop
-    done
-    unset link
+	startopt="-p4 -t 30 -T 3"
+	eval $(startpar $startopt -M halt)
+	unset failed_service skipped_service
 
+    elif test -d /etc/init.d/boot.d/ ; then
+	#
+	# call modules in boot.d via K* symlinks
+	#
+	for link in /etc/init.d/boot.d/K[0-9][0-9]*; do
+	    test -x $link || continue
+	    $link stop
+	done
+	unset link
+    fi
 fi
 
 # check out if a software raid is active
