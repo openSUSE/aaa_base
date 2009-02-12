@@ -69,7 +69,7 @@ case "$1" in
         else
 	    ROOTFS_TYPE=`stat -f -c "%T" /`
 	    case $ROOTFS_TYPE in
-		afs|cifs|nfs|novell|smb) MAY_FSCK=0 ;;
+		aufs|tmpfs|afs|cifs|nfs|novell|smb|UNKNOWN*) MAY_FSCK=0 ;;
 		*)
 		    if test -x /usr/bin/on_ac_power ; then
 			# skip fsck if running on battery
