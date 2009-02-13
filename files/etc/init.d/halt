@@ -16,6 +16,7 @@
 
 test -s /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
 test -e /proc/splash || SPLASH="no"
+test -x /sbin/splash || SPLASH="no"
 
 #
 # Avoid being interrupted by child or keyboard
