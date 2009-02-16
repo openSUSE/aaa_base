@@ -322,7 +322,7 @@ elif test -d ${runrc}/ ; then
 	# Don't start service if previous runlevel includes the service.
 	#
 	service=${link##*/S$rex}
-	checklink $prerc/K$rex$${service} && continue
+	checklink $prerc/K$rex${service} && continue
 
 	#
 	# Ask the user if wanted
