@@ -76,7 +76,7 @@ case "$1" in
 	    if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
 		echo -n "Cleaning temporary directories $CLEAR_DIRS"
 		for CURDIR in $CLEAR_DIRS ; do
-		    find $CURDIR -maxdepth 1 -exec rm -rf {} +
+		    find $CURDIR -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 		done
 		rc_status -v -r
 	    fi
