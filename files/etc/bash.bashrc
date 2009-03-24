@@ -77,7 +77,7 @@ fi
 
 #
 # ls color option depends on the terminal
-# If LS_COLROS is set but empty, the terminal has no colors.
+# If LS_COLORS is set but empty, the terminal has no colors.
 #
 if test "${LS_COLORS+empty}" = "${LS_COLORS:+empty}" ; then
     LS_OPTIONS=--color=tty
