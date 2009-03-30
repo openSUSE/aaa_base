@@ -124,6 +124,8 @@ case "$-" in
     #
     case "$is" in
     bash)
+	# Append history list instead of override
+	shopt -s histappend
 	# Force a reset of the readline library
 	unset TERMCAP
 	# Returns short path (last two directories)
