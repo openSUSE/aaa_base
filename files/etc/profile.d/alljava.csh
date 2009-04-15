@@ -18,11 +18,7 @@ if ( -x /usr/$__libdir/jvm/java/bin/java || -x /usr/$__libdir/jvm/java/bin/jre )
   setenv JAVA_BINDIR /usr/$__libdir/jvm/java/bin
   setenv JAVA_ROOT /usr/$__libdir/jvm/java
   setenv JAVA_HOME /usr/$__libdir/jvm/java
-  if ( -x /usr/$__libdir/jvm/java/jre/bin/java ) then
-    setenv JRE_HOME /usr/$__libdir/jvm/java/jre
-  else
-    setenv JRE_HOME /usr/$__libdir/jvm/java
-  endif        
+  setenv JRE_HOME /usr/$__libdir/jvm/jre
   unsetenv JDK_HOME
   unsetenv SDK_HOME
   if ( -x /usr/$__libdir/jvm/java/bin/javac ) then
