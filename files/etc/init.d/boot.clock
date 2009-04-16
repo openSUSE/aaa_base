@@ -1,7 +1,7 @@
-#! /bin/sh
+#!/bin/bash
 #
 # Copyright (c) 2001-2002 SuSE Linux AG, Nuernberg, Germany.
-# Copyright (c) 2008 SuSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2008,2009 SuSE LINUX Products GmbH, Nuernberg, Germany.
 # All rights reserved.
 #
 # /etc/init.d/boot.clock
@@ -26,18 +26,64 @@
 #
 USE_ADJFILE=no
 case "$HWCLOCK" in
-*-u*) USE_ADJFILE=yes ;;
+*-u*) USE_ADJFILE=yes
 esac
-test "$USE_ADJFILE" = no && HWCLOCK="$HWCLOCK --noadjfile"
+test "$SYSTOHC" != yes && USE_ADJFILE=no
 
 #
 # Don't use hwclock if not valid
 #
 USE_HWCLOCK=yes
 case "$(uname -i)" in
-s390*) USE_HWCLOCK=no ;;
+s390*) USE_HWCLOCK=no
 esac
 test -e /proc/sys/xen/independent_wallclock && USE_HWCLOCK=no
+
+#
+# Get current status of kernel time variables, if kernel
+# is within "11 minute mode" do not adjust 
+#
+SKIP_HCTOSYS=no
+typeset -i status=$(adjtimex --print | sed -rn '/^[[:space:]]*status:/{ s/.*([0-9]+)/\1/p; }')
+test $((status & 64)) -eq 0 && SKIP_HCTOSYS=yes
+
+#
+# Without having rtc_cmos module loaded hwclock will fail on at least x86
+#
+rtc_rule()
+{
+    local temprules=/dev/.udev/rules.d
+    local uevseqnum=/sys/kernel/uevent_seqnum
+    local rule=$temprules/95-rtc-cmos.rules
+    local -i start=0 end=0
+
+    if test -e /dev/rtc ; then
+	${1+"$@"}
+	return $?
+    fi
+
+    if test -z "$(/sbin/modprobe -l rtc_cmos)" ; then
+	${1+"$@"}
+	return $?
+    fi
+
+    /bin/mkdir -m 0755 -p $temprules
+    echo ACTION==\"add\", KERNEL==\"rtc0\", RUN=\"${1+"$@"} --rtc=\$env{DEVNAME}\" > $rule
+
+    test -e $uevseqnum && read -t 1 start < $uevseqnum
+
+    if /sbin/modprobe -q rtc_cmos ; then
+	test -e $uevseqnum && read -t 1 end < $uevseqnum
+	if test $start -lt $end ; then
+	    /sbin/udevadm settle --quiet --seq-start=$start --seq-end=$end
+	else
+	    /sbin/udevadm settle --quiet
+	fi
+    else
+	rm -f $rule
+	${1+"$@"}
+    fi
+}
 
 rc_reset
 
@@ -46,16 +92,21 @@ case "$1" in
 	#
 	# mkinitrd will set this variable if the system time was older than
 	# the mkinitrd.rpm build time.
-	if test "$SYSTEM_TIME_INCORRECT" != "" ; then
-		echo -n "The system time was incorrect: '$SYSTEM_TIME_INCORRECT'"
-		rc_status -s
-		rc_exit
+	if test -n "$SYSTEM_TIME_INCORRECT" ; then
+	    echo -n "The system time was incorrect: '$SYSTEM_TIME_INCORRECT'"
+	    rc_status -s
+	    rc_exit
+	fi
+	if test "$SKIP_HCTOSYS" = yes ; then
+	    echo -n "The System Time is already in sync with Hardware Clock"
+	    rc_status -u
+	    rc_exit
 	fi
 	# Set and adjust the hardware clock
 	#	
-	if test "$USE_HWCLOCK" != "yes" ; then
+	if test "$USE_HWCLOCK" != yes ; then
 
-	    echo -n Setting up the system clock
+	    echo -n Setting up the System Clock
 
 	    # On s390 the hwclock is set outside Linux currently.  The kernel
 	    # always assumes it to be set to UTC.  So if it is set to local
@@ -93,19 +144,12 @@ case "$1" in
 
 	    rc_status -v -r
 	else
-	    #
-	    # Without having this loaded hwclock will fail on x86
-	    #
-	    if modprobe -q rtc_cmos; then
-		/sbin/udevadm settle
-	    fi
-
-	    echo -n Setting up the hardware clock
+	    echo -n "Set System Time to the current Hardware Clock"
 	    #
 	    # Read out to hardware clock and for UTC calculate adjtime
 	    # write back the system time later at reboot/shutdown time.
 	    #
-	    if test "$SYSTOHC" = yes -a "$USE_ADJFILE" = yes ; then
+	    if test "$USE_ADJFILE" = yes ; then
 		#
 		# For UTC calculate adjtime
 		#
@@ -114,23 +158,37 @@ case "$1" in
 		    echo "0"		>> /etc/adjtime
 		    echo "UTC"		>> /etc/adjtime
 		fi
-		/sbin/hwclock --adjust --hctosys $HWCLOCK
+		rtc_rule /sbin/hwclock --adjust    --hctosys $HWCLOCK
 	    else
-		/sbin/hwclock --hctosys $HWCLOCK
+		#
+		# Remove any /etc/adjtime left over
+		#
+		if test -e /etc/adjtime ; then
+		    rm -f /etc/adjtime
+		fi
+		rtc_rule /sbin/hwclock --noadjfile --hctosys $HWCLOCK
 	    fi
 	    rc_status -v -r
 	fi
 	;;
     stop)
-	if test "$HOSTTYPE" != "s390" -a "$HOSTTYPE" != "s390x" ; then
-	    if test "$SYSTOHC" = "yes" ; then
-		echo -n "Set Hardware Clock to the current System Time"
-		#
-		# Write back to hardware clock and for UTC calculate adjtime
-		#
-		/sbin/hwclock --systohc $HWCLOCK
-		rc_status -v -r
+	if test "$USE_HWCLOCK" = yes -a "$SYSTOHC" = yes ; then
+	    echo -n "Set Hardware Clock to the current System Time"
+	    #
+	    # Remove any /etc/adjtime left over
+	    #
+	    if test "$USE_ADJFILE" = no -a -e /etc/adjtime ; then
+		rm -f /etc/adjtime
 	    fi
+	    #
+	    # Write back system time to hardware clock
+	    #
+	    if test "$USE_ADJFILE" = no -o "$SKIP_HCTOSYS" = yes ; then
+		/sbin/hwclock --noadjfile --systohc $HWCLOCK
+	    else
+		/sbin/hwclock             --systohc $HWCLOCK
+	    fi
+	    rc_status -v -r
 	fi
 	;;
     status)
