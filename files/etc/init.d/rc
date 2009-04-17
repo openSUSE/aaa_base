@@ -85,7 +85,7 @@ if test "$PREVLEVEL" = "S" -a -n "$INIT_VERSION" ; then
     # Changing from single user mode into runlevel mode
     # For cold boot run all run boot otherwise start udev
     #
-    if "$RUNLEVEL" != "0" -a "$RUNLEVEL" != "6" ; then
+    if test "$RUNLEVEL" != "0" -a "$RUNLEVEL" != "6" ; then
 	if test "$COLD_BOOT" = "yes" ; then
 	    # This is the case if we're up from cold boot
 	    echo "Sending all processes the TERM signal..."

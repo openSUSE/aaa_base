@@ -41,11 +41,12 @@ test -e /proc/sys/xen/independent_wallclock && USE_HWCLOCK=no
 
 #
 # Get current status of kernel time variables, if kernel
-# is within "11 minute mode" do not adjust 
+# is within "11 minute mode" do not adjust HW clock nor
+# write system time back to HW clock, bug bnc#492921.
 #
-SKIP_HCTOSYS=no
+ELEVENMIN_MODE=no
 typeset -i status=$(adjtimex --print | sed -rn '/^[[:space:]]*status:/{ s/.*([0-9]+)/\1/p; }')
-test $((status & 64)) -eq 0 && SKIP_HCTOSYS=yes
+test $((status & 65)) -eq 1 && ELEVENMIN_MODE=yes
 
 #
 # Without having rtc_cmos module loaded hwclock will fail on at least x86
@@ -93,17 +94,15 @@ case "$1" in
 	# mkinitrd will set this variable if the system time was older than
 	# the mkinitrd.rpm build time.
 	if test -n "$SYSTEM_TIME_INCORRECT" ; then
-	    echo -n "The system time was incorrect: '$SYSTEM_TIME_INCORRECT'"
+	    echo -n "The system time was incorrect: '${warn}$SYSTEM_TIME_INCORRECT${norm}'"
 	    rc_status -s
 	    rc_exit
 	fi
-	if test "$SKIP_HCTOSYS" = yes ; then
-	    echo -n "The System Time is already in sync with Hardware Clock"
-	    rc_status -u
+	if test "$ELEVENMIN_MODE" = yes ; then
+	    echo "The System Time is in sync with Hardware Clock ${stat}${done}good${norm}"
+	    rc_status
 	    rc_exit
 	fi
-	# Set and adjust the hardware clock
-	#	
 	if test "$USE_HWCLOCK" != yes ; then
 
 	    echo -n Setting up the System Clock
@@ -142,53 +141,53 @@ case "$1" in
 		rc_status
 	    fi
 
-	    rc_status -v -r
-	else
-	    echo -n "Set System Time to the current Hardware Clock"
-	    #
-	    # Read out to hardware clock and for UTC calculate adjtime
-	    # write back the system time later at reboot/shutdown time.
-	    #
-	    if test "$USE_ADJFILE" = yes ; then
-		#
-		# For UTC calculate adjtime
-		#
-		if test ! -s /etc/adjtime ; then
-		    echo "0.0 0 0.0"	>  /etc/adjtime
-		    echo "0"		>> /etc/adjtime
-		    echo "UTC"		>> /etc/adjtime
-		fi
-		rtc_rule /sbin/hwclock --adjust    --hctosys $HWCLOCK
-	    else
-		#
-		# Remove any /etc/adjtime left over
-		#
-		if test -e /etc/adjtime ; then
-		    rm -f /etc/adjtime
-		fi
-		rtc_rule /sbin/hwclock --noadjfile --hctosys $HWCLOCK
-	    fi
-	    rc_status -v -r
+	    rc_status -v
+	    rc_exit
 	fi
+	#
+	# Set and adjust the hardware clock
+	#	
+	echo -n "Set System Time to the current Hardware Clock"
+	#
+	# Read out to hardware clock and for UTC calculate adjtime
+	# write back the system time later at reboot/shutdown time.
+	#
+	if test "$USE_ADJFILE" = yes ; then
+	    #
+	    # For UTC calculate adjtime
+	    #
+	    if test ! -s /etc/adjtime ; then
+		echo "0.0 0 0.0"
+		echo "0"
+		echo "UTC"
+	    fi >  /etc/adjtime
+	    rtc_rule /sbin/hwclock --hctosys $HWCLOCK --adjust
+	else
+	    # Remove any /etc/adjtime left over
+	    test -e /etc/adjtime && rm -f /etc/adjtime
+	    rtc_rule /sbin/hwclock --hctosys $HWCLOCK --noadjfile
+	fi
+	rc_status -v
 	;;
     stop)
+	if test "$ELEVENMIN_MODE" = yes ; then
+	    echo "The System Time is in sync with Hardware Clock ${stat}${done}good${norm}"
+	    rc_status
+	    rc_exit
+	fi
 	if test "$USE_HWCLOCK" = yes -a "$SYSTOHC" = yes ; then
 	    echo -n "Set Hardware Clock to the current System Time"
 	    #
-	    # Remove any /etc/adjtime left over
+	    # Write system time back to hardware clock
 	    #
-	    if test "$USE_ADJFILE" = no -a -e /etc/adjtime ; then
-		rm -f /etc/adjtime
-	    fi
-	    #
-	    # Write back system time to hardware clock
-	    #
-	    if test "$USE_ADJFILE" = no -o "$SKIP_HCTOSYS" = yes ; then
-		/sbin/hwclock --noadjfile --systohc $HWCLOCK
+	    if test "$USE_ADJFILE" = yes ; then
+		/sbin/hwclock --systohc $HWCLOCK
 	    else
-		/sbin/hwclock             --systohc $HWCLOCK
+		# Remove any /etc/adjtime left over
+		test -e /etc/adjtime && rm -f /etc/adjtime
+		/sbin/hwclock --systohc $HWCLOCK --noadjfile
 	    fi
-	    rc_status -v -r
+	    rc_status -v
 	fi
 	;;
     status)
