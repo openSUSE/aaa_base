@@ -30,29 +30,6 @@ case "$1" in
 	LDCONFIG_NEEDED=false
 	test -s /etc/ld.so.cache || LDCONFIG_NEEDED=true
 	test "$run_ldconfig" = true && LDCONFIG_NEEDED=true
-	test -x /usr/bin/find -a "$LDCONFIG_NEEDED" = false && {
-	    for DUMMY in `/usr/bin/find /etc/ld.so.cache -mtime +30` ; do
-		LDCONFIG_NEEDED=true
-	    done
-	}
-	LIBDIRS="/lib /usr/lib /usr/local/lib"
-	test -s /etc/ld.so.conf && {
-	    for DIR in `cat /etc/ld.so.conf` ; do
-		case $DIR in
-		    /*)
-			test -d "$DIR" && LIBDIRS="$LIBDIRS $DIR"
-			;;
-		esac
-	    done
-	}
-	for DIR in $LIBDIRS ; do
-	    test $DIR -nt /etc/ld.so.cache && {
-	        LDCONFIG_NEEDED=true
-	        break
-	    }
-	done
-	# cache is corrupt?
-	/sbin/ldconfig -p > /dev/null 2>&1 || LDCONFIG_NEEDED=true
 	test -x /sbin/ldconfig -a "$LDCONFIG_NEEDED" = true && {
 	    echo -n "Setting up linker cache (/etc/ld.so.cache) using ldconfig"
 	    { /sbin/ldconfig -X 2>/dev/null || \

@@ -4,10 +4,11 @@
 #%depends: start
 #%modules: rtc_cmos
 #%provides: rtc
-#%programs: /bin/date /bin/ln /bin/mknod /sbin/modprobe /bin/usleep
+#%programs: /bin/ln /bin/mknod /sbin/modprobe /bin/usleep
+#%if: -n "$(modprobe -C /dev/null --set-version $kernel_version --ignore-install --show-depends rtc_cmos 2>/dev/null)"
 #%dontshow
 
-if test -n "$(modprobe -C /dev/null --ignore-install --show-depends rtc_cmos 2>/dev/null)" -a ! -e /sys/class/rtc/rtc0
+if test ! -e /sys/class/rtc/rtc0
 then
     load_modules
     typeset -i rtccount=300
@@ -19,10 +20,5 @@ then
     if test ! -e /dev/rtc0 ; then
 	mknod -m 0644 /dev/rtc0 c 250 0
 	ln -sf rtc0 /dev/rtc
-    fi
-    if test -e /etc/localtime
-    then
-	echo -n 'System time: '
-	date --rfc-822
     fi
 fi

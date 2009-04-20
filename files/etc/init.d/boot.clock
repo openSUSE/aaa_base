@@ -45,8 +45,8 @@ test -e /proc/sys/xen/independent_wallclock && USE_HWCLOCK=no
 # write system time back to HW clock, bug bnc#492921.
 #
 ELEVENMIN_MODE=no
-typeset -i status=$(adjtimex --print | sed -rn '/^[[:space:]]*status:/{ s/.*([0-9]+)/\1/p; }')
-test $((status & 65)) -eq 1 && ELEVENMIN_MODE=yes
+typeset -i STA_CLOCK=$(adjtimex --print | sed -rn '/^[[:blank:]]*status:/{ s/[^[:digit:]]*([[:digit:]]+)/\1/p; }')
+test $((STA_CLOCK & 65)) -eq 1 && ELEVENMIN_MODE=yes
 
 #
 # Without having rtc_cmos module loaded hwclock will fail on at least x86
@@ -89,18 +89,13 @@ rtc_rule()
 rc_reset
 
 case "$1" in
-    start|restart)
+    start|restart|reload|force-reload)
 	#
 	# mkinitrd will set this variable if the system time was older than
 	# the mkinitrd.rpm build time.
 	if test -n "$SYSTEM_TIME_INCORRECT" ; then
 	    echo -n "The system time was incorrect: '${warn}$SYSTEM_TIME_INCORRECT${norm}'"
 	    rc_status -s
-	    rc_exit
-	fi
-	if test "$ELEVENMIN_MODE" = yes ; then
-	    echo "The System Time is in sync with Hardware Clock ${stat}${done}good${norm}"
-	    rc_status
 	    rc_exit
 	fi
 	if test "$USE_HWCLOCK" != yes ; then
@@ -126,9 +121,11 @@ case "$1" in
 	    # settimeofday, and it only works as long as $0 is executed
 	    # exactly once, at boot.
 
+	    unset TZ
+
 	    case "$HWCLOCK" in
 	    *-l*)
-		date $(date -u +'%m%d%H%M%Y.%S')
+		date --set "$(date --utc +'%Y-%m-%d %H:%M:%S.%N')"
 		rc_status
 		;;
 	    esac
@@ -142,6 +139,11 @@ case "$1" in
 	    fi
 
 	    rc_status -v
+	    rc_exit
+	fi
+	if test "$ELEVENMIN_MODE" = yes ; then
+	    echo "The System Time is in sync with Hardware Clock ${stat}${done}good${norm}"
+	    rc_status
 	    rc_exit
 	fi
 	#
@@ -190,12 +192,21 @@ case "$1" in
 	    rc_status -v
 	fi
 	;;
+    timezone)
+	echo -n "Set Hardware Clock to the current System Time"
+	if test "$USE_HWCLOCK" = yes ; then
+	    /sbin/hwclock --systohc $HWCLOCK --noadjfile
+	else
+	    rc_status -u
+	fi
+	;;
     status)
-	rc_failed 4
-	rc_status -v
+	echo -n "Current Hardware Clock: "
+	/sbin/hwclock --show
+	rc_status -v1
 	;;
     *)
-	echo "Usage: $0 {start|stop|status|restart}"
+	echo "Usage: $0 {start|stop|status|restart|reload|force-reload|timezone}"
 	exit 1
 	;;
 esac

@@ -161,12 +161,15 @@ case "$1" in
 	    else
 		FSCK_OPTS="$FSCK_OPTS -V"
 	    fi
+	    preload=$(pidof preload)
+	    test -n "$preload" && kill -STOP $preload
 	    echo "Checking file systems..."
 	    fsck $FSCK_OPTS
 	    # A return code of 1 indicates that file system errors
 	    # were corrected, but that the boot may proceed.
 	    # A return code of 2 or larger indicates failure.
 	    FSCK_RETURN=$?
+	    test -n "$preload" && kill -CONT $preload
 	    test $FSCK_RETURN -lt 4
 	    rc_status -v1 -r
 	    if test $FSCK_RETURN -gt 1 -a $FSCK_RETURN -lt 4 ; then
