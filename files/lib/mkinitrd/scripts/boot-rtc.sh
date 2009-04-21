@@ -17,8 +17,4 @@ then
 	usleep 10000
     done
     unset rtccount
-    if test ! -e /dev/rtc0 ; then
-	mknod -m 0644 /dev/rtc0 c 250 0
-	ln -sf rtc0 /dev/rtc
-    fi
 fi

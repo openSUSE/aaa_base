@@ -29,11 +29,6 @@ REDIRECT="$(showconsole 2>/dev/null)"
 export CONSOLE REDIRECT
 
 #
-# Set I/O of this script and its childs to console
-#
-exec 0<> $CONSOLE 1>&0 2>&0
-
-#
 # Configuration and coloring of the boot messages
 #
 
@@ -130,6 +125,12 @@ if test "$DTYPE" != "devpts" ; then
     mount -n -t devpts -o mode=0620,gid=5 devpts /dev/pts
     rc_status -v -r
 fi
+
+#
+# Set I/O of this script and its childs to console
+#
+exec 0<> $CONSOLE 1>&0 2>&0
+
 #
 # Should we ask for interactive boot mode
 #

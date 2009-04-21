@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #%stage: boot
-#%depends: start rtc
+#%depends: start rtc udev
 #%provides: clock
 #%programs: /bin/date
 #%dontshow
