@@ -134,16 +134,25 @@ exec 0<> $CONSOLE 1>&0 2>&0
 #
 # Should we ask for interactive boot mode
 #
-DO_CONFIRM=""
-DO_FORCEFSCK=""
+DO_CONFIRM=no
+DO_FORCEFSCK=no
+DO_FASTBOOT=no
+DO_QUIET=no
+DO_BLOGD=yes
 if rc_cmdline confirm > /dev/null ; then
     DO_CONFIRM=yes
 fi
-if rc_cmdline forcefsck > /dev/null ; then
+if rc_cmdline forcefsck > /dev/null || test -e /forcefsck ; then
     DO_FORCEFSCK=yes
 fi
-if rc_cmdline fastboot > /dev/null ; then
+if rc_cmdline fastboot > /dev/null  || test -e /fastboot  ; then
     DO_FASTBOOT=yes
+fi
+if rc_cmdline quiet > /dev/null ; then
+    DO_QUIET=yes
+fi
+if test "$DO_FASTBOOT" = yes -o "$DO_QUIET" = yes -o ! -x /sbin/blogd ; then
+    DO_BLOGD=no
 fi
 test -z "$CONFIRM_PROMPT_TIMEOUT" && CONFIRM_PROMPT_TIMEOUT=5
 if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
@@ -159,7 +168,7 @@ if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
     unset answer
     echo
 fi
-export DO_CONFIRM DO_FORCEFSCK DO_FASTBOOT
+export DO_CONFIRM DO_FORCEFSCK DO_FASTBOOT DO_QUIET DO_BLOGD
 
 #
 # Start blogd, requires /proc and /dev/pts.
@@ -172,7 +181,7 @@ if test -z "$REDIRECT" ; then
 	REDIRECT=/dev/console
     fi
 else
-    if test -x /sbin/blogd ; then
+    if test "$DO_BLOGD" = yes ; then
 	/sbin/blogd $REDIRECT
     fi
 fi
@@ -293,20 +302,26 @@ if test -f /etc/init.d/boot.local ; then
 fi
 
 #
-# Stop blogd
-#
-test -x /sbin/blogd && killproc -QUIT /sbin/blogd
-
-#
 # Check for boot cycle detection
 #
 test -s /lib/bootcycle/stats && . /lib/bootcycle/stats
+
+#
+# Stop blogd
+#
+killproc -QUIT /sbin/blogd
 
 #
 # Remember for master resource script
 #
 if test "$DO_CONFIRM" = "yes" ; then
     > /var/run/do_confirm
+fi
+if test "$DO_FASTBOOT" = "yes" ; then
+    > /var/run/do_fastboot
+fi
+if test "$DO_BLOGD" = "no" ; then
+    > /var/run/no_blogd
 fi
 
 #

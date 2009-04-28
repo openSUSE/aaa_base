@@ -330,32 +330,16 @@ case "$1" in
 
 	if test "$UMOUNT_FAILED" = true -a -z "$mtab" ; then
 	    echo "Oops: umount failed :-(  --  trying to remount readonly..."
+	    ulist=,${ulist// /,},
 	    mounts=/etc/fstab
 	    test -r /proc/mounts && mounts=/proc/mounts
 	    # Use cat and a pipe because umount changes
 	    # /proc/mounts during direct read call
 	    cat $mounts | \
 	    while read des fs type opts rest; do
-	        case "$des" in
-		    ""|\#*)	continue ;; # Comment
-		    swap)	continue ;; # No umount on swap devices
+		case "$ulist" in
+		    *,$fs,*) mount -nv -o remount,ro $fs ;;
 		esac
-		case ",$opts," in
-		    *,ro,*)	continue ;; # Already done
-		esac
-		case ",$mntfs," in
-		    *,$type,*)	continue ;; # Most of them are required
-		esac
-		case ",$nomnt," in
-		    *,$type,*)  continue ;; # Not mountable
-		esac
-		case ",$netfs," in
-		    *,$type,*)	continue ;; # Avoid hanging reboot/halt
-		esac
-		case "$fs" in
-		    /)		continue ;; # leave rootfs alone here
-		esac
-		mount -nv -o remount,ro $fs
 	    done
 
 	    echo "extra sync..."

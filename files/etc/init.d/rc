@@ -122,14 +122,38 @@ exec 0<> $CONSOLE 1>&0 2>&0
 #
 # Up from runlevel N we may want to run in confirm mode
 #
-DO_CONFIRM=""
+DO_CONFIRM=no
+DO_FORCEFSCK=no
+DO_FASTBOOT=no
+DO_QUIET=no
+if test "$RUNLEVEL" != "S" ; then
+    DO_BLOGD=yes
+else
+    DO_BLOGD=no
+fi
 if test "$PREVLEVEL" = "N" ; then
     if rc_cmdline confirm > /dev/null ; then
 	DO_CONFIRM=yes
     fi
     test -e /var/run/do_confirm && DO_CONFIRM=yes
     rm -f   /var/run/do_confirm
-    export DO_CONFIRM
+    if rc_cmdline forcefsck > /dev/null ; then
+	DO_FORCEFSCK=yes
+    fi
+    if rc_cmdline fastboot > /dev/null  ; then
+	DO_FASTBOOT=yes
+    fi
+    test -e /var/run/do_fastboot && DO_FASTBOOT=yes
+    rm -f   /var/run/do_fastboot
+    if rc_cmdline quiet > /dev/null ; then
+	DO_QUIET=yes
+    fi
+    if test "$DO_FASTBOOT" = yes -o "$DO_QUIET" = yes -o ! -x /sbin/blogd ; then
+	DO_BLOGD=no
+    fi
+    test -e /var/run/no_blogd && DO_BLOGD=no
+    rm -f   /var/run/no_blogd
+    export DO_CONFIRM DO_FORCEFSCK DO_FASTBOOT DO_QUIET DO_BLOGD
 fi
 
 #
@@ -159,7 +183,6 @@ else
 	    REDIRECT=/dev/tty1
 	    setconsole $REDIRECT < $CONSOLE
 	    command -p chvt 1 > /dev/null 2>&1
-	    ;;
 	esac
     fi
 fi
@@ -185,7 +208,7 @@ if test -z "$REDIRECT" ; then
 	REDIRECT=/dev/console
     fi
 else
-    if test "$RUNLEVEL" != "S" -a -x /sbin/blogd ; then
+    if test "$DO_BLOGD" = yes; then
 	/sbin/blogd $REDIRECT
     fi
 fi
@@ -293,8 +316,7 @@ case "$RUNLEVEL" in
     S|0|1|6)
 	DO_CONFIRM=no
 	RUN_PARALLEL=no
-	test -x /sbin/blogd && killproc -QUIT /sbin/blogd
-	;;
+	killproc -QUIT /sbin/blogd
 esac
 
 #
@@ -407,7 +429,7 @@ test -s /lib/bootcycle/stats && . /lib/bootcycle/stats
 #
 # Stop blogd if running
 #
-test -x /sbin/blogd && killproc -QUIT /sbin/blogd
+killproc -QUIT /sbin/blogd
 
 #
 # Restore old terminal settings

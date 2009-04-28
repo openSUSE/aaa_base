@@ -10,8 +10,8 @@
 # Provides:          boot.clock
 # Required-Start:    boot.rootfsck
 # Required-Stop:     boot.rootfsck
-# X-Start-Before:    boot.localfs
-# X-Stop-After:      $null
+# X-Start-Before:    boot.localfs apparmor
+# X-Stop-After:      apparmor
 # Default-Start:     B S
 # Default-Stop:
 # Description:       Read hardware clock and set system clock
@@ -102,25 +102,6 @@ case "$1" in
 
 	    echo -n Setting up the System Clock
 
-	    # On s390 the hwclock is set outside Linux currently.  The kernel
-	    # always assumes it to be set to UTC.  So if it is set to local
-	    # time, we have to compensate for that.  We might achieve this
-	    # using this special settimeofday(2) linux feature:
-	    #   Under  Linux there is some peculiar `warp clock' semantics
-	    #   associated to the settimeofday system call if on the  very
-	    #   first  call  (after  booting) that has a non-NULL tz argu-
-	    #   ment, the tv argument is NULL and the tz_minuteswest field
-	    #   is  nonzero.  In  such  a case it is assumed that the CMOS
-	    #   clock is on local time, and that it has to be  incremented
-	    #   by  this  amount to get UTC system time.  No doubt it is a
-	    #   bad idea to use this feature.  (settimeofday(2) man page)
-	    # But unless someone complains we simply will use date(1) to shift
-	    # the system time by the difference between UTC and local time, if
-	    # the system clock is set to local time.  This will introduce a
-	    # minimal shift due to the delay between gettimeofday and
-	    # settimeofday, and it only works as long as $0 is executed
-	    # exactly once, at boot.
-
 	    unset TZ
 
 	    case "$HWCLOCK" in
@@ -196,6 +177,7 @@ case "$1" in
 	echo -n "Set Hardware Clock to the current System Time"
 	if test "$USE_HWCLOCK" = yes ; then
 	    /sbin/hwclock --systohc $HWCLOCK --noadjfile
+	    /sbin/hwclock --hctosys $HWCLOCK --noadjfile
 	else
 	    rc_status -u
 	fi
