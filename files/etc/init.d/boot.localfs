@@ -98,14 +98,14 @@ list_missed ()
 wait_for_udev ()
 {
     local dev
-    local -i timeout=30
+    local -i timeout=1200
     local missing=$(list_missed)
 
     test -n "$missing" || return 0
     echo -n "Waiting for $missing "
     while test $timeout -gt 0 ; do
-	sleep 1
-	echo -n "."
+	usleep 25000
+	((timeout % 40 == 1)) && echo -n "."
 	still_missing=""
 	for dev in $missing; do
 	    if test ! -b $dev ; then
@@ -124,6 +124,38 @@ wait_for_udev ()
 	let timeout--
     done
     test $timeout -eq 0 && echo " timeout! "
+}
+
+#
+# Return the shadow mount points of an AuFS
+#
+aufs ()
+{
+    local IFS pos dir list
+
+    IFS='=:'
+    for pos
+    do
+	case "$pos" in
+	    xino*)
+		dir=${pos#xino=}
+		while test -e "$dir" ; do
+		    if mountpoint -q ${dir} ; then
+			list=${list:+$list,}$dir
+			break
+		    fi
+		    dir=${dir%/*}
+		done
+		;;
+	    br*|dir*)
+		for dir in ${pos} ; do
+		    test -z "${dir##/*}" || continue
+		    mountpoint -q ${dir} || continue
+		    list=${list:+$list,}$dir
+		done
+	esac
+    done
+    echo -n $list
 }
 
 rc_reset
@@ -274,8 +306,9 @@ case "$1" in
 	fi
 
 	ulist=
+	rskip=
 
-	while read des fs type rest; do
+	while read des fs type opts rest; do
 	    case "${des##*/}" in
 		""|\#*)    continue ;;
 		swap)      continue ;;
@@ -289,12 +322,18 @@ case "$1" in
 		*,$type,*) continue ;;
 	    esac
 	    case "$fs" in
-		/)         continue ;;
+		/)	   if test "$type" = aufs; then
+			       rskip="$(aufs ${opts//,/ })"
+			   fi
+			   continue ;;
 		/dev*)     continue ;;
 		/proc*)    continue ;;
 		/sys*)     continue ;;
 		/var/lib/nfs/rpc_pipefs)
 			   continue ;;
+	    esac
+	    case ",$rskip," in
+		*,$fs,*)   continue ;;
 	    esac
 	    ulist="${ulist:+$ulist }$fs"
 	    case "$fs" in
