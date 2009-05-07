@@ -10,8 +10,9 @@
 # Provides:          boot.clock
 # Required-Start:    boot.rootfsck
 # Required-Stop:     boot.rootfsck
-# X-Start-Before:    boot.localfs apparmor
-# X-Stop-After:      apparmor
+# Should-Start:      $null
+# Should-Stop:       apparmor
+# X-Start-Before:    boot.localfs
 # Default-Start:     B S
 # Default-Stop:
 # Description:       Read hardware clock and set system clock
