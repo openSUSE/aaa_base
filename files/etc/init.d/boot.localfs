@@ -357,8 +357,16 @@ case "$1" in
 	    rc_exit
 	fi
 
+	#
 	# If e.g. /var is on a different filesystem than / make sure we can umount
-	mkill -TERM $ulist
+	# but check if /etc/ld.so.preload exists and if this may hold a partition
+	# even for root file systems based programs
+	#
+	if test -s /etc/ld.so.preload && grep -qE "(${ulist// /|})" /etc/ld.so.preload ; then
+	    echo "${warn}Oops${done}: /etc/ld.so.preload exist and breaks the system :-("
+	else
+	    mkill -TERM $ulist
+	fi
 
 	UMOUNT_FAILED=false
 	umount -rv $mtab -t no${tmpfs//,/,no},$nofs -O no_netdev $ulist || {
@@ -368,7 +376,7 @@ case "$1" in
 	rc_status -v1 -r
 
 	if test "$UMOUNT_FAILED" = true -a -z "$mtab" ; then
-	    echo "Oops: umount failed :-(  --  trying to remount readonly..."
+	    echo "${warn}Oops${done}: umount failed :-(  --  trying to remount readonly..."
 	    ulist=,${ulist// /,},
 	    mounts=/etc/fstab
 	    test -r /proc/mounts && mounts=/proc/mounts

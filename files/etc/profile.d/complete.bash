@@ -7,20 +7,63 @@
 # REQUIRES bash 2.0 and higher
 #
 
-_def=; _dir=; _file=; _nosp=
 if complete -o default _nullcommand &> /dev/null ; then
     _def="-o default"
     _dir="-o dirnames"
-    _file="-o filenames"
+   _file="-o filenames"
+else
+    _def=""
+    _dir=""
+   _file=""
 fi
-_minusdd="-d ${_dir}"
-_minusdf="-d ${_file}"
 if complete -o nospace _nullcommand &> /dev/null ; then
     _nosp="-o nospace"
-    _minusdd="${_nosp} ${_dir}"
-    _minusdf="${_nosp} ${_dir}"
+ _minusdd="${_def} ${_nosp} ${_dir}"
+ _minusdf="${_def} ${_nosp} ${_dir}"
+else
+    _nosp=""
+ _minusdd="-d ${_dir}"
+ _minusdf="-d ${_file}"
 fi
 complete -r _nullcommand &> /dev/null
+
+# Escape file and directory names, add slash to directories if needed.
+# Escaping could be done by the option 'filenames' but this fails
+# e.g. on variable expansion like $HO<TAB>
+_compreply_ ()
+{
+    local IFS=$'\n'
+    local s x
+    local -i o
+
+    test ${#COMPREPLY[@]} -eq 0 && return 0
+
+    #
+    # Escape spaces and braces in path names with `\'
+    #
+    s="${COMP_WORDBREAKS// }"
+    s="${s//	}"
+    s="${s//[\{\}()\[\]]}"
+    s="${s} 	(){}[]"
+    o=${#s}
+
+    while test $((o--)) -gt 0 ; do
+	x="${s:${o}:1}"
+	case "$x" in
+	\() COMPREPLY=($(echo "${COMPREPLY[*]}"|command sed -r 's/\(/\\\(/g')) ;;
+	*)  COMPREPLY=(${COMPREPLY[*]//${x}/\\${x}}) ;;
+	esac
+    done
+
+    #
+    # Append a slash on the real result, avoid annoying double tab
+    #
+    for ((o=0; o < ${#COMPREPLY[*]}; o++)) ; do
+	test -d "${COMPREPLY[$o]}"     || continue
+	test -z "${COMPREPLY[$o]##*/}" || continue
+	COMPREPLY[$o]="${COMPREPLY[$o]}/"
+    done
+}
 
 # Expanding shell function for directories
 _cd_ ()
@@ -34,8 +77,8 @@ _cd_ ()
     test $g -eq 0 && shopt -s extglob
 
     case "$(complete -p ${1##*/} 2> /dev/null)" in
-	mkdir)	;;
-	*) s="-S/"  
+    mkdir)  ;;
+    *)	    s="-S/"  
     esac
 
     case "$c" in
@@ -49,8 +92,8 @@ _cd_ ()
     \$\{*\})	eval COMPREPLY=\(${c}\) ;;
     \$\{*)	COMPREPLY=($(compgen -v -P '${' -S '}'	-- ${c#??}))	;;
     \$*)	COMPREPLY=($(compgen -v -P '$' $s	-- ${c#?}))	;;
-    \~*/*)	COMPREPLY=($(compgen -d $s		-- "${c}"))	;;
-    \~*)	COMPREPLY=($(compgen -u $s		-- "${c}"))	;;
+    \~*/*)	COMPREPLY=($(compgen -d $s 		-- "${c}"))	;;
+    \~*)	COMPREPLY=($(compgen -u $s 		-- "${c}"))	;;
     *\:*)
                 if [[ $COMP_WORDBREAKS =~ : ]] ; then
 		    local C=${c%"${c##*[^\\]:}"}
@@ -80,34 +123,10 @@ _cd_ ()
 	done
     fi
 
-    if test ${#COMPREPLY[@]} -gt 0 ; then
-	#
-	# Escape spaces and braces in path names with `\'
-	#
-	s="${COMP_WORDBREAKS// }"
-	s="${s//	}"
-	s="${s//[\{\}()\[\]]}"
-	s="${s} 	(){}[]"
-	o=${#s}
-    
-	while test $((o--)) -gt 0 ; do
-	    c="${s:${o}:1}"
-	    COMPREPLY=(${COMPREPLY[*]//${c}/\\${c}})
-	done
-    fi
-
-    #
-    # Append a slash on the real result, avoid annoying double tab
-    #
-    if test "${1##*/}" != "mkdir" -a ${#COMPREPLY[@]} -eq 1 ; then
-	x=${COMPREPLY[0]}
-	o=$((${#x} - 1))
-	if test "$x" = "$c" -a "${x:${o}:1}" != "/"; then
-	    COMPREPLY[0]="${x}/"
-	fi
-    fi
+    _compreply_
 
     test $g -eq 0 && shopt -u extglob
+    return 0
 }
 
 if shopt -q cdable_vars; then
@@ -126,6 +145,7 @@ _exp_ ()
     local c=${COMP_WORDS[COMP_CWORD]}
     local a="${COMP_LINE}"
     local e s g=0 cd dc t=""
+    local -i o
     local IFS
 
     shopt -q extglob && g=1
@@ -140,10 +160,10 @@ _exp_ ()
 	case "$c" in
 	-)		COMPREPLY=(d c)
 			test $g -eq 0 && shopt -u extglob
-			return					;;
+			return 0				;;
  	-?|-??)		COMPREPLY=($c)
 			test $g -eq 0 && shopt -u extglob
-			return					;;
+			return 0				;;
 	esac
 	case "$a" in
 	$cd|$dc)	e='!*.bz2'				;;
@@ -154,16 +174,44 @@ _exp_ ()
 	case "$c" in
 	-)		COMPREPLY=(d c)
 			test $g -eq 0 && shopt -u extglob
-			return					;;
+			return 0				;;
  	-?|-??)		COMPREPLY=($c)
 			test $g -eq 0 && shopt -u extglob
-			return					;;
+			return 0				;;
 	esac
 	case "$a" in
 	$cd|$dc)	e='!*.+(gz|tgz|z|Z)'			;;
 	*)		e='*.+(gz|tgz|z|Z)'			;;
 	esac							;;
     gunzip)		e='!*.+(gz|tgz|z|Z)'			;;
+    lzma)
+	case "$c" in
+	-)		COMPREPLY=(d c)
+			test $g -eq 0 && shopt -u extglob
+			return 0				;;
+ 	-?|-??)		COMPREPLY=($c)
+			test $g -eq 0 && shopt -u extglob
+			return 0				;;
+	esac
+	case "$a" in
+	$cd|$dc)	e='!*.+(lzma)'				;;
+	*)		e='*.+(lzma)'				;;
+	esac							;;
+    unlzma)		e='!*.+(lzma)'				;;
+    xz)
+	case "$c" in
+	-)		COMPREPLY=(d c)
+			test $g -eq 0 && shopt -u extglob
+			return 0				;;
+ 	-?|-??)		COMPREPLY=($c)
+			test $g -eq 0 && shopt -u extglob
+			return 0				;;
+	esac
+	case "$a" in
+	$cd|$dc)	e='!*.+(xz)'				;;
+	*)		e='*.+(xz)'				;;
+	esac							;;
+    unxz)		e='!*.+(xz)'				;;
     uncompress)		e='!*.Z'				;;
     unzip)		e='!*.+(???)'
 			t="@(MS-DOS executable|Zip archive)*"	;;
@@ -178,7 +226,7 @@ _exp_ ()
 	*=*)		c=${c#*=}				;;
 	*)		COMPREPLY=($(compgen -v -- ${c}))
 			test $g -eq 0 && shopt -u extglob
-			return					;;
+			return 0				;;
 	esac
 	;;
     *)			e='!*'
@@ -206,30 +254,73 @@ _exp_ ()
 	if test $g -eq 0 ; then
 			COMPREPLY=($(compgen -f -X "$e" -- $c))
 			test $g -eq 0 && shopt -u extglob
-			return
+			return 0
 	fi
 			COMPREPLY=($(compgen -G "${c}"))			;;
     *)
 	if test "$c" = ".." ; then
-			COMPREPLY=($(compgen -d -X "$e" -S / ${_nosp} -- $c))
+			COMPREPLY=($(compgen -d -X "$e" ${_nosp} -- $c))
 	else
-			for s in $(compgen -f -X "$e" -- $c) ; do
-			    if test -d $s ; then
-				COMPREPLY=(${COMPREPLY[@]} $(compgen -f -X "$e" -S / -- $s))
-			    elif test -z "$t" ; then
-				COMPREPLY=(${COMPREPLY[@]} $s)
-			    else
-				case "$(file -b $s 2> /dev/null)" in
-				$t) COMPREPLY=(${COMPREPLY[@]} $s)		;;
+			if test -n "$t" ; then
+			    let o=0
+			    COMPREPLY=()
+			    for s in $(compgen -f -X "$e" -- $c) ; do
+				case "$(file -b "$s" 2> /dev/null)" in
+				directory) COMPREPLY[$((o++))]="$s" ;;
+				$t)	   COMPREPLY[$((o++))]="$s" ;;
 				esac
-			    fi
-			done
-	fi									;;
+			    done
+			else
+			    COMPREPLY=($(compgen -f -X "$e" -- $c))
+			fi
+	fi
     esac
+
     test $g -eq 0 && shopt -u extglob
+    return 0
 }
 
-complete -d -X '.[^./]*' -F _exp_ ${_file} \
+_gdb_ ()
+{
+    local c=${COMP_WORDS[COMP_CWORD]}
+    local x
+    local -i o
+
+    if test $COMP_CWORD -eq 1 ; then
+	case "$c" in
+ 	-*) COMPREPLY=($(compgen -W '-args -tty -s -e -se -c -x -d' -- "$c")) ;;
+	*)  COMPREPLY=($(compgen -c -- "$c"))
+	esac
+	return 0
+    fi
+    local p=${COMP_WORDS[COMP_CWORD-1]}
+    case "$p" in
+    -args)	COMPREPLY=($(compgen -c -- "$c")) ;;
+    -tty)	COMPREPLY=(/dev/tty* /dev/pts/*)
+		COMPREPLY=($(compgen -W "${COMPREPLY[*]}" -- "$c")) ;;
+    -s|e|-se)	COMPREPLY=($(compgen -f -- "$c")) ;;
+    -c|-x)	COMPREPLY=($(compgen -f -- "$c")) ;;
+    -d)		COMPREPLY=($(compgen -d ${_nosp} -- "$c")) ;;
+    *)
+		if test -z "$c"; then
+		    COMPREPLY=($(command ps axho comm,pid |\
+				 command sed -rn "\@^${p##*/}@{ s@.*[[:blank:]]+@@p; }"))
+		else
+		    COMPREPLY=()
+		fi
+		let o=${#COMPREPLY[*]}
+		for s in $(compgen -f -- "$c") ; do
+		    case "$(file -b "$s" 2> /dev/null)" in
+		    directory)  COMPREPLY[$((o++))]="$s" ;;
+		    *)		COMPREPLY[$((o++))]="$s" ;;
+		    esac
+		done
+    esac 
+
+   return 0
+}
+
+complete -d -X '.[^./]*' -F _exp_ ${_file} ${_def} \
 				 	compress \
 					bzip2 \
 					bunzip2 \
@@ -242,10 +333,9 @@ complete -d -X '.[^./]*' -F _exp_ ${_file} \
 					acroread xpdf kpdf \
 					dvips xdvi kdvi \
 					tex latex pdflatex
-# No clean way to hande variable expansion _and_ file/dir name expansion
-# with the same string. So let the default expansion on for that commands.
-#complete -d -F _exp_ ${_def}		chown chgrp chmod chattr ln
-#complete -d -F _exp_ ${_def}		more cat less strip grep vi ed
+
+complete -d -F _exp_ ${_file} ${_def}	chown chgrp chmod chattr ln
+complete -d -F _exp_ ${_file} ${_def}	more cat less strip grep vi ed
 
 complete -A function -A alias -A command -A builtin \
 					type
@@ -261,7 +351,8 @@ complete -A user			talk su login sux
 complete -A builtin			builtin
 complete -A export			printenv
 complete -A command ${_def}		command which nohup exec nice eval 
-complete -A command ${_def}		ltrace strace gdb
+complete -A command ${_def}		ltrace strace
+complete -F _gdb_ ${_file} ${_def} 	gdb
 HOSTFILE=""
 test -s $HOME/.hosts && HOSTFILE=$HOME/.hosts
 complete -A hostname			ping telnet slogin rlogin \
@@ -302,8 +393,8 @@ _man_ ()
 		s=$(eval echo {${m}}$o/)
 		if type -p sed &> /dev/null ; then
 		    COMPREPLY=(\
-			$(ls -1fUA $s 2>/dev/null|\
-			  sed -n "/^$c/{s@\.[0-9n].*\.gz@@g;s@.*/:@@g;p;}")\
+			$(command ls -1UA $s 2>/dev/null|\
+			  command sed -rn "/^$c/{s@\.[0-9n].*\.gz@@g;s@.*/:@@g;p;}")\
 		    )
 		else
 		    s=($(ls -1fUA $s 2>/dev/null))

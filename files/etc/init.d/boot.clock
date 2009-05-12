@@ -13,6 +13,7 @@
 # Should-Start:      $null
 # Should-Stop:       apparmor
 # X-Start-Before:    boot.localfs
+# X-Stop-After:      $null
 # Default-Start:     B S
 # Default-Stop:
 # Description:       Read hardware clock and set system clock
