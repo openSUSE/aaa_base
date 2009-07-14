@@ -166,10 +166,12 @@ _exp_ ()
 			return 0				;;
 	esac
 	case "$a" in
-	$cd|$dc)	e='!*.bz2'				;;
+	$cd|$dc)	e='!*.+(*)'
+			t='@(bzip2 compressed)*'		;;
 	*)		e='*.bz2'				;;
 	esac							;;
-    bunzip2)		e='!*.bz2'				;;
+    bunzip2)		e='!*.+(*)'
+			t='@(bzip2 compressed)*'		;;
     gzip)
 	case "$c" in
 	-)		COMPREPLY=(d c)
@@ -180,10 +182,13 @@ _exp_ ()
 			return 0				;;
 	esac
 	case "$a" in
-	$cd|$dc)	e='!*.+(gz|tgz|z|Z)'			;;
+	$cd|$dc)	e='!*.+(*)'
+			t='@(gzip compressed|*data 16 bits)*'	;;
 	*)		e='*.+(gz|tgz|z|Z)'			;;
 	esac							;;
-    gunzip)		e='!*.+(gz|tgz|z|Z)'			;;
+    gunzip)		e='!*.+(*)'
+			t='@(gzip compressed|*data 16 bits)*'	;;
+
     lzma)
 	case "$c" in
 	-)		COMPREPLY=(d c)
@@ -213,7 +218,7 @@ _exp_ ()
 	esac							;;
     unxz)		e='!*.+(xz)'				;;
     uncompress)		e='!*.Z'				;;
-    unzip)		e='!*.+(???)'
+    unzip)		e='!*.+(*)'
 			t="@(MS-DOS executable|Zip archive)*"	;;
     gs|ghostview)	e='!*.+(eps|EPS|ps|PS|pdf|PDF)'		;;
     gv|kghostview)	e='!*.+(eps|EPS|ps|PS|ps.gz|pdf|PDF)'	;;
@@ -261,20 +266,25 @@ _exp_ ()
 	if test "$c" = ".." ; then
 			COMPREPLY=($(compgen -d -X "$e" ${_nosp} -- $c))
 	else
-			if test -n "$t" ; then
-			    let o=0
-			    COMPREPLY=()
-			    for s in $(compgen -f -X "$e" -- $c) ; do
-				case "$(file -b "$s" 2> /dev/null)" in
-				directory) COMPREPLY[$((o++))]="$s" ;;
-				$t)	   COMPREPLY[$((o++))]="$s" ;;
-				esac
-			    done
-			else
-			    COMPREPLY=($(compgen -f -X "$e" -- $c))
-			fi
+			COMPREPLY=($(compgen -f -X "$e" -- $c))
 	fi
     esac
+
+    if test -n "$t" ; then
+	let o=0
+	local -a reply=()
+	for s in ${COMPREPLY[@]}; do
+	    eval e="$s"
+	    if test -d "$e" ; then
+		reply[$((o++))]="$s"	
+		continue
+	    fi
+	    case "$(eval file -b "$s" 2> /dev/null)" in
+	    $t)	reply[$((o++))]="$s"
+	    esac
+	done
+	COMPREPLY=(${reply[@]})
+    fi
 
     test $g -eq 0 && shopt -u extglob
     return 0
@@ -310,9 +320,13 @@ _gdb_ ()
 		fi
 		let o=${#COMPREPLY[*]}
 		for s in $(compgen -f -- "$c") ; do
-		    case "$(file -b "$s" 2> /dev/null)" in
-		    directory)  COMPREPLY[$((o++))]="$s" ;;
-		    *)		COMPREPLY[$((o++))]="$s" ;;
+		    eval e="$s"
+		    if test -d "$e" ; then
+			COMPREPLY[$((o++))]="$s"	
+			continue
+		    fi
+		    case "$(eval file -b "$e" 2> /dev/null)" in
+		    *)	COMPREPLY[$((o++))]="$s"
 		    esac
 		done
     esac 
