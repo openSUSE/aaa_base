@@ -33,6 +33,7 @@ if ( -x /usr/$__libdir/jvm/java/bin/java || -x /usr/$__libdir/jvm/java/bin/jre )
 else
   if ( -x /usr/$__libdir/jvm/jre/bin/java ) then
     # it is IBMJava2-JRE or SunJava2-JRE
+    setenv PATH ${PATH}:/usr/$__libdir/jvm/jre/bin
     setenv JAVA_BINDIR /usr/$__libdir/jvm/jre/bin
     setenv JAVA_ROOT /usr/$__libdir/jvm/jre
     setenv JAVA_HOME /usr/$__libdir/jvm/jre

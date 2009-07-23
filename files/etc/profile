@@ -243,21 +243,6 @@ fi
 #export XAPPLRESDIR
 
 #
-# Set INFOPATH to tell xemacs where he can find the info files
-#
-if test -z "$PROFILEREAD" ; then
-    tmp="$INFODIR"
-    if test -n "$tmp" ; then
-	INFODIR="${tmp}:/usr/local/info:/usr/share/info:/usr/info"
-    else
-	INFODIR="/usr/local/info:/usr/share/info:/usr/info"
-    fi
-    INFOPATH=$INFODIR
-    unset tmp
-    export INFODIR INFOPATH
-fi
-
-#
 # These settings are recommended for old motif applications
 #
 if test -z "$PROFILEREAD" ; then

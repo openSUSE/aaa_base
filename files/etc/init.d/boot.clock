@@ -146,11 +146,11 @@ case "$1" in
 		echo "0"
 		echo "UTC"
 	    fi >  /etc/adjtime
-	    rtc_rule /sbin/hwclock --hctosys $HWCLOCK --adjust
+	    rtc_rule /sbin/hwclock $HWCLOCK --adjust
 	else
 	    # Remove any /etc/adjtime left over
 	    test -e /etc/adjtime && rm -f /etc/adjtime
-	    rtc_rule /sbin/hwclock --hctosys $HWCLOCK --noadjfile
+	    rtc_rule /sbin/hwclock --systz $HWCLOCK --noadjfile
 	fi
 	rc_status -v
 	;;

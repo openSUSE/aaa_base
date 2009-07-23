@@ -194,18 +194,6 @@ endif
 #
 #setenv XAPPLRESDIR "$XAPPLRESDIR:/var/X11R6/app-defaults:/usr/X11R6/lib/X11/app-defaults"
 
-#
-# Set INFOPATH to tell xemacs where he can find the info files
-#
-if (! ${?CSHRCREAD} ) then
-    if ( ${?INFODIR} ) then
-	setenv INFODIR "${INFODIR}:/usr/local/info:/usr/share/info:/usr/info"
-    else
-	setenv INFODIR "/usr/local/info:/usr/share/info:/usr/info"
-    endif
-    setenv INFOPATH $INFODIR
-endif
-
 if (! ${?CSHRCREAD} ) then
     #
     # These settings are recommended for old motif applications

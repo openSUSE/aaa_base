@@ -274,12 +274,12 @@ _exp_ ()
 	let o=0
 	local -a reply=()
 	for s in ${COMPREPLY[@]}; do
-	    eval e="$s"
+	    e=$(eval echo $s)
 	    if test -d "$e" ; then
 		reply[$((o++))]="$s"	
 		continue
 	    fi
-	    case "$(eval file -b "$s" 2> /dev/null)" in
+	    case "$(file -b $e 2> /dev/null)" in
 	    $t)	reply[$((o++))]="$s"
 	    esac
 	done
@@ -293,8 +293,9 @@ _exp_ ()
 _gdb_ ()
 {
     local c=${COMP_WORDS[COMP_CWORD]}
-    local x
+    local e p
     local -i o
+    local IFS
 
     if test $COMP_CWORD -eq 1 ; then
 	case "$c" in
@@ -303,7 +304,9 @@ _gdb_ ()
 	esac
 	return 0
     fi
-    local p=${COMP_WORDS[COMP_CWORD-1]}
+
+    p=${COMP_WORDS[COMP_CWORD-1]}
+    IFS=$'\n'
     case "$p" in
     -args)	COMPREPLY=($(compgen -c -- "$c")) ;;
     -tty)	COMPREPLY=(/dev/tty* /dev/pts/*)
@@ -320,18 +323,17 @@ _gdb_ ()
 		fi
 		let o=${#COMPREPLY[*]}
 		for s in $(compgen -f -- "$c") ; do
-		    eval e="$s"
+		    e=$(eval echo $s)
 		    if test -d "$e" ; then
 			COMPREPLY[$((o++))]="$s"	
 			continue
 		    fi
-		    case "$(eval file -b "$e" 2> /dev/null)" in
+		    case "$(file -b $e 2> /dev/null)" in
 		    *)	COMPREPLY[$((o++))]="$s"
 		    esac
 		done
     esac 
-
-   return 0
+    return 0
 }
 
 complete -d -X '.[^./]*' -F _exp_ ${_file} ${_def} \

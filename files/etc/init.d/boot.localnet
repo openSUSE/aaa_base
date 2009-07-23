@@ -7,7 +7,7 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.localnet
-# Required-Start:    boot.cleanup
+# Required-Start:    boot.rootfsck
 # Required-Stop:     $null
 # Default-Start:     B
 # Default-Stop:

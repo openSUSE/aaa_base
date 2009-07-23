@@ -32,12 +32,14 @@ case "$1" in
 	rm -f /var/lib/rpm/__db*
 	rm -rf /tmp/screens /tmp/uscreens /var/run/screens /var/run/uscreens 2>/dev/null
 	rm -f /tmp/.X*lock /var/spool/uucp/LCK* /var/log/sa/sadc.LOCK /fsck_corrected_errors 2>/dev/null
-	if test -x /usr/bin/find; then
-	    find /tmp/ssh-* /tmp/gpg-* -type s -name "*agent*" -maxdepth 1 -exec rm -f {} + 2>/dev/null
-	    find /var/run /var/lock -type f ! -wholename /var/run/utmp -exec rm -f {} + 2>/dev/null
-	    if test -d /var/lib/ntp/var/run; then
-		find /var/lib/ntp/var/run -type f -exec rm -f {} + 2>/dev/null
-	    fi
+	if test -x /usr/bin/find -a -x /usr/bin/xargs; then
+            {
+	        find /tmp/ssh-* /tmp/gpg-* -type s -name "*agent*" -maxdepth 1 -print0
+	        find /var/run /var/lock -type f ! -wholename /var/run/utmp -print0
+	        if test -d /var/lib/ntp/var/run; then
+		    find /var/lib/ntp/var/run -type f -print0
+	        fi
+            } 2>/dev/null | xargs -0r rm -f
 	else
 	    # fallback for find if we get /usr from nfs
 	    rec_rem() {
@@ -60,8 +62,11 @@ case "$1" in
 	# Re-read inittab for jobs and redo utmp records if required
 	test "$PREVLEVEL" = "S" && telinit q
 
-	# Restore a possibly dynamically modified /etc/resolv.conf
-	/sbin/netconfig update
+#	FASTBOOT: This costs us ~1s, and could be done by a simple "mv"
+#	if at all necessary.
+#
+#	# Restore a possibly dynamically modified /etc/resolv.conf
+	test -z "$DO_FASTBOOT" && /sbin/netconfig update
 
 	# delete temp files
 	# If $CLEAR_TMP_DIRS_AT_BOOTUP = yes, delete files in
@@ -72,27 +77,19 @@ case "$1" in
 	  CLEAR_DIRS="$CLEAR_TMP_DIRS_AT_BOOTUP"
 	  CLEAR_TMP_DIRS_AT_BOOTUP=yes
 	fi
-	if test -x /usr/bin/find; then
+	if test -x /usr/bin/find -a -x /usr/bin/xargs ; then
 	    if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
 		echo -n "Cleaning temporary directories $CLEAR_DIRS"
-		for CURDIR in $CLEAR_DIRS ; do
-		    find $CURDIR -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-		done
+		find $CLEAR_DIRS -maxdepth 1 -print0 2>/dev/null | xargs -0r rm -f
 		rc_status -v -r
 	    fi
 	fi
 	for CURDIR in /tmp /tmp/.X11-unix /tmp/.ICE-unix \
 		      /var/tmp /var/tmp/vi.recover /var/run/uscreens ; do
-	    test -d $CURDIR || \
-		mkdir $CURDIR && \
-		chown root:root $CURDIR && \
-		chmod 1777 $CURDIR
+	    test -d $CURDIR || mkdir -m 1777 $CURDIR
 	done
 	for CURDIR in /var/run/screens ; do
-	    test -d $CURDIR || \
-		mkdir $CURDIR && \
-		chown root:root $CURDIR && \
-		chmod 755 $CURDIR
+	    test -d $CURDIR || mkdir -m 755 $CURDIR
 	done
 	;;
     stop|restart)
