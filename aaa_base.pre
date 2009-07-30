@@ -95,36 +95,6 @@ while read LINE ; do
   esac
 done < var/adm/fillup-templates/passwd.aaa_base
 
-# etc/passwd update
-if test -e etc/passwd ; then
-  sed " 
-	# re-do these users on update, their home-dir was changed
-	 /^news:\|^uucp:\|^man:\|^ftp:.*:.usr.local.ftp:/d
-
-	# change group of wwwrun: nogroup -> www
-        s|^wwwrun:x:30:65534:|wwwrun:x:30:8:|
-
-	# change login shell of wwwrun
-	s|^\(wwwrun:x:30:8:.*:\)/bin/bash|\1/bin/false|
-  " < etc/passwd > etc/passwd.t
-  cat etc/passwd.t > etc/passwd
-  rm -f etc/passwd.t
-fi
-if test -e etc/shadow ; then
-    # nobody had sp_lstchg set to 0 in 8.0 and older
-    sed "/^nobody:[^:]*:0:/d" < etc/shadow > etc/shadow.t
-    cat etc/shadow.t > etc/shadow
-    rm -f etc/shadow.t
-fi
-
-# Rename game -> games, wwwadmin -> www
-for i in etc/group ; do
-  if test -e $i ; then
-    sed -e "s|^game:|games:|" -e "s|^wwwadmin:|www:|" $i > $i.t
-    cat $i.t > $i
-    rm -f $i.t
-  fi
-done
 
 for file in passwd group ; do
  if test -f etc/$file ; then
@@ -141,11 +111,6 @@ for file in passwd group ; do
  fi
 done
 
-if test -d sbin/init.d -a ! -L sbin/init.d ; then
-   if test -L etc/init.d ; then
-     rm -f etc/init.d
-   fi
-fi
 #
 # we have several local files, that changed over the time.  Check the
 # existing one, if they contain real data.  If not, delete them.
@@ -153,8 +118,6 @@ fi
 for LOCALFILE in root/bin/cron.daily.local \
 		etc/init.d/boot.local \
 		etc/init.d/halt.local \
-		sbin/init.d/boot.local \
-		sbin/init.d/halt.local \
 		usr/sbin/usradd.local \
 		usr/sbin/usrdel.local \
 		usr/sbin/userdel.local ; do
@@ -198,11 +161,6 @@ echo "#! /bin/sh
 # before we're going to the first run level.
 #
 " > etc/init.d/boot.local.new
-if [ ! -e etc/init.d/boot.local ] ; then
-  if [ -e sbin/init.d/boot.local ] ; then
-    mv sbin/init.d/boot.local etc/init.d/boot.local
-  fi
-fi
 test -e etc/init.d/boot.local || mv etc/init.d/boot.local.new etc/init.d/boot.local
 rm -f etc/init.d/boot.local.new
 chmod 744 etc/init.d/boot.local
@@ -221,11 +179,6 @@ echo "#! /bin/sh
 # down.
 #
 " > etc/init.d/halt.local.new
-if [ ! -e etc/init.d/halt.local ] ; then
-  if [ -e sbin/init.d/halt.local ] ; then
-    mv sbin/init.d/halt.local etc/init.d/halt.local
-  fi
-fi
 test -e etc/init.d/halt.local || mv etc/init.d/halt.local.new etc/init.d/halt.local
 rm -f etc/init.d/halt.local.new
 chmod 744 etc/init.d/halt.local
@@ -235,17 +188,6 @@ for LINK in usr/X11R6/lib/X11 var/X11R6/lib/fonts usr/lib/mgetty+sendfax \
     if test -L $LINK ; then
         echo "Found forbidden/oldish Link: $LINK ...deleting"
         rm -f $LINK
-    fi
-done
-for DIR in etc/rc.d usr/X11 ; do
-    if test -d $DIR -a ! -L $DIR ; then
-        echo -n "Found oldish directory /$DIR.  "
-        if test -d $DIR.old ; then
-            echo /$DIR.old already exist. Can not move /$DIR to it.
-        else
-            echo Moving it to /$DIR.old
-            mv $DIR $DIR.old
-        fi
     fi
 done
 

@@ -19,20 +19,10 @@ test -e usr/lib/YaST/.configured2 && rm -f usr/lib/YaST/.configured2
 #
 test -e etc/psdevtab && rm -f etc/psdevtab
 #
-# if the old inittab contains "/sbin/init.d", move it away
-# and use inittab.rpmnew. RPM will overwrite old rpmnew files, so this
-# should really the new one.
-#
-test -f etc/inittab.rpmnew && grep sbin.init.d etc/inittab >/dev/null 2>&1 && {
-   mv -f etc/inittab etc/inittab.sbin.init.d
-   mv -f etc/inittab.rpmnew etc/inittab
-}
-#
 # if the old nsswitch.conf contains dns6, replace it with dns
 #
 test -f etc/nsswitch.conf.rpmnew && grep dns6 etc/nsswitch.conf >/dev/null 2>&1 && {
-   cp etc/nsswitch.conf etc/nsswitch.conf.aaa_base
-   sed "s|dns6|dns|g" < etc/nsswitch.conf.aaa_base > etc/nsswitch.conf
+   sed -i -e "s|dns6|dns|g" etc/nsswitch.conf
 }
 # GMT might already be in sysconfig/clock
 %{rename_sysconfig_variable -f etc/sysconfig/clock GMT HWCLOCK}
@@ -65,15 +55,12 @@ for i in language backup boot kernel \
 done
 # migrate HALT_SOUND value if set before
 if [ -n "$HALT_SOUND" -a "$HALT_SOUND" != "no" ] ; then
-    sed -e "s|^HALT_SOUND=.*|HALT_SOUND=\"$HALT_SOUND\"|" \
-        etc/sysconfig/shutdown > etc/sysconfig/shutdown.new \
-        && mv etc/sysconfig/shutdown.new etc/sysconfig/shutdown
+    sed -i -e "s|^HALT_SOUND=.*|HALT_SOUND=\"$HALT_SOUND\"|" etc/sysconfig/shutdown
 fi
 # fix sysconfig backup dir
 if grep -q RCCONFIG_BACKUP_DIR../var/adm/backup/rpmdb etc/sysconfig/backup; then
-    sed -e "s|^RCCONFIG_BACKUP_DIR=.*|RCCONFIG_BACKUP_DIR=\"/var/adm/backup/sysconfig\"|" \
-	etc/sysconfig/backup > etc/sysconfig/backup.new \
-        && mv etc/sysconfig/backup.new etc/sysconfig/backup
+    sed -i -e "s|^RCCONFIG_BACKUP_DIR=.*|RCCONFIG_BACKUP_DIR=\"/var/adm/backup/sysconfig\"|" \
+	etc/sysconfig/backup
     mkdir -p /var/adm/backup/sysconfig
     mv /var/adm/backup/rpmdb/sysconfig[-_]* /var/adm/backup/sysconfig 2>/dev/null
 fi
@@ -89,10 +76,8 @@ for i in $MODULES_LOADED_ON_BOOT ; do
     MLOB_NEW="$MLOB_NEW${MLOB_NEW:+ }$i"
 done
 if test "$MODULES_LOADED_ON_BOOT" != "$MLOB_NEW" ; then
-    sed -e "s|^MODULES_LOADED_ON_BOOT=.*|MODULES_LOADED_ON_BOOT=\"$MLOB_NEW\"|" \
-	etc/sysconfig/kernel > etc/sysconfig/kernel.new \
-	&& mv etc/sysconfig/kernel.new etc/sysconfig/kernel
-    rm -f etc/sysconfig/kernel.new
+    sed -i -e "s|^MODULES_LOADED_ON_BOOT=.*|MODULES_LOADED_ON_BOOT=\"$MLOB_NEW\"|" \
+	etc/sysconfig/kernel
 fi
 #
 # Backup gshadow file and remove it (merge passwords into
@@ -137,17 +122,6 @@ done
 for i in etc/shadow ; do
     chmod 640 $i
     chgrp shadow $i
-done
-#
-# make sure that nobody and nogroup are set to 65534 (we had -2 in former times)
-#
-for i in etc/passwd etc/group ; do
-    sed -e"s/:-2:/:65534:/g" -e"s/:-2:/:65534:/g" < $i > $i.t
-    test -s $i.t && {
-        cat $i.t > $i
-    }
-    rm -f $i.t
-    chmod 644 $i
 done
 #
 # Change primary group of nobody to nobody
@@ -204,22 +178,9 @@ EOT
     chmod 744 usr/sbin/userdel.local
 fi
 
-#
-# Now do the ugly part.  Delete mess from former times...
-#
-if test -L usr/i486-linux-libc6/lib/libqimgio.so ; then
-    rm -f usr/i486-linux-libc6/lib/libqimgio.so
-fi
-
 # change all /media mounts (subfs) to noauto
 if test -f /etc/fstab ; then
-rm -f /etc/fstab.$$
-sed -e '/^[[:space:]]*#/{p;d}' -e '/[[:space:]]subfs.*noauto/{p;d}' -e '/\/media.*fs=\(cdfss\|floppyfss\)/s/\([[:space:]]subfs[[:space:]][[:space:]]*\)/\1noauto,/' < /etc/fstab > /etc/fstab.$$
-cmp -s /etc/fstab /etc/fstab.$$ || {
-    mv /etc/fstab.$$ /etc/fstab
-    chmod 644 /etc/fstab
-}
-rm -f /etc/fstab.$$
+sed  -i -e '/^[[:space:]]*#/{p;d}' -e '/[[:space:]]subfs.*noauto/{p;d}' -e '/\/media.*fs=\(cdfss\|floppyfss\)/s/\([[:space:]]subfs[[:space:]][[:space:]]*\)/\1noauto,/' /etc/fstab
 fi
 
 # IA64 Altix update hook
@@ -227,20 +188,11 @@ if test -d /proc/sgi_sn ; then
     if grep -q "console=ttyS0" /etc/elilo.conf ; then
 	echo "replacing ttyS0 by ttySG0 in elilo.conf, inittab and securetty files"
 	#
-	rm -f /etc/elilo.conf.tmp
-	sed -e "s/console=ttyS0/console=ttySG0/g" /etc/elilo.conf > /etc/elilo.conf.tmp
-	cat /etc/elilo.conf.tmp > /etc/elilo.conf
-	rm -f /etc/elilo.conf.tmp
+	sed -i -e "s/console=ttyS0/console=ttySG0/g" /etc/elilo.conf
 	#
-	rm -f /etc/inittab.tmp
-	sed -e "s/getty\(.*\)ttyS0/getty\1ttySG0/g" /etc/inittab > /etc/inittab.tmp
-	cat /etc/inittab.tmp > /etc/inittab
-	rm -f /etc/inittab.tmp
+	sed -i -e "s/getty\(.*\)ttyS0/getty\1ttySG0/g" /etc/inittab
 	#
-	rm -f /etc/securetty.tmp
-	sed -e "s/ttyS0/ttySG0/g" /etc/securetty > /etc/securetty.tmp
-	cat /etc/securetty.tmp > /etc/securetty
-	rm -f /etc/securetty.tmp
+	sed -i -e "s/ttyS0/ttySG0/g" /etc/securetty
 	#
 	if grep -q /boot/efi /proc/mounts ; then
 	    echo "calling elilo to update"
