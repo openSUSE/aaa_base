@@ -371,20 +371,10 @@ fi
 #
 case "$-" in
 *i*)
-    if test "$TERM" = "xterm" -a -O "$tty" ; then
-	if test -z "${SSH_TTY}" ; then
-	    test ! -f $HOME/.hushlogin -a -s /etc/motd && cat /etc/motd
-	    echo "Directory: $PWD"
-	    # Last but not least
-	    date
-	fi
-	#
-	# shadow passwd
-	# Note: on normal console this will be done by /bin/login
-	if test -r /var/log/faillog ; then
-	    test -x /bin/faillog && /bin/faillog
-	    test -x /usr/bin/faillog && /usr/bin/faillog
-	fi
+    if test "$TERM" = "xterm" -a -O "$tty" -a -z "${SSH_TTY}" ; then
+	echo "Directory: $PWD"
+	# Last but not least
+	date
     fi
 esac
 

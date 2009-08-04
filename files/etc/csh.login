@@ -285,22 +285,10 @@ if ( -r /etc/csh.login.local ) source /etc/csh.login.local
 #
 # An X session
 #
-if (${?TERM} && -o /dev/$tty && ${?prompt}) then
-    if (${TERM} == "xterm") then
-	if (! ${?SSH_TTY} ) then
-	    if ( ! -f $HOME/.hushlogin && -s /etc/motd ) cat /etc/motd
-	    echo "Directory: $cwd"
-	    # Last but not least
-	    date
-	endif
-	#
-	# shadow passwd
-	# Note: on normal console this will be done by /bin/login
-	if ( -r /var/log/faillog ) then
-	    if ( -x /bin/faillog ) /bin/faillog
-	    if ( -x /usr/bin/faillog ) /usr/bin/faillog
-	endif
-    endif
+if (${?TERM} && -o /dev/$tty && ${?prompt} && ${TERM} == "xterm" && ! ${?SSH_TTY}) then
+	echo "Directory: $cwd"
+	# Last but not least
+	date
 endif
 
 #
