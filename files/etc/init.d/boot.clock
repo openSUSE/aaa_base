@@ -150,7 +150,9 @@ case "$1" in
 	else
 	    # Remove any /etc/adjtime left over
 	    test -e /etc/adjtime && rm -f /etc/adjtime
-	    rtc_rule /sbin/hwclock --systz $HWCLOCK --noadjfile
+	    SYSTZ="--systz"
+            test -e /dev/shm/warpclock && SYSTZ=""
+	    rtc_rule /sbin/hwclock $SYSTZ $HWCLOCK --noadjfile
 	fi
 	rc_status -v
 	;;
