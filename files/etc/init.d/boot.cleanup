@@ -80,7 +80,7 @@ case "$1" in
 	if test -x /usr/bin/find -a -x /usr/bin/xargs ; then
 	    if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
 		echo -n "Cleaning temporary directories $CLEAR_DIRS"
-		find $CLEAR_DIRS -maxdepth 1 -print0 2>/dev/null | xargs -0r rm -f
+		find $CLEAR_DIRS -mindepth 1 -maxdepth 1 -print0 2>/dev/null | xargs -0r rm -rf
 		rc_status -v -r
 	    fi
 	fi
