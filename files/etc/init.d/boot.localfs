@@ -180,7 +180,7 @@ case "$1" in
             /usr/bin/on_ac_power -q || MAY_FSCK=0
         fi
 	FSCK_RETURN=0
-	if test ! -f /fastboot -a -z "$DO_FASTBOOT" -a $MAY_FSCK -eq 1 ; then
+	if test ! -f /fastboot -a "$DO_FASTBOOT" != "yes" -a $MAY_FSCK -eq 1 ; then
 	    # common options for file system check
 	    FSCK_OPTS="-R -A -M -a -t noopts=nofail"
 	    # force file system check if forced

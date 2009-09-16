@@ -79,7 +79,7 @@ case "$1" in
 	    esac
         fi
 
-	if test ! -f /fastboot -a -z "$DO_FASTBOOT" -a $MAY_FSCK -eq 1 ; then
+	if test ! -f /fastboot -a "$DO_FASTBOOT" != "yes" -a $MAY_FSCK -eq 1 ; then
 	    # If we use a serial console, don't use the fsck progress bar
 	    if test "$REDIRECT" = "/dev/tty1" ; then
                 FSCK_OPTS="$FSCK_OPTS -C"

@@ -66,7 +66,7 @@ case "$1" in
 #	if at all necessary.
 #
 #	# Restore a possibly dynamically modified /etc/resolv.conf
-	test -z "$DO_FASTBOOT" && /sbin/netconfig update
+	test "$DO_FASTBOOT" != "yes" && /sbin/netconfig update
 
 	# delete temp files
 	# If $CLEAR_TMP_DIRS_AT_BOOTUP = yes, delete files in
