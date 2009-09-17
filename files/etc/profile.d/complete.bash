@@ -223,6 +223,7 @@ _exp_ ()
     gs|ghostview)	e='!*.+(eps|EPS|ps|PS|pdf|PDF)'		;;
     gv|kghostview)	e='!*.+(eps|EPS|ps|PS|ps.gz|pdf|PDF)'	;;
     acroread|[xk]pdf)	e='!*.+(pdf|PDF)'			;;
+    evince)		e='!*.+(ps|PS|pdf|PDF)'                 ;;
     dvips)		e='!*.+(dvi|DVI)'			;;
     [xk]dvi)		e='!*.+(dvi|dvi.gz|DVI|DVI.gz)'		;;
     tex|latex|pdflatex)	e='!*.+(tex|TEX|texi|latex)'		;;
@@ -347,6 +348,7 @@ complete -d -X '.[^./]*' -F _exp_ ${_file} ${_def} \
 					gs ghostview \
 					gv kghostview \
 					acroread xpdf kpdf \
+					evince \
 					dvips xdvi kdvi \
 					tex latex pdflatex
 
