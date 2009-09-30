@@ -85,7 +85,10 @@ case "${0##*/}" in
 	message="Please stand by while rebooting the system..."
 	command="reboot"
 	mddev=""
-	opts="-i"
+	opts=""
+	if test "$HALT_NETWORK" = "yes" ; then
+	    opts="${opts:+$opts }-i"
+	fi
 	;;
     *)
 	echo "$0: call me as \"halt\" or \"reboot\" please!"
