@@ -2,6 +2,7 @@
 ## Description:		Information about your timezone and time
 ## Type:		string(-u,--utc,--localtime)
 ## ServiceRestart:	boot.clock
+## Command:		/sbin/refresh_initrd
 #
 # Set to "-u" if your system clock is set to UTC, and to "--localtime"
 # if your clock runs that way.

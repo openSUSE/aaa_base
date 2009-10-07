@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Refresh initrd depending on conditions.
+# Currently only the change of /etc/sysconfig/clock is
+# honoured but we may add more of conditions.
+#
+# Author: Werner Fink <werner@suse.de>
+#
+
+refresh=no
+test /etc/sysconfig/clock  -nt /boot/initrd && refresh=yes
+test /etc/sysconfig/kernel -nt /boot/initrd && refresh=yes
+test "$refresh" = yes || exit 0
+
+line=on
+test -e /proc/splash && read line < /proc/splash
+line=${line##*: }
+
+SPLASH=no
+[[ $line =~ on ]] && SPLASH=yes
+test -e /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
+
+test $SPLASH = yes && set -- -s auto
+exec -a mkinitrd /sbin/mkinitrd ${1+"$@"}
