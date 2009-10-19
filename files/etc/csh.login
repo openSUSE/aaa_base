@@ -64,8 +64,8 @@ if (! ${?HOME} ) set    HOME=""
 if (! ${?MAIL} ) setenv MAIL /var/spool/mail/$USER
 if (! ${?HOST} ) setenv HOST "`/bin/uname -n`"
 if (! ${?CPU}  ) setenv CPU  "`/bin/uname -m`"
-if (! ${?HOSTNAME} ) then
-    setenv HOSTNAME ${HOST}."`cat /proc/sys/kernel/domainname`"
+if (! ${?HOSTNAME} && -x /bin/hostname ) then
+    setenv HOSTNAME ${HOST}."`/bin/hostname -d`"
 endif
 if (! ${?LOGNAME} )  set    LOGNAME=$USER
 if ( ${CPU} =~ i?86 ) then
