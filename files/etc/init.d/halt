@@ -184,6 +184,10 @@ fi
 mount -no remount,ro / 2> /dev/null
 sync
 
+# wait for md arrays to become clean
+if test -x /sbin/mdadm; then
+    /sbin/mdadm --wait-clean --scan
+fi
 # stop any inactive software raid
 if test -n "$mddev" ; then
     /sbin/mdadm --quiet --stop $mddev
