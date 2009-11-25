@@ -197,7 +197,7 @@ fi
 # Configure the default pager on SuSE Linux
 #
 if test -z "$LESS" -a -x /usr/bin/less ; then
-    LESS="-M -I"
+    LESS="-M -I -R"
     LESSOPEN="lessopen.sh %s"
     LESSCLOSE="lessclose.sh %s %s"
     LESS_ADVANCED_PREPROCESSOR="no"

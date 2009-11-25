@@ -156,7 +156,7 @@ if ( -r /etc/inputrc && ! ${?INPUTRC} ) setenv INPUTRC /etc/inputrc
 # Configure the default pager on SuSE Linux
 #
 if (! ${?LESS} ) then
-    setenv LESS "-M -I"
+    setenv LESS "-M -I -R"
     setenv LESSOPEN "lessopen.sh %s"
     setenv LESSCLOSE "lessclose.sh %s %s"
     setenv LESS_ADVANCED_PREPROCESSOR "no"
