@@ -95,15 +95,10 @@ fi
 #
 # mount tmpfs on /dev if not already done by initramfs
 #
-while read dev dir type options; do
-    if test "$dir" = "/dev" -a "$type" = "tmpfs"; then
-	DEV_MOUNTED=1;
-	break;
-    fi
-done < /proc/mounts
-if test -z "$DEV_MOUNTED"; then
+DTYPE=`stat -f -c "%T" /dev 2>/dev/null`
+if test "$DTYPE" != "tmpfs" ; then
     echo -n "Mounting tmpfs at /dev"
-    mount -n -t tmpfs -o mode=0755 udev /dev
+    mount -n -t tmpfs -o mode=0755 none /dev
     rc_status -v -r
 else
     echo -n "Remounting tmpfs at /dev"
