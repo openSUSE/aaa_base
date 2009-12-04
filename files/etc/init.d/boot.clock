@@ -28,7 +28,7 @@
 #
 USE_ADJFILE=no
 case "$HWCLOCK" in
-*-u*) USE_ADJFILE=yes
+*-u*) USE_ADJFILE=yes ;;
 esac
 test "$SYSTOHC" != yes && USE_ADJFILE=no
 
@@ -37,9 +37,12 @@ test "$SYSTOHC" != yes && USE_ADJFILE=no
 #
 USE_HWCLOCK=yes
 case "$(uname -i)" in
-s390*) USE_HWCLOCK=no
+s390*) USE_HWCLOCK=no ;;
 esac
-test -e /proc/sys/xen/independent_wallclock && USE_HWCLOCK=no
+if test -r /proc/xen/capabilities ; then
+    read -t1 caps < /proc/xen/capabilities
+    test "$caps" = "${caps%control_d*}" && USE_HWCLOCK=no
+fi
 
 #
 # Get current status of kernel time variables, if kernel
@@ -106,8 +109,8 @@ case "$1" in
 
 	    unset TZ
 
-	    case "$HWCLOCK" in
-	    *-l*)
+	    case "$1$HWCLOCK" in
+	    start*-l*)
 		date --set "$(date --utc +'%Y-%m-%d %H:%M:%S.%N')"
 		rc_status
 		;;
