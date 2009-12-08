@@ -18,7 +18,7 @@ if [ -x /usr/$__libdir/jvm/java/bin/java ] || [ -x /usr/$__libdir/jvm/java/bin/j
   export JAVA_BINDIR=/usr/$__libdir/jvm/java/bin
   export JAVA_ROOT=/usr/$__libdir/jvm/java
   export JAVA_HOME=/usr/$__libdir/jvm/java
-  export JRE_HOME=/usr/$_libdir/jvm/jre
+  export JRE_HOME=/usr/$__libdir/jvm/jre
   unset JDK_HOME
   unset SDK_HOME
   if [ -x /usr/$__libdir/jvm/java/bin/javac ] ; then

@@ -354,7 +354,7 @@ if test -z "$_SOURCED_FOR_SSH" ; then
 	if test ! /etc/bash.bashrc -ef /etc/ksh.kshrc ; then
 	    test -r /etc/bash.bashrc && . /etc/bash.bashrc
 	fi
-	if test -n "$ENV" -a "$ENV" != "$HOME/.kshrc" -a -z "$_HOMEKSHRC" ; then
+	if test -n "$ENV" -a "$ENV" != "\$HOME/.kshrc" -a -z "$_HOMEKSHRC" ; then
 	    # loop detection
 	    readonly _HOMEKSHRC=true
 	    test -r $HOME/.kshrc && . $HOME/.kshrc
