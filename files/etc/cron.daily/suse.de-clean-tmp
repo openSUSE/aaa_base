@@ -44,11 +44,11 @@ cleanup_tmp ()
   if [ "$MAX_DAYS" -gt 0 ]; then
     for DIR in $DIRS_TO_CLEAR ; do
       test -x /usr/bin/safe-rm && {
-      find $DIR/. $OMIT ! -type d ! -type s ! -type p \
-        -atime +$MAX_DAYS -exec /usr/bin/safe-rm {} \;
+      find $DIR/. -xdev $OMIT ! -type d ! -type s ! -type p \
+        \( -atime +$MAX_DAYS -a -ctime +$MAX_DAYS \) -exec /usr/bin/safe-rm {} \;
       } || echo "Error: Can not find /usr/bin/safe-rm"
-      find $DIR/. -depth -mindepth 1 $OMIT -type d -empty \
-        -mtime +$MAX_DAYS -exec /usr/bin/safe-rmdir {} \;
+      find $DIR/. -xdev -depth -mindepth 1 $OMIT -type d -empty \
+        \( -mtime +$MAX_DAYS -a -ctime +$MAX_DAYS \) -exec /usr/bin/safe-rmdir {} \;
     done
   fi 
 }

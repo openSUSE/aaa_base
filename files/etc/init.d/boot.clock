@@ -145,10 +145,12 @@ case "$1" in
 	    # For UTC calculate adjtime
 	    #
 	    if test ! -s /etc/adjtime ; then
-		echo "0.0 0 0.0"
-		echo "0"
-		echo "UTC"
-	    fi >  /etc/adjtime
+		{
+			echo "0.0 0 0.0"
+			echo "0"
+			echo "UTC"
+		} > /etc/adjtime
+	    fi
 	    rtc_rule /sbin/hwclock $HWCLOCK --adjust
 	else
 	    # Remove any /etc/adjtime left over

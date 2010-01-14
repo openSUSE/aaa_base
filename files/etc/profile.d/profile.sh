@@ -68,6 +68,8 @@ do
 	    test -n "$val" || continue
 	    no_proxy="${val}"
 	    export no_proxy
+	    NO_PROXY="${val}"
+	    export NO_PROXY
 	    ;;
 	DEFAULT_WM=*)
 	    DEFAULT_WM="${val}"
@@ -100,7 +102,7 @@ if test -d /usr/lib/rasmol ; then
 fi
 
 if test "$PROXY_ENABLED" != "yes" ; then
-    unset http_proxy https_proxy ftp_proxy gopher_proxy no_proxy
+    unset http_proxy https_proxy ftp_proxy gopher_proxy no_proxy NO_PROXY
 fi
 unset PROXY_ENABLED
 
