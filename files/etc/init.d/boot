@@ -64,59 +64,68 @@ echo -n "System Boot Control: "
 echo "Running $0"
 
 #
-# Start of e.g. blogd, requires /proc and /dev/pts.
+# mount usual filesystems if not already done by initramfs or the kernel
 #
-DTYPE=`stat -f -c "%T" /proc 2>/dev/null`
+DTYPE=$(stat -f -c "%T" /proc 2>/dev/null)
 if test "$DTYPE" != "proc" ; then
     echo -n "Mounting procfs at /proc"
     mount -n -t proc proc /proc
     rc_status -v -r
 fi
 
-DTYPE=`stat -f -c "%T" /sys 2>/dev/null`
+DTYPE=$(stat -f -c "%T" /sys 2>/dev/null)
 if test "$DTYPE" != "sysfs" ; then
     echo -n "Mounting sysfs at /sys"
     mount -n -t sysfs sysfs /sys
     rc_status -v -r
 fi
 
+HAVE_DEBUGFS=0
+DEVTMPFS=tmpfs
+while read dev type ; do
+        test "$type" = "debugfs" && HAVE_DEBUGFS=1
+        test "$type" = "devtmpfs" && DEVTMPFS=devtmpfs
+done < /proc/filesystems
+
 if test -d /sys/kernel/debug ; then
-    DTYPE=`stat -f -c "%T" /sys/kernel/debug 2>/dev/null`
-    if test "$DTYPE" = "sysfs" ; then
-    while read dev type ; do
-	if test "$type" = "debugfs" ; then
+    DTYPE=$(stat -f -c "%T" /sys/kernel/debug 2>/dev/null)
+    if test "$DTYPE" = "sysfs" -a "$HAVE_DEBUGFS" = "1" ; then
 	    echo -n "Mounting debugfs at /sys/kernel/debug"
 	    mount -n -t debugfs debugfs /sys/kernel/debug
 	    rc_status -v -r
-	fi
-    done < /proc/filesystems
     fi
 fi
-#
-# mount tmpfs on /dev if not already done by initramfs
-#
-DTYPE=`stat -f -c "%T" /dev 2>/dev/null`
+
+DTYPE=$(stat -f -c "%T" /dev 2>/dev/null)
 if test "$DTYPE" != "tmpfs" ; then
-    echo -n "Mounting tmpfs at /dev"
-    mount -n -t tmpfs -o mode=0755 none /dev
+    echo -n "Mounting devtmpfs at /dev"
+    mount -n -t $DEVTMPFS -o mode=0755 $DEVTMPFS /dev
     rc_status -v -r
 else
-    echo -n "Remounting tmpfs at /dev"
-    mount -oremount /dev
+    echo -n "Remounting /dev"
+    mount -o remount /dev
     rc_status -v -r
 fi
 
-#
-# populate /dev with initial content
-#
-echo -n "Initializing /dev"
-cp --preserve=all --recursive --remove-destination /lib/udev/devices/* /dev
-chmod 1777 /dev/shm
+echo -n "Copying static /dev content"
+cp -axT --remove-destination /lib/udev/devices /dev
 rc_status -v -r
 
-DTYPE=`stat -f -c "%T" /dev/pts 2>/dev/null`
+if test "$(stat -Lc %d /dev/shm 2>/dev/null)" = "$(stat -Lc %d /dev/shm/.. 2>/dev/null)" ; then
+    echo -n "Mounting tmpfs at /dev/shm"
+    mkdir -p -m 1777 /dev/shm
+    mount -t tmpfs -o mode=1777 tmpfs /dev/shm
+    rc_status -v -r
+else
+    echo -n "Remounting /dev/shm"
+    mount -o remount /dev/shm
+    rc_status -v -r
+fi
+
+DTYPE=$(stat -f -c "%T" /dev/pts 2>/dev/null)
 if test "$DTYPE" != "devpts" ; then
     echo -n "Mounting devpts at /dev/pts"
+    mkdir -p -m 755 /dev/pts
     mount -n -t devpts -o mode=0620,gid=5 devpts /dev/pts
     rc_status -v -r
 fi
