@@ -81,7 +81,7 @@ case "$1" in
 
 	if test ! -f /fastboot -a "$DO_FASTBOOT" != "yes" -a $MAY_FSCK -eq 1 ; then
 	    # If we use a serial console, don't use the fsck progress bar
-	    if test "$REDIRECT" = "/dev/tty1" ; then
+	    if test "${REDIRECT##*/}" = "tty1" ; then
                 FSCK_OPTS="$FSCK_OPTS -C"
 	    else
                 FSCK_OPTS="$FSCK_OPTS -V"

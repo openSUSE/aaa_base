@@ -34,7 +34,7 @@
     (if (file-readable-p "/etc/skel/.gnu-emacs")
 	(load "/etc/skel/.gnu-emacs" nil t)))
 
-  ;; Custum Settings
+  ;; Custom Settings
   ;; ===============
   ;; To avoid any trouble with the customization system of GNU emacs
   ;; we set the default file ~/.gnu-emacs-custom

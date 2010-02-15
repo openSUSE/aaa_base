@@ -188,7 +188,7 @@ case "$1" in
 		FSCK_OPTS="$FSCK_OPTS -f"
 	    fi
 	    # If we use a serial console, don't use the fsck progress bar
-	    if test "$REDIRECT" = "/dev/tty1" ; then
+	    if test "${REDIRECT##*/}" = "tty1" ; then
 		FSCK_OPTS="$FSCK_OPTS -C"
 	    else
 		FSCK_OPTS="$FSCK_OPTS -V"
