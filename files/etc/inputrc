@@ -15,7 +15,7 @@
 set meta-flag on
 set output-meta on
 set convert-meta off
-set meta-mode off
+set enable-meta-key off
 set term xy
 #
 # VI line editing
