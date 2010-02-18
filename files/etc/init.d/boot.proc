@@ -49,13 +49,6 @@ case "$1" in
 	    fi
 	fi
 	
-	#
-	# check if bootsplash graphics should be disabled
-	#
-	if test -e /proc/splash ; then
-	    test "$SPLASH" = "no" && echo "0" > /proc/splash
-	fi
-	
 	# Disable ECN if required.
 	if test -e /proc/sys/net/ipv4/tcp_ecn; then
 	    test "$DISABLE_ECN" = "yes" && echo "0" > /proc/sys/net/ipv4/tcp_ecn

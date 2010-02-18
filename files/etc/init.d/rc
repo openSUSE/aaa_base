@@ -182,7 +182,7 @@ else
 	case "$REDIRECT" in /dev/tty[1-9]*)
 	    REDIRECT=/dev/tty1
 	    setconsole $REDIRECT < $CONSOLE
-	    command -p chvt 1 > /dev/null 2>&1
+	    command -p chvt --userwait 1 > /dev/null 2>&1
 	esac
     fi
 fi
