@@ -265,22 +265,30 @@ case "$1" in
 	echo "Mounting local file systems..."
 	mount -fv -t proc proc /proc
 	mount -fv -t sysfs sysfs /sys
-	# remount to make sure options from fstab are honoured
-	mount -oremount /proc
-	mount -oremount /sys
-	while read a b ; do
-	    if test "$b" = "debugfs" ; then
-		mount -fv -t debugfs debugfs /sys/kernel/debug
-	    fi
+	#
+	HAVE_DEBUGFS=0
+	DEVTMPFS=tmpfs
+	while read dev type ; do
+	    test "$type" = "debugfs" && HAVE_DEBUGFS=1
+	    test "$type" = "devtmpfs" && DEVTMPFS=devtmpfs
 	done < /proc/filesystems
-	mount -fv -t tmpfs udev /dev
-	rc_status
+
+	if test -d /sys/kernel/debug -a "$HAVE_DEBUGFS" = "1" ; then
+	    mount -fv -t debugfs debugfs /sys/kernel/debug
+	fi
 	if test ! -d /sys/block/loop0 ; then
 	    /sbin/modprobe loop
 	fi
-	optpts="-o mode=0620,gid=5"
-	mount -fv -t devpts $optpts devpts /dev/pts
+	mount -fv -t $DEVTMPFS -o mode=0755 $DEVTMPFS /dev
 	rc_status
+	mount -fv -t tmpfs  -o mode=1777 tmpfs /dev/shm
+	mount -fv -t devpts -o mode=0620,gid=5 devpts /dev/pts
+	rc_status
+	# remount to make sure options from fstab are honoured
+	mount -oremount /proc
+	mount -oremount /sys
+	mount -oremount /dev/pts
+	# mount the rest
 	mount -av -t $nofs -O no_netdev
 	rc_status -v1 -r
 	;;

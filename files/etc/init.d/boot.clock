@@ -115,14 +115,6 @@ case "$1" in
 		rc_status
 		;;
 	    esac
-	    #
-	    # Let zic set timezone - if present.
-	    #
-	    if test -n "$TIMEZONE" -a -x /usr/sbin/zic ; then
-		echo -n Setting up timezone data
-		/usr/sbin/zic -l $TIMEZONE
-		rc_status
-	    fi
 
 	    rc_status -v
 	    rc_exit
