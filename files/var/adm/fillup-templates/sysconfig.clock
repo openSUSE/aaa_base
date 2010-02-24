@@ -26,7 +26,10 @@ SYSTOHC="yes"
 ## Type:		string(Europe/Berlin,Europe/London,Europe/Paris)
 ## ServiceRestart:	boot.clock
 #
-# Timezone (e.g. CET)
-# (this will set /usr/lib/zoneinfo/localtime)
+# Timezone (e.g. CET or Asia/Tokyo). The value should correspond
+# to the contents of the /etc/localtime file and is for internal
+# YaST use; changing this setting will not make SuSEconfig update
+# the /etc/localtime file, YaST does that or you will need to do
+# this manually by calling zic -l.
 #
 TIMEZONE=""
