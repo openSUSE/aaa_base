@@ -101,10 +101,6 @@ if test "$DTYPE" != "tmpfs" ; then
     echo -n "Mounting devtmpfs at /dev"
     mount -n -t $DEVTMPFS -o mode=0755 $DEVTMPFS /dev
     rc_status -v -r
-else
-    echo -n "Remounting /dev"
-    mount -o remount /dev
-    rc_status -v -r
 fi
 
 echo -n "Copying static /dev content"
@@ -118,10 +114,6 @@ if test "$(stat -Lc %d /dev/shm 2>/dev/null)" = "$(stat -Lc %d /dev/shm/.. 2>/de
     echo -n "Mounting tmpfs at /dev/shm"
     mkdir -p -m 1777 /dev/shm
     mount -t tmpfs -o mode=1777 tmpfs /dev/shm
-    rc_status -v -r
-else
-    echo -n "Remounting /dev/shm"
-    mount -o remount /dev/shm
     rc_status -v -r
 fi
 
