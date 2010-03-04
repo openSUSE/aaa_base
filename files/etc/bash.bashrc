@@ -18,7 +18,9 @@ if test -z "$is" ; then
 		is=sh	;;
 	esac            ;;
     */ash)	is=ash  ;;
+    */dash)	is=ash  ;;
     */ksh)	is=ksh  ;;
+    */ksh93)	is=ksh  ;;
     */pdksh)	is=ksh  ;;
     */zsh)	is=zsh  ;;
     */*)	is=sh   ;;
