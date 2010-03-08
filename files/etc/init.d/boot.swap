@@ -120,7 +120,8 @@ case "$1" in
 	$0 start
 	;;
     status)
-	rc_failed 4
+	# assume we have been run (otherwise this would mean parsing fstab manually)
+	rc_reset
 	rc_status -v
 	;;
     *)

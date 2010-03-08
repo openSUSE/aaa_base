@@ -38,7 +38,8 @@ case "$1" in
 	}
 	;;
     status)
-	rc_failed 4
+	# assume we have been run
+	rc_reset
 	rc_status -v
 	;;
     *)

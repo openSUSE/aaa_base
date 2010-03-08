@@ -124,7 +124,28 @@ case "$1" in
     # skip / nothing to do
     ;;
   status)
-    rc_failed 4
+    echo -n "checking if boot.ipconfig has been run"
+    rc_reset
+    VAL4=`cat /proc/sys/net/ipv4/ip_forward`
+    case $IP_FORWARD in
+	yes)
+	    test "$VAL4" = "1" || rc_failed 3
+	    ;;
+	*)
+	    test "$VAL4" = "0" || rc_failed 3
+	    ;;
+    esac
+    if test -e /proc/sys/net/ipv6/conf/all/forwarding ; then
+	VAL6=`cat /proc/sys/net/ipv6/conf/all/forwarding`
+	case $IPV6_FORWARD in
+	    yes)
+		test "$VAL6" = "1" || rc_failed 3
+		;;
+	    *)
+		test "$VAL6" = "0" || rc_failed 3
+		;;
+	esac
+    fi
     rc_status -v
     ;;
   *)

@@ -35,7 +35,7 @@ test -f etc/nsswitch.conf.rpmnew && grep dns6 etc/nsswitch.conf >/dev/null 2>&1 
 ## powerfail probably needs empty header ...
 
 # add Kill-links in boot.d if needed:
-for i in proc localfs swap clock ldconfig ipconfig klog localnet loadmodules sched ; do
+for i in proc localfs swap clock ldconfig ipconfig klog localnet loadmodules ; do
     if [ -f /etc/init.d/boot.d/S??boot.$i -a ! -f /etc/init.d/boot.d/K??boot.$i ] ; then
 %{insserv_force_if_yast boot.$i}
     fi

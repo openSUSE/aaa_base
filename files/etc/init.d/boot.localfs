@@ -409,9 +409,11 @@ case "$1" in
 	rc_status -v
 	;;
     status)
-	rc_failed 4
-	rc_status -v
-	;;
+        echo -n "Checking if boot.localfs has run"
+        rc_reset
+        grep -q " /dev/shm " /etc/mtab || rc_failed 3
+        rc_status -v
+        ;;
     *)
 	echo "Usage: $0 {start|stop|status|restart}"
 	exit 1

@@ -62,7 +62,8 @@ case "$1" in
     # skip / nothing to do
     ;;
   status)
-    rc_failed 4
+    # assume we have been run
+    rc_reset
     rc_status -v
     ;;
   *)
