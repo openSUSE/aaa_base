@@ -226,7 +226,7 @@ case "$1" in
 	        echo
 	        echo "fsck failed for at least one filesystem (not /)."
 		echo "Please repair manually and reboot."
-		echo "The root file system is is already mounted read-write."
+		echo "The root file system is already mounted read-write."
 	        echo
 	        echo "Attention: Only CONTROL-D will reboot the system in this"
 	        echo "maintanance mode. shutdown or reboot will not work."
