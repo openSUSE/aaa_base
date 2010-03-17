@@ -222,7 +222,7 @@ _exp_ ()
 			t="@(MS-DOS executable|Zip archive)*"	;;
     gs|ghostview)	e='!*.+(eps|EPS|ps|PS|pdf|PDF)'		;;
     gv|kghostview)	e='!*.+(eps|EPS|ps|PS|ps.gz|pdf|PDF)'	;;
-    acroread|[xk]pdf)	e='!*.+(pdf|PDF)'			;;
+    acroread|[xk]pdf)	e='!*.+(fdf|pdf|FDF|PDF)'		;;
     evince)		e='!*.+(ps|PS|pdf|PDF)'                 ;;
     dvips)		e='!*.+(dvi|DVI)'			;;
     [xk]dvi)		e='!*.+(dvi|dvi.gz|DVI|DVI.gz)'		;;
