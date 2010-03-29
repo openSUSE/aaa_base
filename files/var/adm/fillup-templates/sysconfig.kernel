@@ -8,6 +8,18 @@
 # (like drivers for scsi-controllers, for lvm or reiserfs)
 #
 INITRD_MODULES=""
+
+## Type:        string(yes)
+## Command:     /sbin/mkinitrd
+## Default:     ""
+#
+#
+# This variable disables the initialization of KMS in the initrd
+# by not including the modules required for KMS even though KMS is
+# supported on the underlying hardware.
+# After changing run mkinitrd again.
+#
+NO_KMS_IN_INITRD="no"
  
 ## Type:        string
 ## Command:     /sbin/mkinitrd
