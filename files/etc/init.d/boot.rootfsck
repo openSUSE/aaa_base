@@ -45,15 +45,18 @@ case "$1" in
 		ROOTFS_BLKDEV=$ROOTFS_REALDEV
 	    fi
 	else
-	    # if not booted via initrd, /dev is empty.
-	    # use private devnode with proper permissions
-	    ROOTFS_BLKDEV="/dev/shm/root"
-	    rootcpio=`echo / | /bin/cpio --quiet -o -H newc`
-	    rootmajor=0x${rootcpio:62:8}
-	    rootminor=0x${rootcpio:70:8}
-	    if [ $((rootmajor)) -ne 0 ] ; then
-	    	echo /bin/mknod -m600 $ROOTFS_BLKDEV b $((rootmajor)) $((rootminor))
-	    	/bin/mknod -m600 $ROOTFS_BLKDEV b $((rootmajor)) $((rootminor))
+	    # if not booted via initrd, udev should still have
+            # created /dev/root already
+            # if not, create it
+	    ROOTFS_BLKDEV="/dev/root"
+	    if test ! -e /dev/root ; then
+		rootcpio=`echo / | /bin/cpio --quiet -o -H newc`
+		rootmajor=0x${rootcpio:62:8}
+		rootminor=0x${rootcpio:70:8}
+		if [ $((rootmajor)) -ne 0 ] ; then
+		    echo /bin/mknod -m600 $ROOTFS_BLKDEV b $((rootmajor)) $((rootminor))
+		    /bin/mknod -m600 $ROOTFS_BLKDEV b $((rootmajor)) $((rootminor))
+		fi
 	    fi
         fi
 	# common options for file system check

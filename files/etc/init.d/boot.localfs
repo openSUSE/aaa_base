@@ -10,7 +10,7 @@
 # Required-Start:    boot.udev boot.rootfsck
 # Should-Start:      boot.md boot.lvm dasd_devfs_compat boot.multipath boot.evms boot.loadmodules
 # Required-Stop:     boot.udev
-# Should-Stop:       boot.lvm dasd_devfs_compat boot.multipath
+# Should-Stop:       boot.md boot.lvm dasd_devfs_compat boot.multipath boot.evms
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: check and mount local filesystems except /
@@ -193,7 +193,7 @@ case "$1" in
 	    else
 		FSCK_OPTS="$FSCK_OPTS -V"
 	    fi
-	    preload=$(pidof preload)
+	    preload=$(PIDOF_NETFS=yes pidof preload)
 	    test -n "$preload" && kill -STOP $preload
 	    echo "Checking file systems..."
 	    fsck $FSCK_OPTS
