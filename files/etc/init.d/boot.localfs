@@ -32,7 +32,7 @@ export FSCK_MAX_INST
 # Special file systems (memory and network based)
 #
 typeset -r nomnt=autofs,bdev,rootfs,sockfs,pipefs,anon_inodefs,inotifyfs,eventpollfs,futexfs
-typeset -r tmpfs=tmpfs,ramfs,hugetlbfs,mqueue
+typeset -r tmpfs=tmpfs,ramfs,hugetlbfs,mqueue,usbfs
 typeset -r netfs=nfs,nfs4,smbfs,cifs,afs,ncpfs
 
 tmp=""

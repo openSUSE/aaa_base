@@ -1,0 +1,52 @@
+.\"
+.\" SuSE man page smart_agetty
+.\" Copyright (c) 2010 SuSE Linux Products GmbH, Nuernberg, Germany.
+.\"
+.\"
+.TH smart_agetty 1 "May 18th, 2010" "Version 0.0" "Emulate agetty console"
+.\"
+.UC 1
+.SH NAME
+.\"
+smart_agetty \- Emulate agetty for a non vga/framebuffer console
+.B
+.SH SYNOPSIS
+.\"
+.B smart_agetty [OPTIONS] <GETTYSPEED> <GETTYDEVICE> <GETTYTERM>
+.\"
+.SH DESCRIPTION
+smart_agetty is a wrapper script around agetty. It accepts the following options:
+.SH OPTIONS
+.IP -i|-h|-L|-m|-n|-w|<options>
+Normal getty options. See 
+.RS
+.B $ man 8 agetty
+.RE
+.RS
+for more details.
+.RE
+.IP GETTYSPEED
+The speed of the getty device.
+.IP GETTYDEVICE
+The used tty device - as listed in /dev.
+.IP GETTYTERM
+The  value  to  be used for the TERM environment variable. This overrides whatever init(8) may have set, and is inherited by login and the shell.
+.SH DIAGNOSTICS
+The following diagnostics may be issued on kmsg:
+
+Can not determine 'getty device' speed.
+.RS
+stty speed could not autodetect the speed of the given device.
+.RE
+unhandled stdout
+.RS
+Autoconsole could not guess the right output console.
+.RE
+.SH BUGS
+Please visit http://bugs.opensuse.org/ to get a guidance on how to submit bugreports.
+.SH SEE ALSO
+.BR agetty (8)
+.SH COPYRIGHT
+2010 SuSE Linux Products GmbH, Nuernberg, Germany.
+.SH AUTHOR
+Lars Vogdt <lrupp@suse.de>

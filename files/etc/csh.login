@@ -141,7 +141,12 @@ set noglob
 #
 # For all readline library based applications
 #
-if ( -r /etc/inputrc && ! ${?INPUTRC} ) setenv INPUTRC /etc/inputrc
+if (! ${?INPUTRC} ) then
+    if ( -r /etc/inputrc ) setenv INPUTRC /etc/inputrc
+    if ( "$HOME" != "/" ) then
+	if ( -s ${HOME}/.inputrc ) setenv INPUTRC ${HOME}/.inputrc
+    endif
+endif
 
 #
 # Set some environment variables for TeX/LaTeX (Not used due luatex)
@@ -285,10 +290,12 @@ if ( -r /etc/csh.login.local ) source /etc/csh.login.local
 #
 # An X session
 #
-if (${?TERM} && -o /dev/$tty && ${?prompt} && ${TERM} == "xterm" && ! ${?SSH_TTY}) then
+if (${?TERM} && -o /dev/$tty && ${?prompt} && ! ${?SSH_TTY}) then
+    if (${TERM} == "xterm") then
 	echo "Directory: $cwd"
 	# Last but not least
 	date
+    endif
 endif
 
 #

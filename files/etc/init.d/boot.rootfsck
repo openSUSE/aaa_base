@@ -151,7 +151,11 @@ case "$1" in
 	            reboot -f
 	        fi
 	        sync
-	        mount -n -o remount,rw /
+		if rc_cmdline readonlyroot ; then
+		    echo "Skipping rw-remount of / since boot commandline specified \"readonlyroot\""
+		else
+		    mount -n -o remount,rw /
+		fi
 		test $FSCK_RETURN -gt 0 && > /fsck_corrected_errors
 	    else
 		echo

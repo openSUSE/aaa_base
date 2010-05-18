@@ -12,6 +12,16 @@
 # USERS may write their own $HOME/.csh.expert to skip sourcing of
 # /etc/profile.d/complete.tcsh and most parts oft this file.
 #
+
+#
+# Just in case the user excutes a command with ssh
+#
+if ((${?loginsh} || ${?SSH_CONNECTION}) && ! ${?CSHRCREAD}) then
+    set _SOURCED_FOR_SSH=true
+    source /etc/csh.login >& /dev/null
+    unset _SOURCED_FOR_SSH
+endif
+#
 onintr -
 set noglob
 #
@@ -28,13 +38,6 @@ endif
 # Default echo style
 #
 set echo_style=both
-
-#
-# If `login files' are not sourced first
-#
-if ( ${?loginsh} && ! ${?CSHRCREAD} ) then
-    source /etc/csh.login >& /dev/null
-endif
 
 #
 # In case if not known
@@ -212,15 +215,6 @@ endif
 done:
 onintr
 unset noglob
-
-#
-# Just in case the user excutes a command with ssh
-#
-if ( ${?SSH_CONNECTION} && ! ${?CSHRCREAD} ) then
-    set _SOURCED_FOR_SSH=true
-    source /etc/csh.login >& /dev/null
-    unset _SOURCED_FOR_SSH
-endif
 
 #
 # Local configuration
