@@ -107,9 +107,6 @@ echo -n "Copying static /dev content"
 cp -axT --remove-destination /lib/udev/devices /dev
 rc_status -v -r
 
-# workaround until fixed in udev
-chmod 1777 /dev/shm
-
 if test "$(stat -Lc %d /dev/shm 2>/dev/null)" = "$(stat -Lc %d /dev/shm/.. 2>/dev/null)" ; then
     echo -n "Mounting tmpfs at /dev/shm"
     mkdir -p -m 1777 /dev/shm
