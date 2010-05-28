@@ -316,7 +316,7 @@ case "$RUNLEVEL" in
     S|0|1|6)
 	DO_CONFIRM=no
 	RUN_PARALLEL=no
-	killproc -QUIT /sbin/blogd
+	killproc -SYS /sbin/blogd
 esac
 
 #
