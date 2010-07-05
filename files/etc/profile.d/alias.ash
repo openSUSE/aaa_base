@@ -40,27 +40,28 @@ popd () {
     dirs
 }
 dirs () { echo "`pwd` $DSTACK"; return 0; }
-ls   () { /bin/ls $LS_OPTIONS ${1+"$@"}; }
-dir  () { ls -l   ${1+"$@"}; }
-ll   () { ls -l   ${1+"$@"}; }
-la   () { ls -la  ${1+"$@"}; }
-l    () { ls -alF ${1+"$@"}; }
-ls-l () { ls -l   ${1+"$@"}; }
+
+alias ls='/bin/ls $LS_OPTIONS'
+alias dir='ls -l'
+alias ll='ls -l'
+alias la='ls -la'
+alias l='ls -alF'
+alias ls-l='ls -l'
 
 #
 # Set some generic aliase functions
 #
-o    () { less    ${1+"$@"}; }
-..   () { cd ../; }
-...  () { cd ../../; }
-+    () { pushd .; }
--    () { popd; }
-rd   () { rmdir ${1+"$@"}; }
-md   () { mkdir -p ${1+"$@"}; }
-you  () { su - -c "yast2 online_update"; }
-rehash   () { hash -r ${1+"$@"}; }
-beep     () { echo -n ' ' | tr ' ' '\007'; }
-unmount  () { echo "Error: Try the command: umount" 1>&2; return 1; }
+alias o='less'
+alias ..='cd ../'
+alias ...='cd ../../'
+alias +='pushd'
+alias -='popd'
+alias rd='rmdir'
+alias md='mkdir -p'
+alias you='su - -c "yast2 online_update"'
+alias rehash='hash -r'
+alias beep='printf "\007"'
+alias unmount='echo "Error: Try the command: umount" 1>&2 && false'
 
 #
 # End of /etc/profile.d/alias.ash
