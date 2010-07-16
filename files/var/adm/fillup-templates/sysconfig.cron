@@ -87,14 +87,14 @@ MAX_NOT_RUN="5"
 SEND_MAIL_ON_NO_ERROR="no"
 
 ## Type:	yesno
-## Default:	yes
+## Default:	no
 #
 # send email containing output from all successful jobs in
 # cron.{hourly,daily,weekly,monthly}. Output from failed
 # jobs is always sent. If SEND_MAIL_ON_NO_ERROR is yes, this 
 # setting is ignored.  (yes/no)
 #
-SEND_OUTPUT_ON_NO_ERROR="yes"
+SEND_OUTPUT_ON_NO_ERROR="no"
 
 ## Type:	yesno
 ## Default:	no

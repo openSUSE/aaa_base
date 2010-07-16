@@ -189,7 +189,7 @@ case "$1" in
 	## Stop daemon with killproc(8) and if this fails
 	## killproc sets the return value according to LSB.
 
-	/sbin/killproc -TERM $FOO_BIN
+	/sbin/killproc $FOO_BIN
 
 	# Remember status and be verbose
 	rc_status -v
