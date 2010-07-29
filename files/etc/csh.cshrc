@@ -98,42 +98,10 @@ set symlinks=ignore
 #
 unset autologout
 unset ignoreeof
-#
-if ( -x /usr/bin/dircolors ) then
-    if ( -r $HOME/.dir_colors ) then
-	eval `/usr/bin/dircolors -c $HOME/.dir_colors`
-    else if ( -r /etc/DIR_COLORS ) then
-	eval `/usr/bin/dircolors -c /etc/DIR_COLORS`
-    endif
-endif
-setenv LS_OPTIONS '--color=tty'
-if ( ${?LS_COLORS} ) then
-    if ( "${LS_COLORS}" == "" ) setenv LS_OPTIONS '--color=none'
-endif
-unalias ls
-if ( "$uid" == "0" ) then
-    setenv LS_OPTIONS "-A -N $LS_OPTIONS -T 0"
-else
-    setenv LS_OPTIONS "-N $LS_OPTIONS -T 0"
-endif
-alias ls 'ls $LS_OPTIONS'
-alias la 'ls -aF --color=none'
-alias ll 'ls -l  --color=none'
-alias l  'll'
-alias dir  'ls --format=vertical'
-alias vdir 'ls --format=long'
-alias d dir;
-alias v vdir;
-alias o 'less'
-alias .. 'cd ..'
-alias ... 'cd ../..'
-alias cd.. 'cd ..'
-alias rd rmdir
-alias md 'mkdir -p'
-alias startx 'if ( ! -x /usr/bin/startx ) echo "No startx installed";\
-	      if (   -x /usr/bin/startx ) /usr/bin/startx |& tee ${HOME}/.xsession-error'
-alias remount '/bin/mount -o remount,\!*'
 
+if (-r /etc/profile.d/ls.tcsh) source /etc/profile.d/ls.tcsh
+
+if (-r /etc/profile.d/alias.tcsh) source /etc/profile.d/alias.tcsh
 #
 # Prompting and Xterm title
 #

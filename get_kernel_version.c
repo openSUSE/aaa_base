@@ -14,6 +14,7 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -47,7 +48,7 @@ main (int argc, char *argv[])
   /* check if file exist and is compressed */
   {
     unsigned char  buf [2];
-    int fd = open (argv[1], O_RDONLY);
+    int fd = open (argv[1], O_RDONLY | O_CLOEXEC);
     if (fd == -1)
       {
 	fprintf (stderr, "Cannot open kernel image \"%s\"\n", argv[1]);
@@ -64,7 +65,7 @@ main (int argc, char *argv[])
     if (buf [0] == 037 && (buf [1] == 0213 || buf [1] == 0236))
       {
 	snprintf (command, sizeof (command), "/bin/gzip -dc %s 2>/dev/null", argv[1]);
-	fp = popen (command, "r");
+	fp = popen (command, "re");
 	if (fp == NULL)
 	  {
 	    fprintf (stderr, "%s: faild\n", command);
@@ -73,7 +74,7 @@ main (int argc, char *argv[])
       }
     else
       {
-	fp = fopen (argv[1],"r");
+	fp = fopen (argv[1],"re");
       }
     close (fd);
   }

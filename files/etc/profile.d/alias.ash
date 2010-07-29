@@ -41,13 +41,6 @@ popd () {
 }
 dirs () { echo "`pwd` $DSTACK"; return 0; }
 
-alias ls='/bin/ls $LS_OPTIONS'
-alias dir='ls -l'
-alias ll='ls -l'
-alias la='ls -la'
-alias l='ls -alF'
-alias ls-l='ls -l'
-
 #
 # Set some generic aliase functions
 #

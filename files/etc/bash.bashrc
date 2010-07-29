@@ -69,64 +69,21 @@ path ()
 test -z "$UID"  && readonly  UID=`path id -ur 2> /dev/null`
 test -z "$EUID" && readonly EUID=`path id -u  2> /dev/null`
 
-#
-# Colored file listings
-#
-if test -x /usr/bin/dircolors ; then
-    #
-    # set up the color-ls environment variables:
-    #
-    if test -f $HOME/.dir_colors ; then
-	eval "`/usr/bin/dircolors -b $HOME/.dir_colors`"
-    elif test -f /etc/DIR_COLORS ; then
-	eval "`/usr/bin/dircolors -b /etc/DIR_COLORS`"
-    fi
-fi
-
-#
-# ls color option depends on the terminal
-# If LS_COLORS is set but empty, the terminal has no colors.
-#
-if test "${LS_COLORS+empty}" = "${LS_COLORS:+empty}" ; then
-    LS_OPTIONS=--color=tty
-else
-    LS_OPTIONS=--color=none
-fi
-if test "$UID" = 0 ; then
-    LS_OPTIONS="-A -N $LS_OPTIONS -T 0"
-else
-    LS_OPTIONS="-N $LS_OPTIONS -T 0"
-fi
+test -s /etc/profile.d/ls.bash && . /etc/profile.d/ls.bash
 
 #
 # Avoid trouble with Emacs shell mode
 #
 if test "$EMACS" = "t" ; then
-    LS_OPTIONS='-N --color=none -T 0';
     path tset -I -Q
     path stty cooked pass8 dec nl -echo
 fi
-export LS_OPTIONS
 
 #
 # Set prompt and aliases to something useful for an interactive shell
 #
 case "$-" in
 *i*)
-    #
-    # Some useful functions
-    #
-    if test -z "$restricted" ; then
-	startx  () {
-	    test -x /usr/bin/startx || {
-		echo "No startx installed" 1>&2
-		return 1;
-	    }
-	    /usr/bin/startx ${1+"$@"} 2>&1 | tee $HOME/.xsession-errors
-	}
-	remount () { /bin/mount -o remount,${1+"$@"} ; }
-    fi
-
     #
     # Set prompt to something useful
     #
@@ -246,55 +203,7 @@ case "$-" in
 	# if they parse this even if they do not expand.
 	test -s /etc/profile.d/alias.ash && . /etc/profile.d/alias.ash
     else
-	unalias ls 2>/dev/null
-        case "$is" in
-	bash) alias ls='ls $LS_OPTIONS'		;;
-	zsh)  alias ls='\ls $=LS_OPTIONS'	;;
-	*)    alias ls='/bin/ls $LS_OPTIONS'	;;
-	esac
-	alias dir='ls -l'
-	alias ll='ls -l'
-	alias la='ls -la'
-	alias l='ls -alF'
-	alias ls-l='ls -l'
-
-	#
-	# Set some generic aliases
-	#
-	alias o='less'
-	alias ..='cd ..'
-	alias ...='cd ../..'
-	alias cd..='cd ..'
-	if test "$is" != "ksh" ; then
-	    alias -- +='pushd .'
-	    alias -- -='popd'
-	fi
-	alias rd=rmdir
-	alias md='mkdir -p'
-	if test "$is" = "bash" -a ! -x /bin/which -a ! -x /usr/bin/which ; then
-	    #
-	    # Other shells use the which command in path (e.g. ash) or
-	    # their own builtin for the which command (e.g. ksh and zsh).
-	    #
-	    _which () {
-		local file=$(type -p ${1+"$@"} 2>/dev/null)
-		if test -n "$file" -a -x "$file"; then
-		    echo "$file"
-		    return 0
-		fi
-		hash -r
-		type -P ${1+"$@"}
-	    }
-	    alias which=_which
-	fi
-	alias rehash='hash -r'
-	alias you='if test "$EUID" = 0 ; then /sbin/yast2 online_update ; else su - -c "/sbin/yast2 online_update" ; fi'
-	if test "$is" != "ksh" ; then
-	    alias beep='echo -en "\007"' 
-	else
-	    alias beep='echo -en "\x07"'
-	fi
-	alias unmount='echo "Error: Try the command: umount" 1>&2; false'
+	test -s /etc/profile.d/alias.bash && . /etc/profile.d/alias.bash
 	test -s $HOME/.alias && . $HOME/.alias
     fi
 
