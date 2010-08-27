@@ -55,3 +55,13 @@ FSCK_MAX_INST="10"
 #
 KLOGCONSOLE_PARAMS=""
 
+## Type:	yesno
+## Default:	no
+#
+# If set to "yes" this enforce to use the boot logging facility
+# even if "fastboot" and/or "quiet" was found on the kernel
+# command line e.g. specified at /boot/grub/menu.lst in the
+# optional kernel parameter list.  The current log can be found
+# at /var/log/boot.msg and the last at /var/log/boot.omsg
+# 
+ENFORCE_BLOGD="no"

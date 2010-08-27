@@ -150,6 +150,9 @@ fi
 if test "$DO_FASTBOOT" = yes -o "$DO_QUIET" = yes -o ! -x /sbin/blogd ; then
     DO_BLOGD=no
 fi
+if test "$ENFORCE_BLOGD" = yes ; then
+    DO_BLOGD=yes
+fi
 test -z "$CONFIRM_PROMPT_TIMEOUT" && CONFIRM_PROMPT_TIMEOUT=5
 if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
     echo -en "${extd}Enter Interactive startup mode?${norm}"

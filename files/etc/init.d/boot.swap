@@ -108,8 +108,12 @@ case "$1" in
 	    # /proc/swaps during direct read call
 	    cat /proc/swaps | \
 	    while read des type rest ; do
-		# Release only swapfiles to allow a clean filesystem umount
-		test "$type" = "file" || continue
+		# Release swapfiles and partitions on other subsystems
+		# we may want to shut down, like LVM or MD,
+		# so we only keep /dev/sd* for the moment
+		case $des in
+		    /dev/sd*) continue ;;
+		esac
 		swapoff $des &> /dev/null
 	    done
 	    sync

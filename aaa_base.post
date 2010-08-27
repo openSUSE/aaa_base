@@ -65,6 +65,14 @@ if grep -q RCCONFIG_BACKUP_DIR../var/adm/backup/rpmdb etc/sysconfig/backup; then
     mv /var/adm/backup/rpmdb/sysconfig[-_]* /var/adm/backup/sysconfig 2>/dev/null
 fi
 
+if grep -q "SEND_OUTPUT_ON_NO_ERROR=\"yes\"" etc/sysconfig/cron ; then
+  if test ! -f var/adm/bnc_622203_fixed ; then
+    sed -e "s|^SEND_OUTPUT_ON_NO_ERROR=\"yes\"|SEND_OUTPUT_ON_NO_ERROR=\"no\"|" \
+        etc/sysconfig/cron > etc/sysconfig/cron.new \
+        && mv etc/sysconfig/cron.new etc/sysconfig/cron
+    touch var/adm/bnc_622203_fixed
+  fi
+fi
 
 # clear old install settings of MODULES_LOADED_ON_BOOT
 eval `grep "^MODULES_LOADED_ON_BOOT" etc/sysconfig/kernel`
