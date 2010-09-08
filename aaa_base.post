@@ -9,29 +9,29 @@
 # Run this script in C-Locale, or some tools will fail.
 export LC_ALL=C
 #
-# to make shure, var/lib/YaST/bin/bootsetup runs fine, delete
-# usr/lib/YaST/.configured2
-test -e usr/lib/YaST/.configured2 && rm -f usr/lib/YaST/.configured2
+# to make sure, /var/lib/YaST/bin/bootsetup runs fine, delete
+# /usr/lib/YaST/.configured2
+test -e /usr/lib/YaST/.configured2 && rm -f /usr/lib/YaST/.configured2
 #
 # there are some installation with an etc/psdevtab, which is only readable
 # for root - this slows ps for any other user. starting ps as root, creates
 # it, when it doesn't exist (readable). So simply delete it.
 #
-test -e etc/psdevtab && rm -f etc/psdevtab
+test -e /etc/psdevtab && rm -f /etc/psdevtab
 #
 # if the old nsswitch.conf contains dns6, replace it with dns
 #
-test -f etc/nsswitch.conf.rpmnew && grep dns6 etc/nsswitch.conf >/dev/null 2>&1 && {
-   sed -i -e "s|dns6|dns|g" etc/nsswitch.conf
+test -f /etc/nsswitch.conf.rpmnew && grep dns6 /etc/nsswitch.conf >/dev/null 2>&1 && {
+   sed -i -e "s|dns6|dns|g" /etc/nsswitch.conf
 }
 # GMT might already be in sysconfig/clock
-%{rename_sysconfig_variable -f etc/sysconfig/clock GMT HWCLOCK}
+%{rename_sysconfig_variable -f /etc/sysconfig/clock GMT HWCLOCK}
 
 #
 # Initialize runlevel links
 #
 %{fillup_and_insserv -y boot.proc boot.localfs boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single}
-%{insserv_force_if_yast etc/init.d/boot.loadmodules etc/init.d/boot.cleanup etc/init.d/boot.rootfsck}
+%{insserv_force_if_yast /etc/init.d/boot.loadmodules /etc/init.d/boot.cleanup /etc/init.d/boot.rootfsck}
 ## powerfail probably needs empty header ...
 
 # add Kill-links in boot.d if needed:
@@ -45,8 +45,8 @@ done
 %{remove_and_set -n suseconfig CHECK_INITTAB}
 %{remove_and_set -n suseconfig HALT_SOUND}
 
-if ! [ -d etc/sysconfig ] ; then
-  mkdir -p etc/sysconfig
+if ! [ -d /etc/sysconfig ] ; then
+  mkdir -p /etc/sysconfig
 fi
 for i in language backup boot kernel \
 	suseconfig clock proxy windowmanager sysctl \
@@ -55,27 +55,26 @@ for i in language backup boot kernel \
 done
 # migrate HALT_SOUND value if set before
 if [ -n "$HALT_SOUND" -a "$HALT_SOUND" != "no" ] ; then
-    sed -i -e "s|^HALT_SOUND=.*|HALT_SOUND=\"$HALT_SOUND\"|" etc/sysconfig/shutdown
+    sed -i -e "s|^HALT_SOUND=.*|HALT_SOUND=\"$HALT_SOUND\"|" /etc/sysconfig/shutdown
 fi
 # fix sysconfig backup dir
-if grep -q RCCONFIG_BACKUP_DIR../var/adm/backup/rpmdb etc/sysconfig/backup; then
+if grep -q RCCONFIG_BACKUP_DIR../var/adm/backup/rpmdb /etc/sysconfig/backup; then
     sed -i -e "s|^RCCONFIG_BACKUP_DIR=.*|RCCONFIG_BACKUP_DIR=\"/var/adm/backup/sysconfig\"|" \
-	etc/sysconfig/backup
+	/etc/sysconfig/backup
     mkdir -p /var/adm/backup/sysconfig
     mv /var/adm/backup/rpmdb/sysconfig[-_]* /var/adm/backup/sysconfig 2>/dev/null
 fi
 
-if grep -q "SEND_OUTPUT_ON_NO_ERROR=\"yes\"" etc/sysconfig/cron ; then
-  if test ! -f var/adm/bnc_622203_fixed ; then
-    sed -e "s|^SEND_OUTPUT_ON_NO_ERROR=\"yes\"|SEND_OUTPUT_ON_NO_ERROR=\"no\"|" \
-        etc/sysconfig/cron > etc/sysconfig/cron.new \
-        && mv etc/sysconfig/cron.new etc/sysconfig/cron
-    touch var/adm/bnc_622203_fixed
+if grep -q "SEND_OUTPUT_ON_NO_ERROR=\"yes\"" /etc/sysconfig/cron ; then
+  if test ! -f /var/adm/bnc_622203_fixed ; then
+    sed -i -e "s|^SEND_OUTPUT_ON_NO_ERROR=\"yes\"|SEND_OUTPUT_ON_NO_ERROR=\"no\"|" \
+        /etc/sysconfig/cron
+    touch /var/adm/bnc_622203_fixed
   fi
 fi
 
 # clear old install settings of MODULES_LOADED_ON_BOOT
-eval `grep "^MODULES_LOADED_ON_BOOT" etc/sysconfig/kernel`
+eval `grep "^MODULES_LOADED_ON_BOOT" /etc/sysconfig/kernel`
 MLOB_NEW=""
 for i in $MODULES_LOADED_ON_BOOT ; do
     case $i in
@@ -85,7 +84,7 @@ for i in $MODULES_LOADED_ON_BOOT ; do
 done
 if test "$MODULES_LOADED_ON_BOOT" != "$MLOB_NEW" ; then
     sed -i -e "s|^MODULES_LOADED_ON_BOOT=.*|MODULES_LOADED_ON_BOOT=\"$MLOB_NEW\"|" \
-	etc/sysconfig/kernel
+	/etc/sysconfig/kernel
 fi
 #
 # Backup gshadow file and remove it (merge passwords into
@@ -101,33 +100,33 @@ fi
 # handle password files
 #
 for i in passwd group shadow ; do
-    test -e var/adm/fillup-templates/$i.aaa_base || continue
+    test -e /var/adm/fillup-templates/$i.aaa_base || continue
     echo -n "Updating etc/$i..."
-  if test -f etc/$i ; then
-    cp etc/$i etc/$i.tmp
-    rm -f etc/$i.add
-    sort -k 1,1 -t: -u etc/$i var/adm/fillup-templates/$i.aaa_base \
-    | sort -k 1,1 -t: etc/$i - | uniq -u > etc/$i.add
-    cat etc/$i.add >> etc/$i
-    rm -f etc/$i.add
-    if cmp -s etc/$i etc/$i.tmp ; then
+  if test -f /etc/$i ; then
+    cp /etc/$i /etc/$i.tmp
+    rm -f /etc/$i.add
+    sort -k 1,1 -t: -u /etc/$i /var/adm/fillup-templates/$i.aaa_base \
+    | sort -k 1,1 -t: /etc/$i - | uniq -u > /etc/$i.add
+    cat /etc/$i.add >> /etc/$i
+    rm -f /etc/$i.add
+    if cmp -s /etc/$i /etc/$i.tmp ; then
 	echo "unchanged"
     else
 	echo "modified"
     fi
-    rm -f etc/$i.tmp
+    rm -f /etc/$i.tmp
     # If we have a NIS system, we have to make sure, that "^+" is at the end
-    grep -v "^+" etc/$i > etc/$i.tmp || :
-    grep "^+" etc/$i >> etc/$i.tmp || :
-    test -s etc/$i.tmp && cat etc/$i.tmp > etc/$i
-    rm -f etc/$i.tmp
+    grep -v "^+" /etc/$i > /etc/$i.tmp || :
+    grep "^+" /etc/$i >> /etc/$i.tmp || :
+    test -s /etc/$i.tmp && cat /etc/$i.tmp > /etc/$i
+    rm -f /etc/$i.tmp
   else
-    cat var/adm/fillup-templates/$i.aaa_base > etc/$i
+    cat /var/adm/fillup-templates/$i.aaa_base > /etc/$i
     echo "new"
   fi
 done
 # check/fix owner and permission of shadow files
-for i in etc/shadow ; do
+for i in /etc/shadow ; do
     chmod 640 $i
     chgrp shadow $i
 done
@@ -141,38 +140,38 @@ fi
 #
 # create mtab if it does not exist
 #
-touch etc/mtab
+touch /etc/mtab
 #
 # make sure that several log files exist
 #
-if test ! -d var/log ; then
-    mkdir -p var/log
+if test ! -d /var/log ; then
+    mkdir -p /var/log
 fi
-if test ! -e var/log/faillog ; then
-    touch var/log/faillog
-    chmod 600 var/log/faillog
-    chown root:root var/log/faillog
+if test ! -e /var/log/faillog ; then
+    touch /var/log/faillog
+    chmod 600 /var/log/faillog
+    chown root:root /var/log/faillog
 fi
-if test ! -e root/.bash_history ; then
-    touch root/.bash_history
-    chmod 600 root/.bash_history
+if test ! -e /root/.bash_history ; then
+    touch /root/.bash_history
+    chmod 600 /root/.bash_history
 fi
-if test ! -e var/log/lastlog ; then
-    touch var/log/lastlog
-    chmod 644 var/log/lastlog
-    chown root:tty var/log/lastlog
+if test ! -e /var/log/lastlog ; then
+    touch /var/log/lastlog
+    chmod 644 /var/log/lastlog
+    chown root:tty /var/log/lastlog
 fi
-if test ! -e var/log/wtmp ; then
-    touch var/log/wtmp
-    chmod 664 var/log/wtmp
-    chown root:tty var/log/wtmp
+if test ! -e /var/log/wtmp ; then
+    touch /var/log/wtmp
+    chmod 664 /var/log/wtmp
+    chown root:tty /var/log/wtmp
 fi
-if test -e usr/sbin/usrdel.local -a ! -e usr/sbin/userdel.local ; then
-    cp usr/sbin/usrdel.local usr/sbin/userdel.local
+if test -e /usr/sbin/usrdel.local -a ! -e /usr/sbin/userdel.local ; then
+    cp /usr/sbin/usrdel.local /usr/sbin/userdel.local
 fi
-if test ! -e usr/sbin/userdel.local ; then
-    mkdir -p usr/sbin
-    cat << EOT > usr/sbin/userdel.local
+if test ! -e /usr/sbin/userdel.local ; then
+    mkdir -p /usr/sbin
+    cat << EOT > /usr/sbin/userdel.local
 #!/bin/bash
 #
 # Here you can add your own stuff, that should be done for every user who
@@ -183,7 +182,7 @@ if test ! -e usr/sbin/userdel.local ; then
 # from /etc/passwd.
 #
 EOT
-    chmod 744 usr/sbin/userdel.local
+    chmod 744 /usr/sbin/userdel.local
 fi
 
 # change all /media mounts (subfs) to noauto

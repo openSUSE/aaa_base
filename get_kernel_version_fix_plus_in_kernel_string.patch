@@ -1,0 +1,18 @@
+From: Michal Marek <mmarek@suse.cz>
+Subject: get_kernel_version: accept '+' in kernel version string
+
+Starting with 2.6.35, the kernel build by default appends a plus sign to
+the kernel version string when building in a git tree that is not in a clean
+tagged state.
+
+--- get_kernel_version.c~	2010-09-02 22:34:31.000000000 +0200
++++ get_kernel_version.c	2010-09-02 22:34:47.000000000 +0200
+@@ -26,7 +26,7 @@
+ static inline int my_is_alnum_punct(char c)
+ {
+   return isdigit(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') 
+-    || c == '.' || c == ',' || c == '-' || c == '_';
++    || c == '.' || c == ',' || c == '-' || c == '_' || c == '+';
+ }
+ 
+ int

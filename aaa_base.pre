@@ -8,7 +8,7 @@ mkdir -p boot
 #
 # make sure, tmp directories do exist
 #
-for i in tmp var/tmp ; do
+for i in /tmp /var/tmp ; do
     test -d $i || {
         if test -L $i ; then
             echo "Error! $i is a dangling symlink."
@@ -32,9 +32,9 @@ done
 # var/adm/fillup-templates/passwd.aaa_base to etc/passwd.
 # deleted db2 groups and users were uids 46,47,48 and gids 46,47,48
 #
-mkdir -p etc
-touch etc/mtab
-mkdir -p var/adm/fillup-templates
+mkdir -p /etc
+touch /etc/mtab
+mkdir -p /var/adm/fillup-templates
 echo "root:x:0:0:root:/root:/bin/bash
 bin:x:1:1:bin:/bin:/bin/bash
 daemon:x:2:2:Daemon:/sbin:/bin/bash
@@ -47,7 +47,7 @@ man:x:13:62:Manual pages viewer:/var/cache/man:/bin/bash
 wwwrun:x:30:8:WWW daemon apache:/var/lib/wwwrun:/bin/false
 ftp:x:40:49:FTP account:/srv/ftp:/bin/bash
 nobody:x:65534:65533:nobody:/var/lib/nobody:/bin/bash" \
- > var/adm/fillup-templates/passwd.aaa_base
+ > /var/adm/fillup-templates/passwd.aaa_base
 
 echo "root:x:0:
 bin:x:1:daemon
@@ -80,35 +80,35 @@ lock:x:54:
 man:x:62:
 users:x:100:
 nobody:x:65533:
-nogroup:x:65534:nobody" > var/adm/fillup-templates/group.aaa_base
+nogroup:x:65534:nobody" > /var/adm/fillup-templates/group.aaa_base
 
-rm -f var/adm/fillup-templates/shadow.aaa_base
+rm -f /var/adm/fillup-templates/shadow.aaa_base
 while read LINE ; do
   case $LINE in
     root*)
 	echo "root::$(($(date '+%s')/86400))::::::" \
-		>> var/adm/fillup-templates/shadow.aaa_base
+		>> /var/adm/fillup-templates/shadow.aaa_base
 	;;
     *)
 	echo "${LINE%%%%:*}:*:$(($(date '+%s')/86400))::::::" \
-		>> var/adm/fillup-templates/shadow.aaa_base
+		>> /var/adm/fillup-templates/shadow.aaa_base
 	;;
   esac
-done < var/adm/fillup-templates/passwd.aaa_base
+done < /var/adm/fillup-templates/passwd.aaa_base
 
 
 for file in passwd group ; do
- if test -f etc/$file ; then
+ if test -f /etc/$file ; then
   # like fillup, but : is the only separator
-  rm -f etc/$file.add
-  sort -k 1,1 -t: -u etc/$file var/adm/fillup-templates/$file.aaa_base \
-  | sort -k 1,1 -t: etc/$file - | uniq -u > etc/$file.add
-  cat etc/$file.add >> etc/$file
-  rm -f etc/$file.add
+  rm -f /etc/$file.add
+  sort -k 1,1 -t: -u /etc/$file /var/adm/fillup-templates/$file.aaa_base \
+  | sort -k 1,1 -t: /etc/$file - | uniq -u > /etc/$file.add
+  cat /etc/$file.add >> /etc/$file
+  rm -f /etc/$file.add
   # fix permissions if this script is called with strange umask
-  chmod 644 etc/$file
+  chmod 644 /etc/$file
  else
-  cat var/adm/fillup-templates/$file.aaa_base > etc/$file
+  cat /var/adm/fillup-templates/$file.aaa_base > /etc/$file
  fi
 done
 
@@ -116,12 +116,12 @@ done
 # we have several local files, that changed over the time.  Check the
 # existing one, if they contain real data.  If not, delete them.
 #
-for LOCALFILE in root/bin/cron.daily.local \
-		etc/init.d/boot.local \
-		etc/init.d/halt.local \
-		usr/sbin/usradd.local \
-		usr/sbin/usrdel.local \
-		usr/sbin/userdel.local ; do
+for LOCALFILE in /root/bin/cron.daily.local \
+		/etc/init.d/boot.local \
+		/etc/init.d/halt.local \
+		/usr/sbin/usradd.local \
+		/usr/sbin/usrdel.local \
+		/usr/sbin/userdel.local ; do
     test -f $LOCALFILE || continue
     LOCALFILE_CONTAINS_DATA=false
     while read LINE ; do
@@ -146,7 +146,7 @@ for LOCALFILE in root/bin/cron.daily.local \
     done < $LOCALFILE
     test "$LOCALFILE_CONTAINS_DATA" = false && rm -f $LOCALFILE
 done
-mkdir -p etc/init.d
+mkdir -p /etc/init.d
 echo "#! /bin/sh
 #
 # Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.  All rights reserved.
@@ -161,10 +161,10 @@ echo "#! /bin/sh
 # Here you should add things, that should happen directly after booting
 # before we're going to the first run level.
 #
-" > etc/init.d/boot.local.new
-test -e etc/init.d/boot.local || mv etc/init.d/boot.local.new etc/init.d/boot.local
-rm -f etc/init.d/boot.local.new
-chmod 744 etc/init.d/boot.local
+" > /etc/init.d/boot.local.new
+test -e /etc/init.d/boot.local || mv /etc/init.d/boot.local.new /etc/init.d/boot.local
+rm -f /etc/init.d/boot.local.new
+chmod 744 /etc/init.d/boot.local
 echo "#! /bin/sh
 #
 # Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.  All rights reserved.
@@ -179,13 +179,13 @@ echo "#! /bin/sh
 # Here you should add things, that should happen directly before shuting
 # down.
 #
-" > etc/init.d/halt.local.new
-test -e etc/init.d/halt.local || mv etc/init.d/halt.local.new etc/init.d/halt.local
-rm -f etc/init.d/halt.local.new
-chmod 744 etc/init.d/halt.local
-mkdir -p etc
-for LINK in usr/X11R6/lib/X11 var/X11R6/lib/fonts usr/lib/mgetty+sendfax \
-    usr/man/cat? usr/X11R6/man/cat? usr/openwin/man/cat? usr/lib/news ; do
+" > /etc/init.d/halt.local.new
+test -e /etc/init.d/halt.local || mv /etc/init.d/halt.local.new /etc/init.d/halt.local
+rm -f /etc/init.d/halt.local.new
+chmod 744 /etc/init.d/halt.local
+mkdir -p /etc
+for LINK in /usr/X11R6/lib/X11 /var/X11R6/lib/fonts /usr/lib/mgetty+sendfax \
+    /usr/man/cat? /usr/X11R6/man/cat? /usr/openwin/man/cat? /usr/lib/news ; do
     if test -L $LINK ; then
         echo "Found forbidden/oldish Link: $LINK ...deleting"
         rm -f $LINK
