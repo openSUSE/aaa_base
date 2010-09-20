@@ -4,28 +4,13 @@
 # This feature has its own file because some other shells
 # do not like the way how the bash assigns arrays
 #
-# REQUIRES bash 2.0 and higher
+# REQUIRES bash 4.0 and higher
 #
 
-if complete -o default _nullcommand &> /dev/null ; then
-    _def="-o default"
-    _dir="-o dirnames"
-   _file="-o filenames"
-else
-    _def=""
-    _dir=""
-   _file=""
-fi
-if complete -o nospace _nullcommand &> /dev/null ; then
-    _nosp="-o nospace"
- _minusdd="${_def} ${_nosp} ${_dir}"
- _minusdf="${_def} ${_nosp} ${_dir}"
-else
-    _nosp=""
- _minusdd="-d ${_dir}"
- _minusdf="-d ${_file}"
-fi
-complete -r _nullcommand &> /dev/null
+ _def="-o default -o bashdefault"
+ _dir="-o nospace -o dirnames -o plusdirs"
+_file="-o nospace -o dirnames"
+_nosp="-o nospace"
 
 # Escape file and directory names, add slash to directories if needed.
 # Escaping could be done by the option 'filenames' but this fails
@@ -37,6 +22,17 @@ _compreply_ ()
     local -i o
 
     test ${#COMPREPLY[@]} -eq 0 && return 0
+
+    #
+    # Append a slash on the real result, avoid annoying double tab
+    #
+    for ((o=0; o < ${#COMPREPLY[@]}; o++)) ; do
+	if test ! -d "${COMPREPLY[$o]}" ; then
+	    COMPREPLY[$o]="${COMPREPLY[$o]%%/}"
+	    continue
+	fi
+	COMPREPLY[$o]="${COMPREPLY[$o]%%/}/"
+    done
 
     #
     # Escape spaces and braces in path names with `\'
@@ -53,15 +49,6 @@ _compreply_ ()
 	\() COMPREPLY=($(echo "${COMPREPLY[*]}"|command sed -r 's/\(/\\\(/g')) ;;
 	*)  COMPREPLY=(${COMPREPLY[*]//${x}/\\${x}}) ;;
 	esac
-    done
-
-    #
-    # Append a slash on the real result, avoid annoying double tab
-    #
-    for ((o=0; o < ${#COMPREPLY[*]}; o++)) ; do
-	test -d "${COMPREPLY[$o]}"     || continue
-	test -z "${COMPREPLY[$o]##*/}" || continue
-	COMPREPLY[$o]="${COMPREPLY[$o]}/"
     done
 }
 
@@ -82,9 +69,9 @@ _cd_ ()
     esac
 
     case "$c" in
-    *\**)	COMPREPLY=($(for x in $c; do
-		    test -d $x && echo $x/
-		done)) ;;
+    *[*?[]*)	COMPREPLY=()				# use bashdefault
+		test $g -eq 0 && shopt -u extglob
+		return 0						;;
     \$\(*\))	eval COMPREPLY=\(${c}\) ;;
     \$\(*)	COMPREPLY=($(compgen -c -P '$(' -S ')'	-- ${c#??}))	;;
     \`*\`)	eval COMPREPLY=\(${c}\) ;;
@@ -96,15 +83,16 @@ _cd_ ()
     \~*)	COMPREPLY=($(compgen -u $s 		-- "${c}"))	;;
     *\:*)
                 if [[ $COMP_WORDBREAKS =~ : ]] ; then
-		    local C=${c%"${c##*[^\\]:}"}
+		    x=${c%"${c##*[^\\]:}"}
 		    COMPREPLY=($(compgen -d $s          -- "${c}"))
-		    for ((o=0; o<${#COMPREPLY[@]}; o++)) ; do
-			COMPREPLY[o]=${COMPREPLY[o]#"$C"}
-		    done
-                fi
+		    COMPREPLY=(${COMPREPLY[@]#"$x"})
+                fi							;;
+    *)		COMPREPLY=()				# use bashdefault
+		test $g -eq 0 && shopt -u extglob
+		return 0						;;
     esac
 
-    if test "${1##*/}" = "cd" -a ${#COMPREPLY[@]} -gt 0 ; then
+    if test \( "${1##*/}" = "cd" -o "${1##*/}" = "pushd" \) -a ${#COMPREPLY[@]} -gt 0 ; then
 	#
 	# Handle the CDPATH variable
 	#
@@ -130,12 +118,12 @@ _cd_ ()
 }
 
 if shopt -q cdable_vars; then
-    complete ${_minusdd} -vF _cd_	cd
+    complete ${_def} ${_dir} -vF _cd_		cd
 else
-    complete ${_minusdd} -F  _cd_	cd
+    complete ${_def} ${_dir}  -F _cd_		cd
 fi
-complete ${_minusdd} -F _cd_		rmdir pushd chroot chrootx
-complete ${_minusdf} -F _cd_		mkdir
+complete ${_def} ${_dir}  -F _cd_		rmdir pushd chroot chrootx
+complete ${_def} ${_file} -F _cd_		mkdir
 
 # General expanding shell function
 _exp_ ()
@@ -225,6 +213,7 @@ _exp_ ()
     acroread|[xk]pdf)	e='!*.+(fdf|pdf|FDF|PDF)'		;;
     evince)		e='!*.+(ps|PS|pdf|PDF)'                 ;;
     dvips)		e='!*.+(dvi|DVI)'			;;
+    rpm|zypper)		e='!*.+(rpm|you)'			;;
     [xk]dvi)		e='!*.+(dvi|dvi.gz|DVI|DVI.gz)'		;;
     tex|latex|pdflatex)	e='!*.+(tex|TEX|texi|latex)'		;;
     export)
@@ -255,7 +244,9 @@ _exp_ ()
     \~*/*)		COMPREPLY=($(compgen -f -X "$e"         -- ${c}))	;;
     \~*)		COMPREPLY=($(compgen -u ${s}	 	-- ${c}))	;;
     *@*)		COMPREPLY=($(compgen -A hostname -P '@' -S ':' -- ${c#*@})) ;;
-    *[*?[]*)		COMPREPLY=($(compgen -G "${c}"))			;;
+    *[*?[]*)		COMPREPLY=()			# use bashdefault
+			test $g -eq 0 && shopt -u extglob
+			return 0						;;
     *[?*+\!@]\(*\)*)
 	if test $g -eq 0 ; then
 			COMPREPLY=($(compgen -f -X "$e" -- $c))
@@ -277,7 +268,7 @@ _exp_ ()
 	for s in ${COMPREPLY[@]}; do
 	    e=$(eval echo $s)
 	    if test -d "$e" ; then
-		reply[$((o++))]="$s"	
+		reply[$((o++))]="$s"
 		continue
 	    fi
 	    case "$(file -b $e 2> /dev/null)" in
@@ -286,6 +277,8 @@ _exp_ ()
 	done
 	COMPREPLY=(${reply[@]})
     fi
+
+    _compreply_
 
     test $g -eq 0 && shopt -u extglob
     return 0
@@ -337,7 +330,7 @@ _gdb_ ()
     return 0
 }
 
-complete -d -X '.[^./]*' -F _exp_ ${_file} ${_def} \
+complete ${_def} -X '.[^./]*' -F _exp_ ${_file} \
 				 	compress \
 					bzip2 \
 					bunzip2 \
@@ -348,37 +341,37 @@ complete -d -X '.[^./]*' -F _exp_ ${_file} ${_def} \
 					gs ghostview \
 					gv kghostview \
 					acroread xpdf kpdf \
-					evince \
+					evince rpm zypper \
 					dvips xdvi kdvi \
 					tex latex pdflatex
 
-complete -d -F _exp_ ${_file} ${_def}	chown chgrp chmod chattr ln
-complete -d -F _exp_ ${_file} ${_def}	more cat less strip grep vi ed
+complete ${_def} -F _exp_ ${_file} 	chown chgrp chmod chattr ln
+complete ${_def} -F _exp_ ${_file} 	more cat less strip grep vi ed
 
-complete -A function -A alias -A command -A builtin \
+complete ${_def} -A function -A alias -A command -A builtin \
 					type
-complete -A function			function
-complete -A alias			alias unalias
-complete -A variable			unset local readonly
-complete -F _exp_ ${_def} ${_nosp}	export
-complete -A variable -A export		unset
-complete -A shopt			shopt
-complete -A setopt			set
-complete -A helptopic			help
-complete -A user			talk su login sux
-complete -A builtin			builtin
-complete -A export			printenv
-complete -A command ${_def}		command which nohup exec nice eval 
-complete -A command ${_def}		ltrace strace
-complete -F _gdb_ ${_file} ${_def} 	gdb
+complete ${_def} -A function		function
+complete ${_def} -A alias		alias unalias
+complete ${_def} -A variable		unset local readonly
+complete ${_def} -F _exp_ ${_nosp}	export
+complete ${_def} -A variable -A export	unset
+complete ${_def} -A shopt		shopt
+complete ${_def} -A setopt		set
+complete ${_def} -A helptopic		help
+complete ${_def} -A user		talk su login sux
+complete ${_def} -A builtin		builtin
+complete ${_def} -A export		printenv
+complete ${_def} -A command		command which nohup exec nice eval 
+complete ${_def} -A command		ltrace strace
+complete ${_def} -F _gdb_ ${_file}  	gdb
 HOSTFILE=""
 test -s $HOME/.hosts && HOSTFILE=$HOME/.hosts
-complete -A hostname			ping telnet slogin rlogin \
+complete ${_def} -A hostname		ping telnet slogin rlogin \
 					traceroute nslookup
-complete -A hostname -A directory -A file \
+complete ${_def} -A hostname -A directory -A file \
 					rsh ssh scp
-complete -A stopped -P '%'		bg
-complete -A job -P '%'			fg jobs disown
+complete ${_def} -A stopped -P '%'	bg
+complete ${_def} -A job -P '%'		fg jobs disown
 
 # Expanding shell function for manual pager
 _man_ ()
@@ -432,9 +425,22 @@ _man_ ()
     esac
 }
 
-complete -F _man_ ${_file}		man
+complete ${_def} -F _man_ ${_file}		man
 
-unset _def _dir _file _nosp _minusdd _minusdf
+_rootpath_ ()
+{
+    local c=${COMP_WORDS[COMP_CWORD]}
+    local os="-h -K -k -L -l -V -v -b -E -H -P -S -i -s"
+    local ox="-r -p -t -u"
+    case "$c" in
+ 	-*) COMPREPLY=($(compgen -W "$os $ox" -- "$c")) ;;
+	 *) COMPREPLY=($(PATH=/sbin:/usr/sbin:$PATH:/usr/local/sbin compgen -c -- "${c}"))
+    esac
+}
+
+complete ${_def} -F _rootpath_			sudo
+
+unset _def _dir _file _nosp
 
 #
 # End of /etc/profile.d/complete.bash

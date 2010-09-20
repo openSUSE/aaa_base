@@ -125,7 +125,8 @@ case "$-" in
 	    _u="\u@\h"
 	    _p=">"
 	    if test \( "$TERM" = "xterm" -o "${TERM#screen}" != "$TERM" \) \
-		    -a -z "$EMACS" -a -z "$MC_SID" -a -n "$DISPLAY"
+		    -a -z "$EMACS" -a -z "$MC_SID" -a -n "$DISPLAY" \
+		    -a ! -r $HOME/.bash.expert
 	    then
 		_t="\$(ppwd \l)"
 	    fi

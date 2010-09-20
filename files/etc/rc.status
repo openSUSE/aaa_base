@@ -41,7 +41,7 @@ rc_lc () {
     if test -n "$REDIRECT" ; then
 	set -- $(stty size < "$REDIRECT"  2> /dev/null || echo 0 0)
     else
-	set -- $(stty size 2> /dev/null || echo 0 0)
+	set -- $(stty size <&1 2> /dev/null || echo 0 0)
     fi
     LINES=$1
     COLUMNS=$2
