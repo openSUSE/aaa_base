@@ -25,6 +25,7 @@ SYSTOHC="yes"
 
 ## Type:		string(Europe/Berlin,Europe/London,Europe/Paris)
 ## ServiceRestart:	boot.clock
+## Command:		/sbin/refresh_initrd
 #
 # Timezone (e.g. CET or Asia/Tokyo). The value should correspond
 # to the contents of the /etc/localtime file and is for internal
