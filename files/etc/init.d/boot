@@ -81,10 +81,10 @@ if test "$DTYPE" != "sysfs" ; then
 fi
 
 HAVE_DEBUGFS=0
-DEVTMPFS=tmpfs
+HAVE_DEVTMPFS=0
 while read dev type ; do
         test "$type" = "debugfs" && HAVE_DEBUGFS=1
-        test "$type" = "devtmpfs" && DEVTMPFS=devtmpfs
+        test "$type" = "devtmpfs" && HAVE_DEVTMPFS=1
 done < /proc/filesystems
 
 if test -d /sys/kernel/debug ; then
@@ -98,8 +98,14 @@ fi
 
 DTYPE=$(stat -f -c "%T" /dev 2>/dev/null)
 if test "$DTYPE" != "tmpfs" ; then
+    if test "$HAVE_DEVTMPFS" = "0" ; then
+	echo "************************* FATAL ERROR *************************"
+	echo "******* CONFIG_DEVTMPFS missing from kernel, cannot continue..."
+	echo "***************************************************************"
+	/sbin/halt -f
+    fi
     echo -n "Mounting devtmpfs at /dev"
-    mount -n -t $DEVTMPFS -o mode=0755 $DEVTMPFS /dev
+    mount -n -t devtmpfs -o mode=0755 devtmpfs /dev
     rc_status -v -r
 fi
 
