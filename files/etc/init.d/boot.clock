@@ -91,6 +91,14 @@ rtc_rule()
     fi
 }
 
+adjfile_thirdline()
+{
+    case "$HWCLOCK" in
+    *-u*) grep -q LOCAL /etc/adjtime && sed -ir 's/LOCAL/UTC/' /etc/adjtime ;;
+    *-l*) grep -q UTC   /etc/adjtime && sed -ir 's/UTC/LOCAL/' /etc/adjtime ;;
+    esac 2> /dev/null
+}
+
 rc_reset
 
 case "$1" in
@@ -142,11 +150,13 @@ case "$1" in
 			echo "0"
 			echo "UTC"
 		} > /etc/adjtime
+	    else
+		test -w /etc/adjtime && adjfile_thirdline
 	    fi
 	    rtc_rule /sbin/hwclock $HWCLOCK --adjust
 	else
-	    # Remove any /etc/adjtime left over
-	    test -e /etc/adjtime && rm -f /etc/adjtime
+	    # Change any /etc/adjtime left over
+	    test -w /etc/adjtime && adjfile_thirdline
 	    SYSTZ="--systz"
             test -e /dev/shm/warpclock && SYSTZ=""
 	    rtc_rule /sbin/hwclock $SYSTZ $HWCLOCK --noadjfile
@@ -167,8 +177,8 @@ case "$1" in
 	    if test "$USE_ADJFILE" = yes ; then
 		/sbin/hwclock --systohc $HWCLOCK
 	    else
-		# Remove any /etc/adjtime left over
-		test -e /etc/adjtime && rm -f /etc/adjtime
+		# Change any /etc/adjtime left over
+		test -w /etc/adjtime && adjfile_thirdline
 		/sbin/hwclock --systohc $HWCLOCK --noadjfile
 	    fi
 	    rc_status -v
