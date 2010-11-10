@@ -168,9 +168,11 @@ case "$1" in
 	    fi
 	fi
         # start with a clean mtab and enter root fs entry
-	rm -f /etc/mtab* 
-	> /etc/mtab
-	mount -f /
+	if ! test -L /etc/mtab ; then
+	    rm -f /etc/mtab* 
+	    > /etc/mtab
+	    mount -f /
+	fi
 	;;
     stop)
 	;;

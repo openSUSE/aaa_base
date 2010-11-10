@@ -455,7 +455,7 @@ sub readable {
 
 my $mode = '';
 my $printdeps;
-
+my $root = '/';
 
 sub addmode {
   die("Please specify only one mode.\n") if $mode;
@@ -476,8 +476,9 @@ usage:
         chkconfig -h|--help                     (print usage)
         chkconfig -f|--force ...                (call insserv with -f)
 
-        chkconfig [name]           same as chkconfig -t
-        chkconfig name state...    same as chkconfig -s name state
+        chkconfig [name]             same as chkconfig -t
+        chkconfig name state...      same as chkconfig -s name state
+        chkconfig --root=<root> ...  use <root> as the root file system
 EOF
 }
 
@@ -494,7 +495,9 @@ if (!GetOptions('list|l'   => \&addmode,
                 'level=s'  => \$level,
                 'force|f'  => \$force,
                 'allservices|A'  => \$allservices,
-                'deps'     => \$printdeps
+                'deps'     => \$printdeps,
+                'root=s'   => \$root
+
    )) {
   usage();
   exit 1;
@@ -506,6 +509,10 @@ if ($mode eq 'h') {
 my (@services, $s);
 my (@remove, $s);
 my (@enable, $s);
+
+$initdir = "$root/etc/init.d";
+$inetddir = "$root/etc/inetd.d";
+$xinetddir = "$root/etc/xinetd.d";
 
 findknown();
 

@@ -1,12 +1,11 @@
-#!/bin/sh
-
-. /etc/profile
-. /etc/sysconfig/security
+#!/bin/bash --login
 
 test "$UID" = 0 -o ! -z "$RPM_BUILD_ROOT" || {
     echo Check does not work for normal users.
     exit 1
 }
+
+. /etc/sysconfig/security
 
 do_gzip() {
 	while read input; do
