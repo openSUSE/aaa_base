@@ -316,14 +316,6 @@ if test "$is" != "ash" ; then
 fi
 
 #
-# System wide configuration of bourne shells like ash
-#
-if test "$is" != "ksh" -a "$is" != "zsh" -a -z "$PROFILEREAD" ; then
-    ENV=/etc/bash.bashrc
-    export ENV
-fi
-
-#
 # Avoid overwriting user settings if called twice
 #
 if test -z "$PROFILEREAD" ; then

@@ -262,13 +262,6 @@ if ( -d /etc/profile.d && ! ${?CSHRCREAD} ) then
 endif
 
 #
-# System wide configuration of bourne shells like ash
-#
-if (! ${?CSHRCREAD} ) then
-    setenv ENV /etc/bash.bashrc
-endif
-
-#
 # Avoid overwriting user settings if called twice
 #
 if (! ${?CSHRCREAD} ) then
