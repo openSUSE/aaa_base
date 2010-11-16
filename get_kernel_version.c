@@ -26,7 +26,7 @@
 static inline int my_is_alnum_punct(char c)
 {
   return isdigit(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') 
-    || c == '.' || c == ',' || c == '-' || c == '_';
+    || c == '.' || c == ',' || c == '-' || c == '_' || c == '+';
 }
 
 int

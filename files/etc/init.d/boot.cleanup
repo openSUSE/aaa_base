@@ -58,7 +58,7 @@ case "$1" in
 		fi
 		touch /var/run/utmp
 		chmod 664 /var/run/utmp
-		chown root:tty /var/run/utmp
+		chown root:utmp /var/run/utmp
 
 		# Re-read inittab for jobs and redo utmp records if required
 		test "$PREVLEVEL" = "S" && telinit q

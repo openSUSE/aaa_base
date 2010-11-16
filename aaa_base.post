@@ -3,7 +3,8 @@
 #
 # post.sh - to be done after extraction
 #
-# Copyright (c) 2003 SuSE Linux AG Nuernberg, Germany.
+# Copyright (c) 2010 SuSE Linux AG Nuernberg, Germany.
+# Copyright (c) 2010 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 #
 # Run this script in C-Locale, or some tools will fail.
@@ -159,13 +160,17 @@ fi
 if test ! -e /var/log/lastlog ; then
     touch /var/log/lastlog
     chmod 644 /var/log/lastlog
-    chown root:tty /var/log/lastlog
+    chown root:utmp /var/log/lastlog
 fi
 if test ! -e /var/log/wtmp ; then
     touch /var/log/wtmp
     chmod 664 /var/log/wtmp
-    chown root:tty /var/log/wtmp
+    chown root:utmp /var/log/wtmp
 fi
+# The group ownership of the following files has changed for openSUSE 11.4
+# update it:
+chgrp utmp /var/log/wtmp /var/log/lastlog /var/run/utmp
+
 if test -e /usr/sbin/usrdel.local -a ! -e /usr/sbin/userdel.local ; then
     cp /usr/sbin/usrdel.local /usr/sbin/userdel.local
 fi
