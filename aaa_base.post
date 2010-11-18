@@ -148,28 +148,19 @@ touch /etc/mtab
 if test ! -d /var/log ; then
     mkdir -p /var/log
 fi
-if test ! -e /var/log/faillog ; then
-    touch /var/log/faillog
-    chmod 600 /var/log/faillog
-    chown root:root /var/log/faillog
-fi
-if test ! -e /root/.bash_history ; then
-    touch /root/.bash_history
-    chmod 600 /root/.bash_history
-fi
-if test ! -e /var/log/lastlog ; then
-    touch /var/log/lastlog
-    chmod 644 /var/log/lastlog
-    chown root:utmp /var/log/lastlog
-fi
-if test ! -e /var/log/wtmp ; then
-    touch /var/log/wtmp
-    chmod 664 /var/log/wtmp
-    chown root:utmp /var/log/wtmp
-fi
-# The group ownership of the following files has changed for openSUSE 11.4
-# update it:
-chgrp utmp /var/log/wtmp /var/log/lastlog /var/run/utmp
+
+while read file owner mode; do
+    test -e "$file" || touch "$file"
+    chmod "$mode" "$file"
+    chown "$owner" "$file"
+done <<EOT
+/root/.bash_history root:root 600
+/var/log/lastlog    root:root 644
+/var/log/faillog    root:root 600
+/var/log/wtmp       root:utmp 664
+/var/log/btmp       root:root 600
+/var/run/utmp       root:utmp 664
+EOT
 
 if test -e /usr/sbin/usrdel.local -a ! -e /usr/sbin/userdel.local ; then
     cp /usr/sbin/usrdel.local /usr/sbin/userdel.local

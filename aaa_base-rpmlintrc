@@ -23,7 +23,7 @@ addFilter("hidden-file-or-dir.*/root/.exrc")
 # perhaps should be configurable later...
 addFilter("non-etc-or-var-file-marked-as-conffile.*/sbin/quick_halt")
 # confirmed - but standard
-addFilter("non-root-group-log-file.*/var/log/lastlog.*tty")
+addFilter("non-root-group-log-file /var/log/wtmp utmp")
 # the following init script don't need to be reloaded - 
 # even after an update
 addFilter("no-reload-entry.*/etc/init.d/README")
