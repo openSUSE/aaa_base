@@ -106,11 +106,9 @@
 /usr/X11R6/bin/xbombs                  root.game        2755
 /usr/X11R6/bin/xemacs                  root.root        1755
 /usr/X11R6/bin/xmris                   root.game        2755
-/usr/bin/cu                            uucp.uucp        6555
 /usr/bin/emacs                         root.root        1755
 /usr/bin/inews                         news.news        2755
 /usr/bin/man                           man.root         4755
-/usr/bin/minicom                       root.uucp        2755
 /usr/bin/rnews                         news.uucp        4555
 /usr/bin/uucp                          uucp.uucp        6555
 /usr/bin/uuname                        uucp.uucp        6555
@@ -233,6 +231,7 @@
 /etc/profile                           root.root         644
 /etc/protocols                         root.root         644
 /etc/resolv.conf                       root.root         644
+/etc/rmtab                             root.root         644
 /etc/rpc                               root.root         644
 /etc/sendmail.cf                       root.root         644
 /etc/services                          root.root         644
@@ -281,10 +280,12 @@
 /usr/X11R6/bin/seyon                   root.uucp         755
 /usr/X11R6/bin/xload                   root.root         755
 /usr/X11R6/bin/xosview.bin             root.root         755
+/usr/bin/cu                            root.root         755
 /usr/bin/elm                           root.root         755
 /usr/bin/filter                        root.root         755
 /usr/bin/deliver                       root.root         755
 /usr/bin/lockfile                      root.root         755
+/usr/bin/minicom                       root.uucp         755
 /usr/bin/mutt                          root.root         755
 /usr/bin/procmail                      root.root         755
 /usr/sbin/atrun                        root.root         755
