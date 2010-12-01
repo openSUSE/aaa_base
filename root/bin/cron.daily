@@ -322,6 +322,7 @@ if test "$REINIT_MANDB" = yes ; then
     # some applications need whatis database. If makewhatis exists, call it
     #
     if [ -x /usr/sbin/makewhatis -a -w /usr/man ] ; then
+        unset MANPATH manpath
         manpath=/usr/man:/usr/X11R6/man:/usr/local/man
         for DIR in /usr/openwin/man /usr/man/allman /usr/man/de ; do
             test -d $DIR && manpath=$manpath:$DIR
