@@ -126,11 +126,8 @@ rm -f /etc/mtab* /etc/nologin /nologin /fastboot
 # restart of kerneld will be done by /sbin/init.d/kerneld
 # 
 MODULES_DIR=/lib/modules/`uname -r` 
-if test "$START_KERNELD" = yes -a \
-        -x /sbin/depmod -a ! -e /proc/sys/kernel/modprobe ; then
-    if test -d $MODULES_DIR ; then
-        /sbin/depmod -a 2> /dev/null > /dev/null
-    fi
+if test -x /sbin/depmod -a -d $MODULES_DIR ; then
+    /sbin/depmod -a 2> /dev/null > /dev/null
 fi
 
 #
