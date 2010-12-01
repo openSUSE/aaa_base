@@ -1,20 +1,11 @@
 #! /bin/sh
-# Copyright (c) 1996,98, 99 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996,98 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Burchard Steinbild <bs@suse.de>, 1996-97
 #         Florian La Roche <florian@suse.de>, 1996
-# i18n support added by Aleksey Smirnov <smi@logic.ru>
-#  & Aleksey Novodvorsky <aen@logic.ru> from IPLabs Linux Team, Moscow.
-# Attention! The shell must be restarted before localisation takes effect!
-#
-# Rewrote i18n support to use RC_LANG and RC_LC_* rc.config variables
-# Bernhard Kaindl <bk@suse.de>, 1999
-#
-# Change ROOT_LOGIN_REMOTE support to edit PAM config files.
-# Thorsten Kukuk <kukuk@suse.de>, 1999
 #
 
-echo "Started the SuSE-Configuration Tool."
+echo "Started the S.u.S.E.-Configuration Tool."
 
 # check if we are started as root
 # only one of UID and USER must be set correctly
@@ -34,8 +25,6 @@ FORCE_REPLACE=false
 export FORCE_REPLACE
 VERBOSE=false
 export VERBOSE
-DO_RESTARTS=true
-export DO_RESTARTS
 
 for i in $* ; do
   case $i in
@@ -53,9 +42,6 @@ for i in $* ; do
     ;;
     *-force)
       FORCE_REPLACE=true
-    ;;
-    *-norestarts)
-      DO_RESTARTS=false
     ;;
     *)
       echo Unknown parameter $i.
@@ -93,8 +79,8 @@ test -f $r/lib/YaST/SuSEconfig.functions || {
 echo "Reading $r/etc/rc.config and updating the system..."
 
 if test ! -f $r/etc/rc.config ; then
-    echo "No $r/etc/rc.config found."
-    exit 1
+    echo "No $r/etc/rc.config found." 
+    exit 1 
 fi
 
 . $r/etc/rc.config
@@ -161,12 +147,12 @@ if test -e $IS_RUNNING ; then
         echo
         echo "Giving up..."
         echo
-        echo "ps a | grep SuSEconfig"
-        ps a | grep SuSEconfig
+        echo "ps -a | grep SuSEconfig"
+        ps -a | grep SuSEconfig
         echo
         echo "If You think, there is no other SuSEconfig running, please call"
         echo
-        echo "    rm $IS_RUNNING "
+        echo "    rm $IS_RUNNING "  
         echo
         echo "Then you can start SuSEconfig again."
         echo
@@ -203,32 +189,22 @@ if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
     NICKNAME=`echo $FQHOSTNAME | sed -e"s:\..*::"`
     echo $NICKNAME > $r/etc/HOSTNAME.SuSEconfig
     check_md5_and_move $r/etc/HOSTNAME
-
-    NET_DEVICE_FOUND=false
-
+    
     if test -n "$NETCONFIG" -a "$NETCONFIG" != "YAST_ASK" ; then
-        NICKNAME_PRINTED=false
         for I in $NETCONFIG ; do
             eval IPADDR=\$IPADDR$I
             if test -n "$IPADDR" ; then
                 test -x /usr/bin/cut && \
                     IPADDR=`echo "$IPADDR              " | /usr/bin/cut -c -15`
-                grep -w ${IPADDR} $r/etc/hosts > /dev/null || {
-                    if test "$NICKNAME_PRINTED" = false ; then
-                        echo "$IPADDR	$FQHOSTNAME 	$NICKNAME" >> $r/etc/hosts
-                        NICKNAME_PRINTED=true
-                    else
-                        echo "$IPADDR	$FQHOSTNAME" >> $r/etc/hosts
-                    fi
-                }
+                grep -w ${IPADDR} $r/etc/hosts > /dev/null || \
+                    echo "$IPADDR	$FQHOSTNAME 	$NICKNAME" >> $r/etc/hosts
                 echo "$IPADDR" >> $OLDHOSTENTRY
-                NET_DEVICE_FOUND=true
             fi
         done
     fi
 
     # to get plp to work, we have to add hostname to localhost.
-    if test "$NET_DEVICE_FOUND" = false -a "$NETCONFIG" != "YAST_ASK" ; then
+    if test -z "$NETCONFIG" ; then
         grep -vw $FQHOSTNAME $r/etc/hosts > $r/etc/hosts.tmp
         echo "127.0.0.2      	$FQHOSTNAME 	$NICKNAME" >> $r/etc/hosts.tmp
         cp -p $r/etc/hosts.tmp $r/etc/hosts
@@ -238,18 +214,15 @@ if test -n "$FQHOSTNAME" -a "$CHECK_ETC_HOSTS" = "yes" ; then
     #
     # now beautify /etc/hosts
     #
-    if test "$BEAUTIFY_ETC_HOSTS" = yes ; then
-        grep "^#" $r/etc/hosts > $r/etc/hosts.wrzl
-        echo >> $r/etc/hosts.wrzl
-        echo >> $r/etc/hosts.wrzl
-        grep -v "^#" $r/etc/hosts | grep -v "^\$" | sort >> $r/etc/hosts.wrzl
-        mv $r/etc/hosts.wrzl $r/etc/hosts
-    fi
+    grep "^#" $r/etc/hosts > $r/etc/hosts.wrzl
+    echo >> $r/etc/hosts.wrzl
+    echo >> $r/etc/hosts.wrzl
+    grep -v "^#" $r/etc/hosts | grep -v "^\$" | sort >> $r/etc/hosts.wrzl
+    mv $r/etc/hosts.wrzl $r/etc/hosts
 fi
 
 
-if test -n "$CREATE_RESOLVCONF" -a "$CREATE_RESOLVCONF" = "yes" -a \
-    "$DHCLIENT" != yes ; then
+if test -n "$CREATE_RESOLVCONF" -a "$CREATE_RESOLVCONF" = "yes" ; then
     if test -z "$SEARCHLIST" -a -z "$NAMESERVER" ; then
         # user wants no DNS - delete it.
         rm -f $r/etc/resolv.conf
@@ -257,7 +230,7 @@ if test -n "$CREATE_RESOLVCONF" -a "$CREATE_RESOLVCONF" = "yes" -a \
         echo_warning /etc/resolv.conf \
              "# Change variables (NAMESERVER + SEARCHLIST) in /etc/rc.config instead." \
             > $r/etc/resolv.conf.SuSEconfig
-
+    
         test -n "$SEARCHLIST" && echo -e "search $SEARCHLIST" >> $r/etc/resolv.conf.SuSEconfig
         for NSIP in $NAMESERVER; do
             echo -e "nameserver $NSIP" >> $r/etc/resolv.conf.SuSEconfig
@@ -273,9 +246,17 @@ if test -n "$CREATE_HOSTCONF" -a "$CREATE_HOSTCONF" = "yes" ; then
         > $r/etc/host.conf.SuSEconfig
 
     if test -n "$NAMESERVER" ; then
-        echo "order hosts bind" >> $r/etc/host.conf.SuSEconfig
+        if test "$USE_NIS_FOR_RESOLVING" = yes ; then
+            echo "order hosts nis bind" >> $r/etc/host.conf.SuSEconfig
+        else
+            echo "order hosts bind" >> $r/etc/host.conf.SuSEconfig
+        fi
     else
-        echo "order hosts" >> $r/etc/host.conf.SuSEconfig
+        if test "$USE_NIS_FOR_RESOLVING" = yes ; then
+            echo "order hosts nis" >> $r/etc/host.conf.SuSEconfig
+        else
+            echo "order hosts" >> $r/etc/host.conf.SuSEconfig
+        fi
     fi
     echo "multi on" >> $r/etc/host.conf.SuSEconfig
     check_md5_and_move $r/etc/host.conf
@@ -305,8 +286,34 @@ if test -n "$IRCSERVER" ; then
     fi
 fi
 
-if test -n "$TIMEZONE" -a "$TIMEZONE" != "YAST_ASK" -a -x /usr/sbin/zic ; then
-    /usr/sbin/zic -l $TIMEZONE
+if test -e $r/etc/shells.in ; then
+        echo_warning /etc/shells \
+            "# Change /etc/shells.in instead." \
+            > $r/etc/shells.SuSEconfig
+
+        (for shell in `cat $r/etc/shells.in` ; do
+                test -x $r/$shell && echo $shell
+        done) >> $r/etc/shells.SuSEconfig
+        check_md5_and_move $r/etc/shells
+fi
+
+if test -e $r/etc/ld.so.conf.in ; then
+        echo_warning /etc/ld.so.conf \
+            "# Change /etc/ld.so.conf.in instead." \
+            > $r/etc/ld.so.conf.SuSEconfig
+
+        (for i in `cat $r/etc/ld.so.conf.in` ; do
+                test -d $r/$i && echo $i
+        done) >> $r/etc/ld.so.conf.SuSEconfig
+        check_md5_and_move $r/etc/ld.so.conf
+fi
+
+if test -n "$TIMEZONE" -a "$TIMEZONE" != "YAST_ASK" -a \
+   -e $r/usr/lib/zoneinfo/$TIMEZONE ; then
+        my_test_write $r/usr/lib/zoneinfo/ && {
+            rm -f $r/usr/lib/zoneinfo/localtime 
+            cat $r/usr/lib/zoneinfo/$TIMEZONE > $r/usr/lib/zoneinfo/localtime
+        }
 fi
 
 if test -n "$MOUSE" -a "$MOUSE" != "YAST_ASK" ; then
@@ -334,7 +341,6 @@ if test ! -e /sbin/conf.d/SuSEconfig.sendmail -a \
         test -e $SENDMAIL_FILE && check_md5_and_move $r/etc/sendmail.cf
 fi
 
-
 if test -n "$FROM_HEADER" -a -d $r/var/lib/news/ ; then
     echo "$FROM_HEADER" > $r/var/lib/news/mailname.SuSEconfig
     check_md5_and_move $r/var/lib/news/mailname
@@ -342,159 +348,43 @@ if test -n "$FROM_HEADER" -a -d $r/var/lib/news/ ; then
     check_md5_and_move $r/var/lib/news/whoami
 fi
 
+if test -n "$KEYTABLE" -a -e $r/usr/lib/kbd/keytables/$KEYTABLE.map ; then
+    cp -p $r/usr/lib/kbd/keytables/$KEYTABLE.map $r/etc/default.keytab.SuSEconfig
+    check_md5_and_move $r/etc/default.keytab
+fi
+
 #
 # Now setup /etc/SuSEconfig stuff
 #
 mkdir -p $r/etc/SuSEconfig
 echo_warning /etc/SuSEconfig/profile \
-        "# Change variables in /etc/rc.config instead." \
+        "# Change CWD_IN_ROOT_PATH or LANGUAGE in /etc/rc.config instead." \
         > $r/etc/SuSEconfig/profile.SuSEconfig
 echo_warning /etc/SuSEconfig/csh.login \
-        "# Change variables in /etc/rc.config instead." \
+        "# Change CWD_IN_ROOT_PATH in /etc/rc.config instead." \
         > $r/etc/SuSEconfig/csh.login.SuSEconfig
 echo_warning /etc/SuSEconfig/csh.cshrc \
-        "# Change variables in /etc/rc.config instead." \
+        "# Change LANGUAGE in /etc/rc.config instead." \
         > $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-
 if test "$CWD_IN_ROOT_PATH" = "yes" ; then
     echo "test \"\$UID\" = 0 && PATH=\"\$PATH:.\"" \
         >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "if ( \"\$uid\" == \"0\" ) set path=( \$path . )" \
         >> $r/etc/SuSEconfig/csh.login.SuSEconfig
 fi
-
-
-
-# start of i18n support
-echo '# start of i18n support'       >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo '# start of i18n support'       >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-
-if test -z "$RC_LANG" ; then
-        case "$LANGUAGE" in
-                italian)        RC_LANG=it_IT.ISO-8859-1 ;;
-                russian)        RC_LANG=ru_RU.KOI8-R     ;;
-                brazilian)      RC_LANG=pt_BR.ISO-8859-1 ;;
-                english)        RC_LANG=POSIX            ;;
-                *)              RC_LANG="$LANGUAGE"      ;;
-        esac
-fi
-
-locale_vars="\
-LANG         \
-LC_ALL       \
-LC_MESSAGES  \
-LC_CTYPE     \
-LC_COLLATE   \
-LC_TIME      \
-LC_NUMERIC   \
-LC_MONETARY"
-
-if test "$ROOT_USES_LANG" = yes ; then
-    message="\
-#
-# /etc/rc.config: ROOT_USES_LANG = yes:
-#
-# All users get all the locale variables from /etc/rc.config:
-#"
-
-    # sh und ksh:
-    echo "$message"                  >> $r/etc/SuSEconfig/profile.SuSEconfig
-    for var in $locale_vars
-    do
-        if eval test "\$RC_$var"; then
-            eval echo "$var=\\\"\$RC_$var\\\""
-            echo "export $var"
-        else
-            echo "unset $var"
-        fi
-    done                             >> $r/etc/SuSEconfig/profile.SuSEconfig
-
-    # csh:
-    echo "$message"                  >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    for var in $locale_vars
-    do
-        if eval test "\$RC_$var"; then
-            eval echo "setenv $var \\\"\$RC_$var\\\""
-        else
-            echo "unsetenv $var"
-        fi
-    done                             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-
+if test "$LANGUAGE" = "german" ; then
+    echo "LC_CTYPE=de_DE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export LC_CTYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv LC_CTYPE de_DE" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 else
-    root_message="\
-    #
-    # /etc/rc.config: ROOT_USES_LANG != yes:
-    #
-    # root doesn't use locales, we export the locale variables from
-    # /etc/rc.config as-is, and don't assign them to their effective
-    # counterparts. We unset all effective locale variables and set
-    # LANG to POSIX.
-    # root can later decide to use specific locale variables with simple
-    # assignments and do not need to source rc.config. i.e. LANG=\$RC_LANG
-    #"
-
-    user_message="\
-    #
-    # All other users get all the locale variables from /etc/rc.config:
-    #"
-
-    # sh und ksh:
-    echo 'if test "$UID" = 0 ; then' >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "$root_message"             >> $r/etc/SuSEconfig/profile.SuSEconfig
-    for var in $locale_vars
-    do
-        if eval test "\$RC_$var"; then
-            eval echo "'    'RC_$var=\\\"\$RC_$var\\\""
-            echo "    export RC_$var"
-        fi
-        echo "    unset $var"
-    done                             >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo 'else'                      >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "$user_message"             >> $r/etc/SuSEconfig/profile.SuSEconfig
-    for var in $locale_vars
-    do
-        if eval test "\$RC_$var"; then
-            eval echo "'    '$var=\\\"\$RC_$var\\\""
-            echo "    export $var"
-        else
-            echo "    unset $var"
-        fi
-    done                             >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo 'fi'                        >> $r/etc/SuSEconfig/profile.SuSEconfig
-
-    # csh:
-    echo 'if ( "$uid" == "0" ) then' >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    echo "$root_message"             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    for var in $locale_vars
-    do
-        if eval test "\$RC_$var"; then
-            eval echo "'    'setenv RC_$var \\\"\$RC_$var\\\""
-        fi
-        echo "    unsetenv $var"
-    done                             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    echo 'else'                      >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    echo "$user_message"             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    for var in $locale_vars
-    do
-        if eval test "\$RC_$var"; then
-            eval echo "'    'setenv $var \\\"\$RC_$var\\\""
-        else
-            echo "    unsetenv $var"
-        fi
-    done                             >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-    echo 'endif'                     >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    echo "LC_CTYPE=en_GB" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "export LC_CTYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "setenv LC_CTYPE en_GB" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
-
-echo '# end of i18n support'         >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo '# end of i18n support'         >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-# end of i18n support
-
-
-
 if test -n "$FROM_HEADER" ; then
-    echo "FROM_HEADER=\"$FROM_HEADER\"" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "FROM_HEADER=$FROM_HEADER" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export FROM_HEADER" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv FROM_HEADER \"$FROM_HEADER\"" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    echo "setenv FROM_HEADER $FROM_HEADER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test -n "$SCANNER_TYPE" ; then
     echo "SCANNER_TYPE=$SCANNER_TYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig
@@ -506,180 +396,31 @@ if test -n "$DOC_HOST" ; then
     echo "export SUSE_DOC_HOST" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "setenv SUSE_DOC_HOST $DOC_HOST" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
-if test -d $r/opt/kde ; then
-    echo "KDEDIR=/opt/kde" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export KDEDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv KDEDIR /opt/kde" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/X11R6/lib/qt ; then
-    echo "QTDIR=/usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv QTDIR /usr/X11R6/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/qt ; then
-    echo "QTDIR=/usr/lib/qt" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export QTDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv QTDIR /usr/lib/qt" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/opt/gnome ; then
-    echo "GNOMEDIR=/opt/gnome" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export GNOMEDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv GNOMEDIR /opt/gnome" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/X11R6/lib/xad ; then
-    echo "XADIDIR=/usr/X11R6/lib/xad" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export XADIDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv XADIDIR /usr/X11R6/lib/xad" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/dvgt_help ; then
-    echo "DV_IMMED_HELP=/usr/lib/dvgt_help" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export DV_IMMED_HELP" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv DV_IMMED_HELP /usr/lib/dvgt_help" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/maple ; then
-    echo "MAPLE=/usr/lib/maple" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export MAPLE" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv MAPLE /usr/lib/maple" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/rasmol ; then
-    echo "RASMOLPATH=/usr/lib/rasmol" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export RASMOLPATH" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv RASMOLPATH /usr/lib/rasmol" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/mars_e ; then
-    echo "DMARSCONF=/usr/lib/mars_e" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export DMARSCONF" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv DMARSCONF /usr/lib/mars_e" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/crisp/macros ; then
-    echo "CRPATH=/usr/lib/crisp/macros" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export CRPATH" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv CRPATH /usr/lib/crisp/macros" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/cint ; then
-    echo "CINTSYSDIR=/usr/lib/cint" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export CINTSYSDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv CINTSYSDIR /usr/lib/cint" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/lib/maxwell ; then
-    echo "MAXHOME=/usr/lib/maxwell" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export MAXHOME" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv MAXHOME /usr/lib/maxwell" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -d $r/usr/X11R6/lib/blender ; then
-    echo "BLENDERDIR=/usr/X11R6/lib/blender" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export BLENDERDIR" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv BLENDERDIR /usr/X11R6/lib/blender" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -n "$HTTP_PROXY" ; then
-    echo "http_proxy=$HTTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export http_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv http_proxy $HTTP_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -n "$FTP_PROXY" ; then
-    echo "ftp_proxy=$FTP_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export ftp_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv ftp_proxy $FTP_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -n "$GOPHER_PROXY" ; then
-    echo "gopher_proxy=$GOPHER_PROXY" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export gopher_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv gopher_proxy $GOPHER_PROXY" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-if test -n "$NO_PROXY" ; then
-    echo "no_proxy='$NO_PROXY'" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "export no_proxy" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv no_proxy '$NO_PROXY'" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-fi
-
-WINDOWMANAGER=`type -p $DEFAULT_WM`
-test -z "$WINDOWMANAGER" -a -n "$DEFAULT_WM" && {
-    test -x /usr/X11R6/bin/$DEFAULT_WM && \
-        WINDOWMANAGER=/usr/X11R6/bin/$DEFAULT_WM
-}
-test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/kde
-echo "test -z \"\$WINDOWMANAGER\" && WINDOWMANAGER=$WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo "export WINDOWMANAGER" >> $r/etc/SuSEconfig/profile.SuSEconfig
-echo "if ( ! \${?WINDOWMANAGER} ) setenv WINDOWMANAGER $WINDOWMANAGER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
-
-test -n "$CONSOLE_MAGIC" && {
-        echo "# The following sequence is needed for most non-west-european languages" >> $r/etc/SuSEconfig/profile.SuSEconfig
-        echo "test \"\$TERM\" = \"linux\" && echo -en \"\\033"$CONSOLE_MAGIC\"\
- >> $r/etc/SuSEconfig/profile.SuSEconfig
-        echo "# The following sequence is needed for most non-west-european languages" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
-        echo "test \"\$TERM\" = \"linux\" && echo -n \"\\033"$CONSOLE_MAGIC\" >> $r/etc/SuSEconfig/csh.login.SuSEconfig
-}
-
 check_md5_and_move $r/etc/SuSEconfig/profile
 check_md5_and_move $r/etc/SuSEconfig/csh.login
 check_md5_and_move $r/etc/SuSEconfig/csh.cshrc
-
-if test "$SORT_PASSWD_BY_UID" = yes ; then
-    for i in passwd group ; do
-        cat $r/etc/$i | grep "^root:" > $r/etc/$i.t
-        cat $r/etc/$i | grep -v "^+" | grep -v ":-[0-9]:-[0-9]:" | \
-            grep -v "^root:" | sort -n -t : +2 >> $r/etc/$i.t
-        test -s $r/etc/$i.t && {
-            cat $r/etc/$i | grep ":-[0-9]:-[0-9]:" >> $r/etc/$i.t
-            cat $r/etc/$i | grep "^+" >> $r/etc/$i.t
-            cmp -s $r/etc/$i $r/etc/$i.t || {
-                echo "Sorting /etc/$i. Saving old to /etc/$i.unsorted."
-                mv $r/etc/$i $r/etc/$i.unsorted
-                cp $r/etc/$i.t $r/etc/$i
-            }
-        }
-        rm $r/etc/$i.t
-    done
-fi
 
 #
 # Now set ROOT_LOGIN_REMOTE.
 #
 if test -n "$ROOT_LOGIN_REMOTE" ; then
     if test "$ROOT_LOGIN_REMOTE" = "yes" ; then
-        cat $r/etc/pam.d/login | \
-            sed 's@^[[:space:]]*auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)@#&@' \
-            > $r/etc/pam.d/login.SuSEconfig
-        cat $r/etc/pam.d/rlogin | \
-            sed 's@^[[:space:]]*auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)@#&@' \
-            > $r/etc/pam.d/rlogin.SuSEconfig
+        cat $r/etc/login.defs | \
+            sed -e"s:^[ 	]*CONSOLE[ 	]:#CONSOLE	:" \
+            > $r/etc/login.defs.SuSEconfig
     else
-        cat $r/etc/pam.d/login | \
-            sed 's@^[[:space:]]*#[[:space:]]*\(auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)\)@\1@' \
-            > $r/etc/pam.d/login.SuSEconfig
-        cat $r/etc/pam.d/rlogin | \
-            sed 's@^[[:space:]]*#[[:space:]]*\(auth[[:space:]].*[/[:space:]]pam_securetty.so\([[:space:]]\|$\)\)@\1@' \
-            > $r/etc/pam.d/rlogin.SuSEconfig
+        cat $r/etc/login.defs | \
+            sed -e"s:^#[ 	]*CONSOLE[ 	]:CONSOLE	:" \
+            > $r/etc/login.defs.SuSEconfig
     fi
-    check_md5_and_move $r/etc/pam.d/login
-    check_md5_and_move $r/etc/pam.d/rlogin
+    check_md5_and_move $r/etc/login.defs
 fi
-
-#
-# Now set PASSWD_USE_CRACKLIB.
-#
-if test -n "$PASSWD_USE_CRACKLIB" ; then
-    # Please note that the sed expression contains a true tab between \1 and strict.
-    for program in login rlogin passwd ; do
-	if test "$PASSWD_USE_CRACKLIB" = "yes" ; then
-	    cat $r/etc/pam.d/$program | \
-		sed 's@\(^[[:space:]]*password[[:space:]].*[/[:space:]]pam_unix.so\).*$@\1	strict=true@' \
-		> $r/etc/pam.d/$program.SuSEconfig
-	else
-	    cat $r/etc/pam.d/$program | \
-		sed 's@\(^[[:space:]]*password[[:space:]].*[/[:space:]]pam_unix.so\).*$@\1	strict=false@' \
-		> $r/etc/pam.d/$program.SuSEconfig
-	fi
-	check_md5_and_move $r/etc/pam.d/$program
-    done
-fi
-
 
 #
 # check login mode
 #
 test "$CHECK_INITTAB" = yes && {
-    if [ ! -r $r/etc/XF86Config -a "$DISPLAYMANAGER" != console ]; then
+    if [ ! -r $r/etc/XF86Config ]; then
         echo -n "XFree86 not configured yet! No graphical login. "
         echo "Check /etc/XF86Config."
         DISPLAYMANAGER=none
@@ -692,15 +433,15 @@ test "$CHECK_INITTAB" = yes && {
 
     case "$CONSOLE_SHUTDOWN" in
         ignore)
-          CA_SEARCH="^ca::ctrlaltdel.*"
+          CA_SEARCH=".*ca::ctrlaltdel.*"
           CA_LINE="#ca::ctrlaltdel:/sbin/shutdown -h -t 4 now"
         ;;
         halt)
-          CA_SEARCH="^ca::ctrlaltdel.*"
+          CA_SEARCH=".*ca::ctrlaltdel.*"
           CA_LINE="ca::ctrlaltdel:/sbin/shutdown -h -t 4 now"
         ;;
         reboot)
-          CA_SEARCH="^ca::ctrlaltdel.*"
+          CA_SEARCH=".*ca::ctrlaltdel.*"
           CA_LINE="ca::ctrlaltdel:/sbin/shutdown -r -t 4 now"
         ;;
         *)
@@ -716,8 +457,8 @@ test "$CHECK_INITTAB" = yes && {
     }
 
     cat $r/etc/inittab | \
-        sed -e "s%^id:[0-9sSa-cA-C]*:initdefault:%id:$INITRL:initdefault:%" -e \
-               "s%$CA_SEARCH%$CA_LINE%" \
+        sed -e "s%^id:[0-9sSa-cA-C]:initdefault:%id:$INITRL:initdefault:%" -e \
+               "s%.*$CA_SEARCH%$CA_LINE%" \
         > $r/etc/inittab.SuSEconfig
 
     test -s $r/etc/inittab.SuSEconfig || {
@@ -757,24 +498,19 @@ test -x /sbin/ldconfig -a -z "$r" -a "$CHECK_NEWPACKAGE" != false && \
 # first things, that have to be done in 'normal' systems as well as in
 # 'demo mode' system.
 #
-if test -z "$r" ; then
-    if test "$FASTRUN" = "true" ; then
-        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.sendmail /sbin/conf.d/SuSEconfig.ypclient"
-    else
-        SUB_SCRIPTS="/sbin/conf.d/SuSEconfig.*"
-    fi
+if test -z "$r" -a "$FASTRUN" != "true" ; then
     #
     # Now start the package skripts
     #
-    for SKRIPT in $SUB_SCRIPTS ; do
+    for SKRIPT in /sbin/conf.d/SuSEconfig.* ; do
         test -f $SKRIPT || continue
         case "$SKRIPT" in
-          *~|*.swp|*.bak|*.sav|*.save|*.rpmsave|*.rpmorig|*.rpmnew)
+          *~|*.swp|*.bak|*.sav|*.save)
             continue
             ;;
           *)
             echo Executing $SKRIPT...
-            bash $SKRIPT
+            sh $SKRIPT
             ;;
         esac
     done
@@ -853,13 +589,13 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
             fi
         fi
 
-        for i in 100dpi Type1 75dpi cyrillic misc Speedo local ; do
+        for i in 100dpi Type1 75dpi cyrillic misc Speedo; do
             FDIR=/usr/X11R6/lib/X11/fonts/$i
             if test -d $FDIR -a -x /usr/X11R6/bin/mkfontdir -a \
                 "$CHECK_NEWPACKAGE" != false ; then
-                if [ ! -f $FDIR/fonts.dir -o $FDIR -nt $FDIR/fonts.dir ] ; then
-                    echo "Updating X11 font directory $i..."
-                    /usr/X11R6/bin/mkfontdir $FDIR
+                if [ ! -f $FDIR/fonts.dir -o $FDIR -nt $FDIR/fonts.dir ] ; then 
+                    echo "Updating X11 font directory $i..." 
+                    /usr/X11R6/bin/mkfontdir $FDIR 
                 fi
             fi
         done
@@ -877,7 +613,7 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
                     ; then
                     my_test_write /usr/info && {
                         echo "Creating /usr/info/dir..."
-                        /usr/bin/mkinfodir
+                        /usr/bin/mkinfodir 
                     }
                 fi
             fi
@@ -889,52 +625,23 @@ if test -z "$r" -a ! -e $r/usr/lib/YaST/.DemoMode ; then
         fi
     fi
 
-    if test -n "$CHECK_PERMISSIONS" -a \
+    if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
             -x /usr/bin/perl -a -x /usr/bin/chkstat ; then
-
-        PERMISSIONS_FILES=""
-	PACKAGE_PERMFILES=(/etc/permissions.d/*)
-	PACKAGE_PERMFILES=(${PACKAGE_PERMFILES[*]##*/})
-	PACKS=${PACKAGE_PERMFILES[*]%%.*}
-	if test -n "$PACKS" ; then
-	    test -x /usr/bin/sort && {
-	        PACKS=`for j in $PACKS ; do echo $j ; done | /usr/bin/sort -u`
-	    }
-	    RPMPACKS=`rpm -q $PACKS 2> /dev/null`
-	    RPMPACKS=(${RPMPACKS[*]%%-*})
-            for i in $RPMPACKS[*] ; do
-                test -e /etc/permissions.d/$i && \
-                    PERMISSIONS_FILES="$PERMISSIONS_FILES /etc/permissions.d/$i"
-                for PERMEXT in $PERMISSION_SECURITY ; do
-                    test -e /etc/permissions.d/$i.$PERMEXT && \
-                        PERMISSIONS_FILES="$PERMISSIONS_FILES /etc/permissions.d/$i.$PERMEXT"
-                done
+        if test "$CHECK_PERMISSIONS" = "set" ; then
+            /usr/bin/chkstat -set /etc/permissions
+            for PERMEXT in $PERMISSION_SECURITY ; do
+                test -e /etc/permissions."$PERMEXT" &&\
+                    /usr/bin/chkstat -set \
+                        /etc/permissions."$PERMEXT"
             done
-	fi
-    
-        test -e /etc/permissions && \
-          PERMISSIONS_FILES="$PERMISSIONS_FILES /etc/permissions"
-        for PERMEXT in $PERMISSION_SECURITY ; do
-            test -e /etc/permissions.$PERMEXT && \
-                PERMISSIONS_FILES="$PERMISSIONS_FILES /etc/permissions.$PERMEXT"
-        done
-    
-        for PERMFILE in $PERMISSIONS_FILES ; do
-            if test "$CHECK_PERMISSIONS" = "set" ; then
-    	    /usr/bin/chkstat -set $PERMFILE
-            elif test "$CHECK_PERMISSIONS" = "warn" ; then
-    	    /usr/bin/chkstat $PERMFILE
-            fi
-        done
-    fi
-
-    if test ! -e /sbin/conf.d/SuSEconfig.sendmail -a ! -e /etc/aliases.db ; then
-        #
-        # maybe we have smail installed - make sure /etc/aliases is setup
-        # correctly
-        #
-        NEWALIASES=`type -p newaliases`
-        test -n "$NEWALIASES" && eval $NEWALIASES
+        elif test "$CHECK_PERMISSIONS" = "warn" ; then
+            /usr/bin/chkstat /etc/permissions
+            for PERMEXT in $PERMISSION_SECURITY ; do
+                test -e /etc/permissions."$PERMEXT" &&\
+                    /usr/bin/chkstat \
+                        /etc/permissions."$PERMEXT"
+            done
+        fi
     fi
 fi
 

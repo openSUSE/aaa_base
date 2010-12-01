@@ -1,7 +1,7 @@
 #
 # /etc/permissions
 #
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Burchard Steinbild <bs@suse.de>, 1996
 #
@@ -29,22 +29,13 @@
 # 'normal' suid root programs
 #
 /usr/X11R6/bin/cardinfo                root.root        4755
-/usr/X11R6/bin/v4l-conf                root.video       4755
-/usr/X11R6/bin/rxvt                    root.tty         2755
-/usr/X11R6/bin/xtvscreen.SuSE-dynamic  root.video       4755
-/usr/X11R6/bin/xtvscreen.SuSE-static   root.video       4755
-/usr/bin/bttvgrab                      root.video       4750
-/usr/bin/chage                         root.shadow      2755
+/usr/bin/bttvgrab                      root.root        4755
+/usr/bin/chage                         root.shadow      4755
 /usr/bin/chfn                          root.shadow      4755
-/usr/bin/chkey                         root.root        4755
 /usr/bin/chsh                          root.shadow      4755
 /usr/bin/dos                           root.root        4755
 /usr/bin/expiry                        root.root        4755
-/usr/bin/gnuplot                       root.root        4755
-/bin/mount                             root.root        4755
-/usr/bin/suidperl                      root.root         755
-#/usr/bin/suidperl                     root.root        4755
-/bin/umount                            root.root        4755
+/usr/bin/suidperl                      root.root        4755
 /usr/bin/zgv                           root.root        4755
 /usr/games/abuse-1.10/keydrv           root.root        4755
 /usr/games/bdash                       root.root        4755
@@ -59,45 +50,10 @@
 /usr/lib/mc/bin/cons.saver             root.root        4755
 /usr/local/bin/spic                    root.root        4755
 /usr/sbin/amcheck                      root.root        4755
-/usr/sbin/suexec                       root.root        4755
-/opt/kde/bin/apm_proxy                 root.root        4755
-
-#
-# sgid video
-#
-/opt/kde/bin/kradio                    root.video       2755
-/usr/X11R6/bin/xawtv                   root.video       2755
-/usr/bin/radio                         root.video       2755
-
-
-#
-# KDE Binaries
-#
-/opt/kde/bin/kbanner.kss               root.shadow      2755
-/opt/kde/bin/kblankscrn.kss            root.shadow      2755
-/opt/kde/bin/kblob.kss                 root.shadow      2755
-/opt/kde/bin/kbouboule.kss             root.shadow      2755
-/opt/kde/bin/kflame.kss                root.shadow      2755
-/opt/kde/bin/kforest.kss               root.shadow      2755
-/opt/kde/bin/khop.kss                  root.shadow      2755
-/opt/kde/bin/klaser.kss                root.shadow      2755
-/opt/kde/bin/klines.kss                root.shadow      2755
-/opt/kde/bin/klissie.kss               root.shadow      2755
-/opt/kde/bin/klock                     root.shadow      2755
-/opt/kde/bin/kpolygon.kss              root.shadow      2755
-/opt/kde/bin/kpyro.kss                 root.shadow      2755
-/opt/kde/bin/krock.kss                 root.shadow      2755
-/opt/kde/bin/kscience.kss              root.shadow      2755
-/opt/kde/bin/kslip.kss                 root.shadow      2755
-/opt/kde/bin/kswarm.kss                root.shadow      2755
-/opt/kde/bin/kppp                      root.root        4755
-/opt/kde/bin/kbat.kss                  root.shadow      2755
-
 
 #
 # cdplayer programs
 #
-/opt/kde/bin/kscd                      root.disk        2755
 /usr/bin/cd-console                    root.disk        2755
 /usr/X11R6/bin/xmitsumi.SuSE-static    root.disk        2755
 /usr/X11R6/bin/xmitsumi.SuSE-dynamic   root.disk        2755
@@ -113,6 +69,9 @@
 
 # Files & scripts
 /etc/rc.config                         root.root         644
+/etc/aliases                           root.root         644
+/etc/aliases.db                        root.root         644
+/etc/lilo.conf                         root.root         644
 /etc/minicom.users                     root.uucp         644
 /etc/minirc.dfl                        root.uucp         644
 /etc/yp.conf                           root.root         644
@@ -121,12 +80,51 @@
 /etc/permissions.easy                  root.root         644
 /etc/permissions.local                 root.root         644
 /etc/permissions.paranoid              root.root         644
+/sbin/init.d/amd                       root.root         755
+/sbin/init.d/apache                    root.root         755
+/sbin/init.d/at                        root.root         755
+/sbin/init.d/boot                      root.root         755
+/sbin/init.d/boot.local                root.root         755
+/sbin/init.d/boot.setup                root.root         755
+/sbin/init.d/cron                      root.root         755
+/sbin/init.d/dosemu                    root.root         755
+/sbin/init.d/dummy                     root.root         755
+/sbin/init.d/gpm                       root.root         755
+/sbin/init.d/halt                      root.root         755
+/sbin/init.d/i4l                       root.root         755
+/sbin/init.d/i4l_hardware              root.root         755
+/sbin/init.d/inetd                     root.root         755
+/sbin/init.d/inn                       root.root         755
+/sbin/init.d/ipfwadm                   root.root         755
+/sbin/init.d/kerneld                   root.root         755
+/sbin/init.d/lpd                       root.root         755
+/sbin/init.d/makerunlvl                root.root         755
+/sbin/init.d/named                     root.root         755
+/sbin/init.d/network                   root.root         755
+/sbin/init.d/nfs                       root.root         755
+/sbin/init.d/nfsserver                 root.root         755
+/sbin/init.d/nntpd                     root.root         755
+/sbin/init.d/pcmcia                    root.root         755
+/sbin/init.d/pcnfsd                    root.root         755
+/sbin/init.d/powerfail                 root.root         755
+/sbin/init.d/rc                        root.root         755
+/sbin/init.d/reboot                    root.root         755
+/sbin/init.d/route                     root.root         755
+/sbin/init.d/rwhod                     root.root         755
+/sbin/init.d/rpc                       root.root         755
+/sbin/init.d/sendmail                  root.root         755
+/sbin/init.d/serial                    root.root         755
+/sbin/init.d/single                    root.root         755
+/sbin/init.d/skeleton                  root.root         755
+/sbin/init.d/smb                       root.root         755
+/sbin/init.d/snmpd                     root.root         755
+/sbin/init.d/squid                     root.root         755
+/sbin/init.d/sshd                      root.root         755
+/sbin/init.d/svgatext                  root.root         755
+/sbin/init.d/syslog                    root.root         755
+/sbin/init.d/xdm                       root.root         755
+/sbin/init.d/xntpd                     root.root         755
+/sbin/init.d/ypclient                  root.root         755
 
-#devices
-/dev/fd0                               root.disk         666
-/dev/fd0h1440                          root.disk         666
-/dev/fd0u1440                          root.disk         666
-/dev/fd1                               root.disk         666
-/dev/fd1h1440                          root.disk         666
-/dev/fd1u1440                          root.disk         666
+
 

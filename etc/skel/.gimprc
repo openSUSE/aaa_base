@@ -1,0 +1,105 @@
+# This is the gimp initialization file.
+# Lines that start with a '#' are comments.
+# Blank lines are ignored.
+
+# Set the swap directory...swap files will appear here
+swap-path "/tmp"
+
+# Set the brush search path...this path will be searched for valid
+#  brushes at startup.
+brush-path "~/gimp/brushes:/usr/lib/gimp/brushes"
+
+# Specify a default brush. If none is specified it defaults to the
+#  "1circle.gbr" brush which is just a single pixel sized brush.
+#  The brush is searched for in the brush path.
+default-brush "19fcircle.gbr"
+
+# Set the plug-in search path...this path will be searched for
+#  plug-ins when the plug-in is run.
+plug-in-path "./:~/gimp/plug-ins:/usr/lib/gimp/plug-ins"
+
+# Notify the GIMP of the available file plug-ins.
+# The format of the line is as follows:
+#  file-plug-in <image types> <plug-in name> <plug-in title> <extensions>
+# The `image types' argument specifies what types of images the
+#  plug-in can save. It is a 3 digit number where each digit is 0 or
+#  1. The digits correspond to `indexed images', `grayscale images'
+#  and `rgb images' respectively. For example, the "jpeg" file plug-in
+#  can save rgb and grayscale images but not indexed color, so the
+#  image types argument is 011.
+# The `plug-in name' is the name of the plug-in program.
+# The `plug-in title' is the title of the program is it will appear
+#  from the GIMP. This will most likely be the name of the plug-in.
+# The `extensions' are a comma separated string of extensions. These
+#  are used by the GIMP to map file names to images.
+#  Note: case does not matter for extensions.
+
+file-plug-in  jpeg    011  "jpeg"   "jpg,jpeg"
+file-plug-in  png     111  "png"    "png"
+file-plug-in  gif     110  "gif"    "gif"
+file-plug-in  tiff    111  "tiff"   "tiff,tif"
+file-plug-in  tga     111  "tga"    "tga,targa"
+file-plug-in  gbrush  010  "gbrush" "gbr"
+file-plug-in  xpm     110  "xpm"    "xpm"
+
+# Notify the GIMP of plug-ins that will exist in the `plug-ins' menu.
+# The format of the line is as follows:
+#  plug-in <plug-in name> <menu location> <accelerator key> <accelerator text>
+# The `plug-in name' is the name of the plug-in program.
+# The `menu location' is the item name and location in the plug-in
+#  menu. A slash indicates a submenu. Therefore, the menu location
+#  "Blur/Blur" specifies an item name of "Blur" in a submenu entitled
+#  "Blur". Multiple submenus are possible. If a menu already exists
+#  the item is simply placed in that menu. Menu items are placed in 
+#  alphabetically sorted order in menus.
+# The `accelerator key' is a string which designates a key combination
+#  which will invoke the plug-in. The format should be clear by
+#  inspection. (It is the same one used by motif to specify
+#  accelerators). This string is optional.
+# The `accelerator text' is a string which specifies how the key
+#  accelerator specified by `accelerator key' should be shown in the
+#  menu. This string is optional.
+#
+# If the `accelerator key' is empty, then the `accelerator text'
+#  should also be empty.
+# It is convention to only use the `alt' and `shift' key modifiers for
+#  plug-ins. The `control' key is used as a modifier for menu items by
+#  the main application. The main application will not use the `alt'
+#  or `shift' key modifiers.
+
+plug-in blur       "Blur/Blur"                  "Alt<Key>B"        "Alt+B"
+plug-in gauss      "Blur/Gaussian Blur"         "Shift Alt<Key>B"  "Shft+Alt+B"
+
+plug-in bleed      "Effects/Bleed"              
+plug-in edge       "Effects/Edge Detect"        "Alt<Key>E"        "Alt+E"
+plug-in enhance    "Effects/Enhance"            "Shift Alt<Key>E"  "Shft+Alt+E"
+plug-in gamma      "Effects/Gamma"              "Alt<Key>G"        "Alt+G"
+plug-in grayify    "Effects/Grayify"            
+plug-in invert     "Effects/Invert"             "Alt<Key>I"        "Alt+I"
+plug-in pixelize   "Effects/Pixelize"           
+plug-in relief     "Effects/Relief"             "Alt<Key>R"        "Alt+R"
+plug-in spread     "Effects/Spread"             
+plug-in shift      "Effects/Shift"              
+plug-in tile       "Effects/Tile"               "Alt<Key>T"	   "Alt+T"
+
+plug-in compose    "Conversions/Compose"        
+plug-in decompose  "Conversions/Decompose"      
+plug-in to-color   "Conversions/To Color"       "Shift Alt<Key>C"  "Shft+Alt+C"
+plug-in to-gray    "Conversions/To Grayscale"   "Shift Alt<Key>G"  "Shft+Alt+G"
+plug-in to-indexed "Conversions/To Indexed"     "Shift Alt<Key>I"  "Shft+Alt+I"
+
+plug-in flip_horz  "Transforms/Flip Horizontal" "Alt<Key>H"        "Alt+H"
+plug-in flip_vert  "Transforms/Flip Vertical"   "Alt<Key>V"        "Alt+V"
+plug-in rotate     "Transforms/Rotate"          
+plug-in scale      "Transforms/Scale"           "Shift Alt<Key>S"  "Shft+Alt+S"
+
+plug-in add        "Channel Ops/Add"            "Alt<Key>A"        "Alt+A"
+plug-in blend      "Channel Ops/Blend"          
+plug-in composite  "Channel Ops/Composite"      "Alt<Key>C"        "Alt+C"
+plug-in difference "Channel Ops/Difference"     "Shift Alt<Key>D"  "Shft+Alt+D"
+plug-in duplicate  "Channel Ops/Duplicate"      "Alt<Key>D"        "Alt+D"
+plug-in multiply   "Channel Ops/Multiply"       "Alt<Key>M"        "Alt+M"
+plug-in offset     "Channel Ops/Offset"         "Alt<Key>O"        "Alt+O"
+plug-in subtract   "Channel Ops/Subtract"       
+
+plug-in netpbm	   "Miscellaneous/Netpbm Filter" "Shift Alt<Key>N"  "Shft+Alt+N"

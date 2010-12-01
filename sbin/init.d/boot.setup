@@ -1,56 +1,32 @@
 #! /bin/sh
 #
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
 #         Werner Fink <werner@suse.de>, 1996
 #         Burchard Steinbild <bs@suse.de>, 1996
 #
-# /sbin/init.d/boot.setup
+# /sin/init.d/boot.setup
 #
 
 . /etc/rc.config
 
 case "$1" in
     start)
-        if test -d /usr/lib/kbd/consolefonts -a \
-           -n "$CONSOLE_FONT" -a "$CONSOLE_FONT" != "YAST_ASK" ; then
-            if test -x /usr/bin/setfont ; then
-                ECHO_RETURN=$rc_done_up
-                echo Loading console font $CONSOLE_FONT
-                /usr/bin/setfont $CONSOLE_FONT || ECHO_RETURN=$rc_failed_up
-                echo -e "$ECHO_RETURN"
-            fi
-            if test -n "$CONSOLE_UNICODEMAP" -a \
-                "$CONSOLE_UNICODEMAP" != "none" -a \
-                -x /usr/bin/setfont ; then
-                ECHO_RETURN=$rc_done_up
-                echo Loading unimap $CONSOLE_UNICODEMAP
-                /usr/bin/setfont -u $CONSOLE_UNICODEMAP || ECHO_RETURN=$rc_failed_up
-                echo -e "$ECHO_RETURN"
-            fi
-            if test -n "$CONSOLE_SCREENMAP" -a \
-                "$CONSOLE_SCREENMAP" != "none" -a \
-                -x /usr/bin/setfont ; then
-                ECHO_RETURN=$rc_done_up
-                echo Loading screenmap $CONSOLE_SCREENMAP
-                /usr/bin/setfont -m $CONSOLE_SCREENMAP || ECHO_RETURN=$rc_failed_up
-                echo -e "$ECHO_RETURN"
-            fi
-            if test -n "$CONSOLE_MAGIC" -a "$CONSOLE_MAGIC" != "none" ; then
-                ECHO_RETURN=$rc_done_up
-                echo Setting up console ttys
-                for i in /dev/tty[1-6]; do
-                     echo -en "\033$CONSOLE_MAGIC" > $i || ECHO_RETURN=$rc_failed_up
-                done
-                echo -e "$ECHO_RETURN"
-            fi
+        if test -x /usr/sbin/klogconsole ; then
+                /usr/sbin/klogconsole -r 8
+        fi
+        if test -f /etc/default.keytab -a -x /bin/loadkeys; then
+                /bin/loadkeys /etc/default.keytab
+        fi
+        if test -n "$FONT" -a "$FONT" != "YAST_ASK" -a \
+                -x /usr/bin/setfont -a -x /usr/bin/loadunimap -a \
+                -d /usr/lib/kbd/consolefonts ; then
+                /usr/bin/loadunimap
+                /usr/bin/setfont $FONT
         fi
         if test -n "$KBD_RATE" -a -n "$KBD_DELAY" -a -x /sbin/kbdrate; then
-                ECHO_RETURN=$rc_done_up
-                /sbin/kbdrate -r $KBD_RATE -d $KBD_DELAY || \
-                        ECHO_RETURN=$rc_failed_up
-                echo -e "$ECHO_RETURN"
+                /sbin/kbdrate -r $KBD_RATE -d $KBD_DELAY
         fi
         # setleds
         if test "$KBD_NUMLOCK" = "yes"; then
@@ -70,7 +46,7 @@ case "$1" in
                         KBD_TTY="tty[1-9]*"
                 fi
                 for tty in $KBD_TTY; do
-                        ( test -c $tty && > $tty ) > /dev/null 2>&1 && /usr/bin/setleds -D $LEDOPT < $tty
+                        /usr/bin/setleds -D $LEDOPT < $tty
                 done
         fi
 

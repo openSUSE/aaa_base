@@ -1,9 +1,5 @@
 # /etc/profile
 
-# PLEASE DON'T CHANGE /etc/profile. Chances are that your changes will
-#  be lost during the next upgrade. 
-# Use /etc/profile.local for your favourite global aliases, your VISUAL and
-#  EDITOR variables, etc ...
 
 PROFILEREAD=true
 
@@ -11,18 +7,14 @@ PROFILEREAD=true
 umask 022
 
 # adjust some limits (see bash(1))
-# Note: You may instead use /etc/initscript to set up ulimits and your PATH.
 #ulimit -c 20000		# only core-files less than 20 MB are written
 #ulimit -d 15000		# max data size of a program is 15 MB
 #ulimit -s 15000		# max stack size of a program is 15 MB
 #ulimit -m 30000		# max resident set size is 30 MB
 
-ulimit -Sc 0			# don't create core files
+ulimit -c 0                     # don't create core files
 ulimit -d unlimited
-if [ -z "$KSH_VERSION" ]; then
-    # ksh does not support this command.
-    ulimit -s unlimited
-fi
+ulimit -s unlimited
 ulimit -m unlimited
 
 
@@ -34,39 +26,61 @@ PATH=/usr/local/bin:/usr/bin:/usr/X11R6/bin:/bin
 for DIR in ~/bin/$MACHINE ~/bin ; do
     test -d $DIR && PATH=$DIR:$PATH
 done
-#test "$UID" = 0 && PATH=/sbin:/usr/sbin:$PATH
-test "$UID" = 0 && PATH=/sbin:/usr/sbin:/usr/local/sbin/:$PATH
-for DIR in /usr/lib/java/bin \
+test "$UID" = 0 && PATH=/sbin:/usr/sbin:$PATH
+for DIR in /usr/openwin/bin \
+           /usr/lib/java/bin \
            /var/lib/dosemu \
            /usr/games/bin \
            /usr/games \
-           /opt/bin \
-           /opt/gnome/bin \
-           /opt/kde/bin \
-	   /usr/openwin/bin ; do
+           /opt/kde/bin ; do
     test -d $DIR && PATH=$PATH:$DIR
 done
 test "$UID" = 0 || PATH="$PATH:."
 export PATH
+
+# for all programs that use the GNU readline library (bash, gdb)
+if ! test -f ~/.inputrc ; then
+  INPUTRC=/etc/inputrc
+  export INPUTRC
+fi
+
 
 #
 # set some environment variables
 #
 POVRAYOPT=-l/usr/lib/povray/include
 export POVRAYOPT
-if test -n "$TEXINPUTS" ; then
-  TEXINPUTS=":$TEXINPUTS:~/.TeX:/usr/doc/.TeX"
-else
-  TEXINPUTS=":~/.TeX:/usr/doc/.TeX"
-fi
+test -z "$WINDOWMANAGER" && WINDOWMANAGER=/usr/X11R6/bin/fvwm2
+export WINDOWMANAGER
+KDEDIR=/opt/kde
+export KDEDIR
+TEXINPUTS="$TEXINPUTS:~/.TeX:/usr/doc/.TeX"
 export TEXINPUTS
+XADIDIR="/usr/X11R6/lib/xad"
+export XADIDIR
+DV_IMMED_HELP=/usr/lib/dvgt_help
+export DV_IMMED_HELP
+MAPLE=/usr/lib/maple
+export MAPLE
+RASMOLPATH="/usr/lib/rasmol"
+export RASMOLPATH
+DMARSCONF=/usr/lib/mars_e
+export DMARSCONF
+CRPATH=/usr/lib/crisp/macros
+export CRPATH
 PRINTER='lp'
 export PRINTER
+QTDIR=/usr/X11R6/lib/qt
+export QTDIR  
 
+
+
+LC_CTYPE=de_DE
+export LC_CTYPE
 
 LESSCHARSET=latin1
 export LESSCHARSET
-LESS="-M -S -I"
+LESS=-M
 export LESS
 LESSKEY=/etc/lesskey.bin
 export LESSKEY
@@ -76,14 +90,8 @@ export LESSOPEN
 MINICOM="-c on"
 export MINICOM
 
-MANPATH=/usr/local/man:/usr/share/man:/usr/man:/usr/X11R6/man
-for DIR in /usr/openwin/man \
-           /usr/man/allman \
-           /usr/man/de \
-           /usr/man/es \
-           /usr/man/fr \
-           /usr/man/it \
-           ; do
+MANPATH=/usr/local/man:/usr/man:/usr/X11R6/man
+for DIR in /usr/openwin/man /usr/man/allman /usr/man/de /usr/man/allman/de ; do
     test -d $DIR && MANPATH=$MANPATH:$DIR
 done
 
@@ -153,50 +161,30 @@ if [ -f /usr/lib/teTeX/texmf.cnf ] ; then
 fi
 
 
+# See metamail(1). Run metamail also as root.
+MM_RUNASROOT=true
+export MM_RUNASROOT
+
 # Further options for the 'ls' command are in /etc/DIR_COLORS.
-unalias ls 2>/dev/null
-if test "$UID" = 0 ; then
-    LS_OPTIONS='-a -N --color=tty -T 0';
-else
-    LS_OPTIONS='-N --color=tty -T 0';
-fi
-export LS_OPTIONS
-if test -n "$ZSH_VERSION" ; then
-    alias ls='eval /bin/ls $LS_OPTIONS'
-else
-    alias ls='ls $LS_OPTIONS'
-fi
+alias ls='ls --color=tty'
 alias dir='ls -l'
 alias ll='ls -l'
 alias la='ls -la'
 alias l='ls -alF'
 alias ls-l='ls -l'
-# Handle emacs
-if test "$EMACS" = "t" ; then
-    LS_OPTIONS='-N --color=none -T 0';
-    tset -I -Q
-    stty cooked pass8 dec nl -echo
-fi
 alias o='less'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias +='pushd .'
-if [ -z "$KSH_VERSION" ]; then
-    alias -- -='popd'
-fi
+alias -- -='popd'
 alias rd=rmdir
 alias md='mkdir -p'
-alias unix2dos='recode lat1..ibmpc'
-alias dos2unix='recode ibmpc..lat1'
+alias unix2dos='recode lat1:ibmpc'
+alias dos2unix='recode ibmpc:lat1'
 alias unzip='unzip -L'
 alias which='type -p'
-alias rehash='hash -r'
-alias beep='echo -en "\x07"'
-
-alias unmount='echo "Error: Try the command: umount"'
 
 function startx { /usr/X11R6/bin/startx $* 2>&1 | tee ~/.X.err ; }
-function remount { /bin/mount -o remount,$* ; }
 
 #
 # Midnight Commander needs this to run in color mode
@@ -209,6 +197,13 @@ export COLORTERM
 
 PAGER=less
 export PAGER
+
+PROMPT_COMMAND='PS1=`if test "$UID" = 0 ; then \
+        echo "\h:\`pwd -P\` # " ; \
+    else \
+        echo "\u@\h:\`pwd -P\` > " ; \
+    fi `'
+export PROMPT_COMMAND
 
 # I had problems using 'eval tset' instead of 'TERM=', but you might want to 
 # try it anyway. I think with the right /etc/termcap it would work great.
@@ -229,39 +224,17 @@ fi
 # unset TERMCAP
 
 
-#
-# set prompt
-#
 #PS1='`hostname`:`pwd`# '
-if [ "$SHELL" = "/usr/bin/pdksh" -o "$SHELL" = "/usr/bin/ksh" -o "$SHELL" = "/bin/ksh" ]; then
-    PS1="! $ "
-elif [ -n "$ZSH_VERSION" ]; then
-    # setopt chaselinks
-    if test "$UID" = 0; then
-        PS1='%n@%m:%~ # '
-    else
-        PS1='%n@%m:%~ > '
-    fi
-elif [ "$SHELL" = "/usr/bin/ash" -o "$SHELL" = "/bin/ash" ]; then
-    PS1="$ "
-elif [ -n "$BASH_VERSION" ] ; then
-    # set -P
-    set -p
-    if test "$UID" = 0 ; then
-        PS1="\h:\w # "
-    else
-        PS1="\u@\h:\w > "
-    fi
-    # PROMPT_COMMAND='PS1=`if test "$UID" = 0 ; then \
-    #         echo "\h:\`pwd -P\` # " ; \
-    #     else \
-    #         echo "\u@\h:\`pwd -P\` > " ; \
-    #     fi `'
-    # export PROMPT_COMMAND
+if [ "$SHELL" = "/usr/bin/pdksh" -o "$SHELL" = "/usr/bin/ksh" ]; then
+ PS1="! $ "
+elif [ "$SHELL" = "/usr/bin/zsh" ]; then
+ PS1="%m:%~%# "
+elif [ "$SHELL" = "/usr/bin/ash" ]; then
+ PS1="$ "
 else
-    PS1='\h:\w \$ '
-    #PS1='\u \w \$ '
-fi
+ PS1='\h:\w \$ '
+#PS1='\u \w \$ '
+  fi
 PS2='> '
 ignoreeof=0
 export PS1 PS2 ignoreeof
@@ -279,25 +252,11 @@ fi
 #
 test -e /etc/SuSEconfig/profile && . /etc/SuSEconfig/profile
 
-#
-# now source profile extensions for special packages
-#
-test -d /etc/profile.d && \
-  {
-    for s in /etc/profile.d/*.sh ; do
-      test -r $s && . $s
-    done
-  }
-
-
-# source some aliases which provide help for DOS users
-#test -e /etc/profile.dos && . /etc/profile.dos
 
 #
-# and now let's look if there is a local profile (for stuff not 
-# defined by SuSE Linux, but your friendly admin)
+# and now let's look if there is a local profile (for stuff not done in
+# S.u.S.E. Linux).
 #
 test -e /etc/profile.local && . /etc/profile.local
 
-unset DIR
 

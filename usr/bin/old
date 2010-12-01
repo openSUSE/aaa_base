@@ -3,7 +3,7 @@
 #
 # This script simply renames files or directories to <name>-<date>[<num>]
 #
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.
 #
 # please send bugfixes or comments to feedback@suse.de.
 #
@@ -21,10 +21,9 @@ if [ -z "$*" ] ; then
     exit
 fi
 
-DATESTRING=`date +"%Y%m%d"`
+DATESTRING=`date +"%y%m%d"`
 
 for i in $* ; do
-    i=${i%%/}
     if [ -e $i ] ; then
         NEWNAME=$i-$DATESTRING
         NUMBER=0

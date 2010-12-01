@@ -1,0 +1,396 @@
+
+###############################################################################
+#									      #
+#	     UNIX Interactive Tools 4.2b configuration file		      #
+#	  Copyright (c) Tudor Hulubei & Andrei Pitis, May 1994	      	      #
+#									      #
+###############################################################################
+
+
+#
+# xterm configuration file (X window system).
+# If you are using color_xterm consider changing LinuxConsole and
+# ColorMonitor to ON.
+#
+
+
+#
+#  - If 'LinuxColorConsole' and 'ColorMonitor' are both ON, [UITxxx-Color]
+# descriptions will be used.
+#  - If you are working on a Linux system but you have a monochrome monitor,
+# 'ColorMonitor' should be OFF ([UITxxx-Monochrome] descriptions will be used).
+#  - If you are working on a serial b/w tty, 'LinuxConsole' should be OFF.
+#  - 'ColorMonitor' is ignored if 'LinuxConsole' is OFF.
+#  - 'LinuxConsole' and 'ColorMonitor' are meaningless if UIT was compiled
+# without 'HAVE_LINUX' (see also Makefile).
+#
+
+
+[Setup]
+TempDirectory		= /tmp
+LinuxConsole		= OFF		# empty means OFF
+ColorMonitor		= OFF		# empty means OFF
+
+[UIT-Setup]
+StartupFileDisplayMode = Size 	# OwnerGroup, DateTime, Size, Mode or FullName
+StartupLeftPanelPath   =  	# empty means current directory
+StartupRightPanelPath  =
+NormalModeHelp	       = F3 View  F4 Edit  F5 Copy  F6 Move  F7 MkDir  F8 Del  F10 Exit  ^kl Ln ^ks SymLn
+CommandLineModeHelp    = Del Delete_cmd_line   Up/Down History   ^O Switch mode   F10 Exit  CtrlZ Suspend
+InfoDisplay	       = ON
+FrameDisplay	       = ON
+
+
+[UITPS-Setup]
+UitPsModeHelp	       = Arrows-MOVE  space-SIGNALS  r/^R-REFRESH  ^C/F10-QUIT   ^K^K-KILL
+
+
+[UITVIEW-Setup]
+UitViewModeHelp	       = Arrows/PgUp/PgDown/Home/End-MOVE   ^R-REFRESH   ^C/F10-QUIT   0-9/a-f/A-F-OFFSET
+
+
+#    To ignore a section just comment its name
+
+
+###############
+# Color xterm #
+###############
+
+
+[UIT-Color]
+TitleForeground			= CYAN
+TitleBackground			= BLUE
+TitleBrightness			= ON
+UserName			= YELLOW
+TtyName				= YELLOW
+ClockForeground			= BLACK
+ClockBackground 		= CYAN
+ClockBrightness 		= OFF
+PanelFrame 			= WHITE
+PanelBackground 		= BLUE
+PanelSelectedFile 		= YELLOW
+PanelSelectedFileBrightness	= ON
+PanelNotSelectedFile		= WHITE
+PanelNotSelectedFileBrightness	= ON
+PanelCurrentSelectedFile	= YELLOW
+PanelCurrentNotSelectedFile	= WHITE
+PanelCurrentFile		= CYAN
+PanelPath 			= RED
+PanelPathBrightness 		= OFF
+PanelDeviceFreeSpace        	= RED
+PanelDeviceFreeSpaceBrightness	= OFF
+PanelFileInfo 			= RED
+PanelFileInfoBrightness 	= OFF
+PanelFilesInfo			= BLACK
+PanelFilesInfoBrightness	= OFF
+CommandLineForeground		= WHITE
+CommandLineBackground		= BLACK
+CommandLineBrightness		= ON
+StatusBarForeground 		= BLACK
+StatusBarBackground 		= CYAN
+StatusBarBrightness 		= OFF
+StatusBarWarningForeground 	= BLACK
+StatusBarWarningBackground 	= WHITE
+StatusBarWarningBrightness 	= OFF
+StatusBarErrorForeground 	= WHITE
+StatusBarErrorBackground 	= RED
+StatusBarErrorBrightness 	= ON
+
+
+[UITPS-Color]
+TitleForeground			= CYAN
+TitleBackground			= BLUE
+TitleBrightness			= ON
+HeaderForeground		= CYAN
+HeaderBackground		= RED
+HeaderBrightness		= ON
+ScreenForeground		= BLACK
+ScreenBackground		= CYAN
+ScreenBrightness		= OFF
+StatusForeground		= CYAN
+StatusBackground		= BLUE
+StatusBrightness		= ON
+
+
+[UITVIEW-Color]
+TitleForeground			= CYAN
+TitleBackground			= BLUE
+TitleBrightness			= ON
+HeaderForeground		= CYAN
+HeaderBackground		= RED
+HeaderBrightness		= ON
+ScreenForeground		= BLACK
+ScreenBackground		= CYAN
+ScreenBrightness		= OFF
+StatusForeground		= CYAN
+StatusBackground		= BLUE
+StatusBrightness		= ON
+
+
+####################
+# monochrome xterm #
+####################
+
+
+[UIT-Monochrome]
+TitleForeground			= WHITE
+TitleBackground			= BLACK
+TitleBrightness			= ON
+UserName			= WHITE
+TtyName				= WHITE
+ClockForeground			= BLACK
+ClockBackground 		= WHITE
+ClockBrightness 		= OFF
+PanelFrame 			= WHITE
+PanelBackground 		= BLACK
+PanelSelectedFile 		= WHITE
+PanelSelectedFileBrightness	= ON
+PanelNotSelectedFile		= WHITE
+PanelNotSelectedFileBrightness	= OFF
+PanelCurrentSelectedFile	= WHITE
+PanelCurrentNotSelectedFile	= BLACK
+PanelCurrentFile		= WHITE
+PanelPath 			= BLACK
+PanelPathBrightness 		= OFF
+PanelDeviceFreeSpace        	= BLACK
+PanelDeviceFreeSpaceBrightness	= OFF
+PanelFileInfo 			= BLACK
+PanelFileInfoBrightness 	= OFF
+PanelFilesInfo			= BLACK
+PanelFilesInfoBrightness	= OFF
+CommandLineForeground		= WHITE
+CommandLineBackground		= BLACK
+CommandLineBrightness		= ON
+StatusBarForeground 		= BLACK
+StatusBarBackground 		= WHITE
+StatusBarBrightness 		= OFF
+StatusBarWarningForeground 	= BLACK
+StatusBarWarningBackground 	= WHITE
+StatusBarWarningBrightness 	= OFF
+StatusBarErrorForeground 	= BLACK
+StatusBarErrorBackground 	= WHITE
+StatusBarErrorBrightness 	= OFF
+
+
+[UITPS-Monochrome]
+TitleForeground			= BLACK
+TitleBackground			= WHITE
+TitleBrightness			= OFF
+HeaderForeground		= WHITE
+HeaderBackground		= BLACK
+HeaderBrightness		= ON
+ScreenForeground		= WHITE
+ScreenBackground		= BLACK
+ScreenBrightness		= OFF
+StatusForeground		= BLACK
+StatusBackground		= WHITE
+StatusBrightness		= OFF
+
+
+[UITVIEW-Monochrome]
+TitleForeground			= BLACK
+TitleBackground			= WHITE
+TitleBrightness			= OFF
+HeaderForeground		= WHITE
+HeaderBackground		= BLACK
+HeaderBrightness		= ON
+ScreenForeground		= WHITE
+ScreenBackground		= BLACK
+ScreenBrightness		= OFF
+StatusForeground		= BLACK
+StatusBackground		= WHITE
+StatusBrightness		= OFF
+
+
+# COMMAND FORMAT:
+# key = command name; formatted command; new dir; save screen; pause; hide
+
+# SEE MANUAL FOR COMPLETE DOCUMENTATION ABOUT FORMATTED COMMANDS  (man uit)
+# BRIEF:
+# 	FORMAT SPECIFIERS:
+# 	- %s{question,default_answer} 
+
+# 	- %f file (not directory)
+# 	- %d directory (not file)
+# 	- %l symbolic link
+#	- %t fifo
+#	- %z socket
+# 	- %a all kind of directory entry (file, directory, link, fifo, socket)
+# 	- %m current file mode
+# 	- %g current file group
+# 	- %o current file owner
+#	- %p current panel path
+#	- %b current panel directory name
+
+# 	**** For the other panel: *****
+#
+# 	- %F file (not directory)
+# 	- %D directory (not file)
+# 	- %L symbolic link
+#	- %T fifo
+#	- %Z socket
+# 	- %A all kind of directory entry (file, directory, link, fifo, socket)
+# 	- %M current file mode
+# 	- %G current file group
+# 	- %O current file owner
+#	- %P the other panel path
+#	- %B the other panel directory name
+
+
+# Key sequences starting with characters between ' ' and '~' are IGNORED !
+
+[UIT-Keys]
+^[[A        = <CursorUp>
+^[[B        = <CursorDown>
+^[[C 	    = <CursorRight>
+^[[D  	    = <CursorLeft>
+^[[2~       = <FileSelect>
+^[[5~	    = <PageUp>
+^[[6~       = <PageDown>
+^[[28~ 	    = UIT HELP; man uit						# F1
+^[[33~	    = ZLESS; zless %f;;0					# F2
+^[[34~ 	    = VIEW; uitview %f;;0					# F3
+^[[29~ 	    = EDIT; joe %f;;0						# F4
+^[[32~ 	    = <Copy>							# F5
+^[[17~ 	    = <RenameMove>						# F6
+^[[18~ 	    = <MkDir>							# F7
+^[[19~ 	    = <Delete>							# F8
+^[[20~	    = MAKE; make;;;1						# F9
+^[[21~ 	    = <Exit>							# F10
+^[[23~	    = MOUNT; mount -t ext2 /dev/fd0 /mnt/fd0; /mnt/fd0;;;1	# F11
+^[[24~ 	    = MOUNT; mount -t ext2 /dev/fd1 /mnt/fd1; /mnt/fd1;;;1	# F12
+^A 	    = <CopyFileToCmdLn>
+^B 	    = <CursorDown>
+^Da	    = UMOUNT; umount /dev/fd0;;;;1  
+^Db	    = UMOUNT; umount /dev/fd1;;;;1  
+^E 	    = <HistoryBack>
+^F 	    = <CursorLeft>
+^G 	    = <CursorRight>
+^Kb	    = BACKGROUND MAKE; make&;;;;1
+^Kc	    = <Copy>
+^Kd	    = <MkDir>
+^Kf	    = FIND; find %s{Path: ,/} -name %s{File name: ,} -print;;;1
+^Kh	    = <DeleteCmdLn>
+^Ki	    = <ChangePanel>
+^Kk	    = KILL; kill %s{Signal number: ,-9} %s{Processes: ,};;;;1
+^Kl	    = LINK; ln %p/%a %s{Linking %a to: ,%P/};;;;1
+^Km	    = <RenameMove>
+^Kn	    = NEW FILE; joe %s{New file name: ,}
+^Ko	    = <PageUp>
+^Kp	    = <PageDown>
+^Kq	    = MAN; man %s{Question: ,}
+^Ks	    = SYMLINK; ln -s %p/%a %s{Symbolic linking %a to: ,%P/};;;;1
+^Kt	    = <SwitchPanels>
+^Ku	    = <Home>
+^Kv	    = <End>
+^Kx	    = <Exit>
+^Ky	    = <Delete>
+^Kz	    = ZLESS; zless %f;;0
+^L 	    = <FileSelect>
+^Na	    = MOUNT; mount -t msdos /dev/fd0 /mnt/fd0; /mnt/fd0;;;1 
+^Nb	    = MOUNT; mount -t msdos /dev/fd1 /mnt/fd1; /mnt/fd1;;;1 
+^O 	    = <ShowTty>
+^Pa	    = AUXILIARY PROCESSSES; ps -ax;;;1
+^Pf	    = FINGER; finger %s{Server name: ,};;;1
+^Pi	    = UITPS; uitps -ax;;0
+^Po	    = UITPS; uitps -x;;0
+^Pp	    = PROCESSSES; ps -la;;;1
+^Pw	    = WHO; w;;;1
+^Px	    = UITPS; uitps -aux;;0
+^R 	    = <Refresh>
+^T 	    = <GotoRoot>
+^U 	    = <FileDisplayMode>
+^Vc	    = TREE COPY; cp -r %d %s{Copying directory %d to: ,%P};;;;1
+^Vd	    = TREE DELETE; rm -r -f %s{Removing directory: ,%d};;;;1
+^Vm	    = TREE MOVE; mv -f %d %s{Moving directory %d to: ,%P};;;;1
+^Wa	    = MAKE; make;;;1
+^Wb	    = C COMPILER; cc -O %f;;;;1
+^Wc	    = COMPRESS; gzip -9 %f;;;;1
+^Wd	    = <ChangeDir>
+^We	    = ENVIRONEMENT; env;;;1
+^Wg	    = CHGRP; chgrp %s{New group of %a: ,} %a;;;;1
+^Wh	    = GOTO HOME DIR; true; /home/tudor;;;1
+^Wi	    = GOTO INCLUDE DIR; true; /usr/include;;;1
+^Wk	    = COMPARE; uitcmp %f %P/%F;;;;1
+^Wm	    = CHMOD; chmod %s{New mode of %a: ,%m} %a;;;;1
+^Wo	    = CHOWN; chown %s{New owner of %a: ,} %a;;;;1
+^Ws	    = SYNC; sync&;;;;1
+^Wt	    = TAR; tar cf %b.tar * %s{Aditional files: ,};;;;1
+^Wu	    = UNCOMPRESS; gzip -d %f;;;;1
+^Wx	    = TAR; tar xf %f;;;;1
+^X	    = <HistoryNext>
+^Y	    = <CursorUp>
+
+
+# Key sequences starting with characters between ' ' and '~' are ALLOWED.
+
+[UITPS-Keys]
+^[[A	    = <CursorUp>
+^[[B	    = <CursorDown>
+^[[5~	    = <PageUp>
+^[[D	    = <PageUp>
+^[[6~	    = <PageDown>
+^[[C	    = <PageDown>
+^Y	    = <CursorUp>
+^B 	    = <CursorDown>
+^F 	    = <PageUp>
+^G 	    = <PageDown>
+^Ku	    = <Home>
+^Kv	    = <End>
+^Ko	    = <PageUp>
+^Kp	    = <PageDown>
+^@	    = <NextSignal>
+h	    = <SIGHUP>
+H	    = <SIGHUP>
+i	    = <SIGINT>
+I	    = <SIGINT>
+q	    = <SIGQUIT>
+Q	    = <SIGQUIT>
+j	    = <SIGILL>
+J	    = <SIGILL>
+f	    = <SIGFPE>
+F	    = <SIGFPE>
+k	    = <SIGKILL>
+K	    = <SIGKILL>
+1	    = <SIGUSR1>
+s	    = <SIGSEGV>
+S	    = <SIGSEGV>
+2	    = <SIGUSR2>
+p	    = <SIGPIPE>
+P	    = <SIGPIPE>
+a	    = <SIGALRM>
+A	    = <SIGALRM>
+t	    = <SIGTERM>
+T	    = <SIGTERM>
+y	    = <SIGCHLD>
+Y	    = <SIGCHLD>
+c	    = <SIGCONT>
+C	    = <SIGCONT>
+^KK	    = <KillProcess>
+^Kk	    = <KillProcess>
+^K^K	    = <KillProcess>
+r	    = <Refresh>
+R	    = <Refresh>
+^R	    = <Refresh>
+^[[21~	    = <Exit>
+
+
+# Key sequences starting with characters between ' ' and '~' are IGNORED !
+
+[UITVIEW-Keys]
+^[[A	    = <CursorUp>
+^[[B	    = <CursorDown>
+^[[5~	    = <PageUp>
+^[[D	    = <PageUp>
+^[[6~	    = <PageDown>
+^[[C	    = <PageDown>
+^R	    = <Refresh>
+^Y	    = <CursorUp>
+^B 	    = <CursorDown>
+^F 	    = <PageUp>
+^G 	    = <PageDown>
+^Ku	    = <Home>
+^Kv	    = <End>
+^Ko	    = <PageUp>
+^Kp	    = <PageDown>
+^[[21~	    = <Exit>

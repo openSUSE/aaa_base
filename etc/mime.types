@@ -41,7 +41,6 @@ application/x-gunzip		gz
 application/x-gzip		gz
 application/x-hdf		hdf
 application/x-httpd-php		phtml pht php
-application/x-javascript	js
 application/x-koan		skp skd skt skm
 application/x-latex		latex
 application/x-maker		frm maker frame fm fb book fbdoc
@@ -67,10 +66,10 @@ application/x-wais-source	src
 application/zip			zip
 audio/basic			au snd
 audio/midi			mid midi kar
-audio/mpeg			mpga mp2 mp3
+audio/mpeg			mpga mp2
 audio/x-aiff			aif aifc aiff
 audio/x-pn-realaudio		ra ram
-audio/x-pn-realaudio-plugin
+audio/x-pn-realaudio-plugin	rpm
 audio/x-realaudio		ra
 audio/x-wav			wav
 chemical/x-pdb			pdb xyz
@@ -92,15 +91,11 @@ message/external-body
 message/news
 message/partial
 message/rfc822
-model/iges			igs iges
-model/mesh			msh mesh silo
-model/vrml			wrl vrml
 multipart/alternative
 multipart/appledouble
 multipart/digest
 multipart/mixed
 multipart/parallel
-text/css			css
 text/html			html htm
 text/plain			asc txt c cc h hh cpp hpp
 text/richtext			rtx
@@ -109,7 +104,6 @@ text/x-setext			etx
 text/x-sgml			sgml sgm
 text/x-vCalendar		vcs
 text/x-vCard			vcf
-text/xml			xml dtd
 video/dl			dl
 video/fli			fli
 video/gl			gl

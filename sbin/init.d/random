@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1998 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1998 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Burchard Steinbild <bs@suse.de>, 1998
 #         originally from Theodore Ts'o <tytso@mit.edu>
@@ -16,36 +16,30 @@
 
 random_seed=/var/run/random-seed
 
-return=$rc_done
 case "$1" in
     start)
-        echo -n "Initializing random number generator"
+        echo "Initializing random number generator..."
         # Carry a random seed from start-up to start-up
         # Load and then save 512 bytes, which is the size of the entropy pool
-        if test -f $random_seed ; then
-                cat $random_seed > /dev/urandom || return=$rc_failed
+        if [ -f $random_seed ]; then
+                cat $random_seed >/dev/urandom
         else
-                touch $random_seed || return=$rc_failed
+                touch $random_seed
         fi
         chmod 600 $random_seed
         dd if=/dev/urandom of=$random_seed count=1 bs=512 2>/dev/null
-	test $? -eq 0 || return=$rc_failed
-	echo -e "$return"
 	;;
     stop)
         # Carry a random seed from shut-down to start-up
         # Save 512 bytes, which is the size of the entropy pool
-        echo -n "Saving random seed"
-        touch $random_seed || return=$rc_failed
+        echo "Saving random seed..."
+        touch $random_seed
         chmod 600 $random_seed
         dd if=/dev/urandom of=$random_seed count=1 bs=512 2>/dev/null
-	test $? -eq 0 || return=$rc_failed
-	echo -e "$return"
 	;;
     *)
 	echo "Usage: $0 {start|stop}"
 	exit 1
 esac
 
-test "$return" = "$rc_done" || exit 1
 exit 0

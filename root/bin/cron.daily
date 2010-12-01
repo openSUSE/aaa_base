@@ -1,0 +1,351 @@
+#!/bin/sh
+#
+#
+# cron.daily. This script is executed as a cron-job in the 
+# early morning-hours. Please add your local changes to cron.daily.local
+# since this file will be overwritten, when updating your system.
+#
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.   
+#
+# please send bugfixes or comments to feedback@suse.de.
+#
+# Author: Burchard Steinbild <bs@suse.de>, 1996
+#         Florian La Roche <florian@suse.de>, 1996
+#
+#
+#
+
+
+#
+# paranoia settings
+#
+umask 022
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+TMPDIR=/var/tmp/cron.daily.$$
+rm -rf $TMPDIR
+mkdir $TMPDIR || {
+    echo
+    echo Security problems detected.
+    echo
+    echo can not create a new directory $TMPDIR - due to security problems 
+    echo it is better to abort.  Good Luck.
+    echo
+    exit 1
+}
+export TMPDIR
+
+if [ -f /usr/lib/teTeX/texmf.cnf ] ; then
+    TETEXDIR=/usr/lib/teTeX
+    PATH=$PATH:/usr/bin/TeX
+    export TETEXDIR PATH
+fi
+
+
+#
+# get information from /etc/rc.config
+#
+if [ -f /etc/rc.config ] ; then
+    . /etc/rc.config
+fi
+
+test -n "$MAX_DAYS_FOR_LOG_FILES" && export MAX_DAYS_FOR_LOG_FILES
+
+#
+# this function checks log files. It has four parameters: 
+# file name, size, access rights, ownership
+#
+check_log_file () {
+    local BACKUP_CREATED=false
+
+    rm -f "$1".o
+
+    test -f "$1" && \
+    find "$1" -size $2 \
+        -exec echo "$1 was $2" \; \
+        -exec rm -f "$1".o \; \
+        -exec cp "$1" "$1".o \; \
+        -exec cp /dev/null "$1" \; \
+        -exec chmod $3 "$1" \; \
+        -exec chown $4 "$1" \; 
+
+    if test -f "$1".o; then
+
+        echo -n "Saving file "
+
+        DATESTRING=`date +"%y%m%d"`
+
+        NEWNAME="$1"-$DATESTRING
+        NUMBER=2
+        while [ -e $NEWNAME -o -e $NEWNAME.gz ] ; do
+            NEWNAME="$1"-$DATESTRING-$NUMBER
+            NUMBER=`expr $NUMBER + 1`
+        done
+        mv "$1".o $NEWNAME
+        gzip -9 $NEWNAME
+
+        echo "to $NEWNAME.gz"
+        BACKUP_CREATED=true
+    fi
+
+    #
+    # now check for old files...
+    #
+    if [ -n "$MAX_DAYS_FOR_LOG_FILES" -a \
+         $MAX_DAYS_FOR_LOG_FILES -gt 0 ] ; then
+        find "$1"-*.gz -mtime +$MAX_DAYS_FOR_LOG_FILES -type f -print0 2> /dev/null | \
+            xargs --no-run-if-empty --max-lines=200 --null -- rm -f 
+    fi
+
+    if test "$BACKUP_CREATED" = true ; then
+        echo "The following backup(s) do exist now:"
+        ls -l "$1"-[0-9]*
+        echo
+    fi
+}
+
+
+#
+# First check file sizes of log files.
+#
+if [ -n "$MAX_DAYS_FOR_LOG_FILES" -a "$MAX_DAYS_FOR_LOG_FILES" -gt 0 ] ; then
+    for i in /var/log/mgetty.* /var/log/vbox.tty* ; do
+        check_log_file $i +1024k 644 root.root
+    done
+    check_log_file /var/adm/isdn.log          +1024k 644 root.root
+    check_log_file /var/lib/pgsql/server.log  +1024k 644 postgres.daemon
+    check_log_file /var/lib/xdm/xdm-errors     +200k 644 root.root
+    check_log_file /var/log/allmessages       +4096k 640 root.root
+    check_log_file /var/log/autobuild         +4096k 644 root.root
+    check_log_file /var/log/debug             +1024k 640 root.root
+    check_log_file /var/log/httpd.access_log  +4096k 644 root.root
+    check_log_file /var/log/httpd.error_log   +1024k 644 root.root
+    check_log_file /var/log/isdn              +4096k 644 root.root
+    check_log_file /var/log/isdn.log          +4096k 644 root.root
+    check_log_file /var/log/isdncalls         +1024k 644 root.root
+    check_log_file /var/log/log.ceptd         +1024k 640 root.root
+    check_log_file /var/log/mail              +4096k 640 root.root
+    check_log_file /var/log/maillog           +1024k 640 root.root
+    check_log_file /var/log/messages          +4096k 640 root.root
+    check_log_file /var/log/news              +4096k 640 root.root
+    check_log_file /var/log/pop3svr.log       +1024k 640 root.root
+    check_log_file /var/log/pvf.log           +1024k 640 root.root
+    check_log_file /var/log/setup_autobuild   +4096k 644 root.root
+    check_log_file /var/log/warn              +1024k 640 root.root
+    check_log_file /var/log/wtmp               +400k 664 root.tty
+    check_log_file /var/log/xferlog           +4096k 640 root.root
+    check_log_file /var/spool/smail/log/logfile +512k 644 root.root
+    check_log_file /var/spool/smail/log/paniclog +128k 644 root.root
+    check_log_file /var/spool/uucp/Log        +2048k 644 uucp.uucp
+    check_log_file /var/spool/uucp/Stats      +1024k 644 uucp.uucp
+    check_log_file /local/www/logs/access_log +4096k 644 root.root
+    check_log_file /local/www/logs/error_log  +1024k 644 root.root
+fi
+
+# Delete too old nvi-saved files.
+if test -d /var/tmp/vi.recover; then
+	find /var/tmp/vi.recover -type f -mtime +7 -exec rm -f -- {} \;
+fi
+
+# Recover nvi-saved files.
+if test -x /usr/sbin/recover.nvi; then
+	/usr/sbin/recover.nvi
+fi
+
+#
+# Delete apropriate files in tmp directories.
+#
+if [ -n "$MAX_DAYS_IN_TMP" -a "$MAX_DAYS_IN_TMP" -gt 0 ] ; then
+    OMIT=""
+    for i in $OWNER_TO_KEEP_IN_TMP ; do
+        OMIT="$OMIT  ( ! -user $i )"
+    done
+
+    for TMP_DIR in $TMP_DIRS_TO_CLEAR ; do
+        for DEL_FILE in `find $TMP_DIR $OMIT \( -type f -o -type l \) \
+                         -atime +$MAX_DAYS_IN_TMP | sort -r` ; do
+            rm -f $DEL_FILE
+            DEL_DIR=`dirname $DEL_FILE`
+            if [ "$DEL_DIR" != "$TMP_DIR" ] ; then
+                rmdir $DEL_DIR 2> /dev/null
+            fi
+        done
+    done
+fi
+
+#
+# Delete too old preformatted man-pages.
+#
+if [ "$DELETE_OLD_CATMAN" = yes ] ; then
+  if [ -z "$CATMAN_ATIME" ] ; then
+    # Default is 7 days
+    CATMAN_ATIME=7
+  fi
+  test -e /var/catman && \
+      find /var/catman -name '*.gz' -type f -atime +$CATMAN_ATIME  -print0 | \
+      xargs --no-run-if-empty --max-lines=200 --null -- rm -f
+fi
+
+
+#
+# create backups of rpm data base
+#
+if test -n "$RPMDB_BACKUP_DIR" -a -e /var/lib/rpm/packages.rpm ; then
+    mkdir -p $RPMDB_BACKUP_DIR
+    OLD_MD5=""
+    test -e $RPMDB_BACKUP_DIR/rpmdb_recent_md5 && \
+        OLD_MD5="`cat $RPMDB_BACKUP_DIR/rpmdb_recent_md5`"
+    NEW_MD5="`cat /var/lib/rpm/packages.rpm | md5sum`"
+    if test "$OLD_MD5" != "$NEW_MD5" ; then
+        DATESTRING=`date +"%y%m%d"`
+
+        NEWNAME=$RPMDB_BACKUP_DIR/packages.rpm-$DATESTRING
+        NUMBER=2
+        while [ -e $NEWNAME -o -e $NEWNAME.gz ] ; do
+            NEWNAME=$RPMDB_BACKUP_DIR/packages.rpm-$DATESTRING-$NUMBER
+            NUMBER=`expr $NUMBER + 1`
+        done
+
+        if gzip -9 < /var/lib/rpm/packages.rpm > $NEWNAME.gz; then
+            echo "$NEW_MD5" > $RPMDB_BACKUP_DIR/rpmdb_recent_md5
+            test "$MAX_RPMDB_BACKUPS" -gt 0 2> /dev/null || MAX_RPMDB_BACKUPS=0
+            NUMBER=1
+            for BACKUPFILE in `ls -1 -t $RPMDB_BACKUP_DIR/packages.rpm-*` ; do
+                if test "$NUMBER" -gt "$MAX_RPMDB_BACKUPS" ; then
+                    rm -f $BACKUPFILE
+                fi
+                NUMBER=`expr $NUMBER + 1`
+            done
+        else
+            echo "ERROR!! can not backup RPM Database to $RPMDB_BACKUP_DIR."
+            echo "Maybe there is not enough disk space."
+            rm -f $NEWNAME $NEWNAME.gz
+        fi
+    fi
+fi
+# 
+# update database for tetex
+#
+if [ -x /usr/bin/TeX/texhash ] ; then
+    # maybe /var/texfonts is mounted via nfs with root_squash. This could
+    # lead into trouble, so omit nfs directories.
+    for DUMMY in `find /var/texfonts -prune -type d ! -fstype nfs 2> /dev/null` ; do
+        /usr/bin/TeX/texhash 2> /dev/null
+    done
+fi
+
+
+#
+# update database for locate
+#
+if [ -n "$RUN_UPDATEDB" -a "$RUN_UPDATEDB" = "yes" -a \
+     -x /usr/bin/updatedb ] ; then
+
+    # avoid error messages from updatedb when using user nobody for find.
+    cd / 
+
+    PARAMS="`test -n "$RUN_UPDATEDB_AS" && \
+            fgrep localuser /usr/bin/updatedb > /dev/null && \
+            echo --localuser=$RUN_UPDATEDB_AS`"
+
+    PARAMS="$PARAMS `test -n "$UPDATEDB_PRUNEPATHS" && \
+            echo --prunepaths=\'$(eval echo $UPDATEDB_PRUNEPATHS)\'`"
+
+    PARAMS="$PARAMS `test -n "$UPDATEDB_NETUSER" && \
+            echo --netuser=$UPDATEDB_NETUSER`"
+
+    PARAMS="$PARAMS `test -n "$UPDATEDB_NETPATHS" && \
+            echo --netpaths=\'$(eval echo $UPDATEDB_NETPATHS)\'`"
+
+    eval /usr/bin/updatedb $PARAMS 2> /dev/null
+fi
+
+
+#
+# look for old YaST log files
+#
+
+if test -n "$MAX_DAYS_FOR_LOG_FILES" -a $MAX_DAYS_FOR_LOG_FILES -gt 0 ; then
+    find /var/adm/inst-log/ -name "installation-*" -ctime +90 \
+        -type f \! -name "*.gz" -print0 2> /dev/null | \
+        xargs --no-run-if-empty --max-lines=200 --null -- gzip -9
+    find /var/adm/inst-log/ -name "installation-*.gz" \
+        -mtime +$MAX_DAYS_FOR_LOG_FILES \
+        -type f -print0 2> /dev/null | \
+        xargs --no-run-if-empty --max-lines=200 --null -- rm -f
+fi
+
+#
+#
+# look for old core files and tell user about it.
+#
+if [ -z "$MAX_DAYS_FOR_CORE" ] ; then
+    MAX_DAYS_FOR_CORE=5
+fi
+for DUMMY in `find /var/lib/locatedb -ctime -8 2> /dev/null` ; do
+    cat /dev/null > $TMPDIR/cron.daily.$$
+    for i in `locate '*/core'` ; do
+        if [ -f $i ] ; then
+            echo $i >> $TMPDIR/cron.daily.$$
+        fi
+    done
+
+    for COREFILE in `cat $TMPDIR/cron.daily.$$`; do
+        for i in `find $COREFILE ! \( -fstype nfs -o -fstype NFS \) \
+            -name core -type f \
+            -ctime +$MAX_DAYS_FOR_CORE 2> /dev/null` ; do
+            if [ -n "$DELETE_OLD_CORE" -a "$DELETE_OLD_CORE" = "yes" ] ; then
+                rm -f $i
+            else
+                echo "Found core file older than $MAX_DAYS_FOR_CORE days: $i"
+            fi
+        done
+    done
+    rm -f $TMPDIR/cron.daily.$$
+done
+
+#
+# now we do the man page stuff
+#
+if test "$REINIT_MANDB" = yes ; then
+    if test -x /usr/bin/mandb ; then
+        rm -f /var/catman/index.bt
+        /usr/bin/mandb -q 2> /dev/null || {
+            echo There seem to be trouble with mandb.
+            echo
+            echo please run /usr/bin/mandb an check the output...
+        }
+    fi
+    #
+    # some applications need whatis database. If makewhatis exists, call it
+    #
+    if [ -x /usr/sbin/makewhatis -a -w /usr/man ] ; then
+        manpath=/usr/man:/usr/X11R6/man:/usr/local/man
+        for DIR in /usr/openwin/man /usr/man/allman /usr/man/de \
+                   /usr/man/allman/de ; do
+            test -d $DIR && manpath=$manpath:$DIR
+        done
+        export manpath
+
+        /usr/sbin/makewhatis
+    fi
+fi
+
+#
+# check CMOS Battery
+#
+test -r /proc/rtc && {
+    test $(awk '$1 == "batt_status" { print $3 }' /proc/rtc) != "okay" && \
+        echo "CMOS battery empty -- expect problems"
+}
+
+# now start the local cron.daily file, if it exists.
+
+if [ -f /root/bin/cron.daily.local ] ; then
+    . /root/bin/cron.daily.local
+fi
+
+rm -rf $TMPDIR
+
+exit 0

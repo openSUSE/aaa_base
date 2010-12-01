@@ -1,8 +1,8 @@
 #! /bin/sh
-# Copyright (c) 1996, 1999 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
-#         Werner Fink <werner@suse.de>, 1996,98
+#         Werner Fink <werner@suse.de>, 1996
 #         Burchard Steinbild <bs@suse.de>, 1997
 #
 # /sbin/init.d/nfsserver
@@ -10,105 +10,33 @@
 
 . /etc/rc.config
 
-base=${0##*/}
-link=${base#*[SK][0-9][0-9]}
+test "$START_PORTMAP" = no -a "$NFS_SERVER" = no && exit 0
 
-test $link = $base && NFS_SERVER=yes
-test "$NFS_SERVER" = yes || exit 0
-
-if test -x /sbin/portmap ; then
-    PORTMAP=/sbin/portmap
-else
-    PORTMAP=/usr/sbin/portmap
-fi
-
-case `uname -r` in
-    0.*|1.*|2.0.*) USE_KERNEL_NFSD="no"
-esac
-
-test -x /usr/sbin/rpc.kmountd || USE_KERNEL_NFSD="no"
-
-return=$rc_done
 case "$1" in
     start)
-      checkproc $PORTMAP
-      if test $? -ne 0 ; then
-	echo -n "Starting NFS server requires portmapper $rc_failed"
-	exit 1
-      fi
-      if test "$USE_KERNEL_NFSD" = yes ; then
-	test -x /usr/sbin/rpc.kstatd || exit 0
-	PARAMS=3
-	test "$USE_KERNEL_NFSD_NUMBER" -gt 0 && PARAMS="$USE_KERNEL_NFSD_NUMBER"
-
-	echo -n "Starting kernel based NFS server"
-	checkproc -n lockd || \
-		/usr/sbin/rpc.klockd                       || return=$rc_failed
-	checkproc /usr/sbin/rpc.kstatd || \
-		startproc /usr/sbin/rpc.kstatd             || return=$rc_failed
-	/usr/sbin/kexportfs -r 			           || return=$rc_failed
-	startproc /usr/sbin/rpc.kmountd --no-nfs-version 3 || return=$rc_failed
-	/usr/sbin/rpc.knfsd $PARAMS		           || return=$rc_failed
-      else
-	test -x /usr/sbin/rpc.mountd || exit 0
-	PARAMS=""
-	test "$REEXPORT_NFS" = yes && PARAMS="--re-export"
-
-	echo -n "Starting NFS server"
-	startproc /usr/sbin/rpc.mountd $PARAMS  || return=$rc_failed
-	startproc /usr/sbin/rpc.nfsd   $PARAMS  || return=$rc_failed
-      fi
-      echo -e "$return"
-      ;;
+    if test "$NFS_SERVER" = yes; then
+        echo "Starting NFS server."
+        PARAMS=""
+        test "$REEXPORT_NFS" = yes && PARAMS="--re-export"
+        test -x /usr/sbin/rpc.mountd && /usr/sbin/rpc.mountd $PARAMS
+        test -x /usr/sbin/rpc.nfsd && /usr/sbin/rpc.nfsd $PARAMS
+        if test "$NFS_SERVER_UGID" = yes; then
+            test -x /usr/sbin/rpc.ugidd && /usr/sbin/rpc.ugidd
+        fi
+    fi
+    ;;
     stop)
-      if test "$USE_KERNEL_NFSD" = yes ; then
-	test -x /usr/sbin/rpc.kstatd || exit 0
-
-	echo -n "Shutting down kernel based NFS server"
-	/usr/sbin/kexportfs -au
-	killproc -n -KILL nfsd                  || return=$rc_failed
-	killproc    -TERM /usr/sbin/rpc.kmountd || return=$rc_failed
-	killproc -n -KILL lockd
-	killproc    -TERM /usr/sbin/rpc.kstatd
-      else
-	test -x /usr/sbin/rpc.mountd || exit 0
-        echo -n "Shutting down NFS server"
-        killproc -TERM /usr/sbin/rpc.mountd     || return=$rc_failed
-        killproc -TERM /usr/sbin/rpc.nfsd       || return=$rc_failed
-      fi
-      echo -e "$return"
-      ;;
-    restart)
-      $0 stop && $0 start || return=$rc_failed
-      ;;
-    reload)
-      if test "$USE_KERNEL_NFSD" = yes ; then
-	echo -n "Reload kernel based NFS server"
-	/usr/sbin/kexportfs -r
-      else
-        echo -n "Reload NFS server"
-        killproc -HUP /usr/sbin/rpc.mountd      || return=$rc_failed
-        killproc -HUP /usr/sbin/rpc.nfsd        || return=$rc_failed
-      fi
-      echo -e "$return"
-      ;;
-    status)
-      status="NFS server up"
-      checkproc $PORTMAP || status="NFS server up, no portmapper"
-      if test "$USE_KERNEL_NFSD" = yes ; then
-	checkproc    /usr/sbin/rpc.kstatd  || status="NFS server up, no kstatd"
-	checkproc -n nfsd                  || status="NFS server down"
-	checkproc    /usr/sbin/rpc.kmountd || status="NFS server down"
-      else
-        checkproc    /usr/sbin/rpc.mountd  || status="NFS server down"
-        checkproc    /usr/sbin/rpc.nfsd    || status="NFS server down"
-      fi
-      echo "$status"
-      ;;
+    if test "$NFS_SERVER" = yes; then
+        echo -n "Shutting down NFS server:"
+        killproc -TERM /usr/sbin/rpc.mountd
+        killproc -TERM /usr/sbin/rpc.nfsd
+        killproc -TERM /usr/sbin/rpc.ugidd
+        echo
+    fi
+    ;;
     *)
-    echo "Usage: $0 {start|stop|status|reload|restart}"
+    echo "Usage: $0 {start|stop}"
     exit 1
 esac
 
-test "$return" = "$rc_done" || exit 1
 exit 0

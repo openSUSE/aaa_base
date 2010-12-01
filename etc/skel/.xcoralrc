@@ -1,0 +1,265 @@
+/* ########################################################################
+   
+			SMAC FILE USED BY XCORAL EDITOR
+   
+   File: xcoralrc.lf
+   Path: /home/fournigault/c/X11/xcoral-2.33/SmacLib/xcoralrc.lf
+   Description: 
+   Created: Sun Aug  7 14:52:32 MET 1994
+   Author: Thierry Emery
+   Modified: Fri Feb 17 15:38:00 MET 1995
+   Last maintained by: Lionel Fournigault
+   
+   RCS $Revision$ $State$
+   
+   
+   ########################################################################
+   
+   Note: initialization file for Xcoral
+   
+   ########################################################################
+   
+   Copyright (c) : Thierry Emery
+   
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   
+   ######################################################################## */
+
+
+/* -------------------------------------------------------------------------
+   load standard libraries
+   ------------------------------------------------------------------------- */
+
+{
+  /* general SMAC programmer and XCORAL user utilities */
+  load_file("utilities.sc");
+  
+  /* C and C++ mode, auto indent, reindent, indent region etc */
+  load_file("mode.sc" );
+
+  /* provide class method and function profile */
+  load_file("head.sc");
+  
+  /* extract logical pathname from automount pathname */
+  load_file("hack-filename.sc");
+
+  /* command shell utilities, grep make user interface */
+  load_file("cmd.sc" );
+  
+  /* for us frenchies */
+  load_file("french.sc");
+
+  /* SMAC functions writer and/or user help */
+  load_file("describe.sc");
+  
+  /* extensions of C and C++ modes */
+  load_file("mode-ext.sc");
+  
+  /* mouse customization */
+  load_file("mouse.sc");
+  
+  /* C C++ comments facilities */
+  load_file("comments.sc");
+  
+  /* file title and custom organization title */
+  load_file("title.sc");
+  
+  /* save file utilities */
+  load_file("save.sc");
+  
+  /* global set key utilities */
+  load_file("keydef-ext.sc");
+  
+  /* word completion */
+  load_file("complete-word.sc");
+  
+  /* window-utilities */
+  load_file("window-utilities.sc");
+  
+  /* compare two windows */
+  load_file("compare-win.sc");
+
+  /* latex indent */
+  load_file("latex.sc");
+
+  /* color region buffer */
+  load_file("color.sc");
+
+  /* edit directory */
+  load_file("edir.sc");
+
+  /* rcs interface */
+  load_file("rcs.sc");
+  
+  /* Version control */
+  load_file("version.sc");
+  
+  /* Latex utilities */
+  load_file("latex-macros.sc");
+  
+  /* Misc utilities */
+  load_file("misc-commands.sc");
+ 
+ /* html utilities */
+  load_file("html.sc");
+}
+
+/* -------------------------------------------------------------------------
+   define fonts
+   ------------------------------------------------------------------------- */
+
+{
+  set_mode_font("default",
+		  "-adobe-courier-medium-r-normal--14-140-75-75-m-90-iso8859-1");
+  set_mode_font("C-mode",
+		  "-adobe-courier-medium-r-normal--14-140-75-75-m-90-iso8859-1");
+  set_mode_font("C++mode",
+		  "-adobe-courier-medium-r-normal--14-140-75-75-m-90-iso8859-1");
+  set_mode_font("Latex",
+		  "-adobe-courier-medium-r-normal--14-140-75-75-m-90-iso8859-1");
+  set_mode_font("Html",
+		  "-adobe-courier-medium-r-normal--14-140-75-75-m-90-iso8859-1");
+  set_mode_font("Ada",
+		  "-adobe-courier-medium-r-normal--14-140-75-75-m-90-iso8859-1");
+  set_mode_font("Perl",
+		  "-adobe-courier-medium-r-normal--14-140-75-75-m-90-iso8859-1");
+  set_mode_font("Fortran",
+		  "-adobe-courier-medium-r-normal--14-140-75-75-m-90-iso8859-1");
+  set_mode_font("shell",
+		  "-adobe-courier-medium-r-normal--14-140-75-75-m-90-iso8859-1");
+  set_mode_font("Shell",
+		  "-adobe-courier-medium-r-normal--14-140-75-75-m-90-iso8859-1");
+  set_mode_font ("french",
+		  "-adobe-courier-medium-r-normal--14-140-75-75-m-90-iso8859-1");
+}
+
+/* -------------------------------------------------------------------------
+   define suffixes
+   ------------------------------------------------------------------------- */
+
+{
+  set_mode_suffixes("C++mode",".c .cc .h .sc");
+  set_mode_suffixes("C-mode",".c .h .sc .xcoralrc");
+  set_mode_suffixes("Latex",".tex .latex .sty");
+  set_mode_suffixes("Html",".html");
+  set_mode_suffixes("Perl",".pl");
+  set_mode_suffixes("Fortran",".f");
+  set_mode_suffixes("Ada",".a");
+  
+  set_mode_suffixes("french",".txt .texte");
+}
+
+/* -------------------------------------------------------------------------
+   define modes on which global_key_def operates
+   ------------------------------------------------------------------------- */
+
+{
+  globalize_mode("default");
+  globalize_mode("C-mode");
+  globalize_mode("C++mode");
+  globalize_mode("Latex");
+  globalize_mode("Html");
+  globalize_mode("Perl");
+  globalize_mode("Ada");
+  globalize_mode("Fortran");
+  globalize_mode("shell");
+  globalize_mode("french");
+  globalize_mode("Shell");
+}
+
+/* -------------------------------------------------------------------------
+   define keys
+   ------------------------------------------------------------------------- */
+
+{
+  global_key_def("^xt", "transpose_chars");
+  global_key_def("^xy", "transpose_forms");
+  global_key_def("^[\\", "delete_line_blanks");
+  global_key_def("^[ ",  "just_one_blank");
+  global_key_def("^[k",  "delete_to_beginning_of_line");
+  global_key_def("^xc",  "center_line");
+  global_key_def("^[m", "recenter");
+  
+  global_key_def("^x#", "sharp_comment");
+  global_key_def("^x+", "plus_comment");
+  global_key_def("^x=", "equal_comment");
+  global_key_def("^x-", "minus_comment");
+  global_key_def("^x%", "percent_comment");
+  
+  global_key_def("^xz", "update_title_and_save_file");
+  global_key_def("^xs", "update_title_backup_and_save_file");
+  
+  global_key_def("^[/", "complete_word");
+  
+  global_key_def("^xC", "CompareAgain");
+  
+  global_key_def("^xg", "go_next");
+
+  global_key_def("^xa", "color_buffer");
+  global_key_def("^xr", "color_region");
+  
+  global_key_def("^xd", "edir");
+  key_def("Edir", "^xd", "edir");
+
+  key_def("Shell", "^[b", "backward_c_form");
+  key_def("Shell", "^[f", "forward_c_form");
+  key_def("Shell", "^[d", "delete_next_c_form");
+  key_def("Shell", "^[\b", "delete_previous_c_form");
+  key_def("Shell", "^[\177", "delete_previous_c_form"); /* esc delete */
+  key_def("Shell", "^x^c", "quit_shell");
+
+}
+
+/* --------------------------------------------------------------------------------
+   French accents in Latex mode.
+   -------------------------------------------------------------------------------- */
+{
+    key_def("Latex", "'", "french_accent");
+    key_def("Latex", "`", "french_accent");
+    key_def("Latex", "^^", "french_accent");
+    key_def("Latex", "\"", "french_accent");
+}
+
+/* --------------------------------------------------------------------------------
+   User commands: call by Users commands item in Misc Menu.
+   -------------------------------------------------------------------------------- */
+user_commands()
+{
+/****
+    char *str;
+    int win = current_window();
+
+    clear_list();
+    add_list_item("User smac function 1");
+    add_list_item("User smac function 2");
+    add_list_item("User smac function 3");
+
+    str = select_from_list("User commands");
+    redisplay();
+    select_window(win);
+    
+    if(str==0 || strlen(str) < 2) {
+	return;
+    }
+    
+    if (strcmp(str,"User smac function 1")==0) {
+	user_smac_function_1();
+	return;
+    }
+    ...
+****/
+}
+
+

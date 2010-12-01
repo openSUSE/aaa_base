@@ -1,8 +1,8 @@
-#! /bin/bash
-# Copyright (c) 1996-99 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#! /bin/sh
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
-#	  Werner Fink <werner@suse.de>, 1996,98,99
+#	  Werner Fink <werner@suse.de>, 1996
 #         Martin Scherbaum <maddin@suse.de>, 1997
 #         Reinhard Max <max@suse.de>, 1997
 #
@@ -10,77 +10,47 @@
 #
 
 . /etc/rc.config
-. /etc/SuSEconfig/profile
-
-locale_vars="\
-LANG         \
-LC_ALL       \
-LC_MESSAGES  \
-LC_CTYPE     \
-LC_COLLATE   \
-LC_TIME      \
-LC_NUMERIC   \
-LC_MONETARY"
-
-for var in $locale_vars
-do
-    if eval test -z "\$$var"; then
-        eval $var="\$RC_$var"
-        export $var
-    fi
-done
 
 case "$DISPLAYMANAGER" in
-    kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde/bin/kdm   ;;
-    gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/bin/gdm ;;
-    *)			 DISPLAYMANAGER=/usr/X11R6/bin/xdm ;;
+    kdm|kde|KDM|KDE)
+	DISPLAYMANAGER=/opt/kde/bin/kdm
+    ;;
+    *)
+	DISPLAYMANAGER=/usr/X11R6/bin/xdm
+    ;;
 esac
-test ! -x "$DISPLAYMANAGER" && DISPLAYMANAGER=/usr/X11R6/bin/xdm
+if [ ! -x "$DISPLAYMANAGER" ]; then
+    DISPLAYMANAGER=/usr/X11R6/bin/xdm
+fi
 
-DM=${DISPLAYMANAGER##*/}
+DM=`basename $DISPLAYMANAGER`
 
-return=$rc_done
 case "$1" in
+
     start)
-	echo -n "Starting service $DM"
-	startproc $DISPLAYMANAGER || return=$rc_failed
-	# After a crash or a kill signal we may have
-	# a wrong owner ship of /dev/console
-	if test "$return" = "$rc_done" ; then
-	    chown root:tty /dev/console /dev/tty0
-	    chmod 622      /dev/console /dev/tty0
-	fi
-	echo -e "$return"
+	test -z "$RE" && echo -n "Starting $DM... "
+	$DISPLAYMANAGER
+	test -z "$RE" && echo "Done."
 	;;
+
     stop)
-	echo -n "Shutting down service $DM"
-	killproc -TERM $DISPLAYMANAGER || return=$rc_failed
-	echo -e "$return"
+	killproc /usr/X11R6/bin/xconsole &> /dev/null
+	test -z "$RE" && echo -n "Shutting down $DM... "
+	kill -TERM `cat /var/lib/xdm/xdm-pid` 
+	test -z "$RE" && echo "Done."
 	;;
+
     restart)
-	$0 stop && $0 start || return=$rc_failed
-	;;
-    reload)
-	echo -n "Reload service $DM"
-	killproc -HUP  $DISPLAYMANAGER || return=$rc_failed
-	echo -e "$return"
-	;;
-    status|check)
-	echo -n "Checking for service ${DM}: "
-	checkproc $DISPLAYMANAGER && echo "is running" || echo "is NOT running"
-	;;
-    probe)
-	XDMDIR=/usr/X11R6/lib/X11/xdm
-	if test $XDMDIR/xdm-config -nt /var/run/xdm.pid -o \
-	        $XDMDIR/Xservers   -nt /var/run/xdm.pid
-	then
-	    echo reload
-	fi
+	export RE=yes
+	echo -n "Restarting $DM... "
+	/sbin/init.d/xdm stop
+	sleep 1
+	/sbin/init.d/xdm start
+	echo "Done."
 	;;
     *)
-	echo "Usage: $0 {start|stop|status|restart|reload|probe}"
+	echo "Usage: $0 {start|stop|restart}"
 	exit 1
 esac
 
-test "$return" = "$rc_done" || exit 1
 exit 0

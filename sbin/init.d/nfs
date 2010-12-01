@@ -1,5 +1,5 @@
 #! /bin/bash
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
 #      Werner Fink <werner@suse.de>, 1996
@@ -12,34 +12,22 @@
 
 nfs=no
 while read  where what type options rest  ; do
-    case "$where" in
-	\#*|"") ;;
-	*)  case "$options" in
-		*noauto*) ;;
-		*)  if test "$type" = "nfs" ; then
-			nfs=yes
-			break
-		    fi ;;
-	    esac
+    case "$options" in
+      *noauto*)
+        ;;
+      *)
+        if test "$type" = "nfs" ; then
+            nfs=yes
+        fi
+      ;;
     esac
 done < /etc/fstab
 
-case `uname -r` in
-   0.*|1.*|2.0.*) RPCSTATD="" ; RPCLOCKD="" ;;
-   *)
-      test -x /usr/sbin/rpc.kstatd && RPCSTATD=/usr/sbin/rpc.kstatd
-      test -x /usr/sbin/rpc.klockd && RPCLOCKD=/usr/sbin/rpc.klockd
-      ;;
-esac
-
-return=$rc_done
 case "$1" in
-    start|reload)
-	test "$nfs" = "yes" || exit 0;
+    start)
+    test "$nfs" = "yes" || exit 0;
 
-	test -n "$RPCLOCKD" && startproc $RPCLOCKD
-	test -n "$RPCSTATD" && startproc $RPCSTATD
-	echo -n "Importing Net File System (NFS)"
+	echo "Importing Net File System (NFS)."
 	# Mount all auto NFS devices (-> nfs(5) and mount(8) )
 	#  NFS-Server sometime not reachable during boot phase.
 	#  It's sometime usefull to mount NFS devices in
@@ -52,35 +40,25 @@ case "$1" in
 	#  Note: Some people importing the /usr partition.
 	#        Therefore we do _NOT_ use an ampersand!
 	#
-	mount -at nfs || return=$rc_failed
+	mount -at nfs
 	sleep 1
 	#
     	# generate new list of available shared libraries
 	#
 	ldconfig -X 2>/dev/null
-	echo -e "$return"
 	;;
     stop)
-	test "$nfs" = "yes" && echo -n "Remove Net File System (NFS)"
+	test "$nfs" = "yes" && echo "Remove Net File System (NFS)."
 	#
 	# Unmount in background because during long timeouts
 	#
+	sleep 1
 	umount -at nfs &
-	sleep 2
-	test "$nfs" = "yes" && echo -e "$return"
-	;;
-    restart)
-	$0 stop && $0 start || return=$rc_failed
-	;;
-    status)
-	mount -t nfs | while read from x point rest ; do
-	    echo -e "$from\033[50G$point"
-	done
+	sleep 1
 	;;
     *)
-	echo "Usage: $0 {start|stop|status|reload|restart}"
+	echo "Usage: $0 {start|stop}"
 	exit 1
 esac
 
-test "$return" = "$rc_done" || exit 1
 exit 0

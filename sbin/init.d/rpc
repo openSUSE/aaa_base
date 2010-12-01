@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
 #	  Werner Fink <werner@suse.de>, 1996
@@ -9,57 +9,22 @@
 
 . /etc/rc.config
 
-base=${0##*/}
-link=${base#*[SK][0-9][0-9]}
+test "$START_PORTMAP" = no -a "$NFS_SERVER" = no && exit 0
 
-test $link = $base && START_PORTMAP=yes
-test "$START_PORTMAP" = yes -o "$NFS_SERVER" = yes || exit 0
-
-if test -x /sbin/portmap ; then
-    PORTMAP=/sbin/portmap
-else
-    PORTMAP=/usr/sbin/portmap
-fi
-
-return=$rc_done
 case "$1" in
     start)
-	checkproc $PORTMAP && {
-	    killproc $PORTMAP 2> /dev/null
-	    echo -n "Re-"
-        }
-	echo -n "Starting RPC portmap daemon"
-	startproc $PORTMAP || return=$rc_failed
+	echo "Starting RPC portmap daemon."
+	/usr/sbin/portmap
 	/bin/sleep 1
-        if test "$NFS_SERVER_UGID" = yes; then
-	   if test -x /usr/sbin/rpc.ugidd ; then
-            startproc /usr/sbin/rpc.ugidd       || return=$rc_failed
-           fi
-        fi
-	echo -e "$return"
 	;;
     stop)
-	if test -x /usr/sbin/rpc.ugidd ; then
-	  killproc -TERM /usr/sbin/rpc.ugidd      || return=$rc_failed
-	fi
-	echo -n "Shutting down RPC services"
-	killproc -TERM $PORTMAP || return=$rc_failed
-	echo -e "$return"
-	;;
-    restart|reload)
-	$0 stop && $0 start || return=$rc_failed
-	;;
-    status)
-        status="OK"
-        if test "$NFS_SERVER_UGID" = yes; then
-            checkproc /usr/sbin/rpc.ugidd  || status="rpc.ugidd down"
-        fi
-	checkproc $PORTMAP && echo "OK" || echo "portmapper down"
+	echo -n "Shutting down RPC services:"
+	killproc -TERM /usr/sbin/portmap
+	echo
 	;;
     *)
 	echo "Usage: $0 {start|stop}"
 	exit 1
 esac
 
-test "$return" = "$rc_done" || exit 1
 exit 0

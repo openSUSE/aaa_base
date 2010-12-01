@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
 #	  Werner Fink <werner@suse.de>, 1996
@@ -8,12 +8,6 @@
 #
 
 . /etc/rc.config
-
-base=${0##*/}
-link=${base#*[SK][0-9][0-9]}
-
-test $link = $base && START_INETD=yes
-test "$START_INETD" = yes || exit 0
 
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin
 export HOME=/
@@ -29,36 +23,21 @@ if [ -d /usr/man/de ] ; then
     export MANPATH=/usr/man/de:$MANPATH
 fi
 
-return=$rc_done
+test "$START_INETD" = yes || exit 0
+
 case "$1" in
     start)
-	echo -n "Starting INET services (inetd)"
-	startproc /usr/sbin/inetd || return=$rc_failed
-	echo -e "$return"
+	echo "Starting INET services. (inetd)"
+	/usr/sbin/inetd
 	;;
     stop)
-	echo -n "Shutting down INET services (inetd)"
-	killproc -TERM /usr/sbin/inetd || return=$rc_failed
-	echo -e "$return"
-	;;
-    restart)
-	$0 stop && $0 start || return=$rc_failed
-	;;
-    reload)
-	echo -n "Reload INET services (inetd)"
-	killproc -HUP /usr/sbin/inetd || return=$rc_failed
-	echo -e "$return"
-	;;
-    status)
-	checkproc /usr/sbin/inetd && echo "INET up" || echo "No INET"
-	;;
-    probe)
-	test /etc/inetd.conf -nt /var/run/inetd.conf && echo reload
+	echo -n "Shutting down INET services:"
+	killproc -TERM /usr/sbin/inetd
+	echo
 	;;
     *)
-	echo "Usage: $0 {start|stop|status|restart|reload|probe}"
+	echo "Usage: $0 {start|stop}"
 	exit 1
 esac
 
-test "$return" = "$rc_done" || exit 1
 exit 0

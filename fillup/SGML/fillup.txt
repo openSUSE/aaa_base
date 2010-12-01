@@ -1,0 +1,79 @@
+  FFIILLLLUUPP (1)
+  Martin Scherbaum, mmaaddddiinn@@ssuussee..ddee
+
+  v1.0, March 3 1996
+
+  This document describes how to use the ffiilllluupp tool.
+
+  11..
+
+  NNAAMMEE
+
+  ffiilllluupp - fill one configuration file into another
+
+  22..
+
+  SSYYNNOOPPSSIISS
+
+  ffiilllluupp options basefile additionalfile Options: -hsvq -d char -c char
+  -o filename
+
+  33..
+
+  DDEESSCCRRIIPPTTIIOONN
+
+  This manual page documents the S.u.S.E. programm ffiilllluupp.  ffiilllluupp takes
+  at least 2 arguments: a basefile and a newfile.  Both of them contain
+  e.g. configuration information expressed by e.g. environment variables
+  consisting of a variable name, an assignment delimitor and a variable
+  value.  ffiilllluupp reads both files and looks up wether variables of the
+  new file are not contained in the basefile. New variables are appended
+  to the basefile including comments preceeding the variable definition,
+  the variable name, the assignment delimitor and the variables value.
+  Logical lines connected by  are copied as one line.
+
+  The default delimitor is '=', the default comment marker is '#'. Both
+  may be altered by command line options.
+
+  While processing the files, ffiilllluupp will display the name of every new
+  variable found in newfile. If ffiilllluupp finds duplicate variables in the
+  basefile and the newfile, it will issue a warning.
+
+  44..  OOPPTTIIOONNSS
+
+     --cc cchhaarr
+        use char as comment marker instead of default comment marker '#'
+
+     --dd cchhaarr
+        use char as assignment delimitor instead of the default
+        delimitor '='
+
+     --hh help: display a message how to use ffiilllluupp
+
+     --oo ffiilleennaammee
+        do not append output to basefile but write output to filename.
+        Previous contents of filename will be deleted!
+
+     --qq quiet: no output to screen except errors
+
+     --ss suppress comments: do not copy the comments contained in the
+        newfile to the target file
+
+     --vv verbose: display any new variable on the screen while processing
+        including assignment delimitor and variable value (stdout may be
+        redirected)
+
+  55..  EEXXIITT CCOODDEE
+
+  ffiilllluupp returns -1 on any error.  on successful completion, ffiilllluupp
+  returns the (non-negative) number of new variable lines added /
+  written to the output file.
+
+  66..  CCOOPPYYRRIIGGHHTT
+
+  ffiilllluupp is copyright by S.u.S.E. GmbH, Fuerth, Germany.
+
+  77..  AAUUTTHHOORR
+
+  Martin Scherbaum, S.u.S.E. GmbH
+

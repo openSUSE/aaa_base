@@ -1,24 +1,21 @@
 #! /bin/sh
 #
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Florian La Roche <florian@suse.de>, 1996
-#         Werner Fink <werner@suse.de>, 1996
+#	  Werner Fink <werner@suse.de>, 1996
 #         Burchard Steinbild <bs@suse.de>, 1996
 #
-# /sbin/init.d/boot
+# /sin/init.d/boot
 #
 # first script to be executed from init on system startup
 #
 
 . /etc/rc.config
-echo "Running $0"
+echo "Running $0."
 
-ECHO_RETURN=$rc_done
-echo -n "Mounting /proc device"
-mount -n -t proc proc /proc || ECHO_RETURN=$rc_failed
-echo -e "$ECHO_RETURN"
-
+echo "Mounting /proc device..."
+mount -nv /proc
 
 #
 # possibly there are file systems on devices, which need a kernel 
@@ -26,138 +23,62 @@ echo -e "$ECHO_RETURN"
 #
 if test "$START_KERNELD" = yes -a \
         -x /sbin/kerneld -a ! -e /proc/sys/kernel/modprobe ; then
-    echo -n "Starting kerneld:"
-    ECHO_RETURN=$rc_done_up
-    /sbin/kerneld || ECHO_RETURN=$rc_failed_up
-    echo -e "$ECHO_RETURN"
+    /sbin/kerneld
 fi
 
 #
 # maybe we use "Multiple devices".  So initialize MD.
 #
 if test -f /etc/mdtab -a -x /sbin/mdadd ; then
-    ECHO_RETURN=$rc_done_up
     echo "Initializing Multiple Devices..."
-    /sbin/mdadd -ar && MDADD_RETURN=0 || MDADD_RETURN=1
-    if test $MDADD_RETURN != 0 ; then
-        if test  -x /sbin/ckraid ; then
-            echo "Initializing Multiple Devices failed.  Trying to recover it..."
-	    /sbin/mdstop -a	
-            for i in /etc/raid?.conf ; do
-                /sbin/ckraid --fix $i
-            done
-            /sbin/mdadd -ar || ECHO_RETURN=$rc_failed_up
-        else
-            ECHO_RETURN=$rc_failed_up
-        fi
-    fi
-    echo -e "$ECHO_RETURN"
-fi
-
-#
-# Find and activate volume groups (HM 1/1/1999)
-#
-if test -d /etc/lvmtab.d/ -a -x /sbin/vgscan -a -x /sbin/vgchange ; then
-    echo "Run file syetem check on root for LVM activation"
-    while read des fs type rest; do
-	case "$fs" in
-	    /) break ;;
-	    *)       ;;
-	esac
-    done < /etc/fstab
-
-    fsck -C -a -t $type /
-    FSCK_RETURN=$?
-    # A return code of 1 indicates that file system errors
-    # were corrected, but that the boot may proceed.
-    # A return code of 2 or larger indicates failure.
-    if test $FSCK_RETURN -gt 1 ; then
-	echo
-	echo "fsck for root file system (/) failed."
-	echo "Please repair it manually and reboot."
-	echo "The root file system is currently mounted read-only."
-	echo
-	echo "Attention: Only CONTROL-D will reboot the system in this"
-	echo "maintanance mode. shutdown or reboot will not work."
-	echo
-	PS1="(repair filesystem) # "
-	export PS1
-	/sbin/sulogin /dev/console
-
-	# if the user has mounted something rw, this should be umounted
-	echo "Unmounting file systems (ignore error messages)"
-	umount -avn
-
-	# on umsdos fs this would lead to an error message. so direct
-	# errors to /dev/null
-	mount -no remount,ro / 2> /dev/null
-
-	sync
-	reboot -f
-    else
-	echo "Remounting root file system (/) read/write for vgscan..."
-	mount -n -o remount,rw /
-	echo "Scanning for LVM volume groups..."
-	/sbin/vgscan
-	mount -n -o remount,ro /
-	echo "Activating LVM volume groups..."
-	/sbin/vgchange -a y
-    fi
+       /sbin/mdadd -ar
 fi
 
 #
 # fsck can need a huge amount of memory, so make sure, it is there.
 #
-ECHO_RETURN=$rc_done_up
 echo "Activating swap-devices in /etc/fstab..."
-swapon -a || ECHO_RETURN=$rc_failed_up
-echo -e "$ECHO_RETURN"
+swapon -a
 
+#
+# you will need "update".
+#
+echo "Running update (bdflush) daemon."
+/sbin/update
 
-ECHO_RETURN=$rc_done
-case `uname -r` in
-    0.*|1.*|2.[01].*|2.2.?|2.2.10)
-        echo -n "Running update (bdflush) daemon"
-        /sbin/update || ECHO_RETURN=$rc_failed
-        echo -e "$ECHO_RETURN"
-	;;
-esac
 
 #
 # do fsck and start sulogin, if it fails.
 #
-FSCK_RETURN=0
-if test ! -f /fastboot -a -z "$fastboot" ; then
+if test ! -f /fastboot; then
     # on an umsdos root fs this mount will fail, so direct error messages 
     # to /dev/null.
     # this seems to be ugly, but should not really be a problem.
     mount -n -o remount,ro / 2> /dev/null
     if test $? = 0; then
-        ECHO_RETURN=$rc_done_up
-        echo "Checking file systems..."
-        fsck -C -A -a
-        # A return code of 1 indicates that file system errors
-        # were corrected, but that the boot may proceed.
-        # A return code of 2 or larger indicates failure.
-        FSCK_RETURN=$?
-        if test $FSCK_RETURN -gt 1; then
-            echo -e "$rc_failed_up"
-            if test -x /sbin/init.d/kbd ; then
-                /sbin/init.d/kbd start
+	echo "Checking file systems..."
+        fsck -A -a
+	# A return code of 1 indicates that file system errors
+	# were corrected, but that the boot may proceed.
+	# A return code of 2 or larger indicates failure.
+	if test $? -gt 1; then
+            if test -f /etc/default.keytab -a -x /bin/loadkeys; then
+                /bin/loadkeys /etc/default.keytab
             fi
-            echo
-            echo "fsck failed.  Please repair manually and reboot. The root"
-            echo "file system is currently mounted read-only. To remount it"
-            echo "read-write do:"
-            echo
-            echo "   bash# mount -n -o remount,rw /"
-            echo
-            echo "Attention: Only CONTROL-D will reboot the system in this"
+	    echo
+	    echo "fsck failed.  Please repair manually and reboot. The root"
+	    echo "file system is currently mounted read-only. To remount it"
+	    echo "read-write do:"
+	    echo
+	    echo "   bash# mount -n -o remount,rw /"
+	    echo
+	    echo "Attention: Only CONTROL-D will reboot the system in this"
             echo "maintanance mode. shutdown or reboot will not work."
-            echo
-            PS1="(repair filesystem) # "
-            export PS1
-            /sbin/sulogin /dev/console
+	    echo
+	    PS1="(repair filesystem) # "
+	    export PS1
+	    # XXX /sbin/sulogin /dev/console
+	    /sbin/sulogin /dev/tty1
 
             # if the user has mounted something rw, this should be umounted
             echo "Unmounting file systems (ignore error messages)"
@@ -167,27 +88,18 @@ if test ! -f /fastboot -a -z "$fastboot" ; then
             # errors to /dev/null
             mount -no remount,ro / 2> /dev/null
 
-            sync
-            reboot -f
-        fi
-        echo -e "$ECHO_RETURN"
-        sync
+	    sync
+	    reboot
+	fi
+	sync
         mount -n -o remount,rw /
     else
-	mounts=/etc/mtab
-	test -r /proc/mounts && mounts=/proc/mounts
-	while read des fs type rest; do
-	    case "$fs" in
-	        /) break ;;
-	        *)       ;;
-	    esac
-	done < $mounts
-
-	if test "$type" != "umsdos" ; then
+	if test ! -d /DOS ; then # this is a hack - we need a better
+                                 # recognization of umsdos root fs
 	    echo
 	    echo "*** ERROR!  Cannot fsck because root is not read-only!"
 	    echo
-	fi
+        fi
     fi
 else
     echo "File systems are NOT being checked."
@@ -205,19 +117,10 @@ rm -f /etc/mtab* /etc/nologin /nologin /fastboot
 # restart of kerneld will be done by /sbin/init.d/kerneld
 # 
 MODULES_DIR=/lib/modules/`uname -r` 
-if test -x /sbin/depmod -a -d $MODULES_DIR ; then
-    ECHO_RETURN=$rc_done
-    for i in $MODULES_DIR/* $MODULES_DIR/*/* /etc/conf.modules ; do
-        test -e $i || continue
-        if test $i -nt $MODULES_DIR/modules.dep ; then
-            rm -f $MODULES_DIR/modules.dep
-            break
-        fi
-    done
-    if test ! -e $MODULES_DIR/modules.dep ; then
-        echo -n Setting up $MODULES_DIR
-        /sbin/depmod -a 2> /dev/null > /dev/null || ECHO_RETURN=$rc_failed
-        echo -e "$ECHO_RETURN"
+if test "$START_KERNELD" = yes -a \
+        -x /sbin/depmod -a ! -e /proc/sys/kernel/modprobe ; then
+    if test -d $MODULES_DIR ; then
+        /sbin/depmod -a 2> /dev/null > /dev/null
     fi
 fi
 
@@ -225,244 +128,98 @@ fi
 # Mount local filesystems in '/etc/fstab' (and create an entry 
 # for / and /proc).
 #
-ECHO_RETURN=$rc_done_up
 echo "Mounting local file systems..."
-mount -fv -t proc proc /proc || ECHO_RETURN=$rc_failed_up
-mount -av -t nonfs,noproc || ECHO_RETURN=$rc_failed_up
-echo -e "$ECHO_RETURN"
-
-#
-# mount /dev/pts if not done by /etc/fstab.
-#
-DEV_PTS_MOUNTED=false
-mounts=/etc/mtab
-test -r /proc/mounts && mounts=/proc/mounts
-while read des fs type rest; do
-    case "$fs" in
-        /dev/pts) DEV_PTS_MOUNTED=true ; break ;;
-        *)       ;;
-    esac
-done < $mounts
-
-if test $DEV_PTS_MOUNTED = false ; then
-    ECHO_RETURN=$rc_done_up
-    echo -n Mounting /dev/pts.
-    mount -t devpts -ogid=5 -omode=0620 devpts /dev/pts || \
-        ECHO_RETURN=$rc_failed_up
-    echo -e "$ECHO_RETURN"
-fi
-
-
-#
-# reinit quota, if fsck has returned value != 0
-#
-if test $FSCK_RETURN -gt 0 -a -n "$START_QUOTA" -a "$START_QUOTA"="yes" ; then
-    # Check quota and then turn quota on.
-    if test -x /sbin/quotacheck ; then
-        ECHO_RETURN=$rc_done_up
-        echo "Checking quotas. This may take some time."
-        /sbin/quotacheck -avug || ECHO_RETURN=$rc_failed_up
-        echo -e "$ECHO_RETURN"
-    fi
-fi
+mount -f /proc
+mount -av -t nonfs,noproc
+mount -a -t proc
 
 # Let ld.so rebuild its cache.
-test -x /sbin/ldconfig && {
-    ECHO_RETURN=$rc_done
-    echo -n "Setting up /etc/ld.so.cache"
-    /sbin/ldconfig -X 2>/dev/null || ECHO_RETURN=$rc_failed
-    echo -e "$ECHO_RETURN"
-}
+test -x /sbin/ldconfig && /sbin/ldconfig -X 2>/dev/null
 
-#
-# Let zic set timezone - if present.
-#
-if test -n "$TIMEZONE" -a "$TIMEZONE" != "YAST_ASK" -a -x /usr/sbin/zic ; then
-    ECHO_RETURN=$rc_done
-    echo -n Setting up timezone data
-    /usr/sbin/zic -l $TIMEZONE || ECHO_RETURN=$rc_failed
-    echo -e "$ECHO_RETURN"
-fi
+# XXX write reboot record here and delete the code in /sbin/init...
 
 #
 # initialize loopback device
 #
 if test "$START_LOOPBACK" = yes; then
-        ECHO_RETURN=$rc_done
-        echo -n Setting up loopback device
-        ifconfig lo 127.0.0.1 netmask 255.0.0.0 up || ECHO_RETURN=$rc_failed
-        route add -net 127.0.0.0 netmask 255.0.0.0 dev lo || ECHO_RETURN=$rc_failed
-        echo -e "$ECHO_RETURN"
+	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
+	route add -net 127.0.0.0 netmask 255.0.0.0 dev lo
 fi
-
-#
-# set hostname and domainname
-#
-test -n "$FQHOSTNAME" && {
-    ECHO_RETURN=$rc_done
-    echo -n Setting up hostname
-    hostname ${FQHOSTNAME%%.*} || ECHO_RETURN=$rc_failed
-    echo -e "$ECHO_RETURN"
-}
-test -n "$YP_DOMAINNAME" && {
-    ECHO_RETURN=$rc_done
-    echo -n Setting YP up domainname
-    domainname $YP_DOMAINNAME || ECHO_RETURN=$rc_failed
-    echo -e "$ECHO_RETURN"
-} || domainname ""
-
-
-# set and adjust the CMOS clock
-echo -n Setting up the CMOS clock
-ECHO_RETURN=$rc_done
-test "$GMT" != "YAST_ASK" && hwclock -s $GMT || ECHO_RETURN=$rc_failed
-test -f /etc/adjtime || echo "0.0 0 0.0" > /etc/adjtime
-test "$GMT" != "YAST_ASK"  -a "$START_XNTPD" != "yes" && {
-    hwclock -a $GMT || ECHO_RETURN=$rc_failed
-}
-echo -e "$ECHO_RETURN"
-
-
-#
-# clean up
-#
-rm -f /var/lock/* /var/lock/*/* /tmp/.X*lock \
-      /var/run/*  /var/run/*/*  /var/spool/uucp/LCK* 2>/dev/null
-
-rm -f /var/run/utmp
-echo -n > /var/run/utmp
-chmod 664 /var/run/utmp
-chown root.tty /var/run/utmp
-
-#
-# there could be a new kernel version.  reinit /etc/psdevtab, to be sure.
-#
-rm -f /etc/psdevtab
-test -x /bin/ps && /bin/ps > /dev/null 2> /dev/null
 
 #
 # start bootup client scripts.
 #
 if test -d /sbin/init.d/boot.d; then
-        for i in /sbin/init.d/boot.d/S*; do
-                test -f $i || continue
-                echo Running $i
-                ECHO_RETURN=$rc_done_up
-                test -f "$i" && {
-                    /bin/sh $i b || ECHO_RETURN=$rc_failed_up
-                }
-                echo -e "$ECHO_RETURN"
-        done
+	for i in /sbin/init.d/boot.d/S*; do
+		test -f "$i" && /bin/sh $i b
+	done
 fi
 
 #
-# setup PNP if config file is present
+# set hostname and domainname
 #
-if test -r /etc/isapnp.conf -a -x /sbin/isapnp -a "$START_ISAPNP" = yes ; then
-    ECHO_RETURN=$rc_done_up
-    echo "Initializing PnP devices"
-    /sbin/isapnp /etc/isapnp.conf || ECHO_RETURN=$rc_failed_up
-    echo -e "$ECHO_RETURN"
-fi
+test -n "$FQHOSTNAME" && hostname ${FQHOSTNAME%%.*}
+test -n "$YP_DOMAINNAME" && domainname $YP_DOMAINNAME
+
+
+# set and adjust the CMOS clock
+test "$GMT" != "YAST_ASK" && hwclock -s $GMT
+test -f /etc/adjtime || echo "0.0 0 0.0" > /etc/adjtime
+test "$GMT" != "YAST_ASK"  -a "$START_XNTPD" != "yes" && hwclock -a $GMT
+
+#
+# clean up
+#
+rm -f /var/run/utmp
+echo -n > /var/run/utmp
+chmod 664 /var/run/utmp
+chown root.tty /var/run/utmp
+
+rm -f /var/lock/* /var/lock/*/* /tmp/.X*lock \
+      /var/run/syslogd.pid /var/spool/uucp/LCK* 2>/dev/null
+
+# The following script is executed at boot-up and also from a cron-entry
+# in the early morning. So your system should be checked often enough.
+#if test -x /root/bin/cron.daily; then
+#	/root/bin/cron.daily
+#fi
 
 #
 # start user defined bootup script.
 #
 if test -f /sbin/init.d/boot.local ; then
-        ECHO_RETURN=$rc_done_up
-        echo "Running /sbin/init.d/boot.local"
-        /bin/sh /sbin/init.d/boot.local || ECHO_RETURN=$rc_failed_up
-        echo -e "$ECHO_RETURN"
+	/bin/sh /sbin/init.d/boot.local
 fi
 
 # Read all kernel messages generated until now and put them in one file.
 if test -x /usr/sbin/klogd ; then
-        ECHO_RETURN=$rc_done_up
-        echo Creating /var/log/boot.msg
-        rm -f /var/log/boot.msg
-        /usr/sbin/klogd -s -o -n -f /var/log/boot.msg
-        /bin/sleep 1
-        test -s /var/log/boot.msg || ECHO_RETURN=$rc_failed_up
-        echo -e "$ECHO_RETURN"
-elif test -x /bin/dmesg ; then
-	ECHO_RETURN=$rc_done_up
-	echo Creating /var/log/boot.msg
-	rm -f /var/log/boot.msg
-	/bin/dmesg -s16384 > /var/log/boot.msg
+	/usr/sbin/klogd -f /var/log/boot.msg -o
 	/bin/sleep 1
-	test -s /var/log/boot.msg || ECHO_RETURN=$rc_failed_up
-	echo -e "$ECHO_RETURN"
-fi
-if test -x /usr/sbin/klogconsole ; then
-	( test -c /dev/tty10 && > /dev/tty10 ) > /dev/null 2>&1 && /usr/sbin/klogconsole -r10 
 fi
 
+#
+# setup PNP if config file is present
+#
+if test -r /etc/isapnp.conf -a -x /sbin/isapnp ; then
+    echo "Initializing PnP devices."
+    /sbin/isapnp /etc/isapnp.conf
+fi
 
 #
 # enable DEXE binary format
 #
-if test -d /proc/sys/fs/binfmt_misc -a -x /usr/bin/dosexec; then
-  ECHO_RETURN=$rc_done
-  echo -n "Registering DEXE for binfmt"
-  echo :DEXE:M::\\x0eDEXE::/usr/bin/dosexec: > \
-    /proc/sys/fs/binfmt_misc/register || ECHO_RETURN=$rc_failed
-  echo -e "$ECHO_RETURN"
-fi
-
-#
-# Enable "dynamic IP patch"
-#
-if test -n "$IP_DYNIP" -a "$IP_DYNIP" != no -a \
-    -e /proc/sys/net/ipv4/ip_dynaddr ; then
-    echo -n "Enabling dynamic IP patch"
-    case "$IP_DYNIP" in
-	yes)    echo 7         ; ECHO_RETURN=$rc_done ;;
-	[1-9])  echo $IP_DYNIP ; ECHO_RETURN=$rc_done ;;
-	*)      ECHO_RETURN=" invalid IP_DYNIP=$IP_DYNIP $rc_skipped" ;;
-    esac > /proc/sys/net/ipv4/ip_dynaddr || ECHO_RETURN=$rc_failed
-    echo -e "$ECHO_RETURN"
-fi
-
-#
-# Enable syn flood protection
-#
-if test -n "$IP_TCP_SYNCOOKIES" -a "$IP_TCP_SYNCOOKIES" != no -a \
-    -e /proc/sys/net/ipv4/tcp_syncookies ; then
-    echo -n "Enabling syn flood protection"
-    case "$IP_TCP_SYNCOOKIES" in
-        yes)    echo 1         ; ECHO_RETURN=$rc_done ;;
-        *)      ECHO_RETURN=" invalid IP_TCP_SYNCOOKIES=$IP_TCP_SYNCOOKIES $rc_skipped" ;;
-    esac > /proc/sys/net/ipv4/tcp_syncookies || ECHO_RETURN=$rc_failed
-    echo -e "$ECHO_RETURN"
-fi
-
-
-#
-# Enable IP forwarding ?
-#
-if test -e /proc/sys/net/ipv4/ip_forward -a -n "$IP_FORWARD" ; then
-    ECHO_RETURN=$rc_done
-    case $IP_FORWARD in
-      yes)
-        echo -n "Enabling IP forwarding"
-        echo "1" > /proc/sys/net/ipv4/ip_forward || ECHO_RETURN=$rc_failed
-      ;;
-      *)
-        echo -n "Disabling IP forwarding"
-        echo "0" > /proc/sys/net/ipv4/ip_forward || ECHO_RETURN=$rc_failed
-      ;;
-    esac
-    echo -e "$ECHO_RETURN"
+if test -d /proc/sys/fs/binfmt_misc ; then
+  echo "Registering DEXE for binfmt..."
+  ( cd /proc/sys/fs/binfmt_misc; \
+    echo :DEXE:M::\\x0eDEXE::/usr/bin/dosexec: >register )
 fi
 
 #
 # insert memstat module for xosview
 #
 if test -f $MODULES_DIR/misc/memstat.o ; then
-    ECHO_RETURN=$rc_done_up
-    echo Loading memstat module
-    insmod $MODULES_DIR/misc/memstat.o || ECHO_RETURN=$rc_failed_up
-    echo -e "$ECHO_RETURN"
+    echo Loading memstat module...
+    insmod $MODULES_DIR/misc/memstat.o
 fi
 
 #
@@ -484,15 +241,8 @@ if test -e /var/adm/setup/setup.newinst -o -e /usr/lib/YaST/.configured2 ; then
         # setserial.  Since it is started again, when entering into
         # runlevel 2, we can kill it here.
         #
-	test -x /usr/sbin/gpm && \
-            killproc -TERM /usr/sbin/gpm > /dev/null 2> /dev/null
+        killproc -TERM /usr/bin/gpm > /dev/null 2> /dev/null
     fi
 fi
-
-#
-# Let YaST2 finish its installation, if you installed with YaST2
-#
-test -f /var/lib/YaST2/runme_at_boot -a -x /lib/YaST2/bin/YaST2.firstboot && 
-	/lib/YaST2/bin/YaST2.firstboot
 
 exit 0

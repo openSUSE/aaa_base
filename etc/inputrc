@@ -2,7 +2,7 @@
 ## /etc/inputrc
 ##
 ## Attempt to put different TERMs together in one readline init file.
-## Copyright (c) 1997 SuSE GmbH Nuernberg, Germany.
+## Copyright (c) 1997 S.u.S.E. GmbH Fuerth, Germany.
 ##
 ## Author: Werner Fink,  <werner@suse.de>
 ##
@@ -23,14 +23,10 @@ $endif
 #
 # Common standard keypad and cursor
 #
-"\e[1~":	beginning-of-line
 "\e[2~":	yank
 "\e[3~":	delete-char
-"\e[4~":	end-of-line
-#"\e[5~":	previous-history
-#"\e[6~":	next-history
-"\e[5~":history-search-backward
-"\e[6~":history-search-forward
+"\e[5~":	previous-history
+"\e[6~":	next-history
 "\e[C":		forward-char
 "\e[D":		backward-char
 "\e[A":		previous-history

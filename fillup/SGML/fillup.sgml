@@ -1,0 +1,104 @@
+<!doctype linuxdoc system "/home/alex/maddin/sgml/linuxdoc.dtd">
+
+  <article>
+
+      <title><BF/FILLUP/ (1)</title>
+      <author>Martin Scherbaum, <tt/maddin@suse.de/
+      <date>v1.0, March 3 1996
+
+      <abstract>
+              This document describes how to use the <bf/fillup/ tool.
+       </abstract>
+
+    <p>
+    <sect><bf/NAME/
+      <p>
+	<bf/fillup/ - fill one configuration file into another
+
+      <p>
+    <sect>SYNOPSIS
+      <p>
+             <bf/fillup/ [options] basefile additionalfile
+             Options:  
+	     [-hsvq] [-d char] [-c char] [-o filename]
+
+      <p>
+    <sect>DESCRIPTION
+      <p>
+	This manual page documents the S.u.S.E. programm <bf/fillup/.
+	<bf/fillup/ takes at least 2 arguments: a basefile and a newfile.
+	Both of them contain e.g. configuration information expressed 
+	by e.g. environment variables consisting of a variable name, 
+	an assignment delimitor and a variable value.
+	<bf/fillup/ reads both files and looks up wether variables of the new file
+	are not contained in the basefile. New variables are appended to the basefile
+	including comments preceeding the variable definition, the variable name, 
+	the assignment delimitor and the variables value.
+	Logical lines connected by \ are copied as one line.
+
+	The default delimitor is '=', the default comment marker is '&num'. Both may 
+	be altered by command line options. 
+
+	While processing the files, <bf/fillup/ will display the name of every new 
+	variable found in newfile. If <bf/fillup/ finds duplicate variables in the
+	basefile and the newfile, it will issue a warning.
+
+<p>
+<sect>OPTIONS
+<p>
+<descrip>
+	<tag/-c char/      
+		use char as comment marker instead of default comment 
+		marker '#'  
+	         
+	<tag/-d char/      
+		use char as assignment delimitor instead of the default
+		delimitor '='
+  
+	<tag/-h/    	         
+		help: display a message how to use <bf/fillup/ 
+
+	<tag/-o filename/
+		do not append output to basefile but write output to filename. 
+		Previous contents of filename will be deleted!
+		
+        <tag/-q/
+		quiet: no output to screen except errors
+	
+	<tag/-s/
+		suppress comments: do not copy the comments contained
+		in the newfile to the target file
+        <tag/-v/
+		verbose: display any new variable on the screen while 
+		processing including assignment delimitor and variable value
+		(stdout may be redirected)
+</descrip>
+<p>
+<sect>EXIT CODE
+<p>
+	<bf/fillup/ returns -1 on any error.
+        on successful completion, <bf/fillup/ returns the (non-negative) number of 
+        new variable lines added / written to the output file.
+
+<p>
+<sect>COPYRIGHT
+<p>
+	<bf/fillup/ is copyright by S.u.S.E. GmbH, Fuerth, Germany.
+
+<p>
+<sect>AUTHOR
+<p>
+	Martin Scherbaum, S.u.S.E. GmbH
+
+</article>
+
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-auto-insert-required-elements:nil
+sgml-balanced-tag-edit:nil
+sgml-shorttag:nil
+sgml-default-dtd-file:"~/sgml/linuxdoc.ced"
+End:
+-->

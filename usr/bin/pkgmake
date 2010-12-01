@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # (C) Copyright  Florian  La Roche, <flla@stud.uni-sb.de, florian@suse.de>
-# (C) SuSE GmbH, Nuernberg, Germany 
+# (C) S.u.S.E. GmbH, Fuerth, Germany 
 # See the GNU Copyright...
 
 version="0.12"
@@ -121,7 +121,8 @@ Diff(){
 	cd $inp || ErrorExit "Cd failed on $inp."
 	find . \( -name '*,v' -o -name '.*,v' \) \
                 | sed 's/,v$//' | sed 's:^./::' | sort | \
-		xargs -r -ihugo rcsdiff -ko -q -u -L hugo hugo > ../$inp.dif
+		xargs -r -ihugo rcsdiff -ko -q -u -L hugo hugo | \
+                grep -v '^\\ No newline at end of file' > ../$inp.dif
 	cd ..
    done
 }

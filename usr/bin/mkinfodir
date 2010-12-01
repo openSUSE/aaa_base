@@ -1,9 +1,9 @@
 #!/usr/bin/perl
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Werner Fink <werner@suse.de>, 1996,1997
 #
-# MAKEDIR.perl  --- Version 0.51
+# MAKEDIR.perl  --- Version 0.50
 #
 if ( $#ARGV > 0 ) {
     printf(STDERR "%s: Usage:\n", $0);
@@ -36,7 +36,6 @@ if ( length($ENV{'INFOPATH'}) > 0 ) {
 # different paths ... it's really buggy.
 #
 	     "/usr/X11R6/lib/xemacs/info",
-             "/usr/share/xemacs/info",
 );
 #
 # Special: flushing file descriptor for speed, smothing, and big results
@@ -53,22 +52,14 @@ sub flush {
 # Open the main dir file
 #
 if ( $#ARGV == 0 ) {
-    $mdir    = "$ARGV[0]";
-    $mdirbak = "$ARGV[0].bak";
-    $mdirtmp = "$ARGV[0].tmp$$";
+    $mdir    = "@ARGV[0]";
+    $mdirbak = "@ARGV[0].bak";
+    $mdirtmp = "@ARGV[0].tmp$$";
 } else {
-    $mdir    = "$PATHS[0]/dir";
-    $mdirbak = "$PATHS[0]/dir.bak";
-    $mdirtmp = "$PATHS[0]/dir.tmp$$";
+    $mdir    = "@PATHS[0]/dir";
+    $mdirbak = "@PATHS[0]/dir.bak";
+    $mdirtmp = "@PATHS[0]/dir.tmp$$";
 }
-sub cleanup {
-    unlink $mdirtmp;
-    exit(1);
-}
-$SIG{'INT'} = "cleanup";
-$SIG{'TERM'} = "cleanup";
-$SIG{'HUP'} = "cleanup";
-
 if ( !-e $mdir ) { `touch $mdir 2>&1 /dev/null`; }
 
 if ( -w $mdir ) {
@@ -99,10 +90,10 @@ for ( @PATHS ) {
 	next;
     }
     (-e $_) && (@info = ( -d $_ ) ? ( <$_/*> ) : ( $_ ));
-    @info = grep(/[^0-9](|\.gz)$/, @info);
-    @info = grep(!/(dir|dir\.bak|localdir|\~|\,v|\.orig)(|\.gz)$/, @info);
-    @info = sort grep(!/-\d+\./, @info);
-    push(@allinfo, @info);
+    @info = grep(/[^0-9]\.gz/, @info);
+    @info = grep(!/(dir|dir\.bak|localdir|\~|\,v|\.orig)/, @info);
+    @info = sort(@info);
+    @allinfo = (@allinfo, @info);
 }
 ##
 ## end read info dir
@@ -111,23 +102,19 @@ for ( @PATHS ) {
 sub read_entry {
     local($file) = @_;
     local(@buf, $add, $lines);
-    local($source) = $file =~ /\.gz$/ ? "gunzip -q -d -c $file |" : "< $file";
 
     @buf = ();
     $add = 0;
     $lines = 0;
 
-    open(_FILE, $source) or warn "can't open $source\n";
+    open(_FILE, "gunzip -q -d -c $file|");
     while (<_FILE>) {
-	chomp;
-	s/^\s+//;
-	s/\s+$//;
-	if ( /^$/ ) { next; }
-	if ( /^START-INFO-DIR-ENTRY/o )  { $add = 1; next; }
-	if ( /^END-INFO-DIR-ENTRY/o )    { $add = 0; last; }
-	if ( $add == 1 ) { push(@buf, $_); $lines++; next; }
+	if ( /^START-INFO-DIR-ENTRY/o ) { $add = 1; next; }
+	if ( /^END-INFO-DIR-ENTRY/o )   { $add = 0; last; }
+	if ( $add == 1 ) { @buf = (@buf, $_); $lines++; }
 	if ( /^^_$/ ) { last; }
     }
+    flush(_FILE);
     close(_FILE);
 
     return ($lines, @buf);
@@ -135,7 +122,7 @@ sub read_entry {
 
 sub basename {
     local($name) = @_;
-    $name =~ s!.*/!!;
+    $name =~ s/^[a-zA-Z0-9\-\+\.\/]*\///;
     $name =~ s/\.gz//;
     $name =~ s/\.info//;
     $name =~ s/\+/\\\\+/g;
@@ -145,7 +132,7 @@ sub basename {
 
 sub path {
     local($name) = @_;
-    $name =~ s!\/[^/]*$!!;
+    $name =~ s/\/[a-zA-Z0-9\-\+\.]*$//;
 
     return ($name);
 }
@@ -170,8 +157,7 @@ File: dir	Node: Top	This is the top of the INFO tree
     typing "q" exits,     typing "h" gives a  primer for first-timers,
     pressing 2nd button on a highlighted word follows cross-reference.
 
- ---- AUTOCONFIGURED BY SuSEConfig: EDIT WITH CARE: ----
- ---- Only descriptive text for otherwise empty topics will survive ----
+ ---- AUTOCONFIGURED BY SuSEConfig: DO NOT EDIT BY HAND ----
 
 * Menu: The list of major topics begins on the next line.
 
@@ -187,6 +173,7 @@ $nl      = 0;
 @allbase = ();
 %found   = ();
 foreach $elem (@allinfo) {
+    $tmp   = "";
     $base  = "";
     $path  = "";
     $name  = "";
@@ -194,30 +181,29 @@ foreach $elem (@allinfo) {
     $node  = "";
     $lines = 0;
     @info  = ();
-    if ( -f $elem ) {
-	
-	$node =  $elem;
-	$node =~ s/\.gz$//;
-	$node =~ s/\.info$//;
-	$node =~ s!//!/!g;
+    if ( -r $elem ) {
+	$tmp  =  $elem;
+	$tmp  =~ s/\.gz//;
+	$tmp  =~ s/\.info//;
+	$node =  $tmp;
+	$node =~ s/\/\//\//g;
 
 	$base =  basename($elem);
-	$found{$base} = 0;
 	grep($found{$_}=1, @allbase);
 
 	if ( $found{$base} > 0 ) { next; }
-	push(@allbase, $base);
+	@allbase = (@allbase, $base);
 
 	($lines, @info) = &read_entry($elem);
 
 	$path =  path($elem);
-	if ( $path =~ /^$PATHS[0]$/ ) { $node = $base; }
+	if ( $path =~ /^@PATHS[0]$/ ) { $node = $base; }
 
 	#
 	# Read foreign or old dir files to get infomation about $base
 	# 
 	if ( $lines == 0 ) {
-	    if ( $path !~ /^$PATHS[0]$/ ) {
+	    if ( $path !~ /^@PATHS[0]$/ ) {
 		$ldir = "$path/dir";
 	    } else {
 		$ldir = $mdirtmp;
@@ -231,24 +217,21 @@ foreach $elem (@allinfo) {
 		    # read next few lines if there is information ($add == 1)
 		    #
 		    if ( $add == 1 ) {
-			if ( /^\s+[^\:\*]+$/ ) {
-			    push(@info, $_); $lines++;
+			if ( /^[\ \t]+[^\:\*]+$/ ) {
+			    @info = (@info, $_); $lines++;
 			    next;
 			}
 			last;
 		    }
-		    if      ( /^\*\s+$base\:\s+\($base\)\.\s+\w/i ) {
-			$add = 1; push(@info, $_); $lines = 1;
-		    } elsif ( /^\*\s+$base\:\:\s+\w/i ) {
-			$add = 1; push(@info, $_); $lines = 1;
-		    } elsif ( /^\*\s+$base\:\s+\($base\)\.\s+$/i ) {
-			$add = 1; push(@info, $_); $lines = 0;
-		    } elsif ( /^\*\s+$base\:\:\s+$/i ) {
-			$add = 1; push(@info, $_); $lines = 0;
+		    if ( /^\*[\ \t]+$base\:\:+[\ \t]+/i ) {
+			$add = 1; @info = (@info, $_); $lines = 1;
+		    } elsif ( /^\*[\ \t]+$base\:\:$/i ) {
+			$add = 1; @info = (@info, $_); $lines = 0;
 		    } else {
 			next;
 		    }
 		}
+		flush(FILE); 
 		close(FILE);
 	    }
 	}
@@ -261,26 +244,26 @@ foreach $elem (@allinfo) {
 
 		$l =~ s/\($base\)/\($node\)/g;
 		$l =~ s/::/: \($node\)\./g;
-		$l =~ s/^(\s+)//g;
+		$l =~ s/^([ \t]*)//g;
 
 		$name = "";
 		$desc = "";
 		$link = "";
 
-		($name,$desc) = split(/\.\s+/,"$l");
+		($name,$desc) = split(/\.[\ \t]+/,"$l");
 
 		$name =~ s/\n//g;
-		$name =~ s/\s+$//g;
-		$name =~ s/^\s+//g;
+		$name =~ s/[\ \t]*$//g;
+		$name =~ s/^[\ \t]*//g;
 
 		$desc =~ s/\n//g;
-		$desc =~ s/\s+$//g;
-		$desc =~ s/^\s+//g;
+		$desc =~ s/[\ \t]*$//g;
+		$desc =~ s/^[\ \t]*//g;
 
 		if ( $first == 0 ) {
 		    ($name, $link) = split(/:/, $name);
-		    $name =~ s/\s+$//g;
-		    $link =~ s/^\s+//g;
+		    $name =~ s/[\ \t]*$//g;
+		    $link =~ s/^[\ \t]*//g;
 		    $link =~ s/\.$//g;
 		    $name = $name . ':' . ' ' . $link . '.';
 		    if ( length($name) < 16 &&
@@ -304,9 +287,10 @@ foreach $elem (@allinfo) {
 	} else {
 
 	    $name  = basename($node);
-	    $name =~ s!(.*)!\L$1!;
-	    $name =~ s!(.*)!\u$1!;
-	    $name  = '* ' . $name . ':';
+	    $name  =~ s/^([a-z])//;
+	    $tmp = $1;
+	    $tmp =~ y/a-z/A-Z/;
+	    $name  = '* ' . $tmp . $name . ':';
 	    $link  = '(' . $node . ').';
 	    printf(DIR "%-0.80s %s\n", $name, $link);
 	    $nl = 0;

@@ -2,7 +2,7 @@
 #
 # /sbin/rctab
 #
-# Copyright (c) 1997 SuSE GmbH Nuernberg, Germany.   
+# Copyright (c) 1997 S.u.S.E. GmbH Fuerth, Germany.   
 # please send bugfixes or comments to feedback@suse.de.
 #
 # Author:  Werner Fink        <werner@suse.de>
@@ -31,24 +31,8 @@ fi
 #
 : ${todo=""}
 : ${optkey=""}
+: ${tmp=/tmp/rctmp$$}
 : ${EDITOR=vi}
-#
-tmpdir=/tmp/rctmpdir.$$
-tmp="${tmpdir}/rctmp"
-
-trap "rm -rf $tmpdir" 0 1 3 4 7 9 13 15
-trap "exit 1" 2
-mkdir -p ${tmpdir}
-if test $? -gt 0 -o ! -d ${tmpdir} ; then
-    echo "Error $0: cannot create $tmpdir" 1>&2
-    exit 1
-fi
-chmod 0700 $tmpdir
-#
-# make sort secure
-#
-export TMPDIR=$tmpdir
-
 #
 # Some defaults: format of our sorting number in start and stop links
 #
@@ -510,7 +494,7 @@ function makerl () {
 
 #
 # This routine ``simply'' inserts a start and stop link
-# for the given SuSE service script
+# for the given S.u.S.E. service script
 #  ...
 #
 function insertscript () { 
@@ -699,6 +683,10 @@ case "$todo" in
 	genlevels
 	inittable
 	placein
+	trap "rm -f $tmp" 0 1 3 4 7 9 13 15
+	trap "exit 1" 2
+	touch $tmp
+	test -e $tmp || { echo "Error $0: cannot open $tmp" 1>&2 ; exit 1; }
 	line=$(echo "$head"|wc -l)
 	line=$((line + 1))
 	echo "$head" >> $tmp
@@ -747,7 +735,6 @@ case "$todo" in
 	do_restore=no
     ;;
     insert)
-	do_restore=yes
 	genlevels
 	inittable
 	checkrl $fallback
@@ -761,7 +748,6 @@ case "$todo" in
 	    exit 1
 	fi
 	insertscript $singlescript
-	do_restore=no
     ;;
     *) usage
     ;;

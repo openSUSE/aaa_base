@@ -1,72 +1,41 @@
 #! /bin/sh
-# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1996 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Burchard Steinbild <bs@suse.de>, 1996
-#         Werner Fink <werenr@suse.de>, 1998
 #
 # /sbin/init.d/pcnfsd
 #
 
 . /etc/rc.config
 
-base=${0##*/}
-link=${base#*[SK][0-9][0-9]}
+test "$START_PORTMAP" = no -a "$NFS_SERVER" = no && exit 0
 
-test $link = $base && NFS_SERVER=yes
-test "$NFS_SERVER" = yes || exit 0
-
-if test -x /sbin/portmap ; then
-    PORTMAP=/sbin/portmap
-else
-    PORTMAP=/usr/sbin/portmap
-fi
-
-return_pc=$rc_done
-return_bw=$rc_done
 case "$1" in
     start)
-    checkproc $PORTMAP
-    if test $? -ne 0 ; then
-        echo -n "Starting PCNFS/BWNFS daemon requires portmapper $rc_failed"
-        exit 1
+    if test "$START_PCNFSD" = yes; then
+        echo "Starting PCNFS daemon."
+        test -x /usr/sbin/rpc.pcnfsd && /usr/sbin/rpc.pcnfsd $PCNFSD_LPSPOOL
     fi
-    if test "$START_PCNFSD" = yes -a -x /usr/sbin/rpc.pcnfsd ; then
-        echo -n "Starting PCNFS daemon"
-        startproc /usr/sbin/rpc.pcnfsd $PCNFSD_LPSPOOL || return_pc=$rc_failed
-	echo -e "$return_pc"
-    fi
-    if test "$START_BWNFSD" = yes -a -x /usr/sbin/rpc.bwnfsd ; then
-        echo -n "Starting BWNFS daemon"
-        startproc /usr/sbin/rpc.bwnfsd $PCNFSD_LPSPOOL || return_bw=$rc_failed
-	echo -e "$return_bw"
+    if test "$START_BWNFSD" = yes; then
+        echo "Starting BWNFS daemon."
+        test -x /usr/sbin/rpc.bwnfsd && /usr/sbin/rpc.bwnfsd $PCNFSD_LPSPOOL
     fi
     ;;
     stop)
-    if test "$START_BWNFSD" = yes -a -x /usr/sbin/rpc.pcnfsd ; then
-        echo -n "Shutting down BWNFS daemon"
-        killproc -TERM /usr/sbin/rpc.bwnfsd || return_bw=$rc_failed
-	echo -e "$return_bw"
+    if test "$START_BWNFSD" = yes; then
+        echo -n "Shutting down BWNFS daemon:"
+        killproc -TERM /usr/sbin/rpc.bwnfsd
+        echo
     fi
-    if test "$START_PCNFSD" = yes -a -x /usr/sbin/rpc.bwnfsd ; then
-        echo -n "Shutting down PCNFS daemon"
-        killproc -TERM /usr/sbin/rpc.pcnfsd || return_pc=$rc_failed
-	echo -e "$return_pc"
+    if test "$START_PCNFSD" = yes; then
+        echo -n "Shutting down PCNFS daemon:"
+        killproc -TERM /usr/sbin/rpc.pcnfsd
+        echo
     fi
-    ;;
-    restart|reload)
-    $0 stop && $0 start || return_pc=$rc_failed
-    ;;
-    status)
-    warning=""
-    checkproc $PORTMAP || warning=", no portmapper"
-    checkproc /usr/sbin/rpc.bwnfsd && echo "BWNFS up${warning}" || echo "BWNFS down"
-    checkproc /usr/sbin/rpc.pcnfsd && echo "PCNFS up${warning}" || echo "PCNFS down"
     ;;
     *)
-    echo "Usage: $0 {start|stop|restart|reload}"
+    echo "Usage: $0 {start|stop}"
     exit 1
 esac
 
-test "$return_pc" = "$rc_done" -a \
-     "$return_bw" = "$rc_done" || exit 1
 exit 0

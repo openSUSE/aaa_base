@@ -1,12 +1,6 @@
 #!/bin/sh
 
-. /etc/profile
 . /etc/rc.config
-
-test "$UID" = 0 || {
-    echo Check does not work for normal users.
-    exit 1
-}
 
 do_gzip() {
 	while read input; do
@@ -19,23 +13,15 @@ do_gzip() {
 			rm -f $input
 			ln -sf $link.gz $input.gz
 		else
-			gzip -f9 $input
+			gzip -9 $input
 		fi
 		ls -l $input.gz
 	done
 	return
 }
 
-DIRS="/usr/info /usr/X11R6/lib/X11/fonts/*"
-
-OLD_IFS="$IFS"
-IFS="$IFS:"
-
-for MANDIR in $MANPATH $manpath ; do
-    DIRS="$DIRS $MANDIR"
-done
-
-IFS="$OLD_IFS"
+DIRS="/usr/info /usr/man /usr/X11R6/man /usr/openwin/man \
+      /usr/X11R6/lib/X11/fonts/*"
 
 if test -n "$RPM_BUILD_ROOT" ; then
     TDIRS=""
@@ -56,15 +42,12 @@ for DIR in $DIRS ; do
         \! -name dir \! -name dir.old \! -name localdir \
         \! -name whatis \! -name fonts.alias \! -name fonts.dir \
         \! -name fonts.scale \! -name "*.spd" \! -name "*.pfa" \
-        \! -name "*.pfb" \! -name "*.phont" \! -name ".*.gz" \
-        \! -name ".*.Z" \! -name ".*.spd" \! -name ".*.pfa" \
-        \! -name ".*.pfb" \! -name ".*.phont" \! -name URW \
-        \! -type d | do_gzip
+        \! -name "*.pfb" \! -name "*.phont" \! -type d | do_gzip
 done
 
 
-TMPFILE=`mktemp /tmp/Check.perms.XXXXXX`
-TMPFILE2=`mktemp /tmp/Check.perms.XXXXXX`
+TMPFILE=/tmp/Check.perms.$$
+rm -f $TMPFILE
 
 if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
         -x /usr/bin/perl -a -x /usr/bin/chkstat ; then
@@ -75,9 +58,9 @@ if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
 	    cat /etc/permissions."$PERMEXT" >> $TMPFILE
     done
     if test -n "$RPM_BUILD_ROOT" ; then
-        cat $TMPFILE | sed -e"s:^/:$RPM_BUILD_ROOT/:" > $TMPFILE2
-        cat $TMPFILE2 >> $TMPFILE
-        rm -f $TMPFILE2
+        cat $TMPFILE | sed -e"s:^/:$RPM_BUILD_ROOT/:" > $TMPFILE.t
+        cat $TMPFILE.t >> $TMPFILE
+        rm -f $TMPFILE.t
     fi
 
     if test "$CHECK_PERMISSIONS" = "set" ; then
@@ -87,4 +70,4 @@ if test -n "$CHECK_PERMISSIONS" -a -e /etc/permissions -a \
     fi
 fi
 
-rm -rf $TMPFILE $TMPFILE2
+rm -rf $TMPFILE

@@ -71,24 +71,3 @@ image/*; xv %s; ;  test=test -n "$DISPLAY"
 # Lynx exports the environment variable LYNX_VERSION, so if you wish
 # to test if Lynx is running or not you can use 'test -n "LYNX_VERSION"'
 #
-# HTML
-text/html; lynx -dump %s; copiousoutput; nametemplate=%s.html
-# Compressed
-application/x-gunzip; gunzip -c %s; copiousoutput
-application/x-gzip; gunzip -c %s; copiousoutput
-application/x-bunzip2; bunzip2 -c %s; copiousoutput
-# Archive directory
-application/x-tar-gz; gunzip -c %s | tar -tf -; copiousoutput
-# Using gs to display postscript is dangerous as postscript may
-# contain statements which are not safe to execute in your
-# ps interpreter gs
-#application/postscript; gv %s
-# Real audio player
-#audio/x-pn-realaudio; rvplayer %s
-#audio/x-pn-realaudio; realplay %s
-video/*; xanim %s
-#video/mpeg; xmpeg %s
-application/pgp; pgp -f < %s | metamail; needsterminal; test=test
-%{encapsulation}=entity
-application/pgp; pgp %s; needsterminal
-

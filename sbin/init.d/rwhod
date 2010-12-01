@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright (c) 1998 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+# Copyright (c) 1998 S.u.S.E. GmbH Fuerth, Germany.  All rights reserved.
 #
 # Author: Tilman Müller-Gerbes <tmg@suse.de>, 1998
 #
@@ -8,35 +8,27 @@
 
 . /etc/rc.config
 
-base=${0##*/}
-link=${base#*[SK][0-9][0-9]}
-
-test $link = $base && START_RWHOD=yes
 test "$START_RWHOD" = yes || exit 0
 
-return=$rc_done
 case "$1" in
     start)
-	echo -n "Starting rwho daemon"
-	startproc /usr/sbin/rwhod || return=$rc_failed
+	echo "Starting rwho daemon."
+	/usr/sbin/rwhod
 	/bin/sleep 1
-	echo -e "$return"
 	;;
     stop)
-	echo -n "Shutting down rwho service"
-	killproc -TERM /usr/sbin/rwhod || return=$rc_failed
-	echo -e "$return"
+	echo -n "Shutting down rwho services:"
+	killproc -TERM /usr/sbin/rwhod
+	echo
 	;;
     reload|restart)
-	$0 stop && $0 start || return=$rc_failed
-	;;
-    status)
-	checkproc /usr/sbin/rwhod && echo OK || echo No process
+	killproc -TERM /usr/sbin/rwhod
+	/usr/sbin/rwhod
+	/bin/sleep 1
 	;;
     *)
 	echo "Usage: $0 {start|stop|reload|restart}"
 	exit 1
 esac
 
-test "$return" = "$rc_done" || exit 1
 exit 0
