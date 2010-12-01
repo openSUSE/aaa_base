@@ -580,7 +580,7 @@ if test -z "$r" -a "$FASTRUN" != "true" ; then
             ;;
           *)
             echo Executing $SKRIPT...
-            sh $SKRIPT
+            bash $SKRIPT
             ;;
         esac
     done
