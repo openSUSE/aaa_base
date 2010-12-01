@@ -109,10 +109,8 @@ case "$1" in
 	            sync
 	            reboot -f
 	        fi
-	        if test $FSCK_RETURN -gt 0; then
-	            sync
-		    touch /fsck_corrected_errors
-		fi
+	        sync
+		test $FSCK_RETURN -gt 0 && touch /fsck_corrected_errors
 	fi
 
 	#
