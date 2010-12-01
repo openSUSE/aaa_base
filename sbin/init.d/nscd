@@ -28,9 +28,9 @@ case "$1" in
 	secure=` cat /etc/nsswitch.conf | while read curline ; do
 	  table=${curline%:*}
 	  entries=${curline##$table:}
-	  table=${table%[^a-z]}
+	  table=${table%%[^a-z]*}
 	  case $table in
-	    passwd|group|hosts)
+	    passwd*|group*|hosts)
 	      for entry in $entries ; do
 		case $entry in
 		  nisplus*)
