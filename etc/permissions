@@ -23,7 +23,6 @@
 /tmp/.X11-unix                         root.root        1777
 /usr/postgres/data/base                postgres.daemon   700
 /usr/postgres/data/files               postgres.daemon   755
-/usr/lib/ircd                          irc.root          700
 /usr/tmp                               root.root        1777
 /var/X11R6/scores                      root.root        1777
 /var/catman                            man.root          755

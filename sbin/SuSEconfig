@@ -386,9 +386,9 @@ else
     echo "setenv LC_CTYPE en_GB" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test -n "$FROM_HEADER" ; then
-    echo "FROM_HEADER=\"$FROM_HEADER\"" >> $r/etc/SuSEconfig/profile.SuSEconfig
+    echo "FROM_HEADER=$FROM_HEADER" >> $r/etc/SuSEconfig/profile.SuSEconfig
     echo "export FROM_HEADER" >> $r/etc/SuSEconfig/profile.SuSEconfig
-    echo "setenv FROM_HEADER \"$FROM_HEADER\"" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
+    echo "setenv FROM_HEADER $FROM_HEADER" >> $r/etc/SuSEconfig/csh.cshrc.SuSEconfig
 fi
 if test -n "$SCANNER_TYPE" ; then
     echo "SCANNER_TYPE=$SCANNER_TYPE" >> $r/etc/SuSEconfig/profile.SuSEconfig

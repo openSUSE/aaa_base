@@ -9,7 +9,7 @@
 
 . /etc/rc.config
 
-test "$START_PORTMAP" = yes -o "$NFS_SERVER" = yes || exit 0
+test "$START_PORTMAP" = no -a "$NFS_SERVER" = no && exit 0
 
 case "$1" in
     start)
