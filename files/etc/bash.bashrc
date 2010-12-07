@@ -265,6 +265,16 @@ if test -n "$SSH_CONNECTION" -a -z "$PROFILEREAD" ; then
     unset _SOURCED_FOR_SSH
 fi
 
+#
+# Set GPG_TTY for curses pinentry
+# (see man gpg-agent and bnc#619295)
+#
+if test -t && type -p tty > /dev/null 2>&1 ; then
+    GPG_TTY="`tty`"
+    export GPG_TTY
+fi
+
+
 if test "$is" != "ash" ; then
     #
     # And now let's see if there is a local bash.bashrc

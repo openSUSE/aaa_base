@@ -106,7 +106,7 @@ if (-r /etc/profile.d/alias.tcsh) source /etc/profile.d/alias.tcsh
 # Prompting and Xterm title
 #
 set prompt="%B%m%b %C2%# "
-if ( -o /dev/$tty ) then
+if ( -o /dev/$tty && -c /dev/$tty ) then
   alias cwdcmd '(echo "Directory: $cwd" > /dev/$tty)'
   if ( -x /usr/bin/biff ) /usr/bin/biff y
   # If we're running under X11
@@ -179,6 +179,12 @@ if ($?tcsh) then
     #
     unset _rev _rel
 endif
+
+#
+# Set GPG_TTY for curses pinentry
+# (see man gpg-agent and bnc#619295)
+#
+if ( -o /dev/$tty && -c /dev/$tty ) setenv GPG_TTY /dev/$tty
 
 done:
 onintr

@@ -21,7 +21,7 @@ endif
 #
 # Initialize terminal
 #
-if ( -o /dev/$tty && ${?prompt} ) then
+if ( -o /dev/$tty && -c /dev/$tty && ${?prompt} ) then
     # Console
     if ( ! ${?TERM} )           setenv TERM linux
     if ( "$TERM" == "unknown" ) setenv TERM linux
@@ -62,10 +62,14 @@ if (! ${?EUID} ) set -r EUID="`${id} -u`"
 if (! ${?USER} ) set    USER="`${id} -un`"
 if (! ${?HOME} ) set    HOME=""
 if (! ${?MAIL} ) setenv MAIL /var/spool/mail/$USER
-if (! ${?HOST} ) setenv HOST "`/bin/uname -n`"
-if (! ${?CPU}  ) setenv CPU  "`/bin/uname -m`"
-if (! ${?HOSTNAME} && -x /bin/hostname ) then
-    setenv HOSTNAME ${HOST}."`/bin/hostname -d`"
+if ( -x /bin/uname ) then
+    if (! ${?HOST} ) setenv HOST "`/bin/uname -n`"
+    if ( ${HOST} == localhost ) setenv HOST "`/bin/uname -n`"
+    if (! ${?CPU}  ) setenv CPU  "`/bin/uname -m`"
+endif
+if ( -x /bin/hostname ) then
+    if (! ${?HOSTNAME} ) setenv HOSTNAME ${HOST}."`/bin/hostname -d`"
+    if (  ${HOSTNAME} == ${HOSTNAME:ar} ) setenv HOSTNAME ${HOST}."`/bin/hostname -d`"
 endif
 if (! ${?LOGNAME} )  set    LOGNAME=$USER
 if ( ${CPU} =~ i?86 ) then
@@ -283,7 +287,7 @@ if ( -r /etc/csh.login.local ) source /etc/csh.login.local
 #
 # An X session
 #
-if (${?TERM} && -o /dev/$tty && ${?prompt} && ! ${?SSH_TTY}) then
+if (${?TERM} && -o /dev/$tty && -c /dev/$tty && ${?prompt} && ! ${?SSH_TTY}) then
     if (${TERM} == "xterm") then
 	echo "Directory: $cwd"
 	# Last but not least

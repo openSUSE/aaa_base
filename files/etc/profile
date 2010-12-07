@@ -115,10 +115,16 @@ test -z "$UID"  && readonly  UID=`path id -ur 2> /dev/null`
 test -z "$EUID" && readonly EUID=`path id -u  2> /dev/null`
 test -z "$USER" && USER=`path id -un 2> /dev/null`
 test -z "$MAIL" && MAIL=/var/spool/mail/$USER
-test -z "$HOST" && HOST=`/bin/uname -n 2> /dev/null`
-test -z "$CPU"  &&  CPU=`/bin/uname -m 2> /dev/null`
-if test -z "$HOSTNAME" ; then
-   HOSTNAME=${HOST}.`cat /proc/sys/kernel/domainname`
+if test -x /bin/uname ; then
+    test -z "$HOST" && HOST=`/bin/uname -n`
+    test "$HOST" = "localhost" && HOST=`/bin/uname -n`
+    test -z "$CPU"  &&  CPU=`/bin/uname -m`
+fi
+if test -x /bin/hostname ; then
+    # Remark: /proc/sys/kernel/domainname and the program domainname
+    # its self will provide the NIS/YP domainname, see domainname(8).
+    test -z "$HOSTNAME" && HOSTNAME=${HOST}.`/bin/hostname -d`
+    test "$HOSTNAME" = "${HOSTNAME#*.}" && HOSTNAME=${HOST}.`/bin/hostname -d`
 fi
 test -z "$LOGNAME"  && LOGNAME=$USER
 case "$CPU" in
