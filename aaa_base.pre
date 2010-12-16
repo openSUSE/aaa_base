@@ -118,6 +118,8 @@ done
 #
 for LOCALFILE in /root/bin/cron.daily.local \
 		/etc/init.d/boot.local \
+		/etc/init.d/after.local \
+		/etc/init.d/before.local \
 		/etc/init.d/halt.local \
 		/usr/sbin/usradd.local \
 		/usr/sbin/usrdel.local \
@@ -151,7 +153,7 @@ echo "#! /bin/sh
 #
 # Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.  All rights reserved.
 #
-# Author: Werner Fink <werner@suse.de>, 1996
+# Author: Werner Fink, 1996
 #         Burchard Steinbild, 1996
 #
 # /etc/init.d/boot.local
@@ -169,7 +171,7 @@ echo "#! /bin/sh
 #
 # Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.  All rights reserved.
 #
-# Author: Werner Fink <werner@suse.de>, 1998
+# Author: Werner Fink, 1998
 #         Burchard Steinbild, 1998
 #
 # /etc/init.d/halt.local
@@ -183,6 +185,47 @@ echo "#! /bin/sh
 test -e /etc/init.d/halt.local || mv /etc/init.d/halt.local.new /etc/init.d/halt.local
 rm -f /etc/init.d/halt.local.new
 chmod 744 /etc/init.d/halt.local
+echo "#! /bin/sh
+#
+# Copyright (c) 2010 SuSE LINUX Products GmbH, Germany.  All rights reserved.
+#
+# Author: Werner Fink, 2010
+#
+# /etc/init.d/before.local
+#
+# script with local commands to be executed from init before executing
+# any script of a runlevel. 
+#
+# Here you should add things, that should happen directly before entering
+# a runlevel. Common environment variables for this are:
+#  RUNLEVEL  -- The current system runlevel.
+#  PREVLEVEL -- The previous runlevel (useful after a runlevel switch).
+#
+" > /etc/init.d/before.local.new
+test -e /etc/init.d/before.local || mv /etc/init.d/before.local.new /etc/init.d/before.local
+rm -f /etc/init.d/before.local.new
+chmod 744 /etc/init.d/before.local
+echo "#! /bin/sh
+#
+# Copyright (c) 2010 SuSE LINUX Products GmbH, Germany.  All rights reserved.
+#
+# Author: Werner Fink, 2010
+#
+# /etc/init.d/after.local
+#
+# script with local commands to be executed from init after all scripts
+# of a runlevel have been executed.
+#
+# Here you should add things, that should happen directly after
+# runlevel has been reached.  Common environment
+# variables for this are:
+#  RUNLEVEL  -- The current system runlevel.
+#  PREVLEVEL -- The previous runlevel (useful after a runlevel switch).
+#
+" > /etc/init.d/after.local.new
+test -e /etc/init.d/after.local || mv /etc/init.d/after.local.new /etc/init.d/after.local
+rm -f /etc/init.d/after.local.new
+chmod 744 /etc/init.d/after.local
 mkdir -p /etc
 for LINK in /usr/X11R6/lib/X11 /var/X11R6/lib/fonts /usr/lib/mgetty+sendfax \
     /usr/man/cat? /usr/X11R6/man/cat? /usr/openwin/man/cat? /usr/lib/news ; do

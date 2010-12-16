@@ -117,10 +117,6 @@ wait_for_udev ()
 	    break
 	fi
 	missing="$still_missing"
-	if test ! -d /dev/.udev/queue ; then
-	    echo " no more events"
-	    break
-	fi
 	let timeout--
     done
     test $timeout -eq 0 && echo " timeout! "
