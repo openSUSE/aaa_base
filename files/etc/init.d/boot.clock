@@ -51,7 +51,7 @@ fi
 #
 ELEVENMIN_MODE=no
 typeset -i STA_CLOCK=$(adjtimex --print | sed -rn '/^[[:blank:]]*status:/{ s/[^[:digit:]]*([[:digit:]]+)/\1/p; }')
-test $((STA_CLOCK & 65)) -eq 1 && ELEVENMIN_MODE=yes
+test $((STA_CLOCK & 64)) -eq 0 && ELEVENMIN_MODE=yes
 
 #
 # Without having rtc_cmos module loaded hwclock will fail on at least x86
