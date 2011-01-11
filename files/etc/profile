@@ -120,12 +120,12 @@ if test -x /bin/uname ; then
     test "$HOST" = "localhost" && HOST=`/bin/uname -n`
     test -z "$CPU"  &&  CPU=`/bin/uname -m`
 fi
-if test -x /bin/hostname ; then
-    # Remark: /proc/sys/kernel/domainname and the program domainname
-    # its self will provide the NIS/YP domainname, see domainname(8).
-    test -z "$HOSTNAME" && HOSTNAME=${HOST}.`/bin/hostname -d`
-    test "$HOSTNAME" = "${HOSTNAME#*.}" && HOSTNAME=${HOST}.`/bin/hostname -d`
-    HOSTNAME="${HOSTNAME%\.}"
+# Remark: /proc/sys/kernel/domainname and the program domainname
+# its self will provide the NIS/YP domainname, see domainname(8).
+if test -s /etc/HOSTNAME ; then
+    test -z "$HOSTNAME" && HOSTNAME=`cat /etc/HOSTNAME`
+else
+    test -z "$HOSTNAME" && HOSTNAME=$HOST
 fi
 test -z "$LOGNAME"  && LOGNAME=$USER
 case "$CPU" in

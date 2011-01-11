@@ -67,9 +67,12 @@ if ( -x /bin/uname ) then
     if ( ${HOST} == localhost ) setenv HOST "`/bin/uname -n`"
     if (! ${?CPU}  ) setenv CPU  "`/bin/uname -m`"
 endif
-if ( -x /bin/hostname ) then
-    if (! ${?HOSTNAME} ) setenv HOSTNAME ${HOST}."`/bin/hostname -d`"
-    if (  ${HOSTNAME} == ${HOSTNAME:ar} ) setenv HOSTNAME ${HOST}."`/bin/hostname -d`"
+# Remark: /proc/sys/kernel/domainname and the program domainname
+# its self will provide the NIS/YP domainname, see domainname(8).
+if ( -s /etc/HOSTNAME ) then
+    if (! ${?HOSTNAME} ) setenv HOSTNAME `cat /etc/HOSTNAME`
+else
+    if (! ${?HOSTNAME} ) setenv HOSTNAME $HOST
 endif
 if (! ${?LOGNAME} )  set    LOGNAME=$USER
 if ( ${CPU} =~ i?86 ) then
