@@ -30,7 +30,7 @@ case "$1" in
 	#
 	XHOSTNAME=""
 	test -f /etc/HOSTNAME && {
-	    XHOSTNAME=`cat /etc/HOSTNAME`
+	    read XHOSTNAME < /etc/HOSTNAME
 	}
 	test -n "$HOSTNAME" -a "$HOSTNAME" != '(none)' && {
 	    echo Using boot-specified hostname \'${HOSTNAME}\'
@@ -44,7 +44,7 @@ case "$1" in
 	
 	XDOMAINNAME=""
 	test -f /etc/defaultdomain && {
-	    XDOMAINNAME=`cat /etc/defaultdomain`
+	    read XDOMAINNAME < /etc/defaultdomain
 	}
         test -n "$XDOMAINNAME" && {
 	    echo -n Setting up NIS domainname \'$XDOMAINNAME\'
@@ -57,11 +57,11 @@ case "$1" in
 	unset XHOSTNAME
 	unset XDOMAINNAME
 
-	test -x /sbin/ifup -a -f /etc/sysconfig/network/ifcfg-lo && {
-	    echo -n "Setting up loopback interface "
-	    /sbin/ifup lo -o rc manual
-            rc_status -v -r
-	}
+	echo -n "Setting up loopback interface "
+	#/sbin/ifconfig lo 127.0.0.1 up
+	/sbin/ip addr add 127.0.0.1/8 brd + dev lo
+	/sbin/ip link set lo up
+	rc_status -v -r
 	;;
     stop|restart)
         # skip / nothing to do

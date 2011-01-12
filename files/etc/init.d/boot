@@ -66,19 +66,10 @@ echo "Running $0"
 #
 # mount usual filesystems if not already done by initramfs or the kernel
 #
-DTYPE=$(stat -f -c "%T" /proc 2>/dev/null)
-if test "$DTYPE" != "proc" ; then
-    echo -n "Mounting procfs at /proc"
-    mount -n -t proc proc /proc
-    rc_status -v -r
-fi
-
-DTYPE=$(stat -f -c "%T" /sys 2>/dev/null)
-if test "$DTYPE" != "sysfs" ; then
-    echo -n "Mounting sysfs at /sys"
-    mount -n -t sysfs sysfs /sys
-    rc_status -v -r
-fi
+echo  -n "mounting mandatory file systems ..."
+test -c /dev/null || /bin/mknod -m 666 /dev/null c 1 3
+test -e /proc/mounts || /bin/mount -n -t proc proc /proc >/dev/null 2>&1
+test -e /sys/class || /bin/mount -n -t sysfs sysfs /sys >/dev/null 2>&1
 
 HAVE_DEBUGFS=0
 HAVE_DEVTMPFS=0
@@ -86,15 +77,6 @@ while read dev type ; do
         test "$type" = "debugfs" && HAVE_DEBUGFS=1
         test "$type" = "devtmpfs" && HAVE_DEVTMPFS=1
 done < /proc/filesystems
-
-if test -d /sys/kernel/debug ; then
-    DTYPE=$(stat -f -c "%T" /sys/kernel/debug 2>/dev/null)
-    if test "$DTYPE" = "sysfs" -a "$HAVE_DEBUGFS" = "1" ; then
-	    echo -n "Mounting debugfs at /sys/kernel/debug"
-	    mount -n -t debugfs debugfs /sys/kernel/debug
-	    rc_status -v -r
-    fi
-fi
 
 DTYPE=$(stat -f -c "%T" /dev 2>/dev/null)
 if test "$DTYPE" != "tmpfs" ; then
@@ -109,24 +91,24 @@ if test "$DTYPE" != "tmpfs" ; then
     rc_status -v -r
 fi
 
-echo -n "Copying static /dev content"
 cp -axT --remove-destination /lib/udev/devices /dev
-rc_status -v -r
 
-if test "$(stat -Lc %d /dev/shm 2>/dev/null)" = "$(stat -Lc %d /dev/shm/.. 2>/dev/null)" ; then
-    echo -n "Mounting tmpfs at /dev/shm"
+if test -d /sys/kernel/debug -a "$HAVE_DEBUGFS" = "1" ; then
+    mount -n -t debugfs debugfs /sys/kernel/debug > /dev/null 2>&1
+fi
+
+if ! test -d /dev/shm; then
     mkdir -p -m 1777 /dev/shm
     mount -t tmpfs -o mode=1777 tmpfs /dev/shm
-    rc_status -v -r
 fi
 
-DTYPE=$(stat -f -c "%T" /dev/pts 2>/dev/null)
-if test "$DTYPE" != "devpts" ; then
-    echo -n "Mounting devpts at /dev/pts"
+if ! test -d /dev/pts; then
     mkdir -p -m 755 /dev/pts
     mount -n -t devpts -o mode=0620,gid=5 devpts /dev/pts
-    rc_status -v -r
 fi
+
+rc_failed 0
+rc_status -v
 
 #
 # Set I/O of this script and its childs to console
@@ -159,8 +141,8 @@ fi
 if test "$ENFORCE_BLOGD" = yes ; then
     DO_BLOGD=yes
 fi
-test -z "$CONFIRM_PROMPT_TIMEOUT" && CONFIRM_PROMPT_TIMEOUT=5
 if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
+    test -z "$CONFIRM_PROMPT_TIMEOUT" && CONFIRM_PROMPT_TIMEOUT=5
     echo -en "${extd}Enter Interactive startup mode?${norm}"
     rc_timer_on "$CONFIRM_PROMPT_TIMEOUT" 37
     read -t "$CONFIRM_PROMPT_TIMEOUT" -n 1 \
