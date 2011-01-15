@@ -102,7 +102,7 @@ if ! test -d /dev/shm; then
     mount -t tmpfs -o mode=1777 tmpfs /dev/shm
 fi
 
-if ! test -d /dev/pts; then
+if ! test -c /dev/pts/ptmx; then
     mkdir -p -m 755 /dev/pts
     mount -n -t devpts -o mode=0620,gid=5 devpts /dev/pts
 fi
