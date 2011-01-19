@@ -273,14 +273,14 @@ case "$1" in
 	    if test -d /sys/kernel/debug -a "$HAVE_DEBUGFS" = "1" ; then
 		mount -fv -t debugfs debugfs /sys/kernel/debug
 	    fi
-	    if test ! -d /sys/block/loop0 ; then
-		/sbin/modprobe loop
-	    fi
 	    mount -fv -t $DEVTMPFS -o mode=0755 $DEVTMPFS /dev
 	    rc_status
 	    mount -fv -t tmpfs  -o mode=1777 tmpfs /dev/shm
 	    mount -fv -t devpts -o mode=0620,gid=5 devpts /dev/pts
 	    rc_status
+	fi
+	if test ! -d /sys/block/loop0 ; then
+	    /sbin/modprobe loop
 	fi
 	# remount to make sure options from fstab are honoured
 	mount -oremount /proc

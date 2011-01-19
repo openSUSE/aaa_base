@@ -98,17 +98,18 @@ case "$1" in
     #
     # Enable IPv6 privacy?
     #
-    if test -e /proc/sys/net/ipv6/conf/all/use_tempaddr -a -n "$IPV6_PRIVACY"; then
+    if test -e /proc/sys/net/ipv6/conf/default/use_tempaddr -a -n "$IPV6_PRIVACY"; then
+    [ $IPV6_PRIVACY = yes ] && IPV6_PRIVACY=2
     case $IPV6_PRIVACY in
-      yes)
+      [0-9])
        echo -n "Enabling IPv6 privacy"
-       echo "1" > /proc/sys/net/ipv6/conf/all/use_tempaddr
        ;;
       *)
        echo -n "Disabling IPv6 privacy"
-       echo "0" > /proc/sys/net/ipv6/conf/all/use_tempaddr
+       IPV6_PRIVACY=0
        ;;
     esac
+    echo "$IPV6_PRIVACY" > /proc/sys/net/ipv6/conf/default/use_tempaddr
     rc_status -v -r
     fi
     #
@@ -117,8 +118,8 @@ case "$1" in
     if test -e /proc/sys/net/ipv6/conf/all/force_mld_version -a -n "$IPV6_MLD_VERSION"; then
 	echo -n "Setting MLD version to $IPV6_MLD_VERSION"
 	echo "$IPV6_MLD_VERSION" > /proc/sys/net/ipv6/conf/all/force_mld_version
+	rc_status -v -r
     fi
-    rc_status -v -r
    ;;
   stop)
     # skip / nothing to do

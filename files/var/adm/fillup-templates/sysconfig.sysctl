@@ -1,53 +1,68 @@
 ## Path:		Network/General
 ## Description:
-## Type:		yesno
-## Default:		no
+## Type:		list(yes,no,)
 ## ServiceRestart:	boot.ipconfig
-# Do you want the "dynamic IP patch" to be enabled at bootup? (yes/no)
+# Do you want the "dynamic IP patch" to be enabled at bootup?
 #
-IP_DYNIP="no"
+# DEPRECATED
+# set net.ipv4.ip_dynaddr in /etc/sysctl.conf instead
+#
+IP_DYNIP=
 
-## Type:	yesno
-## Default:	yes
+## Type:	list(yes,no,)
 #
 # Enable syn flood protection (see /usr/src/linux/Documentation/Configure.help)
-# (yes/no)
+# Built-in kernel default is "yes".
 #
-IP_TCP_SYNCOOKIES="yes"
+# DEPRECATED
+# set net.ipv4.tcp_syncookies in /etc/sysctl.conf instead
+#
+IP_TCP_SYNCOOKIES=
 
-## Type:	yesno
-## Default:	no
+## Type:	list(yes,no,)
 #
 # Runtime-configurable parameter: forward IP packets.
-# Is this host a router? (yes/no)
+# Is this host a router?
 #
-IP_FORWARD="no"
+# Note that SuSEfirewall2 may override this if active.
+#
+# DEPRECATED
+# set net.ipv4.ip_forward in /etc/sysctl.conf instead
+#
+IP_FORWARD=
 
-## Type:	yesno
+## Type:	list(yes,no,)
 ## Default:	no
 #
 # Runtime-configurable parameter: forward IPv6 packets.
 #
-IPV6_FORWARD="no"
+# DEPRECATED
+# set net.ipv6.conf.all.forwarding in /etc/sysctl.conf instead
+#
+IPV6_FORWARD=
 
-## Type:        yesno
-## Default:     no
+## Type:	list(yes,no,)
 #
 # Runtime-configurable parameter: use temporary IPv6 addresses
 # instead of using the EUI-64 interface identifer
 #
-IPV6_PRIVACY=no
+# DEPRECATED
+# set net.ipv6.conf.default.use_tempaddr in /etc/sysctl.conf instead
+#
+IPV6_PRIVACY=
 
+## Type:	integer(0:)
 #
 # Runtime-configurable parameter: send MLD announcements of this
 # version.
 #
-IPV6_MLD_VERSION=""
-
-## Type:	yesno
-## Default:	yes
+# DEPRECATED
+# set net.ipv6.conf.all.force_mld_version in /etc/sysctl.conf instead
 #
-# DISABLE_ECN
+IPV6_MLD_VERSION=
+
+## Type:	list(yes,no,)
+#
 # If you have trouble connecting to some machines on the internet,
 # this may be due to broken firewalls dropping network packets with
 # the ECN (early congestion notification) flag set.
