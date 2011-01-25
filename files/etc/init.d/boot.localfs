@@ -280,9 +280,6 @@ case "$1" in
 	    mount -fv -t devpts -o mode=0620,gid=5 devpts /dev/pts
 	    rc_status
 	fi
-	if test ! -d /sys/block/loop0 ; then
-	    /sbin/modprobe loop
-	fi
 	# remount to make sure options from fstab are honoured
 	mount -oremount /proc
 	mount -oremount /sys
