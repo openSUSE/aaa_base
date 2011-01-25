@@ -87,9 +87,10 @@ list_missed ()
     mount -afnv $mount_opts 2> /dev/null | while read line ; do
 	dev="${line%% *}"
 	case "$line" in
+	mount:\ *) continue ;; # messages from mount
 	*mounted*)
 	    continue	  ;;
-	*)  test -b $dev && continue
+	*)  test -e $dev && continue
 	    echo "${dev}" ;;
 	esac
     done

@@ -167,11 +167,8 @@ case "$1" in
 		echo "root file system (/) is NOT being checked."
 	    fi
 	fi
-        # start with a clean mtab and enter root fs entry
 	if ! test -L /etc/mtab ; then
-	    rm -f /etc/mtab* 
-	    > /etc/mtab
-	    mount -f /
+	    ln -sf /proc/self/mounts /etc/mtab
 	fi
 	;;
     stop)

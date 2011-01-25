@@ -141,7 +141,9 @@ fi
 #
 # create mtab if it does not exist
 #
-touch /etc/mtab
+if test ! -e /etc/mtab; then
+    ln -sf /proc/self/mounts /etc/mtab
+fi
 #
 # make sure that several log files exist
 #
