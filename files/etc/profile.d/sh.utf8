@@ -1,7 +1,7 @@
 #
 # Try to autodetect UTF-8 capable terminal line
 #
-if type -p testutf8 > /dev/null 2>&1 ; then
+if command -v testutf8 > /dev/null 2>&1 ; then
     testutf8
     ret="$?"
     if test -n "$LANG" ; then

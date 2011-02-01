@@ -55,10 +55,10 @@ unset tmp name rest
 # that /proc and /sys files are not seekable, therefore
 # we use a TMPDIR on the tmpfs /dev/shm.
 #
-if type -p tac > /dev/null 2>&1 ; then
+if command -v tac > /dev/null 2>&1 ; then
     reverse ()
     {
-	TMPDIR=/dev/shm tac
+	tac
     }
 else
     reverse ()
@@ -293,7 +293,15 @@ case "$1" in
     stop)
 	mounts=/etc/fstab
 	test -r /proc/mounts && mounts=/proc/mounts
-	reverse < $mounts > /dev/shm/mtab
+	if TMPDIR=$(/bin/mktemp -d /dev/shm/.XXXXXX 2>/dev/null) ; then
+	    export TMPDIR
+	    reverse < $mounts > ${TMPDIR}/mtab
+	    rvtab=${TMPDIR}/mtab
+	else
+	    TMPDIR=/dev/shm
+	    export TMPDIR
+	    rvtab=$mounts
+	fi
 
 	mtab=
 	test "$2" = "nomtab" && mtab=-n
@@ -302,13 +310,13 @@ case "$1" in
 
 	# move to intermezzo package ?
 	# First umount intermezzo filesystems
-	if type -p umountizo > /dev/null 1>&2 ; then
+	if command -v umountizo > /dev/null 1>&2 ; then
 	    while read line ; do
 		case "$line" in
 		*[Ii][Nn][Tt][Ee][Rr][Mm][Ee][Zz][Zz][Oo]*)
 		    umountizo >/dev/null 2>&1
 		esac
-	    done < /dev/shm/mtab
+	    done < ${rvtab}
 	fi
 
 	ulist=
@@ -335,7 +343,7 @@ case "$1" in
 		/dev*)     continue ;;
 		/proc*)    continue ;;
 		/sys*)     continue ;;
-		/cgroup*)     continue ;;
+		/cgroup*)  continue ;;
 		/var/lib/nfs/rpc_pipefs)
 			   continue ;;
 	    esac
@@ -350,7 +358,7 @@ case "$1" in
 	    case ",$mntfs," in
 		*,$type,*) umount $mtab -t $type $fs ;;
 	    esac
-	done < /dev/shm/mtab
+	done < ${rvtab}
 
 	grep "loop" /proc/partitions | while read major minor blocks name ; do
 	    case "$name" in
@@ -385,8 +393,6 @@ case "$1" in
 	if test "$UMOUNT_FAILED" = true -a -z "$mtab" ; then
 	    echo "${warn}Oops${done}: umount failed :-(  --  trying to remount readonly..."
 	    ulist=,${ulist// /,},
-	    mounts=/etc/fstab
-	    test -r /proc/mounts && mounts=/proc/mounts
 	    # Use cat and a pipe because umount changes
 	    # /proc/mounts during direct read call
 	    cat $mounts | \

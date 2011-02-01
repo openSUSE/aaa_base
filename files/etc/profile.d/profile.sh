@@ -113,13 +113,13 @@ if test -z "$WINDOWMANAGER" ; then
     if test -s "$desktop" ; then
 	while read -r line; do
 	    case ${line} in
-	    Exec=*) WINDOWMANAGER="$(type -p ${line#Exec=})"
+	    Exec=*) WINDOWMANAGER="$(command -v ${line#Exec=})"
 		    break
 	    esac
 	done < $desktop
     fi
     if test -n "$DEFAULT_WM" -a -z "$WINDOWMANAGER" ; then
-	WINDOWMANAGER="$(type -p ${DEFAULT_WM##*/})"
+	WINDOWMANAGER="$(command -v ${DEFAULT_WM##*/})"
     fi
     PATH=$SAVEPATH
     unset SAVEPATH desktop
