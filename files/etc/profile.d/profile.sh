@@ -106,15 +106,26 @@ if test "$PROXY_ENABLED" != "yes" ; then
 fi
 unset PROXY_ENABLED
 
-if test -n "$DEFAULT_WM" -a -z "$WINDOWMANAGER" ; then
+if test -z "$WINDOWMANAGER" ; then
     SAVEPATH=$PATH
     PATH=$PATH:/usr/X11R6/bin:/usr/openwin/bin
-    WINDOWMANAGER="`type -p ${DEFAULT_WM##*/}`"
+    desktop=/usr/share/xsessions/${DEFAULT_WM}.desktop
+    if test -s "$desktop" ; then
+	while read -r line; do
+	    case ${line} in
+	    Exec=*) WINDOWMANAGER="$(type -p ${line#Exec=})"
+		    break
+	    esac
+	done < $desktop
+    fi
+    if test -n "$DEFAULT_WM" -a -z "$WINDOWMANAGER" ; then
+	WINDOWMANAGER="$(type -p ${DEFAULT_WM##*/})"
+    fi
     PATH=$SAVEPATH
-    export WINDOWMANAGER
-    unset SAVEPATH
+    unset SAVEPATH desktop
 fi
 unset DEFAULT_WM
+export WINDOWMANAGER
 
 if test -n "$CONSOLE_MAGIC" ; then
     case "$(tty 2> /dev/null)" in

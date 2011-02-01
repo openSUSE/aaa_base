@@ -347,7 +347,7 @@ rc_wait()
 	parent_processes="${parent_processes:+$parent_processes:}${ppid}"
     done
     for comm ; do
-	ppid="$(/sbin/pidofproc $comm)" || continue
+	ppid="$(/sbin/pidofproc $comm 2> /dev/null)" || continue
 	parent_processes="${parent_processes:+$parent_processes:}${ppid}"
     done
     unset comm state ppid rest

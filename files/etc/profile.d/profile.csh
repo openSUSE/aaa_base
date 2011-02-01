@@ -107,17 +107,32 @@ endif
 #
 # Do not use the `which' builtin nor set path to avoid a rehash
 #
-if (! ${?default_wm} ) set default_wm
-if ( ${%default_wm} > 0 && ! ${?WINDOWMANAGER} ) then
+if ( ! ${?WINDOWMANAGER} ) then
+    if (! ${?default_wm} ) set default_wm
+    set desktop="/usr/share/xsessions/${default_wm}.desktop"
     set default_wm=${default_wm:t}
-    foreach val ($path /usr/X11R6/bin /usr/openwin/bin)
-	if ( ${val:q} =~ *.* ) continue
-	set val=${val:q}/${default_wm:q}
-	if ( ! -x ${val:q} ) continue
-	setenv WINDOWMANAGER ${val:q}
-	break
-    end
-    unset val
+    if ( -s ${desktop:q} ) then
+	set wm=`sed -rn '/^Exec=/{s@[^=]*=([^=]*)@\1@p;}' ${desktop:q}`
+	foreach val ($path /usr/X11R6/bin /usr/openwin/bin)
+	    if ( ${val:q} =~ *.* ) continue
+	    set val=${val:q}/${wm:q}
+	    if ( ! -x ${val:q} ) continue
+	    setenv WINDOWMANAGER ${val:q}
+	    break
+	end
+	unset val wm
+    endif
+    unset desktop
+    if ( ${%default_wm} > 0 && ! ${?WINDOWMANAGER} ) then
+	foreach val ($path /usr/X11R6/bin /usr/openwin/bin)
+	    if ( ${val:q} =~ *.* ) continue
+	    set val=${val:q}/${default_wm:q}
+	    if ( ! -x ${val:q} ) continue
+	    setenv WINDOWMANAGER ${val:q}
+	    break
+	end
+	unset val
+    endif
 endif
 unset default_wm
 
