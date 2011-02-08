@@ -50,28 +50,6 @@ typeset -r  nofs=no${netfs//,/,no},no${memfs//,/,no}
 
 unset tmp name rest
 
-#
-# Helper shell function for reading files reverse, note
-# that /proc and /sys files are not seekable, therefore
-# we use a TMPDIR on the tmpfs /dev/shm.
-#
-if command -v tac > /dev/null 2>&1 ; then
-    reverse ()
-    {
-	tac
-    }
-else
-    reverse ()
-    {
-	local line
-	while read -r line ; do
-	    reverse
-	    echo "$line"
-	    break
-	done
-    }
-fi
-
 loopdel ()
 {
    losetup ${1+"$@"} > /dev/null 2>&1
@@ -293,15 +271,19 @@ case "$1" in
     stop)
 	mounts=/etc/fstab
 	test -r /proc/mounts && mounts=/proc/mounts
+
 	if TMPDIR=$(/bin/mktemp -d /dev/shm/.XXXXXX 2>/dev/null) ; then
-	    export TMPDIR
-	    reverse < $mounts > ${TMPDIR}/mtab
-	    rvtab=${TMPDIR}/mtab
+	    if command -v rvmtab > /dev/null 2>&1 ; then
+		rvmtab > ${TMPDIR}/mtab
+		rvtab=${TMPDIR}/mtab
+	    else
+		rvtab=$mounts
+	    fi
 	else
-	    TMPDIR=/dev/shm
-	    export TMPDIR
-	    rvtab=$mounts
+		TMPDIR=/dev/shm
+		rvtab=$mounts
 	fi
+	export TMPDIR
 
 	mtab=
 	test "$2" = "nomtab" && mtab=-n
