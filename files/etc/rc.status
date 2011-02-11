@@ -32,6 +32,28 @@
 #    \015          carriage return (without newline)
 #
 
+# Check if the service is used under systemd but not started with
+if /bin/mountpoint -q /sys/fs/cgroup/systemd > /dev/null 2>&1 ; then
+    if test $PPID -ne 1 -a $# -eq 1 ; then
+	_rc_base=
+	case "$0" in
+	/etc/init.d/*)
+	    _rc_base=${0##*/} ;;
+	rc*)
+	    _rc_base=${0##*/} ;;
+	esac
+	if test -n "$_rc_base" -a -x /bin/systemctl ; then
+	    exec /bin/systemctl $1 "${_rc_base}.service"
+	fi
+	unset _rc_base
+    fi
+    if test -z "$REDIRECT" -a -x /sbin/showconsole ; then
+	REDIRECT="$(/sbin/showconsole 2>/dev/null)"
+	test -z "$CONSOLE" && CONSOLE=/dev/console
+	export REDIRECT CONSOLE
+    fi
+fi
+
 # Do _not_ be fooled by non POSIX locale
 LC_ALL=POSIX
 export LC_ALL
