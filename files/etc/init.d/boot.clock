@@ -16,6 +16,7 @@
 # X-Stop-After:      $null
 # Default-Start:     B S
 # Default-Stop:
+# X-Interactive:     true
 # Description:       Read hardware clock and set system clock
 # Short-Description: Read hardware clock and set system clock
 ### END INIT INFO

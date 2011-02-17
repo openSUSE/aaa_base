@@ -11,6 +11,7 @@
 # Required-Stop:     $null
 # Default-Start:     B
 # Default-Stop:
+# X-Interactive:     true
 # Short-Description: check and mount root filesystem
 # Description:       check and mount root filesystem
 ### END INIT INFO

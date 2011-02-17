@@ -13,6 +13,7 @@
 # Should-Stop:       boot.md boot.lvm dasd_devfs_compat boot.multipath boot.evms
 # Default-Start:     B
 # Default-Stop:
+# X-Interactive:     true
 # Short-Description: check and mount local filesystems except /
 # Description:       check and mount local filesystems except /
 ### END INIT INFO
