@@ -39,8 +39,8 @@ if /bin/mountpoint -q /sys/fs/cgroup/systemd > /dev/null 2>&1 ; then
 	case "$0" in
 	/etc/init.d/*)
 	    _rc_base=${0##*/} ;;
-	rc*)
-	    _rc_base=${0##*/} ;;
+	*/rc*)
+	    _rc_base=${0##*/rc} ;;
 	esac
 	if test -n "$_rc_base" -a -x /bin/systemctl ; then
 	    exec /bin/systemctl $1 "${_rc_base}.service"
