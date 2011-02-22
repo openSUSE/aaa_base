@@ -20,6 +20,7 @@ _compreply_ ()
     local IFS=$'\n'
     local s x
     local -i o
+    local -i isdir=$1
 
     test ${#COMPREPLY[@]} -eq 0 && return 0
 
@@ -28,6 +29,7 @@ _compreply_ ()
     #
     for ((o=0; o < ${#COMPREPLY[@]}; o++)) ; do
 	if test ! -d "${COMPREPLY[$o]}" ; then
+	    ((isdir == 0)) || continue
 	    COMPREPLY[$o]="${COMPREPLY[$o]%%/}"
 	    continue
 	fi
@@ -37,7 +39,7 @@ _compreply_ ()
     #
     # Escape spaces and braces in path names with `\'
     #
-    s="${COMP_WORDBREAKS// }"
+    s="${COMP_WORDBREAKS//[: ]}"
     s="${s//	}"
     s="${s//[\{\}()\[\]]}"
     s="${s} 	(){}[]"
@@ -59,9 +61,24 @@ _cd_ ()
     local s g=0 x
     local IFS=$'\n'
     local -i o
+    local -i isdir=0
 
     shopt -q extglob && g=1
     test $g -eq 0 && shopt -s extglob
+
+    if [[ $COMP_WORDBREAKS =~ : && $COMP_LINE  =~ : ]] ; then
+	# Do not use plusdirs as there is a colon in the directory
+	# name(s) which will not work even if escaped with backslash.
+	compopt +o plusdirs
+	# Restore last argument without breaking at colon
+	if ((COMP_CWORD > 1)) ; then
+	    IFS="${COMP_WORDBREAKS//:}"
+	    COMP_WORDS=($COMP_LINE)
+	    let COMP_CWORD=${#COMP_WORDS[@]}-1
+	    c=${COMP_WORDS[COMP_CWORD]}
+	    IFS=$'\n'
+	fi
+    fi
 
     case "$(complete -p ${1##*/} 2> /dev/null)" in
     mkdir)  ;;
@@ -79,15 +96,18 @@ _cd_ ()
     \$\{*\})	eval COMPREPLY=\(${c}\) ;;
     \$\{*)	COMPREPLY=($(compgen -v -P '${' -S '}'	-- ${c#??}))	;;
     \$*)	COMPREPLY=($(compgen -v -P '$' $s	-- ${c#?}))	;;
-    \~*/*)	COMPREPLY=($(compgen -d $s 		-- "${c}"))	;;
+    \~*/*)	COMPREPLY=($(compgen -d $s 		-- "${c}"))
+		((${#COMPREPLY[@]} == 0)) || let isdir++		;;
     \~*)	COMPREPLY=($(compgen -u $s 		-- "${c}"))	;;
-    *\:*)
-                if [[ $COMP_WORDBREAKS =~ : ]] ; then
+    *\:*)	if [[ $COMP_WORDBREAKS =~ : ]] ; then
 		    x=${c%"${c##*[^\\]:}"}
 		    COMPREPLY=($(compgen -d $s          -- "${c}"))
-		    COMPREPLY=(${COMPREPLY[@]#"$x"})
-                fi							;;
-    *)		COMPREPLY=()				# use bashdefault
+ 		    COMPREPLY=(${COMPREPLY[@]#"$x"})
+		    ((${#COMPREPLY[@]} == 0)) || let isdir++
+		fi
+		test $g -eq 0 && shopt -u extglob
+		return 0						;;
+    *)		COMPREPLY=()				# use (bash)default
 		test $g -eq 0 && shopt -u extglob
 		return 0						;;
     esac
@@ -108,10 +128,11 @@ _cd_ ()
 		fi
 		COMPREPLY[o++]=${s#$x/}
 	    done
+	    ((${#COMPREPLY[@]} == 0)) || let isdir++
 	done
     fi
 
-    _compreply_
+    _compreply_ $isdir
 
     test $g -eq 0 && shopt -u extglob
     return 0
@@ -433,8 +454,12 @@ _rootpath_ ()
     local os="-h -K -k -L -l -V -v -b -E -H -P -S -i -s"
     local ox="-r -p -t -u"
     case "$c" in
- 	-*) COMPREPLY=($(compgen -W "$os $ox" -- "$c")) ;;
-	 *) COMPREPLY=($(PATH=/sbin:/usr/sbin:$PATH:/usr/local/sbin compgen -c -- "${c}"))
+	-*) COMPREPLY=($(compgen -W "$os $ox" -- "$c")) ;;
+	*)  if ((COMP_CWORD <= 1)) ; then
+		COMPREPLY=($(PATH=/sbin:/usr/sbin:$PATH:/usr/local/sbin compgen -c -- "${c}"))
+	    else
+		COMPREPLY=()
+	    fi
     esac
 }
 
