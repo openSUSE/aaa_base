@@ -42,7 +42,7 @@ _compreply_ ()
     s="${COMP_WORDBREAKS//[: ]}"
     s="${s//	}"
     s="${s//[\{\}()\[\]]}"
-    s="${s} 	(){}[]"
+    s="${s} 	(){}[]\`\$"
     o=${#s}
 
     while test $((o--)) -gt 0 ; do
@@ -286,6 +286,7 @@ _exp_ ()
     if test -n "$t" ; then
 	let o=0
 	local -a reply=()
+	_compreply_
 	for s in ${COMPREPLY[@]}; do
 	    e=$(eval echo $s)
 	    if test -d "$e" ; then
@@ -297,6 +298,8 @@ _exp_ ()
 	    esac
 	done
 	COMPREPLY=(${reply[@]})
+	test $g -eq 0 && shopt -u extglob
+	return 0
     fi
 
     _compreply_
@@ -337,6 +340,7 @@ _gdb_ ()
 		    COMPREPLY=()
 		fi
 		let o=${#COMPREPLY[*]}
+		_compreply_
 		for s in $(compgen -f -- "$c") ; do
 		    e=$(eval echo $s)
 		    if test -d "$e" ; then
