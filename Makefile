@@ -13,4 +13,7 @@ install: all
 clean:
 	rm -f $(sbin_PROGRAMS)
 
-.PHONY: all install clean
+package:
+	obs/mkpackage
+
+.PHONY: all install clean package
