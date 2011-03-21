@@ -42,5 +42,8 @@ if [ -n "`git rev-list remotes/origin/master..HEAD`" ]; then
 	fi
 	if [ -z "$pushed" ]; then
 		echo "*** Warning: changes not pushed!"
+	else
+		cd "$name"
+		osc ci
 	fi
 fi
