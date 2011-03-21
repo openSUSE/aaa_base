@@ -9,8 +9,8 @@ NAME=aaa_base
 #fullver="$VERSION${scmver:+_}$scmver"
 pfx="$NAME${fullver:+-$fullver}"
 fn="$pfx".tar.bz2
-if ! git config --local --get tar.umask >/dev/null 2>&1 ; then
-	git config --local --add tar.umask 022
+if ! git config --get tar.umask >/dev/null 2>&1 ; then
+	git config --add tar.umask 022
 fi
 git archive --prefix="$pfx"/ HEAD | bzip2 > $fn
 echo "version $fullver -> $fn"

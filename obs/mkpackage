@@ -13,6 +13,7 @@ if [ ! -d "$name/.osc" ]; then
 fi
 if [ "`git status -s |grep -cv '^??'`" != '0' ]; then
 	echo "*** Error: uncomitted changes"
+	echo "run 'git add file' to add files, 'git commit -a' to commit changes"
 	exit 1
 fi
 cd "$name"
