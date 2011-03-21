@@ -6,11 +6,28 @@
 #
 # Author: Werner Fink <werner@suse.de>
 #
+initrd=$(readlink /boot/initrd)
+test -n "$initrd" || exit 0
+modules=lib/modules/${initrd#initrd-}
 
 refresh=no
-test /etc/sysconfig/clock  -nt /boot/initrd && refresh=yes
-test /etc/sysconfig/kernel -nt /boot/initrd && refresh=yes
+test /etc/sysconfig/clock  -nt $initrd && refresh=yes
+test /etc/sysconfig/kernel -nt $initrd && refresh=yes
+
+while read module ; do
+    module=${module##*/}
+    module=${module%.ko}
+    modconfs=$(grep -lE "[[:blank:]]$module[[:blank:]]" /etc/modprobe.d/*)
+    for modconf in $modconfs; do
+	test $modconf -nt $initrd && refresh=yes
+	break 2
+    done
+done < <(lsinitrd /boot/initrd | grep -E "$modules/.*\.ko")
+unset modules module modconfs modconf
+
 test "$refresh" = yes || exit 0
+
+modprobe dm_mod --quiet &> /dev/null || true
 
 line=on
 test -e /proc/splash && read line < /proc/splash

@@ -61,7 +61,7 @@ loopdel ()
 list_missed ()
 {
     local dev line
-    local mount_opts="-t no${tmpfs//,/,no},$nofs -O no_netdev -O nonofail"
+    local mount_opts="-t no${tmpfs//,/,no},$nofs,nonone -O no_netdev -O nonofail"
 
     mount -afnv $mount_opts 2> /dev/null | while read line ; do
 	dev="${line%% *}"
