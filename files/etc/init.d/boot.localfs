@@ -265,6 +265,7 @@ case "$1" in
 	mount -oremount /dev
 	mount -oremount /dev/pts
 	mount -oremount /dev/shm
+	mount -oremount /run
 	# mount the rest
 	mount -av -t $nofs -O no_netdev
 	rc_status -v1 -r
