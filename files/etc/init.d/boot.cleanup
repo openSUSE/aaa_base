@@ -56,6 +56,9 @@ case "$1" in
 		    test -d /var/run && rec_rem /var/run
 		    test -d /var/lock && rec_rem /var/lock
 		fi
+		if test -d /run -a ! -L /var/run ; then
+		    rmdir /var/run && ln -sf /run /var/run
+		fi
 		touch /var/run/utmp
 		chmod 664 /var/run/utmp
 		chown root:utmp /var/run/utmp
