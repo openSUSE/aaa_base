@@ -82,7 +82,7 @@ _cd_ ()
 
     case "$(complete -p ${1##*/} 2> /dev/null)" in
     mkdir)  ;;
-    *)	    s="-S/"  
+    *)	    s="-S/"
     esac
 
     case "$c" in
@@ -95,7 +95,9 @@ _cd_ ()
     \`*)	COMPREPLY=($(compgen -c -P '\`' -S '\`' -- ${c#?}))	;;
     \$\{*\})	eval COMPREPLY=\(${c}\) ;;
     \$\{*)	COMPREPLY=($(compgen -v -P '${' -S '}'	-- ${c#??}))	;;
-    \$*)	COMPREPLY=($(compgen -v -P '$' $s	-- ${c#?}))	;;
+    \$*)	COMPREPLY=($(compgen -v -P '$' $s	-- ${c#?}))
+		eval COMPREPLY=\(${COMPREPLY[@]}\)
+		((${#COMPREPLY[@]} == 0)) || let isdir++		;;
     \~*/*)	COMPREPLY=($(compgen -d $s 		-- "${c}"))
 		((${#COMPREPLY[@]} == 0)) || let isdir++		;;
     \~*)	COMPREPLY=($(compgen -u $s 		-- "${c}"))	;;

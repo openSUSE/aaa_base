@@ -91,6 +91,10 @@ case "$-" in
     bash)
 	# Append history list instead of override
 	shopt -s histappend
+	# All commands of root will have a time stamp
+	if test "$UID" -eq 0  ; then
+	    HISTTIMEFORMAT=${HISTTIMEFORMAT:-"%F %H:%M:%S "}
+	fi
 	# Force a reset of the readline library
 	unset TERMCAP
 	# Returns short path (last two directories)
