@@ -29,6 +29,18 @@ REDIRECT="$(showconsole 2>/dev/null)"
 export CONSOLE REDIRECT
 
 #
+# Check real terminal line
+#
+if test -z "$REDIRECT" ; then
+    if (echo -n > /dev/tty) 2>/dev/null ; then
+	REDIRECT=/dev/tty
+    else
+	REDIRECT=/dev/console
+    fi
+    DO_BLOGD=no
+fi
+
+#
 # Configuration and coloring of the boot messages
 #
 
@@ -53,11 +65,11 @@ fi
 # Save old terminal settings and set -nl to avoid staircase
 # effect, do not lock scrolling, and avoid break characters.
 #
-otty=$(stty -g)
+otty=$(stty -g < $REDIRECT)
 if test "$FLOW_CONTROL" = "yes" ; then
-    stty -nl  ixon ignbrk -brkint
+    stty -nl  ixon ignbrk -brkint < $REDIRECT
 else
-    stty -nl -ixon ignbrk -brkint
+    stty -nl -ixon ignbrk -brkint < $REDIRECT
 fi
 
 echo -n "System Boot Control: "
@@ -161,16 +173,8 @@ export DO_CONFIRM DO_FORCEFSCK DO_FASTBOOT DO_QUIET DO_BLOGD
 # Start blogd, requires /proc and /dev/pts.
 # Export the real device in variable REDIRECT.
 #
-if test -z "$REDIRECT" ; then
-    if (echo -n > /dev/tty) 2>/dev/null ; then
-	REDIRECT=/dev/tty
-    else
-	REDIRECT=/dev/console
-    fi
-else
-    if test "$DO_BLOGD" = yes ; then
-	/sbin/blogd $REDIRECT
-    fi
+if test "$DO_BLOGD" = yes ; then
+    /sbin/blogd $REDIRECT
 fi
 
 #
@@ -294,11 +298,6 @@ fi
 test -s /lib/bootcycle/stats && . /lib/bootcycle/stats
 
 #
-# Stop blogd
-#
-killproc -QUIT /sbin/blogd
-
-#
 # Remember for master resource script
 #
 if test "$DO_CONFIRM" = "yes" ; then
@@ -314,7 +313,7 @@ fi
 #
 # Restore old terminal settings
 #
-stty $otty
+stty $otty < $REDIRECT
 
 #
 # Let YaST2 finish its installation, if you installed with YaST2

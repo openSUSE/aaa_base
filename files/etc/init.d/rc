@@ -115,6 +115,18 @@ REDIRECT="$(showconsole 2>/dev/null)"
 export CONSOLE REDIRECT
 
 #
+# Check real terminal line
+#
+if test -z "$REDIRECT" ; then
+    if (echo -n > /dev/tty) 2>/dev/null ; then
+	REDIRECT=/dev/tty
+    else
+	REDIRECT=/dev/console
+    fi
+    DO_BLOGD=no
+fi
+
+#
 # Set I/O of this script and its childs to console
 #
 exec 0<> $CONSOLE 1>&0 2>&0
@@ -191,26 +203,18 @@ fi
 # Save old terminal settings and set -nl to avoid staircase
 # effect, do not lock scrolling, and avoid break characters.
 #
-otty=$(stty -g)
+otty=$(stty -g < $REDIRECT)
 if test "$FLOW_CONTROL" = "yes" ; then
-    stty -nl  ixon ignbrk -brkint
+    stty -nl  ixon ignbrk -brkint < $REDIRECT
 else
-    stty -nl -ixon ignbrk -brkint
+    stty -nl -ixon ignbrk -brkint < $REDIRECT
 fi
 
 #
 # Start blogd if not in single user mode
 #
-if test -z "$REDIRECT" ; then
-    if (echo -n > /dev/tty) 2>/dev/null ; then
-	REDIRECT=/dev/tty
-    else
-	REDIRECT=/dev/console
-    fi
-else
-    if test "$DO_BLOGD" = yes; then
-	/sbin/blogd $REDIRECT
-    fi
+if test "$DO_BLOGD" = yes; then
+    /sbin/start_daemon /sbin/blogd $REDIRECT
 fi
 
 if test "$DO_CONFIRM" = "yes" ; then
@@ -434,7 +438,7 @@ killproc -QUIT /sbin/blogd
 #
 # Restore old terminal settings
 #
-stty $otty
+stty $otty < $REDIRECT
 
 #
 # For the first logon on a virtual console.
