@@ -102,6 +102,23 @@ wait_for_udev ()
     test $timeout -eq 0 && echo " timeout! "
 }
 
+memfs_nonudev ()
+{
+    local none on mnt tag type opts
+    mount -afnv -t $mntfs -O no_netdev -O nonofail 2> /dev/null | \
+	while read none on mnt tag type opts ; do
+	    test "$mnt"  = already && continue
+	    case "$type" in
+	    proc)	[[ $mnt =~ /proc* ]] && continue ;;
+	    sysfs)	[[ $mnt =~ /sys*  ]] && continue ;;
+	    dev*)	[[ $mnt =~ /dev*  ]] && continue ;;
+	    cgroup*)	[[ $mnt =~ /sys*  ]] && continue ;;
+	    cpuset*)	[[ $mnt =~ /sys*  ]] && continue ;;
+	    esac
+	    mount $mnt
+	done
+}
+
 #
 # Return the shadow mount points of an AuFS
 #
@@ -242,22 +259,40 @@ case "$1" in
 	if ! test -L /etc/mtab; then
 	    mount -fv -t proc proc /proc
 	    mount -fv -t sysfs sysfs /sys
-	    #
-	    HAVE_DEBUGFS=0
 	    DEVTMPFS=tmpfs
-	    while read dev type ; do
-		test "$type" = "debugfs" && HAVE_DEBUGFS=1
-		test "$type" = "devtmpfs" && DEVTMPFS=devtmpfs
-	    done < /proc/filesystems
-
-	    if test -d /sys/kernel/debug -a "$HAVE_DEBUGFS" = "1" ; then
-		mount -fv -t debugfs debugfs /sys/kernel/debug
-	    fi
+	    case "$memfs" in
+	    *,devtmpfs,*) DEVTMPFS=devtmpfs
+	    esac
 	    mount -fv -t $DEVTMPFS -o mode=0755 $DEVTMPFS /dev
 	    rc_status
 	    mount -fv -t tmpfs  -o mode=1777 tmpfs /dev/shm
 	    mount -fv -t devpts -o mode=0620,gid=5 devpts /dev/pts
 	    rc_status
+	fi
+	if test -d /sys/kernel/debug -a "$(stat -fc '%T' /sys/kernel/debug)" != debugfs ; then
+	    case "$memfs" in
+	    *,debugfs,*)
+		mount -t debugfs debugfs /sys/kernel/debug
+	    esac
+	fi
+	if test -d /sys/kernel/security -a "$(stat -fc '%T' /sys/kernel/security)" != securityfs ; then
+	    case "$memfs" in
+	    *,securityfs,*)
+		mount -t securityfs securityfs /sys/kernel/security
+	    esac
+	fi
+	if test -d /sys/fs/cgroup -a "$(stat -fc '%T' /sys/fs/cgroup)" != tmpfs ; then
+	    case "$memfs" in
+	    *,cgroup,*)
+		mount -t tmpfs -o nosuid,nodev,noexec,mode=755 tmpfs /sys/fs/cgroup && \
+		mkdir /sys/fs/cgroup/systemd && \
+		mount -t cgroup -o nosuid,nodev,noexec,none,name=systemd cgroup /sys/fs/cgroup/systemd
+	    esac
+	    case "$memfs" in
+	    *,cpuset,*)
+		mkdir /sys/fs/cgroup/cpuset && \
+		mount -t cgroup -o nosuid,nodev,noexec,cpuset cpuset /sys/fs/cgroup/cpuset
+	    esac
 	fi
 	# remount to make sure options from fstab are honoured
 	mount -oremount /proc
@@ -269,6 +304,9 @@ case "$1" in
 	# mount the rest
 	mount -av -t $nofs -O no_netdev
 	rc_status -v1 -r
+
+	# now handle uncommon mount points
+	memfs_nonudev
 	;;
     stop)
 	mounts=/etc/fstab
@@ -328,19 +366,24 @@ case "$1" in
 		/proc*)    continue ;;
 		/sys*)     continue ;;
 		/cgroup*)  continue ;;
+		/sys/fs/*) continue ;;
+		/sys/kernel/*)
+			   continue ;;
 		/var/lib/nfs/rpc_pipefs)
 			   continue ;;
 	    esac
 	    case ",$rskip," in
 		*,$fs,*)   continue ;;
 	    esac
-	    ulist="${ulist:+$ulist }$fs"
 	    case "$fs" in
-		/tmp)      continue ;;
-		/var/tmp)  continue ;;
+		/tmp)	   ulist="${ulist:+$ulist }$fs"
+			   continue ;;
+		/var/tmp)  ulist="${ulist:+$ulist }$fs"
+			   continue ;;
 	    esac
 	    case ",$mntfs," in
 		*,$type,*) umount $mtab -t $type $fs ;;
+		*)	   ulist="${ulist:+$ulist }$fs"
 	    esac
 	done < ${rvtab}
 
