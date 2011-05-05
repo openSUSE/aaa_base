@@ -99,7 +99,10 @@ _cd_ ()
 		eval COMPREPLY=\(${COMPREPLY[@]}\)
 		((${#COMPREPLY[@]} == 0)) || let isdir++		;;
     \~*/*)	COMPREPLY=($(compgen -d $s 		-- "${c}"))
-		((${#COMPREPLY[@]} == 0)) || let isdir++		;;
+		if ((${#COMPREPLY[@]} > 0)) ; then
+		    compopt +o plusdirs
+		    let isdir++
+		fi							;;
     \~*)	COMPREPLY=($(compgen -u $s 		-- "${c}"))	;;
     *\:*)	if [[ $COMP_WORDBREAKS =~ : ]] ; then
 		    x=${c%"${c##*[^\\]:}"}
