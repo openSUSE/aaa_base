@@ -89,15 +89,41 @@ _cd_ ()
     *[*?[]*)	COMPREPLY=()				# use bashdefault
 		test $g -eq 0 && shopt -u extglob
 		return 0						;;
-    \$\(*\))	eval COMPREPLY=\(${c}\) ;;
-    \$\(*)	COMPREPLY=($(compgen -c -P '$(' -S ')'	-- ${c#??}))	;;
-    \`*\`)	eval COMPREPLY=\(${c}\) ;;
-    \`*)	COMPREPLY=($(compgen -c -P '\`' -S '\`' -- ${c#?}))	;;
+    \$\(*\))	eval COMPREPLY=\(${c}\)
+		compopt +o plusdirs					;;
+    \$\(*)	COMPREPLY=($(compgen -c -P '$(' -S ')'	-- ${c#??}))
+		if ((${#COMPREPLY[@]} > 0)) ; then
+		    compopt +o plusdirs
+		    let isdir++
+		fi							;;
+    \`*\`)	eval COMPREPLY=\(${c}\)
+		compopt +o plusdirs					;;
+    \`*)	COMPREPLY=($(compgen -c -P '\`' -S '\`' -- ${c#?}))
+		if ((${#COMPREPLY[@]} > 0)) ; then
+		    compopt +o plusdirs
+		    let isdir++
+		fi							;;
     \$\{*\})	eval COMPREPLY=\(${c}\) ;;
-    \$\{*)	COMPREPLY=($(compgen -v -P '${' -S '}'	-- ${c#??}))	;;
+    \$\{*)	COMPREPLY=($(compgen -v -P '${' -S '}'	-- ${c#??}))
+		if ((${#COMPREPLY[@]} > 0)) ; then
+		    compopt +o plusdirs
+		    if ((${#COMPREPLY[@]} > 1)) ; then
+			test $g -eq 0 && shopt -u extglob
+			return 0
+		    fi
+		    let isdir++
+		    eval COMPREPLY=\(${COMPREPLY[@]}\)
+		fi							;;
     \$*)	COMPREPLY=($(compgen -v -P '$' $s	-- ${c#?}))
-		eval COMPREPLY=\(${COMPREPLY[@]}\)
-		((${#COMPREPLY[@]} == 0)) || let isdir++		;;
+		if ((${#COMPREPLY[@]} > 0)) ; then
+		    compopt +o plusdirs
+		    if ((${#COMPREPLY[@]} > 1)) ; then
+			test $g -eq 0 && shopt -u extglob
+			return 0
+		    fi
+		    let isdir++
+		    eval COMPREPLY=\(${COMPREPLY[@]}\)
+		fi							;;
     \~*/*)	COMPREPLY=($(compgen -d $s 		-- "${c}"))
 		if ((${#COMPREPLY[@]} > 0)) ; then
 		    compopt +o plusdirs
