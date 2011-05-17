@@ -281,19 +281,6 @@ case "$1" in
 		mount -t securityfs securityfs /sys/kernel/security
 	    esac
 	fi
-	if test -d /sys/fs/cgroup -a "$(stat -fc '%T' /sys/fs/cgroup)" != tmpfs ; then
-	    case "$memfs" in
-	    *,cgroup,*)
-		mount -t tmpfs -o nosuid,nodev,noexec,mode=755 tmpfs /sys/fs/cgroup && \
-		mkdir /sys/fs/cgroup/systemd && \
-		mount -t cgroup -o nosuid,nodev,noexec,none,name=systemd cgroup /sys/fs/cgroup/systemd
-	    esac
-	    case "$memfs" in
-	    *,cpuset,*)
-		mkdir /sys/fs/cgroup/cpuset && \
-		mount -t cgroup -o nosuid,nodev,noexec,cpuset cpuset /sys/fs/cgroup/cpuset
-	    esac
-	fi
 	# remount to make sure options from fstab are honoured
 	mount -oremount /proc
 	mount -oremount /sys
