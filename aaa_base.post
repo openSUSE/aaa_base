@@ -31,12 +31,12 @@ test -f /etc/nsswitch.conf.rpmnew && grep dns6 /etc/nsswitch.conf >/dev/null 2>&
 #
 # Initialize runlevel links
 #
-%{fillup_and_insserv -y boot.proc boot.localfs boot.swap boot.ipconfig boot.klog boot.localnet halt random reboot single}
+%{fillup_and_insserv -y boot.localfs boot.swap boot.klog boot.localnet halt random reboot single}
 %{insserv_force_if_yast /etc/init.d/boot.loadmodules /etc/init.d/boot.cleanup /etc/init.d/boot.rootfsck}
 ## powerfail probably needs empty header ...
 
 # add Kill-links in boot.d if needed:
-for i in proc localfs swap clock ldconfig ipconfig klog localnet loadmodules ; do
+for i in localfs swap clock ldconfig klog localnet loadmodules ; do
     if [ -f /etc/init.d/boot.d/S??boot.$i -a ! -f /etc/init.d/boot.d/K??boot.$i ] ; then
 %{insserv_force_if_yast boot.$i}
     fi
@@ -50,10 +50,15 @@ if ! [ -d /etc/sysconfig ] ; then
   mkdir -p /etc/sysconfig
 fi
 for i in language backup boot kernel \
-	suseconfig clock proxy windowmanager sysctl \
+	suseconfig clock proxy windowmanager \
 	cron news shutdown ; do
 %{fillup_only -n $i}
 done
+if [ -e /etc/sysconfig/sysctl ]; then
+	echo "merging /etc/sysconfig/sysctl into /etc/sysctl.conf ..."
+	/lib/aaa_base/convert_sysctl
+	mv /etc/sysconfig/sysctl /etc/sysconfig/sysctl.rpmsave
+fi
 # migrate HALT_SOUND value if set before
 if [ -n "$HALT_SOUND" -a "$HALT_SOUND" != "no" ] ; then
     sed -i -e "s|^HALT_SOUND=.*|HALT_SOUND=\"$HALT_SOUND\"|" /etc/sysconfig/shutdown

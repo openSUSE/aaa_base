@@ -23,7 +23,6 @@
 # to get max number of parallel fsck processes
 . /etc/sysconfig/boot
 . /etc/sysconfig/kernel
-. /etc/sysconfig/sysctl
 
 test -z "$REDIRECT" && REDIRECT="$(showconsole 2>/dev/null)"
 export REDIRECT
@@ -155,12 +154,6 @@ rc_reset
 
 case "$1" in
   start)
-	# handle DMAPI_PROBE here, boot.sysctl is too late
-	if test "$DMAPI_PROBE" = "yes" ; then
-	    test -d /proc/sys/fs/xfs || modprobe xfs
-	    test -e /proc/sys/fs/xfs/probe_dmapi && echo 1 > /proc/sys/fs/xfs/probe_dmapi
-	fi
-
 	# rootfs is mounted rw, lvm et al should be up now
 	wait_for_udev
 
