@@ -206,4 +206,13 @@ if test -d /proc/sgi_sn ; then
     fi
 fi
 
+# create loop devices here instead of doing it in rpm to allow
+# graceful fail (bnc#661715)
+for i in 0 1 2 3 4 5 6 7; do
+	mkdir -p /lib/udev/devices
+	test -b /lib/udev/devices/loop$i || continue
+	/bin/mknod -m 0660 /lib/udev/devices/loop$i b 7 $i || break
+	chown root:disk /lib/udev/devices/loop$i
+done
+
 exit 0
