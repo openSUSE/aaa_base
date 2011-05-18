@@ -147,7 +147,7 @@ case "$-" in
 	    ;;
 	esac
 	# Colored root prompt (see bugzilla #144620)
-	if test "$UID" -eq 0 -a -t ; then
+	if test "$UID" -eq 0 -a -n "$TERM" -a -t ; then
 	    _bred="$(path tput bold 2> /dev/null; path tput setaf 1 2> /dev/null)"
 	    _sgr0="$(path tput sgr0 2> /dev/null)"
 	    PS1="\[$_bred\]$PS1\[$_sgr0\]"
