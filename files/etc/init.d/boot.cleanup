@@ -31,12 +31,12 @@ case "$1" in
 		# clean up
 		#
 		rm -f /var/lib/rpm/__db*
-		rm -rf /tmp/screens /tmp/uscreens /var/run/screens /var/run/uscreens 2>/dev/null
+		rm -rf /tmp/screens /tmp/uscreens 2>/dev/null
 		rm -f /tmp/.X*lock /var/spool/uucp/LCK* /var/log/sa/sadc.LOCK /fsck_corrected_errors 2>/dev/null
 		if test -x /usr/bin/find -a -x /usr/bin/xargs; then
 		    {
 			find /tmp/ssh-* /tmp/gpg-* -type s -name "*agent*" -maxdepth 1 -print0
-			find /var/run /var/lock -type f ! -wholename /var/run/utmp -print0
+			find /var/lock -type f -print0
 			if test -d /var/lib/ntp/var/run; then
 			    find /var/lib/ntp/var/run -type f -print0
 			fi
@@ -53,11 +53,7 @@ case "$1" in
 			done
 		    }
 		    #
-		    test -d /var/run && rec_rem /var/run
 		    test -d /var/lock && rec_rem /var/lock
-		fi
-		if test -d /run -a ! -L /var/run ; then
-		    rmdir /var/run && ln -sf /run /var/run
 		fi
 		touch /var/run/utmp
 		chmod 664 /var/run/utmp
