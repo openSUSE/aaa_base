@@ -7,8 +7,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          boot.proc
-# Required-Start:    boot.localfs boot.rootfsck
-# Required-Stop:     boot.localfs
+# Required-Start:    $null
+# Required-Stop:     $null
 # Default-Start:     B
 # Default-Stop:
 # Short-Description: sets some procfs values
