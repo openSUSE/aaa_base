@@ -9,8 +9,7 @@
 #
 HWCLOCK=""
 
-## Type:		yesno
-## Default:		yes
+## Type:		list(yes,no,)
 ## Description: Write back system time to the hardware clock
 #
 # Is set to "yes" write back the system time to the hardware
@@ -21,7 +20,12 @@ HWCLOCK=""
 # skipped because it is rather useless without writing back
 # the system time to the hardware clock.
 #
-SYSTOHC="yes"
+# Note that you need to enable boot.clock for this feature to take
+# effect.
+#
+# defaults to 'yes' if unset
+#
+SYSTOHC=""
 
 ## Type:		string(Europe/Berlin,Europe/London,Europe/Paris)
 ## ServiceRestart:	boot.clock

@@ -31,7 +31,7 @@ test -f /etc/nsswitch.conf.rpmnew && grep dns6 /etc/nsswitch.conf >/dev/null 2>&
 #
 # Initialize runlevel links
 #
-%{fillup_and_insserv -y boot.proc boot.localfs boot.swap boot.clock boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single}
+%{fillup_and_insserv -y boot.proc boot.localfs boot.swap boot.ldconfig boot.ipconfig boot.klog boot.localnet halt random reboot single}
 %{insserv_force_if_yast /etc/init.d/boot.loadmodules /etc/init.d/boot.cleanup /etc/init.d/boot.rootfsck}
 ## powerfail probably needs empty header ...
 
