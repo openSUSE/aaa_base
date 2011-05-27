@@ -19,12 +19,13 @@ MAX_DAYS_IN_TMP="0"
 MAX_DAYS_IN_LONG_TMP="0"
 
 ## Type:	string
-## Default:	"/tmp"
 #
 # This variable contains a list of directories, in which old files are to
 # be searched and deleted. The frequency is determined by MAX_DAYS_IN_TMP
 #
-TMP_DIRS_TO_CLEAR="/tmp"
+# Defaults to /tmp if empty
+#
+TMP_DIRS_TO_CLEAR=""
 
 ## Type:	string
 ## Default:	""
@@ -43,7 +44,6 @@ LONG_TMP_DIRS_TO_CLEAR=""
 OWNER_TO_KEEP_IN_TMP="root"
 
 ## Type:	string
-## Default:	no
 #
 # "Set this to "yes" to entirely remove (rm -rf) all  files and subdirectories
 # from the temporary directories defined in TMP_DIRS_TO_CLEAR on bootup.
@@ -55,7 +55,9 @@ OWNER_TO_KEEP_IN_TMP="root"
 # This can be used to clear directories at boot as well as clearing unused
 # files out of other directories.
 #
-CLEAR_TMP_DIRS_AT_BOOTUP="no"
+# Defaults to 'no' if unset
+#
+CLEAR_TMP_DIRS_AT_BOOTUP=""
 
 ## Type:         string
 ## Default:      ""

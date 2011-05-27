@@ -1,7 +1,7 @@
-#! /bin/sh
+#! /bin/bash
 #
 # Copyright (c) 2001-2005 SuSE Linux AG, Nuernberg, Germany.
-# All rights reserved.
+# Copyright (c) 2011 SUSE Linux Products GmbH, Nuernberg, Germany.
 #
 # /etc/init.d/boot.cleanup
 #
@@ -22,51 +22,25 @@
 . /etc/rc.status
 . /etc/sysconfig/cron
 
+: ${TMP_DIRS_TO_CLEAR:=/tmp}
+: ${CLEAR_TMP_DIRS_AT_BOOTUP:=no}
+
 rc_reset
 
 case "$1" in
-  start|stop|restart)
+  start|stop)
 	if test "$1" = "start" -o "$RUNLEVEL" = "6" ; then
 		#
-		# clean up
+		# some legacy clean up
 		#
 		rm -f /var/lib/rpm/__db*
-		rm -rf /tmp/screens /tmp/uscreens 2>/dev/null
-		rm -f /tmp/.X*lock /var/spool/uucp/LCK* /var/log/sa/sadc.LOCK /fsck_corrected_errors 2>/dev/null
-		if test -x /usr/bin/find -a -x /usr/bin/xargs; then
-		    {
-			find /tmp/ssh-* /tmp/gpg-* -type s -name "*agent*" -maxdepth 1 -print0
-			find /var/lock -type f -print0
-			if test -d /var/lib/ntp/var/run; then
-			    find /var/lib/ntp/var/run -type f -print0
-			fi
-		    } 2>/dev/null | xargs -0r rm -f
-		else
-		    # fallback for find if we get /usr from nfs
-		    rec_rem() {
-			for f in "$1"/*
-			do
-			test "$f" = /var/run/utmp && continue
-			test -L "$f" && continue
-			test -f "$f" && rm -f "$f"
-			test -d "$f" && rec_rem "$f"
-			done
-		    }
-		    #
-		    test -d /var/lock && rec_rem /var/lock
-		fi
+		rm -f /tmp/.X*lock /var/spool/uucp/LCK* /var/log/sa/sadc.LOCK /fsck_corrected_errors
+		rm -rf /tmp/ssh-*
+		rm -rf /tmp/gpg-*
+
 		touch /var/run/utmp
 		chmod 664 /var/run/utmp
 		chown root:utmp /var/run/utmp
-
-		# Re-read inittab for jobs and redo utmp records if required
-		test "$PREVLEVEL" = "S" && telinit q
-
-	#	FASTBOOT: This costs us ~1s, and could be done by a simple "mv"
-	#	if at all necessary.
-	#
-	#	# Restore a possibly dynamically modified /etc/resolv.conf
-		test "$DO_FASTBOOT" != "yes" && /sbin/netconfig update
 
 		# delete temp files
 		# If $CLEAR_TMP_DIRS_AT_BOOTUP = yes, delete files in
@@ -89,13 +63,18 @@ case "$1" in
 		done
 	fi
 	;;
+
+    restart|reload)
+	rc_failed 3
+	rc_status -v
+	;;
     status)
 	# assume we have been run
 	rc_reset
 	rc_status -v
 	;;
     *)
-	echo "Usage: $0 {start|stop|status|restart}"
+	echo "Usage: $0 {start|stop|status}"
 	exit 1
 	;;
 esac
