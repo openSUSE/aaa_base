@@ -285,6 +285,9 @@ case "$1" in
 	mount -av -t $nofs -O no_netdev
 	rc_status -v1 -r
 
+	if test -d /var/lock && ! mountpoint -q /var/lock; then
+	    mount -n --bind /run/lock /var/lock
+	fi
 	if test -d /var/run && ! mountpoint -q /var/run; then
 	    mount -n --bind /run /var/run
 	fi
