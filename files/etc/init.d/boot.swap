@@ -20,83 +20,10 @@
 . /etc/rc.status
 . /etc/sysconfig/kernel
 
-
-get_swap_id() {
-    local line dev min type;
-    type -p fdisk >/dev/null || return
-    fdisk -l 2>&1 | while read line; do
-	case "$line" in
-	/*Linux\ [sS]wap*)
-	    echo "${line%% *}"
-	    ;;
-	Disk\ /dev/*\ doesn*)
-	    dev="${line##*/}"
-	    dev="${dev%% *}"
-	    type -p parted >/dev/null || continue
-	    while read min type; do
-		case "$type" in
-		*type=82|*type=82,*) echo /dev/${dev}${min}
-		esac
-	    done < <(parted -s /dev/$dev print quit 2>/dev/null)
-	    ;;
-	esac
-    done
-}
-
-check_swap_sig () {
-    local part="$(get_swap_id)"
-    local where what type rest p c
-    while read where what type rest ; do
-	test "$type" = "swap" || continue
-	c=continue
-	for p in $part ; do
-	    if test "$p" -ef "$where"; then
-		c=true
-		break
-	    fi
-	done
-	$c
-	case "$(dd if=$where bs=1 count=6 skip=4086 2>/dev/null)" in
-	S1SUSP|S2SUSP|ULSUSP) mkswap $where
-	esac
-    done < /etc/fstab
-}
-
-enable_ps3_vram_swap () {
-	local prop
-	local ps3vram_swap=/dev/mtdblock0
-	if test -f /proc/device-tree/model ; then
-		read prop < /proc/device-tree/model
-		case "$prop" in
-			SonyPS3)
-				echo "Activating swap to video ram"
-				modprobe -v ps3vram
-				modprobe -v mtdblock
-				sleep 1
-				if test -b $ps3vram_swap ; then
-					mkswap -L ps3_vram_swap $ps3vram_swap
-					swapon -v -p 42 $ps3vram_swap
-				fi
-			;;
-		esac
-	fi
-}
-
 rc_reset
 
 case "$1" in
     start)
-	#
-	# After mounting we may activate swap files in /etc/fstab
-	# .. this should work now with the new swapon behavio(u)r
-	#
-	# Check for swap signature only if sysfs is not mounted
-	# (then we have no way of knowing if swsuspend is enabled)
-	# or if /sys/power exists (then we are sure it is enabled).
-	if [ ! -d "/sys/devices" ] || [ -d "/sys/power" ]; then
-	    check_swap_sig
-	fi
-	enable_ps3_vram_swap
 	echo "Activating remaining swap-devices in /etc/fstab..."
 	swapon -a &> /dev/null
 	rc_status -v1 -r
