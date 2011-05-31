@@ -109,7 +109,8 @@ if test "$DTYPE" != "tmpfs" ; then
     echo -n "Mounting tmpfs at /run"
     mount -n -t tmpfs -o mode=0755,nodev,noexec,nosuid tmpfs /run
 fi
-mkdir /run/lock
+mkdir -m 0775 /run/lock
+chgrp 54 /run/lock # lock
 
 cp -axT --remove-destination /lib/udev/devices /dev
 
