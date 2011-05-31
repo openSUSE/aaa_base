@@ -79,28 +79,32 @@ echo "Running $0"
 # mount usual filesystems if not already done by initramfs or the kernel
 #
 echo  -n "mounting mandatory file systems ..."
-test -c /dev/null || /bin/mknod -m 666 /dev/null c 1 3
-test -e /proc/mounts || /bin/mount -n -t proc proc /proc >/dev/null 2>&1
-test -e /sys/class || /bin/mount -n -t sysfs sysfs /sys >/dev/null 2>&1
+test -c /dev/null    || /bin/mknod -m 666 /dev/null c 1 3
+test -e /proc/mounts || /bin/mount -n -t proc proc   /proc >/dev/null 2>&1
+test -e /sys/class   || /bin/mount -n -t sysfs sysfs /sys  >/dev/null 2>&1
 
 HAVE_DEBUGFS=0
 HAVE_DEVTMPFS=0
 while read dev type ; do
-        test "$type" = "debugfs" && HAVE_DEBUGFS=1
+        test "$type" = "debugfs"  && HAVE_DEBUGFS=1
         test "$type" = "devtmpfs" && HAVE_DEVTMPFS=1
 done < /proc/filesystems
 
-DTYPE=$(stat -f -c "%T" /dev 2>/dev/null)
-if test "$DTYPE" != "tmpfs" ; then
-    if test "$HAVE_DEVTMPFS" = "0" ; then
-	echo "************************* FATAL ERROR *************************"
-	echo "******* CONFIG_DEVTMPFS missing from kernel, cannot continue..."
-	echo "***************************************************************"
-	/sbin/halt -f
+if test "$container" != "lxc" ; then
+    DTYPE=$(stat -f -c "%T" /dev 2>/dev/null)
+    if test "$DTYPE" != "tmpfs" ; then
+	if test "$HAVE_DEVTMPFS" = "0" ; then
+	    echo "************************* FATAL ERROR *************************"
+	    echo "******* CONFIG_DEVTMPFS missing from kernel, cannot continue..."
+	    echo "***************************************************************"
+	    /sbin/halt -f
+	fi
+	echo -n "Mounting devtmpfs at /dev"
+	mount -n -t devtmpfs -o mode=0755 devtmpfs /dev
+	rc_status -v -r
     fi
-    echo -n "Mounting devtmpfs at /dev"
-    mount -n -t devtmpfs -o mode=0755 devtmpfs /dev
-    rc_status -v -r
+    cp -axT --remove-destination /lib/udev/devices /dev
+    test -c /dev/null || /bin/mknod -m 666 /dev/null c 1 3
 fi
 
 DTYPE=$(stat -f -c "%T" /run 2>/dev/null)
@@ -111,8 +115,6 @@ if test "$DTYPE" != "tmpfs" ; then
 fi
 mkdir -m 0775 /run/lock
 chgrp 54 /run/lock # lock
-
-cp -axT --remove-destination /lib/udev/devices /dev
 
 if test -d /sys/kernel/debug -a "$HAVE_DEBUGFS" = "1" ; then
     mount -n -t debugfs debugfs /sys/kernel/debug > /dev/null 2>&1
