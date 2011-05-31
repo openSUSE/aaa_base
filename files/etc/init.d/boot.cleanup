@@ -42,6 +42,9 @@ case "$1" in
 		chmod 664 /var/run/utmp
 		chown root:utmp /var/run/utmp
 
+		# Re-read inittab for jobs and redo utmp records if required
+		test "$PREVLEVEL" = "S" && telinit q
+
 		# delete temp files
 		# If $CLEAR_TMP_DIRS_AT_BOOTUP = yes, delete files in
 		# $TMP_DIRS_TO_CLEAR, if $CLEAR_TMP_DIRS_AT_BOOTUP starts with a "/"
