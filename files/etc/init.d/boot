@@ -111,7 +111,7 @@ DTYPE=$(stat -f -c "%T" /run 2>/dev/null)
 if test "$DTYPE" != "tmpfs" ; then
     test -d /run || mkdir -m 0755 /run
     echo -n "Mounting tmpfs at /run"
-    mount -n -t tmpfs -o mode=0755,nodev,noexec,nosuid tmpfs /run
+    mount -n -t tmpfs -o mode=0755,nodev,nosuid tmpfs /run
 fi
 mkdir -m 0775 /run/lock
 chgrp 54 /run/lock # lock
