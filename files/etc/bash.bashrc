@@ -2,8 +2,9 @@
 #
 # PLEASE DO NOT CHANGE /etc/bash.bashrc There are chances that your changes
 # will be lost during system upgrades.  Instead use /etc/bash.bashrc.local
-# for your local settings, favourite global aliases, VISUAL and EDITOR
-# variables, etc ...
+# for bash or /etc/ksh.kshrc.local for ksh or /etc/zsh.zshrc.local for the
+# zsh or /etc/ash.ashrc.local for the plain ash bourne shell  for your local
+# settings, favourite global aliases, VISUAL and EDITOR variables, etc ...
 
 #
 # Check which shell is reading this file
@@ -278,14 +279,17 @@ if test -t && type -p tty > /dev/null 2>&1 ; then
     export GPG_TTY
 fi
 
-
-if test "$is" != "ash" ; then
-    #
-    # And now let's see if there is a local bash.bashrc
-    # (for options defined by your sysadmin, not SuSE Linux)
-    #
-    test -s /etc/bash.bashrc.local && . /etc/bash.bashrc.local
-fi
+#
+# And now let us see if there is e.g. a local bash.bashrc
+# (for options defined by your sysadmin, not SuSE Linux)
+#
+case "$is" in
+bash) test -s /etc/bash.bashrc.local && . /etc/bash.bashrc.local ;;
+ksh)  test -s /etc/ksh.kshrc.local   && . /etc/ksh.kshrc.local ;;
+zsh)  test -s /etc/zsh.zshrc.local   && . /etc/zsh.zshrc.local ;;
+ash)  test -s /etc/ash.ashrc.local   && . /etc/ash.ashrc.local
+esac
+test -s /etc/sh.shrc.local && . /etc/sh.shrc.local
 
 if test -n "$restricted" -a -z "$PROFILEREAD" ; then
     PATH=/usr/lib/restricted/bin

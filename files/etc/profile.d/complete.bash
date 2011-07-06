@@ -54,6 +54,28 @@ _compreply_ ()
     done
 }
 
+#
+# Handle the CDPATH variable
+#
+_cdpath_ ()
+{
+    local -i o
+    local c="$1"
+    local x="$(bind -v | sed -rn 's/set (mark-)/\1/p')"
+    local dir=$([[ $x =~ mark-directories+([[:space:]])on ]] && echo on)
+    local sym=$([[ $x =~ mark-symlinked-directories+([[:space:]])on ]] && echo on)
+
+    for x in ${CDPATH//:/$'\n'}; do
+	o=${#COMPREPLY[@]}
+	for s in $(compgen -d $x/$c); do
+	    if [[ (($sym == on && -h $s) || ($dir == on && ! -h $s)) && ! -d ${s#$x/} ]] ; then
+		s="${s}/"
+	    fi
+	    COMPREPLY[o++]=${s#$x/}
+	done
+    done
+}
+
 # Expanding shell function for directories
 _cd_ ()
 {
@@ -62,6 +84,7 @@ _cd_ ()
     local IFS=$'\n'
     local -i o
     local -i isdir=0
+    local -i cdpath=0
 
     shopt -q extglob && g=1
     test $g -eq 0 && shopt -s extglob
@@ -84,9 +107,11 @@ _cd_ ()
     mkdir)  ;;
     *)	    s="-S/"
     esac
-
+    test "${1##*/}" != "cd" -a "${1##*/}" != "pushd" || let cdpath++
+    
     case "$c" in
     *[*?[]*)	COMPREPLY=()				# use bashdefault
+		((cdpath == 0)) || _cdpath_ "$c"
 		test $g -eq 0 && shopt -u extglob
 		return 0						;;
     \$\(*\))	eval COMPREPLY=\(${c}\)
@@ -108,6 +133,7 @@ _cd_ ()
 		if ((${#COMPREPLY[@]} > 0)) ; then
 		    compopt +o plusdirs
 		    if ((${#COMPREPLY[@]} > 1)) ; then
+			((cdpath == 0)) || _cdpath_ "$c"
 			test $g -eq 0 && shopt -u extglob
 			return 0
 		    fi
@@ -118,6 +144,7 @@ _cd_ ()
 		if ((${#COMPREPLY[@]} > 0)) ; then
 		    compopt +o plusdirs
 		    if ((${#COMPREPLY[@]} > 1)) ; then
+			((cdpath == 0)) || _cdpath_ "$c"
 			test $g -eq 0 && shopt -u extglob
 			return 0
 		    fi
@@ -136,31 +163,18 @@ _cd_ ()
  		    COMPREPLY=(${COMPREPLY[@]#"$x"})
 		    ((${#COMPREPLY[@]} == 0)) || let isdir++
 		fi
+		((cdpath == 0)) || _cdpath_ "$c"
 		test $g -eq 0 && shopt -u extglob
 		return 0						;;
     *)		COMPREPLY=()				# use (bash)default
+		((cdpath == 0)) || _cdpath_ "$c"
 		test $g -eq 0 && shopt -u extglob
 		return 0						;;
     esac
 
-    if test \( "${1##*/}" = "cd" -o "${1##*/}" = "pushd" \) -a ${#COMPREPLY[@]} -gt 0 ; then
-	#
-	# Handle the CDPATH variable
-	#
-	x="$(bind -v)"
-	local dir=$([[ $x =~ mark-directories+([[:space:]])on ]] && echo on)
-	local sym=$([[ $x =~ mark-symlinked-directories+([[:space:]])on ]] && echo on)
-
-	for x in ${CDPATH//:/$'\n'}; do
-	    o=${#COMPREPLY[@]}
-	    for s in $(compgen -d $x/$c); do
-		if [[ (($sym == on && -h $s) || ($dir == on && ! -h $s)) && ! -d ${s#$x/} ]] ; then
-		    s="${s}/"
-		fi
-		COMPREPLY[o++]=${s#$x/}
-	    done
-	    ((${#COMPREPLY[@]} == 0)) || let isdir++
-	done
+    if test ${#COMPREPLY[@]} -gt 0 ; then
+	_cdpath_ "$c"
+	((${#COMPREPLY[@]} == 0)) || let isdir++
     fi
 
     _compreply_ $isdir
