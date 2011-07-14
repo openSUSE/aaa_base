@@ -82,14 +82,13 @@ _cd_ ()
     local c=${COMP_WORDS[COMP_CWORD]}
     local s g=0 x
     local IFS=$'\n'
-    local -i o
     local -i isdir=0
     local -i cdpath=0
 
     shopt -q extglob && g=1
     test $g -eq 0 && shopt -s extglob
 
-    if [[ $COMP_WORDBREAKS =~ : && $COMP_LINE  =~ : ]] ; then
+    if [[ $COMP_WORDBREAKS =~ : && $COMP_LINE =~ : ]] ; then
 	# Do not use plusdirs as there is a colon in the directory
 	# name(s) which will not work even if escaped with backslash.
 	compopt +o plusdirs
@@ -103,12 +102,23 @@ _cd_ ()
 	fi
     fi
 
-    case "$(complete -p ${1##*/} 2> /dev/null)" in
+    case "${1##*/}" in
     mkdir)  ;;
+    cd)	    s="-S/"
+	    case "$c" in
+	    .*)	;;
+	    *)	let cdpath++
+	    esac
+	    ;;
+    pushd)  s="-S/"
+	    case "$c" in
+	    .*)	;;
+	    *)	let cdpath++
+	    esac
+	    ;;
     *)	    s="-S/"
     esac
-    test "${1##*/}" != "cd" -a "${1##*/}" != "pushd" || let cdpath++
-    
+
     case "$c" in
     *[*?[]*)	COMPREPLY=()				# use bashdefault
 		((cdpath == 0)) || _cdpath_ "$c"
