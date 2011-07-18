@@ -80,13 +80,20 @@ _cdpath_ ()
 _cd_ ()
 {
     local c=${COMP_WORDS[COMP_CWORD]}
-    local s g=0 x
+    local s x
     local IFS=$'\n'
+    local -i glob=0
     local -i isdir=0
     local -i cdpath=0
+    local -i quoted=0
 
-    shopt -q extglob && g=1
-    test $g -eq 0 && shopt -s extglob
+    if [[ "${c:0:1}" == '"' ]] ; then
+	let quoted++
+	compopt -o plusdirs
+    fi
+   
+    shopt -q extglob && let glob++
+    ((glob == 0)) && shopt -s extglob
 
     if [[ $COMP_WORDBREAKS =~ : && $COMP_LINE =~ : ]] ; then
 	# Do not use plusdirs as there is a colon in the directory
@@ -104,25 +111,16 @@ _cd_ ()
 
     case "${1##*/}" in
     mkdir)  ;;
-    cd)	    s="-S/"
-	    case "$c" in
-	    .*)	;;
-	    *)	let cdpath++
-	    esac
-	    ;;
-    pushd)  s="-S/"
-	    case "$c" in
-	    .*)	;;
-	    *)	let cdpath++
-	    esac
-	    ;;
-    *)	    s="-S/"
+    cd|pushd)
+	s="-S/"
+	[[ "$c" =~ ^\..* ]] || let cdpath++ ;;
+    *)	s="-S/"
     esac
 
     case "$c" in
     *[*?[]*)	COMPREPLY=()				# use bashdefault
 		((cdpath == 0)) || _cdpath_ "$c"
-		test $g -eq 0 && shopt -u extglob
+		((glob == 0)) && shopt -u extglob
 		return 0						;;
     \$\(*\))	eval COMPREPLY=\(${c}\)
 		compopt +o plusdirs					;;
@@ -144,7 +142,7 @@ _cd_ ()
 		    compopt +o plusdirs
 		    if ((${#COMPREPLY[@]} > 1)) ; then
 			((cdpath == 0)) || _cdpath_ "$c"
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0
 		    fi
 		    let isdir++
@@ -155,7 +153,7 @@ _cd_ ()
 		    compopt +o plusdirs
 		    if ((${#COMPREPLY[@]} > 1)) ; then
 			((cdpath == 0)) || _cdpath_ "$c"
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0
 		    fi
 		    let isdir++
@@ -163,10 +161,14 @@ _cd_ ()
 		fi							;;
     \~*/*)	COMPREPLY=($(compgen -d $s 		-- "${c}"))
 		if ((${#COMPREPLY[@]} > 0)) ; then
-		    compopt +o plusdirs
+ 		    compopt +o plusdirs
 		    let isdir++
 		fi							;;
-    \~*)	COMPREPLY=($(compgen -u $s 		-- "${c}"))	;;
+    \~*)	COMPREPLY=($(compgen -u $s 		-- "${c}"))
+		if ((${#COMPREPLY[@]} > 0)) ; then
+ 		    compopt +o plusdirs
+		    let isdir++
+		fi							;;
     *\:*)	if [[ $COMP_WORDBREAKS =~ : ]] ; then
 		    x=${c%"${c##*[^\\]:}"}
 		    COMPREPLY=($(compgen -d $s          -- "${c}"))
@@ -174,22 +176,21 @@ _cd_ ()
 		    ((${#COMPREPLY[@]} == 0)) || let isdir++
 		fi
 		((cdpath == 0)) || _cdpath_ "$c"
-		test $g -eq 0 && shopt -u extglob
+		((glob == 0)) && shopt -u extglob
 		return 0						;;
     *)		COMPREPLY=()				# use (bash)default
 		((cdpath == 0)) || _cdpath_ "$c"
-		test $g -eq 0 && shopt -u extglob
+		((glob == 0)) && shopt -u extglob
 		return 0						;;
     esac
-
     if test ${#COMPREPLY[@]} -gt 0 ; then
-	_cdpath_ "$c"
+ 	_cdpath_ "$c"
 	((${#COMPREPLY[@]} == 0)) || let isdir++
     fi
 
-    _compreply_ $isdir
+    ((quoted)) || _compreply_ $isdir
 
-    test $g -eq 0 && shopt -u extglob
+    ((glob == 0)) && shopt -u extglob
     return 0
 }
 
@@ -208,12 +209,20 @@ _exp_ ()
     # -d, -f, and -X pattern without missing directories.
     local c=${COMP_WORDS[COMP_CWORD]}
     local a="${COMP_LINE}"
-    local e s g=0 cd dc t=""
+    local e s cd dc t=""
     local -i o
+    local -i glob=0 
+    local -i quoted=0
     local IFS
 
-    shopt -q extglob && g=1
-    test $g -eq 0 && shopt -s extglob
+    if [[ "${c:0:1}" == '"' ]] ; then
+	let quoted++
+	compopt -o plusdirs
+    fi
+   
+    shopt -q extglob && let glob++
+    ((glob == 0)) && shopt -s extglob
+
     # Don't be fooled by the bash parser if extglob is off by default
     cd='*-?(c)d*'
     dc='*-d?(c)*'
@@ -223,10 +232,10 @@ _exp_ ()
     bzip2)
 	case "$c" in
 	-)		COMPREPLY=(d c)
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0				;;
  	-?|-??)		COMPREPLY=($c)
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0				;;
 	esac
 	case "$a" in
@@ -239,10 +248,10 @@ _exp_ ()
     gzip)
 	case "$c" in
 	-)		COMPREPLY=(d c)
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0				;;
  	-?|-??)		COMPREPLY=($c)
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0				;;
 	esac
 	case "$a" in
@@ -256,10 +265,10 @@ _exp_ ()
     lzma)
 	case "$c" in
 	-)		COMPREPLY=(d c)
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0				;;
  	-?|-??)		COMPREPLY=($c)
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0				;;
 	esac
 	case "$a" in
@@ -270,10 +279,10 @@ _exp_ ()
     xz)
 	case "$c" in
 	-)		COMPREPLY=(d c)
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0				;;
  	-?|-??)		COMPREPLY=($c)
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0				;;
 	esac
 	case "$a" in
@@ -296,7 +305,7 @@ _exp_ ()
 	case "$a" in
 	*=*)		c=${c#*=}				;;
 	*)		COMPREPLY=($(compgen -v -- ${c}))
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0				;;
 	esac
 	;;
@@ -321,12 +330,12 @@ _exp_ ()
     \~*)		COMPREPLY=($(compgen -u ${s}	 	-- ${c}))	;;
     *@*)		COMPREPLY=($(compgen -A hostname -P '@' -S ':' -- ${c#*@})) ;;
     *[*?[]*)		COMPREPLY=()			# use bashdefault
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0						;;
     *[?*+\!@]\(*\)*)
-	if test $g -eq 0 ; then
+	if ((glob == 0)) ; then
 			COMPREPLY=($(compgen -f -X "$e" -- $c))
-			test $g -eq 0 && shopt -u extglob
+			((glob == 0)) && shopt -u extglob
 			return 0
 	fi
 			COMPREPLY=($(compgen -G "${c}"))			;;
@@ -341,7 +350,7 @@ _exp_ ()
     if test -n "$t" ; then
 	let o=0
 	local -a reply=()
-	_compreply_
+ 	((quoted)) || _compreply_
 	for s in ${COMPREPLY[@]}; do
 	    e=$(eval echo $s)
 	    if test -d "$e" ; then
@@ -353,13 +362,13 @@ _exp_ ()
 	    esac
 	done
 	COMPREPLY=(${reply[@]})
-	test $g -eq 0 && shopt -u extglob
+	((glob == 0)) && shopt -u extglob
 	return 0
     fi
 
-    _compreply_
+    ((quoted)) || _compreply_
 
-    test $g -eq 0 && shopt -u extglob
+    ((glob == 0)) && shopt -u extglob
     return 0
 }
 
@@ -369,6 +378,12 @@ _gdb_ ()
     local e p
     local -i o
     local IFS
+    local -i quoted=0
+
+    if [[ "${c:0:1}" == '"' ]] ; then
+	let quoted++
+	compopt -o plusdirs
+    fi
 
     if test $COMP_CWORD -eq 1 ; then
 	case "$c" in
@@ -395,7 +410,7 @@ _gdb_ ()
 		    COMPREPLY=()
 		fi
 		let o=${#COMPREPLY[*]}
-		_compreply_
+		((quoted)) || _compreply_
 		for s in $(compgen -f -- "$c") ; do
 		    e=$(eval echo $s)
 		    if test -d "$e" ; then
