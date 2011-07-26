@@ -330,13 +330,12 @@ case "$1" in
 
 	ulist=
 	rskip=
+	lskip=
 
 	while read des fs type opts rest; do
 	    case "${des##*/}" in
 		""|\#*)    continue ;;
 		swap)      continue ;;
-		loop*)	   umount $mtab $fs
-			   loopdel $des ;;
 	    esac
 	    case ",$nomnt," in
 		*,$type,*) continue ;;
@@ -344,10 +343,24 @@ case "$1" in
 	    case ",$netfs," in
 		*,$type,*) continue ;;
 	    esac
+	    case "$type" in
+		fuse.clicfs)
+		    if test "$fs" = "/read-only"; then
+			   mount -nv -o remount,sync,ro "$fs"
+			   rskip="${rskip:+$rskip,}$fs"
+			   continue
+		    fi
+	    esac
 	    case "$fs" in
-		/)	   if test "$type" = aufs; then
-			       rskip="$(aufs ${opts//,/ })"
-			   fi
+		/)  if test "$type" = aufs; then
+			   rskip="${rskip:+$rskip,}$(aufs ${opts//,/ })"
+		    fi
+		    if [[ "${des##*/}" =~ ^loop* ]] ; then
+			   lskip="${des##*/}"
+			   tmp=$(losetup ${des} 2>/dev/null)
+			   tmp="${tmp##*(}"
+			   rskip="${rskip:+$rskip,}${tmp%/*})"
+		    fi 
 			   continue ;;
 		/dev*)     continue ;;
 		/proc*)    continue ;;
@@ -359,6 +372,9 @@ case "$1" in
 			   continue ;;
 		/var/lib/nfs/rpc_pipefs)
 			   continue ;;
+		/read-write)
+			   mount -nv -o remount,sync,ro "$fs"
+			   rskip="${rskip:+$rskip,}$fs"
 	    esac
 	    case ",$rskip," in
 		*,$fs,*)   continue ;;
@@ -373,12 +389,21 @@ case "$1" in
 		*,$type,*) umount $mtab -t $type $fs ;;
 		*)	   ulist="${ulist:+$ulist }$fs"
 	    esac
+	    case "${des##*/}" in
+		loop*)	   umount $mtab $fs
+			   loopdel $des ;;
+	    esac
 	done < ${rvtab}
 
 	grep "loop" /proc/partitions | while read major minor blocks name ; do
+	    test -n "$lskip" -a "$lskip" = "$name" && continue
 	    case "$name" in
-		loop*)	   loopdel /dev/loop/${name#loop}
-			   loopdel /dev/$name ;;
+		loop*)
+		    if test -d /dev/loop ; then
+			   loopdel /dev/loop/${name#loop}
+		    else
+			   loopdel /dev/$name
+		    fi
 	    esac
 	done
 
