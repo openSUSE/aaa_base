@@ -87,6 +87,7 @@ if test $status_all -gt 0 ; then
 	case "${rc##*/}" in
 	*.local|*.rpm*|*.ba*|*.old|*.new) continue ;;
 	*.dpkg|*.save|*.swp|*.core)	  continue ;;
+	*.disabled)			  continue ;;
 	boot|rc|single|halt|reboot)	  continue ;;
 	powerfail|rx|Makefile|README)	  continue ;;
 	skeleton|*.d)			  continue ;;
