@@ -49,7 +49,7 @@ done
 if ! [ -d /etc/sysconfig ] ; then
   mkdir -p /etc/sysconfig
 fi
-for i in language backup boot kernel \
+for i in language backup boot \
 	suseconfig clock proxy windowmanager \
 	cron news shutdown ; do
 %{fillup_only -n $i}
@@ -79,19 +79,6 @@ if grep -q "SEND_OUTPUT_ON_NO_ERROR=\"yes\"" /etc/sysconfig/cron ; then
   fi
 fi
 
-# clear old install settings of MODULES_LOADED_ON_BOOT
-eval `grep "^MODULES_LOADED_ON_BOOT" /etc/sysconfig/kernel`
-MLOB_NEW=""
-for i in $MODULES_LOADED_ON_BOOT ; do
-    case $i in
-	capability|raw1394|video1394) continue ;;
-    esac
-    MLOB_NEW="$MLOB_NEW${MLOB_NEW:+ }$i"
-done
-if test "$MODULES_LOADED_ON_BOOT" != "$MLOB_NEW" ; then
-    sed -i -e "s|^MODULES_LOADED_ON_BOOT=.*|MODULES_LOADED_ON_BOOT=\"$MLOB_NEW\"|" \
-	/etc/sysconfig/kernel
-fi
 #
 # Backup gshadow file and remove it (merge passwords into
 # /etc/group before).
