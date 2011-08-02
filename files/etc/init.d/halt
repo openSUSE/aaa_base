@@ -119,7 +119,7 @@ test -s /etc/init.d/.depend.halt  || RUN_PARALLEL="no"
 type -p startpar &> /dev/null     || RUN_PARALLEL="no"
 startpar -v      &> /dev/null     || RUN_PARALLEL="no"
 
-if test -z "$COLD_BOOT" ; then
+if test "$COLD_BOOT" != "yes" ; then
     #
     # set back system boot configuration
     #
