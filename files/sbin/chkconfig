@@ -7,6 +7,8 @@ use File::Temp 'tempfile';
 my $initdir = '/etc/init.d';
 my $inetddir = '/etc/inetd.d';
 my $xinetddir = '/etc/xinetd.d';
+my $systemd_service_path = '/lib/systemd/system';
+my $systemd_binary_path = '/bin/systemd';
 
 my %to_d = (
   '0' => 'rc0.d', '1' => 'rc1.d', '2' => 'rc2.d', '3' => 'rc3.d',
@@ -448,6 +450,58 @@ sub readable {
   return $rl;
 }
 
+#
+# check if systemd is active
+#
+sub is_systemd_active {
+    my $cgroup_dev;
+    my $systemd_dev;
+    my $st;
+
+    use File::stat;
+    $st = lstat("/sys/fs/cgroup") or return;
+    $cgroup_dev = $st->dev;
+    $st = lstat("/sys/fs/cgroup/systemd") or return;
+    $systemd_dev = $st->dev;
+    return if ($cgroup_dev == $systemd_dev);
+    -e $systemd_binary_path or return;
+    return 1;
+}
+
+sub is_overriden_by_systemd {
+    my $service = shift;
+    my $root = shift;
+    return -e "$root/$systemd_service_path/$service.service";
+}
+
+sub forward_to_systemd {
+    my $service = shift;
+    my $verb = shift;
+    my $root = shift;
+
+    return unless ($root ne "/") or ($root eq "/") and (is_systemd_active());
+
+    if (is_overriden_by_systemd ($service,$root)) {
+	    my $unit = "$service.service";
+	    my $ret;
+	    my $root_option;
+	    print STDERR "Note: Forwarding request to 'systemctl $verb $unit'.\n";
+	    $root_option = "--root $root" unless $root eq "/" ;
+	    $ret = system ("systemctl $root_option $verb $unit");
+	    if ($verb eq "is-enabled") {
+		print "$service  ";
+		if ($ret == 0) {
+                   print "on\n";
+                } else {
+                   print "off\n";
+                }
+	    }
+	    return 1;
+    }
+    return;
+}
+
+
 
 ##################################################################
 #                     main program
@@ -582,6 +636,7 @@ if ($mode eq 'e' || $mode eq 't') {
     next unless defined $current{$s};
     my $r = readable($s, $current{$s});
     next unless defined $r;
+    next if forward_to_systemd($s, "is-enabled", $root);
     printf $fh "%-*s  %s\n", $maxlen, $s, $r;
   }
   exit 0 unless $mode eq 'e';
@@ -699,6 +754,15 @@ if ($mode eq 'a' || $mode eq 'd') {
 }
 if ($mode eq 'l') {
   my $usecolor = -t STDOUT;
+  if (-e $systemd_service_path && -e $systemd_binary_path) {
+      print STDERR <<EOF;
+
+Note: This output shows SysV services only and does not include native
+systemd services. SysV configuration data might be overridden by native
+systemd configuration.
+
+EOF
+  }
   for $s (@services) {
     if (!$known_rc{$s}) {
       print STDERR "$s: unknown service\n" unless $known_all{$s};
