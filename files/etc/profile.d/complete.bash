@@ -37,6 +37,18 @@ _compreply_ ()
     done
 
     #
+    # If we have only one entry, and it's a file-system object, but not
+    # a directory, then indicate this by letting readline put a space behind
+    # it.
+    #
+    if test ${#COMPREPLY[@]} -eq 1 \
+	-a -f ${COMPREPLY[0]} \
+	-a ! -d ${COMPREPLY[0]}
+    then
+	compopt +o nospace
+    fi
+
+    #
     # Escape spaces and braces in path names with `\'
     #
     s="${COMP_WORDBREAKS//[: ]}"
