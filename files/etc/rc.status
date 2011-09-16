@@ -37,6 +37,8 @@ if /bin/mountpoint -q /sys/fs/cgroup/systemd > /dev/null 2>&1 ; then
     if test $PPID -ne 1 -a $# -eq 1 ; then
 	_rc_base=
 	case "$0" in
+	/etc/init.d/boot.*)
+	    _rc_base=${0##*/boot.} ;;
 	/etc/init.d/*)
 	    _rc_base=${0##*/} ;;
 	*/rc*)
