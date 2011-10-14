@@ -291,6 +291,9 @@ case "$1" in
 	if test -d /var/run && ! mountpoint -q /var/run; then
 	    mount -n --bind /run /var/run
 	fi
+	if test -d /media && ! mountpoint -q /media; then
+	    mount -n -t tmpfs -o mode=0755,nodev,nosuid tmpfs /media
+	fi
 
 	# now handle uncommon mount points
 	memfs_nonudev
