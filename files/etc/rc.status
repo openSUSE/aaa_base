@@ -42,7 +42,13 @@ if /bin/mountpoint -q /sys/fs/cgroup/systemd > /dev/null 2>&1 ; then
 	/etc/init.d/*)
 	    _rc_base=${0##*/} ;;
 	*/rc*)
-	    _rc_base=${0##*/rc} ;;
+	    if test -L "$0"; then
+		_rc_base=`readlink "$0"`
+		_rc_base=${_rc_base##*/}
+	    else
+		_rc_base=${0##*/rc}
+	    fi
+	    ;;
 	esac
 	if test -n "$_rc_base" -a -x /bin/systemctl ; then
 	    exec /bin/systemctl $1 "${_rc_base}.service"
