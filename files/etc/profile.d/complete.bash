@@ -547,6 +547,20 @@ _rootpath_ ()
 		COMPREPLY=()
 	    fi
     esac
+    if ((${#COMPREPLY[@]} > 0)) ; then
+	let o=0
+	for s in ${COMPREPLY[@]}; do
+	    e=$(eval echo $s)
+	    if test -d "$e" ; then
+		compopt -o plusdirs
+		break
+	    fi
+	    if ! type -p "$e" > /dev/null 2>&1 ; then
+		COMPREPLY[$o]=$(PATH=/sbin:/usr/sbin:$PATH:/usr/local/sbin type -p "$e" 2> /dev/null)
+	    fi
+	    let o++
+	done
+    fi
 }
 
 complete ${_def} -F _rootpath_			sudo
