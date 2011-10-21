@@ -16,7 +16,11 @@
 # in /etc/sysconfig/suseconfig is set to "no"
 #
 
-# The default runlevel is defined here
+# The default runlevel for SysVinit is defined here
+#   please note that for systemd the symbolic link
+#   /etc/systemd/system/default.target has to relinked
+#   to e.g. /lib/systemd/system/runlevel3.target
+#
 id:3:initdefault:
 
 # First script to be executed, if not booting in emergency (-b) mode
