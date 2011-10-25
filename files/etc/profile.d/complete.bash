@@ -12,6 +12,11 @@
 _file="-o nospace -o dirnames"
 _nosp="-o nospace"
 
+#
+# bnc#725657
+#
+shopt -s direxpand 2> /dev/null || true
+
 # Escape file and directory names, add slash to directories if needed.
 # Escaping could be done by the option 'filenames' but this fails
 # e.g. on variable expansion like $HO<TAB>
