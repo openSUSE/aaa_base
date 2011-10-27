@@ -50,6 +50,10 @@ if /bin/mountpoint -q /sys/fs/cgroup/systemd > /dev/null 2>&1 ; then
 	    fi
 	    ;;
 	esac
+	case "$1" in
+	    start|stop|reload|restart|try-restart|force-reload|status) echo "redirecting to systemctl" >/dev/stderr ;;
+	    *) unset _rc_base ;;
+	esac
 	if test -n "$_rc_base" -a -x /bin/systemctl ; then
 	    exec /bin/systemctl $1 "${_rc_base}.service"
 	fi
