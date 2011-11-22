@@ -21,12 +21,13 @@ RCDIR="/etc/init.d"
 #
 PATH=/sbin:/usr/sbin:/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin
 test -n "$TERM" || TERM=raw
+test -n "$SYSTEMD_NO_WRAP" && export SYSTEMD_NO_WRAP
 LANG=POSIX
 export PATH TERM LANG
 
 exec_rc ()
 {
-    env -i LANG=$LANG PATH=$PATH TERM=$TERM ${1+"$@"}
+    env -i LANG=$LANG PATH=$PATH TERM=$TERM SYSTEMD_NO_WRAP=$SYSTEMD_NO_WRAP ${1+"$@"}
 }
 
 usage ()
