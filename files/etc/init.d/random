@@ -27,13 +27,21 @@
 . /etc/rc.status
 
 random_seed=/var/lib/misc/random-seed
+read pool_size < /proc/sys/kernel/random/poolsize
+# fall back to the old 512 if not found,
+# current default should be 4096
+test -n "$pool_size" || pool_size=512
 
 rc_reset
 case "$1" in
     start)
         echo -n "Initializing random number generator"
         # Carry a random seed from start-up to start-up
-        # Load and then save 512 bytes, which is the size of the entropy pool
+        # Load and then save a number bytes, the size of the entropy pool
+        if test -f $random_seed ; then
+		RSIZE=`stat -c %s $random_seed`
+		test "$RSIZE" = "$pool_size" || rm -f $random_seed
+	fi
         if test -f $random_seed ; then
                 cat $random_seed > /dev/urandom
 		rc_status
@@ -42,7 +50,7 @@ case "$1" in
 		rc_status
         fi
         chmod 600 $random_seed
-        dd if=/dev/urandom of=$random_seed count=1 bs=512 2>/dev/null
+        dd if=/dev/urandom of=$random_seed count=1 bs=$pool_size 2>/dev/null
 	rc_status -v
 	;;
     stop)
@@ -54,7 +62,7 @@ case "$1" in
 		rc_status
 	fi
         chmod 600 $random_seed
-        dd if=/dev/urandom of=$random_seed count=1 bs=512 2>/dev/null
+        dd if=/dev/urandom of=$random_seed count=1 bs=$pool_size 2>/dev/null
 	rc_status -v
 	;;
     status)
