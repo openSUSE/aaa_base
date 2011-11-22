@@ -24,6 +24,9 @@ if test "$is" != "ksh" ; then
     alias -- -='popd'
 fi
 alias rd=rmdir
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias grep='grep --color=auto'
 alias md='mkdir -p'
 if test "$is" = "bash" -a ! -x /bin/which -a ! -x /usr/bin/which ; then
     #
