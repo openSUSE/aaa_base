@@ -1,8 +1,0 @@
-test -d /tmp || mkdir -m 1777 /tmp
-test -d /tmp/.ICE-unix || mkdir -m 1777 /tmp/.ICE-unix
-test -d /tmp/.X11-unix || mkdir -m 1777 /tmp/.X11-unix
-test -d /var/run || mkdir -m 755 /var/run
-test -d /var/run/screens || mkdir -m 755 /var/run/screens
-test -d /var/run/uscreens || mkdir -m 1777 /var/run/uscreens
-test -d /var/tmp || mkdir -m 1777 /var/tmp
-test -d /var/tmp/vi.recover || mkdir -m 1777 /var/tmp/vi.recover

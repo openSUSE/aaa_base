@@ -61,9 +61,7 @@ case "$1" in
 			rc_status -v -r
 		    fi
 		fi
-		for script in /etc/tmpdirs.d/* ; do
-		    test -f $script && builtin . $script
-		done
+		/bin/systemd-tmpfiles --create --remove
 	fi
 	;;
 
