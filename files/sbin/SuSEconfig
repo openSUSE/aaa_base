@@ -75,9 +75,17 @@ while test $# -gt 0; do
       echo Running module $ONLY_MODULE only
       shift
     ;;
+    *-listmodules)
+      echo Listing available modules
+      ls /sbin/conf.d/SuSEconfig.* | \
+        while read module_name; do
+          echo -e "\t${module_name#/sbin/conf.d/SuSEconfig.}"
+        done
+      exit 0
+    ;;
     *)
       echo Unknown parameter $1.
-      echo Usage: SuSEconfig "[--quick|--nonewpackage|--force|--verbose] [--module name]"
+      echo Usage: SuSEconfig "[--quick|--nonewpackage|--force|--verbose] [--module name|--listmodules]"
       exit 1
     ;;
   esac
