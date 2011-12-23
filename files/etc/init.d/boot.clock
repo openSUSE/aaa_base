@@ -53,26 +53,26 @@ fi
 # write system time back to HW clock, bug bnc#492921.
 #
 ELEVENMIN_MODE=no
-
-typeset -i STA_CLOCK=0
-typeset -i STA_DIFF=$(TZ=UTC /bin/date +'%s')
-while IFS=: read tag value ; do
-    value=${value##* }
-    case "${tag}" in
-    *status)
-	let STA_CLOCK=$value ;;
-    *raw\ time)
-	let STA_DIFF-=${value%.*} ;;
-    *return\ value*)
-	let 'STA_CLOCK|=64'
-    esac
-done < <(TZ=UTC /sbin/adjtimex $HWCLOCK --print)
-unset tag value
-
-((STA_DIFF <= -900 || STA_DIFF >= 900)) && let 'STA_CLOCK|=64'
-((STA_CLOCK & 64)) || ELEVENMIN_MODE=yes
-
-unset STA_CLOCK STA_DIFF
+if test -e /sys/class/rtc/rtc0/since_epoch ; then
+    typeset -i STA_DIFF=0
+    read -t 1 STA_DIFF < /sys/class/rtc/rtc0/since_epoch
+    let STA_DIFF-=$(TZ=UTC /bin/date +'%s')
+    if ((STA_DIFF > -900 && STA_DIFF < 900)) ; then
+	typeset -i STA_CLOCK=64
+	while IFS=: read tag value ; do
+	    value=${value##* }
+	    case "${tag}" in
+	    *status)
+		let STA_CLOCK=$value ;;
+	    *return\ value*)
+		let 'STA_CLOCK|=64'
+	    esac
+	done < <(TZ=UTC /sbin/adjtimex $HWCLOCK --print)
+    fi
+    unset tag value
+    ((STA_CLOCK & 64)) || ELEVENMIN_MODE=yes
+    unset STA_CLOCK STA_DIFF
+fi
 
 #
 # Without having rtc_cmos module loaded hwclock will fail on at least x86
