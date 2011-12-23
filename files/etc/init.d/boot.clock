@@ -53,8 +53,26 @@ fi
 # write system time back to HW clock, bug bnc#492921.
 #
 ELEVENMIN_MODE=no
-typeset -i STA_CLOCK=$(adjtimex --print | sed -rn '/^[[:blank:]]*status:/{ s/[^[:digit:]]*([[:digit:]]+)/\1/p; }')
-test $((STA_CLOCK & 64)) -eq 0 && ELEVENMIN_MODE=yes
+
+typeset -i STA_CLOCK=0
+typeset -i STA_DIFF=$(TZ=UTC /bin/date +'%s')
+while IFS=: read tag value ; do
+    value=${value##* }
+    case "${tag}" in
+    *status)
+	let STA_CLOCK=$value ;;
+    *raw\ time)
+	let STA_DIFF-=${value%.*} ;;
+    *return\ value*)
+	let 'STA_CLOCK|=64'
+    esac
+done < <(TZ=UTC /sbin/adjtimex $HWCLOCK --print)
+unset tag value
+
+((STA_DIFF <= -900 || STA_DIFF >= 900)) && let 'STA_CLOCK|=64'
+((STA_CLOCK & 64)) || ELEVENMIN_MODE=yes
+
+unset STA_CLOCK STA_DIFF
 
 #
 # Without having rtc_cmos module loaded hwclock will fail on at least x86
