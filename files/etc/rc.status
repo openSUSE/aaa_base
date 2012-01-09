@@ -45,6 +45,9 @@ if test -z "$SYSTEMD_NO_WRAP" && /bin/mountpoint -q /sys/fs/cgroup/systemd > /de
 	    if test -L "$0"; then
 		_rc_base=`readlink "$0"`
 		_rc_base=${_rc_base##*/}
+		case "$_rc_base" in
+		boot.*) _rc_base=${_rc_base#boot.}
+		esac
 	    else
 		_rc_base=${0##*/rc}
 	    fi
