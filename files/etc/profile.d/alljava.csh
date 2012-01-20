@@ -1,46 +1,41 @@
 #
 #    /etc/profile.d/alljava.csh
 #
-# send feedback to http://www.suse.de/feedback
+# send feedback to http://bugs.opensuse.org
 
 #
 # This script sets some environment variables for default java.
-# Affected variables: PATH, JAVA_BINDIR, JAVA_HOME, JRE_HOME, 
+# Affected variables: JAVA_BINDIR, JAVA_HOME, JRE_HOME, 
 #                     JDK_HOME, SDK_HOME
 #
 
-set __libdir=lib
-if ( -l /usr/lib64/jvm/java || -l /usr/lib64/jvm/jre ) then
-  set __libdir=lib64
-endif
+foreach JDIR ( "/usr/lib64/jvm" "/usr/lib/jvm" "/usr/java/latest" "/usr/java" )
 
-if ( -x /usr/$__libdir/jvm/java/bin/java || -x /usr/$__libdir/jvm/java/bin/jre ) then
-  setenv JAVA_BINDIR /usr/$__libdir/jvm/java/bin
-  setenv JAVA_ROOT /usr/$__libdir/jvm/java
-  setenv JAVA_HOME /usr/$__libdir/jvm/java
-  setenv JRE_HOME /usr/$__libdir/jvm/jre
-  unsetenv JDK_HOME
-  unsetenv SDK_HOME
-  if ( -x /usr/$__libdir/jvm/java/bin/javac ) then
-    # it is development kit 
-    if ( -x /usr/$__libdir/jvm/java/bin/jre ) then
-      setenv JDK_HOME /usr/$__libdir/jvm/java
-    else
-      setenv JDK_HOME /usr/$__libdir/jvm/java
-      setenv SDK_HOME /usr/$__libdir/jvm/java
-    endif
-  endif
-else
-  if ( -x /usr/$__libdir/jvm/jre/bin/java ) then
-    # it is IBMJava2-JRE or SunJava2-JRE
-    setenv PATH ${PATH}:/usr/$__libdir/jvm/jre/bin
-    setenv JAVA_BINDIR /usr/$__libdir/jvm/jre/bin
-    setenv JAVA_ROOT /usr/$__libdir/jvm/jre
-    setenv JAVA_HOME /usr/$__libdir/jvm/jre
-    setenv JRE_HOME /usr/$__libdir/jvm/jre
-    unsetenv JDK_HOME
-    unsetenv SDK_HOME
-  endif
-endif
+    if ( ! -d $JDIR ) continue
 
-unset __libdir
+    foreach JPATH ( $JDIR $JDIR/java `ls -I 'java' -I 'jre' -d $JDIR/*` $JDIR/jre )
+
+        if ( ! -x $JPATH/bin/java ) continue
+
+        setenv JAVA_BINDIR $JPATH/bin
+        setenv JAVA_ROOT $JPATH
+        setenv JAVA_HOME $JPATH
+        unset JDK_HOME
+        unset SDK_HOME
+
+        switch ( $JPATH )
+        case *jre*:
+            setenv JRE_HOME $JPATH
+            breaksw
+        default:
+            setenv JRE_HOME $JPATH/jre
+            # it is development kit=20
+            if ( -x $JPATH/bin/javac ) then
+                setenv JDK_HOME $JPATH
+                setenv SDK_HOME $JPATH
+            endif
+        endsw
+    end
+    unset JPATH
+end
+unset JDIR
