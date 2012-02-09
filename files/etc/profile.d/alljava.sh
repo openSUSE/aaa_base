@@ -11,33 +11,34 @@
 
 for JDIR in /usr/lib64/jvm /usr/lib/jvm /usr/java/latest /usr/java; do
 
-    if ! test -d $JPATH; then
+    if ! test -d $JDIR; then
         continue
     fi
 
     for JPATH in $JDIR $JDIR/java `ls -I 'java' -I 'jre' -d $JDIR/* 2>/dev/null` $JDIR/jre; do
 
-        if ! test -x $JPATH/bin/java ; then
+        if ! test -x $JPATH/bin/java; then
             continue
         fi
 
-        export JAVA_BINDIR=3D$JPATH/bin
-        export JAVA_ROOT=3D$JPATH
-        export JAVA_HOME=3D$JPATH
+        export JAVA_BINDIR=$JPATH/bin
+        export JAVA_ROOT=$JPATH
+        export JAVA_HOME=$JPATH
         unset JDK_HOME
         unset SDK_HOME
 
         case "$JPATH" in
             *jre*)
-                export JRE_HOME=3D$JPATH
+                export JRE_HOME=$JPATH
                 ;;
 
             *)
-                export JRE_HOME=3D$JPATH/jre
+                export JRE_HOME=$JPATH/jre
                 # it is development kit
                 if [ -x $JPATH/bin/javac ] ; then
-                    export JDK_HOME=3D$JPATH
-                    export SDK_HOME=3D$JPATH
+                    export JDK_HOME=$JPATH
+                    export SDK_HOME=$JPATH
+                    break; # we found a JRE + SDK -- don't look any further
                 fi
                 ;;
         esac
