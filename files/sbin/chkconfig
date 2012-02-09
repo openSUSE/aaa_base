@@ -8,6 +8,7 @@ my $initdir = '/etc/init.d';
 my $inetddir = '/etc/inetd.d';
 my $xinetddir = '/etc/xinetd.d';
 my $systemd_service_path = '/lib/systemd/system';
+my $systemd_etc_service_path = '/etc/systemd/system';
 my $systemd_binary_path = '/bin/systemd';
 
 my %to_d = (
@@ -471,7 +472,7 @@ sub is_systemd_active {
 sub is_overriden_by_systemd {
     my $service = shift;
     my $root = shift;
-    return -e "$root/$systemd_service_path/$service.service";
+    return -e "$root/$systemd_service_path/$service.service" or -e "$root/$systemd_etc_service_path/$service.service";
 }
 
 sub forward_to_systemd {
@@ -680,6 +681,14 @@ if ($mode eq 's') {
       my $want = shift @services;
       $want = normalize($s, $want);
       $status = 1, next unless defined $want;
+      if (($root ne "/") or (($root eq "/") and is_systemd_active()) and is_overriden_by_systemd ($s,$root)) {
+	if ($want ne "") {
+          push @enable, $s;
+        } else {
+          push @remove, $s;
+	}
+	next;
+      }
       $current{$s} = getcurrent($s) unless defined $current{$s};
       $status = 1, next unless defined $current{$s};
       my $current = $current{$s};
