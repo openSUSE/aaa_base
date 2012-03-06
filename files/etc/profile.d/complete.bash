@@ -46,11 +46,14 @@ _compreply_ ()
     # a directory, then indicate this by letting readline put a space behind
     # it.
     #
-    if test ${#COMPREPLY[@]} -eq 1 \
-	-a -f ${COMPREPLY[0]} \
-	-a ! -d ${COMPREPLY[0]}
-    then
-	compopt +o nospace
+    if test ${#COMPREPLY[@]} -eq 1 ; then
+	eval x="${COMPREPLY[@]}"
+	if test -d "$x"
+	then
+	    compopt -o plusdirs
+	else
+	    compopt +o nospace
+	fi
     fi
 
     #
