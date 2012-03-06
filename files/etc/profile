@@ -78,8 +78,8 @@ if test -O "$tty" -a -n "$PS1"; then
         LINES=24
 	COLUMNS=80
 	export LINES COLUMNS TERM
-        if test -x /bin/initviocons ; then
-	     eval `/bin/initviocons -q -e`
+        if test -x /usr/bin/initviocons ; then
+	     eval `/usr/bin/initviocons -q -e`
 	fi
     fi
 fi
