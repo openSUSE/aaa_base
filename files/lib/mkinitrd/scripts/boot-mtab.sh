@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #%stage: setup
-#%programs: ln
+#%programs: /bin/ln
 #%modules:
 #%dontshow
 
