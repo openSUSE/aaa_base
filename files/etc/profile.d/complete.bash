@@ -346,7 +346,7 @@ _exp_ ()
     \$\{*\})	   eval COMPREPLY=\(${c}\) ;;
     \$\{*)		COMPREPLY=($(compgen -v -P '${' -S '}'  -- ${c#??}))	;;
     \$*)		COMPREPLY=($(compgen -v -P '$'          -- ${c#?}))	;;
-    \~*/*)		COMPREPLY=($(compgen -f -X "$e"         -- ${c}))	;;
+    \~*/*)		COMPREPLY=($(compgen -f -X "$e" +o plusdirs -- ${c}))	;;
     \~*)		COMPREPLY=($(compgen -u ${s}	 	-- ${c}))	;;
     *@*)		COMPREPLY=($(compgen -A hostname -P '@' -S ':' -- ${c#*@})) ;;
     *[*?[]*)		COMPREPLY=()			# use bashdefault
@@ -361,9 +361,9 @@ _exp_ ()
 			COMPREPLY=($(compgen -G "${c}"))			;;
     *)
 	if test "$c" = ".." ; then
-			COMPREPLY=($(compgen -d -X "$e" ${_nosp} -- $c))
+			COMPREPLY=($(compgen -d -X "$e" ${_nosp} +o plusdirs -- $c))
 	else
-			COMPREPLY=($(compgen -f -X "$e" -- $c))
+			COMPREPLY=($(compgen -f -X "$e" +o plusdirs -- $c))
 	fi
     esac
 
