@@ -33,9 +33,7 @@ if ( -o /dev/$tty && -c /dev/$tty && ${?prompt} ) then
     if ( -d /proc/iSeries && ( $tty == "tty1" || "$tty" == "console")) then
 	setenv LINES   24
 	setenv COLUMNS 80
-	if ( -x /usr/bin/initviocons ) then
-	    eval `/usr/bin/initviocons -q -e -c`
-	endif
+	eval `path initviocons -q -e -c`
     endif
     settc km yes
 endif

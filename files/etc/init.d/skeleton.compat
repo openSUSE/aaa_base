@@ -130,6 +130,9 @@ test -r $FOO_CONFIG || { echo "$FOO_CONFIG not existing";
 # Read config	
 . $FOO_CONFIG
 
+# Some variables
+FOO_PIDFILE=/var/run/foo.pid
+
 # Source LSB init functions
 # providing start_daemon, killproc, pidofproc, 
 # log_success_msg, log_failure_msg and log_warning_msg.
@@ -185,7 +188,7 @@ else
 	    fi
 	}
 	# TODO: Add checking for lockfiles
-	checkproc() { return pidofproc ${1+"$@"} >/dev/null 2>&1; }
+	checkproc() { pidofproc ${1+"$@"} >/dev/null 2>&1; return $?; }
     elif test -e /etc/init.d/functions; then
 	# RHAT
 	. /etc/init.d/functions
@@ -198,8 +201,8 @@ else
 		failure "  [${_SMSG[${_RC_RV}]}] "
 	    fi
 	}
-	checkproc() { return status ${1+"$@"}; }
-	start_daemon() { return daemon ${1+"$@"}; }
+	checkproc() { status ${1+"$@"}; return $?; }
+	start_daemon() { daemon ${1+"$@"}; return $?; }
     else
 	# emulate it
 	echo_rc() { echo "  [${_SMSG[${_RC_RV}]}] "; }
@@ -263,18 +266,30 @@ case "$1" in
 	## the return value is set appropriately by startproc.
 	start_daemon $FOO_BIN
 
-	# Remember status and be verbose
+	## Remember status and be verbose
 	rc_status -v
+
+	## Update PIDFILE if not automatically written
+	# pidofproc $FOO_BIN > $FOO_PIDFILE
 	;;
     stop)
 	echo -n "Shutting down FOO "
 	## Stop daemon with killproc(8) and if this fails
 	## killproc sets the return value according to LSB.
-
+	## Usage on RH: killproc [-p pidfile] [-d delay] {progrm} [-signal]
+	
+	## This one signal TERM followed by e.g. signal KILL
 	killproc $FOO_BIN
+	## or only with signal TERM
+	# killproc $FOO_BIN -TERM	
 
-	# Remember status and be verbose
+	## Remember status and be verbose
 	rc_status -v
+
+	## Remove PIDFILE it not automatically renmoved
+	# if test -e $FOO_PIDFILE ; then
+	#     rm -f $FOO_PIDFILE
+	# fi
 	;;
     try-restart|condrestart)
 	## Do a restart only if the service was active before.
@@ -289,7 +304,7 @@ case "$1" in
 	else
 		rc_reset	# Not running is not a failure.
 	fi
-	# Remember status and be quiet
+	## Remember status and be quiet
 	rc_status
 	;;
     restart)
@@ -298,7 +313,7 @@ case "$1" in
 	$0 stop
 	$0 start
 
-	# Remember status and be quiet
+	## Remember status and be quiet
 	rc_status
 	;;
     force-reload)
@@ -321,7 +336,7 @@ case "$1" in
 	## Like force-reload, but if daemon does not support
 	## signaling, do nothing (!)
 
-	# If it supports signaling:
+	## If it supports signaling:
 	echo -n "Reload service FOO "
 	killproc -HUP $FOO_BIN
 	#touch /var/run/FOO.pid
@@ -336,18 +351,18 @@ case "$1" in
 	## Check status with checkproc(8), if process is running
 	## checkproc will return with exit status 0.
 
-	# Return value is slightly different for the status command:
-	# 0 - service up and running
-	# 1 - service dead, but /var/run/  pid  file exists
-	# 2 - service dead, but /var/lock/ lock file exists
-	# 3 - service not running (unused)
-	# 4 - service status unknown :-(
-	# 5--199 reserved (5--99 LSB, 100--149 distro, 150--199 appl.)
+	## Return value is slightly different for the status command:
+	## 0 - service up and running
+	## 1 - service dead, but /var/run/  pid  file exists
+	## 2 - service dead, but /var/lock/ lock file exists
+	## 3 - service not running (unused)
+	## 4 - service status unknown :-(
+	## 5--199 reserved (5--99 LSB, 100--149 distro, 150--199 appl.)
 	
-	# NOTE: checkproc returns LSB compliant status values.
+	## NOTE: checkproc returns LSB compliant status values.
 	checkproc $FOO_BIN
-	# NOTE: rc_status knows that we called this init script with
-	# "status" option and adapts its messages accordingly.
+	## NOTE: rc_status knows that we called this init script with
+	## "status" option and adapts its messages accordingly.
 	rc_status -v
 	;;
     probe)
