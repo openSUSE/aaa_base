@@ -53,7 +53,7 @@ fi
 #
 path ()
 {
-    command -p ${1+$@"}
+    command -p ${1+"$@"}
 }
 
 #
