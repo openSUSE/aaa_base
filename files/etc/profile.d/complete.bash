@@ -9,13 +9,9 @@
 
  _def="-o default -o bashdefault"
  _dir="-o nospace -o dirnames -o plusdirs"
-_file="-o nospace -o dirnames"
+_file="-o nospace -o filenames"
+_mkdr="-o nospace -o dirnames"
 _nosp="-o nospace"
-
-#
-# bnc#725657
-#
-shopt -s direxpand 2> /dev/null || true
 
 # Escape file and directory names, add slash to directories if needed.
 # Escaping could be done by the option 'filenames' but this fails
@@ -51,8 +47,9 @@ _compreply_ ()
 	if test -d "$x"
 	then
 	    compopt -o plusdirs
-	else
 	    compopt +o nospace
+	else
+	    compopt -o nospace
 	fi
     fi
 
@@ -87,7 +84,7 @@ _cdpath_ ()
 
     for x in ${CDPATH//:/$'\n'}; do
 	o=${#COMPREPLY[@]}
-	for s in $(compgen -d $x/$c); do
+	for s in $(compgen -d +o plusdirs $x/$c); do
 	    if [[ (($sym == on && -h $s) || ($dir == on && ! -h $s)) && ! -d ${s#$x/} ]] ; then
 		s="${s}/"
 	    fi
@@ -179,7 +176,7 @@ _cd_ ()
 		    let isdir++
 		    eval COMPREPLY=\(${COMPREPLY[@]}\)
 		fi							;;
-    \~*/*)	COMPREPLY=($(compgen -d $s 		-- "${c}"))
+    \~*/*)	COMPREPLY=($(compgen -d $s +o plusdirs 	-- "${c}"))
 		if ((${#COMPREPLY[@]} > 0)) ; then
  		    compopt +o plusdirs
 		    let isdir++
@@ -191,7 +188,7 @@ _cd_ ()
 		fi							;;
     *\:*)	if [[ $COMP_WORDBREAKS =~ : ]] ; then
 		    x=${c%"${c##*[^\\]:}"}
-		    COMPREPLY=($(compgen -d $s          -- "${c}"))
+		    COMPREPLY=($(compgen -d $s +o plusdirs -- "${c}"))
  		    COMPREPLY=(${COMPREPLY[@]#"$x"})
 		    ((${#COMPREPLY[@]} == 0)) || let isdir++
 		fi
@@ -220,7 +217,7 @@ else
     complete ${_def} ${_dir}  -F _cd_		cd
 fi
 complete ${_def} ${_dir}  -F _cd_		rmdir pushd chroot chrootx
-complete ${_def} ${_file} -F _cd_		mkdir
+complete ${_def} ${_mkdr} -F _cd_		mkdir
 
 # General expanding shell function
 _exp_ ()
@@ -421,7 +418,7 @@ _gdb_ ()
 		COMPREPLY=($(compgen -W "${COMPREPLY[*]}" -- "$c")) ;;
     -s|e|-se)	COMPREPLY=($(compgen -f -- "$c")) ;;
     -c|-x)	COMPREPLY=($(compgen -f -- "$c")) ;;
-    -d)		COMPREPLY=($(compgen -d ${_nosp} -- "$c")) ;;
+    -d)		COMPREPLY=($(compgen -d ${_nosp} +o plusdirs -- "$c")) ;;
     *)
 		if test -z "$c"; then
 		    COMPREPLY=($(command ps axho comm,pid |\
@@ -508,13 +505,13 @@ _man_ ()
 	--) COMPREPLY=($ol) 	;;
  	-?) COMPREPLY=($c)	;;
 	\./*)
-	    COMPREPLY=($(compgen -f -d -X '\./.*'  -- $c)) ;;
+	    COMPREPLY=($(compgen -f -d -X '\./.*' +o plusdirs  -- $c)) ;;
     [0-9n]|[0-9n]p)
 	    COMPREPLY=($c)	;;
 	 *)
 	case "$o" in
 	    -l|--local-file)
-		COMPREPLY=($(compgen -f -d -X '.*' -- $c)) ;;
+		COMPREPLY=($(compgen -f -d -X '.*' +o plusdirs -- $c)) ;;
 	[0-9n]|[0-9n]p)
 		s=$(eval echo {${m}}$o/)
 		if type -p sed &> /dev/null ; then
