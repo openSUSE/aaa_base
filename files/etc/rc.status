@@ -39,7 +39,7 @@ if test -z "$SYSTEMD_NO_WRAP" && /bin/mountpoint -q /sys/fs/cgroup/systemd > /de
 	case "$0" in
 	/etc/init.d/boot.*)
 	    _rc_base=${0##*/boot.} ;;
-	/etc/init.d/*)
+	/etc/init.d/*|/etc/rc.d/*)
 	    _rc_base=${0##*/} ;;
 	*/rc*)
 	    if test -L "$0"; then
