@@ -1,0 +1,52 @@
+#!/usr/bin/perl -w
+
+# primitive merger for mime.type files
+
+my $types;
+my $headers;
+
+for my $file (@ARGV) {
+   open (IN, $file);
+
+   while (my $line = <IN>) {
+	chomp($line);
+        if ($line !~ /^(\#\s+)?[a-z-]+\//) {
+	   push @{$headers->{$file}}, $line;
+	   #print "seeing $line as header\n";
+	   next;
+	}
+	my $enabled = 1;
+	my @elem = split ('\s+', $line);
+	if ($elem[0] eq "#") {
+	    $enabled = 0;
+	    shift (@elem);
+	}
+	#print "line : ".($enabled ? "" : "# " ).join(',',@elem)."\n";
+	my $type = shift (@elem);
+	if ($enabled) {
+	    push @{$types->{$type}->{'enabled'}}, @elem;
+	} else {
+	    push @{$types->{$type}->{'disabled'}}, @elem;
+	}
+    }
+
+    close (IN);
+}
+
+print join("\n",@{$headers->{$ARGV[-1]}})."\n";
+
+sub unify {
+  my %h = map {$_ => 1} @_;
+  return grep(delete($h{$_}), @_);
+}
+
+
+for my $type (sort keys (%{$types})) {
+	@{$types->{$type}->{'disabled'}} = unify (@{$types->{$type}->{'disabled'}}) if $types->{$type}->{'disabled'};
+	@{$types->{$type}->{'enabled'}} = unify (@{$types->{$type}->{'enabled'}}) if $types->{$type}->{'enabled'};
+}
+
+for my $type (sort keys (%{$types})) {
+	printf "%-48s %s\n", "# $type", join(" ",@{$types->{$type}->{'disabled'}}) if $types->{$type}->{'disabled'};
+	printf "%-48s %s\n", $type, join(" ",@{$types->{$type}->{'enabled'}}) if $types->{$type}->{'enabled'};
+}
