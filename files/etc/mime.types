@@ -1264,7 +1264,7 @@ application/x-sms-rom                            sms gg
 application/x-soap-remoting                      soap
 application/x-sql                                sql
 application/x-streamingmedia                     ssm
-application/x-stuffit                            bin sit
+application/x-stuffit                            sit
 application/x-stuffitx                           sitx
 application/x-subrip                             srt
 application/x-sv4cpio                            sv4cpio
