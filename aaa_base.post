@@ -28,6 +28,31 @@ test -f /etc/nsswitch.conf.rpmnew && grep dns6 /etc/nsswitch.conf >/dev/null 2>&
 # GMT might already be in sysconfig/clock
 %{rename_sysconfig_variable -f /etc/sysconfig/clock GMT HWCLOCK}
 
+# just do a one-time migration of the time setting from /etc/sysconfig/clock
+# to /etc/adjtime as systemd now use the later as reference
+#
+if test -s /etc/sysconfig/clock
+then
+    . /etc/sysconfig/clock
+    if test ! -e /etc/adjtime
+    then
+	echo -e "0.0 0 0.0\n0\nUTC" > /etc/adjtime
+    fi
+    if test -n "$HWCLOCK"
+    then
+	sed -ri '\@^##[[:blank:]]+Type:[[:blank:]]+string\(-u,--utc,--localtime\)@,\@^HWCLOCK=@c\
+#\
+# Be aware that the time reference of the CMOS/HW clock has been\
+# forwarded to /etc/adjtime, the file used by hwclock(8) and\
+# systemd(1) as reference for the CMOS/HW clock.\
+' /etc/sysconfig/clock
+    fi
+    case "$HWCLOCK" in
+    *-l*) sed -ri 's@^UTC$@LOCAL@' /etc/adjtime ;;
+    *)	  sed -ri 's@^LOCAL$@UTC@' /etc/adjtime ;;
+    esac
+fi
+
 #
 # Initialize runlevel links
 #

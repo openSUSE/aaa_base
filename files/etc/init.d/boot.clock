@@ -1,13 +1,13 @@
 #!/bin/bash
 #
 # Copyright (c) 2001-2002 SuSE Linux AG, Nuernberg, Germany.
-# Copyright (c) 2008-2011 SuSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2008-2012 SuSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # /etc/init.d/boot.clock
 #
 ### BEGIN INIT INFO
 # Provides:          boot.clock
-# Required-Start:    boot.rootfsck
+# Required-Start:    boot.rootfsck boot.udev
 # Required-Stop:     boot.rootfsck
 # Should-Start:      $null
 # Should-Stop:       apparmor
@@ -23,28 +23,63 @@
 . /etc/rc.status
 . /etc/sysconfig/clock
 
-: ${HWCLOCK:=-u}
 : ${SYSTOHC:=yes}
+: ${USE_HWCLOCK:=yes}
+: ${BADYEAR:=no}
+
+adjtimex=$(PATH=/sbin:/bin:/usr/sbin:/usr/bin type -p adjtimex)
+    date=$(PATH=/sbin:/bin:/usr/sbin:/usr/bin type -p date)
+    grep=$(PATH=/sbin:/bin:/usr/sbin:/usr/bin type -p grep)
+   uname=$(PATH=/sbin:/bin:/usr/sbin:/usr/bin type -p uname)
+ hwclock=$(PATH=/sbin:/bin:/usr/sbin:/usr/bin type -p hwclock)
 
 #
-# Only compensate for clock drift if RTC is UTC
+# If the system adminstrator has deleted the /etc/adjtime create
+# a template with its defaults
 #
-USE_ADJFILE=no
-case "$HWCLOCK" in
-*-u*) USE_ADJFILE=yes ;;
-esac
-test "$SYSTOHC" != yes && USE_ADJFILE=no
+if test -w /etc -a ! -s /etc/adjtime ; then
+    echo -e '0.0 0 0.0\n0\nUTC' > /etc/adjtime
+fi
 
 #
-# Don't use hwclock if not valid
+# Determine the HW/CMOS clock reference
 #
-USE_HWCLOCK=yes
-case "$(uname -i)" in
-s390*) USE_HWCLOCK=no ;;
+HWREFERENCE=--utc
+$grep -q LOCAL /etc/adjtime && HWREFERENCE=""
+
+#
+# Do not use hwclock if not valid on this platform
+#
+case "$($uname -i)" in
+s390*) USE_HWCLOCK=no 
 esac
 if test -r /proc/xen/capabilities ; then
     read -t1 caps < /proc/xen/capabilities
     test "$caps" = "${caps%control_d*}" && USE_HWCLOCK=no
+fi
+
+#
+# Handle broken hardware clock
+#
+case "$BADYEAR" in
+yes) BADYEAR="--badyear" ;;
+*)   BADYEAR=""
+esac
+case "$USE_ADJUST" in
+yes) USE_ADJUST=--adjust ;;
+*)   USE_ADJUST=""
+esac
+
+#
+# If rtc device is not overwritten, determine it
+#
+if test -z "$HCTOSYS_DEVICE" ; then
+    if test -h /dev/rtc ; then
+	readlink=$(PATH=/sbin:/bin:/usr/sbin:/usr/bin type -p readlink)
+	HCTOSYS_DEVICE=$(readlink /dev/rtc)
+	HCTOSYS_DEVICE=${HCTOSYS_DEVICE##*/}
+    fi
+    : ${HCTOSYS_DEVICE:=rtc0}
 fi
 
 #
@@ -53,10 +88,10 @@ fi
 # write system time back to HW clock, bug bnc#492921.
 #
 ELEVENMIN_MODE=no
-if test -e /sys/class/rtc/rtc0/since_epoch ; then
+if test -e /sys/class/rtc/${HCTOSYS_DEVICE}/since_epoch -a -x "$adjtimex" -a -x "$date" ; then
     typeset -i STA_DIFF=0
-    read -t 1 STA_DIFF < /sys/class/rtc/rtc0/since_epoch
-    let STA_DIFF-=$(TZ=UTC /bin/date +'%s')
+    read -t 1 STA_DIFF < /sys/class/rtc/${HCTOSYS_DEVICE}/since_epoch
+    let STA_DIFF-=$(TZ=UTC $date +'%s')
     if ((STA_DIFF > -900 && STA_DIFF < 900)) ; then
 	typeset -i STA_CLOCK=64
 	while IFS=: read tag value ; do
@@ -67,7 +102,7 @@ if test -e /sys/class/rtc/rtc0/since_epoch ; then
 	    *return\ value*)
 		let 'STA_CLOCK|=64'
 	    esac
-	done < <(TZ=UTC /sbin/adjtimex $HWCLOCK --print)
+	done < <(TZ=UTC $adjtimex $HWREFERENCE --print)
     fi
     unset tag value
     ((STA_CLOCK & 64)) || ELEVENMIN_MODE=yes
@@ -79,7 +114,7 @@ fi
 #
 rtc_rule()
 {
-    local temprules=/dev/.udev/rules.d
+    local temprules=/run/udev/rules.d
     local uevseqnum=/sys/kernel/uevent_seqnum
     local rule=$temprules/95-rtc-cmos.rules
     local -i start=0 end=0
@@ -88,36 +123,31 @@ rtc_rule()
 	${1+"$@"}
 	return $?
     fi
+    local modprobe=$(PATH=/sbin:/bin:/usr/sbin:/usr/bin type -p modprobe)
 
-    if test -z "$(/sbin/modprobe -l rtc_cmos)" ; then
+    if test -z "$($modprobe -l rtc_cmos)" ; then
 	${1+"$@"}
 	return $?
     fi
+    local mkdir=$(PATH=/sbin:/bin:/usr/sbin:/usr/bin type -p mkdir)
 
-    /bin/mkdir -m 0755 -p $temprules
-    echo ACTION==\"add\", KERNEL==\"rtc0\", RUN=\"${1+"$@"} --rtc=\$env{DEVNAME}\" > $rule
+    $mkdir -m 0755 -p $temprules
+    echo ACTION==\"add\", KERNEL==\"${HCTOSYS_DEVICE}\", RUN=\"${1+"$@"}\" > $rule
 
     test -e $uevseqnum && read -t 1 start < $uevseqnum
 
-    if /sbin/modprobe -q rtc_cmos ; then
+    if $modprobe -q rtc_cmos ; then
+	local udevadm=$(PATH=/sbin:/bin:/usr/sbin:/usr/bin type -p udevadm)
 	test -e $uevseqnum && read -t 1 end < $uevseqnum
 	if test $start -lt $end ; then
-	    /sbin/udevadm settle --quiet --seq-start=$start --seq-end=$end
+	    $udevadm settle --quiet --seq-start=$start --seq-end=$end
 	else
-	    /sbin/udevadm settle --quiet
+	    $udevadm settle --quiet
 	fi
     else
 	rm -f $rule
 	${1+"$@"}
     fi
-}
-
-adjfile_thirdline()
-{
-    case "$HWCLOCK" in
-    *-u*) grep -q LOCAL /etc/adjtime && sed -ir 's/LOCAL/UTC/' /etc/adjtime ;;
-    *-l*) grep -q UTC   /etc/adjtime && sed -ir 's/UTC/LOCAL/' /etc/adjtime ;;
-    esac 2> /dev/null
 }
 
 rc_reset
@@ -138,9 +168,9 @@ case "$1" in
 
 	    unset TZ
 
-	    case "$1$HWCLOCK" in
-	    start*-l*)
-		date --set "$(date --utc +'%Y-%m-%d %H:%M:%S.%N')"
+	    case "$1$HWREFERENCE" in
+	    start)
+		$date --set "$($date --utc +'%Y-%m-%d %H:%M:%S.%N')"
 		rc_status
 		;;
 	    esac
@@ -158,65 +188,43 @@ case "$1" in
 	#	
 	echo -n "Set System Time to the current Hardware Clock"
 	#
-	# Read out to hardware clock and for UTC calculate adjtime
-	# write back the system time later at reboot/shutdown time.
+	# If not already done in (mk)initrd by warpclock:
+	#   Reset the System Time based on the current timezone.  Please note that
+	#   the old --hctosys is only valid for older kernels below 2.6 as for recent
+	#   kernels the System Time contains the Hardware Clock time.
 	#
-	if test "$USE_ADJFILE" = yes ; then
-	    #
-	    # For UTC calculate adjtime
-	    #
-	    if test ! -s /etc/adjtime ; then
-		{
-			echo "0.0 0 0.0"
-			echo "0"
-			echo "UTC"
-		} > /etc/adjtime
-	    else
-		test -w /etc/adjtime && adjfile_thirdline
-	    fi
-	    rtc_rule /sbin/hwclock $HWCLOCK --adjust
-	else
-	    # Change any /etc/adjtime left over
-	    test -w /etc/adjtime && adjfile_thirdline
-	    SYSTZ="--systz"
-            test -e /dev/shm/warpclock && SYSTZ=""
-	    rtc_rule /sbin/hwclock $SYSTZ $HWCLOCK --noadjfile
-	fi
+	SYSTZ="--systz"
+	test -e /dev/shm/warpclock && SYSTZ=""
+	rtc_rule $hwclock --rtc=/dev/$HCTOSYS_DEVICE $SYSTZ $USE_ADJUST $BADYEAR
 	rc_status -v
 	;;
     stop)
-	if test "$ELEVENMIN_MODE" = yes ; then
+	if test "$ELEVENMIN_MODE" = yes -a "$FORCE_SYSTOHC" = no ; then
 	    echo "The System Time is in sync with Hardware Clock ${stat}${done}good${norm}"
 	    rc_status
 	    rc_exit
 	fi
-	if test "$USE_HWCLOCK" = yes -a "$SYSTOHC" = yes ; then
+	if test "$USE_HWCLOCK" = yes -a \( "$SYSTOHC" = yes -o "$FORCE_SYSTOHC" = yes \) ; then
 	    echo -n "Set Hardware Clock to the current System Time"
 	    #
 	    # Write system time back to hardware clock
 	    #
-	    if test "$USE_ADJFILE" = yes ; then
-		/sbin/hwclock --systohc $HWCLOCK
-	    else
-		# Change any /etc/adjtime left over
-		test -w /etc/adjtime && adjfile_thirdline
-		/sbin/hwclock --systohc $HWCLOCK --noadjfile
-	    fi
+	    $hwclock --rtc=/dev/$HCTOSYS_DEVICE --systohc $USE_ADJUST $BADYEAR
 	    rc_status -v
 	fi
 	;;
     timezone)
 	echo -n "Set Hardware Clock to the current System Time"
 	if test "$USE_HWCLOCK" = yes ; then
-	    /sbin/hwclock --systohc $HWCLOCK --noadjfile
-	    /sbin/hwclock --hctosys $HWCLOCK --noadjfile
+	    $hwclock --rtc=/dev/$HCTOSYS_DEVICE --systohc $USE_ADJUST $BADYEAR
+	    $hwclock --rtc=/dev/$HCTOSYS_DEVICE --hctosys $USE_ADJUST $BADYEAR
 	else
 	    rc_status -u
 	fi
 	;;
-    status)
+    status|show)
 	echo -n "Current Hardware Clock: "
-	/sbin/hwclock --show
+	$hwclock --rtc=/dev/$HCTOSYS_DEVICE --show $USE_ADJUST $BADYEAR
 	rc_status -v1
 	;;
     *)
