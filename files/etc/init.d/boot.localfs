@@ -61,14 +61,13 @@ list_missed ()
 {
     local dev line
     local mount_opts="-t no${tmpfs//,/,no},$nofs,nonone -O no_netdev -O nonofail -O nobind"
-
-    mount -afnv $mount_opts 2> /dev/null | while read line ; do
+    set -- mount -afnv $mount_opts
+    MOUNT_PRINT_SOURCE=1 "$@" 2> /dev/null | while read line ; do
 	dev="${line%% *}"
 	case "$line" in
-	mount:\ *) continue ;; # messages from mount
-	*mounted*)
-	    continue	  ;;
-	*)  test -e $dev && continue
+	*:\ ignored) continue ;;
+	*:\ already\ mounted) continue ;;
+	*)  test "${dev#/}" = "$dev" -o -e $dev && continue
 	    echo "${dev}" ;;
 	esac
     done
@@ -103,18 +102,15 @@ wait_for_udev ()
 
 memfs_nonudev ()
 {
-    local none on mnt tag type opts
-    mount -afnv -t $mntfs -O no_netdev -O nonofail 2> /dev/null | \
-	while read none on mnt tag type opts ; do
-	    test "$mnt"  = already && continue
-	    case "$type" in
-	    proc)	[[ $mnt =~ /proc* ]] && continue ;;
-	    sysfs)	[[ $mnt =~ /sys*  ]] && continue ;;
-	    dev*)	[[ $mnt =~ /dev*  ]] && continue ;;
-	    cgroup*)	[[ $mnt =~ /sys*  ]] && continue ;;
-	    cpuset*)	[[ $mnt =~ /sys*  ]] && continue ;;
+    local dev line
+    set -- mount -afnv -t $mntfs -O no_netdev -O nonofail
+    "$@" 2> /dev/null | while read line ; do
+	    dev="${line%% *}"
+	    case "$line" in
+	    *:\ ignored) continue ;;
+	    *:\ already\ mounted) continue ;;
 	    esac
-	    mount $mnt
+	    mount $dev
 	done
 }
 
