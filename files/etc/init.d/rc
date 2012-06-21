@@ -147,26 +147,25 @@ if test "$PREVLEVEL" = "N" ; then
     if rc_cmdline confirm > /dev/null ; then
 	DO_CONFIRM=yes
     fi
-    test -e /var/run/do_confirm && DO_CONFIRM=yes
-    rm -f   /var/run/do_confirm
+    test -e /run/do_confirm && DO_CONFIRM=yes
+    rm -f   /run/do_confirm
     if rc_cmdline forcefsck > /dev/null ; then
 	DO_FORCEFSCK=yes
     fi
     if rc_cmdline fastboot > /dev/null  ; then
 	DO_FASTBOOT=yes
     fi
-    test -e /var/run/do_fastboot && DO_FASTBOOT=yes
-    rm -f   /var/run/do_fastboot
+    test -e /run/do_fastboot && DO_FASTBOOT=yes
+    rm -f   /run/do_fastboot
     if rc_cmdline quiet > /dev/null ; then
 	DO_QUIET=yes
     fi
     if test "$DO_FASTBOOT" = yes -o "$DO_QUIET" = yes -o ! -x /sbin/blogd ; then
 	DO_BLOGD=no
     fi
-    test -e /var/run/no_blogd && DO_BLOGD=no
-    rm -f   /var/run/no_blogd
     export DO_CONFIRM DO_FORCEFSCK DO_FASTBOOT DO_QUIET DO_BLOGD
 fi
+test -e /run/no_blogd && DO_BLOGD=no
 
 #
 # Reset status of this script

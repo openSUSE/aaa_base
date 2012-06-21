@@ -312,13 +312,13 @@ test -s /lib/bootcycle/stats && . /lib/bootcycle/stats
 # Remember for master resource script
 #
 if test "$DO_CONFIRM" = "yes" ; then
-    > /var/run/do_confirm
+    > /run/do_confirm
 fi
 if test "$DO_FASTBOOT" = "yes" ; then
-    > /var/run/do_fastboot
+    > /run/do_fastboot
 fi
 if test "$DO_BLOGD" = "no" ; then
-    > /var/run/no_blogd
+    > /run/no_blogd
 fi
 
 #
