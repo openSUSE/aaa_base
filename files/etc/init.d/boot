@@ -185,6 +185,7 @@ export DO_CONFIRM DO_FORCEFSCK DO_FASTBOOT DO_QUIET DO_BLOGD
 # Export the real device in variable REDIRECT.
 #
 if test "$DO_BLOGD" = yes ; then
+    test -w /var/log/boot.msg && mv /var/log/boot.msg /var/log/boot.omsg
     /sbin/blogd $REDIRECT
 fi
 
