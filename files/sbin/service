@@ -3,10 +3,15 @@
 # /sbin/service		Handle boot and runlevel services
 #
 
+sd_booted()
+{
+	test -d /sys/fs/cgroup/systemd/
+}
+
 #
 # Only root should do
 #
-if test "$(id -u)" -ne 0; then
+if ! sd_booted && test "$(id -u)" -ne 0; then
    echo "${0##*/}: only root can use ${0##*/}" 1>&2
    exit 1
 fi
@@ -83,18 +88,22 @@ if test $status_all -gt 0 ; then
 	usage 1>&2
 	exit 1
     fi
-    for rc in ${RCDIR}/*; do
-	test ! -x "$rc" -o -d "$rc"    && continue
-	case "${rc##*/}" in
-	*.local|*.rpm*|*.ba*|*.old|*.new) continue ;;
-	*.dpkg|*.save|*.swp|*.core)	  continue ;;
-	*.disabled)			  continue ;;
-	boot|rc|single|halt|reboot)	  continue ;;
-	powerfail|rx|Makefile|README)	  continue ;;
-	skeleton|*.d)			  continue ;;
-	esac
-	exec_rc $rc status
-    done
+    if sd_booted; then
+	    systemctl --full --no-legend --no-pager --type=service list-units
+    else
+	    for rc in ${RCDIR}/*; do
+		test ! -x "$rc" -o -d "$rc"    && continue
+		case "${rc##*/}" in
+		*.local|*.rpm*|*.ba*|*.old|*.new) continue ;;
+		*.dpkg|*.save|*.swp|*.core)	  continue ;;
+		*.disabled)			  continue ;;
+		boot|rc|single|halt|reboot)	  continue ;;
+		powerfail|rx|Makefile|README)	  continue ;;
+		skeleton|*.d)			  continue ;;
+		esac
+		exec_rc $rc status
+	    done
+    fi
     exit 0
 fi
 
