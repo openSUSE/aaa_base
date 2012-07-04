@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 #
 # /sbin/service		Handle boot and runlevel services
 #
 
 sd_booted()
 {
-	test -d /sys/fs/cgroup/systemd/
+    test -d /sys/fs/cgroup/systemd/
 }
 
 #
@@ -32,7 +32,44 @@ export PATH TERM LANG
 
 exec_rc ()
 {
-    env -i LANG=$LANG PATH=$PATH TERM=$TERM SYSTEMD_NO_WRAP=$SYSTEMD_NO_WRAP ${1+"$@"}
+    if sd_booted; then
+	case "$2" in
+	    "")
+		echo "Usage: $0 "$1" {start|stop|reload|restart|try-restart|force-reload|status}"
+		return 1
+		;;
+	    start|stop|reload|restart|try-restart|force-reload|status)
+		systemctl "$2" "$1.service"
+		return "$?"
+		;;
+	esac
+    fi
+    local rc="${RCDIR}/$1"
+    shift
+    env -i LANG=$LANG PATH=$PATH TERM=$TERM SYSTEMD_NO_WRAP=$SYSTEMD_NO_WRAP "$rc" ${1+"$@"}
+}
+
+check_rc ()
+{
+	local rc="$1"
+	shift
+	if sd_booted; then
+	    systemctl --quiet --lines=0 status "$rc.service" > /dev/null 2>&1
+	else
+	    test -x ${RCDIR}/$rc
+	fi
+}
+
+check_wrapper ()
+{
+    local n="${0##*/}"
+    if test "${n#rc}" != "$n"; then
+	rc="${n#rc}"
+	return 0
+    else
+	rc="$1"
+	return 1
+    fi
 }
 
 usage ()
@@ -93,7 +130,8 @@ if test $status_all -gt 0 ; then
     else
 	    for rc in ${RCDIR}/*; do
 		test ! -x "$rc" -o -d "$rc"    && continue
-		case "${rc##*/}" in
+		rc=${rc##*/}
+		case "$rc" in
 		*.local|*.rpm*|*.ba*|*.old|*.new) continue ;;
 		*.dpkg|*.save|*.swp|*.core)	  continue ;;
 		*.disabled)			  continue ;;
@@ -116,14 +154,13 @@ if test $full_restart -gt 0 ; then
 	exit 1
     fi
     for rc in $args; do
-	if test ! -x ${RCDIR}/$rc ; then
+	if check_rc $rc ; then
 	    echo "${0##*/}: no such service $rc" 1>&2
 	    exit 1
 	fi
     done
     status=0
     for rc in $args; do
-	rc=${RCDIR}/$rc
 	exec_rc $rc stop
 	exec_rc $rc start
 	test $? -gt 0 && status=1
@@ -141,12 +178,13 @@ if test -z "${args}" ; then
 fi
 
 set -- $args
-if test ! -x ${RCDIR}/$1 ; then
-    echo "${0##*/}: no such service $1" 1>&2
+if ! check_wrapper "$@"; then
+    shift
+fi
+if ! check_rc "$rc" ; then
+    echo "${0##*/}: no such service $rc" 1>&2
     exit 1
 fi
-rc=${RCDIR}/$1
-shift
 
 exec_rc $rc ${1+"$@"}
 exit $?
