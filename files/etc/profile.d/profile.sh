@@ -45,27 +45,27 @@ do
 	    PROXY_ENABLED="${val}"
 	    ;;
 	HTTP_PROXY=*)
-	    test -n "$val" || continue
+	    test "$PROXY_ENABLED" = "yes" || continue
 	    http_proxy="${val}"
 	    export http_proxy
 	    ;;
 	HTTPS_PROXY=*)
-	    test -n "$val" || continue
+	    test "$PROXY_ENABLED" = "yes" || continue
 	    https_proxy="${val}"
 	    export https_proxy
 	    ;;
 	FTP_PROXY=*)
-	    test -n "$val" || continue
+	    test "$PROXY_ENABLED" = "yes" || continue
 	    ftp_proxy="${val}"
 	    export ftp_proxy
 	    ;;
 	GOPHER_PROXY=*)
-	    test -n "$val" || continue
+	    test "$PROXY_ENABLED" = "yes" || continue
 	    gopher_proxy="${val}"
 	    export gopher_proxy
 	    ;;
 	NO_PROXY=*)
-	    test -n "$val" || continue
+	    test "$PROXY_ENABLED" = "yes" || continue
 	    no_proxy="${val}"
 	    export no_proxy
 	    NO_PROXY="${val}"

@@ -50,23 +50,23 @@ foreach line ( "`/bin/grep -vh '^#' $sysconf`" )
 	set proxy_enabled=${val:q}
 	breaksw
     case HTTP_PROXY=*:
-	if (! ${%val} ) continue
+	if (! ${%proxy_enabled} == yes ) continue
 	setenv http_proxy ${val:q}
 	breaksw
     case HTTPS_PROXY=*:
-	if (! ${%val} ) continue
+	if (! ${%proxy_enabled} == yes ) continue
 	setenv https_proxy ${val:q}
 	breaksw
     case FTP_PROXY=*:
-	if (! ${%val} ) continue
+	if (! ${%proxy_enabled} == yes ) continue
 	setenv ftp_proxy ${val:q}
 	breaksw
     case GOPHER_PROXY=*:
-	if (! ${%val} ) continue
+	if (! ${%proxy_enabled} == yes ) continue
 	setenv gopher_proxy ${val:q}
 	breaksw
     case NO_PROXY=*:
-	if (! ${%val} ) continue
+	if (! ${%proxy_enabled} == yes ) continue
 	setenv no_proxy ${val:q}
 	breaksw
     case DEFAULT_WM=*:
