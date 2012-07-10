@@ -186,6 +186,7 @@ export DO_CONFIRM DO_FORCEFSCK DO_FASTBOOT DO_QUIET DO_BLOGD
 #
 if test "$DO_BLOGD" = yes ; then
     test -w /var/log/boot.msg && mv /var/log/boot.msg /var/log/boot.omsg
+    rm -f /var/run/blogd.pid
     /sbin/blogd $REDIRECT
 fi
 
