@@ -227,8 +227,8 @@ case "$-" in
 		. $HOME/.bash_completion
 	    elif test -e /etc/bash_completion ; then
 		. /etc/bash_completion
-	    elif test -d /usr/share/bash-completion ; then
-		true # /etc/profile.d/bash_completion.sh will do the right thing
+	    elif test -s /etc/profile.d/bash_completion.sh ; then
+		. /etc/profile.d/bash_completion.sh
 	    elif test -s /etc/profile.d/complete.bash ; then
 		. /etc/profile.d/complete.bash
 	    fi
