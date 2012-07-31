@@ -53,11 +53,13 @@ check_rc ()
 {
 	local rc="$1"
 	shift
-	if sd_booted; then
-	    systemctl --quiet --lines=0 status "$rc.service" > /dev/null 2>&1
-	else
-	    test -x ${RCDIR}/$rc
+	if test -x ${RCDIR}/$rc; then
+		return 0
 	fi
+	if sd_booted && systemctl --full --no-legend --no-pager --type=service --all list-units 2>/dev/null|grep -q "^$rc.service"; then
+		return 0
+	fi
+	return 1
 }
 
 check_wrapper ()
