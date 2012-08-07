@@ -32,7 +32,7 @@ export PATH TERM LANG
 
 exec_rc ()
 {
-    if sd_booted; then
+    if sd_booted && test -z "$SYSTEMD_NO_WRAP"; then
 	case "$2" in
 	    "")
 		echo "Usage: $0 "$1" {start|stop|reload|restart|try-restart|force-reload|status}"
