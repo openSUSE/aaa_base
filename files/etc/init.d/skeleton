@@ -23,7 +23,8 @@
 #
 # Template system startup script for some example service/daemon FOO
 #
-# LSB compatible service control script; see http://www.linuxbase.org/spec/
+# LSB compatible service control script; see 
+# http://refspecs.linuxfoundation.org/LSB_4.1.0/LSB-Core-generic/LSB-Core-generic/initscrcomconv.html
 # 
 # Note: This template uses functions rc_XXX defined in /etc/rc.status on
 # UnitedLinux/SUSE/Novell based Linux distributions. If you want to base your
@@ -109,7 +110,7 @@
 # 3 - multiuser w/ network (text mode)  5 - multiuser w/ network and X11 (xdm)
 # 
 # Note on script names:
-# http://www.linuxbase.org/spec/refspecs/LSB_1.3.0/gLSB/gLSB/scrptnames.html
+# http://refspecs.linuxfoundation.org/LSB_4.1.0/LSB-Core-generic/LSB-Core-generic/etc.html#FHS-NAME-RULES
 # A registry has been set up to manage the init script namespace.
 # http://www.lanana.org/
 # Please use the names already registered or register one or use a
