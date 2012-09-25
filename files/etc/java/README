@@ -18,8 +18,8 @@ Note: In the next text JDK stands for java development kit and JRE for
 The directory /etc/java contains configuration files for all installed
 JDKs and JREs.
 
-These configuration files are used by SuSEconfig and  setDefaultJava
-scripts which will help you to set default JDK or JRE on your computer.
+These configuration files are used by the setDefaultJava
+script which will help you to set default JDK or JRE on your computer.
 
 They are also used by script setJava which will help you to use one of
 valid versions of JDKs or JREs with your application.
@@ -96,7 +96,7 @@ SDK_HOME:
 
 JAVA_LINK:
     - value is a absolute or relative path to a directory
-    - it is used by script setDefaultJava and SuSEconfig,
+    - it is used by script setDefaultJava
     - the link /usr/lib/java and other compatibility links will point
       to this directory name or to this path
 

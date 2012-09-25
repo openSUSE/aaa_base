@@ -12,9 +12,6 @@
 #
 # All scripts for runlevel changes are in /etc/init.d/.
 #
-# This file may be modified by SuSEconfig unless CHECK_INITTAB
-# in /etc/sysconfig/suseconfig is set to "no"
-#
 
 # The default runlevel for SysVinit is defined here
 #   please note that for systemd the symbolic link
