@@ -3,8 +3,7 @@
 #
 # post.sh - to be done after extraction
 #
-# Copyright (c) 2010 SuSE Linux AG Nuernberg, Germany.
-# Copyright (c) 2010 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 #
 # Run this script in C-Locale, or some tools will fail.
@@ -225,11 +224,12 @@ fi
 
 # create loop devices here instead of doing it in rpm to allow
 # graceful fail (bnc#661715)
+# This is done at system start via /usr/lib/tmpfiles.d/loop.conf
+# but we need to create them at install time as well.
 for i in 0 1 2 3 4 5 6 7; do
-	mkdir -p /lib/udev/devices
-	test -b /lib/udev/devices/loop$i && continue
-	/bin/mknod -m 0660 /lib/udev/devices/loop$i b 7 $i || break
-	chown root:disk /lib/udev/devices/loop$i
+       test -b /dev/loop$i && continue
+       /bin/mknod -m 0660 /dev/loop$i b 7 $i || break
+       chown root:disk /dev/loop$i
 done
 
 exit 0
