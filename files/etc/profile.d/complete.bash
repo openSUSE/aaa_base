@@ -1,10 +1,10 @@
-# /etc/profile.d/complete.bash for SuSE Linux
+# /etc/profile.d/complete.bash for SUSE Linux and openSUSE
 #
 #
 # This feature has its own file because some other shells
 # do not like the way how the bash assigns arrays
 #
-# REQUIRES bash 4.0 and higher
+# REQUIRES bash 4.2 and higher
 #
 
  _def="-o default -o bashdefault"
@@ -313,7 +313,7 @@ _exp_ ()
     gs|ghostview)	e='!*.+(eps|EPS|ps|PS|pdf|PDF)'		;;
     gv|kghostview)	e='!*.+(eps|EPS|ps|PS|ps.gz|pdf|PDF)'	;;
     acroread|[xk]pdf)	e='!*.+(fdf|pdf|FDF|PDF)'		;;
-    evince)		e='!*.+(ps|PS|pdf|PDF)'                 ;;
+    evince)		e='!*.+(ps|PS|pdf|PDF)'			;;
     dvips)		e='!*.+(dvi|DVI)'			;;
     rpm|zypper)		e='!*.+(rpm|you)'			;;
     [xk]dvi)		e='!*.+(dvi|dvi.gz|DVI|DVI.gz)'		;;
@@ -342,7 +342,7 @@ _exp_ ()
     \`*)		COMPREPLY=($(compgen -c -P '\`' -S '\`' -- ${c#?}))	;;
     \$\{*\})	   eval COMPREPLY=\(${c}\) ;;
     \$\{*)		COMPREPLY=($(compgen -v -P '${' -S '}'  -- ${c#??}))	;;
-    \$*)		COMPREPLY=($(compgen -v -P '$'          -- ${c#?}))	;;
+    \$*)		COMPREPLY=($(compgen -v -P '$'		-- ${c#?}))	;;
     \~*/*)		COMPREPLY=($(compgen -f -X "$e" +o plusdirs -- ${c}))	;;
     \~*)		COMPREPLY=($(compgen -u ${s}	 	-- ${c}))	;;
     *@*)		COMPREPLY=($(compgen -A hostname -P '@' -S ':' -- ${c#*@})) ;;
@@ -569,6 +569,105 @@ _rootpath_ ()
 }
 
 complete ${_def} -F _rootpath_			sudo
+
+_ls_ ()
+{
+    local c=${COMP_WORDS[COMP_CWORD]}
+    local IFS=$'\n'
+    local s x
+    local -i glob=0
+    local -i isdir=0
+    local -i quoted=0
+    local -i variable=0
+
+    if [[ "${c:0:1}" == '"' ]] ; then
+	let quoted++
+	compopt -o plusdirs
+    fi
+    if [[ "${c:0:1}" == '$' ]] ; then
+	let variable++
+	compopt -o dirnames +o filenames
+    else
+	compopt +o dirnames -o filenames
+    fi
+
+    if test -d "$c" ; then
+	compopt -o nospace
+    else
+	compopt +o nospace
+    fi
+
+    shopt -q extglob && let glob++
+    ((glob == 0)) && shopt -s extglob
+
+    case "$c" in
+    *[*?[]*)	COMPREPLY=()				# use bashdefault
+		((glob == 0)) && shopt -u extglob
+		return 0						;;
+    \$\(*\))    eval COMPREPLY=\(${c}\)
+		compopt +o plusdirs					;;
+    \$\(*)	COMPREPLY=($(compgen -c -P '$(' -S ')'  -- ${c#??}))
+		if ((${#COMPREPLY[@]} > 0)) ; then
+		    compopt +o plusdirs
+		    let isdir++
+		fi							;;
+    \`*\`)	eval COMPREPLY=\(${c}\)
+		compopt +o plusdirs					;;
+    \`*)	COMPREPLY=($(compgen -c -P '\`' -S '\`' -- ${c#?}))
+		if ((${#COMPREPLY[@]} > 0)) ; then
+		    compopt +o plusdirs
+		    let isdir++
+		fi							;;
+    \$\{*\})	eval COMPREPLY=\(${c}\)					;;
+    \$\{*)	COMPREPLY=($(compgen -v -P '${' -S '}'  -- ${c#??}))
+		if ((${#COMPREPLY[@]} > 0)) ; then
+		    compopt +o plusdirs
+		    if ((${#COMPREPLY[@]} > 1)) ; then
+			((glob == 0)) && shopt -u extglob
+			return 0
+		    fi
+		    let isdir++
+		    eval COMPREPLY=\(${COMPREPLY[@]}\)
+		fi							;;
+    \$*)	COMPREPLY=($(compgen -v -P '$' $s	-- ${c#?}))
+		if ((${#COMPREPLY[@]} > 0)) ; then
+		    compopt +o plusdirs
+		    if ((${#COMPREPLY[@]} > 1)) ; then
+			((glob == 0)) && shopt -u extglob
+			return 0
+		    fi
+		    let isdir++
+		    eval COMPREPLY=\(${COMPREPLY[@]}\)
+		fi							;;
+    \~*/*)	COMPREPLY=($(compgen -d $s +o plusdirs  -- "${c}"))
+		if ((${#COMPREPLY[@]} > 0)) ; then
+		    compopt +o plusdirs
+		    let isdir++
+		fi							;;
+    \~*)	COMPREPLY=($(compgen -u $s		-- "${c}"))
+		if ((${#COMPREPLY[@]} > 0)) ; then
+		    compopt +o plusdirs
+		    let isdir++
+		fi							;;
+    *\:*)	if [[ $COMP_WORDBREAKS =~ : ]] ; then
+		    x=${c%"${c##*[^\\]:}"}
+		    COMPREPLY=($(compgen -d $s +o plusdirs -- "${c}"))
+		    COMPREPLY=(${COMPREPLY[@]#"$x"})
+		    ((${#COMPREPLY[@]} == 0)) || let isdir++
+		fi
+		((glob == 0)) && shopt -u extglob
+		return 0						;;
+    *)		COMPREPLY=()			    # use (bash)default
+		((glob == 0)) && shopt -u extglob
+		return 0						;;
+    esac
+
+    ((quoted)) || _compreply_ $isdir
+
+    ((glob == 0)) && shopt -u extglob
+}
+
+complete ${_def} ${_file}  -F _ls_		ls ll la l ls-l lf
 
 unset _def _dir _file _nosp
 
