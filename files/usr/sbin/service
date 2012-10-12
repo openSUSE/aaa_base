@@ -1,0 +1,192 @@
+#!/bin/bash
+#
+# /sbin/service		Handle boot and runlevel services
+#
+
+sd_booted()
+{
+    test -d /sys/fs/cgroup/systemd/
+}
+
+#
+# Only root should do
+#
+if ! sd_booted && test "$(id -u)" -ne 0; then
+   echo "${0##*/}: only root can use ${0##*/}" 1>&2
+   exit 1
+fi
+
+#
+# Location of our service scripts
+#
+RCDIR="/etc/init.d"
+
+#
+# Clean environment
+#
+PATH=/sbin:/usr/sbin:/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin
+test -n "$TERM" || TERM=raw
+test -n "$SYSTEMD_NO_WRAP" && export SYSTEMD_NO_WRAP
+LANG=POSIX
+export PATH TERM LANG
+
+exec_rc ()
+{
+    if sd_booted && test -z "$SYSTEMD_NO_WRAP"; then
+	case "$2" in
+	    "")
+		echo "Usage: $0 "$1" {start|stop|reload|restart|try-restart|force-reload|status}"
+		return 1
+		;;
+	    start|stop|reload|restart|try-restart|force-reload|status)
+		systemctl "$2" "$1.service"
+		return "$?"
+		;;
+	esac
+    fi
+    local rc="${RCDIR}/$1"
+    shift
+    env -i LANG=$LANG PATH=$PATH TERM=$TERM SYSTEMD_NO_WRAP=$SYSTEMD_NO_WRAP "$rc" ${1+"$@"}
+}
+
+check_rc ()
+{
+	local rc="$1"
+	shift
+	if test -x ${RCDIR}/$rc; then
+		return 0
+	fi
+	if sd_booted && systemctl --full --no-legend --no-pager --type=service --all list-units 2>/dev/null|grep -q "^$rc.service"; then
+		return 0
+	fi
+	return 1
+}
+
+check_wrapper ()
+{
+    local n="${0##*/}"
+    if test "${n#rc}" != "$n"; then
+	rc="${n#rc}"
+	return 0
+    else
+	rc="$1"
+	return 1
+    fi
+}
+
+usage ()
+{
+    echo "Usage: ${0##*/} [--help | --status-all | <service> [<args>| --full-restart]]" 1>&2
+    exit 1
+}
+
+help ()
+{
+    echo "Usage: ${0##*/} [<options> | <service> [<args> | --full-restart]]"
+    echo "Available <options>:"
+    echo "  -h,--help        This help."
+    echo "  -s,--status-all  List out status of all services."
+    echo "Usage for specific <service>:"
+    echo "  ${0##*/} service_name argument [option]"
+    echo "  ${0##*/} service_name --full-restart"
+    echo "  ${0##*/} --full-restart service_name"
+    exit 0
+}
+
+  status_all=0
+full_restart=0
+        args=""
+while test $# -gt 0; do
+    opt=
+    if test "${1::1}" = "-"; then
+	if test ${#1} -gt 2 -a "${1::2}" = "--" ; then
+	    opt="${1:2}"
+	else
+	    opt="${1:1}"
+	fi
+	shift
+    else
+	args="${args:+$args }$1"
+	shift
+	continue
+    fi
+
+    case "$opt" in
+    status-all|s)   status_all=1 ;;
+    full-restart) full_restart=1 ;;
+    h*)			    help ;;
+    *)			   usage ;;
+    esac
+done
+
+#
+# Determine the status of all services
+#
+if test $status_all -gt 0 ; then
+    if test -n "$args" ; then
+	usage 1>&2
+	exit 1
+    fi
+    if sd_booted; then
+	    systemctl --full --no-legend --no-pager --type=service list-units
+    else
+	    for rc in ${RCDIR}/*; do
+		test ! -x "$rc" -o -d "$rc"    && continue
+		rc=${rc##*/}
+		case "$rc" in
+		*.local|*.rpm*|*.ba*|*.old|*.new) continue ;;
+		*.dpkg|*.save|*.swp|*.core)	  continue ;;
+		*.disabled)			  continue ;;
+		boot|rc|single|halt|reboot)	  continue ;;
+		powerfail|rx|Makefile|README)	  continue ;;
+		skeleton|*.d)			  continue ;;
+		esac
+		exec_rc $rc status
+	    done
+    fi
+    exit 0
+fi
+
+#
+# Do a full restart of a few services
+#
+if test $full_restart -gt 0 ; then
+    if test -z "$args" ; then
+	usage 1>&2
+	exit 1
+    fi
+    for rc in $args; do
+	if check_rc $rc ; then
+	    echo "${0##*/}: no such service $rc" 1>&2
+	    exit 1
+	fi
+    done
+    status=0
+    for rc in $args; do
+	exec_rc $rc stop
+	exec_rc $rc start
+	test $? -gt 0 && status=1
+    done
+    exit $status
+fi
+
+
+#
+# Execute single service with options
+#
+if test -z "${args}" ; then
+    usage 1>&2
+    exit 1
+fi
+
+set -- $args
+if ! check_wrapper "$@"; then
+    shift
+fi
+if ! check_rc "$rc" ; then
+    echo "${0##*/}: no such service $rc" 1>&2
+    exit 1
+fi
+
+exec_rc $rc ${1+"$@"}
+exit $?

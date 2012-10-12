@@ -2,13 +2,13 @@ CFLAGS=-O2 -g -Wall
 CPPFLAGS=-D_FILE_OFFSET_BITS=64
 LDFLAGS=-Wl,-z,relro,-z,now
 
-sbin_PROGRAMS=get_kernel_version
+bin_PROGRAMS=get_kernel_version
 
-all: $(sbin_PROGRAMS)
+all: $(bin_PROGRAMS)
 
 install: all
 	cp -a files/* $(DESTDIR)/
-	install -m755 get_kernel_version $(DESTDIR)/sbin
+	install -m755 get_kernel_version $(DESTDIR)/usr/bin
 
 clean:
 	rm -f $(sbin_PROGRAMS)

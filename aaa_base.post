@@ -52,20 +52,6 @@ then
     esac
 fi
 
-#
-# Initialize runlevel links
-#
-%{fillup_and_insserv -y boot.localfs boot.swap boot.klog boot.localnet halt random reboot single}
-%{insserv_force_if_yast /etc/init.d/boot.cleanup /etc/init.d/boot.rootfsck}
-## powerfail probably needs empty header ...
-
-# add Kill-links in boot.d if needed:
-for i in localfs swap clock ldconfig klog localnet loadmodules ; do
-    if [ -f /etc/init.d/boot.d/S??boot.$i -a ! -f /etc/init.d/boot.d/K??boot.$i ] ; then
-%{insserv_force_if_yast boot.$i}
-    fi
-done
-
 %{remove_and_set -n security CONSOLE_SHUTDOWN}
 %{remove_and_set -n suseconfig CHECK_INITTAB}
 %{remove_and_set -n suseconfig HALT_SOUND}
@@ -202,24 +188,6 @@ fi
 # change all /media mounts (subfs) to noauto
 if test -f /etc/fstab ; then
 sed  -i -e '/^[[:space:]]*#/{p;d}' -e '/[[:space:]]subfs.*noauto/{p;d}' -e '/\/media.*fs=\(cdfss\|floppyfss\)/s/\([[:space:]]subfs[[:space:]][[:space:]]*\)/\1noauto,/' /etc/fstab
-fi
-
-# IA64 Altix update hook
-if test -d /proc/sgi_sn ; then
-    if grep -q "console=ttyS0" /etc/elilo.conf ; then
-	echo "replacing ttyS0 by ttySG0 in elilo.conf, inittab and securetty files"
-	#
-	sed -i -e "s/console=ttyS0/console=ttySG0/g" /etc/elilo.conf
-	#
-	sed -i -e "s/getty\(.*\)ttyS0/getty\1ttySG0/g" /etc/inittab
-	#
-	sed -i -e "s/ttyS0/ttySG0/g" /etc/securetty
-	#
-	if grep -q /boot/efi /proc/mounts ; then
-	    echo "calling elilo to update"
-	    /sbin/elilo || true
-	fi
-    fi
 fi
 
 # create loop devices here instead of doing it in rpm to allow
