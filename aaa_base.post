@@ -190,14 +190,4 @@ if test -f /etc/fstab ; then
 sed  -i -e '/^[[:space:]]*#/{p;d}' -e '/[[:space:]]subfs.*noauto/{p;d}' -e '/\/media.*fs=\(cdfss\|floppyfss\)/s/\([[:space:]]subfs[[:space:]][[:space:]]*\)/\1noauto,/' /etc/fstab
 fi
 
-# create loop devices here instead of doing it in rpm to allow
-# graceful fail (bnc#661715)
-# This is done at system start via /usr/lib/tmpfiles.d/loop.conf
-# but we need to create them at install time as well.
-for i in 0 1 2 3 4 5 6 7; do
-       test -b /dev/loop$i && continue
-       /bin/mknod -m 0660 /dev/loop$i b 7 $i || break
-       chown root:disk /dev/loop$i
-done
-
 exit 0
