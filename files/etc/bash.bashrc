@@ -108,36 +108,64 @@ case "$-" in
 		eval echo \"..\${$(($#-1))}/\${$#}\"
 	    fi ) ; }
 	# Set xterm prompt with short path (last 18 characters)
-	ppwd () {
-	    local _t="$1" _w _x _u="$USER" _h="$HOST"
-	    test -n "$_t"    || return
-	    test "${_t#tty}" = $_t && _t=pts/$_t
-	    test -O /dev/$_t || return
-	    _w="$(dirs +0)"
-	    _x=$((${#_w}-18))
-	    test ${#_w} -le 18 || _w="...${_w#$(printf "%.*s" $_x "$_w")}"
-	    printf "\e]2;%s@%s:%s\007\e]1;%s\007" "$_u" "$_h" "$_w" "$_h" > /dev/$_t
+	if tput hs 2>/dev/null || tput -T $TERM+sl hs 2>/dev/null ; then
+	    if test "$TERM" = xterm ; then
+		_tsl=$(echo -en '\e]2;')
+		_isl=$(echo -en '\e]1;')
+		_fsl=$(echo -en '\007')
+	    else
+		_tsl=$(tput tsl 2>/dev/null || tput -T $TERM+sl tsl 2>/dev/null)
+		_isl=''
+		_fsl=$(tput fsl 2>/dev/null || tput -T $TERM+sl fsl 2>/dev/null)
+	    fi
+		    _sc=$(tput sc 2>/dev/null)
+		    _rc=$(tput rc 2>/dev/null)
+	    if test -n "$_tsl" -a -n "$_isl" -a "$_fsl" ; then
+		TS1="$_sc$_tsl%s@%s:%s$_fsl$_isl%s$_fsl$_rc"
+	    elif test -n "$_tsl" -a "$_fsl" ; then
+		TS1="$_sc$_tsl%s@%s:%s$_fsl$_rc"
+	    fi
+	    unset _tsl _fsl _sc _rc
+	    ppwd () {
+		local tty="$1" dir
+		local -i width
+		test -n "$TS1" || return;
+		test -n "$tty" || return;
+		test "${tty#tty}" = "$tty" && tty="pts/$tty"
+		tty="/dev/$tty"
+		test -O "$tty" || return;
+		dir="$(dirs +0)"
+		let width=${#dir}-18
+		test ${#dir} -le 18 || dir="...${dir#$(printf "%.*s" $width "$dir")}"
+		if test ${#TS1} -gt 17 ; then
+		    printf "$TS1" "$USER" "$HOST" "$dir" "$HOST" > "$tty"
+		else
+		    printf "$TS1" "$USER" "$HOST" "$dir" > "$tty"
+		fi
 	    }
+	else
+	    ppwd () { true; }
+	fi
 	# If set: do not follow sym links
 	# set -P
 	#
 	# Other prompting for root
-	_t=""
 	if test "$UID" -eq 0  ; then
 	    _u="\h"
 	    _p=" #"
 	else
 	    _u="\u@\h"
 	    _p=">"
-	    if test \( "$TERM" = "xterm" -o "${TERM#screen}" != "$TERM" \) \
-		    -a -z "$EMACS" -a -z "$MC_SID" -a -n "$DISPLAY" \
-		    -a ! -r $HOME/.bash.expert
-	    then
-		_t="\$(ppwd \l)"
-	    fi
-	    if test -n "$restricted" ; then
-		_t=""
-	    fi
+	fi
+	if test -z "$EMACS" -a -z "$MC_SID" -a -n "$DISPLAY" \
+		-a ! -r $HOME/.bash.expert
+	then
+	    _t="\$(ppwd \l)"
+	else
+	    _t=""
+	fi
+	if test -n "$restricted" ; then
+	    _t=""
 	fi
 	case "$(declare -p PS1 2> /dev/null)" in
 	*-x*PS1=*)
