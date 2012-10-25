@@ -163,7 +163,7 @@ done <<EOT
 /var/log/faillog    root:root 600
 /var/log/wtmp       root:utmp 664
 /var/log/btmp       root:root 600
-/var/run/utmp       root:utmp 664
+/run/utmp       root:utmp 664
 EOT
 
 if test -e /usr/sbin/usrdel.local -a ! -e /usr/sbin/userdel.local ; then
