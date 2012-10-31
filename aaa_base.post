@@ -30,13 +30,13 @@ test -f /etc/nsswitch.conf.rpmnew && grep dns6 /etc/nsswitch.conf >/dev/null 2>&
 # just do a one-time migration of the time setting from /etc/sysconfig/clock
 # to /etc/adjtime as systemd now use the later as reference
 #
+if test ! -e /etc/adjtime
+then
+    echo -e "0.0 0 0.0\n0\nUTC" > /etc/adjtime
+fi
 if test -s /etc/sysconfig/clock
 then
     . /etc/sysconfig/clock
-    if test ! -e /etc/adjtime
-    then
-	echo -e "0.0 0 0.0\n0\nUTC" > /etc/adjtime
-    fi
     if test -n "$HWCLOCK"
     then
 	sed -ri '\@^##[[:blank:]]+Type:[[:blank:]]+string\(-u,--utc,--localtime\)@,\@^HWCLOCK=@c\
