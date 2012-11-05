@@ -1,0 +1,34 @@
+#! /bin/sh
+#
+# Copyright (c) 2001-2002 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
+#
+# /etc/init.d/boot.localfs
+#
+### BEGIN INIT INFO
+# Provides:          boot.localfs
+# Required-Start:    $null
+# Required-Stop:     $null
+# Default-Start:     B
+# Default-Stop:
+# X-Interactive:     true
+# Short-Description: check and mount local filesystems except /
+# Description:       check and mount local filesystems except /
+### END INIT INFO
+
+. /etc/rc.status
+
+rc_reset
+
+case "$1" in
+  start|stop|restart)
+	rc_failed 3
+	rc_status -v
+	;;
+    *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+	;;
+esac
+
+rc_exit

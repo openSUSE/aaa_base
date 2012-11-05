@@ -1,0 +1,41 @@
+#! /bin/bash
+#
+# Copyright (c) 2001-2005 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 2011 SUSE Linux Products GmbH, Nuernberg, Germany.
+#
+# /etc/init.d/boot.cleanup
+#
+### BEGIN INIT INFO
+# Provides:          boot.cleanup
+# Required-Start:    $null
+# Should-Start:      $null
+# Required-Stop:     $null
+# Should-Stop:       $null
+# Default-Start:     B
+# Default-Stop:
+# Short-Description: do cleanup
+# Description: Cleanup left over tempfiles from 
+#	last run: screen sockets, temporary rpm-database files,
+#	ssh agent infos, various lockfiles, utmp and some more.
+### END INIT INFO
+
+. /etc/rc.status
+
+rc_reset
+
+case "$1" in
+  start|stop)
+	rc_failed 3
+	;;
+
+    restart|reload)
+	rc_failed 3
+	rc_status -v
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status}"
+	exit 1
+	;;
+esac
+
+rc_exit
