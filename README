@@ -1,0 +1,9 @@
+aaa_base
+========
+
+This repository makes up the tar ball in the aaa_base package
+http://build.opensuse.org/package/show?package=aaa_base&project=Base:System
+
+After commit, checkout Base:System aaa_base and run
+  osc service dr
+
