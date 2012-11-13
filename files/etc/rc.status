@@ -58,7 +58,7 @@ if test -z "$SYSTEMD_NO_WRAP" && /bin/mountpoint -q /sys/fs/cgroup/systemd > /de
 	    *) unset _rc_base ;;
 	esac
 	if test -n "$_rc_base" -a -x /bin/systemctl ; then
-	    exec /bin/systemctl $1 "${_rc_base}.service"
+	    exec /bin/systemctl $1 "${_rc_base}
 	fi
 	unset _rc_base
     fi
