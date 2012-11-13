@@ -180,12 +180,21 @@ case "$-" in
 	    ;;
 	esac
 	# Colored root prompt (see bugzilla #144620)
+	_ps1_nocolor="$PS1"
 	if test "$UID" -eq 0 -a -n "$TERM" -a -t ; then
 	    _bred="$(path tput bold 2> /dev/null; path tput setaf 1 2> /dev/null)"
 	    _sgr0="$(path tput sgr0 2> /dev/null)"
 	    PS1="\[$_bred\]$PS1\[$_sgr0\]"
 	    unset _bred _sgr0
 	fi
+	# Mirror prompt in terminal "status line", which for graphical
+	# terminals usually is the window title.  kde konsole in
+	# addition needs to have "%w" in the "tabs" setting, ymmv fo
+	# other console emulators.
+	if _tsl=$(path tput tsl 2> /dev/null) && _fsl=$(path tput fsl 2> /dev/null); then
+	    PS1="$_tsl$_ps1_nocolor$_fsl$PS1"
+	fi
+	unset _ps1_nocolor _tsl _fsl
 	unset _u _p _t
 	;;
     ash)
