@@ -52,7 +52,7 @@ then
     esac
 fi
 
-%{fillup_and_insserv -y boot.localfs boot.rootfsck boot.cleanup boot.localnet}
+%{fillup_and_insserv -y boot.localnet}
 
 %{remove_and_set -n security CONSOLE_SHUTDOWN}
 %{remove_and_set -n suseconfig CHECK_INITTAB}
