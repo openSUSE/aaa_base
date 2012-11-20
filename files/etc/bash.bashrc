@@ -98,7 +98,9 @@ case "$-" in
 	fi
 	# Force a reset of the readline library
 	unset TERMCAP
+	#
 	# Returns short path (last two directories)
+	#
 	spwd () {
 	  ( IFS=/
 	    set $PWD
@@ -107,19 +109,27 @@ case "$-" in
 	    else
 		eval echo \"..\${$(($#-1))}/\${$#}\"
 	    fi ) ; }
+	#
 	# Set xterm prompt with short path (last 18 characters)
-	if tput hs 2>/dev/null || tput -T $TERM+sl hs 2>/dev/null ; then
+	#
+	if path tput hs 2>/dev/null || path tput -T $TERM+sl hs 2>/dev/null ; then
+	    #
+	    # Mirror prompt in terminal "status line", which for graphical
+	    # terminals usually is the window title. KDE konsole in
+	    # addition needs to have "%w" in the "tabs" setting, ymmv for
+	    # other console emulators.
+	    #
 	    if test "$TERM" = xterm ; then
 		_tsl=$(echo -en '\e]2;')
 		_isl=$(echo -en '\e]1;')
 		_fsl=$(echo -en '\007')
 	    else
-		_tsl=$(tput tsl 2>/dev/null || tput -T $TERM+sl tsl 2>/dev/null)
+		_tsl=$(path tput tsl 2>/dev/null || path tput -T $TERM+sl tsl 2>/dev/null)
 		_isl=''
-		_fsl=$(tput fsl 2>/dev/null || tput -T $TERM+sl fsl 2>/dev/null)
+		_fsl=$(path tput fsl 2>/dev/null || path tput -T $TERM+sl fsl 2>/dev/null)
 	    fi
-		    _sc=$(tput sc 2>/dev/null)
-		    _rc=$(tput rc 2>/dev/null)
+	    _sc=$(tput sc 2>/dev/null)
+	    _rc=$(tput rc 2>/dev/null)
 	    if test -n "$_tsl" -a -n "$_isl" -a "$_fsl" ; then
 		TS1="$_sc$_tsl%s@%s:%s$_fsl$_isl%s$_fsl$_rc"
 	    elif test -n "$_tsl" -a "$_fsl" ; then
@@ -127,20 +137,16 @@ case "$-" in
 	    fi
 	    unset _tsl _fsl _sc _rc
 	    ppwd () {
-		local tty="$1" dir
+		local dir
 		local -i width
 		test -n "$TS1" || return;
-		test -n "$tty" || return;
-		test "${tty#tty}" = "$tty" && tty="pts/$tty"
-		tty="/dev/$tty"
-		test -O "$tty" || return;
 		dir="$(dirs +0)"
 		let width=${#dir}-18
 		test ${#dir} -le 18 || dir="...${dir#$(printf "%.*s" $width "$dir")}"
 		if test ${#TS1} -gt 17 ; then
-		    printf "$TS1" "$USER" "$HOST" "$dir" "$HOST" > "$tty"
+		    printf "$TS1" "$USER" "$HOST" "$dir" "$HOST"
 		else
-		    printf "$TS1" "$USER" "$HOST" "$dir" > "$tty"
+		    printf "$TS1" "$USER" "$HOST" "$dir"
 		fi
 	    }
 	else
@@ -151,20 +157,28 @@ case "$-" in
 	#
 	# Other prompting for root
 	if test "$UID" -eq 0  ; then
-	    _u="\h"
-	    _p=" #"
+	    if test -n "$TERM" -a -t ; then
+	    	_bred="$(path tput bold 2> /dev/null; path tput setaf 1 2> /dev/null)"
+	    	_sgr0="$(path tput sgr0 2> /dev/null)"
+	    fi
+	    # Colored root prompt (see bugzilla #144620)
+	    if test -n "$_bred" -a -n "$_sgr0" ; then
+		_u="\[$_bred\]\h"
+		_p=" #\[$_sgr0\]"
+	    else
+		_u="\h"
+		_p=" #"
+	    fi
+	    unset _bred _sgr0
 	else
 	    _u="\u@\h"
 	    _p=">"
 	fi
-	if test -z "$EMACS" -a -z "$MC_SID" -a -n "$DISPLAY" \
-		-a ! -r $HOME/.bash.expert
+	if test -z "$EMACS" -a -z "$MC_SID" -a -z "$restricted" -a \
+		-n "$DISPLAY" -a ! -r $HOME/.bash.expert
 	then
-	    _t="\$(ppwd \l)"
+	    _t="\[\$(ppwd)\]"
 	else
-	    _t=""
-	fi
-	if test -n "$restricted" ; then
 	    _t=""
 	fi
 	case "$(declare -p PS1 2> /dev/null)" in
@@ -179,22 +193,6 @@ case "$-" in
 #	    PS1="${_t}${_u}:\$(pwd -P)${_p} "
 	    ;;
 	esac
-	# Colored root prompt (see bugzilla #144620)
-	_ps1_nocolor="$PS1"
-	if test "$UID" -eq 0 -a -n "$TERM" -a -t ; then
-	    _bred="$(path tput bold 2> /dev/null; path tput setaf 1 2> /dev/null)"
-	    _sgr0="$(path tput sgr0 2> /dev/null)"
-	    PS1="\[$_bred\]$PS1\[$_sgr0\]"
-	    unset _bred _sgr0
-	fi
-	# Mirror prompt in terminal "status line", which for graphical
-	# terminals usually is the window title.  kde konsole in
-	# addition needs to have "%w" in the "tabs" setting, ymmv fo
-	# other console emulators.
-	if _tsl=$(path tput tsl 2> /dev/null) && _fsl=$(path tput fsl 2> /dev/null); then
-	    PS1="$_tsl$_ps1_nocolor$_fsl$PS1"
-	fi
-	unset _ps1_nocolor _tsl _fsl
 	unset _u _p _t
 	;;
     ash)
