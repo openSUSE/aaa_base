@@ -55,11 +55,11 @@ if test -z "$SYSTEMD_NO_WRAP" && /bin/mountpoint -q /sys/fs/cgroup/systemd > /de
 	esac
 	case "$1" in
 	    status) SYSTEMD_NO_WRAP=1 "$0" "$1" ;;
-	    start|stop|reload|restart|try-restart|force-reload) echo "redirecting to systemctl $1 ${_rc_base}" >/dev/stderr ;;
+	    start|stop|reload|restart|try-restart|force-reload) echo "redirecting to systemctl ${SYSTEMCTL_OPTIONS} $1 ${_rc_base}" >/dev/stderr ;;
 	    *) unset _rc_base ;;
 	esac
 	if test -n "$_rc_base" -a -x /bin/systemctl ; then
-	    exec /bin/systemctl $1 "${_rc_base}"
+	    exec /bin/systemctl ${SYSTEMCTL_OPTIONS} $1 "${_rc_base}"
 	fi
 	unset _rc_base
     fi
