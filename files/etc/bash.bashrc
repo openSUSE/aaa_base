@@ -90,6 +90,11 @@ case "$-" in
     #
     case "$is" in
     bash)
+	# If COLUMNS are within the environment the shell should update
+	# the winsize after each job otherwise the values are wrong
+	case "$(declare -p COLUMNS 2> /dev/null)" in
+	*-x*COLUMNS=*) shopt -s checkwinsize
+	esac
 	# Append history list instead of override
 	shopt -s histappend
 	# All commands of root will have a time stamp
