@@ -1,6 +1,6 @@
 #
 # (c) System csh.cshrc for tcsh, Werner Fink '93
-#                         and  J"org Stadler '94
+#                           and Jörg Stadler '94
 #
 # This file sources /etc/profile.d/complete.tcsh and
 # /etc/profile.d/bindkey.tcsh used especially by tcsh.
@@ -14,9 +14,9 @@
 #
 
 #
-# Just in case the user excutes a command with ssh
+# Just in case the user excutes a command with ssh or sudo
 #
-if ((${?loginsh} || ${?SSH_CONNECTION}) && ! ${?CSHRCREAD}) then
+if ((${?loginsh} || ${?SSH_CONNECTION} || ${?SUDO_COMMAND}) && ! ${?CSHRCREAD}) then
     set _SOURCED_FOR_SSH=true
     source /etc/csh.login >& /dev/null
     unset _SOURCED_FOR_SSH

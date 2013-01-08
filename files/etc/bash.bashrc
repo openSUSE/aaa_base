@@ -299,9 +299,9 @@ case "$-" in
 esac
 
 #
-# Just in case the user excutes a command with ssh
+# Just in case the user excutes a command with ssh or sudo
 #
-if test -n "$SSH_CONNECTION" -a -z "$PROFILEREAD" ; then
+if test \( -n "$SSH_CONNECTION" -o -n "$SUDO_COMMAND" \) -a -z "$PROFILEREAD" ; then
     _SOURCED_FOR_SSH=true
     . /etc/profile > /dev/null 2>&1
     unset _SOURCED_FOR_SSH
