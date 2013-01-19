@@ -7,8 +7,7 @@ use File::Temp 'tempfile';
 my $initdir = '/etc/init.d';
 my $inetddir = '/etc/inetd.d';
 my $xinetddir = '/etc/xinetd.d';
-my $systemd_service_path = '/lib/systemd/system';
-my $systemd_etc_service_path = '/etc/systemd/system';
+my @systemd_paths = ('/usr/lib/systemd/system', '/run/systemd/system', '/etc/systemd/system');
 my $systemd_binary_path = '/bin/systemd';
 
 my %to_d = (
@@ -472,7 +471,22 @@ sub is_systemd_active {
 sub is_overriden_by_systemd {
     my $service = shift;
     my $root = shift;
-    return -e "$root/$systemd_service_path/$service.service" or -e "$root/$systemd_etc_service_path/$service.service";
+    for my $path (@systemd_paths) {
+	return $path if -e "$root/$path/$service.service";
+    }
+    return undef;
+}
+
+sub systemd_get_enabled {
+    my $service = shift;
+    my $root = shift;
+    my $unit = "$service.service";
+    my $ret;
+    my $root_option;
+    $root_option = "--root $root" if $root ne "/" ;
+    #print STDERR "Note: Forwarding request to 'systemctl is-enabled $unit'.\n";
+    $ret = system ("systemctl -q $root_option is-enabled $unit");
+    return $ret==0?'on':'off';
 }
 
 sub forward_to_systemd {
@@ -481,25 +495,15 @@ sub forward_to_systemd {
     my $root = shift;
 
     return unless ($root ne "/") or ($root eq "/") and (is_systemd_active());
+    return unless is_overriden_by_systemd ($service,$root);
 
-    if (is_overriden_by_systemd ($service,$root)) {
-	    my $unit = "$service.service";
-	    my $ret;
-	    my $root_option;
-	    print STDERR "Note: Forwarding request to 'systemctl $verb $unit'.\n";
-	    $root_option = "--root $root" unless $root eq "/" ;
-	    $ret = system ("systemctl $root_option $verb $unit");
-	    if ($verb eq "is-enabled") {
-		print "$service  ";
-		if ($ret == 0) {
-                   print "on\n";
-                } else {
-                   print "off\n";
-                }
-	    }
-	    return 1;
-    }
-    return;
+    my $unit = "$service.service";
+    my $ret;
+    my $root_option;
+    #print STDERR "Note: Forwarding request to 'systemctl $verb $unit'.\n";
+    $root_option = "--root $root" unless $root eq "/" ;
+    $ret = system ("systemctl $root_option $verb $unit");
+    return $ret == 0;
 }
 
 
@@ -637,7 +641,9 @@ if ($mode eq 'e' || $mode eq 't') {
     next unless defined $current{$s};
     my $r = readable($s, $current{$s});
     next unless defined $r;
-    next if forward_to_systemd($s, "is-enabled", $root);
+    if (is_overriden_by_systemd($s, $root)) {
+	$r = systemd_get_enabled($s, $root);
+    }
     printf $fh "%-*s  %s\n", $maxlen, $s, $r;
   }
   exit 0 unless $mode eq 'e';
@@ -681,11 +687,11 @@ if ($mode eq 's') {
       my $want = shift @services;
       $want = normalize($s, $want);
       $status = 1, next unless defined $want;
-      if (($root ne "/") or (($root eq "/") and is_systemd_active()) and is_overriden_by_systemd ($s,$root)) {
+      if (is_overriden_by_systemd ($s,$root)) {
 	if ($want ne "") {
-          push @enable, $s;
+	    $status = 1 unless forward_to_systemd($s, 'enable', $root);
         } else {
-          push @remove, $s;
+	    $status = 1 unless forward_to_systemd($s, 'disable', $root);
 	}
 	next;
       }
@@ -752,10 +758,23 @@ if ($mode eq 'a' || $mode eq 'd') {
     push @services, $s;
   }
   if (!$status) {
-    if ($mode eq 'a') {
-      insserv('-p', "$initdir", @services) or $status = 1;
-    } else {
-      insserv('-p', "$initdir", '-r', @services) or $status = 1;
+    for $s (splice @services) {
+      if (is_overriden_by_systemd($s,$root)) {
+	if ($mode eq 'a') {
+	  forward_to_systemd($s, 'enable', $root);
+	} else {
+	  forward_to_systemd($s, 'disable', $root);
+	}
+      } else {
+	push @services, $s;
+      }
+    }
+    if (scalar(@services)) {
+      if ($mode eq 'a') {
+	insserv('-p', "$initdir", @services) or $status = 1;
+      } else {
+	insserv('-p', "$initdir", '-r', @services) or $status = 1;
+      }
     }
   }
   $mode = 'l';
@@ -763,7 +782,7 @@ if ($mode eq 'a' || $mode eq 'd') {
 }
 if ($mode eq 'l') {
   my $usecolor = -t STDOUT;
-  if (-e $systemd_service_path && -e $systemd_binary_path) {
+  if (is_systemd_active()) {
       print STDERR <<EOF;
 
 Note: This output shows SysV services only and does not include native
