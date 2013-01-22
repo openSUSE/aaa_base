@@ -494,7 +494,6 @@ sub forward_to_systemd {
     my $verb = shift;
     my $root = shift;
 
-    return unless ($root ne "/") or ($root eq "/") and (is_systemd_active());
     return unless is_overriden_by_systemd ($service,$root);
 
     my $unit = "$service.service";
