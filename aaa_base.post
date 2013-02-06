@@ -45,11 +45,11 @@ then
 # forwarded to /etc/adjtime, the file used by hwclock(8) and\
 # systemd(1) as reference for the CMOS/HW clock.\
 ' /etc/sysconfig/clock
+	case "$HWCLOCK" in
+	*-l*) sed -ri 's@^UTC$@LOCAL@' /etc/adjtime ;;
+	*)    sed -ri 's@^LOCAL$@UTC@' /etc/adjtime ;;
+	esac
     fi
-    case "$HWCLOCK" in
-    *-l*) sed -ri 's@^UTC$@LOCAL@' /etc/adjtime ;;
-    *)	  sed -ri 's@^LOCAL$@UTC@' /etc/adjtime ;;
-    esac
 fi
 
 %{fillup_and_insserv -y boot.localnet}
