@@ -4,11 +4,14 @@ shopt -s nullglob
 name="`pwd -P`"
 name=${name##*/}
 name=${name%%.*}
+branch=`git rev-parse --abbrev-ref HEAD`
+pkgdir="$name"
+[ "$branch" = "master" ] || pkgdir="$pkgdir.$branch"
 src="$PWD"
-if [ ! -d "$name/.osc" ]; then
+if [ ! -d "$pkgdir/.osc" ]; then
 	echo "*** Error: please check out the package:"
-	echo "osc branch openSUSE:Factory aaa_base"
-	echo "ln -s home\:*\:branches\:*/aaa_base ."
+	echo "osc branch openSUSE:Factory $name"
+	echo "ln -s home\:*\:branches\:*/$name $pkgdir"
 	exit 1
 fi
 if [ "`git --no-pager diff --name-only|wc -l`" != '0' -o "`git --no-pager diff --name-only --cached|wc -l`" != 0 ]; then
@@ -16,34 +19,35 @@ if [ "`git --no-pager diff --name-only|wc -l`" != '0' -o "`git --no-pager diff -
 	echo "run 'git add file' to add files, 'git commit -a' to commit changes"
 	exit 1
 fi
-cd "$name"
+cd "$pkgdir"
 echo "osc up"
 osc up
 cd "$src"
-"$src"/obs/mkchanges "$name/$name".changes | tee "$name"/.changes
-#test ! -s $name/.changes || git push
+"$src"/obs/mkchanges "$pkgdir/$name".changes | tee "$pkgdir"/.changes
+#test ! -s $pkgdir/.changes || git push
 for i in *.gz; do
 	/bin/rm -vi "$i"
 done
 cd "$src"
 "$src"/obs/mktar
-mv *gz "$name"
-cd "$name"
+mv *gz "$pkgdir"
+cd "$pkgdir"
 osc vc "$name".changes .changes && rm -f .changes
 cd "$src"
 if [ -n "`git rev-list remotes/origin/master..HEAD`" ]; then
 	pushed=
-	if ! grep -q refs/heads/master .git/HEAD; then
+	if [ "$branch" != "master" ]; then
 		echo "Warning: not on master branch"
-	elif read -p "push changes now? (Y/n) "; then
+	fi
+	if read -p "push changes now? (Y/n) "; then
 		if [ -z "$REPLY" -o "${REPLY#y}" != "$REPLY" ]; then
-			git push && pushed=1 || true
+			git push origin $branch && pushed=1 || true
 		fi
 	fi
 	if [ -z "$pushed" ]; then
 		echo "*** Warning: changes not pushed!"
 	else
-		cd "$name"
+		cd "$pkgdir"
 		osc ci
 	fi
 fi
