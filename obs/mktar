@@ -8,9 +8,9 @@ VERSION=12.3
 #scmver="$DATE"
 fullver="$VERSION${scmver:+_}$scmver"
 pfx="$NAME${fullver:+-$fullver}"
-fn="$pfx".tar.gz
+fn="$pfx".tar.xz
 if ! git config --get tar.umask >/dev/null 2>&1 ; then
 	git config --add tar.umask 022
 fi
-git archive --prefix="$pfx"/ HEAD | gzip > $fn
+git archive --prefix="$pfx"/ HEAD | xz > $fn
 echo "version $fullver -> $fn"
