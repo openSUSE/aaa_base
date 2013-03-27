@@ -576,7 +576,7 @@ findknown();
 
 if (@ARGV) {
   @services = @ARGV;
-  $mode = @services == 1 ? 't' : 's' if $mode eq '';
+  $mode = @services == 1 ? ($level ? 'c': 't') : 's' if $mode eq '';
 } else {
   die("Please specify a service\n") if $mode eq 'c' || $mode eq 'a' || $mode eq 'd';
   @services = sort grep {!$skips_rc{$_}} keys %known_all if $mode ne 's';
@@ -600,7 +600,9 @@ if ($mode eq 'c') {
   die("Please specify only one service to check\n") if @services > 2;
   $s = $services[0];
   my $want;
-  if (@services == 1) {
+  if (@services == 1 && $level) {
+    $want = $level;
+  } elsif (@services == 1) {
     $want = `/sbin/runlevel`;
     chomp($want);
     die("Can't determine current runlevel\n") unless $want =~ s/^. (.)$/$1/;
