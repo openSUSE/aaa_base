@@ -7,7 +7,7 @@ use File::Temp 'tempfile';
 my $initdir = '/etc/init.d';
 my $inetddir = '/etc/inetd.d';
 my $xinetddir = '/etc/xinetd.d';
-my @systemd_paths = ('/usr/lib/systemd/system', '/run/systemd/system', '/etc/systemd/system');
+my @systemd_paths = ('/usr/lib/systemd/system', '/lib/systemd/system', '/run/systemd/system', '/etc/systemd/system');
 my $systemd_binary_path = '/bin/systemd';
 
 my %to_d = (
