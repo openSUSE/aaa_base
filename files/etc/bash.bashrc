@@ -263,9 +263,7 @@ case "$-" in
 	# Complete builtin of the bash 2.0 and higher
 	case "$BASH_VERSION" in
 	[2-9].*)
-	    if test -e $HOME/.bash_completion ; then
-		. $HOME/.bash_completion
-	    elif test -e /etc/bash_completion ; then
+	    if test -e /etc/bash_completion ; then
 		. /etc/bash_completion
 	    elif test -s /etc/profile.d/bash_completion.sh ; then
 		. /etc/profile.d/bash_completion.sh
@@ -275,6 +273,9 @@ case "$-" in
 	    for s in /etc/bash_completion.d/*.sh ; do
 		test -r $s && . $s
 	    done
+	    if test -e $HOME/.bash_completion ; then
+		. $HOME/.bash_completion
+	    fi
 	    if test -f /etc/bash_command_not_found ; then
 		. /etc/bash_command_not_found
 	    fi

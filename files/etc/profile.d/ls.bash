@@ -44,9 +44,31 @@ case "$-" in
 	unalias ls 2>/dev/null
     fi
     case "$is" in
-	bash) alias ls='ls $LS_OPTIONS'      ;;
-	zsh)  alias ls='\ls $=LS_OPTIONS'    ;;
-	*)    alias ls='/bin/ls $LS_OPTIONS' ;;
+	bash|dash|ash)
+	    _ls ()
+	    {
+		local IFS=' '
+		command ls $LS_OPTIONS ${1+"$@"}
+	    }
+	    alias ls=_ls
+	    ;;
+	zsh)
+	    _ls ()
+	    {
+		local IFS=' '
+		command \ls $=LS_OPTIONS ${1+"$@"}
+	    }
+	    alias ls=_ls
+	    ;;
+	ksh)
+	    _ls ()
+	    {
+		typeset IFS=' '
+		command ls $LS_OPTIONS ${1+"$@"}
+	    }
+	    alias ls=_ls
+	    ;;
+	*)  alias ls='/bin/ls $LS_OPTIONS' ;;
     esac
     alias dir='ls -l'
     alias ll='ls -l'
