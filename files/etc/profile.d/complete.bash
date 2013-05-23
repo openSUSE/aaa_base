@@ -672,5 +672,20 @@ complete ${_def} ${_file}  -F _ls_		ls ll la l ls-l lf
 unset _def _dir _file _nosp
 
 #
+# info bash 'Command Line Editing' 'Programmable Completion'
+#
+if ! type -t _completion_loader &> /dev/null ; then
+    _completion_loader ()
+    {
+	local fallback=(-o default -o bashdefault -o filenames)
+	local dir=/usr/share/bash-completion/completions
+	local cmd="${1##*/}"
+	. "${dir}/${cmd}" &>/dev/null && return 124
+	complete "${fallback[@]}" ${cmd} &>/dev/null && return 124
+    }
+    complete -D -F _completion_loader
+fi
+
+#
 # End of /etc/profile.d/complete.bash
 #
