@@ -33,7 +33,7 @@
 #
 
 # Check if the service is used under systemd but not started with
-if test -z "$SYSTEMD_NO_WRAP" && /bin/mountpoint -q /sys/fs/cgroup/systemd > /dev/null 2>&1 ; then
+if test -z "$SYSTEMD_NO_WRAP" && /usr/bin/mountpoint -q /sys/fs/cgroup/systemd; then
     if test $PPID -ne 1 -a $# -eq 1 ; then
 	_rc_base=
 	case "$0" in
