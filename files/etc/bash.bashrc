@@ -304,6 +304,13 @@ case "$-" in
     ;;
 esac
 
+# Source /etc/profile.d/vte.sh, which improvies usage of VTE based terminals.
+# It is vte.sh's responsibility to 'not load' when it's not applicable (not inside a VTE term)
+# If you want to 'disable' this functionality, set the sticky bit on /etc/profile.d/vte.sh
+if test -r /etc/profile.d/vte.sh -a ! -k /etc/profile.d/vte.sh; then
+  . /etc/profile.d/vte.sh
+fi
+
 #
 # Just in case the user excutes a command with ssh or sudo
 #
