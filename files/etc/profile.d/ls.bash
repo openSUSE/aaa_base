@@ -53,7 +53,7 @@ case "$-" in
 	    alias ls=_ls
 	    ;;
 	zsh)
-	    _ls ()
+	    z_ls ()
 	    {
 		local IFS=' '
 		command \ls $=LS_OPTIONS ${1+"$@"}
