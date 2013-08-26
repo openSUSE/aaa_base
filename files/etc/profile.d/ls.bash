@@ -58,7 +58,7 @@ case "$-" in
 		local IFS=' '
 		command \ls $=LS_OPTIONS ${1+"$@"}
 	    }
-	    alias ls=_ls
+	    alias ls=z_ls
 	    ;;
 	ksh)
 	    _ls ()
