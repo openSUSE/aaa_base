@@ -28,6 +28,8 @@ if test -z "$is" ; then
     */ksh)	is=ksh  ;;
     */ksh93)	is=ksh  ;;
     */pdksh)	is=ksh  ;;
+    */mksh)	is=ksh  ;;
+    */lksh)	is=ksh  ;;
     */*pcksh)	is=ksh  ;;
     */zsh)	is=zsh  ;;
     */*)	is=sh   ;;
