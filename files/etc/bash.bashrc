@@ -236,8 +236,11 @@ case "$-" in
 	fi
 	;;
     *)
-#	PS1='\u:\w> '
-	PS1='\h:\w> '
+	if test "$UID" = 0 ; then
+	    PS1="${HOST}:"'${PWD}'" # "
+	else
+	    PS1="${USER}@${HOST}:"'${PWD}'"> "
+	fi
 	;;
     esac
     PS2='> '
