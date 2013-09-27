@@ -53,13 +53,23 @@ if test -z "$SYSTEMD_NO_WRAP" && /usr/bin/mountpoint -q /sys/fs/cgroup/systemd; 
 	    fi
 	    ;;
 	esac
+	if ! _rc_system=$(systemctl is-enabled "${_rc_base}.service" 2>/dev/null) ; then
+	    case "$_rc_system" in
+	    static) echo "Skipped: ${_rc_base} is overwritten by a native systemd unit" 1>&2
+		    exit 2 ;;
+	    masked) echo "Error: ${_rc_base} is masked out and forbidden by systemd" 1>&2
+		    exit 2 ;;
+	    esac
+	    systemctl daemon-reload
+	    systemctl --no-reload enable "${_rc_base}.service" 2> /dev/null
+	fi
 	case "$1" in
 	    status) SYSTEMD_NO_WRAP=1 "$0" "$1" ;;
 	    start|stop|reload|restart|try-restart|force-reload) echo "redirecting to systemctl $1 ${_rc_base}" 1>&2 ;;
 	    *) unset _rc_base ;;
 	esac
 	if test -n "$_rc_base" -a -x /bin/systemctl ; then
-	    exec /bin/systemctl $1 "${_rc_base}"
+	    exec /bin/systemctl $1 "${_rc_base}.service"
 	fi
 	unset _rc_base
     fi
