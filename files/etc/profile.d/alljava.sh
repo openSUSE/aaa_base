@@ -29,16 +29,17 @@ for JDIR in /usr/lib64/jvm /usr/lib/jvm /usr/java/latest /usr/java; do
 
         case "$JPATH" in
             *jre*)
-                export JRE_HOME=$JPATH
+                [ -z "$JRE_HOME" ] && export JRE_HOME=$JPATH
                 ;;
 
             *)
-                export JRE_HOME=$JPATH/jre
+                [ -z "$JRE_HOME" ] && export JRE_HOME=$JPATH/jre
                 # it is development kit
                 if [ -x $JPATH/bin/javac ] ; then
                     export JDK_HOME=$JPATH
                     export SDK_HOME=$JPATH
-                    break; # we found a JRE + SDK -- don't look any further
+                    unset JPATH
+                    break 2; # we found a JRE + SDK -- don't look any further
                 fi
                 ;;
         esac
