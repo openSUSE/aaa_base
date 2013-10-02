@@ -5,6 +5,7 @@
 /bin/false
 /bin/ksh
 /bin/ksh93
+/bin/mksh
 /bin/pdksh
 /bin/sh
 /bin/tcsh
@@ -14,6 +15,7 @@
 /usr/bin/dash
 /usr/bin/ksh
 /usr/bin/ksh93
+/usr/bin/mksh
 /usr/bin/passwd
 /usr/bin/pdksh
 /usr/bin/bash
