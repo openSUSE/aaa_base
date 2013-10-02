@@ -28,6 +28,8 @@ if test -z "$is" ; then
     */ksh)	is=ksh  ;;
     */ksh93)	is=ksh  ;;
     */pdksh)	is=ksh  ;;
+    */mksh)	is=ksh  ;;
+    */lksh)	is=ksh  ;;
     */*pcksh)	is=ksh  ;;
     */zsh)	is=zsh  ;;
     */*)	is=sh   ;;
@@ -236,8 +238,11 @@ case "$-" in
 	fi
 	;;
     *)
-#	PS1='\u:\w> '
-	PS1='\h:\w> '
+	if test "$UID" = 0 ; then
+	    PS1="${HOST}:"'${PWD}'" # "
+	else
+	    PS1="${USER}@${HOST}:"'${PWD}'"> "
+	fi
 	;;
     esac
     PS2='> '
