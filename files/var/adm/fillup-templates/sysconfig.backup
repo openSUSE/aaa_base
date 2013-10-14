@@ -20,7 +20,7 @@ RPMDB_BACKUP_DIR="/var/adm/backup/rpmdb"
 MAX_RPMDB_BACKUPS="5"
 
 ## Type:	string
-## Default:	/var/adm/backup/rpmdb
+## Default:	/var/adm/backup/sysconfig
 #
 # If you want cron.daily to backup /etc/rc.config and the files in 
 # /etc/sysconfig, specify a directory where the backups will be stored.
