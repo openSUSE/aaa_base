@@ -85,6 +85,7 @@ RC_LC_PAPER=""
 # This defines if the user "root" should use the locale settings
 # which are defined here.
 # Value "ctype" means that root uses just LC_CTYPE. 
+# Value "yes" means that root uses the full settings.. 
 #
 ROOT_USES_LANG="ctype"
 
