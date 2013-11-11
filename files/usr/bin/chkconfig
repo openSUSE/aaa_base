@@ -362,7 +362,7 @@ sub findknown {
   for (ls($initdir)) {
     next unless -f "$initdir/$_";
     next if /^README/ || /^core/;
-    next if /~$/ || /^[\d\$\.#_\-\\\*]/ || /\.(rpm|ba|old|new|save|swp|core)/;
+    next if /~$/ || /^[\d\$\.#_\-\\\*]/ || /\.(rpm.*|ba.|old|new|save|swp|core)$/;
     $known_rc{$_} = 1;
     $known_all{$_} = 1;
   }
