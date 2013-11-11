@@ -528,6 +528,7 @@ usage:
         chkconfig -e|--edit  [names]            (configure services)
         chkconfig -s|--set   [name state]...    (configure services)
         chkconfig -l|--list [--deps] [names]    (shows the links)
+	chkconfig -L|--liston [--deps] [names]  (as -l, enabled in at least 1 level)
         chkconfig -c|--check name [state]       (check state)
         chkconfig -a|--add   [names]            (runs insserv)
         chkconfig -d|--del   [names]            (runs insserv -r)
@@ -543,6 +544,7 @@ EOF
 Getopt::Long::Configure('no_ignore_case');
 
 if (!GetOptions('list|l'   => \&addmode,
+		'L|liston' => \&addmode,
                 'terse|t'  => \&addmode,
                 'add|a'    => \&addmode,
                 'del|d'    => \&addmode,
@@ -583,7 +585,7 @@ if (@ARGV) {
 }
 $mode = 't' if $mode eq '';
 
-initlinks_rc() if $mode eq 'e' || $mode eq 't' || $mode eq 's' || $mode eq 'c' || $mode eq 'l';
+initlinks_rc() if $mode eq 'e' || $mode eq 't' || $mode eq 's' || $mode eq 'c' || $mode eq 'l' || $mode eq 'L';
 
 if (!@ARGV && !$allservices) {
   my $l;
@@ -781,7 +783,7 @@ if ($mode eq 'a' || $mode eq 'd') {
   $mode = 'l';
   initlinks_rc();
 }
-if ($mode eq 'l') {
+if ($mode eq 'l' || $mode eq 'L') {
   my $usecolor = -t STDOUT;
   if (is_systemd_active()) {
       print STDERR <<EOF;
@@ -797,25 +799,30 @@ EOF
       print STDERR "$s: unknown service\n" unless $known_all{$s};
       next;
     }
-    printf "%-24s", $s;
+    my $line = "";
     my $l;
     for $l (0, 1, 2, 3, 4, 5, 6, 'B', 'S') {
       next if ($l eq 'B' || $l eq 'S') && !$links{$l}->{$s};
       if ($usecolor) {
-	print $links{$l}->{$s} ? "  \e[0;1;32m$l:on\e[m " : "  $l:off";
+	$line .= ( $links{$l}->{$s} ? "  \e[0;1;32m$l:on\e[m " : "  $l:off" );
       } else {
-	print $links{$l}->{$s} ? "  $l:on " : "  $l:off";
+	$line .= ( $links{$l}->{$s} ? "  $l:on " : "  $l:off" );
       }
     }
-    print getdeps_rc($s) if $printdeps;
-    print "\n";
+    if (($mode eq 'l') || ($line =~ /:on/)) {
+      printf "%-24s%s", $s, $line;
+      print getdeps_rc($s) if $printdeps;
+      print "\n";
+    }
   }
   my @inetd_services = grep {$known_inetd{$_}} @services;
   if (@inetd_services) {
     print "inetd based services:\n";
     for $s (@inetd_services) {
+      my $enabled = getreal_inetd($s) ne '';
+      next if !$enabled && $mode eq 'L';
       printf "        %-19s ", "$s:";
-      if (getreal_inetd($s) ne '') {
+      if ($enabled) {
 	print $usecolor ? "\e[0;1;32mon\e[m\n" : "on\n";
       } else {
 	print "off\n";
@@ -826,8 +833,10 @@ EOF
   if (@xinetd_services) {
     print "xinetd based services:\n";
     for $s (@xinetd_services) {
+      my $enabled = getreal_xinetd($s) ne '';
+      next if !$enabled && $mode eq 'L';
       printf "        %-19s ", "$s:";
-      if (getreal_xinetd($s) ne '') {
+      if ($enabled) {
 	print $usecolor ? "\e[0;1;32mon\e[m\n" : "on\n";
       } else {
 	print "off\n";
