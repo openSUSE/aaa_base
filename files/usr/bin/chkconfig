@@ -622,7 +622,12 @@ if ($mode eq 'c') {
       exit 1 unless getreal_xinetd($s) ne '';
       next;
     }
-    exit 1 unless $links{$l}->{$s};
+    if (is_overriden_by_systemd($s, $root)) {
+       my $r = systemd_get_enabled($s, $root);
+       exit 1 if $r eq "off";
+    } else {
+       exit 1 unless $links{$l}->{$s};
+    }
   }
   exit 0;
 }
