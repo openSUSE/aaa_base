@@ -137,9 +137,12 @@ for i in /etc/shadow ; do
 done
 #
 # Change primary group of nobody to nobody
+# and change mistakenly root:users group to root:root (bnc#843230)
 #
 if [ -x /usr/sbin/usermod ]; then
   /usr/sbin/usermod -g nobody nobody 2> /dev/null ||:
+
+  /usr/sbin/usermod -g root root 2> /dev/null ||:
 fi
 
 #
