@@ -677,11 +677,10 @@ unset _def _dir _file _nosp
 if ! type -t _completion_loader &> /dev/null ; then
     _completion_loader ()
     {
-	local fallback=(-o default -o bashdefault -o filenames)
 	local dir=/usr/share/bash-completion/completions
 	local cmd="${1##*/}"
 	. "${dir}/${cmd}" &>/dev/null && return 124
-	complete "${fallback[@]}" ${cmd} &>/dev/null && return 124
+	complete -o default -o bashdefault "${cmd}" &>/dev/null && return 124
     }
     complete -D -F _completion_loader
 fi
