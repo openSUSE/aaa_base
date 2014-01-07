@@ -56,7 +56,7 @@ check_rc ()
 	if test -x ${RCDIR}/$rc; then
 		return 0
 	fi
-	if sd_booted && systemctl --full --no-legend --no-pager --type=service --all list-units 2>/dev/null|grep -q "^$rc.service"; then
+	if sd_booted && systemctl --full --no-legend --no-pager --type=service --all list-unit-files 2>/dev/null|grep -q "^$rc.service"; then
 		return 0
 	fi
 	return 1
