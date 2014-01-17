@@ -679,6 +679,10 @@ if ! type -t _completion_loader &> /dev/null ; then
     {
 	local dir=/usr/share/bash-completion/completions
 	local cmd="${1##*/}"
+	local -i init=$(grep -c _init_completion "${dir}/${cmd}")
+	if ((init > 0)) && ! type -t _init_completion &> /dev/null ; then
+	    complete -o default -o bashdefault "${cmd}" &>/dev/null && return 124
+	fi
 	. "${dir}/${cmd}" &>/dev/null && return 124
 	complete -o default -o bashdefault "${cmd}" &>/dev/null && return 124
     }
