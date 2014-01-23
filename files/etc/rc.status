@@ -36,6 +36,7 @@
 if test -z "$SYSTEMD_NO_WRAP" && /usr/bin/mountpoint -q /sys/fs/cgroup/systemd; then
     if test $PPID -ne 1 -a $# -eq 1 ; then
 	_rc_base=
+	_sd_opts=
 	case "$0" in
 	/etc/init.d/boot.*)
 	    _rc_base=${0##*/boot.} ;;
@@ -67,14 +68,20 @@ if test -z "$SYSTEMD_NO_WRAP" && /usr/bin/mountpoint -q /sys/fs/cgroup/systemd; 
 	esac
 	unset _rc_system
 	case "$1" in
-	    status) SYSTEMD_NO_WRAP=1 "$0" "$1" ;;
-	    start|stop|reload|restart|try-restart|force-reload) echo "redirecting to systemctl $1 ${_rc_base}" 1>&2 ;;
-	    *) unset _rc_base ;;
+	    status)
+		SYSTEMD_NO_WRAP=1 "$0" "$1"
+		_sd_opts='--lines=0 --full --output=cat'
+		;;
+	    start|stop|reload|restart|try-restart|force-reload)
+		echo "redirecting to systemctl $1 ${_rc_base}.service" 1>&2
+		_sd_opts='--ignore-dependencies'
+		;;
+	    *)	unset _rc_base
 	esac
 	if test -n "$_rc_base" -a -x /usr/bin/systemctl ; then
-	    exec /usr/bin/systemctl $1 "${_rc_base}.service"
+	    exec /usr/bin/systemctl $_sd_opts $1 "${_rc_base}.service"
 	fi
-	unset _rc_base
+	unset _rc_base _sd_opts
     fi
     if test -z "$REDIRECT" -a -x /sbin/showconsole ; then
 	REDIRECT="$(/sbin/showconsole 2>/dev/null)"
