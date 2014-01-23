@@ -51,13 +51,14 @@ exec_rc ()
 
 check_rc ()
 {
-	local rc="$1"
+	local loaded rc="$1"
 	shift
 	if test -x ${RCDIR}/$rc; then
 		return 0
 	fi
-	if sd_booted && systemctl --full --no-legend --no-pager --type=service --all list-unit-files 2>/dev/null|grep -q "^$rc.service"; then
-		return 0
+	if sd_booted ; then
+		loaded=`systemctl --full --no-legend --no-pager --type=service --property=LoadState show "$rc.service" 2>/dev/null`
+		test "X$loaded" = "XLoadState=loaded" && return 0
 	fi
 	return 1
 }
