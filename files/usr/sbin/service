@@ -30,6 +30,18 @@ test -n "$SYSTEMD_NO_WRAP" && export SYSTEMD_NO_WRAP
 LANG=POSIX
 export PATH TERM LANG
 
+is_service()
+{
+	local state=`systemctl --full --no-legend --no-pager --type=service --property=LoadState show "$1.service" 2>/dev/null`
+	test "$state" = "LoadState=loaded"
+}
+
+is_target()
+{
+	local state=`systemctl --full --no-legend --no-pager --type=target --property=LoadState show "$1.target" 2>/dev/null`
+	test "$state" = "LoadState=loaded"
+}
+
 exec_rc ()
 {
     if sd_booted && test -z "$SYSTEMD_NO_WRAP"; then
@@ -39,8 +51,24 @@ exec_rc ()
 		return 1
 		;;
 	    start|stop|reload|restart|try-restart|force-reload|status)
-		systemctl "$2" "$1.service"
-		return "$?"
+		if is_service "$1"; then
+			systemctl "$2" "$1.service"
+			return "$?"
+		elif is_target "$1"; then
+			systemctl "$2" "$1.target"
+			local ret="$?"
+			if [ "$ret" -eq 0 -a "$2" = "status" ]; then
+				local l=`systemctl show -p ConsistsOf $1.target 2>/dev/null`
+				local s
+				for s in ${l#ConsistsOf=} ; do
+					echo
+					systemctl status "$s"
+				done
+			fi
+			return "$ret"
+		fi
+		echo "$1 is neither service nor target!?" >&2
+		return "1"
 		;;
 	esac
     fi
@@ -51,14 +79,15 @@ exec_rc ()
 
 check_rc ()
 {
-	local loaded rc="$1"
+	local rc="$1"
 	shift
 	if test -x ${RCDIR}/$rc; then
 		return 0
 	fi
 	if sd_booted ; then
-		loaded=`systemctl --full --no-legend --no-pager --type=service --property=LoadState show "$rc.service" 2>/dev/null`
-		test "X$loaded" = "XLoadState=loaded" && return 0
+		if is_service "$rc" || is_target "$rc"; then
+			return 0
+		fi
 	fi
 	return 1
 }
