@@ -119,7 +119,7 @@ main (int argc, char *argv[])
 		    ((number_dots >= 2) && !my_is_alnum_punct(c)))
 		  {
 		    //invalid_char = 1;
-		    printf("invalid=1 for %c\n", c);
+		    fprintf(stderr, "invalid=1 for %c\n", c);
 		    break;
 		  }
 	      }
