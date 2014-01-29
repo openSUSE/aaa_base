@@ -66,6 +66,7 @@ test $? -ne 0 && tty=""
 if test -O "$tty" -a -n "$PS1"; then
     test -z "${TERM}"		&& { TERM=linux; export TERM; }
     test "${TERM}" = "unknown"	&& { TERM=linux; export TERM; }
+    test "${TERM}" = "ibm327x"	&& { TERM=dumb;  export TERM; }
     # Do not change settings on local line if connected to remote
     if test -z "$SSH_TTY" -a "${TERM}" != "dumb" ; then
 	path stty sane cr0 pass8 dec
