@@ -30,15 +30,26 @@ test -n "$SYSTEMD_NO_WRAP" && export SYSTEMD_NO_WRAP
 LANG=POSIX
 export PATH TERM LANG
 
+typeset -i reloaded=0
+daemon_reload()
+{
+	local state
+	((reloaded)) && return
+	state=$(systemctl --full --no-legend --no-pager --property=NeedDaemonReload show "$1" 2>/dev/null)
+	test "$state" = "NeedDaemonReload=no" && return
+	systemctl daemon-reload
+	let reloaded++
+}
+
 is_service()
 {
-	local state=`systemctl --full --no-legend --no-pager --type=service --property=LoadState show "$1.service" 2>/dev/null`
+	local state=$(systemctl --full --no-legend --no-pager --type=service --property=LoadState show "$1.service" 2>/dev/null)
 	test "$state" = "LoadState=loaded"
 }
 
 is_target()
 {
-	local state=`systemctl --full --no-legend --no-pager --type=target --property=LoadState show "$1.target" 2>/dev/null`
+	local state=$(systemctl --full --no-legend --no-pager --type=target --property=LoadState show "$1.target" 2>/dev/null)
 	test "$state" = "LoadState=loaded"
 }
 
@@ -46,19 +57,17 @@ exec_rc ()
 {
     if sd_booted && test -z "$SYSTEMD_NO_WRAP"; then
 	case "$2" in
-	    "")
-		echo "Usage: $0 "$1" {start|stop|reload|restart|try-restart|force-reload|status}"
-		return 1
-		;;
 	    start|stop|reload|restart|try-restart|force-reload|status)
 		if is_service "$1"; then
+			daemon_reload "$1.service"
 			systemctl "$2" "$1.service"
 			return "$?"
 		elif is_target "$1"; then
+			daemon_reload "$1.target"
 			systemctl "$2" "$1.target"
 			local ret="$?"
 			if [ "$ret" -eq 0 -a "$2" = "status" ]; then
-				local l=`systemctl show -p ConsistsOf $1.target 2>/dev/null`
+				local l=$(systemctl show -p ConsistsOf $1.target 2>/dev/null)
 				local s
 				for s in ${l#ConsistsOf=} ; do
 					echo
@@ -69,6 +78,10 @@ exec_rc ()
 		fi
 		echo "$1 is neither service nor target!?" >&2
 		return "1"
+		;;
+	    *)
+		echo "Usage: $0 "$1" {start|stop|reload|restart|try-restart|force-reload|status}"
+		return 1
 		;;
 	esac
     fi
