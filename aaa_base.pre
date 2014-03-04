@@ -237,3 +237,140 @@ done
 if test -f /root/.gnupg/secring.gpg ; then
   cp -a /root/.gnupg/secring.gpg /root/.gnupg/secring.gpg.aaa_save
 fi
+
+#fate 314974
+if [ -f /etc/sysconfig/cron ]; then
+   . /etc/sysconfig/cron
+
+   if [ ! -f /etc/tmpfiles.d/tmp.conf ]; then
+      if [ -f /usr/lib/tmpfiles.d/tmp.conf ]; then
+         cp /usr/lib/tmpfiles.d/tmp.conf /etc/tmpfiles.d/tmp.conf
+      else
+         echo "#  This file is part of systemd.
+               #
+               #  systemd is free software; you can redistribute it and/or modify it
+               #  under the terms of the GNU Lesser General Public License as published by
+               #  the Free Software Foundation; either version 2.1 of the License, or
+               #  (at your option) any later version.
+
+               # See tmpfiles.d(5) for details
+
+               # Clear tmp directories separately, to make them easier to override
+               # SUSE policy: we don't clean those directories
+               d /tmp 1777 root root -
+               d /var/tmp 1777 root root -
+               #"  | sed 's/^ *//g' > /etc/tmpfiles.d/tmp.conf
+      fi
+   fi
+
+   #if present, transform settings from /etc/sysconfig/cron to /etc/tmpfiles.d/tmp.conf
+   if [ "${#MAX_DAYS_IN_TMP}" -gt 0 ] || [ "${#TMP_DIRS_TO_CLEAR}" -gt 0 ]; then
+      ISINTTMP=`test "$MAX_DAYS_IN_TMP" -eq "$MAX_DAYS_IN_TMP" 2>/dev/null ; echo $?`
+      if [ "$ISINTTMP" -eq 0 ]; then
+         for DIR in $TMP_DIRS_TO_CLEAR; do
+            DIRENT=`sed -n "\c^d $DIR cp" /etc/tmpfiles.d/tmp.conf`
+            if [ -n "$DIRENT" ]; then
+               AGE=`echo $DIRENT | cut -d " " -f 6`
+                  if [ $AGE == "-" ] && [ "$MAX_DAYS_IN_TMP" -gt 0 ]; then
+                     MODENT+=`sed -n "\c^d $DIR cs/-/"$MAX_DAYS_IN_TMP"d/p" /etc/tmpfiles.d/tmp.conf | sed 's/^d/\\\nd/'`
+                  else
+                     MODENT+=`echo $DIRENT | sed 's/^d/\\\nd/'`
+                  fi
+            elif [ "$MAX_DAYS_IN_TMP" -gt 0 ]; then
+               MODENT+=`echo "\nd $DIR 1777 root root "$MAX_DAYS_IN_TMP"d"`
+            elif [ "$MAX_DAYS_IN_TMP" -eq 0 ]; then
+               MODENT+=`echo "\nd $DIR 1777 root root -"`
+            fi
+         done
+         if [ ${#TMP_DIRS_TO_CLEAR} -eq 0 ] && [ "$MAX_DAYS_IN_TMP" -gt 0 ]; then
+            MODENT+=`echo "\nd /tmp 1777 root root "$MAX_DAYS_IN_TMP"d"`
+         fi
+      fi
+   fi
+
+   if [ -n "$MAX_DAYS_IN_LONG_TMP" ] || [ -n  "$LONG_TMP_DIRS_TO_CLEAR" ]; then
+      ISINTTMP=`test $MAX_DAYS_IN_LONG_TMP -eq $MAX_DAYS_IN_LONG_TMP 2>/dev/null ; echo $?`
+      if [ "$ISINTTMP" -eq 0 ]; then
+         for DIR in $LONG_TMP_DIRS_TO_CLEAR; do
+            DIRENT=`sed -n "\c^d $DIR cp" /etc/tmpfiles.d/tmp.conf`
+            if [ -n "$DIRENT" ]; then
+               AGE=`echo $DIRENT | cut -d " " -f 6`
+                  if [ $AGE == "-" ] && [ "$MAX_DAYS_IN_LONG_TMP" -gt 0 ]; then
+                     MODENT+=`sed -n "\c^d $DIR cs/-/"$MAX_DAYS_IN_LONG_TMP"d/p" /etc/tmpfiles.d/tmp.conf | sed 's/^d/\\\nd/'`
+                  else
+                     MODENT+=`echo $DIRENT | sed 's/^d/\\\nd/'`
+                  fi
+            elif [ "$MAX_DAYS_IN_LONG_TMP" -gt 0 ]; then
+               MODENT+=`echo "\nd $DIR 1777 root root "$MAX_DAYS_IN_LONG_TMP"d"`
+            elif [ "$MAX_DAYS_IN_TMP" -eq 0 ]; then
+               MODENT+=`echo "\nd $DIR 1777 root root -"`
+            fi
+         done
+      fi
+   fi
+
+   for ENTRY in `sed -n '/^d\ \//p' /etc/tmpfiles.d/tmp.conf | cut -d " " -f 2`; do
+   	if [[ ! "$MODENT" =~ "d $ENTRY " ]]; then
+           MODENT+=`sed -n "\c^d $ENTRY cp" /etc/tmpfiles.d/tmp.conf | sed 's/^d/\\\nd/'`
+        fi
+   done
+
+   sed -e '/^d\ \//d' -e '/^R\ \//d' -e '/# Clear tmp directories/,+2d' /etc/tmpfiles.d/tmp.conf | sed -re '$!N;/^\n$/!P;D' > /etc/tmpfiles.d/tmp.conf.tmp
+   echo -e "\n# Clear tmp directories separately, to make them easier to override" >>/etc/tmpfiles.d/tmp.conf.tmp
+   echo "# SUSE policy: we don't clean those directories" >>/etc/tmpfiles.d/tmp.conf.tmp
+   echo -e "$MODENT" >> /etc/tmpfiles.d/tmp.conf.tmp
+
+   : ${TMP_DIRS_TO_CLEAR:=/tmp}
+   : ${CLEAR_TMP_DIRS_AT_BOOTUP:=no}
+   REMENT=`sed -n '/^R\ \//s/^/ /p' /etc/tmpfiles.d/tmp.conf`
+   CLEAR_DIRS="$TMP_DIRS_TO_CLEAR"
+   if [ "${CLEAR_TMP_DIRS_AT_BOOTUP:0:1}" == "/" ]; then
+      CLEAR_DIRS="$CLEAR_TMP_DIRS_AT_BOOTUP"
+      CLEAR_TMP_DIRS_AT_BOOTUP=yes
+   fi
+   if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
+      for DIR in $CLEAR_DIRS; do
+         if [[ ! "$REMENT" =~ "R $DIR/*" ]]; then
+            REMENT+=`echo " R $DIR/*"`	
+         fi
+      done
+   fi
+   echo -e "$REMENT" | sed -e 's/ R/\nR/g' | sed '/^$/d' >> /etc/tmpfiles.d/tmp.conf.tmp
+
+   #take care of ownerkeep parameters
+   OWNER_TO_KEEP_IN_TMP=`sed -n '/^OWNER_TO_KEEP_IN_TMP/p' /etc/sysconfig/cron`
+   if [ ${#OWNER_TO_KEEP_IN_TMP} -gt 0 ]; then
+      TMPDIR_TO_SEARCH_OWNER=`sed -n 's/^TMP_DIRS_TO_CLEAR/TMPDIR_TO_SEARCH_OWNER/p' /etc/sysconfig/cron`
+
+      echo "
+      #########Moved sysconfig variables, do not delete leading hashes!#########
+      ## Type:        string
+      ## Default:     root
+      #
+      # In OWNER_TO_KEEP_IN_TMP, you can specify, whose files shall not be deleted.
+      #
+      #${OWNER_TO_KEEP_IN_TMP:-OWNER_TO_KEEP_IN_TMP=\"root\"}
+      
+      ## Type:         string
+      ## Default:      ""
+      #
+      # To which of the TMP directories should OWNER_TO_KEEP_IN_TMP apply.
+      # If empty it defaults to all directory entries in /etc/tmpfiles.d/tmp.conf.
+      #${TMPDIR_TO_SEARCH_OWNER:-TMPDIR_TO_SEARCH_OWNER=\"\"}
+      ##########################################################################
+      " | sed 's/^ *//g' >> /etc/tmpfiles.d/tmp.conf.tmp
+   fi
+   mv /etc/tmpfiles.d/tmp.conf.tmp /etc/tmpfiles.d/tmp.conf
+   OLDVARS=`sed '1!G;h;$!d' /etc/sysconfig/cron | sed  -n '/^CLEAR_TMP_DIRS_AT_BOOTUP/,/Path:.*System\/Cron$/p'`
+   #clear old variables from /etc/sysconfig/cron
+   if [ ${#OLDVARS} -gt 0 ]; then
+      echo "## The Parameters MAX_DAYS_IN_TMP, MAX_DAYS_IN_LONG_TMP, TMP_DIRS_TO_CLEAR, 
+      ## LONG_TMP_DIRS_TO_CLEAR, CLEAR_TMP_DIRS_AT_BOOTUP and OWNER_TO_KEEP_IN_TMP have 
+      ## been converted to systemd-tmpfiles settings in /etc/tmpfiles.d/tmp.conf.
+      ## Please check and modify to your needs.
+      ## See 'man tmpfiles.d' for details.
+      " | sed 's/^ *//g' > /etc/sysconfig/cron.tmp
+      sed '1!G;h;$!d' /etc/sysconfig/cron | sed '/^CLEAR_TMP_DIRS_AT_BOOTUP/,/Path:.*System\/Cron$/d' | sed '1!G;h;$!d' >> /etc/sysconfig/cron.tmp
+      mv /etc/sysconfig/cron.tmp /etc/sysconfig/cron
+   fi
+fi
