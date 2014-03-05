@@ -238,10 +238,12 @@ if test -f /root/.gnupg/secring.gpg ; then
   cp -a /root/.gnupg/secring.gpg /root/.gnupg/secring.gpg.aaa_save
 fi
 
-#fate 314974
+# fate 314974: port tmpdir removal parameters from /etc/sysconfig/cron to /etc/tmpfiles.d/tmp.conf
+# we don't take action if /etc/sysconfig/cron is not present
 if [ -f /etc/sysconfig/cron ]; then
    . /etc/sysconfig/cron
 
+# we need at least a skeleton of tmp.conf
    if [ ! -f /etc/tmpfiles.d/tmp.conf ]; then
       if [ -f /usr/lib/tmpfiles.d/tmp.conf ]; then
          cp /usr/lib/tmpfiles.d/tmp.conf /etc/tmpfiles.d/tmp.conf
@@ -263,7 +265,7 @@ if [ -f /etc/sysconfig/cron ]; then
       fi
    fi
 
-   #if present, transform settings from /etc/sysconfig/cron to /etc/tmpfiles.d/tmp.conf
+# transform settings from /etc/sysconfig/cron to /etc/tmpfiles.d/tmp.conf
    if [ "${#MAX_DAYS_IN_TMP}" -gt 0 ] || [ "${#TMP_DIRS_TO_CLEAR}" -gt 0 ]; then
       ISINTTMP=`test "$MAX_DAYS_IN_TMP" -eq "$MAX_DAYS_IN_TMP" 2>/dev/null ; echo $?`
       if [ "$ISINTTMP" -eq 0 ]; then
@@ -309,6 +311,7 @@ if [ -f /etc/sysconfig/cron ]; then
       fi
    fi
 
+# keep additional directory entries that are already present in tmp.conf
    for ENTRY in `sed -n '/^d\ \//p' /etc/tmpfiles.d/tmp.conf | cut -d " " -f 2`; do
    	if [[ ! "$MODENT" =~ "d $ENTRY " ]]; then
            MODENT+=`sed -n "\c^d $ENTRY cp" /etc/tmpfiles.d/tmp.conf | sed 's/^d/\\\nd/'`
@@ -320,6 +323,7 @@ if [ -f /etc/sysconfig/cron ]; then
    echo "# SUSE policy: we don't clean those directories" >>/etc/tmpfiles.d/tmp.conf.tmp
    echo -e "$MODENT" >> /etc/tmpfiles.d/tmp.conf.tmp
 
+# address directories to be cleared at system boot
    : ${TMP_DIRS_TO_CLEAR:=/tmp}
    : ${CLEAR_TMP_DIRS_AT_BOOTUP:=no}
    REMENT=`sed -n '/^R\ \//s/^/ /p' /etc/tmpfiles.d/tmp.conf`
@@ -337,7 +341,9 @@ if [ -f /etc/sysconfig/cron ]; then
    fi
    echo -e "$REMENT" | sed -e 's/ R/\nR/g' | sed '/^$/d' >> /etc/tmpfiles.d/tmp.conf.tmp
 
-   #take care of ownerkeep parameters
+# take care of ownerkeep parameters
+# owner based keeping of files is not implemented in systemd, so we need to run a script
+# that creates keep entries before each scheduled removal run
    OWNER_TO_KEEP_IN_TMP=`sed -n '/^OWNER_TO_KEEP_IN_TMP/p' /etc/sysconfig/cron`
    if [ ${#OWNER_TO_KEEP_IN_TMP} -gt 0 ]; then
       TMPDIR_TO_SEARCH_OWNER=`sed -n 's/^TMP_DIRS_TO_CLEAR/TMPDIR_TO_SEARCH_OWNER/p' /etc/sysconfig/cron`
@@ -361,8 +367,9 @@ if [ -f /etc/sysconfig/cron ]; then
       " | sed 's/^ *//g' >> /etc/tmpfiles.d/tmp.conf.tmp
    fi
    mv /etc/tmpfiles.d/tmp.conf.tmp /etc/tmpfiles.d/tmp.conf
+
+# clear old variables from /etc/sysconfig/cron
    OLDVARS=`sed '1!G;h;$!d' /etc/sysconfig/cron | sed  -n '/^CLEAR_TMP_DIRS_AT_BOOTUP/,/Path:.*System\/Cron$/p'`
-   #clear old variables from /etc/sysconfig/cron
    if [ ${#OLDVARS} -gt 0 ]; then
       echo "## The Parameters MAX_DAYS_IN_TMP, MAX_DAYS_IN_LONG_TMP, TMP_DIRS_TO_CLEAR, 
       ## LONG_TMP_DIRS_TO_CLEAR, CLEAR_TMP_DIRS_AT_BOOTUP and OWNER_TO_KEEP_IN_TMP have 

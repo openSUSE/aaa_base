@@ -1,11 +1,13 @@
 #!/bin/sh
 #
+# Create exclude entries for files owned by $OWNER_TO_KEEP_IN_TMP in /etc/tmpfiles.d/tmp.conf
 #
-# Copyright (c) 2002 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 2014 SUSE LINUX Products GmbH, Germany.
 #
-# please send bugfixes or comments to http://www.suse.de/feedback.
+# Author: Thomas Blume
 #
-
+# Please send feedback to http://www.suse.de/feedback
+#
 
 #
 # paranoia settings
