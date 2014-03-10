@@ -28,10 +28,23 @@ cd "$src"
 for i in *.xz; do
 	/bin/rm -vi "$i"
 done
-cd "$src"
-"$src"/obs/mktar
-mv *xz "$pkgdir"
+eval `"$src"/obs/mktar`
+mv "$src/$FILENAME" "$pkgdir"
 cd "$pkgdir"
+osc add "$FILENAME"
+if [ -n "$VERSION" ]; then
+	read oldver < <(/usr/lib/build/spectool --tag "version" "$name".spec)
+	oldver="${oldver/*: /}"
+	while read sourcefile; do
+		sourcefile="${sourcefile/*: /}"
+		[ -n "$sourcefile" ] || continue
+		[ "$sourcefile" != "${sourcefile#$name-$oldver}" ] || continue
+		if [ -e "$sourcefile" ]; then
+			osc rm -f "$sourcefile" || true
+		fi
+	done < <(/usr/lib/build/spectool --tag "/source0?/" "$name".spec)
+	sed -i -e "0,/^Version: /{s/^\(Version: *\).*/\1$VERSION/;}" "$name".spec
+fi
 osc vc "$name".changes .changes && rm -f .changes
 cd "$src"
 if [ -n "`git rev-list remotes/origin/master..HEAD`" ]; then
