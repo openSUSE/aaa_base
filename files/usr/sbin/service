@@ -21,6 +21,9 @@ fi
 #
 RCDIR="/etc/init.d"
 
+# legacy actions
+actiondir="/usr/lib/initscripts/legacy-actions"
+
 #
 # Clean environment
 #
@@ -53,11 +56,19 @@ is_target()
 	test "$state" = "LoadState=loaded"
 }
 
+
+is_systemd_action()
+{
+	case "$1" in
+		start|stop|reload|restart|try-restart|force-reload|status) return 0 ;;
+	esac
+	return 1
+}
 exec_rc ()
 {
+    local rc=''
     if sd_booted && test -z "$SYSTEMD_NO_WRAP"; then
-	case "$2" in
-	    start|stop|reload|restart|try-restart|force-reload|status)
+	if is_systemd_action "$2"; then
 		if is_service "$1"; then
 			daemon_reload "$1.service"
 			systemctl "$2" "$1.service"
@@ -78,15 +89,18 @@ exec_rc ()
 		fi
 		echo "$1 is neither service nor target!?" >&2
 		return "1"
-		;;
-	    *)
+	elif [ -x "$actiondir/$1/$2" ]; then
+		rc="$actiondir/$1/$2"
+		shift 2
+	else
 		echo "Usage: $0 "$1" {start|stop|reload|restart|try-restart|force-reload|status}"
 		return 1
-		;;
-	esac
+	fi
     fi
-    local rc="${RCDIR}/$1"
-    shift
+    if [ -z "$rc" ]; then
+	rc="${RCDIR}/$1"
+	shift
+    fi
     env -i LANG=$LANG PATH=$PATH TERM=$TERM SYSTEMD_NO_WRAP=$SYSTEMD_NO_WRAP "$rc" ${1+"$@"}
 }
 
