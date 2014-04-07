@@ -41,46 +41,46 @@ foreach line ( "`/bin/grep -vh '^#' $sysconf`" )
 	if ( $uid >= 100 ) set -l path=( $path . )
 	breaksw
     case FROM_HEADER=*:
-	setenv FROM_HEADER ${val:q}
+	setenv FROM_HEADER "${val:q}"
 	breaksw
     case SCANNER_TYPE=*:
-	setenv SCANNER_TYPE ${val:q}
+	setenv SCANNER_TYPE "${val:q}"
 	breaksw
     case PROXY_ENABLED=*:
-	set proxy_enabled=${val:q}
+	set proxy_enabled="${val:q}"
 	breaksw
     case HTTP_PROXY=*:
 	if (! ${%proxy_enabled} == yes ) continue
-	setenv http_proxy ${val:q}
+	setenv http_proxy "${val:q}"
 	breaksw
     case HTTPS_PROXY=*:
 	if (! ${%proxy_enabled} == yes ) continue
-	setenv https_proxy ${val:q}
+	setenv https_proxy "${val:q}"
 	breaksw
     case FTP_PROXY=*:
 	if (! ${%proxy_enabled} == yes ) continue
-	setenv ftp_proxy ${val:q}
+	setenv ftp_proxy "${val:q}"
 	breaksw
     case GOPHER_PROXY=*:
 	if (! ${%proxy_enabled} == yes ) continue
-	setenv gopher_proxy ${val:q}
+	setenv gopher_proxy "${val:q}"
 	breaksw
     case NO_PROXY=*:
 	if (! ${%proxy_enabled} == yes ) continue
-	setenv no_proxy ${val:q}
+	setenv no_proxy "${val:q}"
 	breaksw
     case DEFAULT_WM=*:
-	set default_wm=${val:q}
+	set default_wm="${val:q}"
 	breaksw
     case CONSOLE_MAGIC=*:
-	set console_magic=${val:q}
+	set console_magic="${val:q}"
 	breaksw
     case ORGANIZATION=*:
 	if (! ${%val} ) continue
-	setenv ORGANIZATION ${val:q}
+	setenv ORGANIZATION "${val:q}"
 	breaksw
     case NNTPSERVER=*:
-	setenv NNTPSERVER ${val:q}
+	setenv NNTPSERVER "${val:q}"
 	if ( ! ${?NNTPSERVER} ) setenv NNTPSERVER news
 	breaksw
     default:
@@ -110,14 +110,14 @@ endif
 if ( ! ${?WINDOWMANAGER} ) then
     if (! ${?default_wm} ) set default_wm
     set desktop="/usr/share/xsessions/${default_wm}.desktop"
-    set default_wm=${default_wm:t}
+    set default_wm="${default_wm:t}"
     if ( -s ${desktop:q} ) then
-	set wm=`sed -rn '/^Exec=/{s@[^=]*=([^=]*)@\1@p;}' ${desktop:q}`
+	set wm="`sed -rn '/^Exec=/{s@[^=]*=([^=]*)@\1@p;}' ${desktop:q}`"
 	foreach val ($path /usr/X11R6/bin /usr/openwin/bin)
 	    if ( ${val:q} =~ *.* ) continue
-	    set val=${val:q}/${wm:q}
+	    set val="${val:q}/${wm:q}"
 	    if ( ! -x ${val:q} ) continue
-	    setenv WINDOWMANAGER ${val:q}
+	    setenv WINDOWMANAGER "${val:q}"
 	    break
 	end
 	unset val wm
@@ -126,9 +126,9 @@ if ( ! ${?WINDOWMANAGER} ) then
     if ( ${%default_wm} > 0 && ! ${?WINDOWMANAGER} ) then
 	foreach val ($path /usr/X11R6/bin /usr/openwin/bin)
 	    if ( ${val:q} =~ *.* ) continue
-	    set val=${val:q}/${default_wm:q}
+	    set val="${val:q}/${default_wm:q}"
 	    if ( ! -x ${val:q} ) continue
-	    setenv WINDOWMANAGER ${val:q}
+	    setenv WINDOWMANAGER "${val:q}"
 	    break
 	end
 	unset val
