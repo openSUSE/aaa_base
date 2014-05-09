@@ -21,30 +21,37 @@ uniquefy_search_path ()
   unset _y _x
 }
 
-for xdgdir in /usr/local/share /usr/share /etc/opt/*/share /opt/*/share /usr/share/gnome ; do
-   if test -d "$xdgdir" && test -d "$xdgdir/applications"; then
-      if test -z "$XDG_DATA_DIRS"; then
-         XDG_DATA_DIRS="$xdgdir"
-      else
-         XDG_DATA_DIRS="$XDG_DATA_DIRS:$xdgdir"
-      fi
-   fi
-done
+setup_xdg_paths() {
+  if [ "x$ZSH_VERSION" != "x" ] ; then
+    setopt nullglob localoptions
+  fi
+  for xdgdir in /usr/local/share /usr/share /etc/opt/*/share /opt/*/share /usr/share/gnome ; do
+     if test -d "$xdgdir" && test -d "$xdgdir/applications"; then
+        if test -z "$XDG_DATA_DIRS"; then
+           XDG_DATA_DIRS="$xdgdir"
+        else
+           XDG_DATA_DIRS="$XDG_DATA_DIRS:$xdgdir"
+        fi
+     fi
+  done
+  
+  XDG_DATA_DIRS=$(uniquefy_search_path "$XDG_DATA_DIRS")
+  export XDG_DATA_DIRS
+  
+  for xdgdir in /usr/local/etc/xdg /etc/xdg /etc/opt/*/xdg ; do
+     if test -d "$xdgdir"; then
+        if test -z "$XDG_CONFIG_DIRS"; then
+           XDG_CONFIG_DIRS="$xdgdir"
+        else
+           XDG_CONFIG_DIRS="$XDG_CONFIG_DIRS:$xdgdir"
+        fi
+     fi
+  done
+  
+  XDG_CONFIG_DIRS=$(uniquefy_search_path "$XDG_CONFIG_DIRS")
+  export XDG_CONFIG_DIRS
+  
+  unset xdgdir
+}
 
-XDG_DATA_DIRS=$(uniquefy_search_path "$XDG_DATA_DIRS")
-export XDG_DATA_DIRS
-
-for xdgdir in /usr/local/etc/xdg /etc/xdg /etc/opt/*/xdg ; do
-   if test -d "$xdgdir"; then
-      if test -z "$XDG_CONFIG_DIRS"; then
-         XDG_CONFIG_DIRS="$xdgdir"
-      else
-         XDG_CONFIG_DIRS="$XDG_CONFIG_DIRS:$xdgdir"
-      fi
-   fi
-done
-
-XDG_CONFIG_DIRS=$(uniquefy_search_path "$XDG_CONFIG_DIRS")
-export XDG_CONFIG_DIRS
-
-unset xdgdir
+setup_xdg_paths
