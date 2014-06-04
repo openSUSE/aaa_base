@@ -67,25 +67,37 @@ is_systemd_action()
 exec_rc ()
 {
     local rc=''
+    local -i ret
     if sd_booted && test -z "$SYSTEMD_NO_WRAP"; then
 	if is_systemd_action "$2"; then
 		if is_service "$1"; then
 			daemon_reload "$1.service"
 			systemctl "$2" "$1.service"
-			return "$?"
+			ret=$?
+			if [ "$2" = status ]; then
+				systemctl is-active "$1.service" > /dev/null 2>&1
+				ret=$?
+			fi
+			return $ret
 		elif is_target "$1"; then
 			daemon_reload "$1.target"
 			systemctl "$2" "$1.target"
-			local ret="$?"
-			if [ "$ret" -eq 0 -a "$2" = "status" ]; then
+			ret=$?
+			if [ $ret -eq 0 -a "$2" = "status" ]; then
 				local l=$(systemctl show -p ConsistsOf $1.target 2>/dev/null)
 				local s
+				systemctl is-active "$1.target" > /dev/null 2>&1
+				ret=$?
+				test $ret -ne 0 && return $ret
 				for s in ${l#ConsistsOf=} ; do
 					echo
 					systemctl status "$s"
+					systemctl is-active "$s" > /dev/null 2>&1
+					ret=$?
+					test $ret -ne 0 && return $ret
 				done
 			fi
-			return "$ret"
+			return $ret
 		fi
 		echo "$1 is neither service nor target!?" >&2
 		return "1"
