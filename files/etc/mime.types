@@ -1768,7 +1768,6 @@ text/x-idl                                       idl
 text/x-install                                   
 text/x-java                                      java
 text/x-java-source                               java
-text/x-js                                        js
 text/x-ksysv-log                                 
 text/x-literate-haskell                          lhs
 text/x-log                                       log
