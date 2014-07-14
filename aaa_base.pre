@@ -196,10 +196,7 @@ echo "#! /bin/sh
 # of a runlevel have been executed.
 #
 # Here you should add things, that should happen directly after
-# runlevel has been reached.  Common environment
-# variables for this are:
-#  RUNLEVEL  -- The current system runlevel.
-#  PREVLEVEL -- The previous runlevel (useful after a runlevel switch).
+# runlevel has been reached.
 #
 " > /etc/init.d/after.local.new
 test -e /etc/init.d/after.local || mv /etc/init.d/after.local.new /etc/init.d/after.local
