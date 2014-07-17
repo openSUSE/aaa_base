@@ -50,15 +50,20 @@ if (! ${?EUID} ) set -r EUID="`${id} -u`"
 #
 if ($?EMACS) then
   setenv LS_OPTIONS '-N --color=none -T 0';
-  path tset -I -Q
-  path stty cooked pass8 dec nl -echo
-# if ($?tcsh) unset edit
 endif
 
 #
 # Only for interactive shells
 #
 if (! ${?prompt}) goto done
+
+#
+# Avoid trouble with Emacs shell mode
+#
+if ($?EMACS) then
+  path tset -I -Q
+  path stty cooked pass8 dec nl -echo
+endif
 
 #
 # Let root watch its system
