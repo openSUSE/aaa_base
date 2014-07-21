@@ -20,7 +20,11 @@ test_lc()
     return 1
 }
 
-if test -n "$SSH_CONNECTION" && test_lc ; then
-    SSH_SENDS_LOCALE=yes
-    export SSH_SENDS_LOCALE
+if test -n "$SSH_CONNECTION" ; then
+    if test_lc ; then
+	SSH_SENDS_LOCALE=yes
+	export SSH_SENDS_LOCALE
+    fi
+    LIBGL_ALWAYS_INDIRECT=1
+    export LIBGL_ALWAYS_INDIRECT
 fi

@@ -17,4 +17,5 @@ if ( ${?SSH_CONNECTION} ) then
 	endif
     end
     unset lc val
+    setenv LIBGL_ALWAYS_INDIRECT 1
 endif
