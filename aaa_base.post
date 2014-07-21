@@ -139,6 +139,7 @@ if test ! -d /var/log ; then
 fi
 
 while read file owner mode; do
+    test -h "$file" && continue
     test -e "$file" || touch "$file"
     chmod "$mode" "$file"
     chown "$owner" "$file"
