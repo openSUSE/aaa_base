@@ -53,12 +53,7 @@ case "$-" in
 	    alias ls=_ls
 	    ;;
 	zsh)
-	    z_ls ()
-	    {
-		local IFS=' '
-		command \ls $=LS_OPTIONS ${1+"$@"}
-	    }
-	    alias ls=z_ls
+	    test -s /etc/profile.d/ls.zsh && . /etc/profile.d/ls.zsh
 	    ;;
 	ksh)
 	    _ls ()
