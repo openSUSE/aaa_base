@@ -25,6 +25,6 @@ if test -n "$SSH_CONNECTION" ; then
 	SSH_SENDS_LOCALE=yes
 	export SSH_SENDS_LOCALE
     fi
-    LIBGL_ALWAYS_INDIRECT=1
-    export LIBGL_ALWAYS_INDIRECT
+    LIBGL_DEBUG=quiet
+    export LIBGL_DEBUG
 fi
