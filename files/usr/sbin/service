@@ -151,14 +151,12 @@ usage ()
 
 help ()
 {
-    echo "Usage: ${0##*/} [<options> | <service> [<args> | --full-restart]]"
+    echo "Usage: ${0##*/} [<options> | <service> [<args>]]"
     echo "Available <options>:"
     echo "  -h,--help        This help."
     echo "  -s,--status-all  List out status of all services."
     echo "Usage for specific <service>:"
     echo "  ${0##*/} service_name argument [option]"
-    echo "  ${0##*/} service_name --full-restart"
-    echo "  ${0##*/} --full-restart service_name"
     exit 0
 }
 
