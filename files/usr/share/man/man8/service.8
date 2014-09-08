@@ -1,39 +1,42 @@
-.\"$Id:$
-.TH service 8 "Jan 2006"
+.TH service 8 "Sep 2014"
 .SH NAME
-service \- run a System V init script
+service \- run service
 .SH SYNOPSIS
-       service \fBSCRIPT\fR \fBCOMMAND\fR [\fBOPTIONS\fR]
+       service \fBSERVICE\fR \fBACTION\fR [\fBOPTIONS\fR]
 .br
        service --status-all
 .br
-       service --help | -h | --version
+       service --help | -h
 
 .SH DESCRIPTION
-service runs a System V init script in as predictable environment as
-possible, removing most environment variables and with current working
-directory set to /.
 .PP
-The  \fBSCRIPT\fR  parameter  specifies  a  System  V init script, located in
-/etc/init.d/\fBSCRIPT\fR.  The supported values  of  \fBCOMMAND\fR  depend  on  the
-invoked  script,  service  passes  \fBCOMMAND\fR  and  \fBOPTIONS\fR it to the init
-script unmodified.  All scripts should support at least the  start  and
-stop  commands.   As  a special case, if \fBCOMMAND\fR is \-\-full-restart, the
-script is run twice, first with the stop command, then with  the  start
-command.
+The \fBSERVICE\fR parameter specifies a systemd service name to operate on.
+The supported values of \fBACTION\fR depend  on  the specified  service.
+The actions start, stop, reload, restart, try-restart, force-reload, and status
+are forwarded to systemctl, \fBOPTIONS\fR are ignored in that case.
+Other actions may be defined in /usr/lib/initscripts/legacy-actions. Legacy
+actions are called directly and \fBOPTIONS\fR are passed on the command line.
 
-service \-\-status-all runs all init scripts, in alphabetical order, with
-the status command.
+The \-\-status-all option displays the status of all loaded service units.
+
 .SH FILES
-/etc/init.d
-              The directory containing System V init scripts.
+/usr/lib/initscripts/legacy-actions
+              Directory containing System V legacy actions
 .BR 
-.SH ENVIRONMENT
-LANG,
-TERM
-              The only environment variables passed to the init scripts.
+
+.SH HISTORY
+service used to run System V init scripts in a predictable environment.
+
+.SH USE AS rc* WRAPPER
+SUSE Linux distributions used to have convenience symlinks to call
+System V init scripts, for example /usr/sbin/rcexample ->
+/etc/init.d/example. With the move to systemd the service command
+can be used as wrapper for systemctl instead. For example
+/usr/sbin/rcexample -> /usr/sbin/service.
+
 .BR 
 .SH "SEE ALSO"
 chkconfig(8),
-ntsysv(8)
+systemctl(1)
+systemd.service(5)
 .BR 
