@@ -72,7 +72,7 @@ exec_rc ()
 	if is_systemd_action "$2"; then
 		if is_service "$1"; then
 			daemon_reload "$1.service"
-			systemctl "$2" "$1.service"
+			systemctl "$2" --full "$1.service"
 			ret=$?
 			if [ "$2" = status ]; then
 				systemctl is-active "$1.service" > /dev/null 2>&1
@@ -91,7 +91,7 @@ exec_rc ()
 				test $ret -ne 0 && return $ret
 				for s in ${l#ConsistsOf=} ; do
 					echo
-					systemctl status "$s"
+					systemctl status --full "$s"
 					systemctl is-active "$s" > /dev/null 2>&1
 					ret=$?
 					test $ret -ne 0 && return $ret
