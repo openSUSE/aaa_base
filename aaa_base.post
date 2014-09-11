@@ -19,12 +19,6 @@ test -e /usr/lib/YaST/.configured2 && rm -f /usr/lib/YaST/.configured2
 # it, when it doesn't exist (readable). So simply delete it.
 #
 test -e /etc/psdevtab && rm -f /etc/psdevtab
-#
-# if the old nsswitch.conf contains dns6, replace it with dns
-#
-test -f /etc/nsswitch.conf.rpmnew && grep dns6 /etc/nsswitch.conf >/dev/null 2>&1 && {
-   sed -i -e "s|dns6|dns|g" /etc/nsswitch.conf
-}
 
 %{remove_and_set -n security CONSOLE_SHUTDOWN}
 %{remove_and_set -n suseconfig CHECK_INITTAB}
