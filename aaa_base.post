@@ -8,6 +8,7 @@
 #
 # Run this script in C-Locale, or some tools will fail.
 export LC_ALL=C
+test -n "$FIRST_ARG" || FIRST_ARG=$1
 #
 # to make sure, /var/lib/YaST/bin/bootsetup runs fine, delete
 # /usr/lib/YaST/.configured2
@@ -28,6 +29,33 @@ test -f /etc/nsswitch.conf.rpmnew && grep dns6 /etc/nsswitch.conf >/dev/null 2>&
 %{remove_and_set -n security CONSOLE_SHUTDOWN}
 %{remove_and_set -n suseconfig CHECK_INITTAB}
 %{remove_and_set -n suseconfig HALT_SOUND}
+
+if [ "$FIRST_ARG" -gt 1 ]; then
+	old_cron_vars="MAX_DAYS_IN_TMP MAX_DAYS_IN_LONG_TMP TMP_DIRS_TO_CLEAR LONG_TMP_DIRS_TO_CLEAR OWNER_TO_KEEP_IN_TMP CLEAR_TMP_DIRS_AT_BOOTUP"
+	%{remove_and_set -n cron $old_cron_vars}
+	if [ "$MAX_DAYS_IN_TMP" != '0' -a "$MAX_DAYS_IN_TMP" != 'no' -o \
+	     "$MAX_DAYS_IN_LONG_TMP" != '0' -a "$MAX_DAYS_IN_LONG_TMP" != 'no' -o \
+	     "$CLEAR_TMP_DIRS_AT_BOOTUP" != 'no' ]; then
+		mkdir -p '/var/adm/update-messages'
+		msgfile='/var/adm/update-messages/%name-%version-%release-tmpdirs'
+		for i in $old_cron_vars; do
+			eval v=\$$i
+			[ -n "$v" -a "$v" != 'no' ] || continue
+			if [ ! -e "$msgfile" ]; then
+				cat > "$msgfile" <<-EOF
+				sysconfig settings for cleaning up temporary directories are no longer
+				supported. Some of the features are provided by systemd's tmpfile
+				mechanism instead. Please refer to 'man tmpfiles.d' for more
+				information.
+
+				Here are the old settings for reference:
+
+				EOF
+			fi
+			echo "$i=$v" >> "$msgfile"
+		done
+	fi
+fi
 
 if ! [ -d /etc/sysconfig ] ; then
   mkdir -p /etc/sysconfig
