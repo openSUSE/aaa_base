@@ -340,8 +340,7 @@ File: dir	Node: Top	This is the top of the INFO tree
     Typing "d" returns here,       typing "?" lists all INFO commands,
     typing "q" exits,     typing "h" gives a  primer for first-timers,
     pressing 2nd button on a highlighted word follows cross-reference.
-
- ---- AUTOCONFIGURED BY SuSEConfig: EDIT WITH CARE: ----
+ ---- EDIT WITH CARE: ----
  ---- Only descriptive text for otherwise empty topics will survive ----
 
 * Menu: The list of major topics begins on the next line.

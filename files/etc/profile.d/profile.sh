@@ -4,7 +4,6 @@
 # Used configuration files:
 #
 #     /etc/sysconfig/windowmanager
-#     /etc/sysconfig/suseconfig
 #     /etc/sysconfig/mail
 #     /etc/sysconfig/proxy
 #     /etc/sysconfig/console
@@ -12,7 +11,6 @@
 #
 
 for sys in /etc/sysconfig/windowmanager	\
-	   /etc/sysconfig/suseconfig	\
 	   /etc/sysconfig/mail		\
 	   /etc/sysconfig/proxy		\
 	   /etc/sysconfig/console	\
@@ -25,21 +23,9 @@ do
         esac
 	eval val=${line#*=}
 	case "$line" in
-	CWD_IN_ROOT_PATH=*)
-	    test "$val" = "yes" || continue
-	    test $UID -lt 100 && PATH=$PATH:.
-	    ;;
-	CWD_IN_USER_PATH=*)
-	    test "$val" = "yes" || continue
-	    test $UID -ge 100 && PATH=$PATH:.
-	    ;;
 	FROM_HEADER=*)
 	    FROM_HEADER="${val}"
 	    export FROM_HEADER
-	    ;;
-	SCANNER_TYPE=*)
-	    SCANNER_TYPE="${val}"
-	    export SCANNER_TYPE
 	    ;;
 	PROXY_ENABLED=*)
 	    PROXY_ENABLED="${val}"

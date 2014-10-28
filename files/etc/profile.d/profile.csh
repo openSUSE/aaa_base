@@ -4,7 +4,6 @@
 # Used configuration files:
 #
 #     /etc/sysconfig/windowmanager
-#     /etc/sysconfig/suseconfig
 #     /etc/sysconfig/mail
 #     /etc/sysconfig/proxy
 #     /etc/sysconfig/console
@@ -14,7 +13,6 @@
 set noglob
 set sysconf=""
 foreach sys (/etc/sysconfig/windowmanager	\
-	     /etc/sysconfig/suseconfig		\
 	     /etc/sysconfig/mail		\
 	     /etc/sysconfig/proxy		\
 	     /etc/sysconfig/console		\
@@ -30,21 +28,8 @@ foreach line ( "`/bin/grep -vh '^#' $sysconf`" )
     set arr=( $val )
     eval set val="${arr[2-]}"
     switch (${line:q})
-    case CWD_IN_ROOT_PATH=*:
-	if ( ${line:q} !~ *=*yes* ) continue
-	if ( "$path[*]" =~ *.* )    continue
-	if ( $uid <  100 ) set -l path=( $path . )
-	breaksw
-    case CWD_IN_USER_PATH=*:
-	if ( ${line:q} !~ *=*yes* ) continue
-	if ( "$path[*]" =~ *.* )    continue
-	if ( $uid >= 100 ) set -l path=( $path . )
-	breaksw
     case FROM_HEADER=*:
 	setenv FROM_HEADER "${val:q}"
-	breaksw
-    case SCANNER_TYPE=*:
-	setenv SCANNER_TYPE "${val:q}"
 	breaksw
     case PROXY_ENABLED=*:
 	set proxy_enabled="${val:q}"
