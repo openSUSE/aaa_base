@@ -164,7 +164,7 @@ endif
 #endif
 
 #
-# Configure the default pager on SuSE Linux
+# Configure the default pager on SUSE Linux
 #
 if (! ${?LESS} ) then
     setenv LESS "-M -I -R"

@@ -1,4 +1,4 @@
-# /etc/profile.d/alias.ash for SuSE Linux
+# /etc/profile.d/alias.ash for SUSE Linux
 #
 # The ash shell does not have an alias builtin in
 # therefore we use functions here. This is a seperate

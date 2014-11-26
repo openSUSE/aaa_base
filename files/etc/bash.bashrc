@@ -1,4 +1,4 @@
-# /etc/bash.bashrc for SuSE Linux
+# /etc/bash.bashrc for SUSE Linux
 #
 # PLEASE DO NOT CHANGE /etc/bash.bashrc There are chances that your changes
 # will be lost during system upgrades.  Instead use /etc/bash.bashrc.local

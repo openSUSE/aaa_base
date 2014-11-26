@@ -1,4 +1,4 @@
-# /etc/profile for SuSE Linux
+# /etc/profile for SUSE Linux
 #
 # PLEASE DO NOT CHANGE /etc/profile. There are chances that your changes
 # will be lost during system upgrades. Instead use /etc/profile.local for
