@@ -275,9 +275,12 @@ case "$-" in
 	    elif test -s /etc/profile.d/complete.bash ; then
 		. /etc/profile.d/complete.bash
 	    fi
-	    for s in /etc/bash_completion.d/*.sh ; do
-		test -r $s && . $s
-	    done
+	    # Do not source twice if already handled by bash-completion
+	    if [[ $BASH_COMPLETION_COMPAT_DIR != /etc/bash_completion.d ]]; then
+		for s in /etc/bash_completion.d/*.sh ; do
+		    test -r $s && . $s
+		done
+	    fi
 	    if test -e $HOME/.bash_completion ; then
 		. $HOME/.bash_completion
 	    fi
