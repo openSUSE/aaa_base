@@ -24,13 +24,13 @@ do
 	eval val=${line#*=}
 	case "$line" in
 	CWD_IN_ROOT_PATH=*)
-      test "$val" = "yes" || continue
-      test $UID -lt 100 && PATH=$PATH:.
-      ;;
+	    test "$val" = "yes" || continue
+	    test $UID -lt 100 && PATH=$PATH:.
+	    ;;
 	CWD_IN_USER_PATH=*)
-      test "$val" = "yes" || continue
-      test $UID -ge 100 && PATH=$PATH:.
-      ;;
+	    test "$val" = "yes" || continue
+	    test $UID -ge 100 && PATH=$PATH:.
+	    ;;
 	FROM_HEADER=*)
 	    FROM_HEADER="${val}"
 	    export FROM_HEADER
