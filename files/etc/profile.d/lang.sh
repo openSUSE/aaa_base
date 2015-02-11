@@ -15,7 +15,10 @@ test -z "$SSH_SENDS_LOCALE" || return
 #
 # Already done by the GDM
 #
-test -z "$GDM_LANG" || return
+if test -z "$GDM_LANG"; then
+    test -s $HOME/.i18n && . $HOME/.i18n
+    return
+fi
 
 #
 # Get the system and after that the users configuration
