@@ -15,7 +15,7 @@ test -z "$SSH_SENDS_LOCALE" || return
 #
 # Already done by the GDM
 #
-if test -z "$GDM_LANG"; then
+if test -n "$GDM_LANG"; then
     test -s $HOME/.i18n && . $HOME/.i18n
     return
 fi
