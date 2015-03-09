@@ -113,13 +113,21 @@ if ( ! ${?WINDOWMANAGER} ) then
     set default_wm="${default_wm:t}"
     if ( -s ${desktop:q} ) then
 	set wm="`sed -rn '/^Exec=/{s@[^=]*=([^=]*)@\1@p;}' ${desktop:q}`"
-	foreach val ($path /usr/X11R6/bin /usr/openwin/bin)
-	    if ( ${val:q} =~ *.* ) continue
-	    set val="${val:q}/${wm:q}"
-	    if ( ! -x ${val:q} ) continue
-	    setenv WINDOWMANAGER "${val:q}"
-	    break
-	end
+	switch ("${wm:q}")
+	case /usr/bin/env*:
+	case env*:
+	    setenv WINDOWMANAGER "${wm:q}"
+	    breaksw
+	default:
+	    foreach val ($path /usr/X11R6/bin /usr/openwin/bin)
+		if ( ${val:q} =~ *.* ) continue
+		set val="${val:q}/${wm:q}"
+		if ( ! -x ${val:q} ) continue
+		setenv WINDOWMANAGER "${val:q}"
+		break
+	    end
+	    breaksw
+	endsw
 	unset val wm
     endif
     unset desktop

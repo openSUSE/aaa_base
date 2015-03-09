@@ -113,6 +113,10 @@ if test -z "$WINDOWMANAGER" ; then
     if test -s "$desktop" ; then
 	while read -r line; do
 	    case ${line} in
+	    Exec=/usr/bin/env*|Exec=env*)
+		    WINDOWMANAGER="${line#Exec=}"
+		    break
+		    ;;
 	    Exec=*) WINDOWMANAGER="$(command -v ${line#Exec=})"
 		    break
 	    esac
