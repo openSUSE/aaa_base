@@ -102,7 +102,6 @@ main (int argc, char *argv[])
 	    buffer[i+12] == 'n' && buffer[i+13] == ' ')
           {
 	    int j = i+14;
-	    int invalid_char = 0;
 	    int number_dots = 0;
 
 	    /* check if we really found a version */
@@ -118,17 +117,13 @@ main (int argc, char *argv[])
 		if (((number_dots < 2) && !isdigit(c)) ||
 		    ((number_dots >= 2) && !my_is_alnum_punct(c)))
 		  {
-		    //invalid_char = 1;
-		    fprintf(stderr, "invalid=1 for %c\n", c);
+		    fprintf(stderr, "invalid char %c\n", c);
 		    break;
 		  }
 	      }
-
-	    if (!invalid_char)
-	      {
-		found = 1;
-		break;
-	      }
+	    /* Use the result anyway */
+	    found = 1;
+	    break;
           }
 
       if (found)
