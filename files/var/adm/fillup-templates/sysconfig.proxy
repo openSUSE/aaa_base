@@ -40,6 +40,20 @@ FTP_PROXY=""
 #
 GOPHER_PROXY=""
 
+## Type:	string
+## Default:	""
+#
+# Example: SOCKS_PROXY="socks://proxy.example.com:8080"
+#
+SOCKS_PROXY=""
+
+## Type:	string
+## Default:	""
+#
+# Example: SOCKS5_SERVER="office-proxy.example.com:8881"
+#
+SOCKS5_SERVER=""
+
 ## Type:	string(localhost)
 ## Default:	localhost
 #

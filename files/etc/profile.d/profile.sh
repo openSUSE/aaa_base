@@ -64,6 +64,18 @@ do
 	    gopher_proxy="${val}"
 	    export gopher_proxy
 	    ;;
+	SOCKS_PROXY=*)
+	    test "$PROXY_ENABLED" = "yes" || continue
+	    socks_proxy="${val}"
+	    export socks_proxy
+	    SOCKS_PROXY="${val}"
+	    export SOCKS_PROXY
+	    ;;
+	SOCKS5_SERVER=*)
+	    test "$PROXY_ENABLED" = "yes" || continue
+	    SOCKS5_SERVER="${val}"
+	    export SOCKS5_SERVER
+	    ;;
 	NO_PROXY=*)
 	    test "$PROXY_ENABLED" = "yes" || continue
 	    no_proxy="${val}"
@@ -102,7 +114,7 @@ if test -d /usr/lib/rasmol ; then
 fi
 
 if test "$PROXY_ENABLED" != "yes" ; then
-    unset http_proxy https_proxy ftp_proxy gopher_proxy no_proxy NO_PROXY
+    unset http_proxy https_proxy ftp_proxy gopher_proxy no_proxy NO_PROXY socks_proxy SOCKS_PROXY SOCKS5_SERVER
 fi
 unset PROXY_ENABLED
 

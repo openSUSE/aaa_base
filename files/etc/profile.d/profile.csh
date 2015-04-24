@@ -65,6 +65,15 @@ foreach line ( "`/bin/grep -vh '^#' $sysconf`" )
 	if (! ${%proxy_enabled} == yes ) continue
 	setenv gopher_proxy "${val:q}"
 	breaksw
+    case SOCKS_PROXY=*:
+	if (! ${%proxy_enabled} == yes ) continue
+	setenv socks_proxy "${val:q}"
+	setenv SOCKS_PROXY "${val:q}"
+	breaksw
+    case SOCKS5_SERVER=*:
+	if (! ${%proxy_enabled} == yes ) continue
+	setenv SOCKS5_SERVER "${val:q}"
+	breaksw
     case NO_PROXY=*:
 	if (! ${%proxy_enabled} == yes ) continue
 	setenv no_proxy "${val:q}"
@@ -99,7 +108,7 @@ endif
 
 if ( ${?proxy_enabled} ) then
     if ( "$proxy_enabled" != "yes" ) then
-	unsetenv http_proxy https_proxy ftp_proxy gopher_proxy no_proxy
+	unsetenv http_proxy https_proxy ftp_proxy gopher_proxy no_proxy socks_proxy SOCKS_PROXY SOCKS5_SERVER
     endif
     unset proxy_enabled
 endif
