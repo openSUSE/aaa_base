@@ -4,7 +4,7 @@ else
     set XDG_DATA_DIRS=(${XDG_DATA_DIRS:as/:/ /})
 endif
 set nonomatch
-foreach xdgdir (/usr/local/share /usr/share /etc/opt/*/share /opt/*/share /usr/share/gnome/help)
+foreach xdgdir (/usr/local/share /usr/share /etc/opt/gnome/share /etc/opt/kde4/share /etc/opt/kde3/share /opt/gnome/share /opt/kde4/share /opt/kde3/share /usr/share/gnome)
     if ( -d "$xdgdir" ) then
 	set -l XDG_DATA_DIRS=($XDG_DATA_DIRS $xdgdir)
     endif
@@ -22,7 +22,7 @@ else
     set XDG_CONFIG_DIRS=(${XDG_CONFIG_DIRS:as/:/ /})
 endif
 set nonomatch
-foreach xdgdir (/usr/local/etc/xdg /etc/xdg /etc/opt/*/xdg)
+foreach xdgdir (/usr/local/etc/xdg /etc/xdg /etc/opt/gnome/xdg /etc/opt/kde4/xdg /etc/opt/kde3/xdg)
     if ( -d "$xdgdir" ) then
 	set -l XDG_CONFIG_DIRS=($XDG_CONFIG_DIRS $xdgdir)
     endif
