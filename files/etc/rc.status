@@ -67,19 +67,21 @@ if test -z "$SYSTEMD_NO_WRAP" && /usr/bin/mountpoint -q /sys/fs/cgroup/systemd; 
 	    /usr/bin/systemctl --system --no-pager daemon-reload
 	esac
 	unset _rc_system
-	case "$1" in
+	action="$1"
+	case "$action" in
 	    status)
-		SYSTEMD_NO_WRAP=1 "$0" "$1"
+		SYSTEMD_NO_WRAP=1 "$0" "$action"
 		_sd_opts='--lines=0 --full --output=cat'
+		action=is-active
 		;;
 	    start|stop|reload|restart|try-restart|force-reload)
-		echo "redirecting to systemctl $1 ${_rc_base}.service" 1>&2
+		echo "redirecting to systemctl $action ${_rc_base}.service" 1>&2
 		_sd_opts='--ignore-dependencies'
 		;;
 	    *)	unset _rc_base
 	esac
 	if test -n "$_rc_base" -a -x /usr/bin/systemctl ; then
-	    exec /usr/bin/systemctl $_sd_opts $1 "${_rc_base}.service"
+	    exec /usr/bin/systemctl $_sd_opts $action "${_rc_base}.service"
 	fi
 	unset _rc_base _sd_opts
     fi
