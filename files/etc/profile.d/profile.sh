@@ -9,6 +9,7 @@
 #     /etc/sysconfig/proxy
 #     /etc/sysconfig/console
 #     /etc/sysconfig/news
+#     /etc/sysconfig/profile
 #
 
 for sys in /etc/sysconfig/windowmanager	\
@@ -16,7 +17,8 @@ for sys in /etc/sysconfig/windowmanager	\
 	   /etc/sysconfig/mail		\
 	   /etc/sysconfig/proxy		\
 	   /etc/sysconfig/console	\
-	   /etc/sysconfig/news
+	   /etc/sysconfig/news          \
+           /etc/sysconfig/profile
 do
     test -s $sys || continue
     while read line ; do
@@ -27,11 +29,11 @@ do
 	case "$line" in
 	CWD_IN_ROOT_PATH=*)
 	    test "$val" = "yes" || continue
-	    test $UID -lt 100 && PATH=$PATH:.
+	    test $UID -eq 0 && PATH=$PATH:.
 	    ;;
 	CWD_IN_USER_PATH=*)
 	    test "$val" = "yes" || continue
-	    test $UID -ge 100 && PATH=$PATH:.
+	    test $UID -ge 1000 && PATH=$PATH:.
 	    ;;
 	FROM_HEADER=*)
 	    FROM_HEADER="${val}"

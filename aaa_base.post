@@ -62,7 +62,7 @@ if ! [ -d /etc/sysconfig ] ; then
 fi
 for i in language backup \
 	proxy windowmanager \
-	news ; do
+	news profile ; do
 %{fillup_only -n $i}
 done
 if [ -e /etc/sysconfig/sysctl ]; then
