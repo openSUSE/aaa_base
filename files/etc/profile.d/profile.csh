@@ -9,6 +9,7 @@
 #     /etc/sysconfig/proxy
 #     /etc/sysconfig/console
 #     /etc/sysconfig/news
+#     /etc/sysconfig/profile
 #
 
 set noglob
@@ -18,7 +19,8 @@ foreach sys (/etc/sysconfig/windowmanager	\
 	     /etc/sysconfig/mail		\
 	     /etc/sysconfig/proxy		\
 	     /etc/sysconfig/console		\
-	     /etc/sysconfig/news)
+	     /etc/sysconfig/news                \
+             /etc/sysconfig/profile)
     if (! -s ${sys:q} ) continue
     set sysconf="${sysconf} ${sys}"
 end
@@ -33,12 +35,12 @@ foreach line ( "`/bin/grep -vh '^#' $sysconf`" )
     case CWD_IN_ROOT_PATH=*:
 	if ( ${line:q} !~ *=*yes* ) continue
 	if ( "$path[*]" =~ *.* )    continue
-	if ( $uid <  100 ) set -l path=( $path . )
+	if ( $uid ==  0 ) set -l path=( $path . )
 	breaksw
     case CWD_IN_USER_PATH=*:
 	if ( ${line:q} !~ *=*yes* ) continue
 	if ( "$path[*]" =~ *.* )    continue
-	if ( $uid >= 100 ) set -l path=( $path . )
+	if ( $uid >= 1000 ) set -l path=( $path . )
 	breaksw
     case FROM_HEADER=*:
 	setenv FROM_HEADER "${val:q}"
