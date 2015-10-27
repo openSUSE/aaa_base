@@ -4,7 +4,6 @@
 # Used configuration files:
 #
 #     /etc/sysconfig/windowmanager
-#     /etc/sysconfig/suseconfig
 #     /etc/sysconfig/mail
 #     /etc/sysconfig/proxy
 #     /etc/sysconfig/console
@@ -12,7 +11,6 @@
 #
 
 for sys in /etc/sysconfig/windowmanager	\
-	   /etc/sysconfig/suseconfig	\
 	   /etc/sysconfig/mail		\
 	   /etc/sysconfig/proxy		\
 	   /etc/sysconfig/console	\
@@ -36,10 +34,6 @@ do
 	FROM_HEADER=*)
 	    FROM_HEADER="${val}"
 	    export FROM_HEADER
-	    ;;
-	SCANNER_TYPE=*)
-	    SCANNER_TYPE="${val}"
-	    export SCANNER_TYPE
 	    ;;
 	PROXY_ENABLED=*)
 	    PROXY_ENABLED="${val}"
