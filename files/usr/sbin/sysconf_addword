@@ -54,7 +54,7 @@ add_word() {
 		$debug && cp $file $tmpf
 		sed -i -e "${lineno} { 
 			s/^[[:space:]]*\($var=\".*\)\(\".*\)/\1 $word_quoted\2/; 
-			s/=\" /=\"/ 
+			s/=\"  */=\"/ 
 			}" $file
 		$debug && diff -u $tmpf $file
 	else
