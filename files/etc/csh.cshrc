@@ -116,7 +116,7 @@ if ( -o /dev/$tty && -c /dev/$tty ) then
   if ( -x /usr/bin/biff ) /usr/bin/biff y
   # If we're running under X11
   if ( ${?DISPLAY} ) then
-    if ( ${?TERM} && ${?EMACS} == 0 && ${?MC_SID} == 0 && ! -r $HOME/.csh.expert ) then
+    if ( ${?TERM} && ${?EMACS} == 0 && ${?MC_SID} == 0 && ${?STY} == 0 && ! -r $HOME/.csh.expert ) then
       if ( ${TERM} == "xterm" ) then
         alias cwdcmd '(echo -n "\033]2;$USER on ${HOST}: $cwd\007\033]1;$HOST\007" > /dev/$tty)'
         cd .

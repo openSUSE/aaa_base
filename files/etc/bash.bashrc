@@ -142,7 +142,7 @@ case "$-" in
 	    elif test -n "$_tsl" -a "$_fsl" ; then
 		TS1="$_sc$_tsl%s@%s:%s$_fsl$_rc"
 	    fi
-	    unset _tsl _fsl _sc _rc
+	    unset _isl _tsl _fsl _sc _rc
 	    ppwd () {
 		local dir
 		local -i width
@@ -182,7 +182,7 @@ case "$-" in
 	    _p=">"
 	fi
 	if test -z "$EMACS" -a -z "$MC_SID" -a -z "$restricted" -a \
-		-n "$DISPLAY" -a ! -r $HOME/.bash.expert
+		-z "$STY" -a -n "$DISPLAY" -a ! -r $HOME/.bash.expert
 	then
 	    _t="\[\$(ppwd)\]"
 	else
