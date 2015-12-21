@@ -23,17 +23,13 @@ test -e /etc/psdevtab && rm -f /etc/psdevtab
 if [ "$FIRST_ARG" -gt 1 ]; then
 
 	# boot variables dropped after 13.1
-	%{remove_and_set -n boot PROMPT_FOR_CONFIRM \
-	 CONFIRM_PROMPT_TIMEOUT RUN_PARALLEL FLOW_CONTROL \
-	 FSCK_MAX_INST KLOGCONSOLE_PARAMS ENFORCE_BLOGD}
+	%{remove_and_set -n boot PROMPT_FOR_CONFIRM CONFIRM_PROMPT_TIMEOUT RUN_PARALLEL FLOW_CONTROL FSCK_MAX_INST KLOGCONSOLE_PARAMS ENFORCE_BLOGD}
 
 	# clock variables dropped after 13.1
-	%{remove_and_set -n clock SYSTOHC FORCE_SYSTOHC BADYEAR \
-	 HCTOSYS_DEVICE USE_HWCLOCK USE_ADJUST}
+	%{remove_and_set -n clock SYSTOHC FORCE_SYSTOHC BADYEAR HCTOSYS_DEVICE USE_HWCLOCK USE_ADJUST}
 
 	# shutdown variables dropped after 13.1
-	%{remove_and_set -n shutdown HALT_SOUND
-	 HALT_POWERDOWN_INSERT HALT HALT_NETWORK HALT_DISKS}
+	%{remove_and_set -n shutdown HALT_SOUND HALT_POWERDOWN_INSERT HALT HALT_NETWORK HALT_DISKS}
 
 	# variables droped in 13.1
 	old_cron_vars="MAX_DAYS_IN_TMP MAX_DAYS_IN_LONG_TMP TMP_DIRS_TO_CLEAR LONG_TMP_DIRS_TO_CLEAR OWNER_TO_KEEP_IN_TMP CLEAR_TMP_DIRS_AT_BOOTUP"
