@@ -4,6 +4,12 @@ use strict;
 use Getopt::Long;
 use File::Temp 'tempfile';
 
+# avoid recursion if systemd calls us back for sysv units.
+if ($ENV{CHKCONFIG_RECURSIVE_CALL}) {
+  exit 0;
+}
+$ENV{CHKCONFIG_RECURSIVE_CALL} = 1;
+
 my $initdir = '/etc/init.d';
 my $inetddir = '/etc/inetd.d';
 my $xinetddir = '/etc/xinetd.d';
