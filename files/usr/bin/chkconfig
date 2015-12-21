@@ -753,15 +753,17 @@ if ($mode eq 's') {
 my $status = 0;
 if ($mode eq 'a' || $mode eq 'd') {
   for $s (splice @services) {
-    if (!$known_all{$s}) {
-      print STDERR "$s: unknown service\n";
-      $status = 1;
-      next;
-    }
-    if (!$known_rc{$s}) {
-      print STDERR "$s: not a runlevel service\n";
-      $status = 1;
-      next;
+    if (!is_overriden_by_systemd($s, $root)) {
+      if (!$known_all{$s}) {
+	print STDERR "$s: unknown service\n";
+	$status = 1;
+	next;
+      }
+      if (!$known_rc{$s}) {
+	print STDERR "$s: not a runlevel service\n";
+	$status = 1;
+	next;
+      }
     }
     push @services, $s;
   }
@@ -790,7 +792,7 @@ if ($mode eq 'a' || $mode eq 'd') {
 }
 if ($mode eq 'l' || $mode eq 'L') {
   my $usecolor = -t STDOUT;
-  if (is_systemd_active()) {
+  if (is_systemd_active() && @services) {
       print STDERR <<EOF;
 
 Note: This output shows SysV services only and does not include native
