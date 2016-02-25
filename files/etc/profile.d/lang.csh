@@ -15,32 +15,46 @@ if ( ${?SSH_SENDS_LOCALE} ) goto end
 #
 # Already done by the GDM
 #
-if ( ${?GDM_LANG} ) goto end
+if ( ${?GDM_LANG} ) then
+    set LANG=$GDM_LANG
+endif
+
+unset _save
+if ( ${?LANG} ) then
+    set _save=$LANG
+endif
 
 #
 # Get the system and after that the users configuration
 #
 if ( -s /etc/sysconfig/language ) then
-    eval `sed -n \
-	-e 's/^RC_\(\(LANG\|LC_[A-Z_]\+\)\)=/set \1=/p' \
-	-e 's/^\(ROOT_USES_LANG\)=/set \1=/p' \
-	< /etc/sysconfig/language`
-    if ( "$uid" != 0 ) set ROOT_USES_LANG=yes
+    if ( ${?LANG} ) then
+	if ( "$uid" == 0 ) then
+	    eval `sed -rn -e 's/^(ROOT_USES_LANG)=/set \1=/p' < /etc/sysconfig/language`
+	else
+	    set ROOT_USES_LANG=yes
+	endif
+    else
+	eval `sed -rn \
+	    -e 's/^RC_((LANG|LC_[A-Z_]+))=/set \1=/p' -e 's/^(ROOT_USES_LANG)=/set \1=/p' \
+	    < /etc/sysconfig/language`
+    endif
 endif
 if ( -s $HOME/.i18n ) then
-    eval `sed -n \
-	-e 's/^\(\(LANG\|LC_[A-Z_]\+\)\)=/set \1=/p' \
-	< $HOME/.i18n`
+    eval `sed -rn -e 's/^((LANG|LC_[A-Z_]+))=/set \1=/p' < $HOME/.i18n`
+endif
+if ( ${?_save} ) then
+    set LANG=$_save
+    unset _save
 endif
 
 #
 # Handle all LC and the LANG variable
 #
-foreach lc (LANG LC_CTYPE LC_NUMERIC LC_TIME	\
-	    LC_COLLATE LC_MONETARY LC_MESSAGES	\
-	    LC_PAPER LC_NAME LC_ADDRESS 	\
-	    LC_TELEPHONE LC_MEASUREMENT		\
-	    LC_IDENTIFICATION LC_ALL)
+foreach lc (LANG LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE    \
+	    LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES  \
+	    LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER       \
+	    LC_TELEPHONE LC_TIME )
     eval set val=\${\?$lc}
     if ( $val == 0 ) continue
     eval set val=\$$lc
@@ -67,6 +81,8 @@ foreach lc (LANG LC_CTYPE LC_NUMERIC LC_TIME	\
     endif
     eval unset $lc
 end
+unset lc val
+unset ROOT_USES_LANG
 
 #
 # Special LC_ALL handling because the LC_ALL
@@ -82,7 +98,6 @@ if ( ${?LC_ALL} ) then
     unset LC_ALL
 endif
 
-unset ROOT_USES_LANG lc val
 end:
 #
 # end of lang.sh

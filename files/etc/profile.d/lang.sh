@@ -15,10 +15,10 @@ test -z "$SSH_SENDS_LOCALE" || return
 #
 # Already done by the GDM
 #
-if test -n "$GDM_LANG"; then
-    test -s $HOME/.i18n && . $HOME/.i18n
-    return
-fi
+test -n "$GDM_LANG" && LANG=$GDM_LANG
+
+unset _save
+test -n "$LANG" && _save="$LANG"
 
 #
 # Get the system and after that the users configuration
@@ -27,28 +27,31 @@ if test -s /etc/sysconfig/language ; then
     while read line ; do
 	case "$line" in
 	\#*|"")
-	    continue
-	    ;;
+		continue
+		;;
 	RC_*)
-	    eval ${line#RC_}
-	    ;;
+		test -n "$LANG" && continue
+		eval ${line#RC_}
+		;;
 	ROOT_USES_LANG*)
-	    eval $line
-	    test "$UID" != 0 && ROOT_USES_LANG=yes
-	    ;;
+		test "$UID" = 0 && eval $line || ROOT_USES_LANG=yes
+		;;
 	esac
     done < /etc/sysconfig/language
+    unset line
 fi
 test -s $HOME/.i18n && . $HOME/.i18n
+
+test -n "$_save" && LANG="$_save"
+unset _save
 
 #
 # Handle all LC and the LANG variable
 #
-for lc in LANG LC_CTYPE LC_NUMERIC LC_TIME	\
-	  LC_COLLATE LC_MONETARY LC_MESSAGES	\
-	  LC_PAPER LC_NAME LC_ADDRESS 		\
-	  LC_TELEPHONE LC_MEASUREMENT		\
-	  LC_IDENTIFICATION LC_ALL
+for lc in LANG LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE	\
+	  LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES	\
+	  LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER	\
+	  LC_TELEPHONE LC_TIME
 do
     eval val="\$$lc"
     if  test "$ROOT_USES_LANG" = "yes"    ; then
@@ -77,6 +80,9 @@ do
     fi
 done
 
+unset lc val
+unset ROOT_USES_LANG
+
 #
 # Special LC_ALL handling because the LC_ALL
 # overwrites all LC but not the LANG variable
@@ -87,6 +93,5 @@ else
     unset LC_ALL
 fi
 
-unset line ROOT_USES_LANG lc val
 #
 # end of lang.sh
