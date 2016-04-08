@@ -152,6 +152,7 @@ sub initlinks_rc {
 
 my $force;
 my $allservices;
+my $nosystemctl = 0;
 
 #
 # run insserv
@@ -477,8 +478,11 @@ sub is_systemd_active {
 sub is_overriden_by_systemd {
     my $service = shift;
     my $root = shift;
-    for my $path (@systemd_paths) {
-	return $path if -e "$root/$path/$service.service";
+
+    if (!$nosystemctl) {
+        for my $path (@systemd_paths) {
+	    return $path if -e "$root/$path/$service.service";
+        }
     }
     return undef;
 }
@@ -562,8 +566,8 @@ if (!GetOptions('list|l'   => \&addmode,
                 'force|f'  => \$force,
                 'allservices|A'  => \$allservices,
                 'deps'     => \$printdeps,
-                'root=s'   => \$root
-
+                'root=s'   => \$root,
+                'no_systemctl' => \$nosystemctl,
    )) {
   usage();
   exit 1;
@@ -796,6 +800,7 @@ if ($mode eq 'a' || $mode eq 'd') {
   $mode = 'l';
   initlinks_rc();
 }
+
 if ($mode eq 'l' || $mode eq 'L') {
   my $usecolor = -t STDOUT;
   if (is_systemd_active() && @services) {
