@@ -1,6 +1,6 @@
 ## Path:	Desktop/Window manager
 ## Description:	
-## Type:	string(gnome,kde4,kde,lxde,xfce,twm,icewm)
+## Type:	string(gnome,kde4,kde,lxde,xfce,twm,icewm,enlightenment)
 ## Default:	kde4
 ## Config:      profiles,kde,susewm
 #
