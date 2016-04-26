@@ -567,7 +567,7 @@ if (!GetOptions('list|l'   => \&addmode,
                 'allservices|A'  => \$allservices,
                 'deps'     => \$printdeps,
                 'root=s'   => \$root,
-                'no_systemctl' => \$nosystemctl,
+                'no-systemctl' => \$nosystemctl,
    )) {
   usage();
   exit 1;
