@@ -30,7 +30,8 @@ if test -s /etc/sysconfig/language ; then
 		continue
 		;;
 	RC_*)
-		test -n "$LANG" && continue
+		# Allow GDM to override system settings
+		test -n "$GDM_LANG" && continue
 		eval ${line#RC_}
 		;;
 	ROOT_USES_LANG*)

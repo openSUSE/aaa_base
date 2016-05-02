@@ -28,7 +28,8 @@ endif
 # Get the system and after that the users configuration
 #
 if ( -s /etc/sysconfig/language ) then
-    if ( ${?LANG} ) then
+    # Allow GDM to override system settings
+    if ( ${?GDM_LANG} ) then
 	if ( "$uid" == 0 ) then
 	    eval `sed -rn -e 's/^(ROOT_USES_LANG)=/set \1=/p' < /etc/sysconfig/language`
 	else
