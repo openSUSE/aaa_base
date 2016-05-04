@@ -145,6 +145,9 @@ if ( ! ${?WINDOWMANAGER} ) then
 	end
 	unset val
     endif
+    if ( ! ${?WINDOWMANAGER} ) then
+	setenv WINDOWMANAGER xterm
+    endif
 endif
 unset default_wm
 
