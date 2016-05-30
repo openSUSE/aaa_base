@@ -115,7 +115,6 @@ if ( "$uid" == "0" ) then
     set _spath=( /sbin /usr/sbin /usr/local/sbin $_spath )
 endif
 foreach _d (/usr/X11/bin \
-	    /usr/bin/X11 \
 	    /usr/X11R6/bin \
 	    /var/lib/dosemu \
 	    /usr/games \
