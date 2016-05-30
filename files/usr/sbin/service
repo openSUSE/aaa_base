@@ -27,7 +27,7 @@ actiondir="/usr/lib/initscripts/legacy-actions"
 #
 # Clean environment
 #
-PATH=/sbin:/usr/sbin:/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin
+PATH=/sbin:/usr/sbin:/usr/local/sbin:/usr/local/bin:/bin:/usr/bin
 test -n "$TERM" || TERM=raw
 test -n "$SYSTEMD_NO_WRAP" && export SYSTEMD_NO_WRAP
 LANG=POSIX

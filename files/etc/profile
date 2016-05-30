@@ -160,7 +160,6 @@ if test -z "$PROFILEREAD" ; then
 	PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
     fi
     for dir in	/usr/X11/bin \
-		/usr/bin/X11 \
 		/usr/X11R6/bin \
 		/var/lib/dosemu \
 		/usr/games \
