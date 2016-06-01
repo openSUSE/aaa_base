@@ -16,7 +16,15 @@ if ( ${?SSH_SENDS_LOCALE} ) goto end
 # Already done by the GDM
 #
 if ( ${?GDM_LANG} ) then
-    set LANG=$GDM_LANG
+    eval `sed -rn -e 's/^(RC_LANG)=/set _\1=/p' < /etc/sysconfig/language`
+    if ( ${?_RC_LANG} ) then
+	if ( "$_RC_LANG" == "$GDM_LANG" ) then
+	    unsetenv GDM_LANG
+	else
+	    setenv LANG=$GDM_LANG
+	endif
+	unset _RC_LANG
+    endif
 endif
 
 unset _save
