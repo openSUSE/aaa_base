@@ -162,6 +162,10 @@ echo "#! /bin/sh
 # Here you should add things, that should happen directly after booting
 # before we're going to the first run level.
 #
+# Please note that the use of this script is deprecated and should be
+# avoided for starting commands. You should consider creating a dedicated
+# systemd service instead.
+#
 " > /etc/init.d/boot.local.new
 test -e /etc/init.d/boot.local || mv /etc/init.d/boot.local.new /etc/init.d/boot.local
 rm -f /etc/init.d/boot.local.new
@@ -180,6 +184,10 @@ echo "#! /bin/sh
 # Here you should add things, that should happen directly before shuting
 # down.
 #
+# Please note that the use of this script is deprecated and should be
+# avoided for starting commands. You should consider creating a dedicated
+# systemd service instead.
+#
 " > /etc/init.d/halt.local.new
 test -e /etc/init.d/halt.local || mv /etc/init.d/halt.local.new /etc/init.d/halt.local
 rm -f /etc/init.d/halt.local.new
@@ -197,6 +205,10 @@ echo "#! /bin/sh
 #
 # Here you should add things, that should happen directly after
 # runlevel has been reached.
+#
+# Please note that the use of this script is deprecated and should be
+# avoided for starting commands. You should consider creating a dedicated
+# systemd service instead.
 #
 " > /etc/init.d/after.local.new
 test -e /etc/init.d/after.local || mv /etc/init.d/after.local.new /etc/init.d/after.local
