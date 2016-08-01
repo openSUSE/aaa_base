@@ -9,6 +9,8 @@
 #
 # Check which shell is reading this file
 #
+noprofile=false
+restricted=false
 if test -z "$is" ; then
  if test -f /proc/mounts ; then
   if ! is=$(readlink /proc/$$/exe 2>/dev/null) ; then
@@ -19,6 +21,14 @@ if test -z "$is" ; then
   fi
   case "$is" in
     */bash)	is=bash
+	while read -r -d $'\0' a ; do
+	    case "$a" in
+	    --noprofile)
+		readonly noprofile=true ;;
+	    --restricted)
+		readonly restricted=true ;;
+	    esac
+	done < /proc/$$/cmdline
 	case "$0" in
 	sh|-sh|*/sh)
 		is=sh	;;
@@ -322,7 +332,7 @@ fi
 #
 # Just in case the user excutes a command with ssh or sudo
 #
-if test \( -n "$SSH_CONNECTION" -o -n "$SUDO_COMMAND" \) -a -z "$PROFILEREAD" ; then
+if test \( -n "$SSH_CONNECTION" -o -n "$SUDO_COMMAND" \) -a -z "$PROFILEREAD" -a "$noprofile" != true ; then
     _SOURCED_FOR_SSH=true
     . /etc/profile > /dev/null 2>&1
     unset _SOURCED_FOR_SSH
