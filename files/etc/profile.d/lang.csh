@@ -21,7 +21,7 @@ if ( ${?GDM_LANG} ) then
 	if ( "$_RC_LANG" == "$GDM_LANG" ) then
 	    unsetenv GDM_LANG
 	else
-	    setenv LANG=$GDM_LANG
+	    setenv LANG $GDM_LANG
 	endif
 	unset _RC_LANG
     endif
