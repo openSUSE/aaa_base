@@ -191,7 +191,7 @@ case "$-" in
 	    _u="\u@\h"
 	    _p=">"
 	fi
-	if test -z "$EMACS" -a -z "$MC_SID" -a -z "$restricted" -a \
+	if test -z "$EMACS" -a -z "$MC_SID" -a "$restricted" != true -a \
 		-z "$STY" -a -n "$DISPLAY" -a ! -r $HOME/.bash.expert
 	then
 	    _t="\[\$(ppwd)\]"
@@ -359,7 +359,7 @@ ash)  test -s /etc/ash.ashrc.local   && . /etc/ash.ashrc.local
 esac
 test -s /etc/sh.shrc.local && . /etc/sh.shrc.local
 
-if test -n "$restricted" -a -z "$PROFILEREAD" ; then
+if test "$restricted" = true -a -z "$PROFILEREAD" ; then
     PATH=/usr/lib/restricted/bin
     export PATH
 fi
