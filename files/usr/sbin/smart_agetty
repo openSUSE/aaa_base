@@ -88,7 +88,7 @@ then
 	done
 	if test -z "$kernel_console"
 	then
-		# check SuSE TIOCGDEV, remove /dev/
+		# check SUSE TIOCGDEV, remove /dev/
 		kernel_console="`showconsole < /dev/console`"
 		kernel_console="${kernel_console##*/}"
 	fi

@@ -215,7 +215,7 @@ fi
 #export TEXINPUTS
 
 #
-# Configure the default pager on SuSE Linux
+# Configure the default pager on SUSE Linux
 #
 if test -z "$LESS" -a -x /usr/bin/less ; then
     LESS="-M -I -R"
@@ -322,7 +322,7 @@ fi
 if test "$is" != "ash" ; then
     #
     # And now let's see if there is a local profile
-    # (for options defined by your sysadmin, not SuSE Linux)
+    # (for options defined by your sysadmin, not SUSE Linux)
     #
     test -s /etc/profile.local && . /etc/profile.local
 fi
