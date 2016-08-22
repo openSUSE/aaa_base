@@ -11,7 +11,7 @@ DEFAULT_WM="kde-plasma"
 ## Type:	yesno
 ## Default:	yes
 #
-# install the SuSE extension for new users
+# install the SUSE extension for new users
 # (theme and additional functions)
 #
 INSTALL_DESKTOP_EXTENSIONS="yes"

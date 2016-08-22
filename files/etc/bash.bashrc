@@ -349,7 +349,7 @@ fi
 
 #
 # And now let us see if there is e.g. a local bash.bashrc
-# (for options defined by your sysadmin, not SuSE Linux)
+# (for options defined by your sysadmin, not SUSE Linux)
 #
 case "$is" in
 bash) test -s /etc/bash.bashrc.local && . /etc/bash.bashrc.local ;;
