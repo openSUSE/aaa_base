@@ -11,7 +11,7 @@ set noglob
 #   
 # Call common progams from /bin or /usr/bin only
 #   
-alias path 'if ( -x /bin/\!^ ) /bin/\!*; if ( -x /usr/bin/\!^ ) /usr/bin/\!*'
+alias susepath 'if ( -x /bin/\!^ ) /bin/\!*; if ( -x /usr/bin/\!^ ) /usr/bin/\!*'
 if ( -x /bin/id ) then
     set id=/bin/id
 else if ( -x /usr/bin/id ) then
@@ -27,14 +27,14 @@ if ( -o /dev/$tty && -c /dev/$tty && ${?prompt} ) then
     if ( "$TERM" == "unknown" ) setenv TERM linux
     if ( "$TERM" == "ibm327x" ) setenv TERM dumb
     if ( ! ${?SSH_TTY} && "$TERM" != "dumb" ) then
-	path stty sane cr0 pass8 dec
-	path tset -I -Q
+	susepath stty sane cr0 pass8 dec
+	susepath tset -I -Q
     endif
     # on iSeries virtual console, detect screen size and terminal
     if ( -d /proc/iSeries && ( $tty == "tty1" || "$tty" == "console")) then
 	setenv LINES   24
 	setenv COLUMNS 80
-	eval `path initviocons -q -e -c`
+	eval `susepath initviocons -q -e -c`
     endif
     settc km yes
 endif

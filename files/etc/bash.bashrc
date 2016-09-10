@@ -66,7 +66,7 @@ fi
 #
 # Call common progams from /bin or /usr/bin only
 #
-path ()
+susepath ()
 {
     if test -x /usr/bin/$1 ; then
 	${1+"/usr/bin/$@"}
@@ -79,8 +79,8 @@ path ()
 #
 # ksh/ash sometimes do not know
 #
-test -z "$UID"  && readonly  UID=`path id -ur 2> /dev/null`
-test -z "$EUID" && readonly EUID=`path id -u  2> /dev/null`
+test -z "$UID"  && readonly  UID=`susepath id -ur 2> /dev/null`
+test -z "$EUID" && readonly EUID=`susepath id -u  2> /dev/null`
 
 test -s /etc/profile.d/ls.bash && . /etc/profile.d/ls.bash
 
@@ -88,8 +88,8 @@ test -s /etc/profile.d/ls.bash && . /etc/profile.d/ls.bash
 # Avoid trouble with Emacs shell mode
 #
 if test "$EMACS" = "t" ; then
-    path tset -I -Q
-    path stty cooked pass8 dec nl -echo
+    susepath tset -I -Q
+    susepath stty cooked pass8 dec nl -echo
 fi
 
 #
@@ -129,7 +129,7 @@ case "$-" in
 	#
 	# Set xterm prompt with short path (last 18 characters)
 	#
-	if path tput hs 2>/dev/null || path tput -T $TERM+sl hs 2>/dev/null ; then
+	if susepath tput hs 2>/dev/null || susepath tput -T $TERM+sl hs 2>/dev/null ; then
 	    #
 	    # Mirror prompt in terminal "status line", which for graphical
 	    # terminals usually is the window title. KDE konsole in
@@ -141,9 +141,9 @@ case "$-" in
 		_isl=$(echo -en '\e]1;')
 		_fsl=$(echo -en '\007')
 	    else
-		_tsl=$(path tput tsl 2>/dev/null || path tput -T $TERM+sl tsl 2>/dev/null)
+		_tsl=$(susepath tput tsl 2>/dev/null || susepath tput -T $TERM+sl tsl 2>/dev/null)
 		_isl=''
-		_fsl=$(path tput fsl 2>/dev/null || path tput -T $TERM+sl fsl 2>/dev/null)
+		_fsl=$(susepath tput fsl 2>/dev/null || susepath tput -T $TERM+sl fsl 2>/dev/null)
 	    fi
 	    _sc=$(tput sc 2>/dev/null)
 	    _rc=$(tput rc 2>/dev/null)
@@ -175,8 +175,8 @@ case "$-" in
 	# Other prompting for root
 	if test "$UID" -eq 0  ; then
 	    if test -n "$TERM" -a -t ; then
-	    	_bred="$(path tput bold 2> /dev/null; path tput setaf 1 2> /dev/null)"
-	    	_sgr0="$(path tput sgr0 2> /dev/null)"
+		_bred="$(susepath tput bold 2> /dev/null; susepath tput setaf 1 2> /dev/null)"
+		_sgr0="$(susepath tput sgr0 2> /dev/null)"
 	    fi
 	    # Colored root prompt (see bugzilla #144620)
 	    if test -n "$_bred" -a -n "$_sgr0" ; then

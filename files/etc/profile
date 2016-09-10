@@ -63,7 +63,7 @@ fi
 #
 # Call common progams from /bin or /usr/bin only
 #
-path ()
+susepath ()
 {
     command -p ${1+"$@"}
 }
@@ -71,7 +71,7 @@ path ()
 #
 # Initialize terminal
 #
-tty=`path tty 2> /dev/null`
+tty=`susepath tty 2> /dev/null`
 test $? -ne 0 && tty=""
 if test -O "$tty" -a -n "$PS1"; then
     test -z "${TERM}"		&& { TERM=linux; export TERM; }
@@ -79,15 +79,15 @@ if test -O "$tty" -a -n "$PS1"; then
     test "${TERM}" = "ibm327x"	&& { TERM=dumb;  export TERM; }
     # Do not change settings on local line if connected to remote
     if test -z "$SSH_TTY" -a "${TERM}" != "dumb" ; then
-	path stty sane cr0 pass8 dec
-	path tset -I -Q
+	susepath stty sane cr0 pass8 dec
+	susepath tset -I -Q
     fi
     # on iSeries virtual console, detect screen size and terminal
     if test -d /proc/iSeries -a \( "$tty" = "/dev/tty1" -o "$tty" = "/dev/console" \) ; then
         LINES=24
 	COLUMNS=80
 	export LINES COLUMNS TERM
-	eval `path initviocons -q -e`
+	eval `susepath initviocons -q -e`
     fi
 fi
 unset TERMCAP
@@ -118,9 +118,9 @@ fi
 #
 # ksh/ash sometimes do not know
 #
-test -z "$UID"  && readonly  UID=`path id -ur 2> /dev/null`
-test -z "$EUID" && readonly EUID=`path id -u  2> /dev/null`
-test -z "$USER" && USER=`path id -un 2> /dev/null`
+test -z "$UID"  && readonly  UID=`susepath id -ur 2> /dev/null`
+test -z "$EUID" && readonly EUID=`susepath id -u  2> /dev/null`
+test -z "$USER" && USER=`susepath id -un 2> /dev/null`
 test -z "$MAIL" && MAIL=/var/spool/mail/$USER
 if test -x /bin/uname ; then
     test -z "$HOST" && HOST=`/bin/uname -n`
