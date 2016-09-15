@@ -818,9 +818,11 @@ EOF
   }
   for $s (@services) {
     if (!$known_rc{$s}) {
-      print STDERR "$s: unknown service\n" unless $known_all{$s};
-      $status = 1;
-      next;
+      if (!$known_all{$s}) {
+	print STDERR "$s: unknown service\n";
+	$status = 1;
+	next;
+      }
     }
     my $line = "";
     my $l;
