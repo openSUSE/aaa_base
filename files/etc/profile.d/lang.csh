@@ -16,7 +16,15 @@ if ( ${?SSH_SENDS_LOCALE} ) goto end
 # Already done by the GDM
 #
 if ( ${?GDM_LANG} ) then
-    set LANG=$GDM_LANG
+    eval `sed -rn -e 's/^(RC_LANG)=/set _\1=/p' < /etc/sysconfig/language`
+    if ( ${?_RC_LANG} ) then
+	if ( "$_RC_LANG" == "$GDM_LANG" ) then
+	    unsetenv GDM_LANG
+	else
+	    setenv LANG $GDM_LANG
+	endif
+	unset _RC_LANG
+    endif
 endif
 
 unset _save
@@ -28,17 +36,25 @@ endif
 # Get the system and after that the users configuration
 #
 if ( -s /etc/sysconfig/language ) then
-    if ( ${?LANG} ) then
-	if ( "$uid" == 0 ) then
-	    eval `sed -rn -e 's/^(ROOT_USES_LANG)=/set \1=/p' < /etc/sysconfig/language`
-	else
-	    set ROOT_USES_LANG=yes
-	endif
-    else
-	eval `sed -rn \
-	    -e 's/^RC_((LANG|LC_[A-Z_]+))=/set \1=/p' -e 's/^(ROOT_USES_LANG)=/set \1=/p' \
-	    < /etc/sysconfig/language`
-    endif
+    foreach line ("`sed -rn '/^[^#]/p' < /etc/sysconfig/language`")
+	switch ("$line")
+	case RC_*:
+	    # Allow GDM to override system settings
+	    if ( ${?GDM_LANG} ) continue
+	    eval set ${line:s/RC_//}
+	    breaksw
+	case ROOT_USES_LANG*:
+	    if ( "$uid" == 0 ) then
+		eval set $line
+	    else
+		set ROOT_USES_LANG=yes
+	    endif
+	    breaksw
+	default:
+	    breaksw
+	endsw
+    end
+    unset line
 endif
 if ( -s $HOME/.i18n ) then
     eval `sed -rn -e 's/^((LANG|LC_[A-Z_]+))=/set \1=/p' < $HOME/.i18n`

@@ -8,6 +8,8 @@
 #
 # Check which shell is reading this file
 #
+norc=false
+restricted=false
 if test -f /proc/mounts ; then
   if ! is=$(readlink /proc/$$/exe 2>/dev/null) ; then
     case "$0" in
@@ -17,6 +19,14 @@ if test -f /proc/mounts ; then
   fi
   case "$is" in
     */bash)	is=bash
+	while read -r -d $'\0' a ; do
+	    case "$a" in
+	    --norc)
+		readonly norc=true ;;
+	    --restricted)
+		readonly restricted=true ;;
+	    esac
+	done < /proc/$$/cmdline
 	case "$0" in
 	sh|-sh|*/sh)
 		is=sh	;;
@@ -160,7 +170,6 @@ if test -z "$PROFILEREAD" ; then
 	PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
     fi
     for dir in	/usr/X11/bin \
-		/usr/bin/X11 \
 		/usr/X11R6/bin \
 		/var/lib/dosemu \
 		/usr/games \
@@ -206,7 +215,7 @@ fi
 #export TEXINPUTS
 
 #
-# Configure the default pager on SuSE Linux
+# Configure the default pager on SUSE Linux
 #
 if test -z "$LESS" -a -x /usr/bin/less ; then
     LESS="-M -I -R"
@@ -313,7 +322,7 @@ fi
 if test "$is" != "ash" ; then
     #
     # And now let's see if there is a local profile
-    # (for options defined by your sysadmin, not SuSE Linux)
+    # (for options defined by your sysadmin, not SUSE Linux)
     #
     test -s /etc/profile.local && . /etc/profile.local
 fi
@@ -330,7 +339,7 @@ fi
 # Standard ssh command does not do an login, therefore
 # /etc/profile will be sourced by /etc/bash.bashrc
 #
-if test -z "$_SOURCED_FOR_SSH" ; then
+if test -z "$_SOURCED_FOR_SSH" -a "$norc" != true ; then
     #
     # System BASH specials, maybe also good for other shells
     # Note that ksh always reads /etc/ksh.kshrc
@@ -338,7 +347,7 @@ if test -z "$_SOURCED_FOR_SSH" ; then
     if test "$is" != ksh -a "$is" != zsh ; then
 	test -r /etc/bash.bashrc && . /etc/bash.bashrc
     fi
-    if test -n "$restricted" ; then
+    if test "$restricted" = true ; then
 	readonly _HOMEBASHRC=true
     fi
     if test "$is" = "bash" -a -z "$_HOMEBASHRC" ; then
@@ -351,7 +360,7 @@ if test -z "$_SOURCED_FOR_SSH" ; then
     # KSH specials
     #
     if test "$is" = "ksh" -a -r /etc/ksh.kshrc ; then
-	if test -n "$restricted" ; then
+	if test "$restricted" = true ; then
 	    readonly _HOMEKSHRC=true
 	fi
 	if test ! /etc/bash.bashrc -ef /etc/ksh.kshrc ; then
@@ -364,7 +373,7 @@ if test -z "$_SOURCED_FOR_SSH" ; then
 	fi
     fi
 fi
-if test -n "$restricted" ; then
+if test "$restricted" = true ; then
     PATH=/usr/lib/restricted/bin
     export PATH
 fi

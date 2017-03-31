@@ -1,7 +1,7 @@
 ## Path:	Desktop/Window manager
 ## Description:	
-## Type:	string(gnome,kde4,kde,lxde,xfce,twm,icewm,enlightenment)
-## Default:	kde4
+## Type:	string(gnome,kde-plasma,kde,plasma5,lxde,xfce,twm,icewm,enlightenment)
+## Default:	kde-plasma
 ## Config:      profiles,kde,susewm
 #
 # Here you can set the default window manager (kde, fvwm, ...)
@@ -11,7 +11,7 @@ DEFAULT_WM="kde-plasma"
 ## Type:	yesno
 ## Default:	yes
 #
-# install the SuSE extension for new users
+# install the SUSE extension for new users
 # (theme and additional functions)
 #
 INSTALL_DESKTOP_EXTENSIONS="yes"

@@ -133,6 +133,9 @@ if test -z "$WINDOWMANAGER" ; then
     fi
     PATH=$SAVEPATH
     unset SAVEPATH desktop
+    if test -z "$WINDOWMANAGER" ; then
+	WINDOWMANAGER=xterm
+    fi
 fi
 unset DEFAULT_WM
 export WINDOWMANAGER

@@ -15,7 +15,15 @@ test -z "$SSH_SENDS_LOCALE" || return
 #
 # Already done by the GDM
 #
-test -n "$GDM_LANG" && LANG=$GDM_LANG
+if test -n "$GDM_LANG" ; then
+    eval $(sed -rn -e 's/^(RC_LANG)=/_\1=/p' < /etc/sysconfig/language)
+    if test "$_RC_LANG" = "$GDM_LANG" ; then
+	unset GDM_LANG
+    else
+	LANG=$GDM_LANG
+    fi
+    unset _RC_LANG
+fi
 
 unset _save
 test -n "$LANG" && _save="$LANG"
@@ -30,7 +38,8 @@ if test -s /etc/sysconfig/language ; then
 		continue
 		;;
 	RC_*)
-		test -n "$LANG" && continue
+		# Allow GDM to override system settings
+		test -n "$GDM_LANG" && continue
 		eval ${line#RC_}
 		;;
 	ROOT_USES_LANG*)

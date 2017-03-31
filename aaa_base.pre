@@ -35,48 +35,22 @@ done
 mkdir -p /etc
 mkdir -p /var/adm/fillup-templates
 echo "root:x:0:0:root:/root:/bin/bash
-bin:x:1:1:bin:/bin:/bin/bash
-daemon:x:2:2:Daemon:/sbin:/bin/bash
 lp:x:4:7:Printing daemon:/var/spool/lpd:/bin/bash
 mail:x:8:12:Mailer daemon:/var/spool/clientmqueue:/bin/false
-news:x:9:13:News system:/etc/news:/bin/bash
-uucp:x:10:14:Unix-to-Unix CoPy system:/etc/uucp:/bin/bash
-games:x:12:100:Games account:/var/games:/bin/bash
-man:x:13:62:Manual pages viewer:/var/cache/man:/bin/bash
 wwwrun:x:30:8:WWW daemon apache:/var/lib/wwwrun:/bin/false
 ftp:x:40:49:FTP account:/srv/ftp:/bin/bash
 nobody:x:65534:65533:nobody:/var/lib/nobody:/bin/bash" \
  > /var/adm/fillup-templates/passwd.aaa_base
 
 echo "root:x:0:
-bin:x:1:daemon
-daemon:x:2:
 sys:x:3:
-tty:x:5:
-disk:x:6:
 lp:x:7:
 www:x:8:
-kmem:x:9:
-wheel:x:10:
 mail:x:12:
-news:x:13:
-uucp:x:14:
 shadow:x:15:
 dialout:x:16:
-audio:x:17:
-floppy:x:19:
-cdrom:x:20:
-console:x:21:
 utmp:x:22:
-public:x:32:
-video:x:33:
-games:x:40:
-xok:x:41:
-trusted:x:42:
-modem:x:43:
 ftp:x:49:
-lock:x:54:
-man:x:62:
 users:x:100:
 nobody:x:65533:
 nogroup:x:65534:nobody" > /var/adm/fillup-templates/group.aaa_base
@@ -162,6 +136,10 @@ echo "#! /bin/sh
 # Here you should add things, that should happen directly after booting
 # before we're going to the first run level.
 #
+# Please note that the use of this script is deprecated and should be
+# avoided for starting commands. You should consider creating a dedicated
+# systemd service instead.
+#
 " > /etc/init.d/boot.local.new
 test -e /etc/init.d/boot.local || mv /etc/init.d/boot.local.new /etc/init.d/boot.local
 rm -f /etc/init.d/boot.local.new
@@ -180,6 +158,10 @@ echo "#! /bin/sh
 # Here you should add things, that should happen directly before shuting
 # down.
 #
+# Please note that the use of this script is deprecated and should be
+# avoided for starting commands. You should consider creating a dedicated
+# systemd service instead.
+#
 " > /etc/init.d/halt.local.new
 test -e /etc/init.d/halt.local || mv /etc/init.d/halt.local.new /etc/init.d/halt.local
 rm -f /etc/init.d/halt.local.new
@@ -197,6 +179,10 @@ echo "#! /bin/sh
 #
 # Here you should add things, that should happen directly after
 # runlevel has been reached.
+#
+# Please note that the use of this script is deprecated and should be
+# avoided for starting commands. You should consider creating a dedicated
+# systemd service instead.
 #
 " > /etc/init.d/after.local.new
 test -e /etc/init.d/after.local || mv /etc/init.d/after.local.new /etc/init.d/after.local
