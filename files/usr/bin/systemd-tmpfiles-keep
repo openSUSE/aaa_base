@@ -1,0 +1,51 @@
+#!/bin/sh
+#
+# Create exclude entries for files owned by $OWNER_TO_KEEP_IN_TMP in /usr/lib/tmpfiles.d/sysconfig.conf
+#
+# Copyright (c) 2014 SUSE LINUX Products GmbH, Germany.
+#
+# Author: Thomas Blume
+#
+# Please send feedback to http://www.suse.de/feedback
+#
+
+#
+# paranoia settings
+#
+
+umask 022
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+
+if [ -f /usr/lib/tmpfiles.d/sysconfig.conf ]; then
+   OWNER_TO_KEEP_IN_TMP=`sed -n '/#OWNER_TO_KEEP_IN_TMP/s/#OWNER_TO_KEEP_IN_TMP=//p'  /usr/lib/tmpfiles.d/sysconfig.conf | sed 's/\"//g'`
+   TMPDIR_TO_SEARCH_OWNER=`sed -n '/#TMPDIR_TO_SEARCH_OWNER/s/#TMPDIR_TO_SEARCH_OWNER=//p'  /usr/lib/tmpfiles.d/sysconfig.conf | sed 's/\"//g'`
+   
+   if [ "${TMPDIR_TO_SEARCH_OWNER:0:1}" == "/" ]; then
+      DIRENT="$TMPDIR_TO_SEARCH_OWNER"
+   else
+      DIRENT=`sed -n '/^d\ \//p' /usr/lib/tmpfiles.d/sysconfig.conf | cut -d " " -f 2`
+   fi
+
+   for DIR in $DIRENT ; do
+      for OWNER in $OWNER_TO_KEEP_IN_TMP ; do
+         getent passwd $OWNER >/dev/null
+         if [ $? == 0 ] && [ -d $DIR ];  then
+            FILES_TO_KEEP+=`/usr/bin/find $DIR/* -user $OWNER 2>/dev/null` 
+         fi
+      done
+   done
+
+
+   if [ ${#FILES_TO_KEEP} -gt 0 ]; then
+      sed '/######Automatically generated part, please do not modify######/,/###############Automatically generated part end###############/d' /usr/lib/tmpfiles.d/sysconfig.conf | sed -re '$!N;/^\n$/!P;D' > /usr/lib/tmpfiles.d/sysconfig.conf.tmp
+      echo -e "\n######Automatically generated part, please do not modify######" >> /usr/lib/tmpfiles.d/sysconfig.conf.tmp
+      echo "# Exclude files owned by OWNER_TO_KEEP_IN_TMP " >>/usr/lib/tmpfiles.d/sysconfig.conf.tmp
+      for i in $FILES_TO_KEEP; do
+         echo "x $i" >> /usr/lib/tmpfiles.d/sysconfig.conf.tmp
+      done
+      echo "###############Automatically generated part end###############" >>/usr/lib/tmpfiles.d/sysconfig.conf.tmp
+      mv /usr/lib/tmpfiles.d/sysconfig.conf.tmp /usr/lib/tmpfiles.d/sysconfig.conf
+   fi
+fi

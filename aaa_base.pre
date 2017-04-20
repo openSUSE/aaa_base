@@ -206,3 +206,97 @@ done
 if test -f /root/.gnupg/secring.gpg ; then
   cp -a /root/.gnupg/secring.gpg /root/.gnupg/secring.gpg.aaa_save
 fi
+
+# fate 314974: port tmpdir removal parameters from /etc/sysconfig/cron to systemd-tmpfiles settings
+
+# we don't take action if /etc/sysconfig/cron is not present
+if [ -f /etc/sysconfig/cron ]; then
+   . /etc/sysconfig/cron
+
+#write the directories and removal intervals for all tmpdirs specified
+   if [ "${MAX_DAYS_IN_TMP:-0}" -gt 0 -o -n "$TMP_DIRS_TO_CLEAR" ]; then
+      for DIR in $TMP_DIRS_TO_CLEAR; do
+         if [ "$MAX_DAYS_IN_TMP" -gt 0 ]; then
+            DIRENT+=`echo "\nd $DIR 1777 root root "$MAX_DAYS_IN_TMP"d"`
+         elif [ "$MAX_DAYS_IN_TMP" -eq 0 ]; then
+            DIRENT+=`echo "\nd $DIR 1777 root root -"`
+         fi
+      done
+#if no tmpdirs are specified but we have a cleanup interval, default to /tmp
+      if [ -z "$TMP_DIRS_TO_CLEAR" ] && [ "${MAX_DAYS_IN_TMP:-0}" -gt 0 ]; then
+         DIRENT+=`echo "\nd /tmp 1777 root root "$MAX_DAYS_IN_TMP"d"`
+      fi
+   fi
+
+#write the directories and removal intervals for all additional tmpdirs specified
+   if [ "${MAX_DAYS_IN_LONG_TMP:-0}" -gt 0 -o -n "$LONG_TMP_DIRS_TO_CLEAR" ]; then
+      for DIR in $LONG_TMP_DIRS_TO_CLEAR; do
+         if [ "$MAX_DAYS_IN_LONG_TMP" -gt 0 ]; then
+            DIRENT+=`echo "\nd $DIR 1777 root root "$MAX_DAYS_IN_LONG_TMP"d"`
+         elif [ "$MAX_DAYS_IN_LONG_TMP" -eq 0 ]; then
+            DIRENT+=`echo "\nd $DIR 1777 root root -"`
+         fi
+      done
+   fi
+
+   echo "#convert tmpfile settings from /etc/sysconfig/cron to systemd" > /usr/lib/tmpfiles.d/sysconfig.conf
+   echo -e "$DIRENT" >> /usr/lib/tmpfiles.d/sysconfig.conf
+
+# address directories to be cleared at system boot
+   : ${TMP_DIRS_TO_CLEAR:=/tmp}
+   : ${CLEAR_TMP_DIRS_AT_BOOTUP:=no}
+   CLEAR_DIRS="$TMP_DIRS_TO_CLEAR"
+   if [ "${CLEAR_TMP_DIRS_AT_BOOTUP:0:1}" == "/" ]; then
+      CLEAR_DIRS="$CLEAR_TMP_DIRS_AT_BOOTUP"
+      CLEAR_TMP_DIRS_AT_BOOTUP=yes
+   fi
+   if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
+      for DIR in $CLEAR_DIRS; do
+         if [[ ! "$REMENT" =~ "R $DIR/*" ]]; then
+            REMENT+=`echo " R $DIR/*"`	
+         fi
+      done
+   fi
+   echo -e "$REMENT" | sed -e 's/ R/\nR/g' | sed '/^$/d' >> /usr/lib/tmpfiles.d/sysconfig.conf
+
+# take care of ownerkeep parameters
+# owner based keeping of files is not implemented in systemd, so we need to run a script
+# that creates keep entries before each scheduled removal run
+   OWNER_TO_KEEP_IN_TMP=`sed -n '/^OWNER_TO_KEEP_IN_TMP/p' /etc/sysconfig/cron`
+   if [ -n "$OWNER_TO_KEEP_IN_TMP" ]; then
+      TMPDIR_TO_SEARCH_OWNER=`sed -n 's/^TMP_DIRS_TO_CLEAR/TMPDIR_TO_SEARCH_OWNER/p' /etc/sysconfig/cron`
+      echo "
+      #########Moved sysconfig variables, do not delete leading hashes!#########
+      ## Type:        string
+      ## Default:     root
+      #
+      # In OWNER_TO_KEEP_IN_TMP, you can specify, whose files shall not be deleted.
+      #
+      #${OWNER_TO_KEEP_IN_TMP:-OWNER_TO_KEEP_IN_TMP=\"root\"}
+      
+      ## Type:         string
+      ## Default:      ""
+      #
+      # To which of the TMP directories should OWNER_TO_KEEP_IN_TMP apply.
+      # If empty it defaults to all directory entries in /usr/lib/tmpfiles.d/sysconfig.conf.
+      #${TMPDIR_TO_SEARCH_OWNER:-TMPDIR_TO_SEARCH_OWNER=\"\"}
+      ##########################################################################
+      " | sed 's/^ *//g' >> /usr/lib/tmpfiles.d/sysconfig.conf
+   fi
+
+# clear old variables from /etc/sysconfig/cron
+   OLDVARS=`sed '1!G;h;$!d' /etc/sysconfig/cron | sed  -n '/^CLEAR_TMP_DIRS_AT_BOOTUP/,/Path:.*System\/Cron$/p'`
+   if [ ${#OLDVARS} -gt 0 ]; then
+cat <<-'EOF' | sed 's/^ *//g' > /etc/sysconfig/cron.tmp
+      ## The Parameters MAX_DAYS_IN_TMP, MAX_DAYS_IN_LONG_TMP, TMP_DIRS_TO_CLEAR, 
+      ## LONG_TMP_DIRS_TO_CLEAR, CLEAR_TMP_DIRS_AT_BOOTUP and OWNER_TO_KEEP_IN_TMP have 
+      ## been converted to systemd-tmpfiles settings in /usr/lib/tmpfiles.d/sysconfig.conf.
+      ## Please check and modify to your needs.
+      ## See 'man tmpfiles.d' for details.
+
+EOF
+
+      sed '1!G;h;$!d' /etc/sysconfig/cron | sed '/^CLEAR_TMP_DIRS_AT_BOOTUP/,/Path:.*System\/Cron$/d' | sed '1!G;h;$!d' >> /etc/sysconfig/cron.tmp
+      mv /etc/sysconfig/cron.tmp /etc/sysconfig/cron
+   fi
+fi
