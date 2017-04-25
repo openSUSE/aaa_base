@@ -34,26 +34,14 @@ done
 #
 mkdir -p /etc
 mkdir -p /var/adm/fillup-templates
-echo "root:x:0:0:root:/root:/bin/bash
-lp:x:4:7:Printing daemon:/var/spool/lpd:/bin/bash
-mail:x:8:12:Mailer daemon:/var/spool/clientmqueue:/bin/false
-wwwrun:x:30:8:WWW daemon apache:/var/lib/wwwrun:/bin/false
-ftp:x:40:49:FTP account:/srv/ftp:/bin/bash
-nobody:x:65534:65533:nobody:/var/lib/nobody:/bin/bash" \
+echo "root:x:0:0:root:/root:/bin/bash" \
  > /var/adm/fillup-templates/passwd.aaa_base
 
 echo "root:x:0:
-sys:x:3:
-lp:x:7:
-www:x:8:
-mail:x:12:
 shadow:x:15:
 dialout:x:16:
 utmp:x:22:
-ftp:x:49:
-users:x:100:
-nobody:x:65533:
-nogroup:x:65534:nobody" > /var/adm/fillup-templates/group.aaa_base
+users:x:100:" > /var/adm/fillup-templates/group.aaa_base
 
 rm -f /var/adm/fillup-templates/shadow.aaa_base
 while read LINE ; do

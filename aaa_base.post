@@ -175,7 +175,6 @@ while read file owner mode; do
 done <<EOT
 /root/.bash_history root:root 600
 /var/log/lastlog    root:root 644
-/var/log/faillog    root:root 600
 /var/log/wtmp       root:utmp 664
 /var/log/btmp       root:root 600
 /run/utmp       root:utmp 664
