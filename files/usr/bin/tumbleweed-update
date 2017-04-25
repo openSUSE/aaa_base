@@ -1,0 +1,3 @@
+#!/usr/bin/sh
+
+zypper dist-upgrade --no-allow-vendor-change --no-recommends $@
