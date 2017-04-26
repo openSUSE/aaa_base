@@ -144,16 +144,6 @@ unset _hpath
 set noglob
 
 #
-# For all readline library based applications
-#
-if (! ${?INPUTRC} ) then
-    if ( -r /etc/inputrc ) setenv INPUTRC /etc/inputrc
-    if ( "$HOME" != "/" ) then
-	if ( -s ${HOME}/.inputrc ) setenv INPUTRC ${HOME}/.inputrc
-    endif
-endif
-
-#
 # Set some environment variables for TeX/LaTeX (Not used due luatex)
 #
 #if ( ${?TEXINPUTS} ) then

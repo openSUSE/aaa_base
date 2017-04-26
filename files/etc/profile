@@ -187,16 +187,6 @@ if test -z "$PROFILEREAD" ; then
 fi
 
 #
-# Many programs using readline library for line editing
-# should know about this (e.g. bash)
-#
-if test -z "$INPUTRC" ; then
-    INPUTRC=/etc/inputrc
-    test -s $HOME/.inputrc && INPUTRC=$HOME/.inputrc
-    export INPUTRC
-fi
-
-#
 # Most bourn shell clones knows about this
 #
 if test -z "$PROFILEREAD" ; then
