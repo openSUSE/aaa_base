@@ -70,7 +70,7 @@
 "\C-\M-[D":      backward-char
 "\C-\M-[C":      forward-char
 "\C-\M-[A":      previous-history
-"\C-M-[B":      next-history
+"\C-\M-[B":      next-history
 "\C-^[[D":      backward-char
 $if term=xterm
 "\e[2;2~":	yank
