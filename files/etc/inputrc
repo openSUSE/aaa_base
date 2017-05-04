@@ -17,7 +17,18 @@ set input-meta on
 set output-meta on
 set convert-meta off
 set enable-meta-key off
-set enable-keypad on
+#
+# When enabled use application keypad, with XTerm the e.g.  Up key switch from
+# ESC [ A over to ESC O A .  On the bash command prompt the commands
+#  tput smkx
+# for enter keyboard_transmit mode as well as
+#  tput rmkx
+# for leave keyboard_transmit mode can be used to sitch to application keypad
+# and switch back
+#
+#$if Bash
+#set enable-keypad on
+#$endif
 #
 # VI line editing
 #
