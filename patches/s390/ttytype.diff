@@ -1,9 +1,11 @@
 --- etc/ttytype
-+++ etc/ttytype	2003/09/10 11:47:31
-@@ -20,3 +20,6 @@
- vt100	ttypd
- vt100	ttype
- vt100	ttypf
++++ etc/ttytype	2017-05-12 14:20:34.524454300 +0000
+@@ -4,7 +4,7 @@ linux	tty3
+ linux	tty4
+ linux	tty5
+ linux	tty6
+-vt220	ttyS0
 +dumb	ttyS0
-+linux	ttyS1
-+linux  hvc0
+ vt220	ttyS1
+ vt220	ttyS2
+ vt220	ttyS3
