@@ -71,7 +71,6 @@ path ()
 #
 # Initialize terminal
 #
-set -x
 tty=`path tty 2> /dev/null`
 test $? -ne 0 && tty=""
 if test -O "$tty" -a -n "$PS1"; then
@@ -96,7 +95,6 @@ if test -O "$tty" -a -n "$PS1"; then
     fi
 fi
 unset TERMCAP
-set +x
 
 #
 # Time until a complete key sequence must have arrived
