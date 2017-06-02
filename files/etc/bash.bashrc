@@ -231,7 +231,7 @@ case "$-" in
 	# Some users of the ksh are not common with the usage of PS1.
 	# This variable should not be exported, because normally only
 	# interactive shells set this variable by default to ``$ ''.
-	if test "${PS1-\$ }" = '$ ' ; then
+	if test "${PS1-\$ }" = '$ ' -o "${PS1-\$ }" = '# ' ; then
 	    if test "$UID" = 0 ; then
 		PS1="${HOST}:"'${PWD}'" # "
 	    else
