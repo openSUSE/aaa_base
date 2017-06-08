@@ -126,7 +126,7 @@ if ( -o /dev/$tty && -c /dev/$tty ) then
 	  set _tsl=`tput tsl || tput -T $TERM+sl tsl` >& /dev/null
 	  set _isl=''
 	  set _fsl=`tput fsl || tput -T $TERM+sl fsl` >& /dev/null
-	fi
+	endif
       endif
       set _sc=`tput sc` >& /dev/null
       set _rc=`tput rc` >& /dev/null
