@@ -136,14 +136,18 @@ case "$-" in
 	    # addition needs to have "%w" in the "tabs" setting, ymmv for
 	    # other console emulators.
 	    #
-	    if test "$TERM" = xterm ; then
+	    if [[ $TERM =~ xterm* ]] ; then
 		_tsl=$(echo -en '\e]2;')
 		_isl=$(echo -en '\e]1;')
 		_fsl=$(echo -en '\007')
-	    else
-		_tsl=$(path tput tsl 2>/dev/null || path tput -T $TERM+sl tsl 2>/dev/null)
+	    elif path tput -T $TERM+sl tsl 2>/dev/null ; then
+		_tsl=$(path tput -T $TERM+sl tsl 2>/dev/null)
 		_isl=''
-		_fsl=$(path tput fsl 2>/dev/null || path tput -T $TERM+sl fsl 2>/dev/null)
+		_fsl=$(path tput -T $TERM+sl fsl 2>/dev/null)
+	    else
+		_tsl=$(path tput tsl 2>/dev/null)
+		_isl=''
+		_fsl=$(path tput fsl 2>/dev/null)
 	    fi
 	    _sc=$(tput sc 2>/dev/null)
 	    _rc=$(tput rc 2>/dev/null)

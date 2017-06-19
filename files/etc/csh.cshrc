@@ -117,23 +117,27 @@ if ( -o /dev/$tty && -c /dev/$tty ) then
   # If we're running under X11
   if ( ${?DISPLAY} ) then
     if ( ${?TERM} && ${?EMACS} == 0 && ${?MC_SID} == 0 && ${?STY} == 0 && ! -r $HOME/.csh.expert ) then
-      if ( { tput hs >& /dev/null } || { tput -T $TERM+sl hs >& /dev/null } ) then
-	if ( ${TERM} == "xterm" ) then
+      if ( { tput hs >& /dev/null } || { ( tput -T $TERM+sl hs >& /dev/null ) } ) then
+	if ( ${TERM} =~ xterm* ) then
 	  set _tsl=`echo -n '\033]2;'`
 	  set _isl=`echo -n '\033]1;'`
 	  set _fsl=`echo -n '\007'`
-	else
-	  set _tsl=`tput tsl || tput -T $TERM+sl tsl` >& /dev/null
+	else if ( { ( tput -T $TERM+sl tsl >& /dev/null ) } ) then
+	  set _tsl=`tput -T $TERM+sl tsl`
 	  set _isl=''
-	  set _fsl=`tput fsl || tput -T $TERM+sl fsl` >& /dev/null
-	fi
-      endif
-      set _sc=`tput sc` >& /dev/null
-      set _rc=`tput rc` >& /dev/null
-      if ( ${%_tsl} > 0 && ${%_isl} > 0 && ${%_fsl} > 0 ) then
-	alias cwdcmd '(echo -n "'$_sc$_tsl'$USER on ${HOST}: $cwd'$_fsl$_isl'$HOST'$_fsl$_rc'">/dev/$tty)'
-      else if (${%_tsl} > 0 && ${%_fsl} > 0 ) then
-	alias cwdcmd '(echo -n "'$_sc$_tsl'$USER on ${HOST}: $cwd'$_fsl$_rc'">/dev/$tty)'
+	  set _fsl=`tput -T $TERM+sl fsl`
+	else
+	  set _tsl=`tput tsl`
+	  set _isl=''
+	  set _fsl=`tput fsl`
+	endif
+	set _sc=`tput sc`
+	set _rc=`tput rc`
+	if ( ${%_tsl} > 0 && ${%_isl} > 0 && ${%_fsl} > 0 ) then
+	  alias cwdcmd '(echo -n "'$_sc$_tsl'$USER on ${HOST}: $cwd'$_fsl$_isl'$HOST'$_fsl$_rc'">/dev/$tty)'
+	else if (${%_tsl} > 0 && ${%_fsl} > 0 ) then
+	  alias cwdcmd '(echo -n "'$_sc$_tsl'$USER on ${HOST}: $cwd'$_fsl$_rc'">/dev/$tty)'
+	endif
       endif
       unset _isl _tsl _fsl _sc _rc
       cd .
