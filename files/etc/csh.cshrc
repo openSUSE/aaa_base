@@ -112,7 +112,7 @@ if (-r /etc/profile.d/alias.tcsh) source /etc/profile.d/alias.tcsh
 #
 set prompt="%B%m%b %C2%# "
 if ( -o /dev/$tty && -c /dev/$tty ) then
-  alias cwdcmd '(echo "Directory: $cwd" > /dev/$tty)'
+  if ( ! -r $HOME/.csh.expert ) alias cwdcmd '(echo "Directory: $cwd" > /dev/$tty)'
   if ( -x /usr/bin/biff ) /usr/bin/biff y
   # If we're running under X11
   if ( ${?DISPLAY} ) then
