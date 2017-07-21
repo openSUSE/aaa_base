@@ -383,6 +383,7 @@ case "$-" in
 	date
     fi
 esac
+unset is
 
 #
 # End of /etc/profile

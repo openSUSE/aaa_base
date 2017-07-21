@@ -137,7 +137,7 @@ if test -z "$WINDOWMANAGER" ; then
 	WINDOWMANAGER=xterm
     fi
 fi
-unset DEFAULT_WM
+unset DEFAULT_WM line
 export WINDOWMANAGER
 
 if test -n "$CONSOLE_MAGIC" ; then
