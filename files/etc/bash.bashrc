@@ -362,6 +362,7 @@ zsh)  test -s /etc/zsh.zshrc.local   && . /etc/zsh.zshrc.local ;;
 ash)  test -s /etc/ash.ashrc.local   && . /etc/ash.ashrc.local
 esac
 test -s /etc/sh.shrc.local && . /etc/sh.shrc.local
+unset is
 
 if test "$restricted" = true -a -z "$PROFILEREAD" ; then
     PATH=/usr/lib/restricted/bin

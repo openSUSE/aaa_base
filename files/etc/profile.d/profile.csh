@@ -157,6 +157,7 @@ if ( ${?loginsh} && ${?console_magic} && "$tty" =~ tty* ) then
     endif
 endif
 
+unset val arr id
 unset noglob
 #
 # end of profile.csh

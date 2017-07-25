@@ -60,6 +60,7 @@ endif
 if (! ${?UID}  ) set -r  UID=${uid}
 if (! ${?EUID} ) set -r EUID="`${id} -u`"
 if (! ${?USER} ) set    USER="`${id} -un`"
+unset id
 if (! ${?HOME} ) set    HOME=""
 if (! ${?MAIL} ) setenv MAIL /var/spool/mail/$USER
 if ( -x /bin/uname ) then
