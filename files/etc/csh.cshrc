@@ -44,6 +44,7 @@ set echo_style=both
 #
 if (! ${?UID}  ) set -r  UID=${uid}
 if (! ${?EUID} ) set -r EUID="`${id} -u`"
+unset id
 
 #
 # Avoid trouble with Emacs shell mode
