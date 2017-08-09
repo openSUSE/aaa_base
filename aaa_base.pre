@@ -26,52 +26,6 @@ for i in /tmp /var/tmp ; do
         mkdir -p $i
     }
 done
-#
-# now create a var/adm/fillup-templates/passwd.aaa_base.
-# If etc/passwd does not exist, copy
-# var/adm/fillup-templates/passwd.aaa_base to etc/passwd.
-# deleted db2 groups and users were uids 46,47,48 and gids 46,47,48
-#
-mkdir -p /etc
-mkdir -p /var/adm/fillup-templates
-echo "root:x:0:0:root:/root:/bin/bash" \
- > /var/adm/fillup-templates/passwd.aaa_base
-
-echo "root:x:0:
-shadow:x:15:
-dialout:x:16:
-utmp:x:22:
-users:x:100:" > /var/adm/fillup-templates/group.aaa_base
-
-rm -f /var/adm/fillup-templates/shadow.aaa_base
-while read LINE ; do
-  case $LINE in
-    root*)
-	echo "root::$(($(date '+%s')/86400))::::::" \
-		>> /var/adm/fillup-templates/shadow.aaa_base
-	;;
-    *)
-	echo "${LINE%%%%:*}:*:$(($(date '+%s')/86400))::::::" \
-		>> /var/adm/fillup-templates/shadow.aaa_base
-	;;
-  esac
-done < /var/adm/fillup-templates/passwd.aaa_base
-
-
-for file in passwd group ; do
- if test -f /etc/$file ; then
-  # like fillup, but : is the only separator
-  rm -f /etc/$file.add
-  sort -k 1,1 -t: -u /etc/$file /var/adm/fillup-templates/$file.aaa_base \
-  | sort -k 1,1 -t: /etc/$file - | uniq -u > /etc/$file.add
-  cat /etc/$file.add >> /etc/$file
-  rm -f /etc/$file.add
-  # fix permissions if this script is called with strange umask
-  chmod 644 /etc/$file
- else
-  cat /var/adm/fillup-templates/$file.aaa_base > /etc/$file
- fi
-done
 
 #
 # we have several local files, that changed over the time.  Check the
