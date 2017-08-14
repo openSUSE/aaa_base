@@ -11,6 +11,7 @@
 #
 noprofile=false
 restricted=false
+: ${_is_save:=unset}
 if test -z "$is" ; then
  if test -f /proc/mounts ; then
   if ! is=$(readlink /proc/$$/exe 2>/dev/null) ; then
@@ -362,7 +363,9 @@ zsh)  test -s /etc/zsh.zshrc.local   && . /etc/zsh.zshrc.local ;;
 ash)  test -s /etc/ash.ashrc.local   && . /etc/ash.ashrc.local
 esac
 test -s /etc/sh.shrc.local && . /etc/sh.shrc.local
-unset is
+if test "$_is_save" = "unset" ; then
+    unset is _is_save
+fi
 
 if test "$restricted" = true -a -z "$PROFILEREAD" ; then
     PATH=/usr/lib/restricted/bin

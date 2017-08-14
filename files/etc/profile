@@ -339,7 +339,10 @@ if test -z "$_SOURCED_FOR_SSH" -a "$norc" != true ; then
     # Note that ksh always reads /etc/ksh.kshrc
     #
     if test "$is" != ksh -a "$is" != zsh ; then
+	_is_save=$is
 	test -r /etc/bash.bashrc && . /etc/bash.bashrc
+	is=$_is_save
+	unset _is_save
     fi
     if test "$restricted" = true ; then
 	readonly _HOMEBASHRC=true
