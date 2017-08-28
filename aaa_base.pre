@@ -148,3 +148,156 @@ done
 if test -f /root/.gnupg/secring.gpg ; then
   cp -a /root/.gnupg/secring.gpg /root/.gnupg/secring.gpg.aaa_save
 fi
+
+# fate 314974: port tmpdir parameters from /etc/sysconfig/cron to systemd config
+
+CONFFILE=/etc/tmpfiles.d/tmp.conf
+
+# we don't take action if /etc/sysconfig/cron is not present or nothing is set
+if [ -f /etc/sysconfig/cron ]; then
+   . /etc/sysconfig/cron
+   if [ -n "$MAX_DAYS_IN_TMP" ] || [ -n "$LONG_TMP_DIRS_TO_CLEAR" ] || [ -n "$CLEAR_TMP_DIRS_AT_BOOTUP" ]; then
+
+# we need at least a skeleton of tmp.conf
+      if [ ! -f $CONFFILE ]; then
+         if [ -f /usr/lib/tmpfiles.d/tmp.conf ]; then
+            cp /usr/lib/tmpfiles.d/tmp.conf $CONFFILE
+         else
+            echo "#  This file is part of systemd.
+                  #
+                  #  systemd is free software; you can redistribute it and/or modify it
+                  #  under the terms of the GNU Lesser General Public License as published by
+                  #  the Free Software Foundation; either version 2.1 of the License, or
+                  #  (at your option) any later version.
+
+                  # See tmpfiles.d(5) for details
+
+                  # Clear tmp directories separately, to make them easier to override
+                  # SUSE policy: we don't clean those directories
+                  d /tmp 1777 root root -
+                  d /var/tmp 1777 root root -
+
+                  # Exclude namespace mountpoints created with PrivateTmp=yes
+                  x /tmp/systemd-private-%b-*
+                  X /tmp/systemd-private-%b-*/tmp
+                  x /var/tmp/systemd-private-%b-*
+                  X /var/tmp/systemd-private-%b-*/tmp
+                  "  | sed 's/^ *//g' > $CONFFILE
+         fi
+      fi
+
+# check for age parameter in /etc/sysconfig/cron
+      if [ "${#MAX_DAYS_IN_TMP}" -gt 0 ] && [ "${MAX_DAYS_IN_TMP}" -gt 0 ]; then
+         ISINTTMP=$(test "$MAX_DAYS_IN_TMP" -eq "$MAX_DAYS_IN_TMP" 2>/dev/null ; echo $?)
+         if [ "$ISINTTMP" -eq 0 ]; then
+            for DIR in $TMP_DIRS_TO_CLEAR; do
+               DIRENT=$(sed -n "\c^d $DIR cp" $CONFFILE)
+# if there is already an directory entry, use it, otherwise create one
+               if [ -n "$DIRENT" ]; then
+                  AGE=`echo $DIRENT | cut -d " " -f 6`
+                  if [ $AGE == "-" ] && [ "$MAX_DAYS_IN_TMP" -gt 0 ]; then
+                     MODENT+=$(sed -n "\c^d $DIR cs/-/"$MAX_DAYS_IN_TMP"d/p" $CONFFILE | sed 's/^d/\\nd/')
+                  else
+                     MODENT+=$(echo $DIRENT | sed 's/^d/\\nd/')
+                  fi
+               else
+                  MODENT+=$(echo "\nd $DIR 1777 root root "$MAX_DAYS_IN_TMP"d")
+               fi
+            done
+# if no directory is given default to /tmp
+            if [ ${#TMP_DIRS_TO_CLEAR} -eq 0 ]; then
+               MODENT+=$(echo "\nd /tmp 1777 root root "$MAX_DAYS_IN_TMP"d")
+            fi
+         fi
+      fi
+
+# address secondary directory statement
+      if [ -n  "$LONG_TMP_DIRS_TO_CLEAR" ]; then
+         : ${MAX_DAYS_IN_LONG_TMP:=0}
+         ISINTTMP=$(test $MAX_DAYS_IN_LONG_TMP -eq $MAX_DAYS_IN_LONG_TMP 2>/dev/null ; echo $?)
+         if [ "$ISINTTMP" -eq 0 ]; then
+            for DIR in $LONG_TMP_DIRS_TO_CLEAR; do
+               DIRENT=$(sed -n "\c^d $DIR cp" $CONFFILE)
+               if [ -n "$DIRENT" ]; then
+                  AGE=$(echo $DIRENT | cut -d " " -f 6)
+                  if [ $AGE == "-" ] && [ "$MAX_DAYS_IN_LONG_TMP" -gt 0 ]; then
+                     MODENT+=$(sed -n "\c^d $DIR cs/-/"$MAX_DAYS_IN_LONG_TMP"d/p" $CONFFILE | sed 's/^d/\\nd/')
+                  else
+                     MODENT+=$(echo $DIRENT | sed 's/^d/\\nd/')
+                  fi
+               else
+                  if [ "$MAX_DAYS_IN_LONG_TMP" -gt 0 ]; then
+                     MODENT+=$(echo "\nd $DIR 1777 root root "$MAX_DAYS_IN_LONG_TMP"d")
+                  else
+                     MODENT+=$(echo "\nd $DIR 1777 root root -")
+                  fi
+               fi
+            done
+         fi
+      fi
+
+# keep additional directory entries that have not been covered yet
+      for ENTRY in $(sed -n '/^d\ \//p' $CONFFILE | cut -d " " -f 2); do
+           if [[ ! "$MODENT" =~ "d $ENTRY " ]]; then
+              MODENT+=$(sed -n "\c^d $ENTRY cp" $CONFFILE | sed 's/^d/\\nd/')
+           fi
+      done
+
+      MODFILE=$(mktemp)
+
+      sed -e '/^d\ \//d' -e '/^R\ \//d' -e '/# Clear tmp directories/,+2d' $CONFFILE | sed -re '$!N;/^\n$/!P;D' > $MODFILE
+      echo -e "\n# Clear tmp directories separately, to make them easier to override" >> $MODFILE
+      echo "# SUSE policy: we don't clean those directories" >> $MODFILE
+      echo -e "$MODENT" >> $MODFILE
+
+# address directories to be cleared at system boot
+      : ${TMP_DIRS_TO_CLEAR:=/tmp}
+      : ${CLEAR_TMP_DIRS_AT_BOOTUP:=no}
+      REMENT=$(sed -n '/^R\ \//s/^/ /p' $CONFFILE)
+      CLEAR_DIRS="$TMP_DIRS_TO_CLEAR"
+      if [ "${CLEAR_TMP_DIRS_AT_BOOTUP:0:1}" == "/" ]; then
+         CLEAR_DIRS="$CLEAR_TMP_DIRS_AT_BOOTUP"
+         CLEAR_TMP_DIRS_AT_BOOTUP=yes
+      fi
+      if test "$CLEAR_TMP_DIRS_AT_BOOTUP" = yes; then
+         for DIR in $CLEAR_DIRS; do
+            if [[ ! "$REMENT" =~ "R $DIR/*" ]]; then
+               REMENT+=`echo " R $DIR/*"`
+            fi
+         done
+      fi
+      echo -e "$REMENT" | sed -e 's/ R/\nR/g' | sed '/^$/d' >> $MODFILE
+
+# take care of owner based exclude statements
+      if [ ${#OWNER_TO_KEEP_IN_TMP} -gt 0 ]; then
+          if [ "${#MAX_DAYS_IN_TMP}" -gt 0 ] && [ "${MAX_DAYS_IN_TMP}" -gt 0 ]; then
+             TMPDIRS=$(echo -n "${TMP_DIRS_TO_CLEAR:-/tmp}")
+          fi
+
+          TMPDIRS+=$(echo -n " $LONG_TMP_DIRS_TO_CLEAR")
+
+          for i in $TMPDIRS; do
+              EXCLUDENT=$(sed -n "\c^x $i.* -cp" $CONFFILE)
+              if [[ ! "$EXCLUDENT" =~ "x $i/*" ]]; then
+                  echo "x $i/* - - - - $OWNER_TO_KEEP_IN_TMP" >> $MODFILE
+              fi
+          done
+      fi
+
+      mv $MODFILE $CONFFILE
+
+# clear old variables from /etc/sysconfig/cron
+      OLDVARS=$(sed '1!G;h;$!d' /etc/sysconfig/cron | sed  -n '/^CLEAR_TMP_DIRS_AT_BOOTUP/,/Path:.*System\/Cron$/p')
+      if [ ${#OLDVARS} -gt 0 ]; then
+         MODFILE2=$(mktemp)
+         echo "## The Parameters MAX_DAYS_IN_TMP, MAX_DAYS_IN_LONG_TMP, TMP_DIRS_TO_CLEAR,
+         ## LONG_TMP_DIRS_TO_CLEAR, CLEAR_TMP_DIRS_AT_BOOTUP and OWNER_TO_KEEP_IN_TMP have
+         ## been converted to systemd-tmpfiles settings in $CONFFILE.
+         ## Please check and modify to your needs.
+         ## See 'man tmpfiles.d' for details.
+         " | sed 's/^ *//g' > $MODFILE2
+         sed '1!G;h;$!d' /etc/sysconfig/cron | sed '/^CLEAR_TMP_DIRS_AT_BOOTUP/,/Path:.*System\/Cron$/d' | sed '1!G;h;$!d' >> $MODFILE2
+         mv $MODFILE2 /etc/sysconfig/cron
+      fi
+   fi
+fi
