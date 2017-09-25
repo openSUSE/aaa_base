@@ -291,7 +291,7 @@ case "$-" in
 		. /etc/profile.d/complete.bash
 	    fi
 	    # Do not source twice if already handled by bash-completion
-	    if [[ $BASH_COMPLETION_COMPAT_DIR != /etc/bash_completion.d ]]; then
+	    if [[ -n $BASH_COMPLETION_COMPAT_DIR && $BASH_COMPLETION_COMPAT_DIR != /etc/bash_completion.d ]]; then
 		for s in /etc/bash_completion.d/*.sh ; do
 		    test -r $s && . $s
 		done
