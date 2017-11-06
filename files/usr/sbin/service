@@ -104,8 +104,11 @@ exec_rc ()
 	elif [ -x "$actiondir/$1/$2" ]; then
 		rc="$actiondir/$1/$2"
 		shift 2
-	else
+	elif [ ${0##*/} = service ] ; then
 		echo "Usage: $0 "$1" {start|stop|reload|restart|try-restart|force-reload|status}"
+		return 1
+	else
+		echo "Usage: $0 {start|stop|reload|restart|try-restart|force-reload|status}"
 		return 1
 	fi
     fi
@@ -183,6 +186,14 @@ while test $# -gt 0; do
     full-restart) full_restart=1 ;;
     h*)			    help ;;
     *)			   usage ;;
+    esac
+
+    case "${0##*/}" in
+    rc*)
+	if [ -n "$opt" ]; then
+	    echo "Usage: $0 {start|stop|reload|restart|try-restart|force-reload|status}"
+	    exit 1
+	fi
     esac
 done
 
