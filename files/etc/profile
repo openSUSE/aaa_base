@@ -86,13 +86,6 @@ if test -O "$tty" -a -n "$PS1"; then
 	path stty sane cr0 pass8 dec
 	path tset -I -Q
     fi
-    # on iSeries virtual console, detect screen size and terminal
-    if test -d /proc/iSeries -a \( "$tty" = "/dev/tty1" -o "$tty" = "/dev/console" \) ; then
-        LINES=24
-	COLUMNS=80
-	export LINES COLUMNS TERM
-	eval `path initviocons -q -e`
-    fi
 fi
 unset TERMCAP
 
