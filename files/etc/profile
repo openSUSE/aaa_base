@@ -141,10 +141,6 @@ MACHTYPE=${CPU}-suse-${OSTYPE}
 # Do NOT export UID, EUID, USER, and LOGNAME
 export MAIL HOST CPU HOSTNAME HOSTTYPE OSTYPE MACHTYPE
 
-if test -f /proc/version ; then
-IS_WSL=`grep -i microsoft /proc/version`
-fi
-
 #
 # You may use /etc/initscript, /etc/profile.local or the
 # ulimit package instead to set up ulimits and your PATH.
@@ -159,11 +155,11 @@ fi
 #
 # Make path more comfortable
 #
+# save current path setting, we might want to restore it
+ORIG_PATH=$PATH
+#
 if test -z "$PROFILEREAD" ; then
-    # WSL already sets PATH, shouldn't be overridden
-    if test "$IS_WSL" = ""; then
-        PATH=/usr/local/bin:/usr/bin:/bin
-    fi
+    PATH=/usr/local/bin:/usr/bin:/bin
     if test "$HOME" != "/" ; then
 	for dir in $HOME/bin/$CPU $HOME/bin ; do
 	    test -d $dir && PATH=$dir:$PATH
@@ -386,6 +382,7 @@ case "$-" in
 	date
     fi
 esac
+unset ORIG_PATH
 unset is
 
 #
