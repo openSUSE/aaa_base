@@ -104,6 +104,8 @@ set mail=$MAIL
 # Make path more comfortable
 #
 unset noglob
+# save current path setting, we might want to restore it
+set orig_path=($path)
 set _hpath
 set _spath
 set _upath=( /usr/local/bin /usr/bin /bin )
@@ -269,6 +271,7 @@ endif
 # Restore globbing on Ctrl-C
 #
 onintr
+unset orig_path
 unset noglob
 
 #
