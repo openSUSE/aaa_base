@@ -31,6 +31,7 @@ test -n "$LANG" && _save="$LANG"
 #
 # Get the system and after that the users configuration
 #
+_sysconf=no
 if test -s /etc/sysconfig/language ; then
     while read line ; do
 	case "$line" in
@@ -41,6 +42,7 @@ if test -s /etc/sysconfig/language ; then
 		# Allow GDM to override system settings
 		test -n "$GDM_LANG" && continue
 		eval ${line#RC_}
+		_sysconf=yes
 		;;
 	ROOT_USES_LANG*)
 		test "$UID" = 0 && eval $line || ROOT_USES_LANG=yes
@@ -49,6 +51,21 @@ if test -s /etc/sysconfig/language ; then
     done < /etc/sysconfig/language
     unset line
 fi
+if test "$_sysconf" != yes -a -s /etc/locale.conf ; then
+    while read line ; do
+	case "$line" in
+	\#*|"")
+		continue
+		;;
+	L*)
+		# Allow GDM to override system settings
+		test -n "$GDM_LANG" && continue
+		eval ${line}
+	esac
+    done < /etc/locale.conf
+    unset line
+fi
+unset _sysconf
 test -s $HOME/.i18n && . $HOME/.i18n
 
 test -n "$_save" && LANG="$_save"
