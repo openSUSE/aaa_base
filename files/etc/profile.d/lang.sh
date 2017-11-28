@@ -15,23 +15,28 @@ test -z "$SSH_SENDS_LOCALE" || return
 #
 # Already done by the GDM
 #
+unset _save
 if test -n "$GDM_LANG" ; then
-    eval $(sed -rn -e 's/^(RC_LANG)=/_\1=/p' < /etc/sysconfig/language)
+    if test -s /etc/sysconfig/language ; then
+	eval $(sed -rn -e 's/^(RC_LANG)=/_\1=/p' < /etc/sysconfig/language)
+    fi
+    if test -z "$_RC_LANG" -a -s /etc/locale.conf ; then
+	eval $(sed -rn -e 's/^(LANG)=/_RC_\1=/p' < /etc/locale.conf)
+    fi
     if test "$_RC_LANG" = "$GDM_LANG" ; then
 	unset GDM_LANG
     else
 	LANG=$GDM_LANG
     fi
     unset _RC_LANG
+    test -n "$LANG" && _save="$LANG"
 fi
-
-unset _save
-test -n "$LANG" && _save="$LANG"
 
 #
 # Get the system and after that the users configuration
 #
 _sysconf=no
+ROOT_USES_LANG=yes
 if test -s /etc/sysconfig/language ; then
     while read line ; do
 	case "$line" in
@@ -45,7 +50,7 @@ if test -s /etc/sysconfig/language ; then
 		_sysconf=yes
 		;;
 	ROOT_USES_LANG*)
-		test "$UID" = 0 && eval $line || ROOT_USES_LANG=yes
+		test "$UID" = 0 && eval $line
 		;;
 	esac
     done < /etc/sysconfig/language

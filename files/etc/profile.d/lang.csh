@@ -15,8 +15,14 @@ if ( ${?SSH_SENDS_LOCALE} ) goto end
 #
 # Already done by the GDM
 #
+unset _save
 if ( ${?GDM_LANG} ) then
-    eval `sed -rn -e 's/^(RC_LANG)=/set _\1=/p' < /etc/sysconfig/language`
+    if ( -s /etc/sysconfig/language ) then
+	eval `sed -rn -e 's/^(RC_LANG)=/set _\1=/p' < /etc/sysconfig/language`
+    endif
+    if ( ! ${?_RC_LANG} && -s /etc/locale.conf ) then
+	eval `sed -rn -e 's/^(LANG)=/set _RC_\1=/p' < /etc/locale.conf`
+    endif
     if ( ${?_RC_LANG} ) then
 	if ( "$_RC_LANG" == "$GDM_LANG" ) then
 	    unsetenv GDM_LANG
@@ -25,17 +31,14 @@ if ( ${?GDM_LANG} ) then
 	endif
 	unset _RC_LANG
     endif
-endif
-
-unset _save
-if ( ${?LANG} ) then
-    set _save=$LANG
+    if ( ${?LANG} ) set _save=$LANG
 endif
 
 #
 # Get the system and after that the users configuration
 #
 set _sysconf=no
+set ROOT_USES_LANG=yes
 if ( -s /etc/sysconfig/language ) then
     foreach line ("`sed -rn '/^[^#]/p' < /etc/sysconfig/language`")
 	switch ("$line")
@@ -48,8 +51,6 @@ if ( -s /etc/sysconfig/language ) then
 	case ROOT_USES_LANG*:
 	    if ( "$uid" == 0 ) then
 		eval set $line
-	    else
-		set ROOT_USES_LANG=yes
 	    endif
 	    breaksw
 	default:
