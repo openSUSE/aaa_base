@@ -13,9 +13,6 @@ install: all
 clean:
 	rm -f $(sbin_PROGRAMS)
 
-package:
-	obs/mkpackage
-
 mimetypes:
 	if test -d Apache/apache2; then (cd Apache/apache2 && osc up); else osc co Apache/apache2; fi
 	tar --wildcards -Oxjf Apache/apache2/httpd-*.tar.bz2 '*/docs/conf/mime.types' > mime.types.apache
