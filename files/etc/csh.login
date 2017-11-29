@@ -231,14 +231,7 @@ endif
 # overriding locale variables already present in the environment
 #
 if (! ${?CSHRCREAD} ) then
-    if ( -r /etc/profile.d/csh.ssh )    source /etc/profile.d/csh.ssh
-    if (! ${?SSH_SENDS_LOCALE} ) then
-	if ( -r /etc/sysconfig/language && -r /etc/profile.d/csh.utf8 ) then
-	    set _tmp=`/bin/sh -c '. /etc/sysconfig/language; echo $AUTO_DETECT_UTF8'`
-	    if ( ${_tmp} == "yes" ) source /etc/profile.d/csh.utf8
-	    unset _tmp
-	endif
-    endif
+    if ( -r /etc/profile.d/csh.ssh ) source /etc/profile.d/csh.ssh
 endif
 
 #
