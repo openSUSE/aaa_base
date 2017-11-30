@@ -75,7 +75,11 @@ if ($_sysconf != yes && -s /etc/locale.conf) then
 endif
 unset _sysconf
 if ( -s $HOME/.i18n ) then
-    eval `sed -rn -e 's/^((LANG|LC_[A-Z_]+))=/set \1=/p' < $HOME/.i18n`
+    eval `sed -rn -e 's/^((export[[:space:]]+)?(LANG|LC_[A-Z_]+|INPUT_METHOD|_save))=/set \3=/p' < $HOME/.i18n`
+    if ( ${?INPUT_METHOD} ) then
+	setenv INPUT_METHOD $INPUT_METHOD
+	unset INPUT_METHOD
+    endif
 endif
 if ( ${?_save} ) then
     set LANG=$_save
