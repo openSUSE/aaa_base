@@ -37,29 +37,8 @@ endif
 #
 # Get the system and after that the users configuration
 #
-set _sysconf=no
 set ROOT_USES_LANG=yes
-if ( -s /etc/sysconfig/language ) then
-    foreach line ("`sed -rn '/^[^#]/p' < /etc/sysconfig/language`")
-	switch ("$line")
-	case RC_*:
-	    # Allow GDM to override system settings
-	    if ( ${?GDM_LANG} ) continue
-	    eval set ${line:s/RC_//}
-	    set _sysconf=yes
-	    breaksw
-	case ROOT_USES_LANG*:
-	    if ( "$uid" == 0 ) then
-		eval set $line
-	    endif
-	    breaksw
-	default:
-	    breaksw
-	endsw
-    end
-    unset line
-endif
-if ($_sysconf != yes && -s /etc/locale.conf) then
+if ( -s /etc/locale.conf) then
     foreach line ("`sed -rn '/^[^#]/p' < /etc/locale.conf`")
 	switch ("$line")
 	case L*:
@@ -73,7 +52,28 @@ if ($_sysconf != yes && -s /etc/locale.conf) then
     end
     unset line
 endif
-unset _sysconf
+if ( -s /etc/sysconfig/language ) then
+    foreach line ("`sed -rn '/^[^#]/p' < /etc/sysconfig/language`")
+	switch ("$line")
+	case RC_*:
+	    # Allow GDM to override system settings
+	    if ( ${?GDM_LANG} ) continue
+	    set val=( ${line:s/=/ /} )
+	    eval set val=${val[${#val}]}
+	    if ( "$val" == "" ) continue
+	    eval set ${line:s/RC_//}
+	    breaksw
+	case ROOT_USES_LANG*:
+	    if ( "$uid" == 0 ) then
+		eval set $line
+	    endif
+	    breaksw
+	default:
+	    breaksw
+	endsw
+    end
+    unset line val
+endif
 if ( -s $HOME/.i18n ) then
     eval `sed -rn -e 's/^((export[[:space:]]+)?(LANG|LC_[A-Z_]+|INPUT_METHOD|_save))=/set \3=/p' < $HOME/.i18n`
     if ( ${?INPUT_METHOD} ) then
