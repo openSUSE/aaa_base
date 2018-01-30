@@ -1,5 +1,0 @@
-#!/bin/sh
-# this script is obsolete. We keep it around to avoid boot strapping
-# problems as some rpm macros may still refer to it.
-echo "/usr/sbin/Check is obsolete, don't call it!"
-exit 0
