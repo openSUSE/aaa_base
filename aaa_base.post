@@ -123,25 +123,6 @@ done <<EOT
 /var/log/lastlog    root:root 644
 EOT
 
-if test -e /usr/sbin/usrdel.local -a ! -e /usr/sbin/userdel.local ; then
-    cp /usr/sbin/usrdel.local /usr/sbin/userdel.local
-fi
-if test ! -e /usr/sbin/userdel.local ; then
-    mkdir -p /usr/sbin
-    cat << EOT > /usr/sbin/userdel.local
-#!/bin/bash
-#
-# Here you can add your own stuff, that should be done for every user who
-# will be deleted.
-#
-# When you delete a user with YaST, this script will be called
-# with the login name as parameter.  The rest of data can be taken
-# from /etc/passwd.
-#
-EOT
-    chmod 744 /usr/sbin/userdel.local
-fi
-
 # change all /media mounts (subfs) to noauto
 if test -f /etc/fstab ; then
 sed  -i -e '/^[[:space:]]*#/{p;d}' -e '/[[:space:]]subfs.*noauto/{p;d}' -e '/\/media.*fs=\(cdfss\|floppyfss\)/s/\([[:space:]]subfs[[:space:]][[:space:]]*\)/\1noauto,/' /etc/fstab
