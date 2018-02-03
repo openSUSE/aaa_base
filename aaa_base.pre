@@ -144,7 +144,3 @@ for LINK in /usr/X11R6/lib/X11 /var/X11R6/lib/fonts /usr/lib/mgetty+sendfax \
         rm -f $LINK
     fi
 done
-
-if test -f /root/.gnupg/secring.gpg ; then
-  cp -a /root/.gnupg/secring.gpg /root/.gnupg/secring.gpg.aaa_save
-fi
