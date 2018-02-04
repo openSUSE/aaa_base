@@ -1,17 +1,13 @@
 #!/bin/sh
 #
 #
-# backup_rpmdb. This script was split off cron.daily
-# Please add your local changes to cron.daily.local
-# since this file will be overwritten, when updating your system.
+# backup_rpmdb
 #
 # Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
-#
-# please send bugfixes or comments to http://www.suse.de/feedback.
+# Copyright (c) 2018 SUSE Linux GmbH, Nuernberg, Germany.
 #
 # Author: Burchard Steinbild, 1996
 #         Florian La Roche, 1996
-#
 #
 # paranoia settings
 #
@@ -19,6 +15,8 @@ umask 022
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 export PATH
+
+RPMDB_PATH="/usr/lib/sysimage/rpm"
 
 #
 # get information from /etc/sysconfig
@@ -29,18 +27,18 @@ fi
 #
 #
 PACKAGEDBFILE=packages.rpm
-if test -e /var/lib/rpm/Packages ; then
+if test -e ${RPMDB_PATH}/Packages ; then
     PACKAGEDBFILE=Packages
 fi
 #
 # create backups of rpm data base
 #
-if test -n "$RPMDB_BACKUP_DIR" -a -e /var/lib/rpm/$PACKAGEDBFILE ; then
+if test -n "$RPMDB_BACKUP_DIR" -a -e ${RPMDB_PATH}/$PACKAGEDBFILE ; then
     mkdir -p $RPMDB_BACKUP_DIR
     OLD_MD5=""
     test -e $RPMDB_BACKUP_DIR/rpmdb_recent_md5 && \
         OLD_MD5="`cat $RPMDB_BACKUP_DIR/rpmdb_recent_md5`"
-    NEW_MD5="`cat /var/lib/rpm/$PACKAGEDBFILE | md5sum`"
+    NEW_MD5="`cat ${RPMDB_PATH}/$PACKAGEDBFILE | md5sum`"
     if test "$OLD_MD5" != "$NEW_MD5" ; then
         DATESTRING=`date +"%Y%m%d"`
 
@@ -51,7 +49,7 @@ if test -n "$RPMDB_BACKUP_DIR" -a -e /var/lib/rpm/$PACKAGEDBFILE ; then
             NUMBER=`expr $NUMBER + 1`
         done
 
-        if gzip -9 < /var/lib/rpm/$PACKAGEDBFILE > $NEWNAME.gz; then
+        if gzip -9 < ${RPMDB_PATH}/$PACKAGEDBFILE > $NEWNAME.gz; then
             echo "$NEW_MD5" > $RPMDB_BACKUP_DIR/rpmdb_recent_md5
             test "$MAX_RPMDB_BACKUPS" -gt 0 2> /dev/null || MAX_RPMDB_BACKUPS=0
             NUMBER=1

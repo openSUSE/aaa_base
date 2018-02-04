@@ -2,10 +2,8 @@
 #
 #
 # Copyright (c) 2002 SuSE Linux AG, Nuernberg, Germany.   
+# Copyright (c) 2018 SUSE Linux GmbH, Nuernberg, Germany.
 #
-# please send bugfixes or comments to http://www.suse.de/feedback.
-#
-
 
 #
 # paranoia settings
@@ -26,6 +24,6 @@ test -r /proc/rtc && \
 
 
 test -n "$BATT_STATUS" -a "$BATT_STATUS" != "okay" && \
-    echo "CMOS battery empty -- expect problems"
+    echo "CMOS battery empty -- expect problems" | logger -p user.crit
 
 exit 0

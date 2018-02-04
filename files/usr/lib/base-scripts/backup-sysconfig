@@ -1,12 +1,12 @@
-#!/bin/sh
+!/bin/sh
 #
-#
-# backup_rc.config.
+# backup-sysconfig
 #
 # Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 2018 SUSE Linux GmbH, Nuernberg, Germany
 #
-# please send bugfixes or comments to http://www.suse.de/feedback.
 #
+
 # paranoia settings
 #
 umask 022
@@ -27,11 +27,9 @@ fi
 if test -n "$RCCONFIG_BACKUP_DIR" -a -e /etc/sysconfig ; then
     mkdir -p $RCCONFIG_BACKUP_DIR
     OLD_MD5=""
-    ETC_RCCONFIG=""
-    test -f /etc/rc.config && ETC_RCCONFIG="/etc/rc.config"
     test -e $RCCONFIG_BACKUP_DIR/sysconfig_recent_md5 && \
         OLD_MD5="`cat $RCCONFIG_BACKUP_DIR/sysconfig_recent_md5`"
-    NEW_MD5="`find $ETC_RCCONFIG /etc/sysconfig -type f -exec cat {} \+ | md5sum`"
+    NEW_MD5="`find /etc/sysconfig -type f -exec cat {} \+ | md5sum`"
     if test "$OLD_MD5" != "$NEW_MD5" ; then
         DATESTRING=`date +"%Y%m%d"`
 
@@ -42,7 +40,7 @@ if test -n "$RCCONFIG_BACKUP_DIR" -a -e /etc/sysconfig ; then
             NUMBER=`expr $NUMBER + 1`
         done
 
-        if tar czfp $NEWNAME $ETC_RCCONFIG /etc/sysconfig 2>/dev/null ; then
+        if tar czfp $NEWNAME /etc/sysconfig 2>/dev/null ; then
             echo "$NEW_MD5" > $RCCONFIG_BACKUP_DIR/sysconfig_recent_md5
             test "$MAX_RCCONFIG_BACKUPS" -gt 0 2> /dev/null || MAX_RCCONFIG_BACKUPS=0
             NUMBER=1
@@ -54,7 +52,7 @@ if test -n "$RCCONFIG_BACKUP_DIR" -a -e /etc/sysconfig ; then
             done
         else
             echo "ERROR!! can not backup sysconfig files"
-	    echo "to $RCCONFIG_BACKUP_DIR."
+            echo "to $RCCONFIG_BACKUP_DIR."
             echo "Maybe there is not enough disk space."
             rm -f $NEWNAME
         fi

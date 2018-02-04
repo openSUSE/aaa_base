@@ -1,0 +1,7 @@
+[Unit]
+Description=Check if mainboard battery is Ok
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/base-scripts/check-battery

@@ -1,0 +1,8 @@
+[Unit]
+Description=Backup /etc/sysconfig directory
+ConditionACPower=true
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/base-scripts/backup-sysconfig
