@@ -61,8 +61,7 @@ fi
 if ! [ -d /etc/sysconfig ] ; then
   mkdir -p /etc/sysconfig
 fi
-for i in language backup \
-	proxy windowmanager \
+for i in language proxy windowmanager \
 	news ; do
 %{fillup_only -n $i}
 done
@@ -92,14 +91,6 @@ test -e /etc/sysctl.conf || cat <<EOF >/etc/sysctl.conf
 #
 ####
 EOF
-# fix sysconfig backup dir
-if grep -q RCCONFIG_BACKUP_DIR../var/adm/backup/rpmdb /etc/sysconfig/backup; then
-    sed -i -e "s|^RCCONFIG_BACKUP_DIR=.*|RCCONFIG_BACKUP_DIR=\"/var/adm/backup/sysconfig\"|" \
-	/etc/sysconfig/backup
-    mkdir -p /var/adm/backup/sysconfig
-    mv /var/adm/backup/rpmdb/sysconfig[-_]* /var/adm/backup/sysconfig 2>/dev/null
-fi
-
 #
 # create mtab if it does not exist
 #
