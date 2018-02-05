@@ -2,30 +2,6 @@
 #
 # Run this script in C-Locale, or some tools will fail.
 export LC_ALL=C
-# /boot should be the first directory.  This increases the probability, that
-# lilo stuff lies before 1024 cyl.
-mkdir -p boot
-#
-# make sure, tmp directories do exist
-#
-for i in /tmp /var/tmp ; do
-    test -d $i || {
-        if test -L $i ; then
-            echo "Error! $i is a dangling symlink."
-            echo
-            ls -l $i
-            echo
-            echo "To avoid big problems this link has to be deleted and a directory"
-            echo "will be created.  Remember to fix it after installation."
-            echo
-            rm -f $i
-        elif test -f $i ; then
-            echo "$i is a file.  This makes no sense.  Moving it to $i.save."
-            mv -v $i $i.save
-        fi
-        mkdir -p $i
-    }
-done
 
 #
 # we have several local files, that changed over the time.  Check the
@@ -136,11 +112,3 @@ grep -q "not supported by systemd" /etc/init.d/before.local || {
 echo "# this file is not supported by systemd and the content will probably not be run during bootup" >> /etc/init.d/before.local
 }
 }
-mkdir -p /etc
-for LINK in /usr/X11R6/lib/X11 /var/X11R6/lib/fonts /usr/lib/mgetty+sendfax \
-    /usr/man/cat? /usr/X11R6/man/cat? /usr/openwin/man/cat? /usr/lib/news ; do
-    if test -L $LINK ; then
-        echo "Found forbidden/oldish Link: $LINK ...deleting"
-        rm -f $LINK
-    fi
-done

@@ -97,12 +97,6 @@ EOF
 if test ! -e /etc/mtab; then
     ln -sf /proc/self/mounts /etc/mtab
 fi
-#
-# make sure that several log files exist
-#
-if test ! -d /var/log ; then
-    mkdir -p /var/log
-fi
 
 while read file owner mode; do
     test -h "$file" && continue
@@ -113,10 +107,5 @@ done <<EOT
 /root/.bash_history root:root 600
 /var/log/lastlog    root:root 644
 EOT
-
-# change all /media mounts (subfs) to noauto
-if test -f /etc/fstab ; then
-sed  -i -e '/^[[:space:]]*#/{p;d}' -e '/[[:space:]]subfs.*noauto/{p;d}' -e '/\/media.*fs=\(cdfss\|floppyfss\)/s/\([[:space:]]subfs[[:space:]][[:space:]]*\)/\1noauto,/' /etc/fstab
-fi
 
 exit 0
