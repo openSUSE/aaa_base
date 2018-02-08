@@ -67,7 +67,7 @@ for i in language proxy windowmanager \
 done
 if [ -e /etc/sysconfig/sysctl ]; then
 	echo "merging /etc/sysconfig/sysctl into /etc/sysctl.conf ..."
-	/lib/aaa_base/convert_sysctl
+	/usr/lib/base-scripts/convert_sysctl
 	mv /etc/sysconfig/sysctl /etc/sysconfig/sysctl.rpmsave
 fi
 test -e /etc/sysctl.conf || cat <<EOF >/etc/sysctl.conf
