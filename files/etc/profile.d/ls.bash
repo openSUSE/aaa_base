@@ -56,10 +56,9 @@ case "$-" in
 	    test -s /etc/profile.d/ls.zsh && . /etc/profile.d/ls.zsh
 	    ;;
 	ksh)
-	    _ls ()
-	    {
+	    function _ls {
 		typeset IFS=' '
-		command ls $LS_OPTIONS ${1+"$@"}
+		command -p ls $LS_OPTIONS ${1+"$@"}
 	    }
 	    alias ls=_ls
 	    ;;
