@@ -61,8 +61,7 @@ fi
 if ! [ -d /etc/sysconfig ] ; then
   mkdir -p /etc/sysconfig
 fi
-for i in language proxy windowmanager \
-	news ; do
+for i in language proxy windowmanager ; do
 %{fillup_only -n $i}
 done
 if [ -e /etc/sysconfig/sysctl ]; then
