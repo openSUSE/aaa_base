@@ -56,7 +56,8 @@ case "$-" in
 	    test -s /etc/profile.d/ls.zsh && . /etc/profile.d/ls.zsh
 	    ;;
 	ksh)
-	    function _ls {
+	    function _ls
+	    {
 		typeset IFS=' '
 		command -p ls $LS_OPTIONS ${1+"$@"}
 	    }

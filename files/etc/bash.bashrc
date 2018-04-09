@@ -335,15 +335,6 @@ if test -r /etc/profile.d/vte.sh -a ! -k /etc/profile.d/vte.sh; then
 fi
 
 #
-# Just in case the user excutes a command with ssh or sudo
-#
-if test \( -n "$SSH_CONNECTION" -o -n "$SUDO_COMMAND" \) -a -z "$PROFILEREAD" -a "$noprofile" != true ; then
-    _SOURCED_FOR_SSH=true
-    . /etc/profile > /dev/null 2>&1
-    unset _SOURCED_FOR_SSH
-fi
-
-#
 # Set GPG_TTY for curses pinentry
 # (see man gpg-agent and bnc#619295)
 #
@@ -363,7 +354,16 @@ zsh)  test -s /etc/zsh.zshrc.local   && . /etc/zsh.zshrc.local ;;
 ash)  test -s /etc/ash.ashrc.local   && . /etc/ash.ashrc.local
 esac
 test -s /etc/sh.shrc.local && . /etc/sh.shrc.local
+
 if test "$_is_save" = "unset" ; then
+    #
+    # Just in case the user excutes a command with ssh or sudo
+    #
+    if test \( -n "$SSH_CONNECTION" -o -n "$SUDO_COMMAND" \) -a -z "$PROFILEREAD" -a "$noprofile" != true ; then
+	_SOURCED_FOR_SSH=true
+	. /etc/profile > /dev/null 2>&1
+	unset _SOURCED_FOR_SSH
+    fi
     unset is _is_save
 fi
 
