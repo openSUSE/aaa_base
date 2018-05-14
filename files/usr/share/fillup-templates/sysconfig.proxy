@@ -57,6 +57,6 @@ SOCKS5_SERVER=""
 ## Type:	string(localhost)
 ## Default:	localhost
 #
-# Example: NO_PROXY="www.me.de, .do.main, localhost"
+# Example: NO_PROXY="www.me.de,.do.main,localhost"
 #
-NO_PROXY="localhost, 127.0.0.1"
+NO_PROXY="localhost,127.0.0.1"
