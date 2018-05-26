@@ -137,7 +137,7 @@ case "$-" in
 	    # addition needs to have "%w" in the "tabs" setting, ymmv for
 	    # other console emulators.
 	    #
-	    if [[ $TERM =~ xterm* ]] ; then
+	    if [[ $TERM = *xterm* ]] ; then
 		_tsl=$(echo -en '\e]2;')
 		_isl=$(echo -en '\e]1;')
 		_fsl=$(echo -en '\007')
