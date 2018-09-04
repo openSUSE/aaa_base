@@ -13,7 +13,9 @@ foreach JDIR ( "/usr/lib64/jvm" "/usr/lib/jvm" "/usr/java/latest" "/usr/java" )
 
     if ( ! -d $JDIR ) continue
 
-    foreach JPATH ( $JDIR $JDIR/java `ls -I 'java' -I 'jre' -d $JDIR/*` $JDIR/jre )
+    foreach JPATH ( $JDIR $JDIR/java $JDIR/java-[a-z]* $JDIR/java-[0-9]* $JDIR/jre $JDIR/jre-[a-z]* $JDIR/jre-[0-9]* )
+
+	if ( ! -d $JPATH ) continue
 
         if ( ! -x $JPATH/bin/java ) continue
 
