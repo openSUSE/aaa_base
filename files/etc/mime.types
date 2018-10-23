@@ -1125,7 +1125,7 @@ application/x-gameboy-rom                        gb
 application/x-gca-compressed                     gca
 application/x-gdbm                               
 application/x-gdesklets-display                  display
-application/x-genesis-rom                        gen md
+application/x-genesis-rom                        gen smd
 application/x-gettext-translation                gmo
 application/x-glabels                            glabels
 application/x-glade                              glade
