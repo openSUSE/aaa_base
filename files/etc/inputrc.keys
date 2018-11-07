@@ -11,19 +11,30 @@
 # Common standard keypad and cursor
 #
 "\e[1~":	beginning-of-line
-"\e[2~":	yank
+set editing-mode vi
+    set keymap  vi-insert
+    "\e[2~":	vi-replace
+    "\M-[2~":	vi-replace
+    "\2332~":	vi-replace
+    set keymap  vi-command
+    "\e[2~":	vi-editing-mode
+    "\M-[2~":	vi-editing-mode
+    "\2332~":	vi-editing-mode
+set editing-mode emacs
+    set keymap  emacs
+    "\e[2~":	overwrite-mode
+    "\M-[2~":	overwrite-mode
+    "\2332~":	overwrite-mode
 "\e[3~":	delete-char
 "\e[4~":	end-of-line
 "\e[5~":	history-search-backward
 "\e[6~":	history-search-forward
 "\M-[1~":	beginning-of-line
-"\M-[2~":	yank
 "\M-[3~":	delete-char
 "\M-[4~":	end-of-line
 "\M-[5~":	history-search-backward
 "\M-[6~":	history-search-forward
 "\2331~":	beginning-of-line
-"\2332~":	yank
 "\2333~":	delete-char
 "\2334~":	end-of-line
 "\2335~":	history-search-backward
@@ -73,31 +84,50 @@
 "\C-\M-[B":      next-history
 "\C-^[[D":      backward-char
 $if term=xterm
-"\e[2;2~":	yank
+set editing-mode vi
+    set keymap  vi-insert
+    "\e[2;2~":	vi-replace
+    "\e[2;3~":	vi-replace
+    "\e[2;4~":	vi-replace
+    "\e[2;5~":	vi-replace
+    "\e[2;6~":	vi-replace
+    "\e[2;7~":	vi-replace
+    "\e[2;8~":	vi-replace
+    set keymap  vi-command
+    "\e[2;2~":	vi-editing-mode
+    "\e[2;3~":	vi-editing-mode
+    "\e[2;4~":	vi-editing-mode
+    "\e[2;5~":	vi-editing-mode
+    "\e[2;6~":	vi-editing-mode
+    "\e[2;7~":	vi-editing-mode
+    "\e[2;8~":	vi-editing-mode
+set editing-mode emacs
+    set keymap  emacs
+    "\e[2;2~":	overwrite-mode
+    "\e[2;3~":	overwrite-mode
+    "\e[2;4~":	overwrite-mode
+    "\e[2;5~":	overwrite-mode
+    "\e[2;6~":	overwrite-mode
+    "\e[2;7~":	overwrite-mode
+    "\e[2;8~":	overwrite-mode
 "\e[3;2~":	delete-char
 "\e[5;2~":	history-search-backward
 "\e[6;2~":	history-search-forward
-"\e[2;3~":	yank
 "\e[3;3~":	delete-char
 "\e[5;3~":	history-search-backward
 "\e[6;3~":	history-search-forward
-"\e[2;4~":	yank
 "\e[3;4~":	delete-char
 "\e[5;4~":	history-search-backward
 "\e[6;4~":	history-search-forward
-"\e[2;5~":	yank
 "\e[3;5~":	delete-char
 "\e[5;5~":	history-search-backward
 "\e[6;5~":	history-search-forward
-"\e[2;6~":	yank
 "\e[3;6~":	delete-char
 "\e[5;6~":	history-search-backward
 "\e[6;6~":	history-search-forward
-"\e[2;7~":	yank
 "\e[3;7~":	delete-char
 "\e[5;7~":	history-search-backward
 "\e[6;7~":	history-search-forward
-"\e[2;8~":	yank
 "\e[3;8~":	delete-char
 "\e[5;8~":	history-search-backward
 "\e[6;8~":	history-search-forward
@@ -198,7 +228,7 @@ $endif
 "\C-H":		backward-delete-char
 $if term=xterm
 "\e\303\277":	backward-delete-word
-"\eÿ"		backward-delete-word
+"\eÿ":		backward-delete-word
 $endif
 #
 # Home and End
@@ -733,7 +763,23 @@ $if term=rxvt-unicode
 "\e\eOl":	delete-char
 "\e\eOM":	accept-line
 "\e\eOn":	delete-char
-"\e\eOp":	yank
+set editing-mode vi
+    set keymap  vi-insert
+    "\e\eOp":	vi-replace
+    "\e[2^":	vi-replace
+    "\e[2$":	vi-replace
+    "\e\e[2$":	vi-replace
+    set keymap  vi-command
+    "\e\eOp":	vi-editing-mode
+    "\e[2^":	vi-editing-mode
+    "\e[2$":	vi-editing-mode
+    "\e\e[2$":	vi-editing-mode
+set editing-mode emacs
+    set keymap  emacs
+    "\e\eOp":	overwrite-mode
+    "\e[2^":	overwrite-mode
+    "\e[2$":	overwrite-mode
+    "\e\e[2$":	overwrite-mode
 "\e\eOq":	end-of-line
 "\e\eOr":	down-history
 "\e\eOs":	history-search-forward
@@ -755,19 +801,16 @@ $if term=rxvt-unicode
 "\e\e[D":	backward-word
 "\e\e[A":	history-search-backward
 "\e\e[B":	history-search-forward
-"\e[2^":	yank
 "\e[3^":	delete-char
 "\e[5^":	history-search-backward
 "\e[6^":	history-search-forward
 "\e[7^":	beginning-of-line
 "\e[8^":	end-of-line
-"\e[2$":	yank
 "\e[3$":	delete-char
 "\e[5$":	history-search-backward
 "\e[6$":	history-search-forward
 "\e[7$":	beginning-of-line
 "\e[8$":	end-of-line
-"\e\e[2$":	yank
 "\e\e[3$":	delete-char
 "\e\e[5$":	history-search-backward
 "\e\e[6$":	history-search-forward
@@ -787,7 +830,20 @@ $if term=screen
 "\e[1;2B":	down-history
 "\e[1;2H":	beginning-of-line
 "\e[1;2F":	end-of-line
-"\e[2;2~":	yank
+set editing-mode vi
+    set keymap  vi-insert
+    "\e[2;2~":	vi-replace
+    "\e[2;5~":	vi-replace
+    "\e[2;3~":	vi-replace
+    set keymap  vi-command
+    "\e[2;2~":	vi-editing-mode
+    "\e[2;5~":	vi-editing-mode
+    "\e[2;3~":	vi-editing-mode
+set editing-mode emacs
+    set keymap  emacs
+    "\e[2;2~":	overwrite-mode
+    "\e[2;5~":	overwrite-mode
+    "\e[2;3~":	overwrite-mode
 "\e[3;2~":	delete-char
 "\e[5;2~":	history-search-backward
 "\e[6;2~":	history-search-forward
@@ -797,7 +853,6 @@ $if term=screen
 "\e[1;5B":	down-history
 "\e[1;5H":	beginning-of-line
 "\e[1;5F":	end-of-line
-"\e[2;5~":	yank
 "\e[3;5~":	delete-char
 "\e[5;5~":	history-search-backward
 "\e[6;5~":	history-search-forward
@@ -807,7 +862,6 @@ $if term=screen
 "\e[1;3B":	down-history
 "\e[1;3H":	beginning-of-line
 "\e[1;3F":	end-of-line
-"\e[2;3~":	yank
 "\e[3;3~":	delete-char
 "\e[5;3~":	history-search-backward
 "\e[6;3~":	history-search-forward
