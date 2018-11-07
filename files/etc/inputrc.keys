@@ -11,20 +11,25 @@
 # Common standard keypad and cursor
 #
 "\e[1~":	beginning-of-line
+$if mode=emacs
+# Note that this file is included for vi-command, vi-insert, and
+# emacs mapping, therefore do switch within the last $include as
+# otherwise the vi modes do miss the common mappings.
 set editing-mode vi
-    set keymap  vi-insert
-    "\e[2~":	vi-replace
-    "\M-[2~":	vi-replace
-    "\2332~":	vi-replace
-    set keymap  vi-command
+    set keymap vi-command
     "\e[2~":	vi-editing-mode
     "\M-[2~":	vi-editing-mode
     "\2332~":	vi-editing-mode
+    set keymap vi-insert
+    "\e[2~":	vi-replace
+    "\M-[2~":	vi-replace
+    "\2332~":	vi-replace
 set editing-mode emacs
-    set keymap  emacs
+    set keymap emacs
     "\e[2~":	overwrite-mode
     "\M-[2~":	overwrite-mode
     "\2332~":	overwrite-mode
+$endif
 "\e[3~":	delete-char
 "\e[4~":	end-of-line
 "\e[5~":	history-search-backward
@@ -84,16 +89,12 @@ set editing-mode emacs
 "\C-\M-[B":      next-history
 "\C-^[[D":      backward-char
 $if term=xterm
+$if mode=emacs
+# Note that this file is included for vi-command, vi-insert, and
+# emacs mapping, therefore do switch within the last $include as
+# otherwise the vi modes do miss the common mappings.
 set editing-mode vi
-    set keymap  vi-insert
-    "\e[2;2~":	vi-replace
-    "\e[2;3~":	vi-replace
-    "\e[2;4~":	vi-replace
-    "\e[2;5~":	vi-replace
-    "\e[2;6~":	vi-replace
-    "\e[2;7~":	vi-replace
-    "\e[2;8~":	vi-replace
-    set keymap  vi-command
+    set keymap vi-command
     "\e[2;2~":	vi-editing-mode
     "\e[2;3~":	vi-editing-mode
     "\e[2;4~":	vi-editing-mode
@@ -101,8 +102,16 @@ set editing-mode vi
     "\e[2;6~":	vi-editing-mode
     "\e[2;7~":	vi-editing-mode
     "\e[2;8~":	vi-editing-mode
+    set keymap vi-insert
+    "\e[2;2~":	vi-replace
+    "\e[2;3~":	vi-replace
+    "\e[2;4~":	vi-replace
+    "\e[2;5~":	vi-replace
+    "\e[2;6~":	vi-replace
+    "\e[2;7~":	vi-replace
+    "\e[2;8~":	vi-replace
 set editing-mode emacs
-    set keymap  emacs
+    set keymap emacs
     "\e[2;2~":	overwrite-mode
     "\e[2;3~":	overwrite-mode
     "\e[2;4~":	overwrite-mode
@@ -110,6 +119,7 @@ set editing-mode emacs
     "\e[2;6~":	overwrite-mode
     "\e[2;7~":	overwrite-mode
     "\e[2;8~":	overwrite-mode
+$endif
 "\e[3;2~":	delete-char
 "\e[5;2~":	history-search-backward
 "\e[6;2~":	history-search-forward
@@ -245,6 +255,8 @@ $if term=xterm
 "\2174~":	set-mark
 "\217H":	beginning-of-line
 "\217F":	end-of-line
+"\233H":	beginning-of-line
+"\233F":	end-of-line
 "\e[1;2H":	beginning-of-line
 "\e[1;2F":	end-of-line
 "\e[1;3H":	beginning-of-line
@@ -763,23 +775,28 @@ $if term=rxvt-unicode
 "\e\eOl":	delete-char
 "\e\eOM":	accept-line
 "\e\eOn":	delete-char
+$if mode=emacs
+# Note that this file is included for vi-command, vi-insert, and
+# emacs mapping, therefore do switch within the last $include as
+# otherwise the vi modes do miss the common mappings.
 set editing-mode vi
-    set keymap  vi-insert
-    "\e\eOp":	vi-replace
-    "\e[2^":	vi-replace
-    "\e[2$":	vi-replace
-    "\e\e[2$":	vi-replace
-    set keymap  vi-command
+    set keymap vi-command
     "\e\eOp":	vi-editing-mode
     "\e[2^":	vi-editing-mode
     "\e[2$":	vi-editing-mode
     "\e\e[2$":	vi-editing-mode
+    set keymap vi-insert
+    "\e\eOp":	vi-replace
+    "\e[2^":	vi-replace
+    "\e[2$":	vi-replace
+    "\e\e[2$":	vi-replace
 set editing-mode emacs
-    set keymap  emacs
+    set keymap emacs
     "\e\eOp":	overwrite-mode
     "\e[2^":	overwrite-mode
     "\e[2$":	overwrite-mode
     "\e\e[2$":	overwrite-mode
+$endif
 "\e\eOq":	end-of-line
 "\e\eOr":	down-history
 "\e\eOs":	history-search-forward
@@ -830,20 +847,25 @@ $if term=screen
 "\e[1;2B":	down-history
 "\e[1;2H":	beginning-of-line
 "\e[1;2F":	end-of-line
+$if mode=emacs
+# Note that this file is included for vi-command, vi-insert, and
+# emacs mapping, therefore do switch within the last $include as
+# otherwise the vi modes do miss the common mappings.
 set editing-mode vi
-    set keymap  vi-insert
-    "\e[2;2~":	vi-replace
-    "\e[2;5~":	vi-replace
-    "\e[2;3~":	vi-replace
-    set keymap  vi-command
+    set keymap vi-command
     "\e[2;2~":	vi-editing-mode
     "\e[2;5~":	vi-editing-mode
     "\e[2;3~":	vi-editing-mode
+    set keymap vi-insert
+    "\e[2;2~":	vi-replace
+    "\e[2;5~":	vi-replace
+    "\e[2;3~":	vi-replace
 set editing-mode emacs
-    set keymap  emacs
+    set keymap emacs
     "\e[2;2~":	overwrite-mode
     "\e[2;5~":	overwrite-mode
     "\e[2;3~":	overwrite-mode
+$endif
 "\e[3;2~":	delete-char
 "\e[5;2~":	history-search-backward
 "\e[6;2~":	history-search-forward
