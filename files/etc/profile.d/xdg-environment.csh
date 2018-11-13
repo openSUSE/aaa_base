@@ -5,7 +5,7 @@ else
 endif
 set nonomatch
 foreach xdgdir (/usr/local/share /usr/share /etc/opt/gnome/share /etc/opt/kde4/share /etc/opt/kde3/share /opt/gnome/share /opt/kde4/share /opt/kde3/share /usr/share/gnome)
-    if ( -d "$xdgdir" ) then
+    if ( -d "$xdgdir" && -d "$xdgdir/applications" ) then
 	set -l XDG_DATA_DIRS=($XDG_DATA_DIRS $xdgdir)
     endif
 end
