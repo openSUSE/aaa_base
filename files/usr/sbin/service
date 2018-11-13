@@ -3,6 +3,8 @@
 # /sbin/service		Handle boot and runlevel services
 #
 
+VERSION="18.02.16"
+
 sd_booted()
 {
     test -d /sys/fs/cgroup/systemd/
@@ -152,6 +154,12 @@ usage ()
     exit 1
 }
 
+version ()
+{
+    echo "${0##*/} ver. ${VERSION}"
+    exit 0
+}
+
 help ()
 {
     echo "Usage: ${0##*/} [<options> | <service> [<args>]]"
@@ -184,6 +192,7 @@ while test $# -gt 0; do
     case "$opt" in
     status-all|s)   status_all=1 ;;
     full-restart) full_restart=1 ;;
+    version)		    version ;;
     h*)			    help ;;
     *)			   usage ;;
     esac
