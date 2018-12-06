@@ -340,8 +340,11 @@ if test "$_is_save" = "unset" ; then
     #
     if test \( -n "$SSH_CONNECTION" -o -n "$SUDO_COMMAND" \) -a -z "$PROFILEREAD" -a "$noprofile" != true ; then
 	_SOURCED_FOR_SSH=true
+	_is_save="$is"
 	. /etc/profile > /dev/null 2>&1
 	unset _SOURCED_FOR_SSH
+	is="$_is_save"
+        _is_save=unset
     fi
 fi
 
