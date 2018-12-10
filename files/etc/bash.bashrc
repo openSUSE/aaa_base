@@ -112,7 +112,7 @@ case "$-" in
 	shopt -s histappend
 	# All commands of root will have a time stamp
 	if test "$UID" -eq 0  ; then
-	    HISTTIMEFORMAT=${HISTTIMEFORMAT:-"%F %H:%M:%S "}
+	    : ${HISTTIMEFORMAT="%F %H:%M:%S "}
 	fi
 	# Force a reset of the readline library
 	unset TERMCAP
@@ -308,7 +308,7 @@ case "$-" in
     fi
 
     # Do not save dupes and lines starting by space in the bash history file
-    HISTCONTROL=ignoreboth
+    : ${HISTCONTROL=ignoreboth}
     if test "$is" = "ksh" ; then
 	# Use a ksh specific history file and enable
     	# emacs line editor
