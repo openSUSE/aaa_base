@@ -30,7 +30,11 @@ foreach JDIR ( "/usr/lib64/jvm" "/usr/lib/jvm" "/usr/java/latest" "/usr/java" )
             setenv JRE_HOME $JPATH
             breaksw
         default:
-            setenv JRE_HOME $JPATH/jre
+            if ( -x $JPATH/jre/bin/java ) then
+                setenv JRE_HOME $JPATH/jre
+            else
+                setenv JRE_HOME $JPATH
+            endif
             # it is development kit=20
             if ( -x $JPATH/bin/javac ) then
                 setenv JDK_HOME $JPATH

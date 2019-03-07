@@ -37,7 +37,11 @@ for JDIR in /usr/lib64/jvm /usr/lib/jvm /usr/java/latest /usr/java; do
                 ;;
 
             *)
-                [ -z "$JRE_HOME" ] && export JRE_HOME=$JPATH/jre
+		if [ -x $JPATH/jre/bin/java ] ; then
+                    [ -z "$JRE_HOME" ] && export JRE_HOME=$JPATH/jre
+		else
+		    [ -z "$JRE_HOME" ] && export JRE_HOME=$JPATH
+		fi
                 # it is development kit
                 if [ -x $JPATH/bin/javac ] ; then
                     export JDK_HOME=$JPATH
