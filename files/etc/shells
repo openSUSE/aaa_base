@@ -22,3 +22,5 @@
 /usr/bin/tcsh
 /usr/bin/zsh
 /usr/bin/fish
+/usr/bin/scsh
+/usr/bin/rash
