@@ -17,6 +17,7 @@ if test -z "$is" ; then
   if ! is=$(readlink /proc/$$/exe 2>/dev/null) ; then
     case "$0" in
     *pcksh)	is=ksh	;;
+    *bash)	is=bash	;;
     *)		is=sh	;;
     esac
   fi
