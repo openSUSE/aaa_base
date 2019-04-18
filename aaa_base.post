@@ -17,32 +17,6 @@ fi
 for i in language proxy windowmanager ; do
 %{fillup_only -n $i}
 done
-if [ -e /etc/sysconfig/sysctl ]; then
-	echo "merging /etc/sysconfig/sysctl into /etc/sysctl.conf ..."
-	/usr/lib/base-scripts/convert_sysctl
-	mv /etc/sysconfig/sysctl /etc/sysconfig/sysctl.rpmsave
-fi
-test -e /etc/sysctl.conf || cat <<EOF >/etc/sysctl.conf
-####
-#
-# /etc/sysctl.conf is meant for local sysctl settings
-#
-# sysctl reads settings from the following locations:
-#   /boot/sysctl.conf-<kernelversion>
-#   /lib/sysctl.d/*.conf
-#   /usr/lib/sysctl.d/*.conf
-#   /usr/local/lib/sysctl.d/*.conf
-#   /etc/sysctl.d/*.conf
-#   /run/sysctl.d/*.conf
-#   /etc/sysctl.conf
-#
-# To disable or override a distribution provided file just place a
-# file with the same name in /etc/sysctl.d/
-#
-# See sysctl.conf(5), sysctl.d(5) and sysctl(8) for more information
-#
-####
-EOF
 #
 # create mtab if it does not exist
 #
