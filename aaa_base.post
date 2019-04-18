@@ -8,19 +8,8 @@
 #
 # Run this script in C-Locale, or some tools will fail.
 export LC_ALL=C
-test -n "$FIRST_ARG" || FIRST_ARG=$1
-#
-# to make sure, /var/lib/YaST/bin/bootsetup runs fine, delete
-# /usr/lib/YaST/.configured2
-test -e /usr/lib/YaST/.configured2 && rm -f /usr/lib/YaST/.configured2
-#
-# there are some installation with an etc/psdevtab, which is only readable
-# for root - this slows ps for any other user. starting ps as root, creates
-# it, when it doesn't exist (readable). So simply delete it.
-#
-test -e /etc/psdevtab && rm -f /etc/psdevtab
 
-if [ "$FIRST_ARG" -gt 1 ]; then
+if [ "$1" -gt 1 ]; then
 
 	# boot variables dropped after 13.1
 	%{remove_and_set -n boot PROMPT_FOR_CONFIRM CONFIRM_PROMPT_TIMEOUT RUN_PARALLEL FLOW_CONTROL FSCK_MAX_INST KLOGCONSOLE_PARAMS ENFORCE_BLOGD}
