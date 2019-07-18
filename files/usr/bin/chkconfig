@@ -461,16 +461,8 @@ sub readable {
 # check if systemd is active
 #
 sub is_systemd_active {
-    my $cgroup_dev;
-    my $systemd_dev;
-    my $st;
-
     use File::stat;
-    $st = lstat("/sys/fs/cgroup") or return 0;
-    $cgroup_dev = $st->dev;
-    $st = lstat("/sys/fs/cgroup/systemd") or return 0;
-    $systemd_dev = $st->dev;
-    return 0 if ($cgroup_dev == $systemd_dev);
+    lstat("/run/systemd/system") or return 0;
     -e $systemd_binary_path or return 0;
     return 1;
 }
