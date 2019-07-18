@@ -7,7 +7,7 @@ VERSION="18.02.16"
 
 sd_booted()
 {
-    test -d /sys/fs/cgroup/systemd/
+    test -e /run/systemd/system/
 }
 
 #
