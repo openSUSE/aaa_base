@@ -170,6 +170,41 @@ main (int argc, char *argv[])
       }
     }
   }
+  if(!found) {
+    /* Compressed S390x kernel */
+    /* Compare with vanilla kernel git commit 6abe28197024f */
+    if(
+      !fseek(fp, 0x10008, SEEK_SET) &&
+      fread(buffer, 1, 6, fp) == 6 &&
+      buffer[0] == 'S' && buffer[1] == '3' &&
+      buffer[2] == '9' && buffer[3] == '0' &&
+      buffer[4] == 'E' && buffer[5] == 'P' &&
+      !fseek(fp, 0x10428, SEEK_SET) &&
+      fread(buffer, 1, 8, fp) == 8
+    ) {
+      unsigned long long version_string_offset =
+	((unsigned char *) buffer)[7] +
+	(((unsigned char *) buffer)[6] << 8) +
+	(((unsigned char *) buffer)[5] << 16) +
+	(((unsigned char *) buffer)[4] << 24) +
+	((unsigned long long) ((unsigned char *) buffer)[3] << 32) +
+	((unsigned long long) ((unsigned char *) buffer)[2] << 40) +
+	((unsigned long long) ((unsigned char *) buffer)[1] << 48) +
+	((unsigned long long) ((unsigned char *) buffer)[0] << 56);
+      if(
+        !fseek(fp, version_string_offset, SEEK_SET) &&
+        fread(buffer, 1, MAX_VERSION_LENGTH, fp) == MAX_VERSION_LENGTH
+      ) {
+        char *s = buffer;
+
+        for(s[MAX_VERSION_LENGTH] = 0; *s; s++) if(*s == ' ') { *s = 0; break; }
+        if(*buffer) {
+          found = 1;
+          printf("%s\n", buffer);
+        }
+      }
+    }
+  }
 
   if (command[0] != '\0')
     pclose (fp);

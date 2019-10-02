@@ -11,7 +11,7 @@ install: all
 	install -m755 get_kernel_version $(DESTDIR)/usr/bin
 
 clean:
-	rm -f $(sbin_PROGRAMS)
+	rm -f $(bin_PROGRAMS)
 
 mimetypes:
 	if test -d Apache/apache2; then (cd Apache/apache2 && osc up); else osc co Apache/apache2; fi
