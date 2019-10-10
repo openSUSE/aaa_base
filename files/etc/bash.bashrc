@@ -8,9 +8,14 @@
 
 #
 # Check which shell is reading this file
-#
-noprofile=false
-restricted=false
+# check if variables are read-only before setting them
+# for example in a restricted shell
+if unset noprofile 2>/dev/null ; then
+  noprofile=false
+fi
+if unset restricted 2>/dev/null ; then
+  restricted=false
+fi
 : ${_is_save:=unset}
 if test -z "$is" ; then
  if test -f /proc/mounts ; then
