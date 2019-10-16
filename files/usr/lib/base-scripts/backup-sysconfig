@@ -40,7 +40,18 @@ if test -n "$RCCONFIG_BACKUP_DIR" -a -e /etc/sysconfig ; then
             NUMBER=`expr $NUMBER + 1`
         done
 
-        if tar czfp $NEWNAME /etc/sysconfig 2>/dev/null ; then
+        FAIL=1
+        if type -p tar &>/dev/null ; then
+            tar czfp $NEWNAME /etc/sysconfig 2>/dev/null && FAIL=0
+        elif type -p cpio &>/dev/null ; then
+            (cd / ; find etc/sysconfig | cpio -o -Hustar) | gzip > $NEWNAME 2>/dev/null && FAIL=0
+        else
+            echo "ERROR!! can not find either tar or cpio"
+            echo "sysconfig backup is not possible"
+            rm -f $NEWNAME
+            exit 1
+        fi
+        if test $FAIL = 0 ; then
             echo "$NEW_MD5" > $RCCONFIG_BACKUP_DIR/sysconfig_recent_md5
             test "$MAX_RCCONFIG_BACKUPS" -gt 0 2> /dev/null || MAX_RCCONFIG_BACKUPS=0
             NUMBER=1
@@ -55,6 +66,7 @@ if test -n "$RCCONFIG_BACKUP_DIR" -a -e /etc/sysconfig ; then
             echo "to $RCCONFIG_BACKUP_DIR."
             echo "Maybe there is not enough disk space."
             rm -f $NEWNAME
+            exit 1
         fi
     fi
 fi
