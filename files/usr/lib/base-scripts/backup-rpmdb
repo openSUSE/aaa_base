@@ -40,6 +40,11 @@ if test -n "$RPMDB_BACKUP_DIR" -a -e ${RPMDB_PATH}/$PACKAGEDBFILE ; then
         OLD_MD5="`cat $RPMDB_BACKUP_DIR/rpmdb_recent_md5`"
     NEW_MD5="`cat ${RPMDB_PATH}/$PACKAGEDBFILE | md5sum`"
     if test "$OLD_MD5" != "$NEW_MD5" ; then
+        if ! rpm -qa > /dev/null 2>&1  ; then
+            echo "ERROR!! something wrong with RPM DB, it might be corrupted, please double check"
+            logger -p cron.err "ERROR!! something wrong with RPM DB, it might be corrupted, please double check"
+            exit 1
+        fi
         DATESTRING=`date +"%Y%m%d"`
 
         NEWNAME=$RPMDB_BACKUP_DIR/$PACKAGEDBFILE-$DATESTRING
