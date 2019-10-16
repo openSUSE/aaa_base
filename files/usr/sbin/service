@@ -103,7 +103,7 @@ exec_rc ()
 		fi
 		echo "$1 is neither service nor target!?" >&2
 		return "1"
-	elif [ -x "$actiondir/$1/$2" ]; then
+	elif [ -n "$2" -a -x "$actiondir/$1/$2" ]; then
 		rc="$actiondir/$1/$2"
 		shift 2
 	elif [ ${0##*/} = service ] ; then
