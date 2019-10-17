@@ -237,8 +237,8 @@ $endif
 "\C-?":		backward-delete-char
 "\C-H":		backward-delete-char
 $if term=xterm
-"\e\303\277":	backward-delete-word
-"\eÿ":		backward-delete-word
+"\e\303\277":	backward-kill-word
+"\eÿ":		backward-kill-word
 $endif
 #
 # Home and End
@@ -798,14 +798,18 @@ set editing-mode emacs
     "\e\e[2$":	overwrite-mode
 $endif
 "\e\eOq":	end-of-line
-"\e\eOr":	down-history
+"\e\eOr":	next-history
 "\e\eOs":	history-search-forward
 "\e\eOt":	backward-char
 "\e\eOu":	re-read-init-file
 "\e\eOv":	forward-char
 "\e\eOw":	beginning-of-line
-"\e\eOx":	up-history
+"\e\eOx":	previous-history
 "\e\eOy":	history-search-backward
+"\eOc":		forward-word
+"\eOd":		backward-word
+"\eOa":		history-search-backward
+"\eOb":		history-search-forward
 "\e[c":		forward-word
 "\e[d":		backward-word
 "\e[a":		history-search-backward
@@ -843,8 +847,8 @@ $endif
 $if term=screen
 "\e[1;2D":	backward-word
 "\e[1;2C":	forward-word
-"\e[1;2A":	up-history
-"\e[1;2B":	down-history
+"\e[1;2A":	previous-history
+"\e[1;2B":	next-history
 "\e[1;2H":	beginning-of-line
 "\e[1;2F":	end-of-line
 $if mode=emacs
@@ -871,8 +875,8 @@ $endif
 "\e[6;2~":	history-search-forward
 "\e[1;5D":	backward-word
 "\e[1;5C":	forward-word
-"\e[1;5A":	up-history
-"\e[1;5B":	down-history
+"\e[1;5A":	previous-history
+"\e[1;5B":	next-history
 "\e[1;5H":	beginning-of-line
 "\e[1;5F":	end-of-line
 "\e[3;5~":	delete-char
@@ -880,8 +884,8 @@ $endif
 "\e[6;5~":	history-search-forward
 "\e[1;3D":	backward-word
 "\e[1;3C":	forward-word
-"\e[1;3A":	up-history
-"\e[1;3B":	down-history
+"\e[1;3A":	previous-history
+"\e[1;3B":	next-history
 "\e[1;3H":	beginning-of-line
 "\e[1;3F":	end-of-line
 "\e[3;3~":	delete-char

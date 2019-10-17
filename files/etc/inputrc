@@ -54,40 +54,40 @@ $include /etc/inputrc.keys
 $if term=xterm
 "\e\eOD":	backward-word
 "\e\eOC":	forward-word
-"\e\eOA":	up-history
-"\e\eOB":	down-history
+"\e\eOA":	previous-history
+"\e\eOB":	next-history
 "\C-\eOD":	backward-char
 "\C-\eOC":	forward-char
-"\C-\eOA":	up-history
-"\C-\eOB":	down-history
+"\C-\eOA":	previous-history
+"\C-\eOB":	next-history
 "\M-\eOD":	backward-word
 "\M-\eOC":	forward-word
-"\M-\eOA":	up-history
-"\M-\eOB":	down-history
+"\M-\eOA":	previous-history
+"\M-\eOB":	next-history
 "\C-\M-OD":	backward-char
 "\C-\M-OC":	forward-char
-"\C-\M-OA":	up-history
-"\C-\M-OB":	down-history
+"\C-\M-OA":	previous-history
+"\C-\M-OB":	next-history
 $endif
 #
 # Standard cursor
 #
 "\e\e[D":	backward-word
 "\e\e[C":	forward-word
-"\e\e[A":	up-history
-"\e\e[B":	down-history
+"\e\e[A":	previous-history
+"\e\e[B":	next-history
 "\C-\e[D":	backward-char
 "\C-\e[C":	forward-char
-"\C-\e[A":	up-history
-"\C-\e[B":	down-history
+"\C-\e[A":	previous-history
+"\C-\e[B":	next-history
 "\M-\e[D":	backward-word
 "\M-\e[C":	forward-word
-"\M-\e[A":	up-history
-"\M-\e[B":	down-history
+"\M-\e[A":	previous-history
+"\M-\e[B":	next-history
 "\C-\M-[D":	backward-char
 "\C-\M-[C":	forward-char
-"\C-\M-[A":	up-history
-"\C-\M-[B":	down-history
+"\C-\M-[A":	previous-history
+"\C-\M-[B":	next-history
 $endif
 #
 # end
