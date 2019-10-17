@@ -736,7 +736,7 @@ $if term=mlterm
 "\e[24;8~":	""
 $endif
 #
-$if term=rxvt-unicode
+$if term=rxvt
 "\e[23$":	""
 "\e[24$":	""
 "\e[11^":	""
