@@ -6,9 +6,9 @@ __profile_setup_wsl() {
 	PATH=$ORIG_PATH:$PATH
     fi
 
-    if test $(umask) -eq 0; then
+    if test $(umask) -eq 0000; then
 	local logindefs
-	for logindefs in {,/usr}/etc/login.defs; do
+	for logindefs in /etc/login.defs /usr/etc/login.defs; do
 	    test -e "$logindefs" || continue
 	    break
 	done
