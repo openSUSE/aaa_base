@@ -1,15 +1,25 @@
-# WSL does not utilitze this pam functionality currently.
-if test -f /proc/version ; then
-    IS_WSL=$(grep -i microsoft /proc/version)
-fi
+# restore WSL path and set umask as WSL doesn't use pam to open a login shell
+__profile_setup_wsl() {
+    test -n "$WSL_DISTRO_NAME" || return 0
 
-if test -n "$IS_WSL" ; then
     if test -n "$ORIG_PATH" ; then
 	PATH=$ORIG_PATH:$PATH
     fi
+
     if test $(umask) -eq 0; then
-	UMASK_LOGIN_DEFS=$(sed -ne 's/^UMASK[[:space:]]*//p' /etc/login.defs)
-	test "$UMASK_LOGIN_DEFS" && umask "$UMASK_LOGIN_DEFS"
-	unset UMASK_LOGIN_DEFS
+	local logindefs
+	for logindefs in {,/usr}/etc/login.defs; do
+	    test -e "$logindefs" || continue
+	    break
+	done
+	if test -e "$logindefs"; then
+	    local umask_login_defs=`sed -ne 's/^UMASK[[:space:]]*//p' "$logindefs"`
+	    if test -n "$umask_login_defs"; then
+		umask "$umask_login_defs"
+	    fi
+	fi
     fi
-fi
+}
+
+__profile_setup_wsl
+unset __profile_setup_wsl
