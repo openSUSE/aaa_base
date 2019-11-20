@@ -7,8 +7,16 @@ if ( $is_wsl == 1 ) then
 	set -f path=($orig_path $path)
     endif
     if (`umask` == 0) then
-	set umask_login_defs=`sed -ne 's/^UMASK[[:space:]]*//p' /etc/login.defs`
-	if ( $umask_login_defs ) umask $umask_login_defs
-	unset umask_login_defs
+	foreach logindefs ({,/usr}/etc/login.defs)
+	    if ( ! -e $logindefs ) continue
+	    break
+	end
+	if ( -e $logindefs ) then
+	   set _umask_login_defs=`sed -ne 's/^UMASK[[:space:]]*//p' "$logindefs"`
+	   if ( ${%_umask_login_defs} > 0) then
+	       umask ${_umask_login_defs}
+	   endif
+	   unset _umask_login_defs
+	endif
     endif
 endif
