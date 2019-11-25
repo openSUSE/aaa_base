@@ -118,8 +118,10 @@ if ( -o /dev/$tty && -c /dev/$tty ) then
   # If we're running under X11
   if ( ${?DISPLAY} ) then
     if ( ${?TERM} && ${?EMACS} == 0 && ${?MC_SID} == 0 && ${?STY} == 0 && ! -r $HOME/.csh.expert ) then
-      if ( { tput hs >& /dev/null } || { ( tput -T $TERM+sl hs >& /dev/null ) } ) then
-	if ( ${TERM} =~ xterm* ) then
+      if ( { tput hs >& /dev/null } || { ( tput -T $TERM+sl hs >& /dev/null ) } \
+	  || $TERM =~ xterm* || $TERM =~ gnome* || $TERM =~ konsole* || $TERM =~ xfce* ) then
+	if ( $TERM =~ xterm* || $TERM =~ gnome* || $TERM =~ konsole* || $TERM =~ xfce* ) then
+	  # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Miscellaneous
 	  set _tsl=`echo -n '\033]2;'`
 	  set _isl=`echo -n '\033]1;'`
 	  set _fsl=`echo -n '\007'`
