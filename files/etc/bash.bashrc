@@ -136,18 +136,27 @@ case "$-" in
 	#
 	# Set xterm prompt with short path (last 18 characters)
 	#
-	if path tput hs 2>/dev/null || path tput -T $TERM+sl hs 2>/dev/null ; then
+	if path tput hs 2>/dev/null || path tput -T $TERM+sl hs 2>/dev/null || \
+	   path tput -T ${TERM%%[.-]*}+sl hs 2>/dev/null || \
+	   [[ $TERM = *xterm* || $TERM = *gnome* || $TERM = *konsole* || $TERM = *xfce* ]]
+	then
 	    #
 	    # Mirror prompt in terminal "status line", which for graphical
 	    # terminals usually is the window title. KDE konsole in
 	    # addition needs to have "%w" in the "tabs" setting, ymmv for
 	    # other console emulators.
 	    #
-	    if [[ $TERM = *xterm* ]] ; then
+	    if [[ $TERM = *xterm* || $TERM = *gnome* || $TERM = *konsole* || $TERM = *xfce* ]]
+	    then
+		# https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Miscellaneous
 		_tsl=$(echo -en '\e]2;')
 		_isl=$(echo -en '\e]1;')
 		_fsl=$(echo -en '\007')
 	    elif path tput -T $TERM+sl tsl 2>/dev/null ; then
+		_tsl=$(path tput -T $TERM+sl tsl 2>/dev/null)
+		_isl=''
+		_fsl=$(path tput -T $TERM+sl fsl 2>/dev/null)
+	    elif path tput -T ${TERM%%[.-]*}+sl tsl 2>/dev/null ; then
 		_tsl=$(path tput -T $TERM+sl tsl 2>/dev/null)
 		_isl=''
 		_fsl=$(path tput -T $TERM+sl fsl 2>/dev/null)
