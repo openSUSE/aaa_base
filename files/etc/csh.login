@@ -166,6 +166,8 @@ if (! ${?LESS} ) then
     setenv LESS_ADVANCED_PREPROCESSOR "no"
     if ( -s /etc/lesskey.bin ) then
         setenv LESSKEY /etc/lesskey.bin
+    else if ( -s /usr/etc/lesskey.bin ) then
+        setenv LESSKEY /usr/etc/lesskey.bin
     endif
     setenv PAGER less
     setenv MORE -sl
