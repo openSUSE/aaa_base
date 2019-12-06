@@ -215,6 +215,8 @@ if test -z "$LESS" -a -x /usr/bin/less ; then
     LESS_ADVANCED_PREPROCESSOR="no"
     if test -s /etc/lesskey.bin ; then
 	LESSKEY=/etc/lesskey.bin
+    elif test -s /usr/etc/lesskey.bin ; then
+	LESSKEY=/usr/etc/lesskey.bin
     fi
     PAGER=less
     MORE=-sl
