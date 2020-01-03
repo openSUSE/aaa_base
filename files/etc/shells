@@ -11,6 +11,7 @@
 /bin/tcsh
 /bin/true
 /bin/zsh
+/sbin/nologin
 /usr/bin/csh
 /usr/bin/dash
 /usr/bin/ksh
