@@ -15,7 +15,7 @@ for JDIR in /usr/lib64/jvm /usr/lib/jvm /usr/java/latest /usr/java; do
         continue
     fi
 
-    for JPATH in $JDIR $JDIR/java $JDIR/java-[a-z]* $JDIR/java-[0-9]* $JDIR/jre $JDIR/jre-[a-z]* $JDIR/jre-[0-9]*; do
+    for JPATH in $JDIR $JDIR/*; do
 
     	if ! test -d $JPATH; then
             continue
