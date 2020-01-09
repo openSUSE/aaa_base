@@ -9,7 +9,7 @@ if test -z "$restricted" ; then
         }
         /usr/bin/startx ${1+"$@"} 2>&1 | tee $HOME/.xsession-errors
     }
-    remount () { /bin/mount -o remount,${1+"$@"} ; }
+    remount () { /usr/bin/mount -o remount,${1+"$@"} ; }
 fi
 
 #
@@ -29,7 +29,7 @@ alias fgrep='fgrep --color=auto'
 alias grep='grep --color=auto'
 alias ip='ip --color=auto'
 alias md='mkdir -p'
-if test "$is" = "bash" -a ! -x /bin/which -a ! -x /usr/bin/which ; then
+if test "$is" = "bash" -a ! -x /usr/bin/which ; then
     #
     # Other shells use the which command in path (e.g. ash) or
     # their own builtin for the which command (e.g. ksh and zsh).

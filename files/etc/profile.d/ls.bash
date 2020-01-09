@@ -63,7 +63,7 @@ case "$-" in
 	    }
 	    alias ls=_ls
 	    ;;
-	*)  alias ls='/bin/ls $LS_OPTIONS' ;;
+	*)  alias ls='/usr/bin/ls $LS_OPTIONS' ;;
     esac
     alias dir='ls -l'
     alias ll='ls -l'

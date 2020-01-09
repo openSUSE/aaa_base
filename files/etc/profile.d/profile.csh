@@ -23,7 +23,7 @@ end
 unset sys
 
 set val=""
-foreach line ( "`/bin/grep -vh '^#' $sysconf`" )
+foreach line ( "`/usr/bin/grep -vh '^#' $sysconf`" )
     set val="${line:q:s/=/ /}"
     set arr=( $val )
     eval set val="${arr[2-]}"

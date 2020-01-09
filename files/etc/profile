@@ -120,10 +120,10 @@ test -z "$UID"  && readonly  UID=`path id -ur 2> /dev/null`
 test -z "$EUID" && readonly EUID=`path id -u  2> /dev/null`
 test -z "$USER" && USER=`path id -un 2> /dev/null`
 test -z "$MAIL" && MAIL=/var/spool/mail/$USER
-if test -x /bin/uname ; then
-    test -z "$HOST" && HOST=`/bin/uname -n`
-    test "$HOST" = "localhost" && HOST=`/bin/uname -n`
-    test -z "$CPU"  &&  CPU=`/bin/uname -m`
+if test -x /usr/bin/uname ; then
+    test -z "$HOST" && HOST=`/usr/bin/uname -n`
+    test "$HOST" = "localhost" && HOST=`/usr/bin/uname -n`
+    test -z "$CPU"  &&  CPU=`/usr/bin/uname -m`
 fi
 # Remark: /proc/sys/kernel/domainname and the program domainname
 # its self will provide the NIS/YP domainname, see domainname(8).
