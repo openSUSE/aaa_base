@@ -99,7 +99,9 @@ main (int argc, char *argv[])
 	    buffer[i+6] == 'v' && buffer[i+7] == 'e' &&
 	    buffer[i+8] == 'r' && buffer[i+9] == 's' &&
 	    buffer[i+10] == 'i' && buffer[i+11] == 'o' &&
-	    buffer[i+12] == 'n' && buffer[i+13] == ' ')
+	    buffer[i+12] == 'n' && buffer[i+13] == ' ' &&
+	    /* current s390 images have that string without version: */
+	    buffer[i+14] != 0)
           {
 	    int j = i+14;
 	    int number_dots = 0;
