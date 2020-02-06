@@ -14,6 +14,15 @@ if [ "$1" -gt 1 ]; then
 	%{remove_and_set -n clock SYSTOHC FORCE_SYSTOHC BADYEAR HCTOSYS_DEVICE USE_HWCLOCK USE_ADJUST}
 fi
 
+# Fix /etc/nsswitch.conf, either because admin ignored *.rpmnew,
+# or because of YaST bug [bsc#1162916]
+grep -q ^services.*usrfiles /etc/nsswitch.conf
+if [ $? -eq 1 ]; then
+    cp /etc/nsswitch.conf /etc/nsswitch.conf.pre-usrfiles
+    sed -e 's|^\(services:.*[[:space:]]\)files\([[:space:]].*\)*$|\1files usrfiles\2|' /etc/nsswitch.conf > /etc/nsswitch.conf.usrfiles
+    mv /etc/nsswitch.conf.usrfiles /etc/nsswitch.conf
+fi
+
 for i in language proxy windowmanager ; do
 %{fillup_only -n $i}
 done
