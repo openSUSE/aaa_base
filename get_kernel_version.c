@@ -47,7 +47,8 @@ main (int argc, char *argv[])
 
   /* check if file exist and is compressed */
   {
-    unsigned char  buf [2];
+#define DETECT_SIZE 6
+    unsigned char  buf [DETECT_SIZE];
     int fd = open (argv[1], O_RDONLY | O_CLOEXEC);
     if (fd == -1)
       {
@@ -55,16 +56,30 @@ main (int argc, char *argv[])
 	return 1;
       }
 
-    if (read (fd, buf, 2) != 2)
+    if (read (fd, buf, DETECT_SIZE) != DETECT_SIZE)
       {
 	fprintf (stderr, "Short read\n");
 	close (fd);
 	return 1;
       }
 
+    /* \xFD7zXZ\x00 */
+    if ((buf [0] == 0xfd) &&
+	(buf [1] == '7') &&
+	(buf [2] == 'z') &&
+	(buf [3] == 'X') &&
+	(buf [4] == 'Z') &&
+	(buf [5] == 0))
+      {
+	snprintf (command, sizeof (command), "/usr/bin/xz -dc %s 2>/dev/null", argv[1]);
+      }
+
     if (buf [0] == 037 && (buf [1] == 0213 || buf [1] == 0236))
       {
 	snprintf (command, sizeof (command), "/bin/gzip -dc %s 2>/dev/null", argv[1]);
+      }
+
+    if (*command) {
 	fp = popen (command, "re");
 	if (fp == NULL)
 	  {
