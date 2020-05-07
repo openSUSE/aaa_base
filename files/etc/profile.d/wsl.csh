@@ -3,6 +3,7 @@ set is_wsl=0
 if ( -f /proc/version ) set is_wsl=`grep -ic microsoft /proc/version`
 
 if ( $is_wsl == 1 ) then
+    if ( ! -e /run/systemd/system/ ) set SYSTEMD_OFFLINE=1
     if ( ${?orig_path} ) then
 	set -f path=($orig_path $path)
     endif

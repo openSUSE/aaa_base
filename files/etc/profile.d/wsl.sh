@@ -6,6 +6,11 @@ __profile_setup_wsl() {
 	PATH=$ORIG_PATH:$PATH
     fi
 
+    if ! test -e /run/systemd/system/; then
+	SYSTEMD_OFFLINE=1
+	export SYSTEMD_OFFLINE
+    fi
+
     if test $(umask) -eq 0000; then
 	local logindefs
 	for logindefs in /etc/login.defs /usr/etc/login.defs; do
