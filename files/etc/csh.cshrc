@@ -50,7 +50,7 @@ unset id
 # Avoid trouble with Emacs shell mode
 #
 if ($?EMACS) then
-  setenv LS_OPTIONS '-N --color=none -T 0';
+  setenv LS_OPTIONS '-N --color=none -T 0'
 endif
 
 #
@@ -61,7 +61,7 @@ if (! ${?prompt}) goto done
 #
 # Avoid trouble with Emacs shell mode
 #
-if ($?EMACS) then
+if ($?EMACS || $?MC_SID) then
   path tset -I -Q
   path stty cooked pass8 dec nl -echo
 endif
