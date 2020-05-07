@@ -55,6 +55,7 @@ add_word() {
 		sed -i -e "${lineno} { 
 			s/^[[:space:]]*\($var=\".*\)\(\".*\)/\1 $word_quoted\2/; 
 			s/=\"  */=\"/ 
+			s/ \+/ /g
 			}" $file
 		$debug && diff -u $tmpf $file
 	else
@@ -70,7 +71,8 @@ remove_word() {
 		$debug && cp $file $tmpf
 		sed -i -e "${lineno} { 
 			s/\(['\" 	]\)$word_quoted\(['\" 	]\)/\1 \2/g
-			s/  / /g
+			s/ \+/ /g
+			s/\ \+\(\"\)/\1/g
 			}" $file
 		$debug && diff -u $tmpf $file
 	else
