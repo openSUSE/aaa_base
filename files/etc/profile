@@ -291,14 +291,22 @@ fi
 # overriding locale variables already present in the environment
 #
 if test -z "$PROFILEREAD" ; then
-    test -r /etc/profile.d/sh.ssh && . /etc/profile.d/sh.ssh
+    if test -r /etc/profile.d/sh.ssh
+    then . /etc/profile.d/sh.ssh
+    elif test -r /usr/etc/profile.d/sh.ssh
+    then . /usr/etc/profile.d/sh.ssh
+    fi
 fi
 
 #
 # Source profile extensions for certain packages, the super
 # may disable some of them by setting the sticky bit.
 #
-if test -d /etc/profile.d -a -z "$PROFILEREAD" ; then
+if test \( -d /etc/profile.d -o -d /usr/etc/profile.d \) -a -z "$PROFILEREAD" ; then
+    for s in /usr/etc/profile.d/*.sh ; do
+	test -e /etc/profile.d/${s##*/} && continue
+	test -r $s -a ! -k $s && . $s
+    done
     for s in /etc/profile.d/*.sh ; do
 	test -r $s -a ! -k $s && . $s
     done

@@ -89,7 +89,11 @@ path ()
 test -z "$UID"  && readonly  UID=`path id -ur 2> /dev/null`
 test -z "$EUID" && readonly EUID=`path id -u  2> /dev/null`
 
-test -s /etc/profile.d/ls.bash && . /etc/profile.d/ls.bash
+if test -s /etc/profile.d/ls.bash
+then . /etc/profile.d/ls.bash
+elif test -s /usr/etc/profile.d/ls.bash
+then . /usr/etc/profile.d/ls.bash
+fi
 
 #
 # Avoid trouble with Emacs shell mode
@@ -282,9 +286,17 @@ case "$-" in
 	# therefore we use functions here. This is a seperate
 	# file because other shells may run into trouble
 	# if they parse this even if they do not expand.
-	test -s /etc/profile.d/alias.ash && . /etc/profile.d/alias.ash
+	if test -s /etc/profile.d/alias.ash
+	then . /etc/profile.d/alias.ash
+	elif test -s /usr/etc/profile.d/alias.ash
+        then . /usr/etc/profile.d/alias.ash
+	fi
     else
-	test -s /etc/profile.d/alias.bash && . /etc/profile.d/alias.bash
+	if test -s /etc/profile.d/alias.bash
+	then . /etc/profile.d/alias.bash
+	elif -s /usr/etc/profile.d/alias.bash
+	then . /usr/etc/profile.d/alias.bash
+	fi
 	test -s $HOME/.alias && . $HOME/.alias
     fi
 
@@ -302,20 +314,30 @@ case "$-" in
 		. /etc/bash_completion
 	    elif test -s /etc/profile.d/bash_completion.sh ; then
 		. /etc/profile.d/bash_completion.sh
+	    elif test -s /usr/etc/profile.d/bash_completion.sh ; then
+		. /usr/etc/profile.d/bash_completion.sh
 	    elif test -s /etc/profile.d/complete.bash ; then
 		. /etc/profile.d/complete.bash
+	    elif test -s /usr/etc/profile.d/complete.bash ; then
+		. /usr/etc/profile.d/complete.bash
 	    fi
 	    # Do not source twice if already handled by bash-completion
 	    if [[ -n $BASH_COMPLETION_COMPAT_DIR && $BASH_COMPLETION_COMPAT_DIR != /etc/bash_completion.d ]]; then
 		for s in /etc/bash_completion.d/*.sh ; do
 		    test -r $s && . $s
 		done
+	    elif [[ -n $BASH_COMPLETION_COMPAT_DIR && $BASH_COMPLETION_COMPAT_DIR != /usr/etc/bash_completion.d ]]; then
+		for s in /usr/etc/bash_completion.d/*.sh ; do
+		    test -r $s && . $s
+		done
 	    fi
 	    if test -e $HOME/.bash_completion ; then
 		. $HOME/.bash_completion
 	    fi
-	    if test -f /etc/bash_command_not_found ; then
-		. /etc/bash_command_not_found
+	    if test -f /etc/bash_command_not_found
+	    then . /etc/bash_command_not_found
+	    elif test -f /usr/etc/bash_command_not_found
+	    then . /usr/etc/bash_command_not_found
 	    fi
 	    ;;
 	*)  ;;
@@ -335,8 +357,10 @@ case "$-" in
     fi
     # command not found handler in zsh version
     if test "$is" = "zsh" ; then
-	if test -f /etc/zsh_command_not_found ; then
-	    . /etc/zsh_command_not_found
+	if test -f /etc/zsh_command_not_found
+	then . /etc/zsh_command_not_found
+	elif test -f /usr/etc/zsh_command_not_found
+	then . /usr/etc/zsh_command_not_found
 	fi
     fi
     ;;
@@ -345,8 +369,10 @@ esac
 # Source /etc/profile.d/vte.sh, which improvies usage of VTE based terminals.
 # It is vte.sh's responsibility to 'not load' when it's not applicable (not inside a VTE term)
 # If you want to 'disable' this functionality, set the sticky bit on /etc/profile.d/vte.sh
-if test -r /etc/profile.d/vte.sh -a ! -k /etc/profile.d/vte.sh; then
-  . /etc/profile.d/vte.sh
+if test -r /etc/profile.d/vte.sh -a ! -k /etc/profile.d/vte.sh
+then . /etc/profile.d/vte.sh
+elif test -r /usr/etc/profile.d/vte.sh -a ! -k /usr/etc/profile.d/vte.sh
+then . /usr/etc/profile.d/vte.sh
 fi
 
 if test "$_is_save" = "unset" ; then
