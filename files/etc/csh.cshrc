@@ -2,15 +2,15 @@
 # (c) System csh.cshrc for tcsh, Werner Fink '93
 #                           and Jörg Stadler '94
 #
-# This file sources /etc/profile.d/complete.tcsh and
-# /etc/profile.d/bindkey.tcsh used especially by tcsh.
+# This file sources /(usr/)etc/profile.d/complete.tcsh and
+# /(usr/)etc/profile.d/bindkey.tcsh used especially by tcsh.
 #
 # PLEASE DO NOT CHANGE /etc/csh.cshrc. There are chances that your changes
 # will be lost during system upgrades. Instead use /etc/csh.cshrc.local for
 # your local settings, favourite global aliases, VISUAL and EDITOR
 # variables, etc ...
 # USERS may write their own $HOME/.csh.expert to skip sourcing of
-# /etc/profile.d/complete.tcsh and most parts oft this file.
+# /(usr/)etc/profile.d/complete.tcsh and most parts oft this file.
 #
 
 #
@@ -79,7 +79,13 @@ endif
 #
 # Now read in the key bindings of the tcsh
 #
-if ($?tcsh && -r /etc/profile.d/bindkey.tcsh) source /etc/profile.d/bindkey.tcsh
+if ($?tcsh) then
+    if ( -r /etc/profile.d/bindkey.tcsh ) then
+	source /etc/profile.d/bindkey.tcsh
+    else if ( -r /usr/etc/profile.d/bindkey.tcsh ) then
+	source /usr/etc/profile.d/bindkey.tcsh
+    endif
+endif
 
 #
 # Some useful settings
@@ -105,9 +111,15 @@ set symlinks=ignore
 unset autologout
 unset ignoreeof
 
-if (-r /etc/profile.d/ls.tcsh) source /etc/profile.d/ls.tcsh
+foreach _s (ls.tcsh alias.tcsh)
+    if (-r /etc/profile.d/$_s) then
+	source /etc/profile.d/$_s
+	continue
+    endif
+    if (-r /usr/etc/profile.d/$_s) source /usr/etc/profile.d/$_s
+end
+unset _s
 
-if (-r /etc/profile.d/alias.tcsh) source /etc/profile.d/alias.tcsh
 #
 # Prompting and Xterm title
 #
@@ -173,8 +185,12 @@ if ($?tcsh) then
     set _rev=${tcsh:r}
     set _rel=${_rev:e}
     set _rev=${_rev:r}
-    if (($_rev > 6 || ($_rev == 6 && $_rel > 1)) && -r /etc/profile.d/complete.tcsh) then
-	source /etc/profile.d/complete.tcsh
+    if ($_rev > 6 || ($_rev == 6 && $_rel > 1)) then
+	if (-r /etc/profile.d/complete.tcsh) then
+	    source /etc/profile.d/complete.tcsh
+	else if (-r /usr/etc/profile.d/complete.tcsh) then
+	    source /usr/etc/profile.d/complete.tcsh
+	endif
     endif
     #
     # Enable editing in multibyte encodings for the locales

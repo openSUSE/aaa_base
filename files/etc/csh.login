@@ -233,21 +233,27 @@ endif
 # overriding locale variables already present in the environment
 #
 if (! ${?CSHRCREAD} ) then
-    if ( -r /etc/profile.d/csh.ssh ) source /etc/profile.d/csh.ssh
+    if ( -r /etc/profile.d/csh.ssh ) then
+	source /etc/profile.d/csh.ssh
+    else if ( -r /usr/etc/profile.d/csh.ssh ) then 
+	source /usr/etc/profile.d/csh.ssh
+    endif
 endif
 
 #
 # Source profile extensions for certain packages, the super
 # may disable some of them by setting the sticky bit.
 #
-if ( -d /etc/profile.d && ! ${?CSHRCREAD} ) then
+if ((-d /etc/profile.d || -d /usr/etc/profile.d ) && ! ${?CSHRCREAD} ) then
     set _tmp=${?nonomatch}
     set nonomatch
     unset noglob
+    foreach _s ( /usr/etc/profile.d/*.csh )
+	if ( -e /etc/profile.d/${_s:t} ) continue
+	if ( -r $_s && ! -k $_s ) source $_s
+    end
     foreach _s ( /etc/profile.d/*.csh )
-	if ( -r $_s && ! -k $_s ) then
-	    source $_s
-	endif
+	if ( -r $_s && ! -k $_s ) source $_s
     end
     set noglob
     if ( ! ${_tmp} ) unset nonomatch
