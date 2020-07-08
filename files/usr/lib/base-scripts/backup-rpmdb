@@ -27,7 +27,9 @@ fi
 #
 #
 PACKAGEDBFILE=packages.rpm
-if test -e ${RPMDB_PATH}/Packages ; then
+if test -e ${RPMDB_PATH}/Packages.db ; then
+    PACKAGEDBFILE=Packages.db
+elif test -e ${RPMDB_PATH}/Packages ; then
     PACKAGEDBFILE=Packages
 fi
 #
