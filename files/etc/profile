@@ -304,11 +304,11 @@ fi
 #
 if test \( -d /etc/profile.d -o -d /usr/etc/profile.d \) -a -z "$PROFILEREAD" ; then
     for s in /usr/etc/profile.d/*.sh ; do
-	test -e /etc/profile.d/${s##*/} && continue
-	test -r $s -a ! -k $s && . $s
+	test -e "/etc/profile.d/${s##*/}" && continue
+	test -r "$s" -a ! -k "$s" && . "$s"
     done
     for s in /etc/profile.d/*.sh ; do
-	test -r $s -a ! -k $s && . $s
+	test -r "$s" -a ! -k "$s" && . "$s"
     done
     unset s
 fi
