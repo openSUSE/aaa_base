@@ -294,7 +294,7 @@ case "$-" in
     else
 	if test -s /etc/profile.d/alias.bash
 	then . /etc/profile.d/alias.bash
-	elif -s /usr/etc/profile.d/alias.bash
+	elif test -s /usr/etc/profile.d/alias.bash
 	then . /usr/etc/profile.d/alias.bash
 	fi
 	test -s $HOME/.alias && . $HOME/.alias
