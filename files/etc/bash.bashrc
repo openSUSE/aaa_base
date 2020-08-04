@@ -73,7 +73,7 @@ fi
 #
 # Call common progams from /bin or /usr/bin only
 #
-path ()
+_path ()
 {
     if test -x /usr/bin/$1 ; then
 	${1+"/usr/bin/$@"}
@@ -86,8 +86,8 @@ path ()
 #
 # ksh/ash sometimes do not know
 #
-test -z "$UID"  && readonly  UID=`path id -ur 2> /dev/null`
-test -z "$EUID" && readonly EUID=`path id -u  2> /dev/null`
+test -z "$UID"  && readonly  UID=`_path id -ur 2> /dev/null`
+test -z "$EUID" && readonly EUID=`_path id -u  2> /dev/null`
 
 if test -s /etc/profile.d/ls.bash
 then . /etc/profile.d/ls.bash
@@ -99,8 +99,8 @@ fi
 # Avoid trouble with Emacs shell mode
 #
 if test "$EMACS" = "t" ; then
-    path tset -I -Q
-    path stty cooked pass8 dec nl -echo
+    _path tset -I -Q
+    _path stty cooked pass8 dec nl -echo
 fi
 
 #
@@ -140,8 +140,8 @@ case "$-" in
 	#
 	# Set xterm prompt with short path (last 18 characters)
 	#
-	if path tput hs 2>/dev/null || path tput -T $TERM+sl hs 2>/dev/null || \
-	   path tput -T ${TERM%%[.-]*}+sl hs 2>/dev/null || \
+	if _path tput hs 2>/dev/null || _path tput -T $TERM+sl hs 2>/dev/null || \
+	   _path tput -T ${TERM%%[.-]*}+sl hs 2>/dev/null || \
 	   [[ $TERM = *xterm* || $TERM = *gnome* || $TERM = *konsole* || $TERM = *xfce* ]]
 	then
 	    #
@@ -156,18 +156,18 @@ case "$-" in
 		_tsl=$(echo -en '\e]2;')
 		_isl=$(echo -en '\e]1;')
 		_fsl=$(echo -en '\007')
-	    elif path tput -T $TERM+sl tsl 2>/dev/null ; then
-		_tsl=$(path tput -T $TERM+sl tsl 2>/dev/null)
+	    elif _path tput -T $TERM+sl tsl 2>/dev/null ; then
+		_tsl=$(_path tput -T $TERM+sl tsl 2>/dev/null)
 		_isl=''
-		_fsl=$(path tput -T $TERM+sl fsl 2>/dev/null)
-	    elif path tput -T ${TERM%%[.-]*}+sl tsl 2>/dev/null ; then
-		_tsl=$(path tput -T $TERM+sl tsl 2>/dev/null)
+		_fsl=$(_path tput -T $TERM+sl fsl 2>/dev/null)
+	    elif _path tput -T ${TERM%%[.-]*}+sl tsl 2>/dev/null ; then
+		_tsl=$(_path tput -T $TERM+sl tsl 2>/dev/null)
 		_isl=''
-		_fsl=$(path tput -T $TERM+sl fsl 2>/dev/null)
+		_fsl=$(_path tput -T $TERM+sl fsl 2>/dev/null)
 	    else
-		_tsl=$(path tput tsl 2>/dev/null)
+		_tsl=$(_path tput tsl 2>/dev/null)
 		_isl=''
-		_fsl=$(path tput fsl 2>/dev/null)
+		_fsl=$(_path tput fsl 2>/dev/null)
 	    fi
 	    _sc=$(tput sc 2>/dev/null)
 	    _rc=$(tput rc 2>/dev/null)
@@ -199,8 +199,8 @@ case "$-" in
 	# Other prompting for root
 	if test "$UID" -eq 0  ; then
 	    if test -n "$TERM" -a -t ; then
-	    	_bred="$(path tput bold 2> /dev/null; path tput setaf 1 2> /dev/null)"
-	    	_sgr0="$(path tput sgr0 2> /dev/null)"
+	    	_bred="$(_path tput bold 2> /dev/null; _path tput setaf 1 2> /dev/null)"
+	    	_sgr0="$(_path tput sgr0 2> /dev/null)"
 	    fi
 	    # Colored root prompt (see bugzilla #144620)
 	    if test -n "$_bred" -a -n "$_sgr0" ; then
