@@ -27,7 +27,7 @@ unset modules module modconfs modconf
 
 test "$refresh" = yes || exit 0
 
-modprobe dm_mod --quiet &> /dev/null || true
+/sbin/modprobe dm_mod --quiet &> /dev/null || true
 
 line=on
 test -e /proc/splash && read line < /proc/splash
