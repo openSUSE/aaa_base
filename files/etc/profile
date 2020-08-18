@@ -80,7 +80,7 @@ if test -O "$tty" -a -n "$PS1"; then
     test "${TERM}" = "ibm327x"	&& { TERM=dumb;  export TERM; }
     case "$TERM" in
     screen.*)
-	test -e /usr/share/terminfo/s/${TERM} || { TERM=screen;  export TERM; }
+	test -e /usr/share/terminfo/s/${TERM} || { TERM=screen;  export TERM; } ;;
     esac
     # Do not change settings on local line if connected to remote
     if test -z "$SSH_TTY" -a "${TERM}" != "dumb" ; then
@@ -384,7 +384,7 @@ case "$-" in
 	echo "Directory: $PWD"
 	# Last but not least
 	date
-    fi
+    fi ;;
 esac
 unset ORIG_PATH
 unset is
