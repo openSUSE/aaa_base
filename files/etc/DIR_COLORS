@@ -16,9 +16,6 @@ COLOR tty
 OPTIONS -F -T 0
 
 # Below, there should be one TERM entry for each termtype that is colorizable
-TERM linux
-TERM linux-c
-TERM console
 TERM con132x25
 TERM con132x30
 TERM con132x43
@@ -29,21 +26,24 @@ TERM con80x30
 TERM con80x43
 TERM con80x50
 TERM con80x60
+TERM console
 TERM gnome
+TERM iterm
+TERM linux
+TERM linux-c
 TERM mach-color
 TERM rxvt
 TERM rxvt-unicode
 TERM rxvt-unicode-256color
 TERM screen
-TERM screen-w
 TERM screen-256color
+TERM screen-w
 TERM screen.xterm-256color
 TERM vt100
 TERM vt102
 TERM xterm
-TERM xterm-debian
 TERM xterm-256color
-TERM iterm
+TERM xterm-debian
 
 # EIGHTBIT, followed by '1' for on, '0' for off. (8-bit output)
 EIGHTBIT 1
