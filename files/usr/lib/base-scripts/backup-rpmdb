@@ -16,6 +16,15 @@ umask 022
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 export PATH
 
+if [ -s /var/run/zypp.pid ] ; then
+    ZYPP_PID=$(cat /var/run/zypp.pid)
+    if [ -e /proc/$ZYPP_PID ] ; then
+        echo "zypp seems to be running with pid $ZYPP_PID"
+        echo "exiting backup-rpmdb gracefully"
+        exit 0
+    fi
+fi
+
 RPMDB_PATH="/usr/lib/sysimage/rpm"
 
 #
