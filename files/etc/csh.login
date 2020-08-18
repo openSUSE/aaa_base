@@ -26,6 +26,11 @@ if ( -o /dev/$tty && -c /dev/$tty && ${?prompt} ) then
     if ( ! ${?TERM} )           setenv TERM linux
     if ( "$TERM" == "unknown" ) setenv TERM linux
     if ( "$TERM" == "ibm327x" ) setenv TERM dumb
+    if ( `uname -m` == "s390x" ) then
+	if ( "$tty" == "/dev/sclp_line0" || "$tty" == "/dev/ttyS0" ) ; then
+	    if ( "$TERM" == "vt220" ) setenv TERM dumb
+	endif
+    endif
     if ( $TERM =~ screen.* && ! -e /usr/share/terminfo/s/$TERM) setenv TERM screen
     if ( ! ${?SSH_TTY} && "$TERM" != "dumb" ) then
 	path stty sane cr0 pass8 dec

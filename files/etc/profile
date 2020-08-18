@@ -78,6 +78,11 @@ if test -O "$tty" -a -n "$PS1"; then
     test -z "${TERM}"		&& { TERM=linux; export TERM; }
     test "${TERM}" = "unknown"	&& { TERM=linux; export TERM; }
     test "${TERM}" = "ibm327x"	&& { TERM=dumb;  export TERM; }
+    if test "$(uname -m)" = "s390x" ; then
+	if test "$tty" = "/dev/sclp_line0" -o "$tty" = "/dev/ttyS0" ; then
+	    test "${TERM}" = "vt220" && { TERM=dumb;  export TERM; }
+	fi
+    fi
     case "$TERM" in
     screen.*)
 	test -e /usr/share/terminfo/s/${TERM} || { TERM=screen;  export TERM; } ;;
