@@ -38,7 +38,7 @@ setup_xdg_paths() {
   XDG_DATA_DIRS=$(uniquefy_search_path "$XDG_DATA_DIRS")
   export XDG_DATA_DIRS
   
-  for xdgdir in /usr/local/etc/xdg /etc/xdg /etc/opt/gnome/xdg /etc/opt/kde4/xdg /etc/opt/kde3/xdg ; do
+  for xdgdir in /usr/local/etc/xdg /etc/xdg /usr/etc/xdg /etc/opt/gnome/xdg /etc/opt/kde4/xdg /etc/opt/kde3/xdg ; do
      if test -d "$xdgdir"; then
         if test -z "$XDG_CONFIG_DIRS"; then
            XDG_CONFIG_DIRS="$xdgdir"
