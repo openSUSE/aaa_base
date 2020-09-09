@@ -27,7 +27,9 @@ alias rd=rmdir
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias grep='grep --color=auto'
-alias ip='ip --color=auto'
+if ip --color=auto -V > /dev/null 2>/dev/null ; then
+    alias ip='ip --color=auto'
+fi
 alias md='mkdir -p'
 if test "$is" = "bash" -a ! -x /usr/bin/which ; then
     #
