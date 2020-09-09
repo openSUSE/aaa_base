@@ -22,7 +22,7 @@ else
     set XDG_CONFIG_DIRS=(${XDG_CONFIG_DIRS:as/:/ /})
 endif
 set nonomatch
-foreach xdgdir (/usr/local/etc/xdg /etc/xdg /etc/opt/gnome/xdg /etc/opt/kde4/xdg /etc/opt/kde3/xdg)
+foreach xdgdir (/usr/local/etc/xdg /etc/xdg /usr/etc/xdg /etc/opt/gnome/xdg /etc/opt/kde4/xdg /etc/opt/kde3/xdg)
     if ( -d "$xdgdir" ) then
 	set -l XDG_CONFIG_DIRS=($XDG_CONFIG_DIRS $xdgdir)
     endif
