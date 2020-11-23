@@ -39,3 +39,12 @@ for LOCALFILE in /root/bin/cron.daily.local \
     done < $LOCALFILE
     test "$LOCALFILE_CONTAINS_DATA" = false && rm -f $LOCALFILE
 done
+
+# we want to drop ownership of those legacy files.
+# systemd will take over as it has the unit files
+# boo#1179097
+for i in boot after; do
+	if [ -e /etc/init.d/$i.local ]; then
+		mv /etc/init.d/$i.local /etc/init.d/$i.local.backup_aaa_base_ownership
+	fi
+done
