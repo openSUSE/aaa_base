@@ -18,76 +18,58 @@ $if mode=emacs
 set editing-mode vi
     set keymap vi-command
     "\e[2~":	vi-editing-mode
-    "\M-[2~":	vi-editing-mode
-    "\2332~":	vi-editing-mode
+    # [Note: raw C1 chars conflicts with UTF-8]
+    # "\2332~":	vi-editing-mode
     set keymap vi-insert
     "\e[2~":	vi-replace
-    "\M-[2~":	vi-replace
-    "\2332~":	vi-replace
+    # [Note: raw C1 chars conflicts with UTF-8]
+    # "\2332~":	vi-replace
 set editing-mode emacs
     set keymap emacs
     "\e[2~":	overwrite-mode
-    "\M-[2~":	overwrite-mode
-    "\2332~":	overwrite-mode
+    # [Note: raw C1 chars conflicts with UTF-8]
+    # "\2332~":	overwrite-mode
 $endif
 "\e[3~":	delete-char
 "\e[4~":	end-of-line
 "\e[5~":	history-search-backward
 "\e[6~":	history-search-forward
-"\M-[1~":	beginning-of-line
-"\M-[3~":	delete-char
-"\M-[4~":	end-of-line
-"\M-[5~":	history-search-backward
-"\M-[6~":	history-search-forward
-"\2331~":	beginning-of-line
-"\2333~":	delete-char
-"\2334~":	end-of-line
-"\2335~":	history-search-backward
-"\2336~":	history-search-forward
-#
-# Cursor keys
-#
-"\e[C":		forward-char
-"\e[D":		backward-char
-"\e[A":		previous-history
-"\e[B":		next-history
-"\217C":	forward-char
-"\217D":	backward-char
-"\217A":	previous-history
-"\217B":	next-history
-"\233C":	forward-char
-"\233D":	backward-char
-"\233A":	previous-history
-"\233B":	next-history
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\2331~":	beginning-of-line
+# "\2333~":	delete-char
+# "\2334~":	end-of-line
+# "\2335~":	history-search-backward
+# "\2336~":	history-search-forward
 #
 # Cursor keys in keypad mode
 #
-"\C-[OD":       backward-char
-"\C-[OC":       forward-char
-"\C-[OA":       previous-history
-"\C-[OB":       next-history
+"\eOD":       backward-char
+"\eOC":       forward-char
+"\eOA":       previous-history
+"\eOB":       next-history
 #
 # Cursor keys in ANSI mode
 #
-"\C-[[D":       backward-char
-"\C-[[C":       forward-char
-"\C-[[A":       previous-history
-"\C-[[B":       next-history
+"\e[D":       backward-char
+"\e[C":       forward-char
+"\e[A":       previous-history
+"\e[B":       next-history
 #
 # Cursor keys in 8 bit keypad mode
 #
-"\C-\M-OD":      backward-char
-"\C-\M-OC":      forward-char
-"\C-\M-OA":      previous-history
-"\C-\M-OB":      next-history
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\217D":      backward-char
+# "\217C":      forward-char
+# "\217A":      previous-history
+# "\217B":      next-history
 #
 # Cursor keys in 8 bit ANSI mode
 #
-"\C-\M-[D":      backward-char
-"\C-\M-[C":      forward-char
-"\C-\M-[A":      previous-history
-"\C-\M-[B":      next-history
-"\C-^[[D":      backward-char
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\233D":      backward-char
+# "\233C":      forward-char
+# "\233A":      previous-history
+# "\233B":      next-history
 $if term=xterm
 $if mode=emacs
 # Note that this file is included for vi-command, vi-insert, and
@@ -187,41 +169,42 @@ $if term=xterm
 "\e[1;8D":	backward-word
 "\e[1;8A":	history-search-backward
 "\e[1;8B":	history-search-forward
-"\2332C":	forward-word
-"\2332D":	backward-word
-"\2332A":	history-search-backward
-"\2332B":	history-search-forward
-"\2331;2C":	forward-word
-"\2331;2D":	backward-word
-"\2331;2A":	history-search-backward
-"\2331;2B":	history-search-forward
-"\2331;3C":	forward-word
-"\2331;3D":	backward-word
-"\2331;3A":	history-search-backward
-"\2331;3B":	history-search-forward
-"\2331;4C":	forward-word
-"\2331;4D":	backward-word
-"\2331;4A":	history-search-backward
-"\2331;4B":	history-search-forward
-"\2335C":	forward-word
-"\2335D":	backward-word
-"\2335A":	history-search-backward
-"\2335B":	history-search-forward
-"\2331;5C":	forward-word
-"\2331;5D":	backward-word
-"\2331;5A":	history-search-backward
-"\2331;5B":	history-search-forward
-"\2331;6C":	forward-word
-"\2331;6D":	backward-word
-"\2331;6A":	history-search-backward
-"\2331;6B":	history-search-forward
-"\2331;7C":	forward-word
-"\2331;7D":	backward-word
-"\2331;7A":	history-search-backward
-"\2331;7B":	history-search-forward
-"\2331;8C":	forward-word
-"\2331;8D":	backward-word
-"\2331;8A":	history-search-backward
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\2332C":	forward-word
+# "\2332D":	backward-word
+# "\2332A":	history-search-backward
+# "\2332B":	history-search-forward
+# "\2331;2C":	forward-word
+# "\2331;2D":	backward-word
+# "\2331;2A":	history-search-backward
+# "\2331;2B":	history-search-forward
+# "\2331;3C":	forward-word
+# "\2331;3D":	backward-word
+# "\2331;3A":	history-search-backward
+# "\2331;3B":	history-search-forward
+# "\2331;4C":	forward-word
+# "\2331;4D":	backward-word
+# "\2331;4A":	history-search-backward
+# "\2331;4B":	history-search-forward
+# "\2335C":	forward-word
+# "\2335D":	backward-word
+# "\2335A":	history-search-backward
+# "\2335B":	history-search-forward
+# "\2331;5C":	forward-word
+# "\2331;5D":	backward-word
+# "\2331;5A":	history-search-backward
+# "\2331;5B":	history-search-forward
+# "\2331;6C":	forward-word
+# "\2331;6D":	backward-word
+# "\2331;6A":	history-search-backward
+# "\2331;6B":	history-search-forward
+# "\2331;7C":	forward-word
+# "\2331;7D":	backward-word
+# "\2331;7A":	history-search-backward
+# "\2331;7B":	history-search-forward
+# "\2331;8C":	forward-word
+# "\2331;8D":	backward-word
+# "\2331;8A":	history-search-backward
 $else
 "\e[G":		re-read-init-file
 $endif
@@ -251,12 +234,13 @@ $if term=xterm
 "\e[4~":	set-mark
 "\e[H":		beginning-of-line
 "\e[F":		end-of-line
-"\2171~":	history-search-backward
-"\2174~":	set-mark
-"\217H":	beginning-of-line
-"\217F":	end-of-line
-"\233H":	beginning-of-line
-"\233F":	end-of-line
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\2171~":	history-search-backward
+# "\2174~":	set-mark
+# "\217H":	beginning-of-line
+# "\217F":	end-of-line
+# "\233H":	beginning-of-line
+# "\233F":	end-of-line
 "\e[1;2H":	beginning-of-line
 "\e[1;2F":	end-of-line
 "\e[1;3H":	beginning-of-line
@@ -271,20 +255,21 @@ $if term=xterm
 "\e[1;7F":	end-of-line
 "\e[1;8H":	beginning-of-line
 "\e[1;8F":	end-of-line
-"\2331;2H":	beginning-of-line
-"\2331;2F":	end-of-line
-"\2331;3H":	beginning-of-line
-"\2331;3F":	end-of-line
-"\2331;4H":	beginning-of-line
-"\2331;4F":	end-of-line
-"\2331;5H":	beginning-of-line
-"\2331;5F":	end-of-line
-"\2331;6H":	beginning-of-line
-"\2331;6F":	end-of-line
-"\2331;7H":	beginning-of-line
-"\2331;7F":	end-of-line
-"\2331;8H":	beginning-of-line
-"\2331;8F":	end-of-line
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\2331;2H":	beginning-of-line
+# "\2331;2F":	end-of-line
+# "\2331;3H":	beginning-of-line
+# "\2331;3F":	end-of-line
+# "\2331;4H":	beginning-of-line
+# "\2331;4F":	end-of-line
+# "\2331;5H":	beginning-of-line
+# "\2331;5F":	end-of-line
+# "\2331;6H":	beginning-of-line
+# "\2331;6F":	end-of-line
+# "\2331;7H":	beginning-of-line
+# "\2331;7F":	end-of-line
+# "\2331;8H":	beginning-of-line
+# "\2331;8F":	end-of-line
 "\e[2H":	beginning-of-line
 "\e[2F":	end-of-line
 "\e[5H":	beginning-of-line
@@ -318,7 +303,8 @@ $if term=xterm
 "\eOA":         previous-history
 "\eOB":         next-history
 "\eOE":         re-read-init-file
-"\217E":	re-read-init-file
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\217E":	re-read-init-file
 "\eO2D":        backward-word
 "\eO2C":        forward-word
 "\eO2A":        history-search-backward
@@ -409,10 +395,11 @@ $if term=xterm
 "\eO1;8Q":	undo
 "\eO1;8R":	""  
 "\eO1;8S":	kill-line
-"\217P":	"\e"
-"\217Q":	undo
-"\217R":	""  
-"\217S":	kill-line
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\217P":	"\e"
+# "\217Q":	undo
+# "\217R":	""  
+# "\217S":	kill-line
 $endif
 $if term=gnome
 # or gnome terminal F1 - F4
@@ -442,7 +429,8 @@ $else
 "\e[13~":	""
 "\e[14~":	kill-line
 "\e[15~":	""
-"\23315~":	""
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\23315~":	""
 $endif
 "\e[17~":	""
 "\e[18~":	""
@@ -463,23 +451,24 @@ $endif
 "\e[34~":	""
 "\e[35~":	""
 "\e[36~":	""
-"\23317~":	""
-"\23318~":	""
-"\23319~":	""
-"\23320~":	""
-"\23321~":	""
-"\23323~":	""
-"\23324~":	""
-"\23325~":	""
-"\23326~":	""
-"\23328~":	""
-"\23329~":	""
-"\23331~":	""
-"\23332~":	""
-"\23333~":	""
-"\23334~":	""
-"\23335~":	""
-"\23336~":	""
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\23317~":	""
+# "\23318~":	""
+# "\23319~":	""
+# "\23320~":	""
+# "\23321~":	""
+# "\23323~":	""
+# "\23324~":	""
+# "\23325~":	""
+# "\23326~":	""
+# "\23328~":	""
+# "\23329~":	""
+# "\23331~":	""
+# "\23332~":	""
+# "\23333~":	""
+# "\23334~":	""
+# "\23335~":	""
+# "\23336~":	""
 $if term=xterm
 "\e[1;2P":	""
 "\e[1;2Q":	""
@@ -591,25 +580,26 @@ $if term=xterm
 "\eOw":		"7"
 "\eOx":		"8"
 "\eOy":		"9"
-# Operators
-"\217o":	"/"
-"\217j":	"*"
-"\217m":	"-"
-"\217k":	"+"
-"\217l":	","
-"\217M":	accept-line
-"\217n":	"."
-# Numbers
-"\217p":	"0"
-"\217q":	"1"
-"\217r":	"2"
-"\217s":	"3"
-"\217t":	"4"
-"\217u":	"5"
-"\217v":	"6"
-"\217w":	"7"
-"\217x":	"8"
-"\217y":	"9"
+# [Note: raw C1 chars conflicts with UTF-8]
+# # Operators
+# "\217o":	"/"
+# "\217j":	"*"
+# "\217m":	"-"
+# "\217k":	"+"
+# "\217l":	","
+# "\217M":	accept-line
+# "\217n":	"."
+# # Numbers
+# "\217p":	"0"
+# "\217q":	"1"
+# "\217r":	"2"
+# "\217s":	"3"
+# "\217t":	"4"
+# "\217u":	"5"
+# "\217v":	"6"
+# "\217w":	"7"
+# "\217x":	"8"
+# "\217y":	"9"
 $endif
 #
 $if term=kterm

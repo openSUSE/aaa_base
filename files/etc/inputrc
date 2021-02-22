@@ -56,18 +56,19 @@ $if term=xterm
 "\e\eOC":	forward-word
 "\e\eOA":	previous-history
 "\e\eOB":	next-history
-"\C-\eOD":	backward-char
-"\C-\eOC":	forward-char
-"\C-\eOA":	previous-history
-"\C-\eOB":	next-history
-"\M-\eOD":	backward-word
-"\M-\eOC":	forward-word
-"\M-\eOA":	previous-history
-"\M-\eOB":	next-history
-"\C-\M-OD":	backward-char
-"\C-\M-OC":	forward-char
-"\C-\M-OA":	previous-history
-"\C-\M-OB":	next-history
+"\eOD":	backward-char
+"\eOC":	forward-char
+"\eOA":	previous-history
+"\eOB":	next-history
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\e\217D":	backward-word
+# "\e\217C":	forward-word
+# "\e\217A":	previous-history
+# "\e\217B":	next-history
+# "\217D":	backward-char
+# "\217C":	forward-char
+# "\217A":	previous-history
+# "\217B":	next-history
 $endif
 #
 # Standard cursor
@@ -76,18 +77,19 @@ $endif
 "\e\e[C":	forward-word
 "\e\e[A":	previous-history
 "\e\e[B":	next-history
-"\C-\e[D":	backward-char
-"\C-\e[C":	forward-char
-"\C-\e[A":	previous-history
-"\C-\e[B":	next-history
-"\M-\e[D":	backward-word
-"\M-\e[C":	forward-word
-"\M-\e[A":	previous-history
-"\M-\e[B":	next-history
-"\C-\M-[D":	backward-char
-"\C-\M-[C":	forward-char
-"\C-\M-[A":	previous-history
-"\C-\M-[B":	next-history
+"\e[D":	backward-char
+"\e[C":	forward-char
+"\e[A":	previous-history
+"\e[B":	next-history
+# [Note: raw C1 chars conflicts with UTF-8]
+# "\e\233D":	backward-word
+# "\e\233C":	forward-word
+# "\e\233A":	previous-history
+# "\e\233B":	next-history
+# "\233D":	backward-char
+# "\233C":	forward-char
+# "\233A":	previous-history
+# "\233B":	next-history
 $endif
 #
 # end
