@@ -84,6 +84,7 @@ main (int argc, char *argv[])
 	if (fp == NULL)
 	  {
 	    fprintf (stderr, "%s: faild\n", command);
+	    close (fd);
 	    return 1;
 	  }
       }
