@@ -41,6 +41,9 @@ popd () {
 }
 dirs () { echo "`pwd` $DSTACK"; return 0; }
 
+# jump to the directory where the file is (e.g., xd $(location something))
+xd () { cd "$(dirname "$(readlink -f "$1")")"; }
+
 #
 # Set some generic aliase functions
 #
