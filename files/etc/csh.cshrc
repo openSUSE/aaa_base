@@ -104,7 +104,7 @@ set listjobs=long
 set notify=1
 set nostat=( /afs )
 set rmstar=1
-set savehist=( $history merge )
+set savehist=( $history merge lock )
 set showdots=1
 set symlinks=ignore
 #
