@@ -55,3 +55,7 @@ else
     alias beep='echo -en "\x07"'
 fi
 alias unmount='echo "Error: Try the command: umount" 1>&2; false'
+# jump to the directory where the file is (e.g., xd $(location something))
+xd () {
+    cd "$(dirname "$(readlink -f "$1")")"
+}
