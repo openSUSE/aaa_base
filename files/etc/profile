@@ -128,22 +128,18 @@ test -z "$MAIL" && MAIL=/var/spool/mail/$USER
 if test -x /usr/bin/uname ; then
     test -z "$HOST" && HOST=`/usr/bin/uname -n`
     test "$HOST" = "localhost" && HOST=`/usr/bin/uname -n`
-    test -z "$CPU"  &&  CPU=`/usr/bin/uname -m`
+    test -z "$CPU"  &&  CPU=`/usr/bin/uname -p`
 fi
 # Remark: /proc/sys/kernel/domainname and the program domainname
 # its self will provide the NIS/YP domainname, see domainname(8).
 if test -s /etc/HOSTNAME ; then
     test -z "$HOSTNAME" && HOSTNAME=`cat /etc/HOSTNAME`
-else
-    test -z "$HOSTNAME" && HOSTNAME=$HOST
 fi
 test -z "$LOGNAME"  && LOGNAME=$USER
-case "$CPU" in
-    i?86) HOSTTYPE=i386   ;;
-    *)    HOSTTYPE=${CPU} ;;
-esac
-  OSTYPE=linux
-MACHTYPE=${CPU}-suse-${OSTYPE}
+: ${HOSTNAME:=${HOST}}
+: ${HOSTTYPE:=${CPU}}
+: ${OSTYPE:=linux}
+: ${MACHTYPE:=${CPU}-suse-${OSTYPE}}
 # Do NOT export UID, EUID, USER, and LOGNAME
 export MAIL HOST CPU HOSTNAME HOSTTYPE OSTYPE MACHTYPE
 

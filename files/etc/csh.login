@@ -71,23 +71,18 @@ if (! ${?MAIL} ) setenv MAIL /var/spool/mail/$USER
 if ( -x /bin/uname ) then
     if (! ${?HOST} ) setenv HOST "`/bin/uname -n`"
     if ( ${HOST} == localhost ) setenv HOST "`/bin/uname -n`"
-    if (! ${?CPU}  ) setenv CPU  "`/bin/uname -m`"
+    if (! ${?CPU}  ) setenv CPU  "`/bin/uname -p`"
 endif
 # Remark: /proc/sys/kernel/domainname and the program domainname
 # its self will provide the NIS/YP domainname, see domainname(8).
 if ( -s /etc/HOSTNAME ) then
     if (! ${?HOSTNAME} ) setenv HOSTNAME `cat /etc/HOSTNAME`
-else
-    if (! ${?HOSTNAME} ) setenv HOSTNAME $HOST
 endif
-if (! ${?LOGNAME} )  set    LOGNAME=$USER
-if ( ${CPU} =~ i?86 ) then
-    setenv HOSTTYPE i386
-else
-    setenv HOSTTYPE "$CPU"
-endif
-setenv OSTYPE linux
-setenv MACHTYPE "${CPU}-suse-${OSTYPE}"
+if (! ${?LOGNAME}  ) set    LOGNAME=$USER
+if (! ${?HOSTNAME} ) setenv HOSTNAME $HOST
+if (! ${?HOSTTYPE} ) setenv HOSTTYPE $CPU
+if (! ${?OSTYPE}   ) setenv OSTYPE linux
+if (! ${?MACHTYPE} ) setenv MACHTYPE "${CPU}-suse-${OSTYPE}"
 
 #
 # Get message if mail is reached
