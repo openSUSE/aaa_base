@@ -45,32 +45,39 @@ foreach line ( "`/usr/bin/grep -vh '^#' $sysconf`" )
 	set proxy_enabled="${val:q}"
 	breaksw
     case HTTP_PROXY=*:
-	if (! ${%proxy_enabled} == yes ) continue
+	if (! ${?proxy_enabled} ) continue
+	if ( ${proxy_enabled} != yes ) continue
 	setenv http_proxy "${val:q}"
 	breaksw
     case HTTPS_PROXY=*:
-	if (! ${%proxy_enabled} == yes ) continue
+	if (! ${?proxy_enabled} ) continue
+	if ( ${proxy_enabled} != yes ) continue
 	setenv https_proxy "${val:q}"
 	breaksw
     case FTP_PROXY=*:
-	if (! ${%proxy_enabled} == yes ) continue
+	if (! ${?proxy_enabled} ) continue
+	if ( ${proxy_enabled} != yes ) continue
 	setenv ftp_proxy "${val:q}"
 	breaksw
     case GOPHER_PROXY=*:
-	if (! ${%proxy_enabled} == yes ) continue
+	if (! ${?proxy_enabled} ) continue
+	if ( ${proxy_enabled} != yes ) continue
 	setenv gopher_proxy "${val:q}"
 	breaksw
     case SOCKS_PROXY=*:
-	if (! ${%proxy_enabled} == yes ) continue
+	if (! ${?proxy_enabled} ) continue
+	if ( ${proxy_enabled} != yes ) continue
 	setenv socks_proxy "${val:q}"
 	setenv SOCKS_PROXY "${val:q}"
 	breaksw
     case SOCKS5_SERVER=*:
-	if (! ${%proxy_enabled} == yes ) continue
+	if (! ${?proxy_enabled} ) continue
+	if ( ${proxy_enabled} != yes ) continue
 	setenv SOCKS5_SERVER "${val:q}"
 	breaksw
     case NO_PROXY=*:
-	if (! ${%proxy_enabled} == yes ) continue
+	if (! ${?proxy_enabled} ) continue
+	if ( ${proxy_enabled} != yes ) continue
 	setenv no_proxy "${val:q}"
 	breaksw
     case DEFAULT_WM=*:
