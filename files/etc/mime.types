@@ -1015,6 +1015,7 @@ application/voicexml+xml                         vxml
 # application/watcherinfo+xml                    
 # application/whoispp-query                      
 # application/whoispp-response                   
+application/wasm                               wasm
 application/widget                               wgt
 application/winhlp                               hlp
 # application/wita                               
