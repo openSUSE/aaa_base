@@ -271,12 +271,6 @@ if test -z "$PROFILEREAD" ; then
     else
 	export XNLSPATH=/usr/X11R6/lib/X11/nls
     fi
-
-    #
-    # Midnight Commander needs this to run in color mode
-    #
-    COLORTERM=1
-    export COLORTERM
 fi
 
 #

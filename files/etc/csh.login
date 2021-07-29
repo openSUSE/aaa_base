@@ -214,11 +214,6 @@ if (! ${?CSHRCREAD} ) then
     else
 	setenv XNLSPATH /usr/X11R6/lib/X11/nls
     endif
-
-    #
-    # Midnight Commander needs this to run in color mode
-    #
-    setenv COLORTERM 1
 endif
 
 #
