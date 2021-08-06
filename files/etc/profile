@@ -233,21 +233,6 @@ if test -z "$PROFILEREAD" ; then
 fi
 
 #
-# Current manpath
-#
-if test -z "$PROFILEREAD" ; then
-    tmp="$MANPATH"
-    unset MANPATH
-    if test -n "$tmp" ; then
-	MANPATH="${tmp}:`test -x /usr/bin/manpath && /usr/bin/manpath -q`"
-    else
-	MANPATH="`test -x /usr/bin/manpath && /usr/bin/manpath -q`"
-    fi
-    unset tmp
-    export MANPATH
-fi
-
-#
 # Some applications do not handle the XAPPLRESDIR environment properly,
 # when it contains more than one directory. More than one directory only
 # makes sense if you have a client with /usr mounted via nfs and you want
@@ -278,20 +263,6 @@ fi
 #
 #VERSION_CONTROL=numbered
 #export VERSION_CONTROL
-
-#
-# Source profile.d files and UTF8 settings
-#
-# But do not source this if PROFILEREAD is already set to avoid
-# overriding locale variables already present in the environment
-#
-if test -z "$PROFILEREAD" ; then
-    if test -r /etc/profile.d/sh.ssh
-    then . /etc/profile.d/sh.ssh
-    elif test -r /usr/etc/profile.d/sh.ssh
-    then . /usr/etc/profile.d/sh.ssh
-    fi
-fi
 
 #
 # Source profile extensions for certain packages, the super
