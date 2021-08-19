@@ -181,17 +181,6 @@ if (! ${?CSHRCREAD} ) then
 endif
 
 #
-# Current manpath
-#
-if (! ${?CSHRCREAD} && -x /usr/bin/manpath ) then
-    if ( ${?MANPATH} ) then
-	setenv MANPATH "${MANPATH}:`(unsetenv MANPATH; /usr/bin/manpath -q)`"
-    else
-	setenv MANPATH "`(unsetenv MANPATH; /usr/bin/manpath -q)`"
-    endif
-endif
-
-#
 # Some applications do not handle the XAPPLRESDIR environment properly,
 # when it contains more than one directory. More than one directory only
 # makes sense if you have a client with /usr mounted via nfs and you want
@@ -220,20 +209,6 @@ endif
 # For RCS
 #
 #setenv VERSION_CONTROL numbered
-
-#
-# Source profile.d scripts and UTF8 settings
-#
-# But do not source this if CSHRCREAD is already set to avoid
-# overriding locale variables already present in the environment
-#
-if (! ${?CSHRCREAD} ) then
-    if ( -r /etc/profile.d/csh.ssh ) then
-	source /etc/profile.d/csh.ssh
-    else if ( -r /usr/etc/profile.d/csh.ssh ) then 
-	source /usr/etc/profile.d/csh.ssh
-    endif
-endif
 
 #
 # Source profile extensions for certain packages, the super

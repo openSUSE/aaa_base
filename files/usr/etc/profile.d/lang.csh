@@ -7,15 +7,29 @@
 #     $HOME/.i18n
 #
 
+unset _save
+
 #
-# Already done by the remote SSH side
+# Check if, e.g. already done on the remote SSH side
 #
-if ( ${?SSH_SENDS_LOCALE} ) goto end
+set _locale_error=`(locale > /dev/null) |& cat`
+if (${%_locale_error} > 0) then
+    if (${?LANG}) setenv LANG C.UTF-8
+    unsetenv LC_ALL
+    foreach lc (LC_ADDRESS LC_COLLATE LC_CTYPE    \
+		LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES  \
+		LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER       \
+		LC_TELEPHONE LC_TIME )
+	eval unsetenv $lc
+    end
+else
+    if (${?LANG}) set _save=$LANG
+endif
+unset _locale_error
 
 #
 # Already done by the GDM
 #
-unset _save
 if ( ${?GDM_LANG} ) then
     if ( -s /etc/sysconfig/language ) then
 	eval `sed -rn -e 's/^(RC_LANG)=/set _\1=/p' < /etc/sysconfig/language`
@@ -36,6 +50,7 @@ endif
 
 #
 # Get the system and after that the users configuration
+# Note: ROOT_USES_LANG might be become overwritten for root
 #
 set ROOT_USES_LANG=yes
 if ( -s /etc/locale.conf) then
@@ -112,7 +127,7 @@ foreach lc (LANG LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE    \
 	endif
     else
 	if ( "$lc" == "LANG" ) then
-	    setenv LANG POSIX
+	    setenv LANG C.UTF-8
 	else
 	    eval unsetenv $lc
 	endif
@@ -137,5 +152,6 @@ if ( ${?LC_ALL} ) then
 endif
 
 end:
+
 #
-# end of lang.sh
+# end of lang.csh
