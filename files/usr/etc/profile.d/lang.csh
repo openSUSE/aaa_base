@@ -23,7 +23,9 @@ if (${%_locale_error} > 0) then
 	eval unsetenv $lc
     end
 else
-    if (${?LANG}) set _save=$LANG
+    if (${?LANG})then
+	set _save=$LANG
+    endif
 endif
 unset _locale_error
 
