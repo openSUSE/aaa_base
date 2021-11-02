@@ -110,7 +110,7 @@ set _hpath
 set _spath
 set _upath=( /usr/local/bin /usr/bin /bin )
 if ( "$HOME" != "/" ) then
-    foreach _d (${HOME}/bin/${CPU} ${HOME}/bin)
+    foreach _d (${HOME}/bin/${CPU} ${HOME}/bin ${HOME}/.local/bin/${CPU} ${HOME}/.local/bin)
 	if ( -d $_d ) set _hpath=( $_d $_hpath )
     end
 endif
