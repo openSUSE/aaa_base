@@ -163,7 +163,7 @@ ORIG_PATH=$PATH
 if test -z "$PROFILEREAD" ; then
     PATH=/usr/local/bin:/usr/bin:/bin
     if test "$HOME" != "/" ; then
-	for dir in $HOME/bin/$CPU $HOME/bin ; do
+	for dir in $HOME/bin/$CPU $HOME/bin $HOME/.local/bin/$CPU $HOME/.local/bin ; do
 	    test -d $dir && PATH=$dir:$PATH
 	done
     fi
