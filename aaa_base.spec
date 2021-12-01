@@ -118,9 +118,6 @@ fi
 %install
 #
 make DESTDIR=$RPM_BUILD_ROOT install
-%if 0%{?usrmerged}
-rm -f %{buildroot}/sbin/*
-%endif
 #
 mkdir -p %{buildroot}/etc/sysctl.d
 case "$RPM_ARCH" in
@@ -233,11 +230,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 %{_fillupdir}/sysconfig.language
 %{_fillupdir}/sysconfig.proxy
 %{_fillupdir}/sysconfig.windowmanager
-%if !0%{?usrmerged}
-/sbin/service
-/sbin/refresh_initrd
-/sbin/smart_agetty
-%endif
 
 %files extras
 %defattr(-,root,root)
