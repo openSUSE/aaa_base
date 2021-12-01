@@ -1,0 +1,20 @@
+ci_workflow:
+  steps:
+    - branch_package:
+        source_project: Base:System:ci:aaa_base
+        source_package: aaa_base
+        target_project: Base:System:ci:aaa_base
+  filters:
+    event: pull_request
+
+master_workflow:
+  steps:
+    - branch_package:
+        source_project: Base:System:ci:aaa_base
+        source_package: aaa_base
+        target_project: Base:System:ci:aaa_base
+  filters:
+    event: push
+    branches:
+      only:
+        - master
