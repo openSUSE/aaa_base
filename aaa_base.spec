@@ -193,8 +193,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/etc/profile.d/lang.sh
 /usr/etc/profile.d/profile.csh
 /usr/etc/profile.d/profile.sh
-/usr/etc/profile.d/term.csh
-/usr/etc/profile.d/term.sh
 /usr/etc/profile.d/xdg-environment.csh
 /usr/etc/profile.d/xdg-environment.sh
 /usr/etc/profile.d/complete.bash
