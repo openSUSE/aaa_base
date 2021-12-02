@@ -19,4 +19,7 @@ mimetypes:
 	./mimetypemerge files/etc/mime.types mime.types.apache > mime.types
 	mv mime.types files/etc/mime.types
 
-.PHONY: all install clean package mimetypes
+rpm:
+	rpmbuild -bb --build-in-place --noprep aaa_base.spec
+
+.PHONY: all install clean package mimetypes rpm
