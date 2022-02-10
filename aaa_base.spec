@@ -106,14 +106,6 @@ sed -i 's|actiondir="/usr/lib/initscripts/legacy-actions"|actiondir="%{_libexecd
 
 %build
 make CFLAGS="$RPM_OPT_FLAGS" CC="%{__cc}" %{?_smp_mflags}
-if test -d patches/$RPM_ARCH; then
-	pushd files
-	for file in ../patches/$RPM_ARCH/*; do
-		patch -p0 --input=$file
-	done
-	find -name "*.orig" | xargs -r rm
-	popd
-fi
 
 %install
 #
@@ -200,7 +192,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/etc/profile.d/ls.bash
 /usr/etc/profile.d/ls.zsh
 %config /etc/shells
-%config /etc/ttytype
 %ghost %dir /etc/init.d
 %ghost %config(noreplace) /etc/init.d/boot.local
 %ghost %config(noreplace) /etc/init.d/after.local
