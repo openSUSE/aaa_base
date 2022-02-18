@@ -1,7 +1,7 @@
 #
 # spec file for package aaa_base
 #
-# Copyright (c) 2021 SUSE LLC
+# Copyright (c) 2022 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -51,7 +51,7 @@ Recommends:     logrotate
 Recommends:     netcfg
 Recommends:     udev
 Requires(pre):  /usr/bin/rm
-Requires(pre):  glibc >= 2.30
+Requires(pre):  (glibc >= 2.30 if glibc)
 Requires(post): fillup /usr/bin/chmod /usr/bin/chown
 
 Summary:        openSUSE Base Package
