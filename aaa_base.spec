@@ -1,7 +1,7 @@
 #
 # spec file for package aaa_base
 #
-# Copyright (c) 2021 SUSE LLC
+# Copyright (c) 2022 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -22,8 +22,13 @@
   %define _fillupdir /var/adm/fillup-templates
 %endif
 
+%if 0%{?_build_in_place}
+%define git_version %(git log '-n1' '--date=format:%Y%m%d' '--no-show-signature' "--pretty=format:+git%cd.%h")
+BuildRequires:  git-core
+%endif
+
 Name:           aaa_base
-Version:        84.87
+Version:        84.87%{?git_version}
 Release:        0
 URL:            https://github.com/openSUSE/aaa_base
 # do not require systemd - aaa_base is in the build environment and we don't
@@ -46,7 +51,7 @@ Recommends:     logrotate
 Recommends:     netcfg
 Recommends:     udev
 Requires(pre):  /usr/bin/rm
-Requires(pre):  glibc >= 2.30
+Requires(pre):  (glibc >= 2.30 if glibc)
 Requires(post): fillup /usr/bin/chmod /usr/bin/chown
 
 Summary:        openSUSE Base Package
@@ -101,19 +106,9 @@ systems.
 
 %prep
 %setup -q
-sed -i 's|actiondir="/usr/lib/initscripts/legacy-actions"|actiondir="%{_libexecdir}/initscripts/legacy-actions"|' \
-    files/usr/sbin/service
 
 %build
 make CFLAGS="$RPM_OPT_FLAGS" CC="%{__cc}" %{?_smp_mflags}
-if test -d patches/$RPM_ARCH; then
-	pushd files
-	for file in ../patches/$RPM_ARCH/*; do
-		patch -p0 --input=$file
-	done
-	find -name "*.orig" | xargs -r rm
-	popd
-fi
 
 %install
 #
@@ -200,7 +195,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/etc/profile.d/ls.bash
 /usr/etc/profile.d/ls.zsh
 %config /etc/shells
-%config /etc/ttytype
 %ghost %dir /etc/init.d
 %ghost %config(noreplace) /etc/init.d/boot.local
 %ghost %config(noreplace) /etc/init.d/after.local
