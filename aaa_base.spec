@@ -22,8 +22,13 @@
   %define _fillupdir /var/adm/fillup-templates
 %endif
 
+%if 0%{?_build_in_place}
+%define git_version %(git log '-n1' '--date=format:%Y%m%d' '--no-show-signature' "--pretty=format:+git%cd.%h")
+BuildRequires:  git-core
+%endif
+
 Name:           aaa_base
-Version:        84.87
+Version:        84.87%{?git_version}
 Release:        0
 URL:            https://github.com/openSUSE/aaa_base
 # do not require systemd - aaa_base is in the build environment and we don't
@@ -101,8 +106,6 @@ systems.
 
 %prep
 %setup -q
-sed -i 's|actiondir="/usr/lib/initscripts/legacy-actions"|actiondir="%{_libexecdir}/initscripts/legacy-actions"|' \
-    files/usr/sbin/service
 
 %build
 make CFLAGS="$RPM_OPT_FLAGS" CC="%{__cc}" %{?_smp_mflags}

@@ -24,7 +24,7 @@ fi
 RCDIR="/etc/init.d"
 
 # legacy actions
-actiondir="/usr/lib/initscripts/legacy-actions"
+actiondir="/usr/libexec/initscripts/legacy-actions"
 
 #
 # Clean environment
