@@ -130,6 +130,7 @@ EXEC 00;32
 .tz2  00;31
 .tbz2 00;31
 .xz   00;31
+.zst  00;31
 
 # image formats
 .avi  01;35
