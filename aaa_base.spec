@@ -33,7 +33,7 @@ BuildRequires:  git-core
 %endif
 
 Name:           aaa_base
-Version:        84.87%{?git_version}
+Version:        84.87%{git_version}
 Release:        0
 URL:            https://github.com/openSUSE/aaa_base
 # do not require systemd - aaa_base is in the build environment and we don't
@@ -62,7 +62,6 @@ Requires(post): fillup /usr/bin/chmod /usr/bin/chown
 Summary:        openSUSE Base Package
 License:        GPL-2.0-or-later
 Group:          System/Fhs
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 # run osc service mr to recreate
 Source:         aaa_base-%{version}.tar
 #
@@ -113,12 +112,10 @@ systems.
 %setup -q
 
 %build
-make CFLAGS="$RPM_OPT_FLAGS" CC="%{__cc}" %{?_smp_mflags}
+%make_build CFLAGS="%{optflags}" CC="%{__cc}"
 
 %install
-#
-make DESTDIR=$RPM_BUILD_ROOT install
-#
+%make_install
 mkdir -p %{buildroot}/etc/sysctl.d
 case "$RPM_ARCH" in
 	s390*) ;;
@@ -126,11 +123,11 @@ case "$RPM_ARCH" in
 esac
 #
 # make sure it does not creep in again
-test -d $RPM_BUILD_ROOT/root/.gnupg && exit 1
+test -d %{buildroot}/root/.gnupg && exit 1
 # TODO: get rid of that at some point in the future
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p %{buildroot}/etc/init.d
 for i in boot.local after.local ; do
-  install -m 755 /dev/null $RPM_BUILD_ROOT/etc/init.d/$i
+  install -m 755 /dev/null %{buildroot}/etc/init.d/$i
 done
 #
 install -d -m 755 %buildroot%{_libexecdir}/initscripts/legacy-actions
@@ -174,7 +171,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 %service_del_postun backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer
 
 %files
-%defattr(-,root,root)
 %license COPYING
 %config(noreplace) /etc/sysctl.conf
 %config /etc/bash.bashrc
@@ -231,7 +227,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 %{_fillupdir}/sysconfig.windowmanager
 
 %files extras
-%defattr(-,root,root)
 %config(noreplace) /etc/DIR_COLORS
 /etc/skel/.emacs
 /etc/skel/.inputrc
@@ -246,12 +241,10 @@ mkdir -p %{buildroot}%{_fillupdir}
 %{_fillupdir}/sysconfig.backup
 
 %files malloccheck
-%defattr(-,root,root)
 /usr/etc/profile.d/malloc-debug.sh
 /usr/etc/profile.d/malloc-debug.csh
 
 %files wsl
-%defattr(-,root,root)
 /usr/etc/profile.d/wsl.csh
 /usr/etc/profile.d/wsl.sh
 
