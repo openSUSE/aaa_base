@@ -33,12 +33,15 @@ BuildRequires:  git-core
 %endif
 
 Name:           aaa_base
-Version:        84.87%{?git_version}
+Version:        84.87%{git_version}
 Release:        0
+Summary:        openSUSE Base Package
+License:        GPL-2.0-or-later
+Group:          System/Fhs
 URL:            https://github.com/openSUSE/aaa_base
-# do not require systemd - aaa_base is in the build environment and we don't
-# want to pull in tons of dependencies
-Conflicts:      sysvinit-init
+Source:         aaa_base-%{version}.tar
+Source1:        README.packaging.txt
+Source99:       aaa_base-rpmlintrc
 Requires:       /bin/mktemp
 Requires:       /usr/bin/cat
 Requires:       /usr/bin/date
@@ -49,28 +52,20 @@ Requires:       /usr/bin/tput
 Requires:       /usr/bin/xz
 Requires:       distribution-release
 Requires:       filesystem
+Requires(pre):  /usr/bin/rm
+Requires(pre):  (glibc >= 2.30 if glibc)
+Requires(post): fillup /usr/bin/chmod /usr/bin/chown
 Recommends:     aaa_base-extras
 Recommends:     iproute2
 Recommends:     iputils
 Recommends:     logrotate
 Recommends:     netcfg
 Recommends:     udev
-Requires(pre):  /usr/bin/rm
-Requires(pre):  (glibc >= 2.30 if glibc)
-Requires(post): fillup /usr/bin/chmod /usr/bin/chown
+# do not require systemd - aaa_base is in the build environment and we don't
+# want to pull in tons of dependencies
+Conflicts:      sysvinit-init
 
-Summary:        openSUSE Base Package
-License:        GPL-2.0-or-later
-Group:          System/Fhs
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 # run osc service mr to recreate
-Source:         aaa_base-%{version}.tar
-#
-# Read README.packaging.txt before making any changes to this
-# package
-#
-Source1:        README.packaging.txt
-Source99:       aaa_base-rpmlintrc
 
 %description
 This package installs several important configuration files and central scripts.
@@ -113,12 +108,10 @@ systems.
 %setup -q
 
 %build
-make CFLAGS="$RPM_OPT_FLAGS" CC="%{__cc}" %{?_smp_mflags}
+%make_build CFLAGS="%{optflags}" CC="%{__cc}"
 
 %install
-#
-make DESTDIR=$RPM_BUILD_ROOT install
-#
+%make_install
 mkdir -p %{buildroot}/etc/sysctl.d
 case "$RPM_ARCH" in
 	s390*) ;;
@@ -126,11 +119,11 @@ case "$RPM_ARCH" in
 esac
 #
 # make sure it does not creep in again
-test -d $RPM_BUILD_ROOT/root/.gnupg && exit 1
+test -d %{buildroot}/root/.gnupg && exit 1
 # TODO: get rid of that at some point in the future
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p %{buildroot}/etc/init.d
 for i in boot.local after.local ; do
-  install -m 755 /dev/null $RPM_BUILD_ROOT/etc/init.d/$i
+  install -m 755 /dev/null %{buildroot}/etc/init.d/$i
 done
 #
 install -d -m 755 %buildroot%{_libexecdir}/initscripts/legacy-actions
@@ -174,7 +167,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 %service_del_postun backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer
 
 %files
-%defattr(-,root,root)
 %license COPYING
 %config(noreplace) /etc/sysctl.conf
 %config /etc/bash.bashrc
@@ -231,7 +223,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 %{_fillupdir}/sysconfig.windowmanager
 
 %files extras
-%defattr(-,root,root)
 %config(noreplace) /etc/DIR_COLORS
 /etc/skel/.emacs
 /etc/skel/.inputrc
@@ -246,12 +237,10 @@ mkdir -p %{buildroot}%{_fillupdir}
 %{_fillupdir}/sysconfig.backup
 
 %files malloccheck
-%defattr(-,root,root)
 /usr/etc/profile.d/malloc-debug.sh
 /usr/etc/profile.d/malloc-debug.csh
 
 %files wsl
-%defattr(-,root,root)
 /usr/etc/profile.d/wsl.csh
 /usr/etc/profile.d/wsl.sh
 
