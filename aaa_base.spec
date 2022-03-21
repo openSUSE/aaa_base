@@ -35,10 +35,13 @@ BuildRequires:  git-core
 Name:           aaa_base
 Version:        84.87%{git_version}
 Release:        0
+Summary:        openSUSE Base Package
+License:        GPL-2.0-or-later
+Group:          System/Fhs
 URL:            https://github.com/openSUSE/aaa_base
-# do not require systemd - aaa_base is in the build environment and we don't
-# want to pull in tons of dependencies
-Conflicts:      sysvinit-init
+Source:         aaa_base-%{version}.tar
+Source1:        README.packaging.txt
+Source99:       aaa_base-rpmlintrc
 Requires:       /bin/mktemp
 Requires:       /usr/bin/cat
 Requires:       /usr/bin/date
@@ -49,27 +52,20 @@ Requires:       /usr/bin/tput
 Requires:       /usr/bin/xz
 Requires:       distribution-release
 Requires:       filesystem
+Requires(pre):  /usr/bin/rm
+Requires(pre):  (glibc >= 2.30 if glibc)
+Requires(post): fillup /usr/bin/chmod /usr/bin/chown
 Recommends:     aaa_base-extras
 Recommends:     iproute2
 Recommends:     iputils
 Recommends:     logrotate
 Recommends:     netcfg
 Recommends:     udev
-Requires(pre):  /usr/bin/rm
-Requires(pre):  (glibc >= 2.30 if glibc)
-Requires(post): fillup /usr/bin/chmod /usr/bin/chown
+# do not require systemd - aaa_base is in the build environment and we don't
+# want to pull in tons of dependencies
+Conflicts:      sysvinit-init
 
-Summary:        openSUSE Base Package
-License:        GPL-2.0-or-later
-Group:          System/Fhs
 # run osc service mr to recreate
-Source:         aaa_base-%{version}.tar
-#
-# Read README.packaging.txt before making any changes to this
-# package
-#
-Source1:        README.packaging.txt
-Source99:       aaa_base-rpmlintrc
 
 %description
 This package installs several important configuration files and central scripts.
