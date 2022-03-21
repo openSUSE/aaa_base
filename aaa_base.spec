@@ -25,6 +25,11 @@
 %if 0%{?_build_in_place}
 %define git_version %(git log '-n1' '--date=format:%Y%m%d' '--no-show-signature' "--pretty=format:+git%cd.%h")
 BuildRequires:  git-core
+%else
+# this is required for obs' source validator. It's
+# 20-files-present-and-referenced ignores all conditionals. So the
+# definition of git_version actually happens always.
+%define git_version %{nil}
 %endif
 
 Name:           aaa_base
