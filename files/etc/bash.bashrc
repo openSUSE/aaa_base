@@ -306,7 +306,7 @@ case "$-" in
     #
     if test "$is" = "bash" -a -r $HOME/.bash.expert ; then
 	. $HOME/.bash.expert
-    elif test "$is" = "bash" ; then
+    elif test "$is" = "bash" -a "$restricted" != true ; then
 	# Complete builtin of the bash 2.0 and higher
 	case "$BASH_VERSION" in
 	[2-9].*)
