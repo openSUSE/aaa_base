@@ -208,7 +208,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/bin/rpmlocate
 /usr/bin/safe-rm
 /usr/bin/safe-rmdir
-/usr/lib/restricted/bin/hostname
 /usr/sbin/sysconf_addword
 /usr/share/man/man1/smart_agetty.1*
 /usr/share/man/man5/defaultdomain.5*
