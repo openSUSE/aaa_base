@@ -168,6 +168,7 @@ mkdir -p %{buildroot}%{_fillupdir}
 
 %files
 %license COPYING
+%config(noreplace) /etc/DIR_COLORS
 %config(noreplace) /etc/sysctl.conf
 %config /etc/bash.bashrc
 %config /etc/csh.cshrc
@@ -222,7 +223,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 %{_fillupdir}/sysconfig.windowmanager
 
 %files extras
-%config(noreplace) /etc/DIR_COLORS
 /etc/skel/.emacs
 /etc/skel/.inputrc
 %dir /usr/lib/base-scripts
