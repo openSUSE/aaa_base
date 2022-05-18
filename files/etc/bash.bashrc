@@ -56,6 +56,7 @@ if test -z "$is" ; then
   #
   for a in $SHELL ; do
     case "$a" in
+      */rootsh) ;;
       */r*sh)
         readonly restricted=true ;;
       -r*|-[!-]r*|-[!-][!-]r*)
