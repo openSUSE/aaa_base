@@ -67,7 +67,7 @@ if (! ${?EUID} ) set -r EUID="`${id} -u`"
 if (! ${?USER} ) set    USER="`${id} -un`"
 unset id
 if (! ${?HOME} ) set    HOME=""
-if (! ${?MAIL} ) setenv MAIL /var/spool/mail/$USER
+if (! ${?MAIL} ) setenv MAIL /var/mail/$USER
 if ( -x /bin/uname ) then
     if (! ${?HOST} ) setenv HOST "`/bin/uname -n`"
     if ( ${HOST} == localhost ) setenv HOST "`/bin/uname -n`"
