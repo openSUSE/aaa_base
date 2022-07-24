@@ -82,7 +82,8 @@ if (! ${?LOGNAME}  ) set    LOGNAME=$USER
 if (! ${?HOSTNAME} ) setenv HOSTNAME $HOST
 if (! ${?HOSTTYPE} ) setenv HOSTTYPE $CPU
 if (! ${?OSTYPE}   ) setenv OSTYPE linux
-if (! ${?MACHTYPE} ) setenv MACHTYPE "${CPU}-suse-${OSTYPE}"
+if (! ${?VENDOR}   ) setenv VENDOR suse
+if (! ${?MACHTYPE} ) setenv MACHTYPE "${CPU}-${VENDOR}-${OSTYPE}"
 
 #
 # Get message if mail is reached

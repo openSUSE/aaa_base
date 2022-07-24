@@ -140,9 +140,10 @@ test -z "$LOGNAME"  && LOGNAME=$USER
 : ${HOSTNAME:=${HOST}}
 : ${HOSTTYPE:=${CPU}}
 : ${OSTYPE:=linux}
-: ${MACHTYPE:=${CPU}-suse-${OSTYPE}}
+: ${VENDOR:=suse}
+: ${MACHTYPE:=${CPU}-${VENDOR}-${OSTYPE}}
 # Do NOT export UID, EUID, USER, and LOGNAME
-export MAIL HOST CPU HOSTNAME HOSTTYPE OSTYPE MACHTYPE
+export MAIL HOST CPU HOSTNAME HOSTTYPE OSTYPE VENDOR MACHTYPE
 
 #
 # You may use /etc/initscript, /etc/profile.local or the
