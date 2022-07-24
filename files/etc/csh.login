@@ -83,7 +83,7 @@ if (! ${?HOSTNAME} ) setenv HOSTNAME $HOST
 if (! ${?HOSTTYPE} ) setenv HOSTTYPE $CPU
 if (! ${?OSTYPE}   ) setenv OSTYPE linux
 if (! ${?VENDOR}   ) setenv VENDOR suse
-if (! ${?MACHTYPE} ) setenv MACHTYPE "${CPU}-${VENDOR}-${OSTYPE}"
+if (! ${?MACHTYPE} ) setenv MACHTYPE "${HOSTTYPE}-${VENDOR}-${OSTYPE}"
 
 #
 # Get message if mail is reached
