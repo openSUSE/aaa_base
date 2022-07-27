@@ -67,7 +67,7 @@ if (! ${?EUID} ) set -r EUID="`${id} -u`"
 if (! ${?USER} ) set    USER="`${id} -un`"
 unset id
 if (! ${?HOME} ) set    HOME=""
-if (! ${?MAIL} ) setenv MAIL /var/spool/mail/$USER
+if (! ${?MAIL} ) setenv MAIL /var/mail/$USER
 if ( -x /bin/uname ) then
     if (! ${?HOST} ) setenv HOST "`/bin/uname -n`"
     if ( ${HOST} == localhost ) setenv HOST "`/bin/uname -n`"
@@ -82,7 +82,8 @@ if (! ${?LOGNAME}  ) set    LOGNAME=$USER
 if (! ${?HOSTNAME} ) setenv HOSTNAME $HOST
 if (! ${?HOSTTYPE} ) setenv HOSTTYPE $CPU
 if (! ${?OSTYPE}   ) setenv OSTYPE linux
-if (! ${?MACHTYPE} ) setenv MACHTYPE "${CPU}-suse-${OSTYPE}"
+if (! ${?VENDOR}   ) setenv VENDOR suse
+if (! ${?MACHTYPE} ) setenv MACHTYPE "${HOSTTYPE}-${VENDOR}-${OSTYPE}"
 
 #
 # Get message if mail is reached
