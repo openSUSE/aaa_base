@@ -190,6 +190,8 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/etc/profile.d/ls.tcsh
 /usr/etc/profile.d/ls.bash
 /usr/etc/profile.d/ls.zsh
+%dir /usr/lib/environment.d
+/usr/lib/environment.d/50-xdg.conf
 %config /etc/shells
 %ghost %dir /etc/init.d
 %ghost %config(noreplace) /etc/init.d/boot.local
