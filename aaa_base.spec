@@ -167,15 +167,19 @@ mkdir -p %{buildroot}%{_fillupdir}
 
 %files
 %license COPYING
-%config(noreplace) /etc/DIR_COLORS
-%config(noreplace) /etc/sysctl.conf
 %config /etc/bash.bashrc
 %config /etc/csh.cshrc
 %config /etc/csh.login
 %config /etc/inputrc
-%config /etc/inputrc.keys
 %config /etc/mime.types
 %config /etc/profile
+/usr/etc/DIR_COLORS
+/usr/etc/csh.cshrc
+/usr/etc/csh.login
+/usr/etc/bash.bashrc
+/usr/etc/profile
+/usr/etc/inputrc
+/usr/etc/inputrc.keys
 /usr/etc/profile.d/alljava.csh
 /usr/etc/profile.d/alljava.sh
 /usr/etc/profile.d/lang.csh
