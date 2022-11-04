@@ -10,92 +10,92 @@
 #     /etc/sysconfig/news
 #
 
-for sys in /etc/sysconfig/windowmanager	\
+for _sys in /etc/sysconfig/windowmanager	\
 	   /etc/sysconfig/mail		\
 	   /etc/sysconfig/proxy		\
 	   /etc/sysconfig/console	\
 	   /etc/sysconfig/news
 do
-    test -s $sys || continue
-    while read line ; do
-	case "$line" in
+    test -s $_sys || continue
+    while read _line ; do
+	case "$_line" in
 	\#*|"") continue ;;
         esac
-	eval val=${line#*=}
-	case "$line" in
+	eval _val=${_line#*=}
+	case "$_line" in
 	CWD_IN_ROOT_PATH=*)
-	    test "$val" = "yes" || continue
+	    test "$_val" = "yes" || continue
 	    test $UID -lt 100 && PATH=$PATH:.
 	    ;;
 	CWD_IN_USER_PATH=*)
-	    test "$val" = "yes" || continue
+	    test "$_val" = "yes" || continue
 	    test $UID -ge 100 && PATH=$PATH:.
 	    ;;
 	FROM_HEADER=*)
-	    FROM_HEADER="${val}"
+	    FROM_HEADER="${_val}"
 	    export FROM_HEADER
 	    ;;
 	PROXY_ENABLED=*)
-	    PROXY_ENABLED="${val}"
+	    PROXY_ENABLED="${_val}"
 	    ;;
 	HTTP_PROXY=*)
 	    test "$PROXY_ENABLED" = "yes" || continue
-	    http_proxy="${val}"
+	    http_proxy="${_val}"
 	    export http_proxy
 	    ;;
 	HTTPS_PROXY=*)
 	    test "$PROXY_ENABLED" = "yes" || continue
-	    https_proxy="${val}"
+	    https_proxy="${_val}"
 	    export https_proxy
 	    ;;
 	FTP_PROXY=*)
 	    test "$PROXY_ENABLED" = "yes" || continue
-	    ftp_proxy="${val}"
+	    ftp_proxy="${_val}"
 	    export ftp_proxy
 	    ;;
 	GOPHER_PROXY=*)
 	    test "$PROXY_ENABLED" = "yes" || continue
-	    gopher_proxy="${val}"
+	    gopher_proxy="${_val}"
 	    export gopher_proxy
 	    ;;
 	SOCKS_PROXY=*)
 	    test "$PROXY_ENABLED" = "yes" || continue
-	    socks_proxy="${val}"
+	    socks_proxy="${_val}"
 	    export socks_proxy
-	    SOCKS_PROXY="${val}"
+	    SOCKS_PROXY="${_val}"
 	    export SOCKS_PROXY
 	    ;;
 	SOCKS5_SERVER=*)
 	    test "$PROXY_ENABLED" = "yes" || continue
-	    SOCKS5_SERVER="${val}"
+	    SOCKS5_SERVER="${_val}"
 	    export SOCKS5_SERVER
 	    ;;
 	NO_PROXY=*)
 	    test "$PROXY_ENABLED" = "yes" || continue
-	    no_proxy="${val}"
+	    no_proxy="${_val}"
 	    export no_proxy
-	    NO_PROXY="${val}"
+	    NO_PROXY="${_val}"
 	    export NO_PROXY
 	    ;;
 	DEFAULT_WM=*)
-	    DEFAULT_WM="${val}"
+	    DEFAULT_WM="${_val}"
 	    ;;
 	CONSOLE_MAGIC=*)
-	    CONSOLE_MAGIC="${val}"
+	    CONSOLE_MAGIC="${_val}"
 	    ;;
 	ORGANIZATION=*)
-	    test -n "$val" || continue
-	    ORGANIZATION="${val}"
+	    test -n "$_val" || continue
+	    ORGANIZATION="${_val}"
 	    export ORGANIZATION
 	    ;;
 	NNTPSERVER=*)
-	    NNTPSERVER="${val}"
+	    NNTPSERVER="${_val}"
 	    test -z "$NNTPSERVER" && NNTPSERVER=news
 	    export NNTPSERVER
 	esac
-    done < $sys
+    done < $_sys
 done
-unset sys line val
+unset -v _sys _line _val
 
 if test -d /usr/lib/dvgt_help ; then
     DV_IMMED_HELP=/usr/lib/dvgt_help
@@ -108,36 +108,36 @@ if test -d /usr/lib/rasmol ; then
 fi
 
 if test "$PROXY_ENABLED" != "yes" ; then
-    unset http_proxy https_proxy ftp_proxy gopher_proxy no_proxy NO_PROXY socks_proxy SOCKS_PROXY SOCKS5_SERVER
+    unset -v http_proxy https_proxy ftp_proxy gopher_proxy no_proxy NO_PROXY socks_proxy SOCKS_PROXY SOCKS5_SERVER
 fi
-unset PROXY_ENABLED
+unset -v PROXY_ENABLED
 
 if test -z "$WINDOWMANAGER" ; then
-    SAVEPATH=$PATH
+    _SAVEPATH=$PATH
     PATH=$PATH:/usr/X11R6/bin:/usr/openwin/bin
-    desktop=/usr/share/xsessions/${DEFAULT_WM}.desktop
-    if test -s "$desktop" ; then
-	while read -r line; do
-	    case ${line} in
+    _desktop=/usr/share/xsessions/${DEFAULT_WM}.desktop
+    if test -s "$_desktop" ; then
+	while read -r _line; do
+	    case ${_line} in
 	    Exec=/usr/bin/env*|Exec=env*)
-		    WINDOWMANAGER="${line#Exec=}"
+		    WINDOWMANAGER="${_line#Exec=}"
 		    break
 		    ;;
-	    Exec=*) WINDOWMANAGER="$(command -v ${line#Exec=})"
+	    Exec=*) WINDOWMANAGER="$(command -v ${_line#Exec=})"
 		    break
 	    esac
-	done < $desktop
+	done < $_desktop
     fi
     if test -n "$DEFAULT_WM" -a -z "$WINDOWMANAGER" ; then
 	WINDOWMANAGER="$(command -v ${DEFAULT_WM##*/})"
     fi
-    PATH=$SAVEPATH
-    unset SAVEPATH desktop
+    PATH=$_SAVEPATH
+    unset -v _SAVEPATH _desktop
     if test -z "$WINDOWMANAGER" ; then
 	WINDOWMANAGER=xterm
     fi
 fi
-unset DEFAULT_WM line
+unset -v DEFAULT_WM _line
 export WINDOWMANAGER
 
 if test -n "$CONSOLE_MAGIC" ; then
