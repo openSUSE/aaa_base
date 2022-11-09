@@ -6,6 +6,8 @@ if ( -x /usr/bin/dircolors ) then
 	eval `/usr/bin/dircolors -c $HOME/.dir_colors`
     else if ( -r /etc/DIR_COLORS ) then
 	eval `/usr/bin/dircolors -c /etc/DIR_COLORS`
+    else if ( -r /usr/etc/DIR_COLORS ) then
+	eval `/usr/bin/dircolors -c /usr/etc/DIR_COLORS`
     endif
 endif
 setenv LS_OPTIONS '--color=tty'

@@ -11,6 +11,8 @@ case "$-" in
 	    eval "`/usr/bin/dircolors -b $HOME/.dir_colors`"
         elif test -f /etc/DIR_COLORS ; then
 	    eval "`/usr/bin/dircolors -b /etc/DIR_COLORS`"
+        elif test -f /usr/etc/DIR_COLORS ; then
+	    eval "`/usr/bin/dircolors -b /usr/etc/DIR_COLORS`"
         fi
     fi
     

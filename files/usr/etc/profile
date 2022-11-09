@@ -1,0 +1,2 @@
+#!/bin/sh
+[ -s /etc/profile ] && . /etc/profile

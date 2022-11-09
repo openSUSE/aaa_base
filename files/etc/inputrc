@@ -35,19 +35,19 @@ set enable-meta-key off
 # All mappings below the following line belongs to vi-command mode
 set keymap vi-command
 # Common standard keypad and cursor
-$include /etc/inputrc.keys
+$include /usr/etc/inputrc.keys
 #
 # All mappings below the following line belongs to vi-insert mode
 set keymap vi-insert
 # Common standard keypad and cursor
-$include /etc/inputrc.keys
+$include /usr/etc/inputrc.keys
 #
 #  EMACS line editing
 #
 $if mode=emacs
 set keymap emacs
 # Common standard keypad and cursor
-$include /etc/inputrc.keys
+$include /usr/etc/inputrc.keys
 #
 # ... xterm application cursor
 #
