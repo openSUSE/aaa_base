@@ -52,9 +52,7 @@ Requires:       /usr/bin/tput
 Requires:       /usr/bin/xz
 Requires:       distribution-release
 Requires:       filesystem
-Requires(pre):  /usr/bin/rm
-Requires(pre):  (glibc >= 2.30 if glibc)
-Requires(post): fillup /usr/bin/chmod /usr/bin/chown
+Requires(post): fillup
 Recommends:     aaa_base-extras
 Recommends:     iproute2
 Recommends:     iputils
@@ -147,8 +145,6 @@ mkdir -p %{buildroot}%{_fillupdir}
   done
   rm -vrf %{buildroot}/usr/share/fillup-templates
 %endif
-
-%pre -f aaa_base.pre
 
 %post -f aaa_base.post
 
