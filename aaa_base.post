@@ -42,7 +42,6 @@ while read file owner mode; do
     chown "$owner" "$file"
 done <<EOT
 /root/.bash_history root:root 600
-/var/log/lastlog    root:root 644
 EOT
 
 exit 0
