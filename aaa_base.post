@@ -35,13 +35,4 @@ if test ! -e /etc/mtab; then
     ln -sf /proc/self/mounts /etc/mtab
 fi
 
-while read file owner mode; do
-    test -h "$file" && continue
-    test -e "$file" || touch "$file"
-    chmod "$mode" "$file"
-    chown "$owner" "$file"
-done <<EOT
-/root/.bash_history root:root 600
-EOT
-
 exit 0

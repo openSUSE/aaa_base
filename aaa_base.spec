@@ -54,7 +54,7 @@ Requires:       distribution-release
 Requires:       filesystem
 Requires(pre):  /usr/bin/rm
 Requires(pre):  (glibc >= 2.30 if glibc)
-Requires(post): fillup /usr/bin/chmod /usr/bin/chown
+Requires(post): fillup
 Recommends:     aaa_base-extras
 Recommends:     iproute2
 Recommends:     iputils
