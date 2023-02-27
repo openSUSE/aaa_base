@@ -163,6 +163,7 @@ mkdir -p %{buildroot}%{_fillupdir}
 
 %files
 %license COPYING
+%ghost %config(noreplace) /etc/sysctl.conf
 %config /etc/bash.bashrc
 %config /etc/csh.cshrc
 %config /etc/csh.login
