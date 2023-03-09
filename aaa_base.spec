@@ -52,6 +52,7 @@ Requires:       /usr/bin/tput
 Requires:       /usr/bin/xz
 Requires:       distribution-release
 Requires:       filesystem
+Requires:       (glibc >= 2.30 if glibc)
 Requires(post): fillup
 Recommends:     aaa_base-extras
 Recommends:     iproute2
@@ -163,6 +164,7 @@ mkdir -p %{buildroot}%{_fillupdir}
 
 %files
 %license COPYING
+%ghost %config(noreplace) /etc/sysctl.conf
 %config /etc/bash.bashrc
 %config /etc/csh.cshrc
 %config /etc/csh.login
