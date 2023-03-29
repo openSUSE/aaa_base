@@ -52,7 +52,8 @@ Requires:       /usr/bin/tput
 Requires:       /usr/bin/xz
 Requires:       distribution-release
 Requires:       filesystem
-Requires:       (glibc >= 2.30 if glibc)
+# required for nsswitch.conf usrfiles fixes in post script
+Requires(post): (glibc >= 2.30 if glibc)
 Requires(post): fillup
 Recommends:     aaa_base-extras
 Recommends:     iproute2
