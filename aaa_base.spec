@@ -219,6 +219,7 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/share/man/man8/safe-rmdir.8*
 /usr/share/man/man8/service.8*
 /usr/lib/sysctl.d/*.conf
+/usr/lib/systemd/system.conf.d/*.conf
 %dir %{_libexecdir}/initscripts
 %dir %{_libexecdir}/initscripts/legacy-actions
 %{_fillupdir}/sysconfig.language
