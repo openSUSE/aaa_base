@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #
 # This script simply renames files or directories to <name>-<date>[<num>]

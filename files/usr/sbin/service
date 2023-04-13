@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # /sbin/service		Handle boot and runlevel services
 #

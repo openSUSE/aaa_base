@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Refresh initrd depending on conditions.
 # Currently only the change of /etc/sysconfig/clock is
