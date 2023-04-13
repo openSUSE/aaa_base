@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #
 # This script simply renames files or directories to <name>-<date>[<num>]
@@ -32,19 +32,19 @@ if [ "$1" = "-h" -o "$1" = "--help" ] ; then
     exit
 fi
 
-DATESTRING=`date +"%Y%m%d"`
+DATESTRING=$(date +"%Y%m%d")
 
 for i in "$@" ; do
-    i=${i%%/}
+    i=$(echo "$i" | sed 's/\/$//')
     if [ -e "$i" ] ; then
         NEWNAME=$i-$DATESTRING
         NUMBER=0
         while [ -e "$NEWNAME" ] ; do
             NEWNAME=$i-$DATESTRING-$NUMBER
-            let NUMBER=$NUMBER+1
+            NUMBER=$(expr $NUMBER + 1)
         done
         echo moving "$i" to "$NEWNAME"
-	if [ "${i:0:1}" = "-" ] ; then
+	if [ "$(echo $i | cut -c 1)" = "-" ] ; then
 	    i="./$i"
 	    NEWNAME="./$NEWNAME"
 	fi
@@ -53,4 +53,3 @@ for i in "$@" ; do
         echo "$i" does not exist.
     fi
 done
-
