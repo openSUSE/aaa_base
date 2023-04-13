@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Refresh initrd depending on conditions.
 # Currently only the change of /etc/sysconfig/clock is
@@ -14,28 +14,36 @@ refresh=no
 test /etc/sysconfig/clock  -nt $initrd && refresh=yes
 test /etc/sysconfig/kernel -nt $initrd && refresh=yes
 
-while read module ; do
+tmpfile=$(mktemp)
+
+lsinitrd $initrd | grep -E "$modules/.*\.ko" > "$tmpfile"
+
+while IFS= read -r module; do
     module=${module##*/}
     module=${module%.ko}
-    modconfs=$(grep -lE "[[:blank:]]$module[[:blank:]]" /etc/modprobe.d/*)
+    modconfs=$(grep -lE "[[:blank:]]${module}[[:blank:]]" /etc/modprobe.d/*)
     for modconf in $modconfs; do
-	test $modconf -nt $initrd && refresh=yes
-	break 2
+        test $modconf -nt $initrd && refresh=yes
+        break 2
     done
-done < <(lsinitrd /boot/initrd | grep -E "$modules/.*\.ko")
+done < "$tmpfile"
+rm "$tmpfile"
 unset modules module modconfs modconf
 
 test "$refresh" = yes || exit 0
 
-/sbin/modprobe dm_mod --quiet &> /dev/null || true
+/sbin/modprobe dm_mod --quiet > /dev/null 2>&1 || true
 
 line=on
 test -e /proc/splash && read line < /proc/splash
 line=${line##*: }
 
 SPLASH=no
-[[ $line =~ on ]] && SPLASH=yes
+case $line in
+    *on*) SPLASH=yes;;
+esac
 test -e /etc/sysconfig/bootsplash && . /etc/sysconfig/bootsplash
 
 test $SPLASH = yes && set -- -s auto
-exec -a mkinitrd /sbin/mkinitrd ${1+"$@"}
+exec /sbin/mkinitrd "${1+"$@"}"
+
