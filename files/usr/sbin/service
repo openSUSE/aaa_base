@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # /sbin/service		Handle boot and runlevel services
 #
@@ -35,15 +35,17 @@ test -n "$SYSTEMD_NO_WRAP" && export SYSTEMD_NO_WRAP
 LANG=POSIX
 export PATH TERM LANG
 
-typeset -i reloaded=0
+reloaded=0
 daemon_reload()
 {
 	local state
-	((reloaded)) && return
+	if [ "$reloaded" -ne 0 ]; then
+        return
+    fi
 	state=$(systemctl --full --no-legend --no-pager --property=NeedDaemonReload show "$1" 2>/dev/null)
 	test "$state" = "NeedDaemonReload=no" && return
 	systemctl daemon-reload
-	let reloaded++
+	reloaded=$((reloaded + 1))
 }
 
 is_service()
@@ -69,7 +71,7 @@ is_systemd_action()
 exec_rc ()
 {
     local rc=''
-    local -i ret
+    local ret
     if sd_booted && test -z "$SYSTEMD_NO_WRAP"; then
 	if is_systemd_action "$2"; then
 		if is_service "$1"; then
@@ -176,17 +178,17 @@ full_restart=0
         args=""
 while test $# -gt 0; do
     opt=
-    if test "${1::1}" = "-"; then
-	if test ${#1} -gt 2 -a "${1::2}" = "--" ; then
-	    opt="${1:2}"
-	else
-	    opt="${1:1}"
-	fi
-	shift
+	if [ "$(echo "$1" | cut -c1)" = "-" ]; then
+        if [ "$(echo "$1" | cut -c1-2)" = "--" ] && [ "$(echo "$1" | cut -c3- | wc -c)" -gt 1 ]; then
+            opt="$(echo "$1" | cut -c3-)"
+        else
+            opt="$(echo "$1" | cut -c2-)"
+        fi
+        shift
     else
-	args="${args:+$args }$1"
-	shift
-	continue
+        args="${args:+$args }$1"
+        shift
+        continue
     fi
 
     case "$opt" in
