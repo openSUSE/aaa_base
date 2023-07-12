@@ -1,5 +1,5 @@
 #
-# spec file for package aaa_base
+# spec file for package setup
 #
 # Copyright (c) 2022 SUSE LLC
 #
@@ -16,6 +16,7 @@
 #
 # icecream 0
 
+%define oldname aaa_base
 
 #Compat macro for new _fillupdir macro introduced in Nov 2017
 %if ! %{defined _fillupdir}
@@ -32,16 +33,16 @@ BuildRequires:  git-core
 %define git_version %{nil}
 %endif
 
-Name:           aaa_base
+Name:           setup
 Version:        84.87%{git_version}
 Release:        0
 Summary:        openSUSE Base Package
 License:        GPL-2.0-or-later
 Group:          System/Fhs
-URL:            https://github.com/openSUSE/aaa_base
-Source:         aaa_base-%{version}.tar
+URL:            https://github.com/openSUSE/setup
+Source:         setup-%{version}.tar
 Source1:        README.packaging.txt
-Source99:       aaa_base-rpmlintrc
+Source99:       setup-rpmlintrc
 Requires:       /bin/mktemp
 Requires:       /usr/bin/cat
 Requires:       /usr/bin/date
@@ -55,15 +56,18 @@ Requires:       filesystem
 # required for nsswitch.conf usrfiles fixes in post script
 Requires(post): (glibc >= 2.30 if glibc)
 Requires(post): fillup
-Recommends:     aaa_base-extras
+Recommends:     setup-extras
 Recommends:     iproute2
 Recommends:     iputils
 Recommends:     logrotate
 Recommends:     netcfg
 Recommends:     udev
-# do not require systemd - aaa_base is in the build environment and we don't
+# do not require systemd - setup is in the build environment and we don't
 # want to pull in tons of dependencies
 Conflicts:      sysvinit-init
+Obsoletes:      %{oldname} < %{version}
+Conflicts:      %{oldname} < %{version}
+Provides:       %{oldname} = %{version}
 
 # run osc service mr to recreate
 
@@ -74,19 +78,23 @@ This package installs several important configuration files and central scripts.
 Summary:        SUSE Linux Base Package (recommended part)
 Group:          System/Fhs
 Requires:       %{name} = %{version}
+Conflicts:      %{oldname}-extras < %{version}
+Provides:       %{oldname}-extras = %{version}
 Requires:       /usr/bin/find
 Requires:       cpio
 Requires(post): fillup
-Provides:       aaa_base:/etc/DIR_COLORS
 
 %description extras
-The parts of aaa_base that should be installed by default but are not
+The parts of setup that should be installed by default but are not
 strictly required to run a system. (bash completions and convenience hacks).
 
 %package malloccheck
 Summary:        SUSE Linux Base Package (malloc checking)
 Group:          System/Fhs
 Requires:       %{name} = %{version}
+Obsoletes:      %{oldname}-malloccheck < %{version}
+Conflicts:      %{oldname}-malloccheck < %{version}
+Provides:       %{oldname}-malloccheck = %{version}
 
 %description malloccheck
 This package sets environment variables that enable stricter
@@ -97,6 +105,9 @@ installed by default as it may degrade performance.
 Summary:        SUSE Linux Base Package (Windows Subsystem for Linux)
 Group:          System/Fhs
 Requires:       %{name} = %{version}
+Obsoletes:      %{oldname}-wsl < %{version}
+Conflicts:      %{oldname}-wsl < %{version}
+Provides:       %{oldname}-wsl = %{version}
 
 %description wsl
 This package includes some special settings needed on Windows Subsystem
@@ -148,7 +159,7 @@ mkdir -p %{buildroot}%{_fillupdir}
   rm -vrf %{buildroot}/usr/share/fillup-templates
 %endif
 
-%post -f aaa_base.post
+%post -f setup.post
 
 %pre extras
 %service_add_pre backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer
@@ -200,7 +211,7 @@ mkdir -p %{buildroot}%{_fillupdir}
 %ghost %config(noreplace) /etc/init.d/boot.local
 %ghost %config(noreplace) /etc/init.d/after.local
 %ghost %config /etc/inittab
-# don't forget to also change aaa_base.post, boot.cleanup
+# don't forget to also change setup.post, boot.cleanup
 # and /etc/permissions!
 %ghost %attr(0644,root,root) %verify(not md5 size mtime) /var/log/lastlog
 /usr/bin/get_kernel_version

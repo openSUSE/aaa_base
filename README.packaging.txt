@@ -1,5 +1,5 @@
 This package is maintained in git at
-http://github.com/openSUSE/aaa_base
+http://github.com/openSUSE/setup
 
 Please file a pull request for any changes. The spec file is also in
 git.
