@@ -20,6 +20,6 @@ mimetypes:
 	mv mime.types files/etc/mime.types
 
 rpm:
-	rpmbuild -bb --build-in-place --noprep aaa_base.spec
+	rpmbuild -bb --build-in-place --noprep setup.spec
 
 .PHONY: all install clean package mimetypes rpm

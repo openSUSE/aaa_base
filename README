@@ -1,11 +1,11 @@
-aaa_base
-========
+setup
+=====
 
-This repository makes up the tar ball in the aaa_base package
-https://build.opensuse.org/package/show/Base:System/aaa_base
+This repository makes up the tar ball in the setup package
+https://build.opensuse.org/package/show/Base:System/setup
 
-After commit, checkout Base:System aaa_base and run
+After commit, checkout Base:System setup and run
   osc service mr
 
-To build aaa_base locally directly from the git checkout run
-  rpmbuild --build-in-place --noprep aaa_base.spec -bb
+To build setup locally directly from the git checkout run
+  rpmbuild --build-in-place --noprep setup.spec -bb
