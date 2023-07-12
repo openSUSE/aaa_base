@@ -34,6 +34,7 @@ TERM cygwin
 TERM dtterm
 TERM Eterm
 TERM eterm-color
+TERM foot
 TERM gnome
 TERM gnome-256color
 TERM iterm
