@@ -229,7 +229,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 /etc/skel/.emacs
 /etc/skel/.inputrc
 %dir /usr/lib/base-scripts
-/usr/etc/profile.d/complete.bash
 /usr/lib/base-scripts/backup-rpmdb
 /usr/lib/base-scripts/backup-sysconfig
 /usr/lib/base-scripts/check-battery
