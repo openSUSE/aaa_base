@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Copyright 2005 Peter Poeml <apache@suse.de>. All Rights Reserved.
 
@@ -41,7 +41,8 @@ find_last_occurrence () {
 
 word_present () {
 	. $file
-	case " ${!var} " in
+	var_value="$(eval "echo \${$var}")"
+	case " $var_value " in
 	*" $word "*) true;;
 	*) false;;
 	esac
@@ -102,7 +103,7 @@ esac
 file=$1; shift
 var=$1; shift
 word=$1
-word_quoted=${1//\//\\\/}
+word_quoted=$(echo "$1" | sed 's/\//\\\//g')
 
 
 if $debug; then

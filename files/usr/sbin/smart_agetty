@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # emulate: /sbin/agetty -L $speed console for console != vga/framebuffer console
 
 #echo "$0: called with '$*'" > /dev/kmsg

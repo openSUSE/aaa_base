@@ -1,24 +1,23 @@
-#!/bin/bash
+#!/bin/sh
 
 todo=
 opts=
-case "${0##*/}" in
+case "$(basename "$0")" in
     safe-rm)	todo=rm    ; opts=-f ;;
     safe-rmdir) todo=rmdir ; opts=   ;;
 esac
 
-set -o physical
 test -n "$todo"     || exit 2
 test -x /bin/$todo  || exit 2
 test -x /bin/pwd    || exit 2
 
 for d; do
-    if [[ "$d" != /* ]] ; then
+    if ! echo "$d" | grep -q "^/" ; then
 	echo "usage: $0 _absolute_path_to_file" 1>&2
 	exit 1
     fi
-    path=${d//\/.\//\/}
-    name=${path##*/}
+    path=$(echo "$d" | sed 's/\/\.\//\//g') 
+    name=$(basename "$path")
 
     if test "/$name" = "$path" ; then
 	echo "$0: usage in root directory not allowed" 1>&2
@@ -33,7 +32,7 @@ for d; do
 
     if cd -P "${path}" && test "${path}" = "$(pwd -P)" ; then
 
-	if test "$PWD" = "$(/bin/pwd)" ; then
+	if test "$(pwd -P)" = "$(/bin/pwd)" ; then
 	    /bin/$todo $opts -- "$name"
 	else
 	    echo "$0: no symlinks allowed in the path of $d" 1>&2
