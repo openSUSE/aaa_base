@@ -9,7 +9,13 @@
 #                     JDK_HOME, SDK_HOME
 #
 
-foreach JDIR ( "/usr/lib64/jvm" "/usr/lib/jvm" "/usr/java/latest" "/usr/java" )
+set ALTERNATIVES_JAVA_HOME
+if ( -l /etc/alternatives/java ) then
+    set ALTERNATIVES_JAVA_LINK=`realpath /etc/alternatives/java`
+    set ALTERNATIVES_JAVA_HOME=$ALTERNATIVES_JAVA_LINK:h:h
+endif
+
+foreach JDIR ( $ALTERNATIVES_JAVA_HOME "/usr/lib64/jvm" "/usr/lib/jvm" "/usr/java/latest" "/usr/java" )
 
     if ( ! -d $JDIR ) continue
 
