@@ -210,13 +210,9 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/bin/filesize
 /usr/bin/old
 /usr/bin/rpmlocate
-/usr/bin/safe-rm
-/usr/bin/safe-rmdir
 /usr/sbin/sysconf_addword
 /usr/share/man/man1/smart_agetty.1*
 /usr/share/man/man5/defaultdomain.5*
-/usr/share/man/man8/safe-rm.8*
-/usr/share/man/man8/safe-rmdir.8*
 /usr/share/man/man8/service.8*
 /usr/lib/sysctl.d/*.conf
 %dir %{_libexecdir}/initscripts
