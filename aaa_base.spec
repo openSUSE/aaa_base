@@ -200,9 +200,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 %ghost %config(noreplace) /etc/init.d/boot.local
 %ghost %config(noreplace) /etc/init.d/after.local
 %ghost %config /etc/inittab
-# don't forget to also change aaa_base.post, boot.cleanup
-# and /etc/permissions!
-%ghost %attr(0644,root,root) %verify(not md5 size mtime) /var/log/lastlog
 /usr/bin/get_kernel_version
 /usr/sbin/refresh_initrd
 /usr/sbin/service
