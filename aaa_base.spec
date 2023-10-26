@@ -193,6 +193,8 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/etc/profile.d/ls.tcsh
 /usr/etc/profile.d/ls.bash
 /usr/etc/profile.d/ls.zsh
+/usr/etc/profile.d/terminal.sh
+/usr/etc/profile.d/terminal.csh
 %dir /usr/lib/environment.d
 /usr/lib/environment.d/50-xdg.conf
 %config /etc/shells
