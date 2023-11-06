@@ -9,39 +9,18 @@
 #                     JDK_HOME, SDK_HOME
 #
 
-foreach JDIR ( "/usr/lib64/jvm" "/usr/lib/jvm" "/usr/java/latest" "/usr/java" )
+if ( -l /etc/alternatives/java ) then
+    set ALTERNATIVES_JAVA_LINK=`realpath /etc/alternatives/java`
+    setenv JRE_HOME $ALTERNATIVES_JAVA_LINK:h:h
+    unset ALTERNATIVES_JAVA_LINK
+endif
 
-    if ( ! -d $JDIR ) continue
+if ( -l /etc/alternatives/javac ) then
+    set ALTERNATIVES_JAVAC_LINK=`realpath /etc/alternatives/javac`
+    setenv JAVA_HOME $ALTERNATIVES_JAVAC_LINK:h:h
+    setenv JAVA_HOME $JAVA_HOME/bin
+    setenv JDK_HOME $JAVA_HOME
+    setenv SDK_HOME $JAVA_HOME
+    unset ALTERNATIVES_JAVAC_LINK
+endif
 
-    foreach JPATH ( $JDIR $JDIR/* )
-
-	if ( ! -d $JPATH ) continue
-
-        if ( ! -x $JPATH/bin/java ) continue
-
-        setenv JAVA_BINDIR $JPATH/bin
-        setenv JAVA_ROOT $JPATH
-        setenv JAVA_HOME $JPATH
-        unset JDK_HOME
-        unset SDK_HOME
-
-        switch ( $JPATH )
-        case *jre*:
-            setenv JRE_HOME $JPATH
-            breaksw
-        default:
-            if ( -x $JPATH/jre/bin/java ) then
-                setenv JRE_HOME $JPATH/jre
-            else
-                setenv JRE_HOME $JPATH
-            endif
-            # it is development kit=20
-            if ( -x $JPATH/bin/javac ) then
-                setenv JDK_HOME $JPATH
-                setenv SDK_HOME $JPATH
-            endif
-        endsw
-    end
-    unset JPATH
-end
-unset JDIR
