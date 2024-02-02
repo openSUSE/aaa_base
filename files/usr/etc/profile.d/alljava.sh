@@ -9,51 +9,18 @@
 #                     JDK_HOME, SDK_HOME
 #
 
-for JDIR in /usr/lib64/jvm /usr/lib/jvm /usr/java/latest /usr/java; do
+if test -L /etc/alternatives/java -a -e /etc/alternatives/java; then
+    ALTERNATIVES_JAVA_LINK=`realpath /etc/alternatives/java 2> /dev/null`
+    export JRE_HOME=${ALTERNATIVES_JAVA_LINK%/bin/java}
+    unset ALTERNATIVES_JAVA_LINK
+fi
 
-    if ! test -d $JDIR; then
-        continue
-    fi
+if test -L /etc/alternatives/javac -a -e /etc/alternatives/javac; then
+    ALTERNATIVES_JAVAC_LINK=`realpath /etc/alternatives/javac 2> /dev/null`
+    export JAVA_HOME=${ALTERNATIVES_JAVAC_LINK%/bin/javac}
+    export JAVA_BINDIR=$JAVA_HOME/bin
+    export JDK_HOME=$JAVA_HOME
+    export SDK_HOME=$JAVA_HOME
+    unset ALTERNATIVES_JAVAC_LINK
+fi
 
-    for JPATH in $JDIR $JDIR/*; do
-
-    	if ! test -d $JPATH; then
-            continue
-    	fi
-
-        if ! test -x $JPATH/bin/java; then
-            continue
-        fi
-
-        export JAVA_BINDIR=$JPATH/bin
-        export JAVA_ROOT=$JPATH
-        export JAVA_HOME=$JPATH
-        unset JDK_HOME
-        unset SDK_HOME
-
-        case "$JPATH" in
-            *jre*)
-                [ -z "$JRE_HOME" ] && export JRE_HOME=$JPATH
-                ;;
-
-            *)
-		if [ -x $JPATH/jre/bin/java ] ; then
-                    [ -z "$JRE_HOME" ] && export JRE_HOME=$JPATH/jre
-		else
-		    [ -z "$JRE_HOME" ] && export JRE_HOME=$JPATH
-		fi
-                # it is development kit
-                if [ -x $JPATH/bin/javac ] ; then
-                    export JDK_HOME=$JPATH
-                    export SDK_HOME=$JPATH
-                    unset JPATH
-                    break 2; # we found a JRE + SDK -- don't look any further
-                fi
-                ;;
-        esac
-
-    done
-    unset JPATH
-
-done
-unset JDIR
