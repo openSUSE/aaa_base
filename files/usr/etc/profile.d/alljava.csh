@@ -9,14 +9,14 @@
 #                     JDK_HOME, SDK_HOME
 #
 
-if ( -l /etc/alternatives/java ) then
-    set ALTERNATIVES_JAVA_LINK=`realpath /etc/alternatives/java`
+if ( -l /etc/alternatives/java && -e /etc/alternatives/java ) then
+    set ALTERNATIVES_JAVA_LINK=`realpath /etc/alternatives/java 2> /dev/null`
     setenv JRE_HOME $ALTERNATIVES_JAVA_LINK:h:h
     unset ALTERNATIVES_JAVA_LINK
 endif
 
-if ( -l /etc/alternatives/javac ) then
-    set ALTERNATIVES_JAVAC_LINK=`realpath /etc/alternatives/javac`
+if ( -l /etc/alternatives/javac && -e /etc/alternatives/javac ) then
+    set ALTERNATIVES_JAVAC_LINK=`realpath /etc/alternatives/javac 2> /dev/null`
     setenv JAVA_HOME $ALTERNATIVES_JAVAC_LINK:h:h
     setenv JAVA_HOME $JAVA_HOME/bin
     setenv JDK_HOME $JAVA_HOME
