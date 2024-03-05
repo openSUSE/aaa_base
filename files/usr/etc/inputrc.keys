@@ -230,8 +230,6 @@ $if term=xterm
 #
 # Normal keypad and cursor of xterm
 #
-"\e[1~":	history-search-backward
-"\e[4~":	set-mark
 "\e[H":		beginning-of-line
 "\e[F":		end-of-line
 # [Note: raw C1 chars conflicts with UTF-8]
@@ -283,8 +281,6 @@ $if term=xterm
 "\eO5F":	end-of-line
 $else
 $if term=kvt
-"\e[1~":	history-search-backward
-"\e[4~":	set-mark
 "\eOH":		beginning-of-line
 "\eOF":		end-of-line
 $endif
@@ -920,4 +916,20 @@ $endif
 "\e[21;3~":	""
 "\e[23;3~":	""
 "\e[24;3~":	""
+$endif
+$if term=vt200
+"\e[1~":	history-search-backward
+"\e[4~":	set-mark
+$endif
+$if term=vt220
+"\e[1~":	history-search-backward
+"\e[4~":	set-mark
+$endif
+$if term=vt420
+"\e[1~":	history-search-backward
+"\e[4~":	set-mark
+$endif
+$if term=vt520
+"\e[1~":	history-search-backward
+"\e[4~":	set-mark
 $endif
