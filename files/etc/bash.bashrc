@@ -96,6 +96,12 @@ elif test -s /usr/etc/profile.d/ls.bash
 then . /usr/etc/profile.d/ls.bash
 fi
 
+if test -s /etc/profile.d/mc.sh
+then . /etc/profile.d/mc.sh
+elif test -s /usr/share/mc/mc.sh
+then . /usr/share/mc/mc.sh
+fi
+
 #
 # Avoid trouble with Emacs shell mode
 #

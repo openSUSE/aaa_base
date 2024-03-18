@@ -4,6 +4,8 @@
 #
 # This file sources /(usr/)etc/profile.d/complete.tcsh and
 # /(usr/)etc/profile.d/bindkey.tcsh used especially by tcsh.
+# For Midnight Commander (mc) also /etc/profile.d/mc.csh
+# or /usr/share/mc/mc.csh is sourced.
 #
 # PLEASE DO NOT CHANGE /etc/csh.cshrc. There are chances that your changes
 # will be lost during system upgrades. Instead use /etc/csh.cshrc.local for
@@ -111,12 +113,13 @@ set symlinks=ignore
 unset autologout
 unset ignoreeof
 
-foreach _s (ls.tcsh alias.tcsh)
+foreach _s (ls.tcsh alias.tcsh mc.csh)
     if (-r /etc/profile.d/$_s) then
 	source /etc/profile.d/$_s
 	continue
     endif
     if (-r /usr/etc/profile.d/$_s) source /usr/etc/profile.d/$_s
+    if (-r /usr/share/mc/$_s) source /usr/share/mc/$_s
 end
 unset _s
 
