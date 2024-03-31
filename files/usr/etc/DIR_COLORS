@@ -16,6 +16,7 @@ COLOR tty
 OPTIONS -F -T 0
 
 # Below, there should be one TERM entry for each termtype that is colorizable
+TERM alacritty
 TERM ansi
 TERM color-xterm
 TERM con132x25
