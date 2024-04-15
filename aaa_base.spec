@@ -112,10 +112,6 @@ systems.
 %install
 %make_install
 mkdir -p %{buildroot}/etc/sysctl.d
-case "$RPM_ARCH" in
-	s390*) ;;
-	*) rm -f %{buildroot}/usr/lib/sysctl.d/50-default-s390.conf ;;
-esac
 #
 # make sure it does not creep in again
 test -d %{buildroot}/root/.gnupg && exit 1
