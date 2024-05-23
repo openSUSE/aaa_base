@@ -193,6 +193,7 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/etc/profile.d/terminal.csh
 %dir /usr/lib/environment.d
 /usr/lib/environment.d/50-xdg.conf
+%{_tmpfilesdir}/soft-reboot-cleanup.conf
 %config /etc/shells
 %ghost %dir /etc/init.d
 %ghost %config(noreplace) /etc/init.d/boot.local
