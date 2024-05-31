@@ -103,6 +103,18 @@ This package includes some special settings needed on Windows Subsystem
 for Linux. It should only be installed on WSL and not on regular Linux
 systems.
 
+%package yama-enable-ptrace
+Summary:        sysctl setting to allow ptrace with the YAMA LSM enabled
+Group:          System/Fhs
+Requires:       %{name} = %{version}
+
+%description yama-enable-ptrace
+When the YAMA LSM is enabled, ptrace is restriced by default. On
+developer systems this has an impact on e.g. strace and gdb. So
+this package contains a setting that allows ptrace again.
+
+See https://docs.kernel.org/admin-guide/LSM/Yama.html
+
 %prep
 %setup -q
 
@@ -210,7 +222,8 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/share/man/man1/smart_agetty.1*
 /usr/share/man/man5/defaultdomain.5*
 /usr/share/man/man8/service.8*
-/usr/lib/sysctl.d/*.conf
+/usr/lib/sysctl.d/50-default.conf
+/usr/lib/sysctl.d/51-network.conf
 %dir %{_libexecdir}/initscripts
 %dir %{_libexecdir}/initscripts/legacy-actions
 %{_fillupdir}/sysconfig.language
@@ -237,5 +250,8 @@ mkdir -p %{buildroot}%{_fillupdir}
 %files wsl
 /usr/etc/profile.d/wsl.csh
 /usr/etc/profile.d/wsl.sh
+
+%files yama-enable-ptrace
+/usr/lib/sysctl.d/52-yama.conf
 
 %changelog
