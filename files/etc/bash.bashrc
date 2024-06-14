@@ -149,7 +149,7 @@ case "$-" in
 	#
 	if _path tput hs 2>/dev/null || _path tput -T $TERM+sl hs 2>/dev/null || \
 	   _path tput -T ${TERM%%[.-]*}+sl hs 2>/dev/null || \
-	   [[ $TERM = *xterm* || $TERM = *gnome* || $TERM = *konsole* || $TERM = *xfce* ]]
+	   [[ $TERM = *xterm* || $TERM = *gnome* || $TERM = *konsole* || $TERM = *xfce* || $TERM = *foot* ]]
 	then
 	    #
 	    # Mirror prompt in terminal "status line", which for graphical
@@ -176,8 +176,15 @@ case "$-" in
 		_isl=''
 		_fsl=$(_path tput fsl 2>/dev/null)
 	    fi
-	    _sc=$(tput sc 2>/dev/null)
-	    _rc=$(tput rc 2>/dev/null)
+	    if [[ $TERM = *foot* ]]
+	    then
+		# Do not save cursor during writing status line for "foot" nor restore it
+		_sc=''
+		_rc=''
+	    else
+		_sc=$(tput sc 2>/dev/null)
+	    	_rc=$(tput rc 2>/dev/null)
+	    fi
 	    if test -n "$_tsl" -a -n "$_isl" -a "$_fsl" ; then
 		TS1="$_sc$_tsl%s@%s:%s$_fsl$_isl%s$_fsl$_rc"
 	    elif test -n "$_tsl" -a "$_fsl" ; then
