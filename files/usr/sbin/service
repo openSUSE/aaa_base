@@ -23,9 +23,6 @@ fi
 #
 RCDIR="/etc/init.d"
 
-# legacy actions
-actiondir="/usr/libexec/initscripts/legacy-actions"
-
 #
 # Clean environment
 #
@@ -105,9 +102,6 @@ exec_rc ()
 		fi
 		echo "$1 is neither service nor target!?" >&2
 		return "1"
-	elif [ -n "$2" -a -x "$actiondir/$1/$2" ]; then
-		rc="$actiondir/$1/$2"
-		shift 2
 	elif [ ${0##*/} = service ] ; then
 		echo "Usage: $0 "$1" {start|stop|reload|restart|try-restart|force-reload|status}"
 		return 1

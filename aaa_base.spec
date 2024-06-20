@@ -132,8 +132,6 @@ mkdir -p %{buildroot}/etc/init.d
 for i in boot.local after.local ; do
   install -m 755 /dev/null %{buildroot}/etc/init.d/$i
 done
-#
-install -d -m 755 %buildroot%{_libexecdir}/initscripts/legacy-actions
 # keep as ghost for migration
 touch %buildroot/etc/inittab
 
@@ -224,8 +222,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/share/man/man8/service.8*
 /usr/lib/sysctl.d/50-default.conf
 /usr/lib/sysctl.d/51-network.conf
-%dir %{_libexecdir}/initscripts
-%dir %{_libexecdir}/initscripts/legacy-actions
 %{_fillupdir}/sysconfig.language
 %{_fillupdir}/sysconfig.proxy
 %{_fillupdir}/sysconfig.windowmanager

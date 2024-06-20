@@ -14,15 +14,8 @@ The \fBSERVICE\fR parameter specifies a systemd service name to operate on.
 The supported values of \fBACTION\fR depend  on  the specified  service.
 The actions start, stop, reload, restart, try-restart, force-reload, and status
 are forwarded to systemctl, \fBOPTIONS\fR are ignored in that case.
-Other actions may be defined in /usr/lib/initscripts/legacy-actions. Legacy
-actions are called directly and \fBOPTIONS\fR are passed on the command line.
 
 The \-\-status-all option displays the status of all loaded service units.
-
-.SH FILES
-/usr/lib/initscripts/legacy-actions
-              Directory containing System V legacy actions
-.BR 
 
 .SH HISTORY
 service used to run System V init scripts in a predictable environment.
