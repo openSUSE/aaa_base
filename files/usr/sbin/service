@@ -73,6 +73,7 @@ exec_rc ()
 	if is_systemd_action "$2"; then
 		if is_service "$1"; then
 			daemon_reload "$1.service"
+		    	echo "Please use \"systemctl $2 $1.service\" the next time."
 			systemctl "$2" --full "$1.service"
 			ret=$?
 			if [ "$2" = status ]; then
@@ -81,7 +82,8 @@ exec_rc ()
 			fi
 			return $ret
 		elif is_target "$1"; then
-			daemon_reload "$1.target"
+		        daemon_reload "$1.target"
+		    	echo "Please use \"systemctl $2 $1.target\" the next time."
 			systemctl "$2" "$1.target"
 			ret=$?
 			if [ $ret -eq 0 -a "$2" = "status" ]; then
@@ -166,6 +168,10 @@ help ()
     echo "  ${0##*/} service_name argument [option]"
     exit 0
 }
+
+# Deprecation notice
+echo "The service command and the rc* symlinks have been deprecated and"
+echo "will be removed in a future release."
 
   status_all=0
 full_restart=0
