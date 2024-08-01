@@ -221,6 +221,9 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/share/man/man5/defaultdomain.5*
 /usr/share/man/man8/service.8*
 /usr/lib/sysctl.d/50-default.conf
+%ifnarch %ix86 %arm
+/usr/lib/sysctl.d/50-pid-max.conf
+%endif
 /usr/lib/sysctl.d/51-network.conf
 %{_fillupdir}/sysconfig.language
 %{_fillupdir}/sysconfig.proxy
