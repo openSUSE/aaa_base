@@ -8,6 +8,10 @@ service \- run service
 .br
        service --help | -h
 
+.SH DEPRECATED
+The service command has been deprecated and will be removed in a future release.
+It is superseded by systemctl(1).
+
 .SH DESCRIPTION
 .PP
 The \fBSERVICE\fR parameter specifies a systemd service name to operate on.
@@ -23,13 +27,11 @@ service used to run System V init scripts in a predictable environment.
 .SH USE AS rc* WRAPPER
 SUSE Linux distributions used to have convenience symlinks to call
 System V init scripts, for example /usr/sbin/rcexample ->
-/etc/init.d/example. With the move to systemd the service command
-can be used as wrapper for systemctl instead. For example
-/usr/sbin/rcexample -> /usr/sbin/service.
-
-.BR 
+/etc/init.d/example. With the move to systemd this has been deprecated and the
+rc* symlinks will be removed.
+.BR
 .SH "SEE ALSO"
 chkconfig(8),
 systemctl(1)
 systemd.service(5)
-.BR 
+.BR
