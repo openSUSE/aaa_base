@@ -210,7 +210,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 %ghost %config(noreplace) /etc/init.d/after.local
 %ghost %config /etc/inittab
 /usr/bin/get_kernel_version
-/usr/sbin/refresh_initrd
 /usr/sbin/service
 /usr/sbin/smart_agetty
 /usr/bin/filesize
