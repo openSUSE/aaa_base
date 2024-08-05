@@ -217,7 +217,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/bin/rpmlocate
 /usr/sbin/sysconf_addword
 /usr/share/man/man1/smart_agetty.1*
-/usr/share/man/man5/defaultdomain.5*
 /usr/share/man/man8/service.8*
 /usr/lib/sysctl.d/50-default.conf
 %ifnarch %ix86 %arm
