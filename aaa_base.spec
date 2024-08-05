@@ -229,8 +229,8 @@ mkdir -p %{buildroot}%{_fillupdir}
 %{_fillupdir}/sysconfig.windowmanager
 
 %files extras
-/etc/skel/.emacs
-/etc/skel/.inputrc
+/usr/etc/skel/.emacs
+/usr/etc/skel/.inputrc
 %dir /usr/lib/base-scripts
 /usr/lib/base-scripts/backup-rpmdb
 /usr/lib/base-scripts/backup-sysconfig
