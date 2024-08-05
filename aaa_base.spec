@@ -237,7 +237,6 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/lib/base-scripts/backup-sysconfig
 /usr/lib/base-scripts/check-battery
 /usr/lib/systemd/system/*
-/usr/share/man/man8/resolv+.8*
 /var/adm/backup/rpmdb
 /var/adm/backup/sysconfig
 %{_fillupdir}/sysconfig.backup
