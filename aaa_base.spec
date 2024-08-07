@@ -203,6 +203,8 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/etc/profile.d/terminal.csh
 %dir /usr/lib/environment.d
 /usr/lib/environment.d/50-xdg.conf
+/usr/lib/systemd/system/soft-reboot-cleanup.service
+/usr/libexec/soft-reboot-cleanup
 %{_tmpfilesdir}/soft-reboot-cleanup.conf
 %config /etc/shells
 %ghost %dir /etc/init.d
@@ -234,7 +236,7 @@ mkdir -p %{buildroot}%{_fillupdir}
 /usr/lib/base-scripts/backup-rpmdb
 /usr/lib/base-scripts/backup-sysconfig
 /usr/lib/base-scripts/check-battery
-/usr/lib/systemd/system/*
+/usr/lib/systemd/system/[bc]*
 /var/adm/backup/rpmdb
 /var/adm/backup/sysconfig
 %{_fillupdir}/sysconfig.backup
