@@ -1,0 +1,14 @@
+[Unit]
+Description=Cleanup system data after soft-reboot
+Before=network-pre.target
+Wants=network-pre.target
+Before=iptables.service ip6tables.service ebtables.service ipset.service nftables.service
+Before=firewalld.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/soft-reboot-cleanup
+RemainAfterExit=true
+
+[Install]
+WantedBy=default.target
