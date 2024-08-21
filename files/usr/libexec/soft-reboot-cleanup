@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# A normal reboot clears the kernel tables, a soft-reboot does
+# not. Do this manually to avoid problems with old, outdated rules.
+if [ -x /usr/sbin/iptables ]; then
+	iptables -F
+fi
+if [ -x /usr/sbin/nft ]; then
+	nft flush ruleset
+fi
