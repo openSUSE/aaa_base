@@ -9,7 +9,7 @@ all: $(bin_PROGRAMS)
 install: all
 	cp -a files/* $(DESTDIR)/
 	install -m755 get_kernel_version $(DESTDIR)/usr/bin
-ifneq ($(filter i%86 armv%,$(RPM_ARCH)),)
+ifneq ($(filter i%86 arm%,$(RPM_ARCH)),)
 	rm -vf $(DESTDIR)/usr/lib/sysctl.d/50-pid-max.conf
 endif
 
