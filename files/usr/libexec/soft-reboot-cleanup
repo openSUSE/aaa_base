@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # A normal reboot clears the kernel tables, a soft-reboot does
 # not. Do this manually to avoid problems with old, outdated rules.
