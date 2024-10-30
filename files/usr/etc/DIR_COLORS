@@ -110,12 +110,12 @@ EXEC 01;32
 # (and any comments you want to add after a '#')
 
 # executables (bright green)
-.cmd  00;32
-.exe  01;32
-.com  01;32
-.bat  01;32
-.btm  01;32
-.dll  01;32
+#.cmd  00;32
+#.exe  01;32
+#.com  01;32
+#.bat  01;32
+#.btm  01;32
+#.dll  01;32
 
 # archives or compressed
 .tar 00;31
