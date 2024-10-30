@@ -229,9 +229,9 @@ EXEC 01;32
 .ogx 01;35
 
 # audio formats (cyan)
+.aac 00;36
 .aiff 00;36
 .ape 00;36
-.aac 00;36
 .au 00;36
 .flac 00;36
 .m4a 00;36
