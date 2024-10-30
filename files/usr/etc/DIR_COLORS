@@ -1,4 +1,5 @@
-# Configuration file for the color ls utility
+# Configuration file for dircolors, a utility to help you set the
+# LS_COLORS environment variable
 #
 # This file goes in the /etc directory, and must be world readable.
 # You can copy this file to .dir_colors in your $HOME directory to override
