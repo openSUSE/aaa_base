@@ -5,7 +5,9 @@
 # You can copy this file to .dir_colors in your $HOME directory to override
 # the system defaults.
 
-# Below, there should be one TERM entry for each termtype that is colorizable
+# Below are TERM or COLORTERM entries, which can be glob patterns, which
+# restrict following config to systems with matching environment variables.
+COLORTERM ?*
 TERM alacritty
 TERM ansi
 TERM color-xterm
@@ -58,6 +60,7 @@ TERM screen.rxvt
 TERM screen-w
 TERM screen.xterm
 TERM screen.xterm-256color
+TERM st
 TERM terminator
 TERM tmux
 TERM tmux-256color
