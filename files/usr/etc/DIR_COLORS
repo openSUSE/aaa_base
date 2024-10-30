@@ -41,8 +41,8 @@ TERM rxvt-256color
 TERM rxvt-cygwin
 TERM rxvt-cygwin-native
 TERM rxvt-unicode
-TERM rxvt-unicode-256color
 TERM rxvt-unicode256
+TERM rxvt-unicode-256color
 TERM screen
 TERM screen-256color
 TERM screen-256color-bce
@@ -50,13 +50,13 @@ TERM screen-bce
 TERM screen.gnome
 TERM screen.konsole
 TERM screen.konsole-256color
+TERM screen.linux
 TERM screen.putty
 TERM screen.putty-256color
+TERM screen.rxvt
 TERM screen-w
 TERM screen.xterm
 TERM screen.xterm-256color
-TERM screen.linux
-TERM screen.rxvt
 TERM terminator
 TERM tmux
 TERM tmux-256color
