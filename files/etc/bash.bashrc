@@ -389,6 +389,15 @@ elif test -r /usr/etc/profile.d/vte.sh -a ! -k /usr/etc/profile.d/vte.sh
 then . /usr/etc/profile.d/vte.sh
 fi
 
+# Source /etc/profile.d/distrobox_profile.sh, which improves usage and prompt clarity when using Distrobox.
+# It is distrobox_profile.sh's responsibility to 'not load' when it's not applicable (not inside a Distrobox)
+# distrobox_profile.sh will also take care of differences in behaviour needed by different shells (eg bash vs zsh)
+if test -s /etc/profile.d/distrobox_profile.sh ; then
+	. /etc/profile.d/distrobox_profile.sh
+elif test -s /usr/etc/profile.d/distrobox_profile.sh ; then
+	. /usr/etc/profile.d/distrobox_profile.sh
+fi
+
 if test "$_is_save" = "unset" ; then
     #
     # Just in case the user excutes a command with ssh or sudo
