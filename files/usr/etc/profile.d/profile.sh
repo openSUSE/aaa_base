@@ -95,7 +95,7 @@ do
 	esac
     done < $_sys
 done
-unset -v _sys _line _val
+unset -v _sys _line _val PROXY_ENABLED
 
 if test -d /usr/lib/dvgt_help ; then
     DV_IMMED_HELP=/usr/lib/dvgt_help
@@ -106,11 +106,6 @@ if test -d /usr/lib/rasmol ; then
     RASMOLPATH=/usr/lib/rasmol
     export RASMOLPATH
 fi
-
-if test "$PROXY_ENABLED" != "yes" ; then
-    unset -v http_proxy https_proxy ftp_proxy gopher_proxy no_proxy NO_PROXY socks_proxy SOCKS_PROXY SOCKS5_SERVER
-fi
-unset -v PROXY_ENABLED
 
 if test -z "$WINDOWMANAGER" ; then
     _SAVEPATH=$PATH

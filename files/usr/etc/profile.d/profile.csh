@@ -98,7 +98,7 @@ foreach line ( "`/usr/bin/grep -vh '^#' $sysconf`" )
 	breaksw
     endsw
 end
-unset sysconf line
+unset sysconf line proxy_enabled
 
 if ( -d /usr/lib/dvgt_help ) then
     setenv DV_IMMED_HELP /usr/lib/dvgt_help
@@ -106,13 +106,6 @@ endif
 
 if ( -d /usr/lib/rasmol ) then
     setenv RASMOLPATH /usr/lib/rasmol
-endif
-
-if ( ${?proxy_enabled} ) then
-    if ( "$proxy_enabled" != "yes" ) then
-	unsetenv http_proxy https_proxy ftp_proxy gopher_proxy no_proxy socks_proxy SOCKS_PROXY SOCKS5_SERVER
-    endif
-    unset proxy_enabled
 endif
 
 #
