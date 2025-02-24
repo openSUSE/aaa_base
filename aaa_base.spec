@@ -142,14 +142,14 @@ mkdir -p %{buildroot}%{_fillupdir}
 %if "%{_fillupdir}" != "/var/adm/fillup-templates"
   for f in %{buildroot}/var/adm/fillup-templates/* ; do
     test -e "$f" || continue
-    mv $f %{buildroot}%{_fillupdir}/
+    mv "$f" "%{buildroot}/%{_fillupdir}/"
   done
   rm -vrf %{buildroot}/var/adm/fillup-templates
 %endif
 %if "%{_fillupdir}" != "/usr/share/fillup-templates"
   for f in %{buildroot}/usr/share/fillup-templates/* ; do
     test -e "$f" || continue
-    mv $f %{buildroot}%{_fillupdir}/
+    mv "$f" "%{buildroot}/%{_fillupdir}/"
   done
   rm -vrf %{buildroot}/usr/share/fillup-templates
 %endif
@@ -166,9 +166,9 @@ export LC_ALL=C
 #XXX Fix /etc/nsswitch.conf to include usrfiles [bsc#1162916]
 if [ -e /etc/nsswitch.conf ]; then
     for key in services protocols rpc ; do
-	if ! grep -q ^${key}.*usrfiles /etc/nsswitch.conf ; then
-	    cp /etc/nsswitch.conf /etc/nsswitch.conf.pre-usrfiles.${key}
-	    sed -i -e "s|^\(${key}:.*[[:space:]]\)files\([[:space:]].*\)*$|\1files usrfiles\2|" /etc/nsswitch.conf
+	if ! grep -q "^${key}.*usrfiles" /etc/nsswitch.conf ; then
+	    cp /etc/nsswitch.conf "/etc/nsswitch.conf.pre-usrfiles.${key}"
+	    sed -i -e "s|^\(${key}:.*[[:space:]]\)files\([[:space:]].*\)*\$|\1files usrfiles\2|" /etc/nsswitch.conf
 	fi
     done
 fi
