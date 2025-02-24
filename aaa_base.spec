@@ -1,7 +1,7 @@
 #
 # spec file for package aaa_base
 #
-# Copyright (c) 2022 SUSE LLC
+# Copyright (c) 2025 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -136,7 +136,7 @@ done
 touch %buildroot/etc/inittab
 
 # Backup directories
-install -d -m 755 %{buildroot}/var/adm/backup/{rpmdb,sysconfig}
+install -d -m 755 %{buildroot}/var/adm/backup/rpmdb %{buildroot}/var/adm/backup/sysconfig
 
 mkdir -p %{buildroot}%{_fillupdir}
 %if "%{_fillupdir}" != "/var/adm/fillup-templates"
