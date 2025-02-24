@@ -116,7 +116,7 @@ this package contains a setting that allows ptrace again.
 See https://docs.kernel.org/admin-guide/LSM/Yama.html
 
 %prep
-%setup -q
+%autosetup -p1
 
 %build
 %make_build CFLAGS="%{optflags}" CC="%{__cc}"
