@@ -243,6 +243,8 @@ fi
 /usr/etc/profile.d/terminal.csh
 %dir /usr/lib/environment.d
 /usr/lib/environment.d/50-xdg.conf
+%dir /usr/lib/systemd/system-environment-generators
+/usr/lib/systemd/system-environment-generators/00-xdg-dirs.sh
 /usr/lib/systemd/system/soft-reboot-cleanup.service
 /usr/libexec/soft-reboot-cleanup
 %{_tmpfilesdir}/soft-reboot-cleanup.conf
