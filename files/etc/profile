@@ -162,7 +162,7 @@ export MAIL HOST CPU HOSTNAME HOSTTYPE OSTYPE VENDOR MACHTYPE
 # save current path setting, we might want to restore it
 ORIG_PATH=$PATH
 #
-if test -z "$PROFILEREAD" ; then
+if test -z "$PROFILEREAD" -a -z "$CSHRCREAD" ; then
     PATH=/usr/local/bin:/usr/bin:/bin
     if test "$HOME" != "/" ; then
 	for dir in $HOME/bin/$CPU $HOME/bin $HOME/.local/bin/$CPU $HOME/.local/bin ; do
