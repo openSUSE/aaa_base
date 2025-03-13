@@ -181,17 +181,17 @@ fi
 %service_del_postun_without_restart soft-reboot-cleanup.service
 
 %pre extras
-%service_add_pre backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer
+%service_add_pre backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer setup-systemd-proxy-env.path setup-systemd-proxy-env.service
 
 %post extras
 %fillup_only -n backup
-%service_add_post backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer
+%service_add_post backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer setup-systemd-proxy-env.path setup-systemd-proxy-env.service
 
 %preun extras
-%service_del_preun backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer
+%service_del_preun backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer setup-systemd-proxy-env.path setup-systemd-proxy-env.service
 
 %postun extras
-%service_del_postun backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer
+%service_del_postun backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer setup-systemd-proxy-env.path setup-systemd-proxy-env.service
 
 %post yama-enable-ptrace
 # check if yama is active
@@ -269,6 +269,7 @@ fi
 %{_fillupdir}/sysconfig.proxy
 
 %files extras
+/usr/bin/setup-systemd-proxy-env
 /usr/etc/skel/.emacs
 /usr/etc/skel/.inputrc
 %dir /usr/lib/base-scripts
@@ -276,6 +277,7 @@ fi
 /usr/lib/base-scripts/backup-sysconfig
 /usr/lib/base-scripts/check-battery
 /usr/lib/systemd/system/[bc]*
+/usr/lib/systemd/system/setup-systemd-proxy-env.*
 /var/adm/backup/rpmdb
 /var/adm/backup/sysconfig
 %{_fillupdir}/sysconfig.backup
