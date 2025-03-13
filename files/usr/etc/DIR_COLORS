@@ -1,21 +1,13 @@
-# Configuration file for the color ls utility
+# Configuration file for dircolors, a utility to help you set the
+# LS_COLORS environment variable
 #
 # This file goes in the /etc directory, and must be world readable.
 # You can copy this file to .dir_colors in your $HOME directory to override
 # the system defaults.
 
-# COLOR needs one of these arguments: 'tty' colorizes output to ttys, but not
-# pipes. 'all' adds color characters to all output. 'none' shuts colorization
-# off.
-COLOR tty
-
-# Extra command line options for ls go here.
-# Basically these ones are:
-#  -F = show '/' for dirs, '*' for executables, etc.
-#  -T 0 = don't trust tab spacing when formatting ls output.
-OPTIONS -F -T 0
-
-# Below, there should be one TERM entry for each termtype that is colorizable
+# Below are TERM or COLORTERM entries, which can be glob patterns, which
+# restrict following config to systems with matching environment variables.
+COLORTERM ?*
 TERM alacritty
 TERM ansi
 TERM color-xterm
@@ -52,8 +44,8 @@ TERM rxvt-256color
 TERM rxvt-cygwin
 TERM rxvt-cygwin-native
 TERM rxvt-unicode
-TERM rxvt-unicode-256color
 TERM rxvt-unicode256
+TERM rxvt-unicode-256color
 TERM screen
 TERM screen-256color
 TERM screen-256color-bce
@@ -61,13 +53,14 @@ TERM screen-bce
 TERM screen.gnome
 TERM screen.konsole
 TERM screen.konsole-256color
+TERM screen.linux
 TERM screen.putty
 TERM screen.putty-256color
+TERM screen.rxvt
 TERM screen-w
 TERM screen.xterm
 TERM screen.xterm-256color
-TERM screen.linux
-TERM screen.rxvt
+TERM st
 TERM terminator
 TERM tmux
 TERM tmux-256color
@@ -80,9 +73,6 @@ TERM xterm-88color
 TERM xterm-color
 TERM xterm-debian
 TERM xterm-kitty
-
-# EIGHTBIT, followed by '1' for on, '0' for off. (8-bit output)
-EIGHTBIT 1
 
 # Below are the color init strings for the basic file types. A color init
 # string consists of one or more of the following numeric codes:
@@ -97,81 +87,96 @@ EIGHTBIT 1
 NORMAL 00       # global default, although everything should be something.
 FILE   00       # normal file
 DIR    01;34    # directory
-LINK   00;36    # symbolic link
+LINK   01;36    # symbolic link
 FIFO   40;33    # pipe
 SOCK   01;35    # socket
 DOOR   01;35    # door
 BLK    40;33;01 # block device driver
 CHR    40;33;01 # character device driver
-ORPHAN 41;33;01 # symlink to nonexistent file
+ORPHAN 40;31;01 # symlink to nonexistent file...
+MISSING 00      # ...and the file itself
+SETUID 37;41    # regular file that is setuid (u+s)
+SETGID 30;43    # regular file that is setgid (g+s)
+CAPABILITY 00   # regular file with capability (very expensive to lookup)
+STICKY_OTHER_WRITABLE 30;42 # dir that is sticky and other-writable (+t,o+w)
+OTHER_WRITABLE 34;42        # dir that is other-writable (o+w) and not sticky
+STICKY 37;44    # dir with the sticky bit set (+t) and not other-writable
 
 # This is for files with execute permission:
-EXEC 00;32
+EXEC 01;32
 
 # List any file extensions like '.gz' or '.tar' that you would like ls
 # to colorize below. Put the extension, a space, and the color init string.
 # (and any comments you want to add after a '#')
 
 # executables (bright green)
-.cmd  00;32
-.exe  01;32
-.com  01;32
-.bat  01;32
-.btm  01;32
-.dll  01;32
+#.cmd  00;32
+#.exe  01;32
+#.com  01;32
+#.bat  01;32
+#.btm  01;32
+#.dll  01;32
 
-# archives or compressed
-.tar 00;31
-.tgz 00;31
-.arc 00;31
-.arj 00;31
-.taz 00;31
-.lha 00;31
-.lz4 00;31
-.lzh 00;31
-.lzma 00;31
-.tlz 00;31
-.txz 00;31
-.tzo 00;31
-.t7z 00;31
-.zip 00;31
-.z   00;31
-.Z   00;31
-.dz  00;31
-.gz  00;31
-.lrz 00;31
-.lz  00;31
-.lzo 00;31
-.xz  00;31
-.zst 00;31
-.tzst 00;31
-.bz2 00;31
-.bz  00;31
-.tbz 00;31
-.tbz2 00;31
-.tz  00;31
-.deb 00;31
-.rpm 00;31
-.jar 00;31
-.war 00;31
-.ear 00;31
-.sar 00;31
-.rar 00;31
-.alz 00;31
-.ace 00;31
-.zoo 00;31
-.cpio 00;31
-.7z  00;31
-.rz  00;31
-.cab 00;31
-.wim 00;31
-.swm 00;31
-.dwm 00;31
-.esd 00;31
+# archives or compressed (bright red)
+.7z  01;31
+.ace 01;31
+.alz 01;31
+.apk 01;31
+.arc 01;31
+.arj 01;31
+.bz  01;31
+.bz2 01;31
+.cab 01;31
+.cpio 01;31
+.crate 01;31
+.deb 01;31
+.drpm 01;31
+.dwm 01;31
+.dz  01;31
+.ear 01;31
+.egg 01;31
+.esd 01;31
+.gz  01;31
+.jar 01;31
+.lha 01;31
+.lrz 01;31
+.lz  01;31
+.lz4 01;31
+.lzh 01;31
+.lzma 01;31
+.lzo 01;31
+.pyz 01;31
+.rar 01;31
+.rpm 01;31
+.rz  01;31
+.sar 01;31
+.swm 01;31
+.t7z 01;31
+.tar 01;31
+.taz 01;31
+.tbz 01;31
+.tbz2 01;31
+.tgz 01;31
+.tlz 01;31
+.txz 01;31
+.tz  01;31
+.tzo 01;31
+.tzst 01;31
+.udeb 01;31
+.war 01;31
+.whl 01;31
+.wim 01;31
+.xz  01;31
+.z   01;31
+.Z   01;31
+.zip 01;31
+.zoo 01;31
+.zst 01;31
 
-# image formats
+# image formats (bright magenta)
 .asf 01;35
 .avi 01;35
+.avif 01;35
 .bmp 01;35
 .cgm 01;35
 .dl 01;35
@@ -201,8 +206,8 @@ EXEC 00;32
 .pgm 01;35
 .png 01;35
 .ppm 01;35
-.qt  01;35
-.rm  01;35
+.qt 01;35
+.rm 01;35
 .rmvb 01;35
 .svg 01;35
 .svgz 01;35
@@ -223,27 +228,49 @@ EXEC 00;32
 .ogv 01;35
 .ogx 01;35
 
-# audio formats
-.aiff 00;32
-.ape 00;32
-.aac 00;32
-.au 00;32
-.flac 00;32
-.m4a 00;32
-.mid 00;32
-.midi 00;32
-.mka 00;32
-.mp3 00;32
-.mpc 00;32
-.ogg 00;32
-.ra 00;32
-.voc 00;32
-.wav 00;32
-.wma 00;32
-.wv  00;32
+# audio formats (cyan)
+.aac 00;36
+.aiff 00;36
+.ape 00;36
+.au 00;36
+.flac 00;36
+.m4a 00;36
+.mid 00;36
+.midi 00;36
+.mka 00;36
+.mp3 00;36
+.mpc 00;36
+.ogg 00;36
+.ra 00;36
+.voc 00;36
+.wav 00;36
+.wma 00;36
+.wv  00;36
 
 # https://wiki.xiph.org/MIME_Types_and_File_Extensions
-.oga 00;32
-.opus 00;32
-.spx 00;32
-.xspf 00;32
+.oga 00;36
+.opus 00;36
+.spx 00;36
+.xspf 00;36
+
+# backup files (grey)
+*# 00;90
+*~ 00;90
+.bak 00;90
+.crdownload 00;90
+.dpkg-dist 00;90
+.dpkg-new 00;90
+.dpkg-old 00;90
+.dpkg-tmp 00;90
+.old 00;90
+.orig 00;90
+.part 00;90
+.rej 00;90
+.rpmnew 00;90
+.rpmorig 00;90
+.rpmsave 00;90
+.swp 00;90
+.tmp 00;90
+.ucf-dist 00;90
+.ucf-new 00;90
+.ucf-old 00;90
