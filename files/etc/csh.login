@@ -101,25 +101,26 @@ set mail=$MAIL
 #     eval limit `limit -h memoryuse`
 # endif
 
+if (! ${?CSHRCREAD} && ! ${?PROFILEREAD}) then
 #
 # Make path more comfortable
 #
-unset noglob
+    unset noglob
 # save current path setting, we might want to restore it
-set orig_path=($path)
-set _hpath
-set _spath
-set _upath=( /usr/local/bin /usr/bin /bin )
-if ( "$HOME" != "/" ) then
-    foreach _d (${HOME}/bin/${CPU} ${HOME}/bin ${HOME}/.local/bin/${CPU} ${HOME}/.local/bin)
-	if ( -d $_d ) set _hpath=( $_d $_hpath )
-    end
-endif
-if ( "$uid" == "0" ) then
-    if ( -d /opt/kde3/sbin ) set _spath=( /opt/kde3/sbin )
-    set _spath=( /sbin /usr/sbin /usr/local/sbin $_spath )
-endif
-foreach _d (/usr/X11/bin \
+    set orig_path=($path)
+    set _hpath
+    set _spath
+    set _upath=( /usr/local/bin /usr/bin /bin )
+    if ( "$HOME" != "/" ) then
+	foreach _d (${HOME}/bin/${CPU} ${HOME}/bin ${HOME}/.local/bin/${CPU} ${HOME}/.local/bin)
+	    if ( -d $_d ) set _hpath=( $_d $_hpath )
+	end
+    endif
+    if ( "$uid" == "0" ) then
+	if ( -d /opt/kde3/sbin ) set _spath=( /opt/kde3/sbin )
+	set _spath=( /sbin /usr/sbin /usr/local/sbin $_spath )
+    endif
+    foreach _d (/usr/X11/bin \
 	    /usr/X11R6/bin \
 	    /var/lib/dosemu \
 	    /usr/games \
@@ -129,24 +130,25 @@ foreach _d (/usr/X11/bin \
 	    /opt/kde/bin \
 	    /usr/openwin/bin \
 	    /opt/cross/bin )
-    if ( -d $_d ) set _upath=( $_upath $_d )
-end
-unset _d
+	if ( -d $_d ) set _upath=( $_upath $_d )
+    end
+    unset _d
 
-if ( ${?OPENWINHOME} ) then
-    if ( -d $OPENWINHOME/bin ) then
-	set _upath=( $_upath $OPENWINHOME/bin )
+    if ( ${?OPENWINHOME} ) then
+	if ( -d $OPENWINHOME/bin ) then
+	    set _upath=( $_upath $OPENWINHOME/bin )
+	    endif
     endif
-endif
 
 #
 # Doing only one rehash
 #
-set -f path=( $_hpath $_spath $path $_upath )
-unset _upath
-unset _spath
-unset _hpath
-set noglob
+    set -f path=( $_hpath $_spath $path $_upath )
+    unset _upath
+    unset _spath
+    unset _hpath
+    set noglob
+endif
 
 #
 # Set some environment variables for TeX/LaTeX (Not used due luatex)
