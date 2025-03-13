@@ -1,7 +1,7 @@
 #
 # spec file for package aaa_base
 #
-# Copyright (c) 2022 SUSE LLC
+# Copyright (c) 2025 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -116,7 +116,7 @@ this package contains a setting that allows ptrace again.
 See https://docs.kernel.org/admin-guide/LSM/Yama.html
 
 %prep
-%setup -q
+%autosetup -p1
 
 %build
 %make_build CFLAGS="%{optflags}" CC="%{__cc}"
@@ -136,20 +136,20 @@ done
 touch %buildroot/etc/inittab
 
 # Backup directories
-install -d -m 755 %{buildroot}/var/adm/backup/{rpmdb,sysconfig}
+install -d -m 755 %{buildroot}/var/adm/backup/rpmdb %{buildroot}/var/adm/backup/sysconfig
 
 mkdir -p %{buildroot}%{_fillupdir}
 %if "%{_fillupdir}" != "/var/adm/fillup-templates"
   for f in %{buildroot}/var/adm/fillup-templates/* ; do
     test -e "$f" || continue
-    mv $f %{buildroot}%{_fillupdir}/
+    mv "$f" "%{buildroot}/%{_fillupdir}/"
   done
   rm -vrf %{buildroot}/var/adm/fillup-templates
 %endif
 %if "%{_fillupdir}" != "/usr/share/fillup-templates"
   for f in %{buildroot}/usr/share/fillup-templates/* ; do
     test -e "$f" || continue
-    mv $f %{buildroot}%{_fillupdir}/
+    mv "$f" "%{buildroot}/%{_fillupdir}/"
   done
   rm -vrf %{buildroot}/usr/share/fillup-templates
 %endif
@@ -166,9 +166,9 @@ export LC_ALL=C
 #XXX Fix /etc/nsswitch.conf to include usrfiles [bsc#1162916]
 if [ -e /etc/nsswitch.conf ]; then
     for key in services protocols rpc ; do
-	if ! grep -q ^${key}.*usrfiles /etc/nsswitch.conf ; then
-	    cp /etc/nsswitch.conf /etc/nsswitch.conf.pre-usrfiles.${key}
-	    sed -i -e "s|^\(${key}:.*[[:space:]]\)files\([[:space:]].*\)*$|\1files usrfiles\2|" /etc/nsswitch.conf
+	if ! grep -q "^${key}.*usrfiles" /etc/nsswitch.conf ; then
+	    cp /etc/nsswitch.conf "/etc/nsswitch.conf.pre-usrfiles.${key}"
+	    sed -i -e "s|^\(${key}:.*[[:space:]]\)files\([[:space:]].*\)*\$|\1files usrfiles\2|" /etc/nsswitch.conf
 	fi
     done
 fi
