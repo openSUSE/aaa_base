@@ -80,8 +80,8 @@ if test -O "$tty" -a -n "$PS1"; then
     test "${TERM}" = "unknown"	&& { TERM=linux; export TERM; }
     test "${TERM}" = "ibm327x"	&& { TERM=dumb;  export TERM; }
     if test "$(uname -m)" = "s390x" ; then
-	if test "$tty" = "/dev/sclp_line0" -o "$tty" = "/dev/ttyS0" ; then
-	    test "${TERM}" = "vt220" && { TERM=dumb;  export TERM; }
+	if test "${tty%[0-9]}" = "/dev/ttysclp" -o "${tty%[0-9]}" = "/dev/ttyS" ; then
+	    test "${TERM}" = "vt220" && { TERM=linux;  export TERM; }
 	fi
     fi
     case "$TERM" in
