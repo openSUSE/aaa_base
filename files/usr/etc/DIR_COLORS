@@ -60,6 +60,7 @@ TERM screen.rxvt
 TERM screen-w
 TERM screen.xterm
 TERM screen.xterm-256color
+TERM sclp*
 TERM st
 TERM terminator
 TERM tmux

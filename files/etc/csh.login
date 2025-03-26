@@ -27,9 +27,23 @@ if ( -o /dev/$tty && -c /dev/$tty && ${?prompt} ) then
     if ( "$TERM" == "unknown" ) setenv TERM linux
     if ( "$TERM" == "ibm327x" ) setenv TERM dumb
     if ( `uname -m` == "s390x" ) then
-	if ( "$tty" == "/dev/sclp_line0" || "$tty" == "/dev/ttyS0" ) then
+	switch ("${tty:t}")
+	case ttysclp0
+	case ttysclp1
+	    if ( -s /usr/share/terminfo/s/sclp ) then
+		setenv TERM sclp
+	    else if ( -s /usr/share/terminfo/x/xterm-vt220 ) then
+		setenv TERM xterm-vt220
+	    else
+		setenv TERM vt220
+	    breaksw
+	case sclp_line0
+	case ttyS0
 	    if ( "$TERM" == "vt220" ) setenv TERM dumb
-	endif
+	    breaksw
+	default
+	    breaksw
+	endsw
     endif
     if ( $TERM =~ screen.* && ! -e /usr/share/terminfo/s/$TERM) setenv TERM screen
     if ( ! ${?SSH_TTY} && "$TERM" != "dumb" ) then
