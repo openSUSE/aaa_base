@@ -80,13 +80,23 @@ if test -O "$tty" -a -n "$PS1"; then
     test "${TERM}" = "unknown"	&& { TERM=linux; export TERM; }
     test "${TERM}" = "ibm327x"	&& { TERM=dumb;  export TERM; }
     if test "$(uname -m)" = "s390x" ; then
+	if test "${tty%[0-9]}" = "/dev/ttysclp" ; then
+	    if test -s /usr/share/terminfo/s/sclp; then
+		TERM=sclp
+	    elif test -s /usr/share/terminfo/x/xterm-vt220; then
+		TERM=xterm-vt220
+	    else
+		TERM=vt220
+	    fi
+	    export TERM
+	fi
 	if test "$tty" = "/dev/sclp_line0" -o "$tty" = "/dev/ttyS0" ; then
-	    test "${TERM}" = "vt220" && { TERM=dumb;  export TERM; }
+	    test "${TERM}" = "vt220" && { TERM=dumb; export TERM; }
 	fi
     fi
     case "$TERM" in
     screen.*)
-	test -e /usr/share/terminfo/s/${TERM} || { TERM=screen;  export TERM; } ;;
+	test -e /usr/share/terminfo/s/${TERM} || { TERM=screen; export TERM; } ;;
     esac
     # Do not change settings on local line if connected to remote
     if test -z "$SSH_TTY" -a "${TERM}" != "dumb" ; then
