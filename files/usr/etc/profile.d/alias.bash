@@ -24,8 +24,8 @@ if test "$is" != "ksh" ; then
     alias -- -='popd'
 fi
 alias rd=rmdir
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
+alias egrep='grep -E --color=auto'
+alias fgrep='grep -F --color=auto'
 alias grep='grep --color=auto'
 if ip --color=auto -V > /dev/null 2>/dev/null ; then
     alias ip='ip --color=auto'
