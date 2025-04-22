@@ -16,9 +16,9 @@ if ( ${?LS_COLORS} ) then
 endif
 unalias ls
 if ( "$uid" == "0" ) then
-    setenv LS_OPTIONS "-A -N $LS_OPTIONS -T 0"
+    setenv LS_OPTIONS "-A -N $LS_OPTIONS -T 0 --group-directories-first"
 else
-    setenv LS_OPTIONS "-N $LS_OPTIONS -T 0"
+    setenv LS_OPTIONS "-N $LS_OPTIONS -T 0 --group-directories-first"
 endif
 alias ls 'ls $LS_OPTIONS'
 alias la 'ls -aF --color=none'
