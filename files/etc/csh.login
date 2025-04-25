@@ -36,6 +36,7 @@ if ( -o /dev/$tty && -c /dev/$tty && ${?prompt} ) then
 		setenv TERM xterm-vt220
 	    else
 		setenv TERM vt220
+	    endif
 	    breaksw
 	case sclp_line0
 	case ttyS0
