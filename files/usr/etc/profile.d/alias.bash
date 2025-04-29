@@ -48,7 +48,6 @@ if test "$is" = "bash" -a ! -x /usr/bin/which ; then
     alias which=_which
 fi
 alias rehash='hash -r'
-alias you='if test "$EUID" = 0 ; then /sbin/yast2 online_update ; else su - -c "/sbin/yast2 online_update" ; fi'
 if test "$is" != "ksh" ; then
     alias beep='echo -en "\007"' 
 else
