@@ -51,7 +51,7 @@ fi
 #
 ROOT_USES_LANG=yes
 if test -s /etc/locale.conf ; then
-    while read line ; do
+    while read line || test -n "$line" ; do
 	case "$line" in
 	\#*|"")
 		continue
