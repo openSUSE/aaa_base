@@ -173,7 +173,6 @@ if [ -e /etc/nsswitch.conf ]; then
     done
 fi
 
-%{fillup_only -n language}
 %{fillup_only -n proxy}
 %service_add_post soft-reboot-cleanup.service
 
@@ -265,7 +264,6 @@ fi
 /usr/lib/sysctl.d/50-pid-max.conf
 %endif
 /usr/lib/sysctl.d/51-network.conf
-%{_fillupdir}/sysconfig.language
 %{_fillupdir}/sysconfig.proxy
 
 %files extras

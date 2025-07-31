@@ -3,7 +3,7 @@
 #
 # Used configuration files:
 #
-#     /etc/sysconfig/language
+#     /etc/locale.conf
 #     $HOME/.i18n
 #
 
@@ -30,9 +30,6 @@ fi
 # Already done by the GDM
 #
 if test -n "$GDM_LANG" ; then
-    if test -s /etc/sysconfig/language ; then
-	eval $(sed -rn -e 's/^(RC_LANG)=/_\1=/p' < /etc/sysconfig/language)
-    fi
     if test -z "$_RC_LANG" -a -s /etc/locale.conf ; then
 	eval $(sed -rn -e 's/^(LANG)=/_RC_\1=/p' < /etc/locale.conf)
     fi
@@ -47,9 +44,7 @@ fi
 
 #
 # Get the system and after that the users configuration
-# Note: ROOT_USES_LANG might be become overwritten for root
 #
-ROOT_USES_LANG=yes
 if test -s /etc/locale.conf ; then
     while read line || test -n "$line" ; do
 	case "$line" in
@@ -63,26 +58,6 @@ if test -s /etc/locale.conf ; then
 	esac
     done < /etc/locale.conf
     unset line
-fi
-if test -s /etc/sysconfig/language ; then
-    while read line ; do
-	case "$line" in
-	\#*|"")
-		continue
-		;;
-	RC_*)
-		# Allow GDM to override system settings
-		test -n "$GDM_LANG" && continue
-		eval val=${line##*=}
-		test -z "$val" && continue
-		eval ${line#RC_}
-		;;
-	ROOT_USES_LANG*)
-		test "$UID" = 0 && eval $line
-		;;
-	esac
-    done < /etc/sysconfig/language
-    unset line val
 fi
 
 test -s $HOME/.i18n && . $HOME/.i18n
@@ -99,34 +74,15 @@ for lc in LANG LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE	\
 	  LC_TELEPHONE LC_TIME
 do
     eval val="\$$lc"
-    if  test "$ROOT_USES_LANG" = "yes"    ; then
-	if test -z "$val" ; then
-	    eval unset $lc
-	else
-	    eval $lc=\$val
-	    eval export $lc
-	fi
-    elif test "$ROOT_USES_LANG" = "ctype" ; then
-	test "$lc" = "LANG" && continue
-	if test "$lc" = "LC_CTYPE" ; then
-	    LC_CTYPE=$LANG
-	    LANG=POSIX
-	    export LANG LC_CTYPE
-	else
-	    eval unset $lc
-	fi
+    if test -z "$val" ; then
+	eval unset $lc
     else
-	if test "$lc" = "LANG" ; then
-	    LANG=C.UTF-8
-	    export LANG
-	else
-	    eval unset $lc
-	fi
+	eval $lc=\$val
+	eval export $lc
     fi
 done
 
 unset lc val
-unset ROOT_USES_LANG
 
 #
 # Special LC_ALL handling because the LC_ALL
