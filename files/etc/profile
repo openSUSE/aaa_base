@@ -99,7 +99,7 @@ if test -O "$tty" -a -n "$PS1"; then
 	test -e /usr/share/terminfo/s/${TERM} || { TERM=screen; export TERM; } ;;
     esac
     # Do not change settings on local line if connected to remote
-    if test -z "$SSH_TTY" -a "${TERM}" != "dumb" ; then
+    if test -z "$SSH_TTY" -a -z "$SUDO_UID" -a "${TERM}" != "dumb" ; then
 	_path stty sane cr0 pass8 dec
 	_path tset -I -Q
     fi
