@@ -31,7 +31,7 @@ fi
 #
 if test -n "$GDM_LANG" ; then
     if test -z "$_RC_LANG" -a -s /etc/locale.conf ; then
-	eval $(sed -rn -e 's/^(LANG)=/_RC_\1=/p' < /etc/locale.conf)
+	eval "$(sed -rn -e 's/^(LANG)=/_RC_\1=/p' < /etc/locale.conf)"
     fi
     if test "$_RC_LANG" = "$GDM_LANG" ; then
 	unset GDM_LANG
@@ -54,7 +54,7 @@ if test -s /etc/locale.conf ; then
 	L*)
 		# Allow GDM to override system settings
 		test -n "$GDM_LANG" && continue
-		eval ${line}
+		eval "${line}"
 	esac
     done < /etc/locale.conf
     unset line
@@ -75,10 +75,10 @@ for lc in LANG LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE	\
 do
     eval val="\$$lc"
     if test -z "$val" ; then
-	eval unset $lc
+	unset $lc
     else
 	eval $lc=\$val
-	eval export $lc
+	export $lc
     fi
 done
 

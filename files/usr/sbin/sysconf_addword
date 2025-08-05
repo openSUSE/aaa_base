@@ -41,7 +41,7 @@ find_last_occurrence () {
 
 word_present () {
 	. $file
-	var_value="$(eval "echo \${$var}")"
+	eval var_value="\${$var}"
 	case " $var_value " in
 	*" $word "*) true;;
 	*) false;;
