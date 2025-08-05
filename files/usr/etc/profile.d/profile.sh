@@ -21,7 +21,7 @@ do
 	case "$_line" in
 	\#*|"") continue ;;
         esac
-	eval _val=${_line#*=}
+	eval "_val=${_line#*=}"
 	case "$_line" in
 	CWD_IN_ROOT_PATH=*)
 	    test "$_val" = "yes" || continue

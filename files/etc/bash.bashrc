@@ -142,7 +142,8 @@ case "$-" in
 	    if test $# -le 3 ; then
 		echo "$PWD"
 	    else
-		eval echo \"..\${$(($#-1))}/\${$#}\"
+	        shift $(($#-2))
+		echo "..$1/$2"
 	    fi ) ; }
 	#
 	# Set xterm prompt with short path (last 18 characters)
