@@ -47,7 +47,7 @@ if ( -o /dev/$tty && -c /dev/$tty && ${?prompt} ) then
 	endsw
     endif
     if ( $TERM =~ screen.* && ! -e /usr/share/terminfo/s/$TERM) setenv TERM screen
-    if ( ! ${?SSH_TTY} && ! ${SUDO_UID} && "$TERM" != "dumb" ) then
+    if ( ! ${?SSH_TTY} && ! ${?SUDO_UID} && "$TERM" != "dumb" ) then
 	path stty sane cr0 pass8 dec
 	path tset -I -Q
     endif
