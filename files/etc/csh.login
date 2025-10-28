@@ -50,6 +50,12 @@ if ( -o /dev/$tty && -c /dev/$tty && ${?prompt} ) then
     if ( ! ${?SSH_TTY} && ! ${?SUDO_UID} && "$TERM" != "dumb" ) then
 	path stty sane cr0 pass8 dec
 	path tset -I -Q
+	# Latest ncurses has a tool to get kbs character from current $TERM
+	if ( -x /usr/bin/termerase ) then
+	    set _erase="`/usr/bin/termerase`"
+	    if ( ${%_erase} > 0 ) stty erase "$_erase"
+	    unset _erase
+	endif
     endif
     settc km yes
 endif
