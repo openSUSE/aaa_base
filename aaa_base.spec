@@ -163,15 +163,23 @@ mkdir -p %{buildroot}%{_fillupdir}
 %post
 export LC_ALL=C
 
-#XXX Fix /etc/nsswitch.conf to include usrfiles [bsc#1162916]
 if [ -e /etc/nsswitch.conf ]; then
+#XXX Fix /etc/nsswitch.conf to include usrfiles [bsc#1162916]
     for key in services protocols rpc ; do
-	if ! grep -q "^${key}.*usrfiles" /etc/nsswitch.conf ; then
-	    cp /etc/nsswitch.conf "/etc/nsswitch.conf.pre-usrfiles.${key}"
-	    sed -i -e "s|^\(${key}:.*[[:space:]]\)files\([[:space:]].*\)*\$|\1files usrfiles\2|" /etc/nsswitch.conf
-	fi
+        if ! grep -q "^${key}:.*usrfiles" /etc/nsswitch.conf ; then
+            cp /etc/nsswitch.conf "/etc/nsswitch.conf.pre-usrfiles.${key}"
+            sed -i -e "s|^\(${key}:.*[[:space:]]\)files\([[:space:]].*\)*\$|\1files usrfiles\2|" /etc/nsswitch.conf
+        fi
+    done
+# Fix /etc/nsswitch.conf to include systemd [bsc#1250513]
+    for key in passwd group shadow ; do
+        if ! grep -q "^${key}:.*systemd" /etc/nsswitch.conf ; then
+            cp /etc/nsswitch.conf "/etc/nsswitch.conf.pre-systemd.${key}"
+            sed -i "/^${key}:/ s/$/ systemd/" /etc/nsswitch.conf
+        fi
     done
 fi
+
 
 %{fillup_only -n proxy}
 %service_add_post soft-reboot-cleanup.service
