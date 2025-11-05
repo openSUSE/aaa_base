@@ -24,11 +24,16 @@ if test "$is" != "ksh" ; then
     alias -- -='popd'
 fi
 alias rd=rmdir
-alias egrep='grep -E --color=auto'
-alias fgrep='grep -F --color=auto'
-alias grep='grep --color=auto'
-if ip --color=auto -V > /dev/null 2>/dev/null ; then
-    alias ip='ip --color=auto'
+if type -p tput && test "$(tput colors)" -ge 8 ; then
+    alias egrep='grep -E --color=auto'
+    alias fgrep='grep -F --color=auto'
+    alias grep='grep --color=auto'
+    if ip --color=auto -V >/dev/null 2>& ; then
+        alias ip='ip --color=auto'
+    fi
+else
+    alias egrep='grep -E'
+    alias fgrep='grep -F'
 fi
 alias md='mkdir -p'
 if test "$is" = "bash" -a ! -x /usr/bin/which ; then
