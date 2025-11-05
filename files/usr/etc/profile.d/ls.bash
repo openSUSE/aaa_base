@@ -26,10 +26,11 @@ case "$-" in
         LS_OPTIONS=--color=none
     fi
     if test "$UID" = 0 ; then
-        LS_OPTIONS="-A -N $LS_OPTIONS -T 0"
+        LS_OPTIONS="-A -N $LS_OPTIONS -T 0 --group-directories-first"
     else
-        LS_OPTIONS="-N $LS_OPTIONS -T 0"
+        LS_OPTIONS="-N $LS_OPTIONS -T 0 --group-directories-first"
     fi
+
     
     #
     # Avoid trouble with Emacs shell mode
