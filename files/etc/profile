@@ -102,6 +102,12 @@ if test -O "$tty" -a -n "$PS1"; then
     if test -z "$SSH_TTY" -a -z "$SUDO_UID" -a "${TERM}" != "dumb" ; then
 	_path stty sane cr0 pass8 dec
 	_path tset -I -Q
+	# Latest ncurses has a tool to get kbs character from current $TERM
+	if test -x /usr/bin/termerase ; then
+	    _erase="$(/usr/bin/termerase)"
+	    test -n "$_erase" && stty erase "$_erase" || :
+	    unset _erase
+	fi
     fi
 fi
 unset TERMCAP
