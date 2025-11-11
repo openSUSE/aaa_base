@@ -6,7 +6,7 @@ endif
 
 # System XDG - explicit defaults
 if ( ! ${?XDG_DATA_DIRS} ) then
-  setenv XDG_DATA_DIRS /usr/local/share/:/usr/share/
+  setenv XDG_DATA_DIRS /usr/local/share:/usr/share
 endif
 
 # User XDG - explicit defaults
