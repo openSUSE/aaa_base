@@ -3,7 +3,7 @@ alias .. 'cd ..'
 alias ... 'cd ../..'
 alias cd.. 'cd ..'
 alias rd rmdir
-if ( -X tput ) then
+if ( -X tput && ${?TERM} && -t 1 ) then
     if ( `tput colors` >= 8 ) then
 	alias egrep 'grep -E --color=auto'
 	alias fgrep 'grep -F --color=auto'
