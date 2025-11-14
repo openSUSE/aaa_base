@@ -24,7 +24,7 @@ if test "$is" != "ksh" ; then
     alias -- -='popd'
 fi
 alias rd=rmdir
-if type -p tput >/dev/null 2>&1 && test "$(tput colors)" -ge 8 ; then
+if type -p tput >/dev/null 2>&1 && test -n "$TERM" -a -t 1 && test "$(tput colors)" -ge 8 ; then
     alias egrep='grep -E --color=auto'
     alias fgrep='grep -F --color=auto'
     alias grep='grep --color=auto'
