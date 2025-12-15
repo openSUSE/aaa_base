@@ -4,8 +4,9 @@
 # This script simply renames files or directories to <name>-<date>[<num>]
 #
 # Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 2025 SUSE LLC
 #
-# Contributor Bernard Lang
+# Contributor Bernard Lang, Werner Fink
 #
 # please send bugfixes or comments to
 # https://github.com/openSUSE/aaa_base/issues
@@ -17,38 +18,60 @@
 #
 
 usage() {
-    echo usage: "$0" file\|dir [file\|dir ...]
+    echo "${0##*/}: Renames file or directory <name> given in argument list to <name>-<date>[<num>]"
+    echo '     adding when necessary a suffix number <num> to avoid already used names.'
+    echo Usage:
+    echo "     ${0##*/} [ -h | --help ] [ -c | --copy [ -r | --recursive ]] file\|dir [file\|dir ...]"
 }
 
-if [ $# -eq 0 ] ; then
+PARSED_ARGUMENTS=$(getopt -a -n ${0##*/} --options hcr --longoptions help,copy,recursive -- "$@")
+VALID_ARGUMENTS=$?
+
+if [ "$VALID_ARGUMENTS" != "0" ]; then
     usage
     exit
 fi
 
-if [ "$1" = "-h" -o "$1" = "--help" ] ; then
-    echo 'Renames file or directory <name> given in argument list to <name>-<date>[<num>]'
-    echo 'adding when necessary a suffix number <num> to avoid already used names.'
-    usage
-    exit
-fi
+COPY=no
+recursive=
+eval set -- "$PARSED_ARGUMENTS"
+while :
+do
+   case "$1" in
+   -h | --help)      usage; exit ;;
+   -c | --copy)      COPY=yes; shift ;;
+   -r | --recursive) recursive=-r; shift ;;
+   --)               shift; break ;;
+   esac
+done
 
 DATESTRING=$(date +"%Y%m%d")
 
 for i in "$@" ; do
-    i=$(echo "$i" | sed 's/\/$//')
+    i="$(echo "$i" | sed 's/\/$//')"
     if [ -e "$i" ] ; then
-        NEWNAME=$i-$DATESTRING
+        NEWNAME="$i-$DATESTRING"
         NUMBER=0
         while [ -e "$NEWNAME" ] ; do
-            NEWNAME=$i-$DATESTRING-$NUMBER
+            NEWNAME="$i-$DATESTRING-$NUMBER"
             NUMBER=$(expr $NUMBER + 1)
         done
-        echo moving "$i" to "$NEWNAME"
+        if [ $COPY = yes ]
+        then
+            echo ${0##*/}: copying "$i" to "$NEWNAME"
+        else
+            echo ${0##*/}: moving "$i" to "$NEWNAME"
+        fi
 	if [ "$(echo $i | cut -c 1)" = "-" ] ; then
 	    i="./$i"
 	    NEWNAME="./$NEWNAME"
 	fi
-        mv "$i" "$NEWNAME"
+        if [ $COPY = yes ]
+        then
+            cp -p $recursive "$i" "$NEWNAME"
+        else
+            mv "$i" "$NEWNAME"
+        fi
     else
         echo "$i" does not exist.
     fi
