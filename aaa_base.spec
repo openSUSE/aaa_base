@@ -104,7 +104,7 @@ for Linux. It should only be installed on WSL and not on regular Linux
 systems.
 
 %package yama-enable-ptrace
-Summary:        sysctl setting to allow ptrace with the YAMA LSM enabled
+Summary:        Sysctl setting to allow ptrace with the YAMA LSM enabled
 Group:          System/Fhs
 Requires:       %{name} = %{version}
 
@@ -186,6 +186,7 @@ if [ -e /etc/nsswitch.conf ]; then
 fi
 
 %{fillup_only -n proxy}
+%tmpfiles_create soft-reboot-cleanup.conf
 %service_add_post soft-reboot-cleanup.service
 
 %postun
@@ -196,6 +197,7 @@ fi
 
 %post extras
 %fillup_only -n backup
+%tmpfiles_create adm-backup.conf
 %service_add_post backup-rpmdb.service backup-rpmdb.timer backup-sysconfig.service backup-sysconfig.timer check-battery.service check-battery.timer setup-systemd-proxy-env.path setup-systemd-proxy-env.service
 
 %preun extras
@@ -291,8 +293,7 @@ fi
 /usr/lib/base-scripts/check-battery
 /usr/lib/systemd/system/[bc]*
 /usr/lib/systemd/system/setup-systemd-proxy-env.*
-/var/adm/backup/rpmdb
-/var/adm/backup/sysconfig
+%{_tmpfilesdir}/adm-backup.conf
 %{_fillupdir}/sysconfig.backup
 
 %files malloccheck
