@@ -252,6 +252,9 @@ fi
 /usr/etc/profile.d/ls.zsh
 /usr/etc/profile.d/terminal.sh
 /usr/etc/profile.d/terminal.csh
+%dir /usr/etc/security/
+%dir /usr/etc/security/pam_env.conf.d/
+/usr/etc/security/pam_env.conf.d/xdg.conf
 %dir /usr/lib/environment.d
 /usr/lib/environment.d/50-xdg.conf
 /usr/lib/systemd/system/soft-reboot-cleanup.service
