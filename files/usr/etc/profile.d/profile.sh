@@ -110,7 +110,7 @@ fi
 if test -z "$WINDOWMANAGER" ; then
     _SAVEPATH=$PATH
     PATH=$PATH:/usr/X11R6/bin:/usr/openwin/bin
-    _desktop=/usr/share/xsessions/${DEFAULT_WM}.desktop
+    _desktop=/usr/share/xsessions/${DEFAULT_WM:-default}.desktop
     if test -s "$_desktop" ; then
 	while read -r _line; do
 	    case ${_line} in

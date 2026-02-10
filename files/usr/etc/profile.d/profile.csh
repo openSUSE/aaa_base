@@ -112,7 +112,7 @@ endif
 # Do not use the `which' builtin nor set path to avoid a rehash
 #
 if ( ! ${?WINDOWMANAGER} ) then
-    if (! ${?default_wm} ) set default_wm
+    if (! ${?default_wm} ) set default_wm=default
     set desktop="/usr/share/xsessions/${default_wm}.desktop"
     set default_wm="${default_wm:t}"
     if ( -s ${desktop:q} ) then
