@@ -10,14 +10,14 @@
 #
 
 which alts >& /dev/null
-if ( $status == 0 ) then
+if ( $? == 0 ) then
     alts -t java >& /dev/null
-    if ( $status == 0 ) then
+    if ( $? == 0 ) then
         set JAVA_TARGET `alts -t java`
     endif
 
     alts -t javac >& /dev/null
-    if ( $status == 0 ) then
+    if ( $? == 0 ) then
         set JAVAC_TARGET `alts -t javac`
     endif
 endif

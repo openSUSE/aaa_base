@@ -32,7 +32,7 @@ if [ -z "$JAVAC_TARGET" ]; then
 fi
 
 if [ ! -z "$JAVA_TARGET" ]; then
-    export JRE_HOME=${JRE_HOME%/bin/java}
+    export JRE_HOME="${JRE_HOME%/bin/java}"
     unset JAVA_TARGET
 fi
 
