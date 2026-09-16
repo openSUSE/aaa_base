@@ -47,7 +47,7 @@ case "$-" in
 	unalias ls 2>/dev/null
     fi
     case "$is" in
-	zsh)
+	zsh) ;;
 	*)  alias ls='/usr/bin/ls $LS_OPTIONS' ;;
     esac
     alias dir='ls -l'
