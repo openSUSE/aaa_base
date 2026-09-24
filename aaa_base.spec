@@ -75,10 +75,10 @@ Summary:        SUSE Linux Base Package (recommended part)
 Group:          System/Fhs
 Requires:       %{name} = %{version}
 Requires:       /usr/bin/find
-Requires:       cpio
-Requires:       gzip
-Requires:       tar
-Requires(post): fillup
+Requires:       /usr/bin/cpio
+Requires:       /usr/bin/gzip
+Requires:       /usr/bin/tar
+Requires(post): /usr/bin/fillup
 Provides:       aaa_base:/etc/DIR_COLORS
 
 %description extras
